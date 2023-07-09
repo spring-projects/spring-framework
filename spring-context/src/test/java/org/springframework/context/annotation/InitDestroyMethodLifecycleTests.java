@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
@@ -254,18 +253,11 @@ class InitDestroyMethodLifecycleTests {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
 
-		// Configure and register an InitDestroyAnnotationBeanPostProcessor as
-		// done in AnnotationConfigUtils.registerAnnotationConfigProcessors()
-		// for an ApplicatonContext.
-		InitDestroyAnnotationBeanPostProcessor initDestroyBpp = new InitDestroyAnnotationBeanPostProcessor();
-		initDestroyBpp.setInitAnnotationType(javax.annotation.PostConstruct.class);
-		initDestroyBpp.setDestroyAnnotationType(javax.annotation.PreDestroy.class);
-		beanFactory.addBeanPostProcessor(initDestroyBpp);
-
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
 		beanDefinition.setInitMethodName(initMethodName);
 		beanDefinition.setDestroyMethodName(destroyMethodName);
 		beanFactory.registerBeanDefinition("lifecycleTestBean", beanDefinition);
+
 		return beanFactory;
 	}
 
@@ -275,6 +267,7 @@ class InitDestroyMethodLifecycleTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		initializer.initialize(context);
 		context.refresh();
+
 		return context;
 	}
 
@@ -309,6 +302,7 @@ class InitDestroyMethodLifecycleTests {
 		}
 	}
 
+
 	static class CustomInitDestroyBean {
 
 		final List<String> initMethods = new ArrayList<>();
@@ -323,6 +317,7 @@ class InitDestroyMethodLifecycleTests {
 		}
 	}
 
+
 	static class CustomAnnotatedPrivateInitDestroyBean extends CustomInitializingDisposableBean {
 
 		@PostConstruct
@@ -335,6 +330,7 @@ class InitDestroyMethodLifecycleTests {
 			this.destroyMethods.add("@PreDestroy.privateCustomDestroy1");
 		}
 	}
+
 
 	static class CustomAnnotatedPrivateSameNameInitDestroyBean extends CustomAnnotatedPrivateInitDestroyBean {
 
@@ -351,6 +347,7 @@ class InitDestroyMethodLifecycleTests {
 		}
 	}
 
+
 	static class CustomInitializingDisposableBean extends CustomInitDestroyBean
 			implements InitializingBean, DisposableBean {
 
@@ -365,6 +362,7 @@ class InitDestroyMethodLifecycleTests {
 		}
 	}
 
+
 	static class CustomAnnotatedInitDestroyBean extends CustomInitializingDisposableBean {
 
 		@PostConstruct
@@ -377,6 +375,7 @@ class InitDestroyMethodLifecycleTests {
 			this.destroyMethods.add("preDestroy");
 		}
 	}
+
 
 	static class CustomAnnotatedInitDestroyWithShadowedMethodsBean extends CustomInitializingDisposableBean {
 
@@ -392,6 +391,7 @@ class InitDestroyMethodLifecycleTests {
 			this.destroyMethods.add("@PreDestroy.destroy");
 		}
 	}
+
 
 	static class AllInOneBean implements InitializingBean, DisposableBean {
 
@@ -411,8 +411,9 @@ class InitDestroyMethodLifecycleTests {
 		}
 	}
 
+
 	static class SubPackagePrivateInitDestroyBean extends PackagePrivateInitDestroyBean
-		implements InitializingBean, DisposableBean {
+			implements InitializingBean, DisposableBean {
 
 		@Override
 		public void afterPropertiesSet() {
@@ -433,7 +434,6 @@ class InitDestroyMethodLifecycleTests {
 		void preDestroy() {
 			this.destroyMethods.add("SubPackagePrivateInitDestroyBean.preDestroy");
 		}
-
 	}
 
 }

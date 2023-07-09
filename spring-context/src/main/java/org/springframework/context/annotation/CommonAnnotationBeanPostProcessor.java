@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.annotation.Resource;
-import jakarta.ejb.EJB;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
@@ -85,10 +80,15 @@ import org.springframework.util.StringValueResolver;
  * and default names as well. The target beans can be simple POJOs, with no special
  * requirements other than the type having to match.
  *
- * <p>This post-processor also supports the EJB 3 {@link jakarta.ejb.EJB} annotation,
+ * <p>Additionally, the original {@code javax.annotation} variants of the annotations
+ * dating back to the JSR-250 specification (Java EE 5-8, also included in JDK 6-8)
+ * are still supported as well. Note that this is primarily for a smooth upgrade path,
+ * not for adoption in new applications.
+ *
+ * <p>This post-processor also supports the EJB {@link jakarta.ejb.EJB} annotation,
  * analogous to {@link jakarta.annotation.Resource}, with the capability to
  * specify both a local bean name and a global JNDI name for fallback retrieval.
- * The target beans can be plain POJOs as well as EJB 3 Session Beans in this case.
+ * The target beans can be plain POJOs as well as EJB Session Beans in this case.
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:
@@ -113,8 +113,8 @@ import org.springframework.util.StringValueResolver;
  * by the "context:annotation-config" and "context:component-scan" XML tags.
  * Remove or turn off the default annotation configuration there if you intend
  * to specify a custom CommonAnnotationBeanPostProcessor bean definition!
- * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection; thus
- * the latter configuration will override the former for properties wired through
+ * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection;
+ * thus the latter configuration will override the former for properties wired through
  * both approaches.
  *
  * @author Juergen Hoeller
@@ -136,14 +136,28 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
 
 	@Nullable
-	private static final Class<? extends Annotation> ejbClass;
+	private static final Class<? extends Annotation> jakartaResourceType;
+
+	@Nullable
+	private static final Class<? extends Annotation> javaxResourceType;
+
+	@Nullable
+	private static final Class<? extends Annotation> ejbAnnotationType;
 
 	static {
-		resourceAnnotationTypes.add(Resource.class);
+		jakartaResourceType = loadAnnotationType("jakarta.annotation.Resource");
+		if (jakartaResourceType != null) {
+			resourceAnnotationTypes.add(jakartaResourceType);
+		}
 
-		ejbClass = loadAnnotationType("jakarta.ejb.EJB");
-		if (ejbClass != null) {
-			resourceAnnotationTypes.add(ejbClass);
+		javaxResourceType = loadAnnotationType("javax.annotation.Resource");
+		if (javaxResourceType != null) {
+			resourceAnnotationTypes.add(javaxResourceType);
+		}
+
+		ejbAnnotationType = loadAnnotationType("jakarta.ejb.EJB");
+		if (ejbAnnotationType != null) {
+			resourceAnnotationTypes.add(ejbAnnotationType);
 		}
 	}
 
@@ -177,8 +191,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	public CommonAnnotationBeanPostProcessor() {
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
-		setInitAnnotationType(PostConstruct.class);
-		setDestroyAnnotationType(PreDestroy.class);
+
+		// Jakarta EE 9 set of annotations in jakarta.annotation package
+		addInitAnnotationType(loadAnnotationType("jakarta.annotation.PostConstruct"));
+		addDestroyAnnotationType(loadAnnotationType("jakarta.annotation.PreDestroy"));
+
+		// Tolerate legacy JSR-250 annotations in javax.annotation package
+		addInitAnnotationType(loadAnnotationType("javax.annotation.PostConstruct"));
+		addDestroyAnnotationType(loadAnnotationType("javax.annotation.PreDestroy"));
 
 		// java.naming module present on JDK 9+?
 		if (jndiPresent) {
@@ -338,18 +358,26 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-				if (ejbClass != null && field.isAnnotationPresent(ejbClass)) {
+				if (ejbAnnotationType != null && field.isAnnotationPresent(ejbAnnotationType)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@EJB annotation is not supported on static fields");
 					}
 					currElements.add(new EjbRefElement(field, field, null));
 				}
-				else if (field.isAnnotationPresent(Resource.class)) {
+				else if (jakartaResourceType != null && field.isAnnotationPresent(jakartaResourceType)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@Resource annotation is not supported on static fields");
 					}
 					if (!this.ignoredResourceTypes.contains(field.getType().getName())) {
 						currElements.add(new ResourceElement(field, field, null));
+					}
+				}
+				else if (javaxResourceType != null && field.isAnnotationPresent(javaxResourceType)) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						throw new IllegalStateException("@Resource annotation is not supported on static fields");
+					}
+					if (!this.ignoredResourceTypes.contains(field.getType().getName())) {
+						currElements.add(new LegacyResourceElement(field, field, null));
 					}
 				}
 			});
@@ -360,7 +388,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					return;
 				}
 				if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-					if (ejbClass != null && bridgedMethod.isAnnotationPresent(ejbClass)) {
+					if (ejbAnnotationType != null && bridgedMethod.isAnnotationPresent(ejbAnnotationType)) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@EJB annotation is not supported on static methods");
 						}
@@ -370,7 +398,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
 					}
-					else if (bridgedMethod.isAnnotationPresent(Resource.class)) {
+					else if (jakartaResourceType != null && bridgedMethod.isAnnotationPresent(jakartaResourceType)) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@Resource annotation is not supported on static methods");
 						}
@@ -381,6 +409,19 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						if (!this.ignoredResourceTypes.contains(paramTypes[0].getName())) {
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 							currElements.add(new ResourceElement(method, bridgedMethod, pd));
+						}
+					}
+					else if (javaxResourceType != null && bridgedMethod.isAnnotationPresent(javaxResourceType)) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							throw new IllegalStateException("@Resource annotation is not supported on static methods");
+						}
+						Class<?>[] paramTypes = method.getParameterTypes();
+						if (paramTypes.length != 1) {
+							throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
+						}
+						if (!this.ignoredResourceTypes.contains(paramTypes[0].getName())) {
+							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+							currElements.add(new LegacyResourceElement(method, bridgedMethod, pd));
 						}
 					}
 				}
@@ -584,7 +625,55 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		public ResourceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
-			Resource resource = ae.getAnnotation(Resource.class);
+			jakarta.annotation.Resource resource = ae.getAnnotation(jakarta.annotation.Resource.class);
+			String resourceName = resource.name();
+			Class<?> resourceType = resource.type();
+			this.isDefaultName = !StringUtils.hasLength(resourceName);
+			if (this.isDefaultName) {
+				resourceName = this.member.getName();
+				if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
+					resourceName = StringUtils.uncapitalizeAsProperty(resourceName.substring(3));
+				}
+			}
+			else if (embeddedValueResolver != null) {
+				resourceName = embeddedValueResolver.resolveStringValue(resourceName);
+			}
+			if (Object.class != resourceType) {
+				checkResourceType(resourceType);
+			}
+			else {
+				// No resource type specified... check field/method.
+				resourceType = getResourceType();
+			}
+			this.name = (resourceName != null ? resourceName : "");
+			this.lookupType = resourceType;
+			String lookupValue = resource.lookup();
+			this.mappedName = (StringUtils.hasLength(lookupValue) ? lookupValue : resource.mappedName());
+			Lazy lazy = ae.getAnnotation(Lazy.class);
+			this.lazyLookup = (lazy != null && lazy.value());
+		}
+
+		@Override
+		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
+			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
+					getResource(this, requestingBeanName));
+		}
+	}
+
+
+
+
+	/**
+	 * Class representing injection information about an annotated field
+	 * or setter method, supporting the @Resource annotation.
+	 */
+	private class LegacyResourceElement extends LookupElement {
+
+		private final boolean lazyLookup;
+
+		public LegacyResourceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
+			super(member, pd);
+			javax.annotation.Resource resource = ae.getAnnotation(javax.annotation.Resource.class);
 			String resourceName = resource.name();
 			Class<?> resourceType = resource.type();
 			this.isDefaultName = !StringUtils.hasLength(resourceName);
@@ -630,7 +719,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		public EjbRefElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
-			EJB resource = ae.getAnnotation(EJB.class);
+			jakarta.ejb.EJB resource = ae.getAnnotation(jakarta.ejb.EJB.class);
 			String resourceBeanName = resource.beanName();
 			String resourceName = resource.name();
 			this.isDefaultName = !StringUtils.hasLength(resourceName);
