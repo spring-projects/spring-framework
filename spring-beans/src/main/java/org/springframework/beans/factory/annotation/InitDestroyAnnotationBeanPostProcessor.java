@@ -107,11 +107,9 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	protected transient Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private Class<? extends Annotation> initAnnotationType;
+	private final Set<Class<? extends Annotation>> initAnnotationTypes = new LinkedHashSet<>(2);
 
-	@Nullable
-	private Class<? extends Annotation> destroyAnnotationType;
+	private final Set<Class<? extends Annotation>> destroyAnnotationTypes = new LinkedHashSet<>(2);
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
@@ -125,9 +123,23 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the {@link jakarta.annotation.PostConstruct} annotation.
+	 * @see #addInitAnnotationType
 	 */
 	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
-		this.initAnnotationType = initAnnotationType;
+		this.initAnnotationTypes.clear();
+		this.initAnnotationTypes.add(initAnnotationType);
+	}
+
+	/**
+	 * Add an init annotation to check for, indicating initialization
+	 * methods to call after configuration of a bean.
+	 * @since 6.0.11
+	 * @see #setInitAnnotationType
+	 */
+	public void addInitAnnotationType(@Nullable Class<? extends Annotation> initAnnotationType) {
+		if (initAnnotationType != null) {
+			this.initAnnotationTypes.add(initAnnotationType);
+		}
 	}
 
 	/**
@@ -136,9 +148,23 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the {@link jakarta.annotation.PreDestroy} annotation.
+	 * @see #addDestroyAnnotationType
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
-		this.destroyAnnotationType = destroyAnnotationType;
+		this.destroyAnnotationTypes.clear();
+		this.destroyAnnotationTypes.add(destroyAnnotationType);
+	}
+
+	/**
+	 * Add a destroy annotation to check for, indicating destruction
+	 * methods to call when the context is shutting down.
+	 * @since 6.0.11
+	 * @see #setDestroyAnnotationType
+	 */
+	public void addDestroyAnnotationType(@Nullable Class<? extends Annotation> destroyAnnotationType) {
+		if (destroyAnnotationType != null) {
+			this.destroyAnnotationTypes.add(destroyAnnotationType);
+		}
 	}
 
 	public void setOrder(int order) {
@@ -255,7 +281,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> beanClass) {
-		if (!AnnotationUtils.isCandidateClass(beanClass, List.of(this.initAnnotationType, this.destroyAnnotationType))) {
+		if (!AnnotationUtils.isCandidateClass(beanClass, this.initAnnotationTypes) &&
+				!AnnotationUtils.isCandidateClass(beanClass, this.destroyAnnotationTypes)) {
 			return this.emptyLifecycleMetadata;
 		}
 
@@ -268,16 +295,20 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 			final List<LifecycleMethod> currDestroyMethods = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalMethods(currentClass, method -> {
-				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
-					currInitMethods.add(new LifecycleMethod(method, beanClass));
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found init method on class [" + beanClass.getName() + "]: " + method);
+				for (Class<? extends Annotation> initAnnotationType : this.initAnnotationTypes) {
+					if (initAnnotationType != null && method.isAnnotationPresent(initAnnotationType)) {
+						currInitMethods.add(new LifecycleMethod(method, beanClass));
+						if (logger.isTraceEnabled()) {
+							logger.trace("Found init method on class [" + beanClass.getName() + "]: " + method);
+						}
 					}
 				}
-				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
-					currDestroyMethods.add(new LifecycleMethod(method, beanClass));
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found destroy method on class [" + beanClass.getName() + "]: " + method);
+				for (Class<? extends Annotation> destroyAnnotationType : this.destroyAnnotationTypes) {
+					if (destroyAnnotationType != null && method.isAnnotationPresent(destroyAnnotationType)) {
+						currDestroyMethods.add(new LifecycleMethod(method, beanClass));
+						if (logger.isTraceEnabled()) {
+							logger.trace("Found destroy method on class [" + beanClass.getName() + "]: " + method);
+						}
 					}
 				}
 			});
