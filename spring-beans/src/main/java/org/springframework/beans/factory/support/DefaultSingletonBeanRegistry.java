@@ -447,7 +447,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 		String canonicalName = canonicalName(beanName);
 		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
-		if (dependentBeans == null) {
+		if (dependentBeans == null || dependentBeans.isEmpty()) {
 			return false;
 		}
 		if (dependentBeans.contains(dependentBeanName)) {
