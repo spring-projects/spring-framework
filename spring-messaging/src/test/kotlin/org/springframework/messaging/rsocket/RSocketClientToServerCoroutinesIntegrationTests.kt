@@ -54,13 +54,14 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Test
 	fun fireAndForget() {
 		Flux.range(1, 3)
+				.delayElements(Duration.ofMillis(10))
 				.concatMap { requester.route("receive").data("Hello $it").send() }
 				.blockLast()
 		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
-				.thenAwait(Duration.ofMillis(50))
+				.thenAwait(Duration.ofMillis(10))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5))
 	}
@@ -68,13 +69,14 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Test
 	fun fireAndForgetAsync() {
 		Flux.range(1, 3)
+				.delayElements(Duration.ofMillis(10))
 				.concatMap { i: Int -> requester.route("receive-async").data("Hello $i").send() }
 				.blockLast()
 		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
-				.thenAwait(Duration.ofMillis(50))
+				.thenAwait(Duration.ofMillis(10))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5))
 	}
