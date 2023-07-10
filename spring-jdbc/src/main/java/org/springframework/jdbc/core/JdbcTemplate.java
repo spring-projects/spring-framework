@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,12 +187,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 
 	/**
-	 * Set whether we want to ignore SQLWarnings.
-	 * <p>Default is "true", swallowing and logging all warnings. Switch this flag
-	 * to "false" to make the JdbcTemplate throw an SQLWarningException instead.
+	 * Set whether we want to ignore JDBC statement warnings ({@link SQLWarning}).
+	 * <p>Default is {@code true}, swallowing and logging all warnings. Switch this flag to
+	 * {@code false} to make this JdbcTemplate throw a {@link SQLWarningException} instead
+	 * (or chain the {@link SQLWarning} into the primary {@link SQLException}, if any).
+	 * @see Statement#getWarnings()
 	 * @see java.sql.SQLWarning
 	 * @see org.springframework.jdbc.SQLWarningException
-	 * @see #handleWarnings
+	 * @see #handleWarnings(Statement)
 	 */
 	public void setIgnoreWarnings(boolean ignoreWarnings) {
 		this.ignoreWarnings = ignoreWarnings;
@@ -385,6 +387,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
+			if (stmt != null) {
+				handleWarnings(stmt, ex);
+			}
 			String sql = getSql(action);
 			JdbcUtils.closeStatement(stmt);
 			stmt = null;
@@ -657,6 +662,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			// in the case when the exception translator hasn't been initialized yet.
 			if (psc instanceof ParameterDisposer parameterDisposer) {
 				parameterDisposer.cleanupParameters();
+			}
+			if (ps != null) {
+				handleWarnings(ps, ex);
 			}
 			String sql = getSql(psc);
 			psc = null;
@@ -1195,6 +1203,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			if (csc instanceof ParameterDisposer parameterDisposer) {
 				parameterDisposer.cleanupParameters();
 			}
+			if (cs != null) {
+				handleWarnings(cs, ex);
+			}
 			String sql = getSql(csc);
 			csc = null;
 			JdbcUtils.closeStatement(cs);
@@ -1491,13 +1502,44 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw an SQLWarningException if we're not ignoring warnings,
-	 * otherwise log the warnings at debug level.
+	 * Handle warnings before propagating a primary {@code SQLException}
+	 * from executing the given statement.
+	 * <p>Calls regular {@link #handleWarnings(Statement)} but catches
+	 * {@link SQLWarningException} in order to chain the {@link SQLWarning}
+	 * into the primary exception instead.
 	 * @param stmt the current JDBC statement
-	 * @throws SQLWarningException if not ignoring warnings
-	 * @see org.springframework.jdbc.SQLWarningException
+	 * @param ex the primary exception after failed statement execution
+	 * @since 5.3.29
+	 * @see #handleWarnings(Statement)
+	 * @see SQLException#setNextException
 	 */
-	protected void handleWarnings(Statement stmt) throws SQLException {
+	protected void handleWarnings(Statement stmt, SQLException ex) {
+		try {
+			handleWarnings(stmt);
+		}
+		catch (SQLWarningException nonIgnoredWarning) {
+			ex.setNextException(nonIgnoredWarning.getSQLWarning());
+		}
+		catch (SQLException warningsEx) {
+			logger.debug("Failed to retrieve warnings", warningsEx);
+		}
+		catch (Throwable warningsEx) {
+			logger.debug("Failed to process warnings", warningsEx);
+		}
+	}
+
+	/**
+	 * Handle the warnings for the given JDBC statement, if any.
+	 * <p>Throws a {@link SQLWarningException} if we're not ignoring warnings,
+	 * otherwise logs the warnings at debug level.
+	 * @param stmt the current JDBC statement
+	 * @throws SQLException in case of warnings retrieval failure
+	 * @throws SQLWarningException for a concrete warning to raise
+	 * (when not ignoring warnings)
+	 * @see #setIgnoreWarnings
+	 * @see #handleWarnings(SQLWarning)
+	 */
+	protected void handleWarnings(Statement stmt) throws SQLException, SQLWarningException {
 		if (isIgnoreWarnings()) {
 			if (logger.isDebugEnabled()) {
 				SQLWarning warningToLog = stmt.getWarnings();
@@ -1514,7 +1556,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw an SQLWarningException if encountering an actual warning.
+	 * Throw a {@link SQLWarningException} if encountering an actual warning.
 	 * @param warning the warnings object from the current statement.
 	 * May be {@code null}, in which case this method does nothing.
 	 * @throws SQLWarningException in case of an actual warning to be raised
