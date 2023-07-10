@@ -22,6 +22,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -33,23 +34,28 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver {
 
+	private static final boolean REACTOR_PRESENT =
+			ClassUtils.isPresent("reactor.core.publisher.Mono", RequestBodyArgumentResolver.class.getClassLoader());
+
+
+	@Nullable
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 
 	/**
-	 * Default constructor that uses {@link ReactiveAdapterRegistry#getSharedInstance()}.
+	 * Constructor with a {@link HttpExchangeAdapter}, for access to config settings.
 	 * @since 6.1
 	 */
-	public RequestBodyArgumentResolver() {
-		this(ReactiveAdapterRegistry.getSharedInstance());
-	}
-
-	/**
-	 * Constructor with a {@link ReactiveAdapterRegistry}.
-	 */
-	public RequestBodyArgumentResolver(ReactiveAdapterRegistry reactiveAdapterRegistry) {
-		Assert.notNull(reactiveAdapterRegistry, "ReactiveAdapterRegistry is required");
-		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
+	public RequestBodyArgumentResolver(HttpExchangeAdapter exchangeAdapter) {
+		if (REACTOR_PRESENT) {
+			this.reactiveAdapterRegistry =
+					(exchangeAdapter instanceof ReactorHttpExchangeAdapter reactorAdapter ?
+							reactorAdapter.getReactiveAdapterRegistry() :
+							ReactiveAdapterRegistry.getSharedInstance());
+		}
+		else {
+			this.reactiveAdapterRegistry = null;
+		}
 	}
 
 
@@ -63,21 +69,25 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 		}
 
 		if (argument != null) {
-			ReactiveAdapter reactiveAdapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
-			if (reactiveAdapter == null) {
-				requestValues.setBodyValue(argument);
-			}
-			else {
-				MethodParameter nestedParameter = parameter.nested();
+			if (this.reactiveAdapterRegistry != null) {
+				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
+				if (adapter != null) {
+					MethodParameter nestedParameter = parameter.nested();
 
-				String message = "Async type for @RequestBody should produce value(s)";
-				Assert.isTrue(!reactiveAdapter.isNoValue(), message);
-				Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
+					String message = "Async type for @RequestBody should produce value(s)";
+					Assert.isTrue(!adapter.isNoValue(), message);
+					Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
 
-				requestValues.setBody(
-						reactiveAdapter.toPublisher(argument),
-						ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
+					requestValues.setBody(
+							adapter.toPublisher(argument),
+							ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
+
+					return true;
+				}
 			}
+
+			// Not a reactive type
+			requestValues.setBodyValue(argument);
 		}
 
 		return true;

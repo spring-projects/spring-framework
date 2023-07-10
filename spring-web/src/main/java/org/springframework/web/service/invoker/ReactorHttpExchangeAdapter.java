@@ -28,8 +28,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 
 /**
- * Contract to abstract a Project Reactor, HTTP client to decouple it from the
- * {@linkplain HttpServiceProxyFactory#createClient(Class) HTTP service proxy}.
+ * Contract to abstract a reactive, HTTP client from
+ * {@linkplain HttpServiceProxyFactory} and make it pluggable.
  *
  * @author Rossen Stoyanchev
  * @since 6.1

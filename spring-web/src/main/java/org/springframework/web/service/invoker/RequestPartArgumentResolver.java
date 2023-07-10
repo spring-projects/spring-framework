@@ -24,7 +24,9 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 
 /**
@@ -47,22 +49,28 @@ import org.springframework.web.bind.annotation.RequestPart;
  */
 public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResolver {
 
+	private static final boolean REACTOR_PRESENT =
+			ClassUtils.isPresent("reactor.core.publisher.Mono", RequestPartArgumentResolver.class.getClassLoader());
+
+
+	@Nullable
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 
 	/**
-	 * Default constructor that uses {@link ReactiveAdapterRegistry#getSharedInstance()}.
+	 * Constructor with a {@link HttpExchangeAdapter}, for access to config settings.
 	 * @since 6.1
 	 */
-	public RequestPartArgumentResolver() {
-		this(ReactiveAdapterRegistry.getSharedInstance());
-	}
-
-	/**
-	 * Constructor with a {@link ReactiveAdapterRegistry}.
-	 */
-	public RequestPartArgumentResolver(ReactiveAdapterRegistry reactiveAdapterRegistry) {
-		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
+	public RequestPartArgumentResolver(HttpExchangeAdapter exchangeAdapter) {
+		if (REACTOR_PRESENT) {
+			this.reactiveAdapterRegistry =
+					(exchangeAdapter instanceof ReactorHttpExchangeAdapter reactorAdapter ?
+							reactorAdapter.getReactiveAdapterRegistry() :
+							ReactiveAdapterRegistry.getSharedInstance());
+		}
+		else {
+			this.reactiveAdapterRegistry = null;
+		}
 	}
 
 
@@ -77,16 +85,18 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 	protected void addRequestValue(
 			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
-		Class<?> type = parameter.getParameterType();
-		ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(type);
-		if (adapter != null) {
-			Assert.isTrue(!adapter.isNoValue(), "Expected publisher that produces a value");
-			Publisher<?> publisher = adapter.toPublisher(value);
-			requestValues.addRequestPart(name, publisher, ResolvableType.forMethodParameter(parameter.nested()));
+		if (this.reactiveAdapterRegistry != null) {
+			Class<?> type = parameter.getParameterType();
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(type);
+			if (adapter != null) {
+				Assert.isTrue(!adapter.isNoValue(), "Expected publisher that produces a value");
+				Publisher<?> publisher = adapter.toPublisher(value);
+				requestValues.addRequestPart(name, publisher, ResolvableType.forMethodParameter(parameter.nested()));
+				return;
+			}
 		}
-		else {
-			requestValues.addRequestPart(name, value);
-		}
+
+		requestValues.addRequestPart(name, value);
 	}
 
 }

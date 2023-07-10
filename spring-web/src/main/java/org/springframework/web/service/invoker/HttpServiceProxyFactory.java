@@ -53,6 +53,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  *
  * @author Rossen Stoyanchev
  * @since 6.0
+ * @see org.springframework.web.client.support.RestTemplateAdapter
  * @see org.springframework.web.reactive.function.client.support.WebClientAdapter
  */
 public final class HttpServiceProxyFactory {
@@ -107,6 +108,7 @@ public final class HttpServiceProxyFactory {
 
 	/**
 	 * Return a builder that's initialized with the given client.
+	 * @since 6.1
 	 */
 	public static Builder builderFor(HttpExchangeAdapter exchangeAdapter) {
 		return new Builder().exchangeAdapter(exchangeAdapter);
@@ -114,7 +116,8 @@ public final class HttpServiceProxyFactory {
 
 	/**
 	 * Return a builder that's initialized with the given client.
-	 * @deprecated in favor of {@link #builderFor(HttpExchangeAdapter)}
+	 * @deprecated in favor of {@link #builderFor(HttpExchangeAdapter)};
+	 * to be removed in 6.2.
 	 */
 	@SuppressWarnings("removal")
 	@Deprecated(since = "6.1", forRemoval = true)
@@ -164,7 +167,8 @@ public final class HttpServiceProxyFactory {
 		 * Provide the HTTP client to perform requests through.
 		 * @param clientAdapter a client adapted to {@link HttpClientAdapter}
 		 * @return this same builder instance
-		 * @deprecated in favor of {@link #exchangeAdapter(HttpExchangeAdapter)}
+		 * @deprecated in favor of {@link #exchangeAdapter(HttpExchangeAdapter)};
+		 * to be removed in 6.2
 		 */
 		@SuppressWarnings("removal")
 		@Deprecated(since = "6.1", forRemoval = true)
@@ -260,10 +264,10 @@ public final class HttpServiceProxyFactory {
 
 			// Annotation-based
 			resolvers.add(new RequestHeaderArgumentResolver(service));
-			resolvers.add(new RequestBodyArgumentResolver());
+			resolvers.add(new RequestBodyArgumentResolver(this.exchangeAdapter));
 			resolvers.add(new PathVariableArgumentResolver(service));
 			resolvers.add(new RequestParamArgumentResolver(service));
-			resolvers.add(new RequestPartArgumentResolver());
+			resolvers.add(new RequestPartArgumentResolver(this.exchangeAdapter));
 			resolvers.add(new CookieValueArgumentResolver(service));
 			if (this.exchangeAdapter.supportsRequestAttributes()) {
 				resolvers.add(new RequestAttributeArgumentResolver());

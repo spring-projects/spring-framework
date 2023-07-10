@@ -43,7 +43,7 @@ import org.springframework.web.util.UriUtils;
  * Container for HTTP request values extracted from an
  * {@link org.springframework.web.service.annotation.HttpExchange @HttpExchange}-annotated
  * method and argument values passed to it. This is then given to
- * {@link HttpClientAdapter} to adapt to the underlying HTTP client.
+ * {@link HttpExchangeAdapter} to adapt to the underlying HTTP client.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
