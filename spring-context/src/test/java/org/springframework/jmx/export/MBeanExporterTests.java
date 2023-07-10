@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.export;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
@@ -55,10 +57,12 @@ import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembl
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.RegistrationPolicy;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
@@ -353,7 +357,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_NONE);
 		// MBean has a bad ObjectName, so if said MBean is autodetected, an exception will be thrown...
 		start(exporter);
-
 	}
 
 	@Test
@@ -439,57 +442,85 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void setAutodetectModeToSupportedValue() {
-		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
-		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
-	}
-
-	@Test
 	void setAutodetectModeToOutOfRangeNegativeValue() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> exporter.setAutodetectMode(-1));
+				.isThrownBy(() -> exporter.setAutodetectMode(-1))
+				.withMessage("Only values of autodetect constants allowed");
 		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeToOutOfRangePositiveValue() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> exporter.setAutodetectMode(5));
+				.isThrownBy(() -> exporter.setAutodetectMode(5))
+				.withMessage("Only values of autodetect constants allowed");
 		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
+	/**
+	 * This test effectively verifies that the internal 'constants' map is properly
+	 * configured for all autodetect constants defined in {@link MBeanExporter}.
+	 */
 	@Test
-	void setAutodetectModeNameToSupportedValue() {
-		exporter.setAutodetectModeName("AUTODETECT_ASSEMBLER");
+	void setAutodetectModeToAllSupportedValues() {
+		streamConstants(MBeanExporter.class)
+				.map(MBeanExporterTests::getFieldValue)
+				.forEach(mode -> assertThatNoException().isThrownBy(() -> exporter.setAutodetectMode(mode)));
+	}
+
+	@Test
+	void setAutodetectModeToSupportedValue() {
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
 		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
 	void setAutodetectModeNameToNull() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> exporter.setAutodetectModeName(null));
+				.isThrownBy(() -> exporter.setAutodetectModeName(null))
+				.withMessage("'constantName' must not be null or blank");
 		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeNameToAnEmptyString() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> exporter.setAutodetectModeName(""));
+				.isThrownBy(() -> exporter.setAutodetectModeName(""))
+				.withMessage("'constantName' must not be null or blank");
 		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
-	void setAutodetectModeNameToAWhitespacedString() {
+	void setAutodetectModeNameToWhitespace() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> exporter.setAutodetectModeName("  \t"));
+				.isThrownBy(() -> exporter.setAutodetectModeName("  \t"))
+				.withMessage("'constantName' must not be null or blank");
 		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
-	void setAutodetectModeNameToARubbishValue() {
+	void setAutodetectModeNameToBogusValue() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> exporter.setAutodetectModeName("That Hansel is... *sssooo* hot right now!"));
+				.isThrownBy(() -> exporter.setAutodetectModeName("Bogus"))
+				.withMessage("Only autodetect constants allowed");
 		assertThat(exporter.getAutodetectMode()).isNull();
+	}
+
+	/**
+	 * This test effectively verifies that the internal 'constants' map is properly
+	 * configured for all autodetect constants defined in {@link MBeanExporter}.
+	 */
+	@Test
+	void setAutodetectModeNameToAllSupportedValues() {
+		streamConstants(MBeanExporter.class)
+				.map(Field::getName)
+				.forEach(name -> assertThatNoException().isThrownBy(() -> exporter.setAutodetectModeName(name)));
+	}
+
+	@Test
+	void setAutodetectModeNameToSupportedValue() {
+		exporter.setAutodetectModeName("AUTODETECT_ASSEMBLER");
+		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
@@ -669,6 +700,19 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		public ModelMBeanInfo getMBeanInfo(Object managedResource, String beanKey) throws JMException {
 			invoked = true;
 			return null;
+		}
+	}
+
+	private static Stream<Field> streamConstants(Class<?> clazz) {
+		return Arrays.stream(clazz.getFields()).filter(ReflectionUtils::isPublicStaticFinal);
+	}
+
+	private static Integer getFieldValue(Field field) {
+		try {
+			return (Integer) field.get(null);
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
