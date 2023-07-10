@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Tests for {@link HttpServiceMethod} with an {@link HttpExchangeAdapter}
- * build from a test {@link TestHttpClientAdapter} that stubs the client invocations.
+ * build from a test {@link TestReactorExchangeAdapter} that stubs the client invocations.
  * <p>
  * The tests do not create or invoke {@code HttpServiceMethod} directly but rather use
  * {@link HttpServiceProxyFactory} to create a service proxy in order to use a strongly
@@ -32,10 +32,8 @@ public class ReactorExchangeAdapterHttpServiceMethodTests extends ReactiveHttpSe
 
 	@BeforeEach
 	void setUp() {
-		this.client = new TestHttpClientAdapter();
-		this.proxyFactory = HttpServiceProxyFactory.builder()
-			.exchangeAdapter(((HttpClientAdapter) this.client).asHttpExchangeAdapter())
-			.build();
+		this.client = new TestReactorExchangeAdapter();
+		this.proxyFactory = HttpServiceProxyFactory.builder().exchangeAdapter(this.client).build();
 	}
 
 }

@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker;
 
 import java.net.URI;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
@@ -34,16 +33,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class UrlArgumentResolverTests {
 
-	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
+	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
-	private Service service;
-
-
-	@BeforeEach
-	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-		this.service = proxyFactory.createClient(Service.class);
-	}
+	private final Service service =
+			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
 
 
 	@Test

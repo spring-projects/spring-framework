@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * {@link HttpExchangeAdapter} with stubbed responses.
  *
+ * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
  */
-@SuppressWarnings("unchecked")
-public class TestHttpExchangeAdapter implements HttpExchangeAdapter, TestAdapter {
+public class TestExchangeAdapter implements HttpExchangeAdapter {
 
 	@Nullable
 	private String invokedMethodName;
@@ -42,7 +42,8 @@ public class TestHttpExchangeAdapter implements HttpExchangeAdapter, TestAdapter
 	@Nullable
 	private ParameterizedTypeReference<?> bodyType;
 
-	public String getInvokedMethodReference() {
+
+	public String getInvokedMethodName() {
 		assertThat(this.invokedMethodName).isNotNull();
 		return this.invokedMethodName;
 	}
@@ -52,7 +53,6 @@ public class TestHttpExchangeAdapter implements HttpExchangeAdapter, TestAdapter
 		return this.requestValues;
 	}
 
-	@Override
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyType() {
 		return this.bodyType;
@@ -60,45 +60,48 @@ public class TestHttpExchangeAdapter implements HttpExchangeAdapter, TestAdapter
 
 	@Override
 	public void exchange(HttpRequestValues requestValues) {
-		saveInput("void", requestValues, null);
+		saveInput("exchange", requestValues, null);
 	}
 
 	@Override
 	public HttpHeaders exchangeForHeaders(HttpRequestValues requestValues) {
-		saveInput("headers", requestValues, null);
+		saveInput("exchangeForHeaders", requestValues, null);
 		return new HttpHeaders();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		saveInput("body", requestValues, bodyType);
-		return bodyType.getType().getTypeName().contains("List")
-				? (T) Collections.singletonList(getInvokedMethodReference()) : (T) getInvokedMethodReference();
+		saveInput("exchangeForBody", requestValues, bodyType);
+		return bodyType.getType().getTypeName().contains("List") ?
+				(T) Collections.singletonList(getInvokedMethodName()) : (T) getInvokedMethodName();
 	}
 
 	@Override
 	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues requestValues) {
-		saveInput("bodilessEntity", requestValues, null);
+		saveInput("exchangeForBodilessEntity", requestValues, null);
 		return ResponseEntity.ok().build();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues,
-			ParameterizedTypeReference<T> bodyType) {
-		saveInput("entity", requestValues, bodyType);
-		return (ResponseEntity<T>) ResponseEntity.ok(this.getInvokedMethodReference());
+	public <T> ResponseEntity<T> exchangeForEntity(
+			HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+
+		saveInput("exchangeForEntity", requestValues, bodyType);
+		return (ResponseEntity<T>) ResponseEntity.ok(getInvokedMethodName());
 	}
 
 	@Override
 	public boolean supportsRequestAttributes() {
-		return false;
+		return true;
 	}
 
-	private <T> void saveInput(String methodName, HttpRequestValues requestValues,
-			@Nullable ParameterizedTypeReference<T> bodyType) {
+	protected  <T> void saveInput(
+			String methodName, HttpRequestValues values, @Nullable ParameterizedTypeReference<T> bodyType) {
 
 		this.invokedMethodName = methodName;
-		this.requestValues = requestValues;
+		this.requestValues = values;
 		this.bodyType = bodyType;
 	}
 

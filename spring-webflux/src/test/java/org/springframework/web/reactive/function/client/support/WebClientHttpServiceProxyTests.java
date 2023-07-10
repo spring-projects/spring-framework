@@ -163,10 +163,8 @@ public class WebClientHttpServiceProxyTests {
 	}
 
 	private TestHttpService initHttpService(WebClient webClient) {
-		return HttpServiceProxyFactory.builder()
-				.clientAdapter(WebClientAdapter.forClient(webClient))
-				.build()
-				.createClient(TestHttpService.class);
+		WebClientAdapter adapter = WebClientAdapter.forClient(webClient);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(TestHttpService.class);
 	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {

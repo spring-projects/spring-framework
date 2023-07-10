@@ -19,7 +19,7 @@ package org.springframework.web.service.invoker;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * Tests for {@link HttpServiceMethod} with a blocking test {@link TestHttpExchangeAdapter} that
+ * Tests for {@link HttpServiceMethod} with a blocking test {@link TestExchangeAdapter} that
  * stubs the client invocations.
  * <p>
  * The tests do not create or invoke {@code HttpServiceMethod} directly but rather use
@@ -32,10 +32,8 @@ class HttpExchangeAdapterServiceMethodTests extends HttpServiceMethodTests {
 
 	@BeforeEach
 	void setUp() {
-		this.client = new TestHttpExchangeAdapter();
-		this.proxyFactory = HttpServiceProxyFactory.builder()
-			.exchangeAdapter((HttpExchangeAdapter) this.client)
-			.build();
+		this.client = new TestExchangeAdapter();
+		this.proxyFactory = HttpServiceProxyFactory.builderFor(this.client).build();
 	}
 
 }

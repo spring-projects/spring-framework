@@ -37,9 +37,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class RequestBodyArgumentResolverTests {
 
-	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
+	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
-	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
+	private final Service service =
+			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
 
 
 	@Test

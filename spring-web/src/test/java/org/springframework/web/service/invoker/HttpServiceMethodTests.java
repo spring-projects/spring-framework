@@ -36,8 +36,8 @@ import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
- * Base class for testing {@link HttpServiceMethod} with a test {@link TestHttpClientAdapter}
- * and a test {@link TestHttpExchangeAdapter} that stub the client invocations.
+ * Base class for testing {@link HttpServiceMethod} with a test {@link TestExchangeAdapter}
+ * and a test {@link TestExchangeAdapter} that stub the client invocations.
  *
  * <p>
  * The tests do not create or invoke {@code HttpServiceMethod} directly but rather use
@@ -52,7 +52,7 @@ abstract class HttpServiceMethodTests {
 	protected static final ParameterizedTypeReference<String> BODY_TYPE = new ParameterizedTypeReference<>() {
 	};
 
-	protected TestAdapter client;
+	protected TestExchangeAdapter client;
 
 	protected HttpServiceProxyFactory proxyFactory;
 
@@ -66,19 +66,19 @@ abstract class HttpServiceMethodTests {
 		assertThat(headers).isNotNull();
 
 		String body = service.getBody();
-		assertThat(body).isEqualTo(client.getInvokedMethodReference());
+		assertThat(body).isEqualTo(client.getInvokedMethodName());
 
 		Optional<String> optional = service.getBodyOptional();
-		assertThat(optional).contains("body");
+		assertThat(optional.get()).startsWith("exchangeForBody");
 
 		ResponseEntity<String> entity = service.getEntity();
-		assertThat(entity.getBody()).isEqualTo("entity");
+		assertThat(entity.getBody()).startsWith("exchangeForEntity");
 
 		ResponseEntity<Void> voidEntity = service.getVoidEntity();
 		assertThat(voidEntity.getBody()).isNull();
 
 		List<String> list = service.getList();
-		assertThat(list.get(0)).isEqualTo("body");
+		assertThat(list.get(0)).startsWith("exchangeForBody");
 	}
 
 	@Test
@@ -104,10 +104,8 @@ abstract class HttpServiceMethodTests {
 
 	@Test
 	void typeAndMethodAnnotatedService() {
-		HttpExchangeAdapter actualClient = this.client instanceof HttpClientAdapter httpClient
-				? httpClient.asHttpExchangeAdapter() : (HttpExchangeAdapter) client;
 		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder()
-			.exchangeAdapter(actualClient)
+			.exchangeAdapter(this.client)
 			.embeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
 			.build();
 
@@ -131,7 +129,7 @@ abstract class HttpServiceMethodTests {
 	}
 
 	protected void verifyClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
-		assertThat(this.client.getInvokedMethodReference()).isEqualTo(methodName);
+		assertThat(this.client.getInvokedMethodName()).isEqualTo(methodName);
 		assertThat(this.client.getBodyType()).isEqualTo(expectedBodyType);
 	}
 

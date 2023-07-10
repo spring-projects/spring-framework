@@ -33,8 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base class for testing reactive scenarios in {@link HttpServiceMethod} with
- * a test {@link TestHttpClientAdapter} and a test {@link TestHttpExchangeAdapter}
- * that stub the client invocations.
+ * a test {@link TestReactorExchangeAdapter} that stub the client invocations.
  *
  * <p>
  * The tests do not create or invoke {@code HttpServiceMethod} directly but rather use
@@ -52,33 +51,33 @@ abstract class ReactiveHttpServiceMethodTests extends HttpServiceMethodTests {
 
 		Mono<Void> voidMono = service.execute();
 		StepVerifier.create(voidMono).verifyComplete();
-		verifyClientInvocation("void", null);
+		verifyClientInvocation("exchangeForMono", null);
 
 		Mono<HttpHeaders> headersMono = service.getHeaders();
 		StepVerifier.create(headersMono).expectNextCount(1).verifyComplete();
-		verifyClientInvocation("headers", null);
+		verifyClientInvocation("exchangeForHeadersMono", null);
 
 		Mono<String> body = service.getBody();
-		StepVerifier.create(body).expectNext("body").verifyComplete();
-		verifyClientInvocation("body", BODY_TYPE);
+		StepVerifier.create(body).expectNext("exchangeForBodyMono").verifyComplete();
+		verifyClientInvocation("exchangeForBodyMono", BODY_TYPE);
 
 		Flux<String> fluxBody = service.getFluxBody();
-		StepVerifier.create(fluxBody).expectNext("request", "To", "Body", "Flux").verifyComplete();
-		verifyClientInvocation("bodyFlux", BODY_TYPE);
+		StepVerifier.create(fluxBody).expectNext("exchange", "For", "Body", "Flux").verifyComplete();
+		verifyClientInvocation("exchangeForBodyFlux", BODY_TYPE);
 
 		Mono<ResponseEntity<Void>> voidEntity = service.getVoidEntity();
 		StepVerifier.create(voidEntity).expectNext(ResponseEntity.ok().build()).verifyComplete();
-		verifyClientInvocation("bodilessEntity", null);
+		verifyClientInvocation("exchangeForBodilessEntityMono", null);
 
 		Mono<ResponseEntity<String>> entity = service.getEntity();
-		StepVerifier.create(entity).expectNext(ResponseEntity.ok("requestToEntity"));
-		verifyClientInvocation("entity", BODY_TYPE);
+		StepVerifier.create(entity).expectNext(ResponseEntity.ok("exchangeForEntityMono"));
+		verifyClientInvocation("exchangeForEntityMono", BODY_TYPE);
 
 		Mono<ResponseEntity<Flux<String>>> fluxEntity = service.getFluxEntity();
 		StepVerifier.create(fluxEntity.flatMapMany(HttpEntity::getBody))
-				.expectNext("request", "To", "Entity", "Flux")
+				.expectNext("exchange", "For", "Entity", "Flux")
 				.verifyComplete();
-		verifyClientInvocation("entityFlux", BODY_TYPE);
+		verifyClientInvocation("exchangeForEntityFlux", BODY_TYPE);
 
 		assertThat(service.getDefaultMethodValue()).isEqualTo("default value");
 	}
@@ -93,20 +92,20 @@ abstract class ReactiveHttpServiceMethodTests extends HttpServiceMethodTests {
 		assertThat(headersSingle.blockingGet()).isNotNull();
 
 		Single<String> bodySingle = service.getBody();
-		assertThat(bodySingle.blockingGet()).isEqualTo("body");
+		assertThat(bodySingle.blockingGet()).isEqualTo("exchangeForBodyMono");
 
 		Flowable<String> bodyFlow = service.getFlowableBody();
-		assertThat(bodyFlow.toList().blockingGet()).asList().containsExactly("request", "To", "Body", "Flux");
+		assertThat(bodyFlow.toList().blockingGet()).asList().containsExactly("exchange", "For", "Body", "Flux");
 
 		Single<ResponseEntity<Void>> voidEntity = service.getVoidEntity();
 		assertThat(voidEntity.blockingGet().getBody()).isNull();
 
 		Single<ResponseEntity<String>> entitySingle = service.getEntity();
-		assertThat(entitySingle.blockingGet().getBody()).isEqualTo("entity");
+		assertThat(entitySingle.blockingGet().getBody()).isEqualTo("exchangeForEntityMono");
 
 		Single<ResponseEntity<Flowable<String>>> entityFlow = service.getFlowableEntity();
 		Flowable<String> body = (entityFlow.blockingGet()).getBody();
-		assertThat(body.toList().blockingGet()).containsExactly("request", "To", "Entity", "Flux");
+		assertThat(body.toList().blockingGet()).containsExactly("exchange", "For", "Entity", "Flux");
 	}
 
 	private interface ReactorService {

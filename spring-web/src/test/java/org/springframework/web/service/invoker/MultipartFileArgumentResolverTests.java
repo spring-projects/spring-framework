@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpEntity;
@@ -42,16 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("unchecked")
 class MultipartFileArgumentResolverTests {
 
-	private final TestHttpClientAdapter clientAdapter = new TestHttpClientAdapter();
+	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
-	private TestClient client;
-
-
-	@BeforeEach
-	void setUp() {
-		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(this.clientAdapter).build();
-		this.client = factory.createClient(TestClient.class);
-	}
+	private final MultipartService multipartService =
+			HttpServiceProxyFactory.builderFor(this.client).build().createClient(MultipartService.class);
 
 
 	@Test
@@ -60,8 +53,8 @@ class MultipartFileArgumentResolverTests {
 		String originalFileName = "originalTestFileName";
 		MultipartFile testFile = new MockMultipartFile(fileName, originalFileName, "text/plain", "test".getBytes());
 
-		this.client.postMultipartFile(testFile);
-		Object value = this.clientAdapter.getRequestValues().getBodyValue();
+		this.multipartService.postMultipartFile(testFile);
+		Object value = this.client.getRequestValues().getBodyValue();
 
 		assertThat(value).isInstanceOf(MultiValueMap.class);
 		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
@@ -80,8 +73,8 @@ class MultipartFileArgumentResolverTests {
 
 	@Test
 	void optionalMultipartFile() {
-		this.client.postOptionalMultipartFile(Optional.empty(), "anotherPart");
-		Object value = clientAdapter.getRequestValues().getBodyValue();
+		this.multipartService.postOptionalMultipartFile(Optional.empty(), "anotherPart");
+		Object value = client.getRequestValues().getBodyValue();
 
 		assertThat(value).isInstanceOf(MultiValueMap.class);
 		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
@@ -90,7 +83,7 @@ class MultipartFileArgumentResolverTests {
 
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	private interface TestClient {
+	private interface MultipartService {
 
 		@PostExchange
 		void postMultipartFile(MultipartFile file);
