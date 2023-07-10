@@ -91,59 +91,55 @@ public interface HttpClientAdapter {
 
 
 	/**
-	 * Adapt this {@link HttpClientAdapter} to {@link ReactorHttpExchangeAdapter}.
-	 * @return a {@link ReactorHttpExchangeAdapter} instance created that delegating to
-	 * the underlying {@link HttpClientAdapter} implementation
+	 * Adapt this instance to {@link ReactorHttpExchangeAdapter}.
 	 * @since 6.1
 	 */
-	default ReactorHttpExchangeAdapter asHttpExchangeAdapter() {
-
-		HttpClientAdapter delegate = this;
+	default ReactorHttpExchangeAdapter asReactorExchangeAdapter() {
 
 		return new AbstractReactorHttpExchangeAdapter() {
 
 			@Override
-			public Mono<Void> exchangeForMono(HttpRequestValues requestValues) {
-				return delegate.requestToVoid(requestValues);
+			public boolean supportsRequestAttributes() {
+				return true;
 			}
 
 			@Override
-			public Mono<HttpHeaders> exchangeForHeadersMono(HttpRequestValues requestValues) {
-				return delegate.requestToHeaders(requestValues);
+			public Mono<Void> exchangeForMono(HttpRequestValues values) {
+				return HttpClientAdapter.this.requestToVoid(values);
 			}
 
 			@Override
-			public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-				return delegate.requestToBody(requestValues, bodyType);
+			public Mono<HttpHeaders> exchangeForHeadersMono(HttpRequestValues values) {
+				return HttpClientAdapter.this.requestToHeaders(values);
 			}
 
 			@Override
-			public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-				return delegate.requestToBodyFlux(requestValues, bodyType);
+			public <T> Mono<T> exchangeForBodyMono(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+				return HttpClientAdapter.this.requestToBody(values, bodyType);
 			}
 
 			@Override
-			public Mono<ResponseEntity<Void>> exchangeForBodilessEntityMono(HttpRequestValues requestValues) {
-				return delegate.requestToBodilessEntity(requestValues);
+			public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+				return HttpClientAdapter.this.requestToBodyFlux(values, bodyType);
+			}
+
+			@Override
+			public Mono<ResponseEntity<Void>> exchangeForBodilessEntityMono(HttpRequestValues values) {
+				return HttpClientAdapter.this.requestToBodilessEntity(values);
 			}
 
 			@Override
 			public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(
 					HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 
-				return delegate.requestToEntity(requestValues, bodyType);
+				return HttpClientAdapter.this.requestToEntity(requestValues, bodyType);
 			}
 
 			@Override
 			public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(
 					HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 
-				return delegate.requestToEntityFlux(requestValues, bodyType);
-			}
-
-			@Override
-			public boolean supportsRequestAttributes() {
-				return true;
+				return HttpClientAdapter.this.requestToEntityFlux(requestValues, bodyType);
 			}
 		};
 	}

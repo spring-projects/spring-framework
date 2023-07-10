@@ -128,10 +128,8 @@ class KotlinWebClientHttpServiceProxyTests {
 	}
 
 	private fun initHttpService(webClient: WebClient): TestHttpService {
-		return HttpServiceProxyFactory.builder()
-			.clientAdapter(WebClientAdapter.forClient(webClient))
-			.build()
-			.createClient()
+		val adapter = WebClientAdapter.forClient(webClient)
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient()
 	}
 
 	private fun prepareResponse(consumer: Consumer<MockResponse>) {

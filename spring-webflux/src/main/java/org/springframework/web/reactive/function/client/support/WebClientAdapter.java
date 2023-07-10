@@ -54,6 +54,11 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 
 
 	@Override
+	public boolean supportsRequestAttributes() {
+		return true;
+	}
+
+	@Override
 	public Mono<Void> exchangeForMono(HttpRequestValues requestValues) {
 		return newRequest(requestValues).retrieve().toBodilessEntity().then();
 	}
@@ -132,8 +137,4 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		return new WebClientAdapter(webClient);
 	}
 
-	@Override
-	public boolean supportsRequestAttributes() {
-		return true;
-	}
 }

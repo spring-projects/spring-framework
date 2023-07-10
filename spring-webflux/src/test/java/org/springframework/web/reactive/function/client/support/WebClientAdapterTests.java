@@ -53,12 +53,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link HttpServiceProxyFactory HTTP Service proxy}
- * using {@link WebClient} and {@link MockWebServer}.
+ * with {@link WebClientAdapter} connecting to {@link MockWebServer}.
  *
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
  */
-public class WebClientHttpServiceProxyTests {
+public class WebClientAdapterTests {
 
 	private MockWebServer server;
 
@@ -82,7 +82,7 @@ public class WebClientHttpServiceProxyTests {
 		prepareResponse(response ->
 				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		StepVerifier.create(initHttpService().getGreeting())
+		StepVerifier.create(initService().getGreeting())
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -103,7 +103,7 @@ public class WebClientHttpServiceProxyTests {
 		prepareResponse(response ->
 				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		StepVerifier.create(initHttpService(webClient).getGreetingWithAttribute("myAttributeValue"))
+		StepVerifier.create(initService(webClient).getGreetingWithAttribute("myAttributeValue"))
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -117,7 +117,7 @@ public class WebClientHttpServiceProxyTests {
 		prepareResponse(response -> response.setResponseCode(200).setBody(expectedBody));
 
 		URI dynamicUri = this.server.url("/greeting/123").uri();
-		String actualBody = initHttpService().getGreetingById(dynamicUri, "456");
+		String actualBody = initService().getGreetingById(dynamicUri, "456");
 
 		assertThat(actualBody).isEqualTo(expectedBody);
 		assertThat(this.server.takeRequest().getRequestUrl().uri()).isEqualTo(dynamicUri);
@@ -131,7 +131,7 @@ public class WebClientHttpServiceProxyTests {
 		map.add("param1", "value 1");
 		map.add("param2", "value 2");
 
-		initHttpService().postForm(map);
+		initService().postForm(map);
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
@@ -146,7 +146,7 @@ public class WebClientHttpServiceProxyTests {
 		MultipartFile file = new MockMultipartFile(fileName, originalFileName,
 				MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
 
-		initHttpService().postMultipart(file, "test2");
+		initService().postMultipart(file, "test2");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
@@ -157,14 +157,14 @@ public class WebClientHttpServiceProxyTests {
 						"Content-Type: text/plain;charset=UTF-8", "Content-Length: 5", "test2");
 	}
 
-	private TestHttpService initHttpService() {
+	private Service initService() {
 		WebClient webClient = WebClient.builder().baseUrl(this.server.url("/").toString()).build();
-		return initHttpService(webClient);
+		return initService(webClient);
 	}
 
-	private TestHttpService initHttpService(WebClient webClient) {
+	private Service initService(WebClient webClient) {
 		WebClientAdapter adapter = WebClientAdapter.forClient(webClient);
-		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(TestHttpService.class);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
 	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
@@ -174,7 +174,7 @@ public class WebClientHttpServiceProxyTests {
 	}
 
 
-	private interface TestHttpService {
+	private interface Service {
 
 		@GetExchange("/greeting")
 		Mono<String> getGreeting();

@@ -63,7 +63,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
         val restTemplate = RestTemplate()
         restTemplate.uriTemplateHandler = DefaultUriBuilderFactory(server.url("/").toString())
         return HttpServiceProxyFactory.builder()
-                .exchangeAdapter(RestTemplateAdapter.forTemplate(restTemplate))
+                .exchangeAdapter(RestTemplateAdapter.create(restTemplate))
                 .build()
                 .createClient(TestService::class.java)
     }

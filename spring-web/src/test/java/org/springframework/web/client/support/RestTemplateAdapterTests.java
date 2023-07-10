@@ -51,31 +51,27 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link HttpServiceProxyFactory HTTP Service proxy} using
- * {@link RestTemplate} and {@link MockWebServer}.
+ * Integration tests for {@link HttpServiceProxyFactory HTTP Service proxy}
+ * with {@link RestTemplateAdapter} connecting to {@link MockWebServer}.
  *
  * @author Olga Maciaszek-Sharma
  */
-class RestTemplateHttpServiceProxyTests {
+class RestTemplateAdapterTests {
 
 	private MockWebServer server;
 
-	private TestService testService;
+	private Service service;
+
 
 	@BeforeEach
 	void setUp() {
 		this.server = new MockWebServer();
 		prepareResponse();
-		this.testService = initTestService();
-	}
 
-	private TestService initTestService() {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(this.server.url("/").toString()));
-		return HttpServiceProxyFactory.builder()
-			.exchangeAdapter(RestTemplateAdapter.forTemplate(restTemplate))
-			.build()
-			.createClient(TestService.class);
+		RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+		this.service = HttpServiceProxyFactory.builder().exchangeAdapter(adapter).build().createClient(Service.class);
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -86,32 +82,33 @@ class RestTemplateHttpServiceProxyTests {
 		}
 	}
 
+
 	@Test
-	void getRequest() throws InterruptedException {
-		String response = testService.getRequest();
+	void greeting() throws InterruptedException {
+		String response = this.service.getGreeting();
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(response).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/test");
+		assertThat(request.getPath()).isEqualTo("/greeting");
 	}
 
 	@Test
-	void getRequestWithPathVariable() throws InterruptedException {
-		ResponseEntity<String> response = testService.getRequestWithPathVariable("456");
+	void greetingById() throws InterruptedException {
+		ResponseEntity<String> response = this.service.getGreetingById("456");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/test/456");
+		assertThat(request.getPath()).isEqualTo("/greeting/456");
 	}
 
 	@Test
-	void getRequestWithDynamicUri() throws InterruptedException {
+	void greetingWithDynamicUri() throws InterruptedException {
 		URI dynamicUri = this.server.url("/greeting/123").uri();
 
-		Optional<String> response = testService.getRequestWithDynamicUri(dynamicUri, "456");
+		Optional<String> response = this.service.getGreetingWithDynamicUri(dynamicUri, "456");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(response.orElse("empty")).isEqualTo("Hello Spring!");
@@ -120,12 +117,12 @@ class RestTemplateHttpServiceProxyTests {
 	}
 
 	@Test
-	void postWithRequestHeader() throws InterruptedException {
-		testService.postRequestWithHeader("testHeader", "testBody");
+	void postWithHeader() throws InterruptedException {
+		service.postWithHeader("testHeader", "testBody");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/test");
+		assertThat(request.getPath()).isEqualTo("/greeting");
 		assertThat(request.getHeaders().get("testHeaderName")).isEqualTo("testHeader");
 		assertThat(request.getBody().readUtf8()).isEqualTo("testBody");
 	}
@@ -136,7 +133,7 @@ class RestTemplateHttpServiceProxyTests {
 		map.add("param1", "value 1");
 		map.add("param2", "value 2");
 
-		testService.postForm(map);
+		service.postForm(map);
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type"))
@@ -151,7 +148,7 @@ class RestTemplateHttpServiceProxyTests {
 		MultipartFile file = new MockMultipartFile(fileName, originalFileName, MediaType.APPLICATION_JSON_VALUE,
 				"test".getBytes());
 
-		testService.postMultipart(file, "test2");
+		service.postMultipart(file, "test2");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
@@ -163,8 +160,8 @@ class RestTemplateHttpServiceProxyTests {
 	}
 
 	@Test
-	void putRequestWithCookies() throws InterruptedException {
-		testService.putRequestWithCookies("test1", "test2");
+	void putWithCookies() throws InterruptedException {
+		service.putWithCookies("test1", "test2");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("PUT");
@@ -172,8 +169,8 @@ class RestTemplateHttpServiceProxyTests {
 	}
 
 	@Test
-	void putRequestWithSameNameCookies() throws InterruptedException {
-		testService.putRequestWithSameNameCookies("test1", "test2");
+	void putWithSameNameCookies() throws InterruptedException {
+		service.putWithSameNameCookies("test1", "test2");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("PUT");
@@ -186,20 +183,21 @@ class RestTemplateHttpServiceProxyTests {
 		this.server.enqueue(response);
 	}
 
-	private interface TestService {
 
-		@GetExchange("/test")
-		String getRequest();
+	private interface Service {
 
-		@GetExchange("/test/{id}")
-		ResponseEntity<String> getRequestWithPathVariable(@PathVariable String id);
+		@GetExchange("/greeting")
+		String getGreeting();
 
-		@GetExchange("/test/{id}")
-		Optional<String> getRequestWithDynamicUri(@Nullable URI uri, @PathVariable String id);
+		@GetExchange("/greeting/{id}")
+		ResponseEntity<String> getGreetingById(@PathVariable String id);
 
-		@PostExchange("/test")
-		void postRequestWithHeader(@RequestHeader("testHeaderName") String testHeader,
-				@RequestBody String requestBody);
+		@GetExchange("/greeting/{id}")
+		Optional<String> getGreetingWithDynamicUri(@Nullable URI uri, @PathVariable String id);
+
+		@PostExchange("/greeting")
+		void postWithHeader(
+				@RequestHeader("testHeaderName") String testHeader, @RequestBody String requestBody);
 
 		@PostExchange(contentType = "application/x-www-form-urlencoded")
 		void postForm(@RequestParam MultiValueMap<String, String> params);
@@ -208,12 +206,12 @@ class RestTemplateHttpServiceProxyTests {
 		void postMultipart(MultipartFile file, @RequestPart String anotherPart);
 
 		@PutExchange
-		void putRequestWithCookies(@CookieValue String firstCookie,
-				@CookieValue String secondCookie);
+		void putWithCookies(
+				@CookieValue String firstCookie, @CookieValue String secondCookie);
 
 		@PutExchange
-		void putRequestWithSameNameCookies(@CookieValue("testCookie") String firstCookie,
-				@CookieValue("testCookie") String secondCookie);
+		void putWithSameNameCookies(
+				@CookieValue("testCookie") String firstCookie, @CookieValue("testCookie") String secondCookie);
 
 	}
 

@@ -31,6 +31,11 @@ import org.springframework.lang.Nullable;
 public interface HttpExchangeAdapter {
 
 	/**
+	 * Whether the underlying client supports use of request attributes.
+	 */
+	boolean supportsRequestAttributes();
+
+	/**
 	 * Perform the given request, and release the response content, if any.
 	 * @param requestValues the request to perform
 	 */
@@ -49,7 +54,7 @@ public interface HttpExchangeAdapter {
 	 * @param requestValues the request to perform
 	 * @param bodyType the target type to decode to
 	 * @param <T> the type the response is decoded to
-	 * @return the decoded response.
+	 * @return the decoded response body.
 	 */
 	@Nullable
 	<T> T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
@@ -57,18 +62,15 @@ public interface HttpExchangeAdapter {
 	/**
 	 * Variant of {@link #exchange(HttpRequestValues)} with additional
 	 * access to the response status and headers.
+	 * @return the response entity with status and headers.
 	 */
 	ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues requestValues);
 
 	/**
 	 * Variant of {@link #exchangeForBody(HttpRequestValues, ParameterizedTypeReference)}
 	 * with additional access to the response status and headers.
+	 * @return the response entity with status, headers, and body.
 	 */
 	<T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
 
-	/**
-	 * A flag that indicates whether request attributes are supported by a specific client
-	 * adapter.
-	 */
-	boolean supportsRequestAttributes();
 }

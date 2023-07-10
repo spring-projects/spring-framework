@@ -80,7 +80,10 @@ final class HttpServiceMethod {
 		this.method = method;
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
-		this.requestValuesInitializer = HttpRequestValuesInitializer.create(method, containingClass, embeddedValueResolver);
+
+		this.requestValuesInitializer =
+				HttpRequestValuesInitializer.create(method, containingClass, embeddedValueResolver);
+
 		this.responseFunction =
 				(REACTOR_PRESENT && adapter instanceof ReactorHttpExchangeAdapter reactorAdapter ?
 						ReactorExchangeResponseFunction.create(reactorAdapter, method) :
@@ -291,52 +294,54 @@ final class HttpServiceMethod {
 			return this.responseFunction.apply(requestValues);
 		}
 
+
+		/**
+		 * Create the {@code ResponseFunction} that matches the method return type.
+		 */
 		public static ResponseFunction create(HttpExchangeAdapter client, Method method) {
 			if (KotlinDetector.isSuspendingFunction(method)) {
-				throw new IllegalStateException("Kotlin Coroutines are only supported with reactive implementations");
+				throw new IllegalStateException(
+						"Kotlin Coroutines are only supported with reactive implementations");
 			}
-			MethodParameter actualReturnParam = new MethodParameter(method, -1).nestedIfOptional();
-			boolean returnOptional = actualReturnParam.getParameterType().equals(Optional.class);
-			Class<?> actualReturnType = actualReturnParam.getNestedParameterType();
+
+			MethodParameter param = new MethodParameter(method, -1).nestedIfOptional();
+			Class<?> paramType = param.getNestedParameterType();
 
 			Function<HttpRequestValues, Object> responseFunction;
-			if (actualReturnType.equals(void.class) || actualReturnType.equals(Void.class)) {
+			if (paramType.equals(void.class) || paramType.equals(Void.class)) {
 				responseFunction = requestValues -> {
 					client.exchange(requestValues);
 					return null;
 				};
 			}
-			else if (actualReturnType.equals(HttpHeaders.class)) {
-				responseFunction = request -> processResponse(client.exchangeForHeaders(request),
-						returnOptional);
+			else if (paramType.equals(HttpHeaders.class)) {
+				responseFunction = request -> asOptionalIfNecessary(client.exchangeForHeaders(request), param);
 			}
-			else if (actualReturnType.equals(ResponseEntity.class)) {
-				MethodParameter bodyParam = actualReturnParam.nested();
-				Class<?> bodyType = bodyParam.getNestedParameterType();
-				if (bodyType.equals(Void.class)) {
-					responseFunction = request -> processResponse(client
-									.exchangeForBodilessEntity(request), returnOptional);
+			else if (paramType.equals(ResponseEntity.class)) {
+				MethodParameter bodyParam = param.nested();
+				if (bodyParam.getNestedParameterType().equals(Void.class)) {
+					responseFunction = request ->
+							asOptionalIfNecessary(client.exchangeForBodilessEntity(request), param);
 				}
 				else {
-					ParameterizedTypeReference<?> bodyTypeReference = ParameterizedTypeReference
-						.forType(bodyParam.getNestedGenericParameterType());
-					responseFunction = request -> processResponse(client.exchangeForEntity(request,
-									bodyTypeReference), returnOptional);
+					ParameterizedTypeReference<?> bodyTypeRef =
+							ParameterizedTypeReference.forType(bodyParam.getNestedGenericParameterType());
+					responseFunction = request ->
+							asOptionalIfNecessary(client.exchangeForEntity(request, bodyTypeRef), param);
 				}
 			}
 			else {
-				ParameterizedTypeReference<?> bodyTypeReference = ParameterizedTypeReference
-					.forType(actualReturnParam.getNestedGenericParameterType());
-				responseFunction = request -> processResponse(client.exchangeForBody(request,
-								bodyTypeReference), returnOptional);
+				ParameterizedTypeReference<?> bodyTypeRef =
+						ParameterizedTypeReference.forType(param.getNestedGenericParameterType());
+				responseFunction = request ->
+						asOptionalIfNecessary(client.exchangeForBody(request, bodyTypeRef), param);
 			}
 
 			return new ExchangeResponseFunction(responseFunction);
 		}
 
-		private static @Nullable Object processResponse(@Nullable Object response,
-				boolean returnOptional) {
-			return returnOptional ? Optional.ofNullable(response) : response;
+		private static @Nullable Object asOptionalIfNecessary(@Nullable Object response, MethodParameter param) {
+			return param.getParameterType().equals(Optional.class) ? Optional.ofNullable(response) : response;
 		}
 	}
 
@@ -372,7 +377,7 @@ final class HttpServiceMethod {
 
 
 		/**
-		 * Create the {@code ResponseFunction} that matches the method's return type.
+		 * Create the {@code ResponseFunction} that matches the method return type.
 		 */
 		public static ResponseFunction create(ReactorHttpExchangeAdapter client, Method method) {
 			MethodParameter returnParam = new MethodParameter(method, -1);

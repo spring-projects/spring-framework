@@ -119,7 +119,7 @@ public final class HttpServiceProxyFactory {
 	@SuppressWarnings("removal")
 	@Deprecated(since = "6.1", forRemoval = true)
 	public static Builder builder(HttpClientAdapter clientAdapter) {
-		return new Builder().exchangeAdapter(clientAdapter.asHttpExchangeAdapter());
+		return new Builder().exchangeAdapter(clientAdapter.asReactorExchangeAdapter());
 	}
 
 	/**
@@ -169,7 +169,7 @@ public final class HttpServiceProxyFactory {
 		@SuppressWarnings("removal")
 		@Deprecated(since = "6.1", forRemoval = true)
 		public Builder clientAdapter(HttpClientAdapter clientAdapter) {
-			this.exchangeAdapter = clientAdapter.asHttpExchangeAdapter();
+			this.exchangeAdapter = clientAdapter.asReactorExchangeAdapter();
 			return this;
 		}
 
@@ -262,12 +262,12 @@ public final class HttpServiceProxyFactory {
 			resolvers.add(new RequestHeaderArgumentResolver(service));
 			resolvers.add(new RequestBodyArgumentResolver());
 			resolvers.add(new PathVariableArgumentResolver(service));
-			if (this.exchangeAdapter.supportsRequestAttributes()) {
-				resolvers.add(new RequestAttributeArgumentResolver());
-			}
 			resolvers.add(new RequestParamArgumentResolver(service));
 			resolvers.add(new RequestPartArgumentResolver());
 			resolvers.add(new CookieValueArgumentResolver(service));
+			if (this.exchangeAdapter.supportsRequestAttributes()) {
+				resolvers.add(new RequestAttributeArgumentResolver());
+			}
 
 			// Specific type
 			resolvers.add(new UrlArgumentResolver());
