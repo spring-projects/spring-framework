@@ -224,24 +224,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Set the autodetection mode to use.
-	 * @throws IllegalArgumentException if the supplied value is not
-	 * one of the {@code AUTODETECT_} constants
-	 * @see #setAutodetectModeName(String)
-	 * @see #getAutodetectMode()
-	 * @see #AUTODETECT_ALL
-	 * @see #AUTODETECT_ASSEMBLER
-	 * @see #AUTODETECT_MBEAN
-	 * @see #AUTODETECT_NONE
-	 */
-	public void setAutodetectMode(int autodetectMode) {
-		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(autodetectMode)) {
-			throw new IllegalArgumentException("Only values of autodetect constants allowed");
-		}
-		this.autodetectMode = autodetectMode;
-	}
-
-	/**
 	 * Set the autodetection mode to use by name.
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
@@ -257,6 +239,24 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			throw new IllegalArgumentException("Only autodetect constants allowed");
 		}
 		this.autodetectMode = (Integer) constants.asNumber(constantName);
+	}
+
+	/**
+	 * Set the autodetection mode to use.
+	 * @throws IllegalArgumentException if the supplied value is not
+	 * one of the {@code AUTODETECT_} constants
+	 * @see #setAutodetectModeName(String)
+	 * @see #getAutodetectMode()
+	 * @see #AUTODETECT_ALL
+	 * @see #AUTODETECT_ASSEMBLER
+	 * @see #AUTODETECT_MBEAN
+	 * @see #AUTODETECT_NONE
+	 */
+	public void setAutodetectMode(int autodetectMode) {
+		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(autodetectMode)) {
+			throw new IllegalArgumentException("Only values of autodetect constants allowed");
+		}
+		this.autodetectMode = autodetectMode;
 	}
 
 	/**
