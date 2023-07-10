@@ -441,47 +441,55 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	void setAutodetectModeToSupportedValue() {
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
+		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
 	void setAutodetectModeToOutOfRangeNegativeValue() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectMode(-1));
+		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeToOutOfRangePositiveValue() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectMode(5));
+		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeNameToSupportedValue() {
 		exporter.setAutodetectModeName("AUTODETECT_ASSEMBLER");
+		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
 	void setAutodetectModeNameToNull() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName(null));
+		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeNameToAnEmptyString() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName(""));
+		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeNameToAWhitespacedString() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName("  \t"));
+		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test
 	void setAutodetectModeNameToARubbishValue() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName("That Hansel is... *sssooo* hot right now!"));
+		assertThat(exporter.getAutodetectMode()).isNull();
 	}
 
 	@Test

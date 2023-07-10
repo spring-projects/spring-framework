@@ -92,6 +92,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rick Evans
  * @author Mark Fisher
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -227,6 +228,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @throws IllegalArgumentException if the supplied value is not
 	 * one of the {@code AUTODETECT_} constants
 	 * @see #setAutodetectModeName(String)
+	 * @see #getAutodetectMode()
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
@@ -244,6 +246,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
 	 * @see #setAutodetectMode(int)
+	 * @see #getAutodetectMode()
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
@@ -254,6 +257,19 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			throw new IllegalArgumentException("Only autodetect constants allowed");
 		}
 		this.autodetectMode = (Integer) constants.asNumber(constantName);
+	}
+
+	/**
+	 * Get the autodetect mode to use for this {@code MBeanExporter}.
+	 * @return the configured autodetect mode, or {@code null} if not explicitly
+	 * configured
+	 * @since 6.0.11
+	 * @see #setAutodetectModeName(String)
+	 * @see #setAutodetectMode(int)
+	 */
+	@Nullable
+	public Integer getAutodetectMode() {
+		return this.autodetectMode;
 	}
 
 	/**
