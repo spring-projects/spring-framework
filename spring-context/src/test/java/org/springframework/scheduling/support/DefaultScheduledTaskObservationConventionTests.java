@@ -101,6 +101,7 @@ class DefaultScheduledTaskObservationConventionTests {
 
 	static class BeanWithScheduledMethods implements TaskProcessor {
 
+		@Override
 		public void process() {
 		}
 	}
