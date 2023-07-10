@@ -59,9 +59,8 @@ public class TestHttpExchangeAdapter implements HttpExchangeAdapter, TestAdapter
 	}
 
 	@Override
-	public Void exchange(HttpRequestValues requestValues) {
+	public void exchange(HttpRequestValues requestValues) {
 		saveInput("void", requestValues, null);
-		return null;
 	}
 
 	@Override

@@ -301,7 +301,10 @@ final class HttpServiceMethod {
 
 			Function<HttpRequestValues, Object> responseFunction;
 			if (actualReturnType.equals(void.class) || actualReturnType.equals(Void.class)) {
-				responseFunction = client::exchange;
+				responseFunction = requestValues -> {
+					client.exchange(requestValues);
+					return null;
+				};
 			}
 			else if (actualReturnType.equals(HttpHeaders.class)) {
 				responseFunction = request -> processResponse(client.exchangeForHeaders(request),

@@ -91,12 +91,12 @@ public abstract class AbstractReactorHttpExchangeAdapter
 	}
 
 	@Override
-	public Void exchange(HttpRequestValues requestValues) {
+	public void exchange(HttpRequestValues requestValues) {
 		if (this.blockTimeout != null) {
-			return exchangeForMono(requestValues).block(this.blockTimeout);
+			exchangeForMono(requestValues).block(this.blockTimeout);
 		}
 		else {
-			return exchangeForMono(requestValues).block();
+			exchangeForMono(requestValues).block();
 		}
 	}
 

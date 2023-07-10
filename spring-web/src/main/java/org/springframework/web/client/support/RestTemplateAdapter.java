@@ -54,9 +54,8 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 	}
 
 	@Override
-	public Void exchange(HttpRequestValues requestValues) {
+	public void exchange(HttpRequestValues requestValues) {
 		this.restTemplate.exchange(newRequest(requestValues), Void.class);
-		return null;
 	}
 
 	@Override

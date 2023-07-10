@@ -34,7 +34,7 @@ public interface HttpExchangeAdapter {
 	 * Perform the given request, and release the response content, if any.
 	 * @param requestValues the request to perform
 	 */
-	Void exchange(HttpRequestValues requestValues);
+	void exchange(HttpRequestValues requestValues);
 
 	/**
 	 * Perform the given request, release the response content, and return the
