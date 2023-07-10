@@ -75,7 +75,7 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 		if (context.getError() != null) {
 			return OUTCOME_ERROR;
 		}
-		else if (!context.isComplete()) {
+		if (!context.isComplete()) {
 			return OUTCOME_UNKNOWN;
 		}
 		return OUTCOME_SUCCESS;

@@ -103,8 +103,8 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`code.function` _(required)_|Name of Java `Method` that is scheduled for execution.
 |`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method.
-|`exception` _(required)_|Name of the exception thrown during the execution, or `KeyValue#NONE_VALUE`} if no exception happened.
-|`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution.
+|`exception` _(required)_|Name of the exception thrown during the execution, or `"none"` if no exception happened.
+|`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution).
 |===
 
 
@@ -135,7 +135,7 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `KeyValue#NONE_VALUE`} if no exception happened.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
