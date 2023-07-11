@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -657,21 +656,31 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						growCollectionIfNecessary(list, index, indexedPropertyName.toString(), ph, i + 1);
 						value = list.get(index);
 					}
-					else if (value instanceof Set set) {
-						// Apply index to Iterator in case of a Set.
+					else if (value instanceof Iterable iterable) {
+						// Apply index to Iterator in case of a Set/Collection/Iterable.
 						int index = Integer.parseInt(key);
-						if (index < 0 || index >= set.size()) {
-							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-									"Cannot get element with index " + index + " from Set of size " +
-											set.size() + ", accessed using property path '" + propertyName + "'");
+						if (value instanceof Collection<?> coll) {
+							if (index < 0 || index >= coll.size()) {
+								throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+										"Cannot get element with index " + index + " from Collection of size " +
+												coll.size() + ", accessed using property path '" + propertyName + "'");
+							}
 						}
-						Iterator<Object> it = set.iterator();
-						for (int j = 0; it.hasNext(); j++) {
+						Iterator<Object> it = iterable.iterator();
+						boolean found = false;
+						int currIndex = 0;
+						for (; it.hasNext(); currIndex++) {
 							Object elem = it.next();
-							if (j == index) {
+							if (currIndex == index) {
 								value = elem;
+								found = true;
 								break;
 							}
+						}
+						if (!found) {
+							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+									"Cannot get element with index " + index + " from Iterable of size " +
+											currIndex + ", accessed using property path '" + propertyName + "'");
 						}
 					}
 					else if (value instanceof Map map) {
@@ -685,12 +694,16 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					else {
 						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 								"Property referenced in indexed property path '" + propertyName +
-										"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
+										"' is neither an array nor a List/Set/Collection/Iterable nor a Map; " +
+										"returned value was [" + value + "]");
 					}
 					indexedPropertyName.append(PROPERTY_KEY_PREFIX).append(key).append(PROPERTY_KEY_SUFFIX);
 				}
 			}
 			return value;
+		}
+		catch (InvalidPropertyException ex) {
+			throw ex;
 		}
 		catch (IndexOutOfBoundsException ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
