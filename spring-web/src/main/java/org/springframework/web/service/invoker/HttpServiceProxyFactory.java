@@ -55,6 +55,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @since 6.0
  * @see org.springframework.web.client.support.RestTemplateAdapter
  * @see org.springframework.web.reactive.function.client.support.WebClientAdapter
+ * @see org.springframework.web.client.support.RestClientAdapter
  */
 public final class HttpServiceProxyFactory {
 
