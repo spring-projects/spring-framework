@@ -97,16 +97,18 @@ import org.springframework.util.Assert;
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
+ * <p><b>NOTE: Hibernate ORM 6.x is officially only supported as a JPA provider.
+ * Please use {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
+ * with {@link org.springframework.orm.jpa.JpaTransactionManager} there instead.</b>
+ *
  * @author Juergen Hoeller
  * @since 4.2
  * @see #setSessionFactory
- * @see #setDataSource
  * @see SessionFactory#getCurrentSession()
- * @see DataSourceUtils#getConnection
- * @see DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.support.JdbcTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.jpa.JpaTransactionManager
+ * @see org.springframework.orm.jpa.vendor.HibernateJpaDialect
  */
 @SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
@@ -271,7 +273,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see Connection#setHoldability
 	 * @see ResultSet#HOLD_CURSORS_OVER_COMMIT
 	 * @see #disconnectOnCompletion(Session)
+	 * @deprecated as of 5.3.29 since Hibernate 5.x aggressively closes ResultSets on commit,
+	 * making it impossible to rely on ResultSet holdability. Also, Spring does not provide
+	 * an equivalent setting on {@link org.springframework.orm.jpa.JpaTransactionManager}.
 	 */
+	@Deprecated(since = "5.3.29")
 	public void setAllowResultAccessAfterCompletion(boolean allowResultAccessAfterCompletion) {
 		this.allowResultAccessAfterCompletion = allowResultAccessAfterCompletion;
 	}
@@ -487,7 +493,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			session = txObject.getSessionHolder().getSession().unwrap(SessionImplementor.class);
 
-			boolean holdabilityNeeded = this.allowResultAccessAfterCompletion && !txObject.isNewSession();
+			boolean holdabilityNeeded = (this.allowResultAccessAfterCompletion && !txObject.isNewSession());
 			boolean isolationLevelNeeded = (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
 			if (holdabilityNeeded || isolationLevelNeeded || definition.isReadOnly()) {
 				if (this.prepareConnection && ConnectionReleaseMode.ON_CLOSE.equals(
@@ -500,7 +506,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 					txObject.setPreviousIsolationLevel(previousIsolationLevel);
 					txObject.setReadOnly(definition.isReadOnly());
-					if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
+					if (holdabilityNeeded) {
 						int currentHoldability = con.getHoldability();
 						if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
 							txObject.setPreviousHoldability(currentHoldability);
