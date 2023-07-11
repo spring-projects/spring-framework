@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,10 +107,9 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate path(String pattern) {
 		Assert.notNull(pattern, "'pattern' must not be null");
-		if (!pattern.isEmpty() && !pattern.startsWith("/")) {
-			pattern = "/" + pattern;
-		}
-		return pathPredicates(PathPatternParser.defaultInstance).apply(pattern);
+		PathPatternParser parser = PathPatternParser.defaultInstance;
+		pattern = parser.initFullPathPattern(pattern);
+		return pathPredicates(parser).apply(pattern);
 	}
 
 	/**
@@ -333,14 +332,14 @@ public abstract class RequestPredicates {
 		void method(Set<HttpMethod> methods);
 
 		/**
-		 * Receive notification of an path predicate.
+		 * Receive notification of a path predicate.
 		 * @param pattern the path pattern that makes up the predicate
 		 * @see RequestPredicates#path(String)
 		 */
 		void path(String pattern);
 
 		/**
-		 * Receive notification of an path extension predicate.
+		 * Receive notification of a path extension predicate.
 		 * @param extension the path extension that makes up the predicate
 		 * @see RequestPredicates#pathExtension(String)
 		 */
@@ -426,10 +425,10 @@ public abstract class RequestPredicates {
 		void unknown(RequestPredicate predicate);
 	}
 
+
 	private static class HttpMethodPredicate implements RequestPredicate {
 
 		private final Set<HttpMethod> httpMethods;
-
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
@@ -641,12 +640,14 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class PathExtensionPredicate implements RequestPredicate {
 
 		private final Predicate<String> extensionPredicate;
 
 		@Nullable
 		private final String extension;
+
 		public PathExtensionPredicate(Predicate<String> extensionPredicate) {
 			Assert.notNull(extensionPredicate, "Predicate must not be null");
 			this.extensionPredicate = extensionPredicate;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.server.PathContainer;
+import org.springframework.util.StringUtils;
 
 /**
  * Parser for URI path patterns producing {@link PathPattern} instances that can
@@ -102,6 +103,17 @@ public class PathPatternParser {
 		return this.pathOptions;
 	}
 
+
+	/**
+	 * Prepare the given pattern for use in matching to full URL paths.
+	 * <p>By default, prepend a leading slash if needed for non-empty patterns.
+	 * @param pattern the pattern to initialize
+	 * @return the updated pattern
+	 * @since 5.2.25
+	 */
+	public String initFullPathPattern(String pattern) {
+		return (StringUtils.hasLength(pattern) && !pattern.startsWith("/") ? "/" + pattern : pattern);
+	}
 
 	/**
 	 * Process the path pattern content, a character at a time, breaking it into

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Creates instances of {@link org.springframework.web.util.UriComponentsBuilder}
@@ -545,9 +546,7 @@ public class MvcUriComponentsBuilder {
 		String typePath = getClassMapping(controllerType);
 		String methodPath = getMethodMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		if (StringUtils.hasLength(path) && !path.startsWith("/")) {
-			path = "/" + path;
-		}
+		path = PathPatternParser.defaultInstance.initFullPathPattern(path);
 		builder.path(path);
 
 		return applyContributors(builder, method, args);
