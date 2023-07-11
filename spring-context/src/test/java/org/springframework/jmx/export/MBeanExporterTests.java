@@ -463,7 +463,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	 */
 	@Test
 	void setAutodetectModeToAllSupportedValues() {
-		streamConstants(MBeanExporter.class)
+		streamAutodetectConstants()
 				.map(MBeanExporterTests::getFieldValue)
 				.forEach(mode -> assertThatNoException().isThrownBy(() -> exporter.setAutodetectMode(mode)));
 	}
@@ -512,7 +512,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	 */
 	@Test
 	void setAutodetectModeNameToAllSupportedValues() {
-		streamConstants(MBeanExporter.class)
+		streamAutodetectConstants()
 				.map(Field::getName)
 				.forEach(name -> assertThatNoException().isThrownBy(() -> exporter.setAutodetectModeName(name)));
 	}
@@ -703,8 +703,10 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		}
 	}
 
-	private static Stream<Field> streamConstants(Class<?> clazz) {
-		return Arrays.stream(clazz.getFields()).filter(ReflectionUtils::isPublicStaticFinal);
+	private static Stream<Field> streamAutodetectConstants() {
+		return Arrays.stream(MBeanExporter.class.getFields())
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.filter(field -> field.getName().startsWith("AUTODETECT_"));
 	}
 
 	private static Integer getFieldValue(Field field) {

@@ -89,12 +89,6 @@ public abstract class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed JSR-250 annotation processor.
-	 */
-	private static final String JSR250_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalJsr250AnnotationProcessor";
-
-	/**
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
