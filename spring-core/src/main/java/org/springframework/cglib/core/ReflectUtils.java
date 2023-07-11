@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -508,13 +509,13 @@ public class ReflectUtils {
 				catch (InvocationTargetException ex) {
 					throw new CodeGenerationException(ex.getTargetException());
 				}
-				catch (Throwable ex) {
-					// Fall through if setAccessible fails with InaccessibleObjectException on JDK 9+
-					// (on the module path and/or with a JVM bootstrapped with --illegal-access=deny)
-					if (!ex.getClass().getName().endsWith("InaccessibleObjectException")) {
-						throw new CodeGenerationException(ex);
-					}
+				catch (InaccessibleObjectException ex) {
+					// setAccessible failed with JDK 9+ InaccessibleObjectException -> fall through
+					// Avoid through JVM startup with --add-opens=java.base/java.lang=ALL-UNNAMED
 					t = ex;
+				}
+				catch (Throwable ex) {
+					throw new CodeGenerationException(ex);
 				}
 			}
 		}
@@ -525,13 +526,14 @@ public class ReflectUtils {
 				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(contextClass, MethodHandles.lookup());
 				c = lookup.defineClass(b);
 			}
-			catch (IllegalAccessException ex) {
+			catch (LinkageError | IllegalAccessException ex) {
 				throw new CodeGenerationException(ex) {
 					@Override
 					public String getMessage() {
 						return "ClassLoader mismatch for [" + contextClass.getName() +
 								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
-								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName();
+								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName() +
+								"; consider co-locating the affected class in that target ClassLoader instead.";
 					}
 				};
 			}
