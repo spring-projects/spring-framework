@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -81,13 +82,16 @@ final class HttpServiceMethod {
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
 
-		this.requestValuesInitializer =
-				HttpRequestValuesInitializer.create(method, containingClass, embeddedValueResolver);
+		boolean isReactorAdapter = (REACTOR_PRESENT && adapter instanceof ReactorHttpExchangeAdapter);
 
-		this.responseFunction =
-				(REACTOR_PRESENT && adapter instanceof ReactorHttpExchangeAdapter reactorAdapter ?
-						ReactorExchangeResponseFunction.create(reactorAdapter, method) :
-						ExchangeResponseFunction.create(adapter, method));
+		this.requestValuesInitializer =
+				HttpRequestValuesInitializer.create(
+						method, containingClass, embeddedValueResolver,
+						(isReactorAdapter ? ReactiveHttpRequestValues::builder : HttpRequestValues::builder));
+
+		this.responseFunction = (isReactorAdapter ?
+				ReactorExchangeResponseFunction.create((ReactorHttpExchangeAdapter) adapter, method) :
+				ExchangeResponseFunction.create(adapter, method));
 	}
 
 	private static MethodParameter[] initMethodParameters(Method method) {
@@ -147,20 +151,11 @@ final class HttpServiceMethod {
 	 */
 	private record HttpRequestValuesInitializer(
 			@Nullable HttpMethod httpMethod, @Nullable String url,
-			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
-
-		private HttpRequestValuesInitializer(
-				HttpMethod httpMethod, @Nullable String url,
-				@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
-
-			this.url = url;
-			this.httpMethod = httpMethod;
-			this.contentType = contentType;
-			this.acceptMediaTypes = acceptMediaTypes;
-		}
+			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes,
+			Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
 		public HttpRequestValues.Builder initializeRequestValuesBuilder() {
-			HttpRequestValues.Builder requestValues = HttpRequestValues.builder();
+			HttpRequestValues.Builder requestValues = this.requestValuesSupplier.get();
 			if (this.httpMethod != null) {
 				requestValues.setHttpMethod(this.httpMethod);
 			}
@@ -181,7 +176,8 @@ final class HttpServiceMethod {
 		 * Introspect the method and create the request factory for it.
 		 */
 		public static HttpRequestValuesInitializer create(
-				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver) {
+				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver,
+				Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
 			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
 			HttpExchange annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
@@ -193,7 +189,8 @@ final class HttpServiceMethod {
 			MediaType contentType = initContentType(annot1, annot2);
 			List<MediaType> acceptableMediaTypes = initAccept(annot1, annot2);
 
-			return new HttpRequestValuesInitializer(httpMethod, url, contentType, acceptableMediaTypes);
+			return new HttpRequestValuesInitializer(
+					httpMethod, url, contentType, acceptableMediaTypes, requestValuesSupplier);
 		}
 
 		@Nullable

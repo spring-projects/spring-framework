@@ -23,6 +23,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.GetExchange;
 
@@ -32,12 +33,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link RequestBodyArgumentResolver}.
- *
  * @author Rossen Stoyanchev
  */
 class RequestBodyArgumentResolverTests {
 
-	private final TestExchangeAdapter client = new TestExchangeAdapter();
+	private final TestReactorExchangeAdapter client = new TestReactorExchangeAdapter();
 
 	private final Service service =
 			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
@@ -48,8 +48,8 @@ class RequestBodyArgumentResolverTests {
 		String body = "bodyValue";
 		this.service.execute(body);
 
-		assertThat(getRequestValues().getBodyValue()).isEqualTo(body);
-		assertThat(getRequestValues().getBody()).isNull();
+		assertThat(getBodyValue()).isEqualTo(body);
+		assertThat(getPublisherBody()).isNull();
 	}
 
 	@Test
@@ -57,9 +57,9 @@ class RequestBodyArgumentResolverTests {
 		Mono<String> bodyMono = Mono.just("bodyValue");
 		this.service.executeMono(bodyMono);
 
-		assertThat(getRequestValues().getBodyValue()).isNull();
-		assertThat(getRequestValues().getBody()).isSameAs(bodyMono);
-		assertThat(getRequestValues().getBodyElementType()).isEqualTo(new ParameterizedTypeReference<String>() {});
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isSameAs(bodyMono);
+		assertThat(getBodyElementType()).isEqualTo(new ParameterizedTypeReference<String>() {});
 	}
 
 	@Test
@@ -68,10 +68,10 @@ class RequestBodyArgumentResolverTests {
 		String bodyValue = "bodyValue";
 		this.service.executeSingle(Single.just(bodyValue));
 
-		assertThat(getRequestValues().getBodyValue()).isNull();
-		assertThat(getRequestValues().getBodyElementType()).isEqualTo(new ParameterizedTypeReference<String>() {});
+		assertThat(getBodyValue()).isNull();
+		assertThat(getBodyElementType()).isEqualTo(new ParameterizedTypeReference<String>() {});
 
-		Publisher<?> body = getRequestValues().getBody();
+		Publisher<?> body = getPublisherBody();
 		assertThat(body).isNotNull();
 		assertThat(((Mono<String>) body).block()).isEqualTo(bodyValue);
 	}
@@ -104,17 +104,32 @@ class RequestBodyArgumentResolverTests {
 	void ignoreNull() {
 		this.service.execute(null);
 
-		assertThat(getRequestValues().getBodyValue()).isNull();
-		assertThat(getRequestValues().getBody()).isNull();
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isNull();
 
 		this.service.executeMono(null);
 
-		assertThat(getRequestValues().getBodyValue()).isNull();
-		assertThat(getRequestValues().getBody()).isNull();
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isNull();
 	}
 
-	private HttpRequestValues getRequestValues() {
-		return this.client.getRequestValues();
+	@Nullable
+	private Object getBodyValue() {
+		return getReactiveRequestValues().getBodyValue();
+	}
+
+	@Nullable
+	private Publisher<?> getPublisherBody() {
+		return getReactiveRequestValues().getBodyPublisher();
+	}
+
+	@Nullable
+	private ParameterizedTypeReference<?> getBodyElementType() {
+		return getReactiveRequestValues().getBodyPublisherElementType();
+	}
+
+	private ReactiveHttpRequestValues getReactiveRequestValues() {
+		return (ReactiveHttpRequestValues) this.client.getRequestValues();
 	}
 
 

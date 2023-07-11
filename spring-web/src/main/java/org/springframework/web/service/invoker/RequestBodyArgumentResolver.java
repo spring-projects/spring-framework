@@ -78,9 +78,14 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 					Assert.isTrue(!adapter.isNoValue(), message);
 					Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
 
-					requestValues.setBody(
-							adapter.toPublisher(argument),
-							ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
+					if (requestValues instanceof ReactiveHttpRequestValues.Builder reactiveRequestValues) {
+						reactiveRequestValues.setBodyPublisher(
+								adapter.toPublisher(argument), asParameterizedTypeRef(nestedParameter));
+					}
+					else {
+						throw new IllegalStateException(
+								"RequestBody with a reactive type is only supported with reactive client");
+					}
 
 					return true;
 				}
@@ -91,6 +96,10 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 		}
 
 		return true;
+	}
+
+	private static ParameterizedTypeReference<Object> asParameterizedTypeRef(MethodParameter nestedParam) {
+		return ParameterizedTypeReference.forType(nestedParam.getNestedGenericParameterType());
 	}
 
 }

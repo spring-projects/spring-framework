@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client.support;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,6 +29,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.AbstractReactorHttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import org.springframework.web.service.invoker.ReactiveHttpRequestValues;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 
 /**
@@ -119,9 +121,13 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		if (requestValues.getBodyValue() != null) {
 			bodySpec.bodyValue(requestValues.getBodyValue());
 		}
-		else if (requestValues.getBody() != null) {
-			Assert.notNull(requestValues.getBodyElementType(), "Publisher body element type is required");
-			bodySpec.body(requestValues.getBody(), requestValues.getBodyElementType());
+		else if (requestValues instanceof ReactiveHttpRequestValues reactiveRequestValues) {
+			Publisher<?> body = reactiveRequestValues.getBodyPublisher();
+			if (body != null) {
+				ParameterizedTypeReference<?> elementType = reactiveRequestValues.getBodyPublisherElementType();
+				Assert.notNull(elementType, "Publisher body element type is required");
+				bodySpec.body(body, elementType);
+			}
 		}
 
 		return bodySpec;

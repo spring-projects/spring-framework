@@ -19,9 +19,9 @@ package org.springframework.web.service.invoker;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.lang.Nullable;
@@ -89,14 +89,29 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 			Class<?> type = parameter.getParameterType();
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(type);
 			if (adapter != null) {
-				Assert.isTrue(!adapter.isNoValue(), "Expected publisher that produces a value");
-				Publisher<?> publisher = adapter.toPublisher(value);
-				requestValues.addRequestPart(name, publisher, ResolvableType.forMethodParameter(parameter.nested()));
+				MethodParameter nestedParameter = parameter.nested();
+
+				String message = "Async type for @RequestPart should produce value(s)";
+				Assert.isTrue(!adapter.isNoValue(), message);
+				Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
+
+				if (requestValues instanceof ReactiveHttpRequestValues.Builder reactiveValues) {
+					reactiveValues.addRequestPartPublisher(
+							name, adapter.toPublisher(value), asParameterizedTypeRef(nestedParameter));
+				}
+				else {
+					throw new IllegalStateException(
+							"RequestPart with a reactive type is only supported with reactive client");
+				}
 				return;
 			}
 		}
 
 		requestValues.addRequestPart(name, value);
+	}
+
+	private static ParameterizedTypeReference<Object> asParameterizedTypeRef(MethodParameter nestedParam) {
+		return ParameterizedTypeReference.forType(nestedParam.getNestedGenericParameterType());
 	}
 
 }

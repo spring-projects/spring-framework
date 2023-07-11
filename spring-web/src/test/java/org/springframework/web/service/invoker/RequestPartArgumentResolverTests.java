@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class RequestPartArgumentResolverTests {
 
-	private final TestExchangeAdapter client = new TestExchangeAdapter();
+	private final TestReactorExchangeAdapter client = new TestReactorExchangeAdapter();
 
 	private final Service service =
 			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
