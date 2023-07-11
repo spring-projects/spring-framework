@@ -3,7 +3,7 @@
 
 STOMP over WebSocket support is available in the `spring-messaging` and
 `spring-websocket` modules. Once you have those dependencies, you can expose a STOMP
-endpoint over WebSocket with xref:web/websocket/fallback.adoc[SockJS Fallback], as the following example shows:
+endpoint over WebSocket, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -16,7 +16,7 @@ endpoint over WebSocket with xref:web/websocket/fallback.adoc[SockJS Fallback], 
 
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/portfolio").withSockJS(); // <1>
+			registry.addEndpoint("/portfolio"); // <1>
 		}
 
 		@Override
@@ -49,9 +49,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
-			<websocket:stomp-endpoint path="/portfolio">
-				<websocket:sockjs/>
-			</websocket:stomp-endpoint>
+			<websocket:stomp-endpoint path="/portfolio" />
 			<websocket:simple-broker prefix="/topic, /queue"/>
 		</websocket:message-broker>
 
@@ -64,34 +62,27 @@ messaging (that is, many subscribers versus one consumer). When you use an exter
 check the STOMP page of the broker to understand what kind of STOMP destinations and
 prefixes it supports.
 
-To connect from a browser, for SockJS, you can use the
-https://github.com/sockjs/sockjs-client[`sockjs-client`]. For STOMP, many applications have
-used the https://github.com/jmesnil/stomp-websocket[jmesnil/stomp-websocket] library
-(also known as stomp.js), which is feature-complete and has been used in production for
-years but is no longer maintained. At present the
-https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] is the most
-actively maintained and evolving successor of that library. The following example code
-is based on it:
+To connect from a browser, for STOMP, you can use
+https://github.com/stomp-js/stompjs[`stomp-js/stompjs`] which is the most
+actively maintained JavaScript library.
+
+The following example code is based on it:
 
 [source,javascript,indent=0,subs="verbatim,quotes"]
 ----
-	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
-	var stompClient = webstomp.over(socket);
-
-	stompClient.connect({}, function(frame) {
-	}
+	const stompClient = new StompJs.Client({
+        brokerURL: 'ws://domain.com/portfolio',
+        onConnect: () => {
+            // ...
+        }
+    });
 ----
 
-Alternatively, if you connect through WebSocket (without SockJS), you can use the following code:
-
-[source,javascript,indent=0,subs="verbatim,quotes"]
-----
-	var socket = new WebSocket("/spring-websocket-portfolio/portfolio");
-	var stompClient = Stomp.over(socket);
-
-	stompClient.connect({}, function(frame) {
-	}
-----
+Alternatively, if you connect through SockJS, you can enable the
+xref:web/websocket/fallback.adoc[SockJS Fallback] on server-side with
+`registry.addEndpoint("/portfolio").withSockJS()` and on JavaScript side,
+by following
+https://stomp-js.github.io/guide/stompjs/rx-stomp/using-stomp-with-sockjs.html[those instructions].
 
 Note that `stompClient` in the preceding example does not need to specify `login`
 and `passcode` headers. Even if it did, they would be ignored (or, rather,
