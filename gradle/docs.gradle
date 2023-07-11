@@ -3,7 +3,7 @@ configurations {
 }
 
 dependencies {
-	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.0.RELEASE")
+	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.6.1")
 }
 
 repositories {
@@ -107,9 +107,8 @@ dokka {
 }
 
 task downloadResources(type: Download) {
-	def version = "0.2.1.RELEASE"
-	src "https://repo.spring.io/release/io/spring/docresources/" +
-			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
+	src "https://repo.spring.io/artifactory/snapshot/io/spring/docresources/" +
+		"spring-doc-resources/0.2.6-SNAPSHOT/spring-doc-resources-0.2.6-20210308.231804-2.zip"
 	dest project.file("$buildDir/docs/spring-doc-resources.zip")
 	onlyIfModified true
 	useETag "all"
