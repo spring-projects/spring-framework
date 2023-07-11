@@ -46,7 +46,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.core.log.LogMessage;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.BootstrapUtils;
 import org.springframework.test.context.ContextLoadException;
@@ -195,8 +194,10 @@ public class TestContextAotGenerator {
 		ClassLoader classLoader = getClass().getClassLoader();
 		MultiValueMap<ClassName, Class<?>> initializerClassMappings = new LinkedMultiValueMap<>();
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
-			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
-					testClasses.stream().map(Class::getName).toList()));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Generating AOT artifacts for test classes " +
+						testClasses.stream().map(Class::getName).toList());
+			}
 			this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
 			try {
 				// Use first test class discovered for a given unique MergedContextConfiguration.
@@ -209,8 +210,16 @@ public class TestContextAotGenerator {
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
-				logger.warn(LogMessage.format("Failed to generate AOT artifacts for test classes %s",
-						testClasses.stream().map(Class::getName).toList()), ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to generate AOT artifacts for test classes " +
+							testClasses.stream().map(Class::getName).toList(), ex);
+				}
+				else if (logger.isWarnEnabled()) {
+					logger.warn("""
+							Failed to generate AOT artifacts for test classes %s. \
+							Enable DEBUG logging to view the stack trace. %s"""
+								.formatted(testClasses.stream().map(Class::getName).toList(), ex));
+				}
 			}
 		});
 		return initializerClassMappings;
