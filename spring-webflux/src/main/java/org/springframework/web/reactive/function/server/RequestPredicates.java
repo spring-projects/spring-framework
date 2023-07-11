@@ -112,10 +112,9 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate path(String pattern) {
 		Assert.notNull(pattern, "'pattern' must not be null");
-		if (!pattern.isEmpty() && !pattern.startsWith("/")) {
-			pattern = "/" + pattern;
-		}
-		return pathPredicates(PathPatternParser.defaultInstance).apply(pattern);
+		PathPatternParser parser = PathPatternParser.defaultInstance;
+		pattern = parser.initFullPathPattern(pattern);
+		return pathPredicates(parser).apply(pattern);
 	}
 
 	/**

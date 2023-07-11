@@ -64,6 +64,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Creates instances of {@link org.springframework.web.util.UriComponentsBuilder}
@@ -544,10 +545,8 @@ public class MvcUriComponentsBuilder {
 		String typePath = getClassMapping(controllerType);
 		String methodPath = getMethodMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		if (StringUtils.hasLength(path) && !path.startsWith("/")) {
-			path = "/" + path;
-		}
-		else if (!StringUtils.hasText(prefix + path)) {
+		path = PathPatternParser.defaultInstance.initFullPathPattern(path);
+		if (!StringUtils.hasText(prefix + path)) {
 			path = "/";
 		}
 		builder.path(path);

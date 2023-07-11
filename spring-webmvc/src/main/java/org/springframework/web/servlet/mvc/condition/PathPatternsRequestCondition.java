@@ -79,11 +79,9 @@ public final class PathPatternsRequestCondition extends AbstractRequestCondition
 			return EMPTY_PATH_PATTERN;
 		}
 		SortedSet<PathPattern> result = new TreeSet<>();
-		for (String path : patterns) {
-			if (StringUtils.hasText(path) && !path.startsWith("/")) {
-				path = "/" + path;
-			}
-			result.add(parser.parse(path));
+		for (String pattern : patterns) {
+			pattern = parser.initFullPathPattern(pattern);
+			result.add(parser.parse(pattern));
 		}
 		return result;
 	}
