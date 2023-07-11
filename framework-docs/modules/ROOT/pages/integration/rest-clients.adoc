@@ -394,13 +394,24 @@ either using `WebClient`:
 	RepositoryService service = factory.createClient(RepositoryService.class);
 ----
 
-or using `RestTemplate`:
+using `RestTemplate`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RestTemplate restTemplate = new RestTemplate();
 	restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("https://api.github.com/"));
-	RestTemplateAdapter adapter = RestTemplateAdapter.forTemplate(restTemplate);
+	RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+
+	RepositoryService service = factory.createClient(RepositoryService.class);
+----
+
+or using `RestClient`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RestClient restClient = RestClient.builder().baseUrl("https://api.github.com/").build();
+	RestClientAdapter adapter = RestClientAdapter.create(restClient);
 	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 
 	RepositoryService service = factory.createClient(RepositoryService.class);
