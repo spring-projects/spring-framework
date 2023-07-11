@@ -133,7 +133,8 @@ public class InitBinderBindingContextTests {
 		handlerMethod.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		return new InitBinderBindingContext(
-				this.bindingInitializer, Collections.singletonList(handlerMethod), false);
+				this.bindingInitializer, Collections.singletonList(handlerMethod), false,
+				ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 

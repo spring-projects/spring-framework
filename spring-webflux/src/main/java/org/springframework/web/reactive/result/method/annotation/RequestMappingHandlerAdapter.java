@@ -186,12 +186,16 @@ public class RequestMappingHandlerAdapter
 
 	@Override
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
+
+		Assert.state(this.methodResolver != null &&
+				this.modelInitializer != null && this.reactiveAdapterRegistry != null, "Not initialized");
+
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
-		Assert.state(this.methodResolver != null && this.modelInitializer != null, "Not initialized");
 
 		InitBinderBindingContext bindingContext = new InitBinderBindingContext(
 				this.webBindingInitializer, this.methodResolver.getInitBinderMethods(handlerMethod),
-				this.methodResolver.hasMethodValidator() && handlerMethod.shouldValidateArguments());
+				this.methodResolver.hasMethodValidator() && handlerMethod.shouldValidateArguments(),
+				this.reactiveAdapterRegistry);
 
 		InvocableHandlerMethod invocableMethod = this.methodResolver.getRequestMappingMethod(handlerMethod);
 
@@ -202,7 +206,6 @@ public class RequestMappingHandlerAdapter
 				.initModel(handlerMethod, bindingContext, exchange)
 				.then(Mono.defer(() -> invocableMethod.invoke(exchange, bindingContext)))
 				.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
-				.doOnNext(result -> bindingContext.saveModel())
 				.onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
 	}
 

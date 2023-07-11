@@ -144,7 +144,7 @@ public class ModelInitializerTests {
 		assertThat(session).isNotNull();
 		assertThat(session.getAttributes()).isEmpty();
 
-		context.saveModel();
+		context.updateModel(this.exchange);
 		assertThat(session.getAttributes()).hasSize(1);
 		assertThat(((TestBean) session.getRequiredAttribute("bean")).getName()).isEqualTo("Bean");
 	}
@@ -164,7 +164,7 @@ public class ModelInitializerTests {
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
-		context.saveModel();
+		context.updateModel(this.exchange);
 		assertThat(session.getAttributes()).hasSize(1);
 		assertThat(((TestBean) session.getRequiredAttribute("bean")).getName()).isEqualTo("Session Bean");
 	}
@@ -197,7 +197,7 @@ public class ModelInitializerTests {
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(TIMEOUT);
 
 		context.getSessionStatus().setComplete();
-		context.saveModel();
+		context.updateModel(this.exchange);
 
 		assertThat(session.getAttributes()).isEmpty();
 	}
@@ -211,7 +211,8 @@ public class ModelInitializerTests {
 						.toList();
 
 		WebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
-		return new InitBinderBindingContext(bindingInitializer, binderMethods, false);
+		return new InitBinderBindingContext(
+				bindingInitializer, binderMethods, false, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 

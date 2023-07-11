@@ -17,16 +17,19 @@
 package org.springframework.web.reactive;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -57,20 +60,30 @@ public class BindingContext {
 
 	private boolean methodValidationApplicable;
 
+	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+
 
 	/**
-	 * Create a new {@code BindingContext}.
+	 * Create an instance without an initializer.
 	 */
 	public BindingContext() {
 		this(null);
 	}
 
 	/**
-	 * Create a new {@code BindingContext} with the given initializer.
-	 * @param initializer the binding initializer to apply (may be {@code null})
+	 * Create an instance with the given initializer, which may be {@code null}.
 	 */
 	public BindingContext(@Nullable WebBindingInitializer initializer) {
+		this(initializer, ReactiveAdapterRegistry.getSharedInstance());
+	}
+
+	/**
+	 * Create an instance with the given initializer and {@code ReactiveAdapterRegistry}.
+	 * @since 6.1
+	 */
+	public BindingContext(@Nullable WebBindingInitializer initializer, ReactiveAdapterRegistry registry) {
 		this.initializer = initializer;
+		this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
 	}
 
 
@@ -149,6 +162,34 @@ public class BindingContext {
 	 */
 	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder;
+	}
+
+	/**
+	 * Invoked before rendering to add {@link BindingResult} attributes where
+	 * necessary, and also to promote model attributes listed as
+	 * {@code @SessionAttributes} to the session.
+	 * @param exchange the current exchange
+	 * @since 6.1
+	 */
+	public void updateModel(ServerWebExchange exchange) {
+		Map<String, Object> model = getModel().asMap();
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			String name = entry.getKey();
+			Object value = entry.getValue();
+			if (isBindingCandidate(name, value)) {
+				if (!model.containsKey(BindingResult.MODEL_KEY_PREFIX + name)) {
+					WebExchangeDataBinder binder = createDataBinder(exchange, value, name);
+					model.put(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
+				}
+			}
+		}
+	}
+
+	private boolean isBindingCandidate(String name, @Nullable Object value) {
+		return (!name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
+				!value.getClass().isArray() && !(value instanceof Collection) && !(value instanceof Map) &&
+				this.reactiveAdapterRegistry.getAdapter(null, value) == null &&
+				!BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 
