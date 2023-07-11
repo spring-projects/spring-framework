@@ -704,7 +704,7 @@ public final class ContentDisposition {
 		/**
 		 * Set the value of the {@literal name} parameter.
 		 */
-		Builder name(String name);
+		Builder name(@Nullable String name);
 
 		/**
 		 * Set the value of the {@literal filename} parameter. The given
