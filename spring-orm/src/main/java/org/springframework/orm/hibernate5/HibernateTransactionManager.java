@@ -100,13 +100,11 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 4.2
  * @see #setSessionFactory
- * @see #setDataSource
  * @see SessionFactory#getCurrentSession()
- * @see DataSourceUtils#getConnection
- * @see DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.support.JdbcTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.jpa.JpaTransactionManager
+ * @see org.springframework.orm.jpa.vendor.HibernateJpaDialect
  */
 @SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
@@ -271,7 +269,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see Connection#setHoldability
 	 * @see ResultSet#HOLD_CURSORS_OVER_COMMIT
 	 * @see #disconnectOnCompletion(Session)
+	 * @deprecated as of 5.3.29 since Hibernate 5.x aggressively closes ResultSets on commit,
+	 * making it impossible to rely on ResultSet holdability. Also, Spring does not provide
+	 * an equivalent setting on {@link org.springframework.orm.jpa.JpaTransactionManager}.
 	 */
+	@Deprecated
 	public void setAllowResultAccessAfterCompletion(boolean allowResultAccessAfterCompletion) {
 		this.allowResultAccessAfterCompletion = allowResultAccessAfterCompletion;
 	}
