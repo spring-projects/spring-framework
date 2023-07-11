@@ -8,7 +8,7 @@ javaPlatform {
 
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.14.3"))
-	api(platform("io.micrometer:micrometer-bom:1.10.8"))
+	api(platform("io.micrometer:micrometer-bom:1.10.9"))
 	api(platform("io.netty:netty-bom:4.1.94.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
 	api(platform("io.projectreactor:reactor-bom:2022.0.8"))
@@ -46,7 +46,7 @@ dependencies {
 		api("commons-io:commons-io:2.11.0")
 		api("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.2")
 		api("info.picocli:picocli:4.7.4")
-		api("io.micrometer:context-propagation:1.0.3")
+		api("io.micrometer:context-propagation:1.0.4")
 		api("io.mockk:mockk:1.13.4")
 		api("io.projectreactor.netty:reactor-netty5-http:2.0.0-M3")
 		api("io.projectreactor.tools:blockhound:1.0.8.RELEASE")
