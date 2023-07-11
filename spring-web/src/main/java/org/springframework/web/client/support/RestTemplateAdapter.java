@@ -34,11 +34,11 @@ import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
- * {@link HttpExchangeAdapter} that enables an {@link HttpServiceProxyFactory} to use
- * {@link RestTemplate} for request execution.
+ * {@link HttpExchangeAdapter} that enables an {@link HttpServiceProxyFactory}
+ * to use {@link RestTemplate} for request execution.
  *
  * <p>Use static factory methods in this class to create an
- * {@link HttpServiceProxyFactory} configured with a given {@link RestTemplate}.
+ * {@link HttpServiceProxyFactory} configured with the given {@link RestTemplate}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 6.1
@@ -59,63 +59,61 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 	}
 
 	@Override
-	public void exchange(HttpRequestValues requestValues) {
-		this.restTemplate.exchange(newRequest(requestValues), Void.class);
+	public void exchange(HttpRequestValues values) {
+		this.restTemplate.exchange(newRequest(values), Void.class);
 	}
 
 	@Override
-	public HttpHeaders exchangeForHeaders(HttpRequestValues requestValues) {
-		return this.restTemplate.exchange(newRequest(requestValues), Void.class).getHeaders();
+	public HttpHeaders exchangeForHeaders(HttpRequestValues values) {
+		return this.restTemplate.exchange(newRequest(values), Void.class).getHeaders();
 	}
 
 	@Override
-	public <T> T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return this.restTemplate.exchange(newRequest(requestValues), bodyType).getBody();
+	public <T> T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+		return this.restTemplate.exchange(newRequest(values), bodyType).getBody();
 	}
 
 	@Override
-	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues requestValues) {
-		return this.restTemplate.exchange(newRequest(requestValues), Void.class);
+	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues values) {
+		return this.restTemplate.exchange(newRequest(values), Void.class);
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchangeForEntity(
-			HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-
-		return this.restTemplate.exchange(newRequest(requestValues), bodyType);
+	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+		return this.restTemplate.exchange(newRequest(values), bodyType);
 	}
 
-	private RequestEntity<?> newRequest(HttpRequestValues requestValues) {
+	private RequestEntity<?> newRequest(HttpRequestValues values) {
 		URI uri;
-		if (requestValues.getUri() != null) {
-			uri = requestValues.getUri();
+		if (values.getUri() != null) {
+			uri = values.getUri();
 		}
-		else if (requestValues.getUriTemplate() != null) {
-			String uriTemplate = requestValues.getUriTemplate();
-			Map<String, String> variables = requestValues.getUriVariables();
+		else if (values.getUriTemplate() != null) {
+			String uriTemplate = values.getUriTemplate();
+			Map<String, String> variables = values.getUriVariables();
 			uri = this.restTemplate.getUriTemplateHandler().expand(uriTemplate, variables);
 		}
 		else {
 			throw new IllegalStateException("Neither full URL nor URI template");
 		}
 
-		HttpMethod httpMethod = requestValues.getHttpMethod();
+		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
 
 		RequestEntity.BodyBuilder builder = RequestEntity.method(httpMethod, uri);
-		builder.headers(requestValues.getHeaders());
+		builder.headers(values.getHeaders());
 
-		if (!requestValues.getCookies().isEmpty()) {
+		if (!values.getCookies().isEmpty()) {
 			List<String> cookies = new ArrayList<>();
-			requestValues.getCookies().forEach((name, values) -> values.forEach(value -> {
+			values.getCookies().forEach((name, cookieValues) -> cookieValues.forEach(value -> {
 				HttpCookie cookie = new HttpCookie(name, value);
 				cookies.add(cookie.toString());
 			}));
 			builder.header(HttpHeaders.COOKIE, String.join("; ", cookies));
 		}
 
-		if (requestValues.getBodyValue() != null) {
-			return builder.body(requestValues.getBodyValue());
+		if (values.getBodyValue() != null) {
+			return builder.body(values.getBodyValue());
 		}
 
 		return builder.build();
@@ -123,7 +121,7 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 
 
 	/**
-	 * Create a {@link RestTemplateAdapter} with the given {@link RestTemplate}.
+	 * Create a {@link RestTemplateAdapter} for the given {@link RestTemplate}.
 	 */
 	public static RestTemplateAdapter create(RestTemplate restTemplate) {
 		return new RestTemplateAdapter(restTemplate);

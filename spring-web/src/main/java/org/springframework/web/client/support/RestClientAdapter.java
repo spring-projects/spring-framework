@@ -31,23 +31,25 @@ import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
- * {@link HttpExchangeAdapter} that enables an {@link HttpServiceProxyFactory} to use
- * {@link RestClient} for request execution.
+ * {@link HttpExchangeAdapter} that enables an {@link HttpServiceProxyFactory}
+ * to use {@link RestClient} for request execution.
  *
- * <p>
- * Use static factory methods in this class to create an {@link HttpServiceProxyFactory}
- * configured with a given {@link RestClient}.
+ * <p>Use static factory methods in this class to create an
+ * {@link HttpServiceProxyFactory} configured with the given {@link RestClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  * @since 6.1
  */
 public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	private final RestClient restClient;
 
+
 	private RestClientAdapter(RestClient restClient) {
 		this.restClient = restClient;
 	}
+
 
 	@Override
 	public boolean supportsRequestAttributes() {
@@ -60,66 +62,66 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 	}
 
 	@Override
-	public HttpHeaders exchangeForHeaders(HttpRequestValues requestValues) {
-		return newRequest(requestValues).retrieve().toBodilessEntity().getHeaders();
+	public HttpHeaders exchangeForHeaders(HttpRequestValues values) {
+		return newRequest(values).retrieve().toBodilessEntity().getHeaders();
 	}
 
 	@Override
-	public <T> T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return newRequest(requestValues).retrieve().body(bodyType);
+	public <T> T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+		return newRequest(values).retrieve().body(bodyType);
 	}
 
 	@Override
-	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues requestValues) {
-		return newRequest(requestValues).retrieve().toBodilessEntity();
+	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues values) {
+		return newRequest(values).retrieve().toBodilessEntity();
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues,
-			ParameterizedTypeReference<T> bodyType) {
-		return newRequest(requestValues).retrieve().toEntity(bodyType);
+	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+		return newRequest(values).retrieve().toEntity(bodyType);
 	}
 
-	private RestClient.RequestBodySpec newRequest(HttpRequestValues requestValues) {
+	private RestClient.RequestBodySpec newRequest(HttpRequestValues values) {
 
-		HttpMethod httpMethod = requestValues.getHttpMethod();
+		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
 
 		RestClient.RequestBodyUriSpec uriSpec = this.restClient.method(httpMethod);
 
 		RestClient.RequestBodySpec bodySpec;
-		if (requestValues.getUri() != null) {
-			bodySpec = uriSpec.uri(requestValues.getUri());
+		if (values.getUri() != null) {
+			bodySpec = uriSpec.uri(values.getUri());
 		}
-		else if (requestValues.getUriTemplate() != null) {
-			bodySpec = uriSpec.uri(requestValues.getUriTemplate(), requestValues.getUriVariables());
+		else if (values.getUriTemplate() != null) {
+			bodySpec = uriSpec.uri(values.getUriTemplate(), values.getUriVariables());
 		}
 		else {
 			throw new IllegalStateException("Neither full URL nor URI template");
 		}
 
-		bodySpec.headers(headers -> headers.putAll(requestValues.getHeaders()));
+		bodySpec.headers(headers -> headers.putAll(values.getHeaders()));
 
-		if (!requestValues.getCookies().isEmpty()) {
+		if (!values.getCookies().isEmpty()) {
 			List<String> cookies = new ArrayList<>();
-			requestValues.getCookies().forEach((name, values) -> values.forEach(value -> {
+			values.getCookies().forEach((name, cookieValues) -> cookieValues.forEach(value -> {
 				HttpCookie cookie = new HttpCookie(name, value);
 				cookies.add(cookie.toString());
 			}));
 			bodySpec.header(HttpHeaders.COOKIE, String.join("; ", cookies));
 		}
 
-		bodySpec.attributes(attributes -> attributes.putAll(requestValues.getAttributes()));
+		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 
-		if (requestValues.getBodyValue() != null) {
-			bodySpec.body(requestValues.getBodyValue());
+		if (values.getBodyValue() != null) {
+			bodySpec.body(values.getBodyValue());
 		}
 
 		return bodySpec;
 	}
 
+
 	/**
-	 * Create a {@link RestClientAdapter} with the given {@link RestClient}.
+	 * Create a {@link RestClientAdapter} for the given {@link RestClient}.
 	 */
 	public static RestClientAdapter create(RestClient restClient) {
 		return new RestClientAdapter(restClient);
