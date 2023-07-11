@@ -51,6 +51,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.event.ApplicationContextEvent;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
@@ -108,7 +110,7 @@ import org.springframework.util.StringValueResolver;
 public class ScheduledAnnotationBeanPostProcessor
 		implements ScheduledTaskHolder, MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
 		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
-		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
+		SmartInitializingSingleton, DisposableBean, ApplicationListener<ApplicationContextEvent> {
 
 	/**
 	 * The default name of the {@link TaskScheduler} bean to pick up: {@value}.
@@ -235,16 +237,6 @@ public class ScheduledAnnotationBeanPostProcessor
 
 		if (this.applicationContext == null) {
 			// Not running in an ApplicationContext -> register tasks early...
-			finishRegistration();
-		}
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() == this.applicationContext) {
-			// Running in an ApplicationContext -> register tasks this late...
-			// giving other ContextRefreshedEvent listeners a chance to perform
-			// their work at the same time (e.g. Spring Batch's job registration).
 			finishRegistration();
 		}
 	}
@@ -642,6 +634,35 @@ public class ScheduledAnnotationBeanPostProcessor
 		this.registrar.destroy();
 		if (this.localScheduler != null) {
 			this.localScheduler.destroy();
+		}
+	}
+
+
+	/**
+	 * Reacts to {@link ContextRefreshedEvent} as well as {@link ContextClosedEvent}:
+	 * performing {@link #finishRegistration()} and early cancelling of scheduled tasks,
+	 * respectively.
+	 */
+	@Override
+	public void onApplicationEvent(ApplicationContextEvent event) {
+		if (event.getApplicationContext() == this.applicationContext) {
+			if (event instanceof ContextRefreshedEvent) {
+				// Running in an ApplicationContext -> register tasks this late...
+				// giving other ContextRefreshedEvent listeners a chance to perform
+				// their work at the same time (e.g. Spring Batch's job registration).
+				finishRegistration();
+			}
+			else if (event instanceof ContextClosedEvent) {
+				synchronized (this.scheduledTasks) {
+					Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
+					for (Set<ScheduledTask> tasks : allTasks) {
+						for (ScheduledTask task : tasks) {
+							// At this early point, let in-progress tasks complete still
+							task.cancel(false);
+						}
+					}
+				}
+			}
 		}
 	}
 
