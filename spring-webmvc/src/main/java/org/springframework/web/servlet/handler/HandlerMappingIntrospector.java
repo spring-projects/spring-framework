@@ -51,6 +51,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Helper class to get information from the {@code HandlerMapping} that would
@@ -309,10 +310,15 @@ public class HandlerMappingIntrospector
 					ServletRequestPathUtils.PATH_ATTRIBUTE : UrlPathHelper.PATH_ATTRIBUTE);
 		}
 
+		@Override
+		public PathPatternParser getPatternParser() {
+			return this.delegate.getPatternParser();
+		}
+
 		@Nullable
 		@Override
 		public RequestMatchResult match(HttpServletRequest request, String pattern) {
-			pattern = (StringUtils.hasLength(pattern) && !pattern.startsWith("/") ? "/" + pattern : pattern);
+			pattern = initFullPathPattern(pattern);
 			Object previousPath = request.getAttribute(this.pathAttributeName);
 			request.setAttribute(this.pathAttributeName, this.lookupPath);
 			try {
@@ -321,6 +327,11 @@ public class HandlerMappingIntrospector
 			finally {
 				request.setAttribute(this.pathAttributeName, previousPath);
 			}
+		}
+
+		private String initFullPathPattern(String pattern) {
+			PathPatternParser parser = (getPatternParser() != null ? getPatternParser() : PathPatternParser.defaultInstance);
+			return parser.initFullPathPattern(pattern);
 		}
 
 		@Nullable
