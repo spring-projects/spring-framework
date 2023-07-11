@@ -576,15 +576,17 @@ public class ReflectUtils {
 				c = (Class) lookupDefineClassMethod.invoke(lookup, b);
 			}
 			catch (InvocationTargetException ex) {
-				throw new CodeGenerationException(ex.getTargetException());
-			}
-			catch (IllegalAccessException ex) {
-				throw new CodeGenerationException(ex) {
+				Throwable target = ex.getTargetException();
+				if (target.getClass() != LinkageError.class && target.getClass() != IllegalAccessException.class) {
+					throw new CodeGenerationException(target);
+				}
+				throw new CodeGenerationException(target) {
 					@Override
 					public String getMessage() {
 						return "ClassLoader mismatch for [" + contextClass.getName() +
 								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
-								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName();
+								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName() +
+								"; consider co-locating the affected class in that target ClassLoader instead.";
 					}
 				};
 			}
