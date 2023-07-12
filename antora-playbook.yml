@@ -26,6 +26,7 @@ asciidoc:
     - '@springio/asciidoctor-extensions'
     - '@springio/asciidoctor-extensions/include-code-extension'
   attributes:
+    page-stackoverflow-url: https://stackoverflow.com/questions/tagged/spring
     page-pagination: ''
     hide-uri-scheme: '@'
     tabs-sync-option: '@'
@@ -39,5 +40,5 @@ runtime:
     failure_level: warn
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.0/ui-bundle.zip
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.1/ui-bundle.zip
     snapshot: true
