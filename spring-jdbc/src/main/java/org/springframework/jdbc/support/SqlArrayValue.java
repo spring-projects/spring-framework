@@ -28,7 +28,8 @@ import org.springframework.util.Assert;
  * Common {@link SqlValue} implementation for JDBC {@link Array} creation
  * based on the JDBC 4 {@link java.sql.Connection#createArrayOf} method.
  *
- * <p>Also serves as a template for custom {@link SqlValue} implementations.
+ * <p>Also serves as a template for custom {@link SqlValue} implementations
+ * with cleanup demand.
  *
  * @author Juergen Hoeller
  * @author Philippe Marschall
@@ -50,7 +51,7 @@ public class SqlArrayValue implements SqlValue {
 	 * @param elements the elements to populate the {@code Array} object with
 	 * @see java.sql.Connection#createArrayOf
 	 */
-	public SqlArrayValue(String typeName, Object[] elements) {
+	public SqlArrayValue(String typeName, Object... elements) {
 		Assert.notNull(typeName, "Type name must not be null");
 		Assert.notNull(elements, "Elements array must not be null");
 		this.typeName = typeName;
