@@ -51,8 +51,7 @@ class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 		Integer age = (Integer) getServer().getAttribute(oname, "Age");
 
 		assertThat(name).as("Name is incorrect in JMX").isEqualTo("Rob Harrop");
-		assertThat(age.intValue()).as("Age is incorrect in JMX").isEqualTo(100);
+		assertThat(age).as("Age is incorrect in JMX").isEqualTo(100);
 	}
 
 }
-

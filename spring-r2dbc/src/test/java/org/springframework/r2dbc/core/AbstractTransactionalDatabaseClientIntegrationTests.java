@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Christoph Strobl
  */
-public abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
+abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 
 	private ConnectionFactory connectionFactory;
 
@@ -184,8 +184,8 @@ public abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 	}
 
 	private Condition<? super Object> numberOf(int expected) {
-		return new Condition<>(object -> object instanceof Number &&
-				((Number) object).intValue() == expected, "Number  %d", expected);
+		return new Condition<>(object -> object instanceof Number num &&
+				num.intValue() == expected, "Number %d", expected);
 	}
 
 

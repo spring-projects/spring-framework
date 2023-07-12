@@ -115,7 +115,7 @@ public class InitializeDatabaseIntegrationTests {
 
 	private void assertCorrectSetup(DataSource dataSource) {
 		JdbcTemplate jt = new JdbcTemplate(dataSource);
-		assertThat(jt.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(1);
+		assertThat(jt.queryForObject("select count(*) from T_TEST", Integer.class)).isEqualTo(1);
 	}
 
 

@@ -325,7 +325,7 @@ class ReflectionTestUtilsTests {
 	void invokeMethodWithAutoboxingAndUnboxing() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer difference = invokeMethod(component, "subtract", 5, 2);
-		assertThat(difference.intValue()).as("subtract(5, 2)").isEqualTo(3);
+		assertThat(difference).as("subtract(5, 2)").isEqualTo(3);
 	}
 
 	@Test
@@ -333,14 +333,14 @@ class ReflectionTestUtilsTests {
 	void invokeMethodWithPrimitiveVarArgs() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", 1, 2, 3, 4);
-		assertThat(sum.intValue()).as("add(1,2,3,4)").isEqualTo(10);
+		assertThat(sum).as("add(1,2,3,4)").isEqualTo(10);
 	}
 
 	@Test
 	void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", new int[] { 1, 2, 3, 4 });
-		assertThat(sum.intValue()).as("add(1,2,3,4)").isEqualTo(10);
+		assertThat(sum).as("add(1,2,3,4)").isEqualTo(10);
 	}
 
 	@Test

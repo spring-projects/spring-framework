@@ -325,7 +325,7 @@ public class StoredProcedureTests {
 		assertThat(m2.get("eggs")).isEqualTo("Eggs");
 
 		Number n = (Number) res.get("#update-count-1");
-		assertThat(n.intValue()).as("wrong update count").isEqualTo(0);
+		assertThat(n).as("wrong update count").isEqualTo(0);
 		verify(resultSet1).close();
 		verify(resultSet2).close();
 	}
