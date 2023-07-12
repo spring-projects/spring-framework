@@ -173,7 +173,9 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	 * {@code generator} supplier to instantiate the underlying bean.
 	 * @param generator a {@link ThrowingSupplier} to instantiate the underlying bean
 	 * @return a new {@link BeanInstanceSupplier} instance with the specified generator
+	 * @deprecated in favor of {@link #withGenerator(ThrowingFunction)}
 	 */
+	@Deprecated(since = "6.0.11", forRemoval = true)
 	public BeanInstanceSupplier<T> withGenerator(ThrowingSupplier<T> generator) {
 		Assert.notNull(generator, "'generator' must not be null");
 		return new BeanInstanceSupplier<>(this.lookup,
