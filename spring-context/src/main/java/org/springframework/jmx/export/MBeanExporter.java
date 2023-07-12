@@ -137,7 +137,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/**
 	 * Map of constant names to constant values for the autodetect constants defined
 	 * in this class.
-	 * @since 6.0.11
 	 */
 	private static final Map<String, Integer> constants = Map.of(
 			"AUTODETECT_NONE", AUTODETECT_NONE,
