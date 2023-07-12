@@ -232,7 +232,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
 	 * @see #setAutodetectMode(int)
-	 * @see #getAutodetectMode()
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
@@ -250,7 +249,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @throws IllegalArgumentException if the supplied value is not
 	 * one of the {@code AUTODETECT_} constants
 	 * @see #setAutodetectModeName(String)
-	 * @see #getAutodetectMode()
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
