@@ -371,7 +371,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * Return the target bean instance to use.
 	 */
 	protected Object getTargetBean() {
-		Assert.notNull(this.applicationContext, "ApplicationContext must no be null");
+		Assert.notNull(this.applicationContext, "ApplicationContext must not be null");
 		return this.applicationContext.getBean(this.beanName);
 	}
 
