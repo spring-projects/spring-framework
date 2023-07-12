@@ -19,10 +19,14 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -65,6 +69,12 @@ public class RequestMappingHandlerAdapter
 
 	@Nullable
 	private ArgumentResolverConfigurer argumentResolverConfigurer;
+
+	@Nullable
+	private Scheduler scheduler;
+
+	@Nullable
+	private Predicate<HandlerMethod> blockingMethodPredicate;
 
 	@Nullable
 	private ReactiveAdapterRegistry reactiveAdapterRegistry;
@@ -127,6 +137,30 @@ public class RequestMappingHandlerAdapter
 	}
 
 	/**
+	 * Configure an executor to invoke blocking controller methods with.
+	 * <p>By default, this is not set in which case controller methods are
+	 * invoked without the use of an Executor.
+	 * @param executor the task executor to use
+	 * @since 6.1
+	 */
+	public void setBlockingExecutor(@Nullable Executor executor) {
+		this.scheduler = (executor != null ? Schedulers.fromExecutor(executor) : null);
+	}
+
+	/**
+	 * Provide a predicate to decide which controller methods to invoke through
+	 * the configured {@link #setBlockingExecutor blockingExecutor}.
+	 * <p>If an executor is configured, the default predicate matches controller
+	 * methods whose return type not recognized by the configured
+	 * {@link org.springframework.core.ReactiveAdapterRegistry}.
+	 * @param predicate the predicate to use
+	 * @since 6.1
+	 */
+	public void setBlockingMethodPredicate(Predicate<HandlerMethod> predicate) {
+		this.blockingMethodPredicate = predicate;
+	}
+
+	/**
 	 * Configure the registry for adapting various reactive types.
 	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
 	 * default settings.
@@ -164,11 +198,17 @@ public class RequestMappingHandlerAdapter
 			ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 			this.messageReaders = codecConfigurer.getReaders();
 		}
+
 		if (this.argumentResolverConfigurer == null) {
 			this.argumentResolverConfigurer = new ArgumentResolverConfigurer();
 		}
+
 		if (this.reactiveAdapterRegistry == null) {
 			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+		}
+
+		if (this.scheduler != null && this.blockingMethodPredicate == null) {
+			this.blockingMethodPredicate = new NonReactiveHandlerMethodPredicate(this.reactiveAdapterRegistry);
 		}
 
 		this.methodResolver = new ControllerMethodResolver(
@@ -202,11 +242,20 @@ public class RequestMappingHandlerAdapter
 		DispatchExceptionHandler exceptionHandler =
 				(exchange2, ex) -> handleException(exchange, ex, handlerMethod, bindingContext);
 
-		return this.modelInitializer
+		Mono<HandlerResult> resultMono = this.modelInitializer
 				.initModel(handlerMethod, bindingContext, exchange)
 				.then(Mono.defer(() -> invocableMethod.invoke(exchange, bindingContext)))
 				.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
 				.onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
+
+		if (this.scheduler != null) {
+			Assert.state(this.blockingMethodPredicate != null, "Expected HandlerMethod Predicate");
+			if (this.blockingMethodPredicate.test(handlerMethod)) {
+				resultMono = resultMono.subscribeOn(this.scheduler);
+			}
+		}
+
+		return resultMono;
 	}
 
 	private Mono<HandlerResult> handleException(
@@ -262,6 +311,20 @@ public class RequestMappingHandlerAdapter
 	@Override
 	public Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex) {
 		return handleException(exchange, ex, null, null);
+	}
+
+
+	/**
+	 * Match methods with a return type without an adapter in {@link ReactiveAdapterRegistry}.
+	 */
+	private record NonReactiveHandlerMethodPredicate(ReactiveAdapterRegistry adapterRegistry)
+			implements Predicate<HandlerMethod> {
+
+		@Override
+		public boolean test(HandlerMethod handlerMethod) {
+			Class<?> returnType = handlerMethod.getReturnType().getParameterType();
+			return (this.adapterRegistry.getAdapter(returnType) == null);
+		}
 	}
 
 }

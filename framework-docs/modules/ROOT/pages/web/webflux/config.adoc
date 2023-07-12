@@ -700,9 +700,8 @@ Java::
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer
-				.setUseCaseSensitiveMatch(true)
-				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
+			configurer.addPathPrefix(
+					"/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 	}
 ----
@@ -717,9 +716,8 @@ Kotlin::
 
 		@Override
 		fun configurePathMatch(configurer: PathMatchConfigurer) {
-			configurer
-				.setUseCaseSensitiveMatch(true)
-				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
+			configurer.addPathPrefix(
+					"/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 	}
 ----
@@ -737,6 +735,59 @@ Spring WebFlux also does not support suffix pattern matching, unlike in Spring M
 are also xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[recommend] moving away from
 reliance on it.
 ====
+
+
+
+
+[[webflux-config-blocking-execution]]
+== Blocking Execution
+
+The WebFlux Java config lets you to customize blocking execution in WebFlux.
+
+You can have blocking controller methods called on a separate thread by providing
+an `Executor` such as the
+{api-spring-framework}/core/task/VirtualThreadTaskExecutor.html[`VirtualThreadTaskExecutor`]
+as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureBlockingExecution(BlockingExecutionConfigurer configurer) {
+			Executor executor = ...
+			configurer.setExecutor(executor);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		@Override
+		fun configureBlockingExecution(configurer: BlockingExecutionConfigurer) {
+            val executor = ...
+			configurer.setExecutor(executor)
+		}
+	}
+----
+======
+
+By default, controller methods whose return type is not recognized by the configured
+`ReactiveAdapterRegistry` are considered blocking, but you can set a custom controller
+method predicate via `BlockingExecutionConfigurer`.
+
 
 
 
