@@ -23,6 +23,7 @@ buildSrc/build
 /spring-*/build
 /spring-core/kotlin-coroutines/build
 /framework-bom/build
+/framework-docs/build
 /integration-tests/build
 /src/asciidoc/build
 target/
