@@ -551,7 +551,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			this.barrier = null;
 
 			Duration timeTakenToRestart = Duration.ofNanos(System.nanoTime() - restartTime);
-			logger.info("Restart complete in " + timeTakenToRestart.toMillis() + " ms");
+			logger.info("Spring-managed lifecycle restart completed in " + timeTakenToRestart.toMillis() + " ms");
 		}
 
 		private void awaitPreventShutdownBarrier() {
