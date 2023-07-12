@@ -446,7 +446,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectMode(-1))
 				.withMessage("Only values of autodetect constants allowed");
-		assertThat(exporter.getAutodetectMode()).isNull();
+		assertThat(exporter.autodetectMode).isNull();
 	}
 
 	@Test
@@ -454,7 +454,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectMode(5))
 				.withMessage("Only values of autodetect constants allowed");
-		assertThat(exporter.getAutodetectMode()).isNull();
+		assertThat(exporter.autodetectMode).isNull();
 	}
 
 	/**
@@ -471,7 +471,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	void setAutodetectModeToSupportedValue() {
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
-		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
+		assertThat(exporter.autodetectMode).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
@@ -479,7 +479,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName(null))
 				.withMessage("'constantName' must not be null or blank");
-		assertThat(exporter.getAutodetectMode()).isNull();
+		assertThat(exporter.autodetectMode).isNull();
 	}
 
 	@Test
@@ -487,7 +487,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName(""))
 				.withMessage("'constantName' must not be null or blank");
-		assertThat(exporter.getAutodetectMode()).isNull();
+		assertThat(exporter.autodetectMode).isNull();
 	}
 
 	@Test
@@ -495,7 +495,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName("  \t"))
 				.withMessage("'constantName' must not be null or blank");
-		assertThat(exporter.getAutodetectMode()).isNull();
+		assertThat(exporter.autodetectMode).isNull();
 	}
 
 	@Test
@@ -503,7 +503,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName("Bogus"))
 				.withMessage("Only autodetect constants allowed");
-		assertThat(exporter.getAutodetectMode()).isNull();
+		assertThat(exporter.autodetectMode).isNull();
 	}
 
 	/**
@@ -520,7 +520,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	void setAutodetectModeNameToSupportedValue() {
 		exporter.setAutodetectModeName("AUTODETECT_ASSEMBLER");
-		assertThat(exporter.getAutodetectMode()).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
+		assertThat(exporter.autodetectMode).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
