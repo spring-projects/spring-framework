@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 18.06.2003
  */
 @SuppressWarnings("deprecation")
-public class ViewResolverTests {
+class ViewResolverTests {
 
 	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 	private final MockServletContext sc = new MockServletContext();
@@ -73,12 +73,12 @@ public class ViewResolverTests {
 	private final HttpServletResponse response = new MockHttpServletResponse();
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.wac.setServletContext(this.sc);
 	}
 
 	@Test
-	public void beanNameViewResolver() {
+	void beanNameViewResolver() {
 		MutablePropertyValues pvs1 = new MutablePropertyValues();
 		pvs1.addPropertyValue(new PropertyValue("url", "/example1.jsp"));
 		this.wac.registerSingleton("example1", InternalResourceView.class, pvs1);
@@ -99,7 +99,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void urlBasedViewResolverOverridesCustomRequestContextAttributeWithNonNullValue() throws Exception {
+	void urlBasedViewResolverOverridesCustomRequestContextAttributeWithNonNullValue() throws Exception {
 		assertThat(new TestView().getRequestContextAttribute())
 			.as("requestContextAttribute when instantiated directly")
 			.isEqualTo("testRequestContext");
@@ -118,7 +118,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void urlBasedViewResolverDoesNotOverrideCustomRequestContextAttributeWithNull() throws Exception {
+	void urlBasedViewResolverDoesNotOverrideCustomRequestContextAttributeWithNull() throws Exception {
 		assertThat(new TestView().getRequestContextAttribute())
 			.as("requestContextAttribute when instantiated directly")
 			.isEqualTo("testRequestContext");
@@ -136,26 +136,26 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void urlBasedViewResolverWithoutPrefixes() throws Exception {
+	void urlBasedViewResolverWithoutPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
 		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithoutPrefixes(vr);
 	}
 
 	@Test
-	public void urlBasedViewResolverWithPrefixes() throws Exception {
+	void urlBasedViewResolverWithPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
 		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithPrefixes(vr);
 	}
 
 	@Test
-	public void internalResourceViewResolverWithoutPrefixes() throws Exception {
+	void internalResourceViewResolverWithoutPrefixes() throws Exception {
 		doTestUrlBasedViewResolverWithoutPrefixes(new InternalResourceViewResolver());
 	}
 
 	@Test
-	public void internalResourceViewResolverWithPrefixes() throws Exception {
+	void internalResourceViewResolverWithPrefixes() throws Exception {
 		doTestUrlBasedViewResolverWithPrefixes(new InternalResourceViewResolver());
 	}
 
@@ -220,7 +220,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void internalResourceViewResolverWithAttributes() throws Exception {
+	void internalResourceViewResolverWithAttributes() throws Exception {
 		this.wac.refresh();
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		Properties props = new Properties();
@@ -259,7 +259,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void internalResourceViewResolverWithContextBeans() throws Exception {
+	void internalResourceViewResolverWithContextBeans() throws Exception {
 		this.wac.registerSingleton("myBean", TestBean.class);
 		this.wac.registerSingleton("myBean2", TestBean.class);
 		this.wac.refresh();
@@ -295,7 +295,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void internalResourceViewResolverWithSpecificContextBeans() throws Exception {
+	void internalResourceViewResolverWithSpecificContextBeans() throws Exception {
 		this.wac.registerSingleton("myBean", TestBean.class);
 		this.wac.registerSingleton("myBean2", TestBean.class);
 		this.wac.refresh();
@@ -331,7 +331,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void internalResourceViewResolverWithJstl() throws Exception {
+	void internalResourceViewResolverWithJstl() throws Exception {
 		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
 
 		this.wac.addMessage("code1", locale, "messageX");
@@ -364,7 +364,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void internalResourceViewResolverWithJstlAndContextParam() throws Exception {
+	void internalResourceViewResolverWithJstlAndContextParam() throws Exception {
 		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
 
 		this.sc.addInitParameter(Config.FMT_LOCALIZATION_CONTEXT, "org/springframework/web/context/WEB-INF/context-messages");
@@ -400,7 +400,7 @@ public class ViewResolverTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void xmlViewResolver() throws Exception {
+	void xmlViewResolver() throws Exception {
 		this.wac.registerSingleton("testBean", TestBean.class);
 		this.wac.refresh();
 		TestBean testBean = (TestBean) this.wac.getBean("testBean");
@@ -440,7 +440,7 @@ public class ViewResolverTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void xmlViewResolverDefaultLocation() {
+	void xmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {
@@ -457,7 +457,7 @@ public class ViewResolverTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void xmlViewResolverWithoutCache() throws Exception {
+	void xmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {
@@ -475,7 +475,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void cacheRemoval() throws Exception {
+	void cacheRemoval() throws Exception {
 		this.wac.refresh();
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setViewClass(JstlView.class);
@@ -492,7 +492,7 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void cacheUnresolved() throws Exception {
+	void cacheUnresolved() throws Exception {
 		final AtomicInteger count = new AtomicInteger();
 		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
 			@Override
@@ -507,7 +507,7 @@ public class ViewResolverTests {
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
 
-		assertThat(count.intValue()).isEqualTo(2);
+		assertThat(count.get()).isEqualTo(2);
 
 		viewResolver.setCacheUnresolved(true);
 
@@ -517,11 +517,11 @@ public class ViewResolverTests {
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
 
-		assertThat(count.intValue()).isEqualTo(3);
+		assertThat(count.get()).isEqualTo(3);
 	}
 
 	@Test
-	public void cacheFilterEnabled() throws Exception {
+	void cacheFilterEnabled() throws Exception {
 		AtomicInteger count = new AtomicInteger();
 
 		// filter is enabled by default
@@ -538,11 +538,11 @@ public class ViewResolverTests {
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
 
-		assertThat(count.intValue()).isEqualTo(1);
+		assertThat(count.get()).isEqualTo(1);
 	}
 
 	@Test
-	public void cacheFilterDisabled() throws Exception {
+	void cacheFilterDisabled() throws Exception {
 		AtomicInteger count = new AtomicInteger();
 
 		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
@@ -558,16 +558,17 @@ public class ViewResolverTests {
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
 
-		assertThat(count.intValue()).isEqualTo(2);
+		assertThat(count.get()).isEqualTo(2);
 	}
 
 
-	public static class TestView extends InternalResourceView {
+	private static class TestView extends InternalResourceView {
 
 		public TestView() {
 			setRequestContextAttribute("testRequestContext");
 		}
 
+		@SuppressWarnings("unused")
 		public void setLocation(Resource location) {
 			if (!(location instanceof ServletContextResource)) {
 				throw new IllegalArgumentException("Expecting ServletContextResource, not " + location.getClass().getName());

@@ -60,26 +60,18 @@ class CollectionToCollectionConverterTests {
 
 	@Test
 	void scalarList() throws Exception {
-		List<String> list = new ArrayList<>();
-		list.add("9");
-		list.add("37");
+		List<String> list = List.of("9", "37");
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("scalarListTarget"));
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
-		try {
-			conversionService.convert(list, sourceType, targetType);
-		}
-		catch (ConversionFailedException ex) {
-			boolean condition = ex.getCause() instanceof ConverterNotFoundException;
-			assertThat(condition).isTrue();
-		}
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(list, sourceType, targetType))
+				.withCauseInstanceOf(ConverterNotFoundException.class);
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		List<Integer> result = (List<Integer>) conversionService.convert(list, sourceType, targetType);
-		assertThat(list.equals(result)).isFalse();
-		assertThat(result.get(0).intValue()).isEqualTo(9);
-		assertThat(result.get(1).intValue()).isEqualTo(37);
+		assertThat(result).isNotEqualTo(list).containsExactly(9, 37);
 	}
 
 	@Test

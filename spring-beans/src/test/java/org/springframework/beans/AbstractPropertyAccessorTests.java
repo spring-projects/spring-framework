@@ -673,22 +673,22 @@ abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("myDouble", doubleValue);
 
 		assertThat(target.getMyPrimitiveByte()).isEqualTo(Byte.MAX_VALUE);
-		assertThat(target.getMyByte().byteValue()).isEqualTo(Byte.MAX_VALUE);
+		assertThat(target.getMyByte()).isEqualTo(Byte.MAX_VALUE);
 
 		assertThat(target.getMyPrimitiveShort()).isEqualTo(Short.MAX_VALUE);
-		assertThat(target.getMyShort().shortValue()).isEqualTo(Short.MAX_VALUE);
+		assertThat(target.getMyShort()).isEqualTo(Short.MAX_VALUE);
 
 		assertThat(target.getMyPrimitiveInt()).isEqualTo(Integer.MAX_VALUE);
-		assertThat(target.getMyInteger().intValue()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(target.getMyInteger()).isEqualTo(Integer.MAX_VALUE);
 
 		assertThat(target.getMyPrimitiveLong()).isEqualTo(Long.MAX_VALUE);
-		assertThat(target.getMyLong().longValue()).isEqualTo(Long.MAX_VALUE);
+		assertThat(target.getMyLong()).isEqualTo(Long.MAX_VALUE);
 
 		assertThat((double) target.getMyPrimitiveFloat()).isCloseTo(Float.MAX_VALUE, within(0.001));
 		assertThat((double) target.getMyFloat()).isCloseTo(Float.MAX_VALUE, within(0.001));
 
 		assertThat(target.getMyPrimitiveDouble()).isCloseTo(Double.MAX_VALUE, within(0.001));
-		assertThat(target.getMyDouble().doubleValue()).isCloseTo(Double.MAX_VALUE, within(0.001));
+		assertThat(target.getMyDouble()).isCloseTo(Double.MAX_VALUE, within(0.001));
 	}
 
 	@Test

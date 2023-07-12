@@ -164,9 +164,9 @@ class ObjectUtilsTests {
 	void toObjectArray() {
 		int[] a = new int[] {1, 2, 3, 4, 5};
 		Integer[] wrapper = (Integer[]) ObjectUtils.toObjectArray(a);
-		assertThat(wrapper.length).isEqualTo(5);
+		assertThat(wrapper).hasSize(5);
 		for (int i = 0; i < wrapper.length; i++) {
-			assertThat(wrapper[i].intValue()).isEqualTo(a[i]);
+			assertThat(wrapper[i]).isEqualTo(a[i]);
 		}
 	}
 

@@ -221,7 +221,7 @@ public class SqlUpdateTests {
 
 		assertThat(rowsAffected).isEqualTo(1);
 		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
-		assertThat(generatedKeyHolder.getKey().intValue()).isEqualTo(11);
+		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();
 	}

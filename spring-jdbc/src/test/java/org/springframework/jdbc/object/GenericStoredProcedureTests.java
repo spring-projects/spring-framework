@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -60,12 +59,9 @@ public class GenericStoredProcedureTests {
 		given(connection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}")).willReturn(callableStatement);
 
 		StoredProcedure adder = (StoredProcedure) bf.getBean("genericProcedure");
-		Map<String, Object> in = new HashMap<>(2);
-		in.put("amount", 1106);
-		in.put("custid", 3);
+		Map<String, Object> in = Map.of("amount", 1106, "custid", 3);
 		Map<String, Object> out = adder.execute(in);
-		Integer id = (Integer) out.get("newid");
-		assertThat(id.intValue()).isEqualTo(4);
+		assertThat(out.get("newid")).isEqualTo(4);
 
 		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
 		verify(callableStatement).setObject(2, 3, Types.INTEGER);

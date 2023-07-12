@@ -90,8 +90,8 @@ public class NamedParameterQueryTests {
 				"SELECT AGE FROM CUSTMR WHERE ID < :id", params);
 
 		assertThat(li.size()).as("All rows returned").isEqualTo(2);
-		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
-		assertThat(((Integer) li.get(1).get("age")).intValue()).as("Second row is Integer").isEqualTo(12);
+		assertThat(li.get(0).get("age")).as("First row is Integer").isEqualTo(11);
+		assertThat(li.get(1).get("age")).as("Second row is Integer").isEqualTo(12);
 
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
@@ -123,7 +123,7 @@ public class NamedParameterQueryTests {
 				"SELECT AGE FROM CUSTMR WHERE ID < :id", params);
 
 		assertThat(li.size()).as("All rows returned").isEqualTo(1);
-		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
+		assertThat(li.get(0).get("age")).as("First row is Integer").isEqualTo(11);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
@@ -141,7 +141,7 @@ public class NamedParameterQueryTests {
 				params, Integer.class);
 
 		assertThat(li.size()).as("All rows returned").isEqualTo(1);
-		assertThat(li.get(0).intValue()).as("First row is Integer").isEqualTo(11);
+		assertThat(li.get(0)).as("First row is Integer").isEqualTo(11);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
@@ -156,7 +156,7 @@ public class NamedParameterQueryTests {
 		params.addValue("id", 3);
 		Map<String, Object> map = template.queryForMap("SELECT AGE FROM CUSTMR WHERE ID < :id", params);
 
-		assertThat(((Integer) map.get("age")).intValue()).as("Row is Integer").isEqualTo(11);
+		assertThat(map.get("age")).as("Row is Integer").isEqualTo(11);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}

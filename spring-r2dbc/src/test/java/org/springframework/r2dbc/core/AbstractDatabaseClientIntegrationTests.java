@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Mingyuan Wu
  */
-public abstract class AbstractDatabaseClientIntegrationTests {
+abstract class AbstractDatabaseClientIntegrationTests {
 
 	private ConnectionFactory connectionFactory;
 
@@ -88,10 +88,8 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 				.map(row -> row.get("id"))
 				.first()
 				.as(StepVerifier::create)
-				.assertNext(actual -> {
-							assertThat(actual).isInstanceOf(Number.class);
-							assertThat(((Number) actual).intValue()).isEqualTo(42055);
-						}).verifyComplete();
+				.assertNext(actual -> assertThat(actual).isInstanceOf(Number.class).isEqualTo(42055))
+				.verifyComplete();
 	}
 
 	@Test

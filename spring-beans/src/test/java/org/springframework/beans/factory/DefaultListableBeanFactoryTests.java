@@ -3201,9 +3201,9 @@ class DefaultListableBeanFactoryTests {
 
 		@Override
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType) {
-			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
+			if (value instanceof String text && Float.class.isAssignableFrom(requiredType)) {
 				try {
-					return this.numberFormat.parse((String) value).floatValue();
+					return this.numberFormat.parse(text).floatValue();
 				}
 				catch (ParseException ex) {
 					throw new TypeMismatchException(value, requiredType, ex);

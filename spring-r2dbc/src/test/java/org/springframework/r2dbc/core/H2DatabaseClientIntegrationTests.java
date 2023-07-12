@@ -26,12 +26,13 @@ import io.r2dbc.spi.ConnectionFactory;
  */
 public class H2DatabaseClientIntegrationTests extends AbstractDatabaseClientIntegrationTests {
 
-	public static String CREATE_TABLE_LEGOSET = "CREATE TABLE legoset (\n" //
-			+ "    id          serial CONSTRAINT id PRIMARY KEY,\n" //
-			+ "    version     integer NULL,\n" //
-			+ "    name        varchar(255) NOT NULL,\n" //
-			+ "    manual      integer NULL\n" //
-			+ ");";
+	private static final String CREATE_TABLE_LEGOSET = """
+			CREATE TABLE legoset (
+			id          serial CONSTRAINT id PRIMARY KEY,
+			version     integer NULL,
+			name        varchar(255) NOT NULL,
+			manual      integer NULL
+			);""";
 
 	@Override
 	protected ConnectionFactory createConnectionFactory() {

@@ -35,7 +35,7 @@ class MergedPropertiesFilesTestPropertySourceTests extends
 
 	@Test
 	void verifyExtendedPropertiesAreAvailableInEnvironment() {
-		assertThat(env.getProperty("extended", Integer.class).intValue()).isEqualTo(42);
+		assertThat(env.getProperty("extended", Integer.class)).isEqualTo(42);
 	}
 
 }
