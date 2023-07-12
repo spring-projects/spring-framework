@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,19 +236,36 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 
 		private final PropertyDescriptor pd;
 
+		private final TypeDescriptor typeDescriptor;
+
 		public BeanPropertyHandler(PropertyDescriptor pd) {
 			super(pd.getPropertyType(), pd.getReadMethod() != null, pd.getWriteMethod() != null);
 			this.pd = pd;
-		}
-
-		@Override
-		public ResolvableType getResolvableType() {
-			return ResolvableType.forMethodReturnType(this.pd.getReadMethod());
+			this.typeDescriptor = new TypeDescriptor(property(pd));
 		}
 
 		@Override
 		public TypeDescriptor toTypeDescriptor() {
-			return new TypeDescriptor(property(this.pd));
+			return this.typeDescriptor;
+		}
+
+		@Override
+		public ResolvableType getResolvableType() {
+			return this.typeDescriptor.getResolvableType();
+		}
+
+		@Override
+		public TypeDescriptor getMapValueType(int nestingLevel) {
+			return new TypeDescriptor(
+					this.typeDescriptor.getResolvableType().getNested(nestingLevel).asMap().getGeneric(1),
+					null, this.typeDescriptor.getAnnotations());
+		}
+
+		@Override
+		public TypeDescriptor getCollectionType(int nestingLevel) {
+			return new TypeDescriptor(
+					this.typeDescriptor.getResolvableType().getNested(nestingLevel).asCollection().getGeneric(),
+					null, this.typeDescriptor.getAnnotations());
 		}
 
 		@Override
