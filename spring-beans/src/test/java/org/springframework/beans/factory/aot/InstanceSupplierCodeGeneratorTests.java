@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,7 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThat(bean).isInstanceOf(Integer.class);
 			assertThat(bean).isEqualTo(42);
 			assertThat(compiled.getSourceFile())
-					.contains("SimpleConfiguration::integerBean");
+					.contains("(registeredBean) -> SimpleConfiguration.integerBean()");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));

@@ -220,7 +220,8 @@ class InstanceSupplierCodeGenerator {
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.<$T>forFactoryMethod($T.class, $S)", BeanInstanceSupplier.class,
 					suppliedType, declaringClass, factoryMethod.getName());
-			code.add(".withGenerator($T::$L)", declaringClass, factoryMethod.getName());
+			code.add(".withGenerator(($L) -> $T.$L())", REGISTERED_BEAN_PARAMETER_NAME,
+					declaringClass, factoryMethod.getName());
 			return code.build();
 		}
 

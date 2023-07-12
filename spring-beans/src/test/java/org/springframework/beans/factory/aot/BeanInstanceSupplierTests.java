@@ -186,6 +186,8 @@ class BeanInstanceSupplierTests {
 	}
 
 	@Test
+	@Deprecated
+	@SuppressWarnings("removal")
 	void withGeneratorWhenSupplierIsNullThrowsException() {
 		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor();
@@ -245,6 +247,8 @@ class BeanInstanceSupplierTests {
 	}
 
 	@Test
+	@Deprecated
+	@SuppressWarnings("removal")
 	void getWithGeneratorCallsSupplier() throws Exception {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
