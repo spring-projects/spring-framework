@@ -25,9 +25,6 @@ import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -70,12 +67,6 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
 		if (eventAnn == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
-		}
-		Transactional txAnn = AnnotatedElementUtils.findMergedAnnotation(method, Transactional.class);
-		if (txAnn != null && txAnn.propagation() != Propagation.REQUIRES_NEW &&
-				!AnnotatedElementUtils.hasAnnotation(method, Async.class)) {
-			throw new IllegalStateException("@TransactionalEventListener method must not be annotated with " +
-					"@Transactional unless when marked as REQUIRES_NEW or declared as @Async: " + method);
 		}
 		this.annotation = eventAnn;
 		this.transactionPhase = eventAnn.phase();
