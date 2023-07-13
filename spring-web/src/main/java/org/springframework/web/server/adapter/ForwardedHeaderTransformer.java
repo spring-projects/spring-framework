@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.ForwardedHeaderUtils;
 
 /**
  * Extract values from "Forwarded" and "X-Forwarded-*" headers to override
@@ -100,7 +100,9 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		if (hasForwardedHeaders(request)) {
 			ServerHttpRequest.Builder builder = request.mutate();
 			if (!this.removeOnly) {
-				URI uri = UriComponentsBuilder.fromHttpRequest(request).build(true).toUri();
+				URI originalUri = request.getURI();
+				HttpHeaders headers = request.getHeaders();
+				URI uri = ForwardedHeaderUtils.adaptFromForwardedHeaders(originalUri, headers).build(true).toUri();
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
@@ -108,7 +110,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 					builder.contextPath(prefix);
 				}
 				InetSocketAddress remoteAddress = request.getRemoteAddress();
-				remoteAddress = UriComponentsBuilder.parseForwardedFor(request, remoteAddress);
+				remoteAddress = ForwardedHeaderUtils.parseForwardedFor(originalUri, headers, remoteAddress);
 				if (remoteAddress != null) {
 					builder.remoteAddress(remoteAddress);
 				}
