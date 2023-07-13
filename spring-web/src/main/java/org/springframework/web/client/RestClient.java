@@ -346,6 +346,15 @@ public interface RestClient {
 		 * Configure the {@link ClientHttpRequestFactory} to use. This is useful
 		 * for plugging in and/or customizing options of the underlying HTTP
 		 * client library (e.g. SSL).
+		 * <p>If no request factory is specified, {@code RestClient} uses
+		 * {@linkplain org.springframework.http.client.HttpComponentsClientHttpRequestFactory Apache Http Client},
+		 * {@linkplain org.springframework.http.client.OkHttp3ClientHttpRequestFactory OkHttp 3}, or
+		 * {@linkplain org.springframework.http.client.JettyClientHttpRequestFactory Jetty Http Client}
+		 * if available on the classpath, and defaults to the
+		 * {@linkplain org.springframework.http.client.JdkClientHttpRequestFactory JDK HttpClient}
+		 * if the {@code java.net.http} module is loaded, or to a
+		 * {@linkplain org.springframework.http.client.SimpleClientHttpRequestFactory simple default}
+		 * otherwise.
 		 * @param requestFactory the request factory to use
 		 * @return this builder
 		 */

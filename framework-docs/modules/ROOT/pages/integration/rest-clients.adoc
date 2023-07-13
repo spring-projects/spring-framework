@@ -13,7 +13,7 @@ The Spring Framework provides the following choices for making calls to REST end
 == `RestClient`
 
 Reference documentation is forthcoming.
-For now, please refer to the https://docs.spring.io/spring-framework/docs/6.1.0-M1/javadoc-api/org/springframework/web/client/RestClient.html[API documentation].
+For now, please refer to the https://docs.spring.io/spring-framework/docs/6.1.0-M2/javadoc-api/org/springframework/web/client/RestClient.html[API documentation].
 
 
 [[rest-webclient]]
