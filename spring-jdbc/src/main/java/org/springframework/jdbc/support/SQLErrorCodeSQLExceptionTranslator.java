@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,6 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	private static final int MESSAGE_SQL_THROWABLE_CONSTRUCTOR = 4;
 	private static final int MESSAGE_SQL_SQLEX_CONSTRUCTOR = 5;
 
-
-	/** Error codes used by this translator. */
 	@Nullable
 	private SingletonSupplier<SQLErrorCodes> sqlErrorCodes;
 
@@ -194,9 +192,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		if (sqlErrorCodes != null) {
 			SQLExceptionTranslator customTranslator = sqlErrorCodes.getCustomSqlExceptionTranslator();
 			if (customTranslator != null) {
-				DataAccessException customDex = customTranslator.translate(task, sql, sqlEx);
-				if (customDex != null) {
-					return customDex;
+				dae = customTranslator.translate(task, sql, sqlEx);
+				if (dae != null) {
+					return dae;
 				}
 			}
 		}
@@ -224,11 +222,10 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 					for (CustomSQLErrorCodesTranslation customTranslation : customTranslations) {
 						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0 &&
 								customTranslation.getExceptionClass() != null) {
-							DataAccessException customException = createCustomException(
-									task, sql, sqlEx, customTranslation.getExceptionClass());
-							if (customException != null) {
+							dae = createCustomException(task, sql, sqlEx, customTranslation.getExceptionClass());
+							if (dae != null) {
 								logTranslation(task, sql, sqlEx, true);
-								return customException;
+								return dae;
 							}
 						}
 					}
