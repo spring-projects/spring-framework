@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,10 +80,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Specify the database product name for the DataSource that this accessor uses.
-	 * This allows to initialize an SQLErrorCodeSQLExceptionTranslator without
-	 * obtaining a Connection from the DataSource to get the meta-data.
+	 * Specify the database product name for the {@code DataSource} that this accessor uses.
+	 * This allows for initializing a {@link SQLErrorCodeSQLExceptionTranslator} without
+	 * obtaining a {@code Connection} from the {@code DataSource} to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
+	 * @see #setExceptionTranslator
 	 * @see SQLErrorCodeSQLExceptionTranslator#setDatabaseProductName
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
@@ -98,22 +99,20 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Set the exception translator for this instance.
-	 * <p>If no custom translator is provided, a default
-	 * {@link SQLErrorCodeSQLExceptionTranslator} is used
-	 * which examines the SQLException's vendor-specific error code.
+	 * <p>A {@link SQLErrorCodeSQLExceptionTranslator} used by default if a user-provided
+	 * `sql-error-codes.xml` file has been found in the root of the classpath. Otherwise,
+	 * {@link SQLExceptionSubclassTranslator} serves as the default translator as of 6.0.
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLExceptionSubclassTranslator
 	 */
 	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
 		this.exceptionTranslator = exceptionTranslator;
 	}
 
 	/**
-	 * Return the exception translator for this instance.
-	 * <p>Creates a default {@link SQLErrorCodeSQLExceptionTranslator}
-	 * for the specified DataSource if none set, or a
-	 * {@link SQLStateSQLExceptionTranslator} in case of no DataSource.
-	 * @see #getDataSource()
+	 * Return the exception translator to use for this instance,
+	 * creating a default if necessary.
+	 * @see #setExceptionTranslator
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
 		SQLExceptionTranslator exceptionTranslator = this.exceptionTranslator;
