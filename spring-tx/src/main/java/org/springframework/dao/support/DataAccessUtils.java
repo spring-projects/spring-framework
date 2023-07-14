@@ -68,6 +68,7 @@ public abstract class DataAccessUtils {
 	 * @return the single result object, or {@code null} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Stream
+	 * @since 6.1
 	 */
 	@Nullable
 	public static <T> T singleResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
@@ -91,13 +92,14 @@ public abstract class DataAccessUtils {
 	 * @return the single result object, or {@code null} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Iterator
+	 * @since 6.1
 	 */
 	@Nullable
 	public static <T> T singleResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
 		if (results == null) {
 			return null;
 		}
-		T result = results.hasNext() ? results.next() : null;
+		T result = (results.hasNext() ? results.next() : null);
 		if (results.hasNext()) {
 			throw new IncorrectResultSizeDataAccessException(1);
 		}
@@ -112,6 +114,7 @@ public abstract class DataAccessUtils {
 	 * @return the single optional result object, or {@code Optional.empty()} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Collection
+	 * @since 6.1
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		return Optional.ofNullable(singleResult(results));
@@ -125,6 +128,7 @@ public abstract class DataAccessUtils {
 	 * @return the single optional result object, or {@code Optional.empty()} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Stream
+	 * @since 6.1
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
 		return Optional.ofNullable(singleResult(results));
@@ -138,6 +142,7 @@ public abstract class DataAccessUtils {
 	 * @return the single optional result object, or {@code Optional.empty()} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Iterator
+	 * @since 6.1
 	 */
 	public static <T> Optional<T> optionalResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
 		return Optional.ofNullable(singleResult(results));

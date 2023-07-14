@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,20 +247,20 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(out);
 	}
 
+
 	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(
 			int expectedSize, int actualSize) {
+
 		return ex -> {
 			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 			assertThat(ex.getActualSize()).as("actual size").isEqualTo(actualSize);
 		};
 	}
 
-	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(
-			int expectedSize) {
-		return ex -> {
-			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
-		};
+	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(int expectedSize) {
+		return ex -> assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 	}
+
 
 	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 
