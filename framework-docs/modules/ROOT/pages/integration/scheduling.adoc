@@ -380,6 +380,12 @@ Notice that the methods to be scheduled must have void returns and must not acce
 arguments. If the method needs to interact with other objects from the application
 context, those would typically have been provided through dependency injection.
 
+`@Scheduled` can be used as a repeatable annotation. If several scheduled declarations
+are found on the same method, each of them will be processed independently, with a
+separate trigger firing for each of them. As a consequence, such co-located schedules
+may overlap and execute multiple times in parallel or in immediate succession.
+Please make sure that your specified cron expressions etc do not accidentally overlap.
+
 [NOTE]
 ====
 As of Spring Framework 4.3, `@Scheduled` methods are supported on beans of any scope.
