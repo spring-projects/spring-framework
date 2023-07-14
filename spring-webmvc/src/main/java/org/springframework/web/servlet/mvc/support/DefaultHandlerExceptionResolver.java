@@ -662,4 +662,15 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
+	@Override
+	protected void logException(Exception ex, HttpServletRequest request) {
+		if (ex instanceof NoHandlerFoundException || ex instanceof NoResourceFoundException) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(buildLogMessage(ex, request));
+			}
+			return;
+		}
+		super.logException(ex, request);
+	}
+
 }
