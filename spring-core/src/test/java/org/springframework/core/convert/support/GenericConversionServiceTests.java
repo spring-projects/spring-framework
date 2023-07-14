@@ -302,7 +302,7 @@ class GenericConversionServiceTests {
 	void wildcardMap() throws Exception {
 		Map<String, String> input = new LinkedHashMap<>();
 		input.put("key", "value");
-		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input), new TypeDescriptor(getClass().getField("wildcardMap")));
+		Object converted = conversionService.convert(input, new TypeDescriptor(getClass().getField("wildcardMap")));
 		assertThat(converted).isEqualTo(input);
 	}
 

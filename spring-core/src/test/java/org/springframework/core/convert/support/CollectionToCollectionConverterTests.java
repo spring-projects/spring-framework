@@ -193,7 +193,7 @@ class CollectionToCollectionConverterTests {
 	@Test
 	void listToCollectionNoCopyRequired() throws NoSuchFieldException {
 		List<?> input = new ArrayList<>(Arrays.asList("foo", "bar"));
-		assertThat(conversionService.convert(input, TypeDescriptor.forObject(input),
+		assertThat(conversionService.convert(input,
 				new TypeDescriptor(getClass().getField("wildcardCollection")))).isSameAs(input);
 	}
 
@@ -253,7 +253,7 @@ class CollectionToCollectionConverterTests {
 		List<String> list = new ArrayList<>();
 		list.add("A");
 		list.add("C");
-		assertThat(conversionService.convert(list, TypeDescriptor.forObject(list), new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(MyEnum.A, MyEnum.C));
+		assertThat(conversionService.convert(list, new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(MyEnum.A, MyEnum.C));
 	}
 
 
