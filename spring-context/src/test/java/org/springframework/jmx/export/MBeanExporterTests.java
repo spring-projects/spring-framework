@@ -354,7 +354,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beansToExport);
 		exporter.setServer(getServer());
 		exporter.setBeanFactory(factory);
-		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_NONE);
+		exporter.setAutodetect(false);
 		// MBean has a bad ObjectName, so if said MBean is autodetected, an exception will be thrown...
 		start(exporter);
 	}
@@ -524,18 +524,16 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void notRunningInBeanFactoryAndPassedBeanNameToExport() throws Exception {
+	void notRunningInBeanFactoryAndPassedBeanNameToExport() {
 		Map<String, Object> beans = Map.of(OBJECT_NAME, "beanName");
 		exporter.setBeans(beans);
-		assertThatExceptionOfType(MBeanExportException.class)
-				.isThrownBy(() -> start(exporter));
+		assertThatExceptionOfType(MBeanExportException.class).isThrownBy(() -> start(exporter));
 	}
 
 	@Test
-	void notRunningInBeanFactoryAndAutodetectionIsOn() throws Exception {
-		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
-		assertThatExceptionOfType(MBeanExportException.class)
-				.isThrownBy(() -> start(exporter));
+	void notRunningInBeanFactoryAndAutodetectionIsOn() {
+		exporter.setAutodetect(true);
+		assertThatExceptionOfType(MBeanExportException.class).isThrownBy(() -> start(exporter));
 	}
 
 	@Test  // SPR-2158
@@ -556,7 +554,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test  // SPR-3302
-	void beanNameCanBeUsedInNotificationListenersMap() throws Exception {
+	void beanNameCanBeUsedInNotificationListenersMap() {
 		String beanName = "charlesDexterWard";
 		BeanDefinitionBuilder testBean = BeanDefinitionBuilder.rootBeanDefinition(JmxTestBean.class);
 
@@ -576,7 +574,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void wildcardCanBeUsedInNotificationListenersMap() throws Exception {
+	void wildcardCanBeUsedInNotificationListenersMap() {
 		String beanName = "charlesDexterWard";
 		BeanDefinitionBuilder testBean = BeanDefinitionBuilder.rootBeanDefinition(JmxTestBean.class);
 
@@ -636,24 +634,23 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setServer(getServer());
 		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(firstBeanName, secondBeanName));
 		exporter.setBeanFactory(factory);
-		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+		exporter.setAutodetect(true);
 		exporter.addExcludedBean(secondBeanName);
 
 		start(exporter);
-		assertIsRegistered("Bean not autodetected in (AUTODETECT_ALL) mode",
-				ObjectNameManager.getInstance(firstBeanName));
-		assertIsNotRegistered("Bean should have been excluded",
-				ObjectNameManager.getInstance(secondBeanName));
+		assertIsRegistered("Bean not autodetected", ObjectNameManager.getInstance(firstBeanName));
+		assertIsNotRegistered("Bean should have been excluded", ObjectNameManager.getInstance(secondBeanName));
 	}
 
 	@Test
 	void registerFactoryBean() throws MalformedObjectNameException {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		factory.registerBeanDefinition("spring:type=FactoryBean", new RootBeanDefinition(ProperSomethingFactoryBean.class));
+		factory.registerBeanDefinition("spring:type=FactoryBean",
+				new RootBeanDefinition(ProperSomethingFactoryBean.class));
 
 		exporter.setServer(getServer());
 		exporter.setBeanFactory(factory);
-		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+		exporter.setAutodetect(true);
 
 		start(exporter);
 		assertIsRegistered("Non-null FactoryBean object registered",
@@ -663,11 +660,12 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	void ignoreNullObjectFromFactoryBean() throws MalformedObjectNameException {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		factory.registerBeanDefinition("spring:type=FactoryBean", new RootBeanDefinition(NullSomethingFactoryBean.class));
+		factory.registerBeanDefinition("spring:type=FactoryBean",
+				new RootBeanDefinition(NullSomethingFactoryBean.class));
 
 		exporter.setServer(getServer());
 		exporter.setBeanFactory(factory);
-		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+		exporter.setAutodetect(true);
 
 		start(exporter);
 		assertIsNotRegistered("Null FactoryBean object not registered",
