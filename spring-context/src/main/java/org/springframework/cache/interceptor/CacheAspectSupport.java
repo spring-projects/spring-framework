@@ -401,13 +401,6 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		// Check if we have a cached item matching the conditions
 		Cache.ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
 
-		// Collect puts from any @Cacheable miss, if no cached item is found
-		List<CachePutRequest> cachePutRequests = new ArrayList<>();
-		if (cacheHit == null) {
-			collectPutRequests(contexts.get(CacheableOperation.class),
-					CacheOperationExpressionEvaluator.NO_RESULT, cachePutRequests);
-		}
-
 		Object cacheValue;
 		Object returnValue;
 
@@ -420,6 +413,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			// Invoke the method if we don't have a cache hit
 			returnValue = invokeOperation(invoker);
 			cacheValue = unwrapReturnValue(returnValue);
+		}
+
+		// Collect puts from any @Cacheable miss, if no cached item is found
+		List<CachePutRequest> cachePutRequests = new ArrayList<>();
+		if (cacheHit == null) {
+			collectPutRequests(contexts.get(CacheableOperation.class), cacheValue, cachePutRequests);
 		}
 
 		// Collect any explicit @CachePuts
@@ -558,7 +557,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			@Nullable Object result, Collection<CachePutRequest> putRequests) {
 
 		for (CacheOperationContext context : contexts) {
-			if (isConditionPassing(context, result)) {
+			if (isConditionPassing(context, result) && context.canPutToCache(result)) {
 				Object key = generateKey(context, result);
 				putRequests.add(new CachePutRequest(context, key));
 			}
@@ -832,10 +831,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		public void apply(@Nullable Object result) {
-			if (this.context.canPutToCache(result)) {
-				for (Cache cache : this.context.getCaches()) {
-					doPut(cache, this.key, result);
-				}
+			for (Cache cache : this.context.getCaches()) {
+				doPut(cache, this.key, result);
 			}
 		}
 	}
