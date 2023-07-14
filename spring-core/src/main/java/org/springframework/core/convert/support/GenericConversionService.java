@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -140,11 +139,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	public boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
-		if (sourceType == null) {
-			return true;
-		}
-		GenericConverter converter = getConverter(sourceType, targetType);
-		return (converter != null);
+		return (sourceType == null || getConverter(sourceType, targetType) != null);
 	}
 
 	/**
@@ -160,15 +155,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	public boolean canBypassConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
-		if (sourceType == null) {
-			return true;
-		}
-		GenericConverter converter = getConverter(sourceType, targetType);
-		return (converter == NO_OP_CONVERTER);
+		return (sourceType == null || getConverter(sourceType, targetType) == NO_OP_CONVERTER);
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
+	@Override
 	@Nullable
 	public <T> T convert(@Nullable Object source, Class<T> targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
@@ -193,24 +184,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return handleResult(sourceType, targetType, result);
 		}
 		return handleConverterNotFound(source, sourceType, targetType);
-	}
-
-	/**
-	 * Convenience operation for converting a source object to the specified targetType,
-	 * where the target type is a descriptor that provides additional conversion context.
-	 * Simply delegates to {@link #convert(Object, TypeDescriptor, TypeDescriptor)} and
-	 * encapsulates the construction of the source type descriptor using
-	 * {@link TypeDescriptor#forObject(Object)}.
-	 * @param source the source object
-	 * @param targetType the target type
-	 * @return the converted value
-	 * @throws ConversionException if a conversion exception occurred
-	 * @throws IllegalArgumentException if targetType is {@code null},
-	 * or sourceType is {@code null} but source is not {@code null}
-	 */
-	@Nullable
-	public Object convert(@Nullable Object source, TypeDescriptor targetType) {
-		return convert(source, TypeDescriptor.forObject(source), targetType);
 	}
 
 	@Override

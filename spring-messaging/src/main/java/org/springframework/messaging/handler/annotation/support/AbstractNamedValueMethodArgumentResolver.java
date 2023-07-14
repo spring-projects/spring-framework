@@ -114,7 +114,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		if (parameter != nestedParameter || !ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
-			arg = this.conversionService.convert(arg, TypeDescriptor.forObject(arg), new TypeDescriptor(parameter));
+			arg = this.conversionService.convert(arg, new TypeDescriptor(parameter));
 			// Check for null value after conversion of incoming argument value
 			if (arg == null) {
 				if (namedValueInfo.defaultValue != null) {
