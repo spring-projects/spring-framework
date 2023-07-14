@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,13 @@ public class DataAccessUtilsTests {
 		Collection<String> col = new HashSet<>();
 
 		assertThat(DataAccessUtils.uniqueResult(col)).isNull();
+
+		assertThat(DataAccessUtils.singleResult(col)).isNull();
+		assertThat(DataAccessUtils.singleResult(col.stream())).isNull();
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isNull();
+		assertThat(DataAccessUtils.optionalResult(col)).isEmpty();
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEmpty();
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEmpty();
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.requiredUniqueResult(col))
@@ -89,6 +97,30 @@ public class DataAccessUtilsTests {
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.longResult(col))
 			.satisfies(sizeRequirements(1, 2));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.singleResult(col))
+			.satisfies(sizeRequirements(1, 2));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.singleResult(col.stream()))
+			.satisfies(sizeRequirements(1));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.singleResult(col.iterator()))
+			.satisfies(sizeRequirements(1));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.optionalResult(col))
+			.satisfies(sizeRequirements(1, 2));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.optionalResult(col.stream()))
+			.satisfies(sizeRequirements(1));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.optionalResult(col.iterator()))
+			.satisfies(sizeRequirements(1));
 	}
 
 	@Test
@@ -102,6 +134,12 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
 		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
 		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo(5);
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of(5));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of(5));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of(5));
 	}
 
 	@Test
@@ -139,6 +177,12 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
 		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
 		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of(5L));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of(5L));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of(5L));
 	}
 
 	@Test
@@ -149,6 +193,12 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo("test1");
 		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo("test1");
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("test1");
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo("test1");
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo("test1");
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo("test1");
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of("test1"));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of("test1"));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of("test1"));
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.intResult(col));
@@ -167,6 +217,12 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(date);
 		assertThat(DataAccessUtils.objectResult(col, Date.class)).isEqualTo(date);
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo(date.toString());
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo(date);
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo(date);
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo(date);
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of(date));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of(date));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of(date));
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.intResult(col));
@@ -196,6 +252,13 @@ public class DataAccessUtilsTests {
 		return ex -> {
 			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 			assertThat(ex.getActualSize()).as("actual size").isEqualTo(actualSize);
+		};
+	}
+
+	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(
+			int expectedSize) {
+		return ex -> {
+			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 		};
 	}
 
