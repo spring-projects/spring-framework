@@ -281,8 +281,8 @@ Spring Data JPA, make sure to set up deferred bootstrapping for its repositories
 [[orm-jpa-dao]]
 == Implementing DAOs Based on JPA: `EntityManagerFactory` and `EntityManager`
 
-NOTE: Although `EntityManagerFactory` instances are thread-safe, `EntityManager` instances are
-not. The injected JPA `EntityManager` behaves like an `EntityManager` fetched from an
+NOTE: Although `EntityManagerFactory` instances are thread-safe, `EntityManager` instances
+are not. The injected JPA `EntityManager` behaves like an `EntityManager` fetched from an
 application server's JNDI environment, as defined by the JPA specification. It delegates
 all calls to the current transactional `EntityManager`, if any. Otherwise, it falls back
 to a newly created `EntityManager` per operation, in effect making its usage thread-safe.
@@ -290,8 +290,8 @@ to a newly created `EntityManager` per operation, in effect making its usage thr
 It is possible to write code against the plain JPA without any Spring dependencies, by
 using an injected `EntityManagerFactory` or `EntityManager`. Spring can understand the
 `@PersistenceUnit` and `@PersistenceContext` annotations both at the field and the method level
-if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example shows a plain JPA DAO implementation
-that uses the `@PersistenceUnit` annotation:
+if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example shows a plain
+JPA DAO implementation that uses the `@PersistenceUnit` annotation:
 
 [tabs]
 ======
@@ -384,9 +384,9 @@ Consider the following example:
 ----
 
 The main problem with such a DAO is that it always creates a new `EntityManager` through
-the factory. You can avoid this by requesting a transactional `EntityManager` (also
-called a "`shared EntityManager`" because it is a shared, thread-safe proxy for the actual
-transactional EntityManager) to be injected instead of the factory. The following example shows how to do so:
+the factory. You can avoid this by requesting a transactional `EntityManager` (also called a
+"`shared EntityManager`" because it is a shared, thread-safe proxy for the actual transactional
+EntityManager) to be injected instead of the factory. The following example shows how to do so:
 
 [tabs]
 ======
@@ -430,19 +430,19 @@ The `@PersistenceContext` annotation has an optional attribute called `type`, wh
 `EntityManager` proxy. The alternative, `PersistenceContextType.EXTENDED`, is a completely
 different affair. This results in a so-called extended `EntityManager`, which is not
 thread-safe and, hence, must not be used in a concurrently accessed component, such as a
-Spring-managed singleton bean. Extended `EntityManager` instances are only supposed to be used in
-stateful components that, for example, reside in a session, with the lifecycle of the
+Spring-managed singleton bean. Extended `EntityManager` instances are only supposed to be used#
+in stateful components that, for example, reside in a session, with the lifecycle of the
 `EntityManager` not tied to a current transaction but rather being completely up to the
 application.
 
 .Method- and field-level Injection
 ****
 You can apply annotations that indicate dependency injections (such as `@PersistenceUnit` and
-`@PersistenceContext`) on field or methods inside a class -- hence the
-expressions "`method-level injection`" and "`field-level injection`". Field-level
-annotations are concise and easier to use while method-level annotations allow for further
-processing of the injected dependency. In both cases, the member visibility (public,
-protected, or private) does not matter.
+`@PersistenceContext`) on field or methods inside a class -- hence the expressions
+"`method-level injection`" and "`field-level injection`". Field-level annotations are
+concise and easier to use while method-level annotations allow for further processing of the
+injected dependency. In both cases, the member visibility (public, protected, or private)
+does not matter.
 
 What about class-level annotations?
 
@@ -451,9 +451,9 @@ injection.
 ****
 
 The injected `EntityManager` is Spring-managed (aware of the ongoing transaction).
-Even though the new DAO implementation uses method-level
-injection of an `EntityManager` instead of an `EntityManagerFactory`, no change is
-required in the application context XML, due to annotation usage.
+Even though the new DAO implementation uses method-level injection of an `EntityManager`
+instead of an `EntityManagerFactory`, no change is required in the bean definition
+due to annotation usage.
 
 The main advantage of this DAO style is that it depends only on the Java Persistence API.
 No import of any Spring class is required. Moreover, as the JPA annotations are understood,

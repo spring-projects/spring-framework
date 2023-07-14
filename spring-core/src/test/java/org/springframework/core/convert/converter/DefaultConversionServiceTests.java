@@ -660,7 +660,7 @@ class DefaultConversionServiceTests {
 		foo.add("2");
 		foo.add("3");
 		@SuppressWarnings("unchecked")
-		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.forObject(foo),
+		List<Integer> bar = (List<Integer>) conversionService.convert(foo,
 				new TypeDescriptor(getClass().getField("genericList")));
 		assertThat(bar).containsExactly(1, 2, 3);
 	}
