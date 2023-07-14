@@ -42,6 +42,7 @@ startup and shutdown process, as driven by the container's own lifecycle.
 The lifecycle callback interfaces are described in this section.
 
 
+
 [[beans-factory-lifecycle-initializingbean]]
 === Initialization Callbacks
 
@@ -131,6 +132,30 @@ Kotlin::
 ======
 
 However, the first of the two preceding examples does not couple the code to Spring.
+
+[NOTE]
+====
+Be aware that `@PostConstruct` and initialization methods in general are executed
+within the container's singleton creation lock. The bean instance is only considered
+as fully initialized and ready to be published to others after returning from the
+`@PostConstruct` method. Such individual initialization methods are only meant
+for validating the configuration state and possibly preparing some data structures
+based on the given configuration but no further activity with external bean access.
+Otherwise there is a risk for an initialization deadlock.
+
+For a scenario where expensive post-initialization activity is to be triggered,
+e.g. asynchronous database preparation steps, your bean should either implement
+`SmartInitializingSingleton.afterSingletonsInstantiated()` or rely on the context
+refresh event: implementing `ApplicationListener<ContextRefreshedEvent>` or
+declaring its annotation equivalent `@EventListener(ContextRefreshedEvent.class)`.
+Those variants come after all regular singleton initialization and therefore
+outside of any singleton creation lock.
+
+Alternatively, you may implement the `(Smart)Lifecycle` interface and integrate with
+the container's overall lifecycle management, including an auto-startup mechanism,
+a pre-destroy stop step, and potential stop/restart callbacks (see below).
+====
+
 
 
 [[beans-factory-lifecycle-disposablebean]]
@@ -223,31 +248,41 @@ Kotlin::
 However, the first of the two preceding definitions does not couple the code to Spring.
 
 TIP: You can assign the `destroy-method` attribute of a `<bean>` element a special
-`(inferred)` value, which instructs Spring to automatically detect a public `close` or
-`shutdown` method on the specific bean class. (Any class that implements
-`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match.) You can also set
-this special `(inferred)` value on the `default-destroy-method` attribute of a
+`(inferred)` value, which instructs Spring to automatically detect a public `close`
+or `shutdown` method on the specific bean class. (Any class that implements
+`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match.) You can also
+set this special `(inferred)` value on the `default-destroy-method` attribute of a
 `<beans>` element to apply this behavior to an entire set of beans (see
-xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]). Note that this is the
-default behavior with Java configuration.
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]).
+Note that this is the default behavior for `@Bean` methods in Java configuration classes.
+
+[NOTE]
+====
+For extended shutdown phases, you may implement the `Lifecycle` interface and receive
+an early stop signal before the destroy methods of any singleton beans are called.
+You may also implement `SmartLifecycle` for a time-bound stop step where the container
+will wait for all such stop processing to complete before moving on to destroy methods.
+====
+
+
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 === Default Initialization and Destroy Methods
 
 When you write initialization and destroy method callbacks that do not use the
 Spring-specific `InitializingBean` and `DisposableBean` callback interfaces, you
-typically write methods with names such as `init()`, `initialize()`, `dispose()`, and so
-on. Ideally, the names of such lifecycle callback methods are standardized across a
-project so that all developers use the same method names and ensure consistency.
+typically write methods with names such as `init()`, `initialize()`, `dispose()`,
+and so on. Ideally, the names of such lifecycle callback methods are standardized across
+a project so that all developers use the same method names and ensure consistency.
 
 You can configure the Spring container to "`look`" for named initialization and destroy
-callback method names on every bean. This means that you, as an application
-developer, can write your application classes and use an initialization callback called
-`init()`, without having to configure an `init-method="init"` attribute with each bean
-definition. The Spring IoC container calls that method when the bean is created (and in
-accordance with the standard lifecycle callback contract xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[described previously]
-). This feature also enforces a consistent naming convention for
-initialization and destroy method callbacks.
+callback method names on every bean. This means that you, as an application developer,
+can write your application classes and use an initialization callback called `init()`,
+without having to configure an `init-method="init"` attribute with each bean definition.
+The Spring IoC container calls that method when the bean is created (and in accordance
+with the standard lifecycle callback contract xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[described previously]).
+This feature also enforces a consistent naming convention for initialization and
+destroy method callbacks.
 
 Suppose that your initialization callback methods are named `init()` and your destroy
 callback methods are named `destroy()`. Your class then resembles the class in the
@@ -407,14 +442,15 @@ and closed.
 [TIP]
 ====
 Note that the regular `org.springframework.context.Lifecycle` interface is a plain
-contract for explicit start and stop notifications and does not imply auto-startup at context
-refresh time. For fine-grained control over auto-startup of a specific bean (including startup phases),
-consider implementing `org.springframework.context.SmartLifecycle` instead.
+contract for explicit start and stop notifications and does not imply auto-startup
+at context refresh time. For fine-grained control over auto-startup and for graceful
+stopping of a specific bean (including startup and stop phases), consider implementing
+the extended `org.springframework.context.SmartLifecycle` interface instead.
 
 Also, please note that stop notifications are not guaranteed to come before destruction.
 On regular shutdown, all `Lifecycle` beans first receive a stop notification before
-the general destruction callbacks are being propagated. However, on hot refresh during a
-context's lifetime or on stopped refresh attempts, only destroy methods are called.
+the general destruction callbacks are being propagated. However, on hot refresh during
+a context's lifetime or on stopped refresh attempts, only destroy methods are called.
 ====
 
 The order of startup and shutdown invocations can be important. If a "`depends-on`"
