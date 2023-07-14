@@ -105,23 +105,31 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_NONE = 0;
 
 	/**
 	 * Autodetection mode indicating that only valid MBeans should be autodetected.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_MBEAN = 1;
 
 	/**
 	 * Autodetection mode indicating that only the {@link MBeanInfoAssembler} should be able
 	 * to autodetect beans.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_ASSEMBLER = 2;
 
 	/**
 	 * Autodetection mode indicating that all autodetection mechanisms should be used.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_ALL = AUTODETECT_MBEAN | AUTODETECT_ASSEMBLER;
 
 
@@ -236,7 +244,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
 	 * @see #AUTODETECT_NONE
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public void setAutodetectModeName(String constantName) {
 		Assert.hasText(constantName, "'constantName' must not be null or blank");
 		Integer mode = constants.get(constantName);
@@ -253,7 +263,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
 	 * @see #AUTODETECT_NONE
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public void setAutodetectMode(int autodetectMode) {
 		Assert.isTrue(constants.containsValue(autodetectMode),
 				"Only values of autodetect constants allowed");
