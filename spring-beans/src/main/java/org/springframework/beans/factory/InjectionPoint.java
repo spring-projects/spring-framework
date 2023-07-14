@@ -48,6 +48,8 @@ public class InjectionPoint {
 	@Nullable
 	private volatile Annotation[] fieldAnnotations;
 
+	@Nullable
+	private volatile Annotation[] methodParameterAnnotations;
 
 	/**
 	 * Create an injection point descriptor for a method or constructor parameter.
@@ -76,6 +78,7 @@ public class InjectionPoint {
 				new MethodParameter(original.methodParameter) : null);
 		this.field = original.field;
 		this.fieldAnnotations = original.fieldAnnotations;
+		this.methodParameterAnnotations = original.methodParameterAnnotations;
 	}
 
 	/**
@@ -129,7 +132,13 @@ public class InjectionPoint {
 			return fieldAnnotations;
 		}
 		else {
-			return obtainMethodParameter().getParameterAnnotations();
+			Annotation[] methodParameterAnnotations = this.methodParameterAnnotations;
+			if (methodParameterAnnotations == null) {
+				methodParameterAnnotations =
+						obtainMethodParameter().getParameterAnnotations();
+				this.methodParameterAnnotations = methodParameterAnnotations;
+			}
+			return methodParameterAnnotations;
 		}
 	}
 

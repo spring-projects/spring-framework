@@ -155,7 +155,8 @@ public class MethodInvoker {
 	 * @see #invoke
 	 */
 	public void prepare() throws ClassNotFoundException, NoSuchMethodException {
-		if (this.staticMethod != null) {
+		Class<?> targetClass = getTargetClass();
+		if (targetClass == null && this.staticMethod != null) {
 			int lastDotIndex = this.staticMethod.lastIndexOf('.');
 			if (lastDotIndex == -1 || lastDotIndex == this.staticMethod.length()) {
 				throw new IllegalArgumentException(
@@ -164,11 +165,12 @@ public class MethodInvoker {
 			}
 			String className = this.staticMethod.substring(0, lastDotIndex);
 			String methodName = this.staticMethod.substring(lastDotIndex + 1);
-			this.targetClass = resolveClassName(className);
+			targetClass = resolveClassName(className);
+			this.targetClass = targetClass;
 			this.targetMethod = methodName;
+
 		}
 
-		Class<?> targetClass = getTargetClass();
 		String targetMethod = getTargetMethod();
 		Assert.notNull(targetClass, "Either 'targetClass' or 'targetObject' is required");
 		Assert.notNull(targetMethod, "Property 'targetMethod' is required");
