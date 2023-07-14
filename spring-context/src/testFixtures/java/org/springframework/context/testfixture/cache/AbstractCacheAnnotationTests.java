@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.testfixture.cache.beans.AnnotatedClassCacheableService;
 import org.springframework.context.testfixture.cache.beans.CacheableService;
 import org.springframework.context.testfixture.cache.beans.TestEntity;
-import org.springframework.expression.spel.SpelEvaluationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Abstract cache annotation tests (containing several reusable methods).
@@ -507,27 +504,24 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(primary.get(id).get()).isSameAs(entity);
 	}
 
-	public void testPutRefersToNullResult(CacheableService<?> service) {
-		Long id = Long.MIN_VALUE;
+	protected void testPutRefersToResultWithUnless(CacheableService<?> service) {
+		Long id = 42L;
 		TestEntity entity = new TestEntity();
+		entity.setId(id);
 		Cache primary = this.cm.getCache("primary");
-		assertNull(primary.get(id));
-		try {
-			service.putRefersToNullResult(entity);
-		} catch (Exception e) {
-			assertEquals(SpelEvaluationException.class, e.getClass());
-			assertEquals("EL1007E: Property or field 'id' cannot be found on null", e.getMessage());
-		}
-		assertNull(primary.get(id));
+		assertThat(primary.get(id)).isNull();
+		assertThat(service.putEvaluatesUnlessBeforeKey(entity)).isNotNull();
+		assertThat(primary.get(id).get()).isSameAs(entity);
 	}
 
-	public void testPutRefersToNullResultWithUnless(CacheableService<?> service) {
-		Long id = Long.MIN_VALUE;
+	protected void testPutEvaluatesUnlessBeforeKey(CacheableService<?> service) {
+		Long id = Long.MIN_VALUE; // return null
 		TestEntity entity = new TestEntity();
+		entity.setId(id);
 		Cache primary = this.cm.getCache("primary");
-		assertNull(primary.get(id));
-		service.putRefersToNullResultWithUnless(entity);
-		assertNull(primary.get(id));
+		assertThat(primary.get(id)).isNull();
+		assertThat(service.putEvaluatesUnlessBeforeKey(entity)).isNull();
+		assertThat(primary.get(id)).isNull();
 	}
 
 	protected void testMultiCacheAndEvict(CacheableService<?> service) {
@@ -876,28 +870,28 @@ public abstract class AbstractCacheAnnotationTests {
 	}
 
 	@Test
+	public void testPutRefersToResultWithUnless() {
+		testPutRefersToResultWithUnless(this.cs);
+	}
+
+	@Test
+	public void testPutEvaluatesUnlessBeforeKey() {
+		testPutEvaluatesUnlessBeforeKey(this.cs);
+	}
+
+	@Test
 	public void testClassPutRefersToResult() {
 		testPutRefersToResult(this.ccs);
 	}
 
 	@Test
-	public void testPutRefersToNullResult() throws Exception {
-		testPutRefersToNullResult(this.cs);
+	public void testClassPutRefersToResultWithUnless(){
+		testPutRefersToResultWithUnless(this.ccs);
 	}
 
 	@Test
-	public void testClassPutRefersToNullResult() throws Exception {
-		testPutRefersToNullResult(this.ccs);
-	}
-
-	@Test
-	public void testPutRefersToNullResultWithUnless() throws Exception {
-		testPutRefersToNullResultWithUnless(this.cs);
-	}
-
-	@Test
-	public void testClassPutRefersToNullResultWithUnless() throws Exception {
-		testPutRefersToNullResultWithUnless(this.ccs);
+	public void testClassPutEvaluatesUnlessBeforeKey(){
+		testPutEvaluatesUnlessBeforeKey(this.ccs);
 	}
 
 	@Test
