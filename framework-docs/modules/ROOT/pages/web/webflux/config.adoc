@@ -742,7 +742,7 @@ reliance on it.
 [[webflux-config-blocking-execution]]
 == Blocking Execution
 
-The WebFlux Java config lets you to customize blocking execution in WebFlux.
+The WebFlux Java config allows you to customize blocking execution in WebFlux.
 
 You can have blocking controller methods called on a separate thread by providing
 an `Executor` such as the
@@ -777,7 +777,7 @@ Kotlin::
 
 		@Override
 		fun configureBlockingExecution(configurer: BlockingExecutionConfigurer) {
-            val executor = ...
+			val executor = ...
 			configurer.setExecutor(executor)
 		}
 	}

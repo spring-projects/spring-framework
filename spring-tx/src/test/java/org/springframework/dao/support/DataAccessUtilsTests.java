@@ -20,15 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.TypeMismatchDataAccessException;
@@ -40,10 +37,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @since 20.10.2004
  */
-public class DataAccessUtilsTests {
+class DataAccessUtilsTests {
 
 	@Test
-	public void withEmptyCollection() {
+	void withEmptyCollection() {
 		Collection<String> col = new HashSet<>();
 
 		assertThat(DataAccessUtils.uniqueResult(col)).isNull();
@@ -73,7 +70,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withTooLargeCollection() {
+	void withTooLargeCollection() {
 		Collection<String> col = new HashSet<>(2);
 		col.add("test1");
 		col.add("test2");
@@ -124,7 +121,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withInteger() {
+	void withInteger() {
 		Collection<Integer> col = new HashSet<>(1);
 		col.add(5);
 
@@ -143,7 +140,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withSameIntegerInstanceTwice() {
+	void withSameIntegerInstanceTwice() {
 		Integer i = 5;
 		Collection<Integer> col = new ArrayList<>(1);
 		col.add(i);
@@ -158,7 +155,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withEquivalentIntegerInstanceTwice() {
+	void withEquivalentIntegerInstanceTwice() {
 		Collection<Integer> col = Arrays.asList(555, 555);
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class)
@@ -167,7 +164,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withLong() {
+	void withLong() {
 		Collection<Long> col = new HashSet<>(1);
 		col.add(5L);
 
@@ -186,7 +183,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withString() {
+	void withString() {
 		Collection<String> col = new HashSet<>(1);
 		col.add("test1");
 
@@ -208,7 +205,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withDate() {
+	void withDate() {
 		Date date = new Date();
 		Collection<Date> col = new HashSet<>(1);
 		col.add(date);
@@ -232,14 +229,14 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void exceptionTranslationWithNoTranslation() {
+	void exceptionTranslationWithNoTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException();
 		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(in);
 	}
 
 	@Test
-	public void exceptionTranslationWithTranslation() {
+	void exceptionTranslationWithTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException("in");
 		InvalidDataAccessApiUsageException out = new InvalidDataAccessApiUsageException("out");
@@ -259,22 +256,6 @@ public class DataAccessUtilsTests {
 
 	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(int expectedSize) {
 		return ex -> assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
-	}
-
-
-	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
-
-		// in to out
-		private final Map<RuntimeException, RuntimeException> translations = new HashMap<>();
-
-		public void addTranslation(RuntimeException in, RuntimeException out) {
-			this.translations.put(in, out);
-		}
-
-		@Override
-		public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-			return (DataAccessException) translations.get(ex);
-		}
 	}
 
 }

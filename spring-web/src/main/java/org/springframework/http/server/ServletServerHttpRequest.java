@@ -103,7 +103,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	/**
-	 * Initialize a URI from the given Servet request.
+	 * Initialize a URI from the given Servlet request.
 	 * @param servletRequest the request
 	 * @return the initialized URI
 	 * @since 6.1

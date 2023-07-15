@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class BlockingExecutionConfigurer {
 	/**
 	 * Configure a predicate to decide if a controller method is blocking and
 	 * should be called on a separate thread if an executor is
-	 * {@link #setExecutor configured}.
+	 * {@linkplain #setExecutor configured}.
 	 * <p>The default predicate matches controller methods whose return type is
 	 * not recognized by the configured
 	 * {@link org.springframework.core.ReactiveAdapterRegistry}.

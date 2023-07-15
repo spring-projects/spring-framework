@@ -33,7 +33,8 @@ import org.springframework.util.NumberUtils;
 
 /**
  * Miscellaneous utility methods for DAO implementations.
- * Useful with any data access technology.
+ *
+ * <p>Useful with any data access technology.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
@@ -80,7 +81,7 @@ public abstract class DataAccessUtils {
 			if (resultList.size() > 1) {
 				throw new IncorrectResultSizeDataAccessException(1);
 			}
-			return CollectionUtils.isEmpty(resultList) ? null : resultList.get(0);
+			return resultList.isEmpty() ? null : resultList.get(0);
 		}
 	}
 

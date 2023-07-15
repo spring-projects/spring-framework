@@ -25,21 +25,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
-
 /**
  * Utility class to assist with processing "Forwarded" and "X-Forwarded-*" headers.
  *
- * <p><strong>Note:</strong>There are security considerations surrounding the use
+ * <p><strong>Note:</strong> There are security considerations surrounding the use
  * of forwarded headers. Those should not be used unless the application is
  * behind a trusted proxy that inserts them and also explicitly removes any such
  * headers coming from an external source.
  *
- * <p>In most cases, should not use this class directly but rely on
- * {@link org.springframework.web.filter.ForwardedHeaderFilter} for Spring MVC, or
+ * <p>In most cases, you should not use this class directly but rather rely on
+ * {@link org.springframework.web.filter.ForwardedHeaderFilter} for Spring MVC or
  * {@link org.springframework.web.server.adapter.ForwardedHeaderTransformer} in
- * order to extract the information from them as early as possible, and discard
- * such headers. Underlying servers such as Tomcat, Jetty, Reactor Netty, also
- * provides options to handle forwarded headers even earlier.
+ * order to extract the information from the headers as early as possible and discard
+ * such headers. Underlying servers such as Tomcat, Jetty, and Reactor Netty also
+ * provide options to handle forwarded headers even earlier.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -56,10 +55,11 @@ public abstract class ForwardedHeaderUtils {
 
 
 	/**
-	 * Adapt the scheme+host+port of the given {@link URI} from the "Forwarded" header,
-	 * see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>, or
-	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if "Forwarded"
-	 * is not present.
+	 * Adapt the scheme+host+port of the given {@link URI} from the "Forwarded" header
+	 * (see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>) or from the
+	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers if
+	 * "Forwarded" is not present.
+	 * @param uri the request {@code URI}
 	 * @param headers the HTTP headers to consider
 	 * @return a {@link UriComponentsBuilder} that reflects the request URI and
 	 * additional updates from forwarded headers
@@ -106,7 +106,7 @@ public abstract class ForwardedHeaderUtils {
 		catch (NumberFormatException ex) {
 			throw new IllegalArgumentException("Failed to parse a port from \"forwarded\"-type headers. " +
 					"If not behind a trusted proxy, consider using ForwardedHeaderFilter " +
-					"with the removeOnly=true. Request headers: " + headers);
+					"with removeOnly=true. Request headers: " + headers);
 		}
 
 		uriComponentsBuilder.resetPortIfDefaultForScheme();
@@ -138,11 +138,11 @@ public abstract class ForwardedHeaderUtils {
 	/**
 	 * Parse the first "Forwarded: for=..." or "X-Forwarded-For" header value to
 	 * an {@code InetSocketAddress} representing the address of the client.
-	 * @param uri the request URI
+	 * @param uri the request {@code URI}
 	 * @param headers the request headers that may contain forwarded headers
-	 * @param remoteAddress the current remoteAddress
+	 * @param remoteAddress the current remote address
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
-	 * {@code null} if the headers are not present.
+	 * {@code null} if the headers are not present
 	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.2">RFC 7239, Section 5.2</a>
 	 */
 	@Nullable

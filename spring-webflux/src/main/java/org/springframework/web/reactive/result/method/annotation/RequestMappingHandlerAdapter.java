@@ -151,7 +151,7 @@ public class RequestMappingHandlerAdapter
 	 * Provide a predicate to decide which controller methods to invoke through
 	 * the configured {@link #setBlockingExecutor blockingExecutor}.
 	 * <p>If an executor is configured, the default predicate matches controller
-	 * methods whose return type not recognized by the configured
+	 * methods whose return type is not recognized by the configured
 	 * {@link org.springframework.core.ReactiveAdapterRegistry}.
 	 * @param predicate the predicate to use
 	 * @since 6.1

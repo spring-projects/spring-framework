@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.support.DataAccessUtilsTests.MapPersistenceExceptionTranslator;
+import org.springframework.dao.support.MapPersistenceExceptionTranslator;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 

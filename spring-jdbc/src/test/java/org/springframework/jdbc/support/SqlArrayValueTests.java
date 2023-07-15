@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.verify;
  * @author Philippe Marschall
  * @since 6.1
  */
-public class SqlArrayValueTests {
+class SqlArrayValueTests {
 
 	private final Connection con = mock();
 
@@ -47,7 +47,7 @@ public class SqlArrayValueTests {
 
 
 	@Test
-	public void setValue() throws SQLException {
+	void setValue() throws SQLException {
 		given(this.ps.getConnection()).willReturn(this.con);
 		given(this.con.createArrayOf("smallint", elements)).willReturn(this.arr);
 
