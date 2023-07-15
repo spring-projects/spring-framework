@@ -135,7 +135,9 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 	}
 
 
+	@SuppressWarnings("unused")
 	private static final class ConstructorInjection {
+
 		private final String foo;
 
 		private final String bar;
@@ -159,7 +161,9 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static final class PropertyInjection {
+
 		@Nullable
 		private String foo;
 
@@ -190,7 +194,9 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static final class MixedInjection {
+
 		private final String foo;
 
 		@Nullable
@@ -213,12 +219,13 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 			this.bar = bar;
 		}
 
+		@Override
 		public String toString() {
 			return this.foo + ":" + String.valueOf(this.bar);
 		}
-
 	}
 
+	@SuppressWarnings("unused")
 	private static final class ErrorInjection {
 
 		private int foo;
@@ -231,6 +238,5 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 			this.foo = foo;
 		}
 	}
-
 
 }

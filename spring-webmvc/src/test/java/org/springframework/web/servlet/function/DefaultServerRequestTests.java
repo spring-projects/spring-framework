@@ -553,7 +553,10 @@ class DefaultServerRequestTests {
 	@interface ParameterizedHttpMethodTest {
 	}
 
+
+	@SuppressWarnings("unused")
 	private static final class ConstructorInjection {
+
 		private final String foo;
 
 		private final String bar;
@@ -572,7 +575,9 @@ class DefaultServerRequestTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static final class PropertyInjection {
+
 		private String foo;
 
 		private String bar;
@@ -594,7 +599,9 @@ class DefaultServerRequestTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static final class MixedInjection {
+
 		private final String foo;
 
 		private String bar;
@@ -616,6 +623,7 @@ class DefaultServerRequestTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static final class ErrorInjection {
 
 		private int foo;
@@ -628,8 +636,5 @@ class DefaultServerRequestTests {
 			this.foo = foo;
 		}
 	}
-
-
-
 
 }
