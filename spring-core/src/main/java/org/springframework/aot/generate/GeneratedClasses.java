@@ -176,19 +176,6 @@ public class GeneratedClasses {
 		return addForFeatureComponent(featureName, ClassName.get(targetComponent), type);
 	}
 
-	/**
-	 * Create a new {@link GeneratedClasses} instance using the specified feature
-	 * name prefix to qualify generated class names for a dedicated round of code
-	 * generation.
-	 * @param featureNamePrefix the feature name prefix to use
-	 * @return a new instance for the specified feature name prefix
-	 * @since 6.0.12
-	 */
-	public GeneratedClasses withFeatureNamePrefix(String featureNamePrefix) {
-		return new GeneratedClasses(this.classNameGenerator.withFeatureNamePrefix(featureNamePrefix),
-				this.classes, this.classesByOwner);
-	}
-
 	private GeneratedClass createAndAddGeneratedClass(String featureName,
 			@Nullable ClassName targetComponent, Consumer<TypeSpec.Builder> type) {
 
@@ -210,6 +197,18 @@ public class GeneratedClasses {
 		for (GeneratedClass generatedClass : generatedClasses) {
 			generatedFiles.addSourceFile(generatedClass.generateJavaFile());
 		}
+	}
+
+	/**
+	 * Create a new {@link GeneratedClasses} instance using the specified feature
+	 * name prefix to qualify generated class names for a dedicated round of code
+	 * generation.
+	 * @param featureNamePrefix the feature name prefix to use
+	 * @return a new instance for the specified feature name prefix
+	 */
+	GeneratedClasses withFeatureNamePrefix(String featureNamePrefix) {
+		return new GeneratedClasses(this.classNameGenerator.withFeatureNamePrefix(featureNamePrefix),
+				this.classes, this.classesByOwner);
 	}
 
 	private record Owner(String featureNamePrefix, String featureName, @Nullable ClassName target) {

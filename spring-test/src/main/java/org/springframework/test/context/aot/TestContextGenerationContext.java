@@ -18,7 +18,6 @@ package org.springframework.test.context.aot;
 
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.hint.RuntimeHints;
 
@@ -49,16 +48,13 @@ class TestContextGenerationContext extends DefaultGenerationContext {
 	}
 
 	/**
-	 * Create a new {@link TestContextGenerationContext} instance backed by the
-	 * specified {@link GeneratedClasses}, {@link GeneratedFiles}, and
-	 * {@link RuntimeHints}.
-	 * @param generatedClasses the generated classes
-	 * @param generatedFiles the generated files
-	 * @param runtimeHints the runtime hints
+	 * Create a new {@link TestContextGenerationContext} instance based on the
+	 * supplied {@code existing} context and feature name.
+	 * @param existing the existing context upon which to base the new one
+	 * @param featureName the feature name to use
 	 */
-	private TestContextGenerationContext(GeneratedClasses generatedClasses, GeneratedFiles generatedFiles,
-			RuntimeHints runtimeHints, String featureName) {
-		super(generatedClasses, generatedFiles, runtimeHints);
+	private TestContextGenerationContext(TestContextGenerationContext existing, String featureName) {
+		super(existing, featureName);
 		this.featureName = featureName;
 	}
 
@@ -67,8 +63,8 @@ class TestContextGenerationContext extends DefaultGenerationContext {
 	 * Create a new {@link TestContextGenerationContext} instance using the specified
 	 * feature name to qualify generated assets for a dedicated round of code generation.
 	 * <p>If <em>this</em> {@code TestContextGenerationContext} has a configured feature
-	 * name, the supplied feature name will be appended to the existing feature name
-	 * in order to avoid naming collisions.
+	 * name, the existing feature name will prepended to the supplied feature name in
+	 * order to avoid naming collisions.
 	 * @param featureName the feature name to use
 	 * @return a specialized {@link TestContextGenerationContext} for the specified
 	 * feature name
@@ -78,8 +74,7 @@ class TestContextGenerationContext extends DefaultGenerationContext {
 		if (this.featureName != null) {
 			featureName = this.featureName + featureName;
 		}
-		GeneratedClasses generatedClasses = getGeneratedClasses().withFeatureNamePrefix(featureName);
-		return new TestContextGenerationContext(generatedClasses, getGeneratedFiles(), getRuntimeHints(), featureName);
+		return new TestContextGenerationContext(this, featureName);
 	}
 
 }
