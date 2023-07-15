@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -366,14 +366,22 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",
 			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ApplicationContextInitializer.java",
 			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ManagementApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ManagementBeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext001_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext001_ManagementBeanDefinitions.java",
 			// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
 			// BasicSpringJupiterTests.NestedTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
 			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ApplicationContextInitializer.java",
 			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ManagementApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ManagementBeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext002_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext002_ManagementBeanDefinitions.java",
 			// BasicSpringTestNGTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext003_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext003_BeanDefinitions.java",

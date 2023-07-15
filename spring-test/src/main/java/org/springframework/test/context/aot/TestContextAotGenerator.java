@@ -324,8 +324,8 @@ public class TestContextAotGenerator {
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
 		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(testClass));
-		DefaultGenerationContext generationContext =
-				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+		TestContextGenerationContext generationContext =
+				new TestContextGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		return generationContext.withName(nextTestContextId());
 	}
 
