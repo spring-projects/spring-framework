@@ -85,6 +85,8 @@ public class TestContextAotGenerator {
 
 	private final RuntimeHints runtimeHints;
 
+	private final boolean failOnError;
+
 
 	/**
 	 * Create a new {@link TestContextAotGenerator} that uses the supplied
@@ -102,9 +104,23 @@ public class TestContextAotGenerator {
 	 * @param runtimeHints the {@code RuntimeHints} to use
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+		this(generatedFiles, runtimeHints, false);
+	}
+
+	/**
+	 * Create a new {@link TestContextAotGenerator} that uses the supplied
+	 * {@link GeneratedFiles}, {@link RuntimeHints}, and {@code failOnError} flag.
+	 * @param generatedFiles the {@code GeneratedFiles} to use
+	 * @param runtimeHints the {@code RuntimeHints} to use
+	 * @param failOnError {@code true} if errors encountered during AOT processing
+	 * should result in an exception that fails the overall process
+	 * @since 6.0.12
+	 */
+	TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints, boolean failOnError) {
 		this.testRuntimeHintsRegistrars = AotServices.factories().load(TestRuntimeHintsRegistrar.class);
 		this.generatedFiles = generatedFiles;
 		this.runtimeHints = runtimeHints;
+		this.failOnError = failOnError;
 	}
 
 
@@ -210,6 +226,10 @@ public class TestContextAotGenerator {
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
+				if (this.failOnError) {
+					throw new IllegalStateException("Failed to generate AOT artifacts for test classes " +
+							testClasses.stream().map(Class::getName).toList(), ex);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Failed to generate AOT artifacts for test classes " +
 							testClasses.stream().map(Class::getName).toList(), ex);
@@ -304,8 +324,8 @@ public class TestContextAotGenerator {
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
 		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(testClass));
-		DefaultGenerationContext generationContext =
-				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+		TestContextGenerationContext generationContext =
+				new TestContextGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		return generationContext.withName(nextTestContextId());
 	}
 
