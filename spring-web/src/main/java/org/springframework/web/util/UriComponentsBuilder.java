@@ -101,8 +101,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
 					PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
 
-	private static final String FORWARDED_VALUE = "\"?([^;,\"]+)\"?";
-
 	private static final Object[] EMPTY_VALUES = new Object[0];
 
 
