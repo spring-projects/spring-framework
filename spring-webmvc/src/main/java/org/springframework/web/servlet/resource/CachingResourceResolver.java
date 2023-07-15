@@ -106,6 +106,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
+	@Nullable
 	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
@@ -154,6 +155,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
+	@Nullable
 	protected String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
