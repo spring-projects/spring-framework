@@ -227,7 +227,7 @@ public class TestContextAotGenerator {
 			}
 			catch (Exception ex) {
 				if (this.failOnError) {
-					throw new IllegalStateException("Failed to generate AOT artifacts for test classes " +
+					throw new TestContextAotException("Failed to generate AOT artifacts for test classes " +
 							testClasses.stream().map(Class::getName).toList(), ex);
 				}
 				if (logger.isDebugEnabled()) {
