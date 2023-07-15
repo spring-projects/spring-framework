@@ -35,7 +35,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_20;
+import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-@DisabledForJreRange(min = JAVA_20, disabledReason = "Kotlin doesn't support Java 20+ yet")
+@DisabledForJreRange(min = JAVA_21, disabledReason = "Kotlin doesn't support Java 21+ yet")
 class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext = mock();
