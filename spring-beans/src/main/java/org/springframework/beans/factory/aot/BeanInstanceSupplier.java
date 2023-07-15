@@ -248,18 +248,18 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 				() -> "'shortcuts' must contain " + resolved.length + " elements");
 
 		ConstructorArgumentValues argumentValues = resolveArgumentValues(registeredBean);
-		Set<String> autowiredBeans = new LinkedHashSet<>(resolved.length);
+		Set<String> autowiredBeanNames = new LinkedHashSet<>(resolved.length * 2);
 		for (int i = startIndex; i < parameterCount; i++) {
 			MethodParameter parameter = getMethodParameter(executable, i);
 			DependencyDescriptor descriptor = new DependencyDescriptor(parameter, true);
 			String shortcut = (this.shortcuts != null ? this.shortcuts[i - startIndex] : null);
 			if (shortcut != null) {
-				descriptor = new ShortcutDependencyDescriptor(descriptor, shortcut, registeredBean.getBeanClass());
+				descriptor = new ShortcutDependencyDescriptor(descriptor, shortcut);
 			}
 			ValueHolder argumentValue = argumentValues.getIndexedArgumentValue(i, null);
-			resolved[i - startIndex] = resolveArgument(registeredBean, descriptor, argumentValue, autowiredBeans);
+			resolved[i - startIndex] = resolveArgument(registeredBean, descriptor, argumentValue, autowiredBeanNames);
 		}
-		registerDependentBeans(registeredBean.getBeanFactory(), registeredBean.getBeanName(), autowiredBeans);
+		registerDependentBeans(registeredBean.getBeanFactory(), registeredBean.getBeanName(), autowiredBeanNames);
 
 		return AutowiredArguments.of(resolved);
 	}
@@ -302,7 +302,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 
 	@Nullable
 	private Object resolveArgument(RegisteredBean registeredBean, DependencyDescriptor descriptor,
-			@Nullable ValueHolder argumentValue, Set<String> autowiredBeans) {
+			@Nullable ValueHolder argumentValue, Set<String> autowiredBeanNames) {
 
 		TypeConverter typeConverter = registeredBean.getBeanFactory().getTypeConverter();
 		if (argumentValue != null) {
@@ -311,7 +311,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 							descriptor.getDependencyType(), descriptor.getMethodParameter()));
 		}
 		try {
-			return registeredBean.resolveAutowiredArgument(descriptor, typeConverter, autowiredBeans);
+			return registeredBean.resolveAutowiredArgument(descriptor, typeConverter, autowiredBeanNames);
 		}
 		catch (BeansException ex) {
 			throw new UnsatisfiedDependencyException(null, registeredBean.getBeanName(), descriptor, ex);

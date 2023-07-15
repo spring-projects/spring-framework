@@ -48,6 +48,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -85,7 +86,7 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  * @author Stephane Nicoll
- * @author Phil Webb
+ * @author Phillip Webb
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
@@ -95,12 +96,6 @@ import org.springframework.util.StringUtils;
 class ConstructorResolver {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
-
-	/**
-	 * Marker for autowired arguments in a cached argument array, to be replaced
-	 * by a {@linkplain #resolveAutowiredArgument resolved autowired argument}.
-	 */
-	private static final Object autowiredArgumentMarker = new Object();
 
 	private static final NamedThreadLocal<InjectionPoint> currentInjectionPoint =
 			new NamedThreadLocal<>("Current injection point");
@@ -729,7 +724,7 @@ class ConstructorResolver {
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
 		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = new HashSet<>(paramTypes.length);
-		Set<String> autowiredBeanNames = new LinkedHashSet<>(4);
+		Set<String> allAutowiredBeanNames = new LinkedHashSet<>(paramTypes.length * 2);
 
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
 			Class<?> paramType = paramTypes[paramIndex];
@@ -764,8 +759,8 @@ class ConstructorResolver {
 						throw new UnsatisfiedDependencyException(
 								mbd.getResourceDescription(), beanName, new InjectionPoint(methodParam),
 								"Could not convert argument value of type [" +
-										ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
-										"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
+								ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
+								"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
 					}
 					Object sourceHolder = valueHolder.getSource();
 					if (sourceHolder instanceof ConstructorArgumentValues.ValueHolder constructorValueHolder) {
@@ -788,11 +783,17 @@ class ConstructorResolver {
 							"] - did you specify the correct bean references as arguments?");
 				}
 				try {
-					Object autowiredArgument = resolveAutowiredArgument(new DependencyDescriptor(methodParam, true),
-							beanName, autowiredBeanNames, converter, fallback);
-					args.rawArguments[paramIndex] = autowiredArgument;
-					args.arguments[paramIndex] = autowiredArgument;
-					args.preparedArguments[paramIndex] = autowiredArgumentMarker;
+					ConstructorDependencyDescriptor desc = new ConstructorDependencyDescriptor(methodParam, true);
+					Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
+					Object arg = resolveAutowiredArgument(
+							desc, paramType, beanName, autowiredBeanNames, converter, fallback);
+					if (arg != null) {
+						setShortcutIfPossible(desc, paramType, autowiredBeanNames);
+					}
+					allAutowiredBeanNames.addAll(autowiredBeanNames);
+					args.rawArguments[paramIndex] = arg;
+					args.arguments[paramIndex] = arg;
+					args.preparedArguments[paramIndex] = desc;
 					args.resolveNecessary = true;
 				}
 				catch (BeansException ex) {
@@ -802,14 +803,7 @@ class ConstructorResolver {
 			}
 		}
 
-		for (String autowiredBeanName : autowiredBeanNames) {
-			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Autowiring by type from bean name '" + beanName +
-						"' via " + (executable instanceof Constructor ? "constructor" : "factory method") +
-						" to bean named '" + autowiredBeanName + "'");
-			}
-		}
+		registerDependentBeans(executable, beanName, allAutowiredBeanNames);
 
 		return args;
 	}
@@ -829,32 +823,56 @@ class ConstructorResolver {
 		Object[] resolvedArgs = new Object[argsToResolve.length];
 		for (int argIndex = 0; argIndex < argsToResolve.length; argIndex++) {
 			Object argValue = argsToResolve[argIndex];
-			MethodParameter methodParam = MethodParameter.forExecutable(executable, argIndex);
-			if (argValue == autowiredArgumentMarker) {
-				argValue = resolveAutowiredArgument(new DependencyDescriptor(methodParam, true),
-						beanName, null, converter, true);
+			Class<?> paramType = paramTypes[argIndex];
+			boolean convertNecessary = false;
+			if (argValue instanceof ConstructorDependencyDescriptor descriptor) {
+				try {
+					argValue = resolveAutowiredArgument(descriptor, paramType, beanName,
+							null, converter, true);
+				}
+				catch (BeansException ex) {
+					// Unexpected target bean mismatch for cached argument -> re-resolve
+					synchronized (descriptor) {
+						if (!descriptor.hasShortcut()) {
+							throw ex;
+						}
+						descriptor.setShortcut(null);
+						Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
+						argValue = resolveAutowiredArgument(descriptor, paramType, beanName,
+								autowiredBeanNames, converter, true);
+						if (argValue != null) {
+							setShortcutIfPossible(descriptor, paramType, autowiredBeanNames);
+						}
+						registerDependentBeans(executable, beanName, autowiredBeanNames);
+					}
+				}
 			}
 			else if (argValue instanceof BeanMetadataElement) {
 				argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
+				convertNecessary = true;
 			}
 			else if (argValue instanceof String text) {
 				argValue = this.beanFactory.evaluateBeanDefinitionString(text, mbd);
+				convertNecessary = true;
 			}
-			Class<?> paramType = paramTypes[argIndex];
-			try {
-				resolvedArgs[argIndex] = converter.convertIfNecessary(argValue, paramType, methodParam);
+			if (convertNecessary) {
+				MethodParameter methodParam = MethodParameter.forExecutable(executable, argIndex);
+				try {
+					argValue = converter.convertIfNecessary(argValue, paramType, methodParam);
+				}
+				catch (TypeMismatchException ex) {
+					throw new UnsatisfiedDependencyException(
+							mbd.getResourceDescription(), beanName, new InjectionPoint(methodParam),
+							"Could not convert argument value of type [" + ObjectUtils.nullSafeClassName(argValue) +
+							"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
+				}
 			}
-			catch (TypeMismatchException ex) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, new InjectionPoint(methodParam),
-						"Could not convert argument value of type [" + ObjectUtils.nullSafeClassName(argValue) +
-						"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
-			}
+			resolvedArgs[argIndex] = argValue;
 		}
 		return resolvedArgs;
 	}
 
-	protected Constructor<?> getUserDeclaredConstructor(Constructor<?> constructor) {
+	private Constructor<?> getUserDeclaredConstructor(Constructor<?> constructor) {
 		Class<?> declaringClass = constructor.getDeclaringClass();
 		Class<?> userClass = ClassUtils.getUserClass(declaringClass);
 		if (userClass != declaringClass) {
@@ -870,13 +888,12 @@ class ConstructorResolver {
 	}
 
 	/**
-	 * Template method for resolving the specified argument which is supposed to be autowired.
+	 * Resolve the specified argument which is supposed to be autowired.
 	 */
 	@Nullable
-	protected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,
+	Object resolveAutowiredArgument(DependencyDescriptor descriptor, Class<?> paramType, String beanName,
 			@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback) {
 
-		Class<?> paramType = descriptor.getMethodParameter().getParameterType();
 		if (InjectionPoint.class.isAssignableFrom(paramType)) {
 			InjectionPoint injectionPoint = currentInjectionPoint.get();
 			if (injectionPoint == null) {
@@ -884,9 +901,9 @@ class ConstructorResolver {
 			}
 			return injectionPoint;
 		}
+
 		try {
-			return this.beanFactory.resolveDependency(
-					descriptor, beanName, autowiredBeanNames, typeConverter);
+			return this.beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
 		}
 		catch (NoUniqueBeanDefinitionException ex) {
 			throw ex;
@@ -906,6 +923,31 @@ class ConstructorResolver {
 				}
 			}
 			throw ex;
+		}
+	}
+
+	private void setShortcutIfPossible(
+			ConstructorDependencyDescriptor descriptor, Class<?> paramType, Set<String> autowiredBeanNames) {
+
+		if (autowiredBeanNames.size() == 1) {
+			String autowiredBeanName = autowiredBeanNames.iterator().next();
+			if (this.beanFactory.containsBean(autowiredBeanName) &&
+					this.beanFactory.isTypeMatch(autowiredBeanName, paramType)) {
+				descriptor.setShortcut(autowiredBeanName);
+			}
+		}
+	}
+
+	private void registerDependentBeans(
+			Executable executable, String beanName, Set<String> autowiredBeanNames) {
+
+		for (String autowiredBeanName : autowiredBeanNames) {
+			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Autowiring by type from bean name '" + beanName + "' via " +
+						(executable instanceof Constructor ? "constructor" : "factory method") +
+						" to bean named '" + autowiredBeanName + "'");
+			}
 		}
 	}
 
@@ -1357,6 +1399,37 @@ class ConstructorResolver {
 			else {
 				return null;
 			}
+		}
+	}
+
+
+	/**
+	 * DependencyDescriptor marker for constructor arguments,
+	 * for differentiating between a provided DependencyDescriptor instance
+	 * and an internally built DependencyDescriptor for autowiring purposes.
+	 */
+	@SuppressWarnings("serial")
+	private static class ConstructorDependencyDescriptor extends DependencyDescriptor {
+
+		@Nullable
+		private volatile String shortcut;
+
+		public ConstructorDependencyDescriptor(MethodParameter methodParameter, boolean required) {
+			super(methodParameter, required);
+		}
+
+		public void setShortcut(@Nullable String shortcut) {
+			this.shortcut = shortcut;
+		}
+
+		public boolean hasShortcut() {
+			return (this.shortcut != null);
+		}
+
+		@Override
+		public Object resolveShortcut(BeanFactory beanFactory) {
+			String shortcut = this.shortcut;
+			return (shortcut != null ? beanFactory.getBean(shortcut, getDependencyType()) : null);
 		}
 	}
 
