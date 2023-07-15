@@ -153,7 +153,7 @@ public class BeanDefinitionValueResolver {
 					(name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
 		}
 		else if (value instanceof DependencyDescriptor dependencyDescriptor) {
-			Set<String> autowiredBeanNames = new LinkedHashSet<>(4);
+			Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
 			Object result = this.beanFactory.resolveDependency(
 					dependencyDescriptor, this.beanName, autowiredBeanNames, this.typeConverter);
 			for (String autowiredBeanName : autowiredBeanNames) {

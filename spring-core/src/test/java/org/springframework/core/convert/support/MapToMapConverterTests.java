@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Keith Donald
- * @author Phil Webb
+ * @author Phillip Webb
  * @author Juergen Hoeller
  */
 class MapToMapConverterTests {
@@ -47,7 +47,7 @@ class MapToMapConverterTests {
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		conversionService.addConverter(new MapToMapConverter(conversionService));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,8 +179,7 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 		DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
 		descriptor.setContainingClass(beanClass);
 		if (this.shortcut != null) {
-			descriptor = new ShortcutDependencyDescriptor(descriptor, this.shortcut,
-					field.getType());
+			descriptor = new ShortcutDependencyDescriptor(descriptor, this.shortcut);
 		}
 		Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
 		TypeConverter typeConverter = beanFactory.getTypeConverter();

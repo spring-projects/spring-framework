@@ -49,11 +49,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class CollectionToCollectionConverterTests {
 
-	private GenericConversionService conversionService = new GenericConversionService();
+	private final GenericConversionService conversionService = new GenericConversionService();
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 	}
 
