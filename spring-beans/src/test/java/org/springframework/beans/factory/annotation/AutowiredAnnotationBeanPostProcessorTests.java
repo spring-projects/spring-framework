@@ -72,6 +72,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -131,6 +133,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bean = bf.getBean("annotatedBean", ResourceInjectionBean.class);
 		assertThat(bean.getTestBean()).isSameAs(tb);
 		assertThat(bean.getTestBean2()).isSameAs(tb);
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean"});
 	}
 
 	@Test
@@ -152,10 +156,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isNull();
 		assertThat(bean.getTestBean2()).isNull();
 		assertThat(bean.getTestBean3()).isNull();
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean"});
 	}
 
 	@Test
-	void resourceInjectionWithSometimesNullBean() {
+	void resourceInjectionWithSometimesNullBeanEarly() {
 		RootBeanDefinition bd = new RootBeanDefinition(OptionalResourceInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
@@ -170,6 +176,55 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean2()).isNull();
 		assertThat(bean.getTestBean3()).isNull();
 
+		SometimesNullFactoryMethods.active = false;
+		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = true;
+		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNotNull();
+		assertThat(bean.getTestBean2()).isNotNull();
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = true;
+		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNotNull();
+		assertThat(bean.getTestBean2()).isNotNull();
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+		assertThat(bean.getTestBean3()).isNull();
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean"});
+	}
+
+	@Test
+	void resourceInjectionWithSometimesNullBeanLate() {
+		RootBeanDefinition bd = new RootBeanDefinition(OptionalResourceInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition tb = new RootBeanDefinition(SometimesNullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		tb.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tb);
+
+		SometimesNullFactoryMethods.active = true;
+		OptionalResourceInjectionBean bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNotNull();
+		assertThat(bean.getTestBean2()).isNotNull();
+		assertThat(bean.getTestBean3()).isNotNull();
+
 		SometimesNullFactoryMethods.active = true;
 		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isNotNull();
@@ -194,17 +249,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean2()).isNotNull();
 		assertThat(bean.getTestBean3()).isNotNull();
 
-		SometimesNullFactoryMethods.active = true;
-		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
-		assertThat(bean.getTestBean()).isNotNull();
-		assertThat(bean.getTestBean2()).isNotNull();
-		assertThat(bean.getTestBean3()).isNotNull();
-
 		SometimesNullFactoryMethods.active = false;
 		bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isNull();
 		assertThat(bean.getTestBean2()).isNull();
 		assertThat(bean.getTestBean3()).isNull();
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean"});
 	}
 
 	@Test
@@ -233,10 +284,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getNestedTestBean()).isSameAs(ntb);
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 
-		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
-		assertThat(depBeans.length).isEqualTo(2);
-		assertThat(depBeans[0]).isEqualTo("testBean");
-		assertThat(depBeans[1]).isEqualTo("nestedTestBean");
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean", "nestedTestBean"});
 	}
 
 	@Test
@@ -719,6 +767,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean4()).isSameAs(tb);
 		assertThat(bean.getNestedTestBean()).isSameAs(ntb);
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(
+				new String[] {"testBean", "nestedTestBean", ObjectUtils.identityToString(bf)});
 	}
 
 	@Test
@@ -879,6 +930,80 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 			.isThrownBy(() -> bf.getBean("annotatedBean"))
 			.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
+	}
+
+	@Test
+	void constructorResourceInjectionWithSometimesNullBeanEarly() {
+		RootBeanDefinition bd = new RootBeanDefinition(ConstructorWithNullableArgument.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition tb = new RootBeanDefinition(SometimesNullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		tb.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tb);
+
+		SometimesNullFactoryMethods.active = false;
+		ConstructorWithNullableArgument bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = true;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = true;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean"});
+	}
+
+	@Test
+	void constructorResourceInjectionWithSometimesNullBeanLate() {
+		RootBeanDefinition bd = new RootBeanDefinition(ConstructorWithNullableArgument.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition tb = new RootBeanDefinition(SometimesNullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		tb.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tb);
+
+		SometimesNullFactoryMethods.active = true;
+		ConstructorWithNullableArgument bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = true;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		SometimesNullFactoryMethods.active = true;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNotNull();
+
+		SometimesNullFactoryMethods.active = false;
+		bean = (ConstructorWithNullableArgument) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean3()).isNull();
+
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(new String[] {"testBean"});
 	}
 
 	@Test
@@ -2795,6 +2920,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Autowired(required = false)
 		public ConstructorWithoutFallbackBean(ITestBean testBean3) {
+			this.testBean3 = testBean3;
+		}
+
+		public ITestBean getTestBean3() {
+			return this.testBean3;
+		}
+	}
+
+
+	public static class ConstructorWithNullableArgument {
+
+		protected ITestBean testBean3;
+
+		@Autowired(required = false)
+		public ConstructorWithNullableArgument(@Nullable ITestBean testBean3) {
 			this.testBean3 = testBean3;
 		}
 

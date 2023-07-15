@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1504,8 +1504,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			converter = bw;
 		}
 
-		Set<String> autowiredBeanNames = new LinkedHashSet<>(4);
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
+		Set<String> autowiredBeanNames = new LinkedHashSet<>(propertyNames.length * 2);
 		for (String propertyName : propertyNames) {
 			try {
 				PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);

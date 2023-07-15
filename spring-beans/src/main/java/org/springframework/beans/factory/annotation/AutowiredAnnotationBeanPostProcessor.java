@@ -651,7 +651,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
 			DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
 			desc.setContainingClass(bean.getClass());
-			Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
+			Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
 			Assert.state(beanFactory != null, "No BeanFactory available");
 			TypeConverter typeConverter = beanFactory.getTypeConverter();
 			Object value;
@@ -670,8 +670,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 							String autowiredBeanName = autowiredBeanNames.iterator().next();
 							if (beanFactory.containsBean(autowiredBeanName) &&
 									beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-								cachedFieldValue = new ShortcutDependencyDescriptor(
-										desc, autowiredBeanName, field.getType());
+								cachedFieldValue = new ShortcutDependencyDescriptor(desc, autowiredBeanName);
 							}
 						}
 						this.cachedFieldValue = cachedFieldValue;
@@ -754,7 +753,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			int argumentCount = method.getParameterCount();
 			Object[] arguments = new Object[argumentCount];
 			DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
-			Set<String> autowiredBeans = new LinkedHashSet<>(argumentCount);
+			Set<String> autowiredBeanNames = new LinkedHashSet<>(argumentCount * 2);
 			Assert.state(beanFactory != null, "No BeanFactory available");
 			TypeConverter typeConverter = beanFactory.getTypeConverter();
 			for (int i = 0; i < arguments.length; i++) {
@@ -763,7 +762,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				currDesc.setContainingClass(bean.getClass());
 				descriptors[i] = currDesc;
 				try {
-					Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
+					Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeanNames, typeConverter);
 					if (arg == null && !this.required) {
 						arguments = null;
 						break;
@@ -778,16 +777,16 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				if (!this.cached) {
 					if (arguments != null) {
 						DependencyDescriptor[] cachedMethodArguments = Arrays.copyOf(descriptors, argumentCount);
-						registerDependentBeans(beanName, autowiredBeans);
-						if (autowiredBeans.size() == argumentCount) {
-							Iterator<String> it = autowiredBeans.iterator();
+						registerDependentBeans(beanName, autowiredBeanNames);
+						if (autowiredBeanNames.size() == argumentCount) {
+							Iterator<String> it = autowiredBeanNames.iterator();
 							Class<?>[] paramTypes = method.getParameterTypes();
 							for (int i = 0; i < paramTypes.length; i++) {
 								String autowiredBeanName = it.next();
 								if (arguments[i] != null && beanFactory.containsBean(autowiredBeanName) &&
 										beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
 									cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
-											descriptors[i], autowiredBeanName, paramTypes[i]);
+											descriptors[i], autowiredBeanName);
 								}
 							}
 						}
@@ -813,17 +812,14 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private final String shortcut;
 
-		private final Class<?> requiredType;
-
-		public ShortcutDependencyDescriptor(DependencyDescriptor original, String shortcut, Class<?> requiredType) {
+		public ShortcutDependencyDescriptor(DependencyDescriptor original, String shortcut) {
 			super(original);
 			this.shortcut = shortcut;
-			this.requiredType = requiredType;
 		}
 
 		@Override
 		public Object resolveShortcut(BeanFactory beanFactory) {
-			return beanFactory.getBean(this.shortcut, this.requiredType);
+			return beanFactory.getBean(this.shortcut, getDependencyType());
 		}
 	}
 
