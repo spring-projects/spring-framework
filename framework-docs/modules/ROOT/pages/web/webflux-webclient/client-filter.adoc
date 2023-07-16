@@ -148,5 +148,73 @@ Kotlin::
 ----
 ======
 
+The example below demonstrates how to use the `ExchangeFilterFunction` interface to create
+a custom filter class that helps with computing a `Content-Length` header for `PUT` and `POST`
+`multipart/form-data` requests using buffering.
 
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+public class MultipartExchangeFilterFunction implements ExchangeFilterFunction {
 
+    @Override
+    @Nonnull
+    public Mono<ClientResponse> filter(@Nonnull ClientRequest request, @Nonnull ExchangeFunction next) {
+        if (MediaType.MULTIPART_FORM_DATA.includes(request.headers().getContentType())
+                && (request.method() == HttpMethod.PUT || request.method() == HttpMethod.POST)) {
+            return next.exchange(
+                    ClientRequest.from(request)
+                            .body((outputMessage, context) -> request.body().insert(new BufferingDecorator(outputMessage), context))
+                            .build()
+            );
+        } else {
+            return next.exchange(request);
+        }
+    }
+
+    private static final class BufferingDecorator extends ClientHttpRequestDecorator {
+
+        private BufferingDecorator(ClientHttpRequest delegate) {
+            super(delegate);
+        }
+
+        @Override
+        @Nonnull
+        public Mono<Void> writeWith(@Nonnull Publisher<? extends DataBuffer> body) {
+            return DataBufferUtils.join(body).flatMap(buffer -> {
+                getHeaders().setContentLength(buffer.readableByteCount());
+                return super.writeWith(Mono.just(buffer));
+            });
+        }
+    }
+}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+class MultipartExchangeFilterFunction : ExchangeFilterFunction {
+
+    override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
+        return next.exchange(ClientRequest.from(request)
+                .body { message: ClientHttpRequest?, context: BodyInserter.Context? -> request.body().insert(BufferingDecorator(message), context!!) }
+                .build())
+    }
+
+    private class BufferingDecorator(delegate: ClientHttpRequest?) : ClientHttpRequestDecorator(delegate!!) {
+        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
+            return DataBufferUtils.join(body)
+                    .flatMap { dataBuffer: DataBuffer ->
+                        val length = dataBuffer.readableByteCount()
+                        headers.contentLength = length.toLong()
+                        super.writeWith(Mono.just(dataBuffer))
+                    }
+        }
+    }
+}
+----
+======
