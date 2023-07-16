@@ -27,73 +27,79 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_EXCEPTION;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_INVOCATION_TIME;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_NAME;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME;
 
 /**
+ * Tests for {@link CustomizableTraceInterceptor}.
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
-public class CustomizableTraceInterceptorTests {
+class CustomizableTraceInterceptorTests {
+
+	private final CustomizableTraceInterceptor interceptor = new CustomizableTraceInterceptor();
+
 
 	@Test
-	public void testSetEmptyEnterMessage() {
+	void setEmptyEnterMessage() {
 		// Must not be able to set empty enter message
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setEnterMessage(""));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setEnterMessage(""));
 	}
 
 	@Test
-	public void testSetEnterMessageWithReturnValuePlaceholder() {
+	void setEnterMessageWithReturnValuePlaceholder() {
 		// Must not be able to set enter message with return value placeholder
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setEnterMessage(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setEnterMessage(PLACEHOLDER_RETURN_VALUE));
 	}
 
 	@Test
-	public void testSetEnterMessageWithExceptionPlaceholder() {
+	void setEnterMessageWithExceptionPlaceholder() {
 		// Must not be able to set enter message with exception placeholder
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setEnterMessage(CustomizableTraceInterceptor.PLACEHOLDER_EXCEPTION));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setEnterMessage(PLACEHOLDER_EXCEPTION));
 	}
 
 	@Test
-	public void testSetEnterMessageWithInvocationTimePlaceholder() {
+	void setEnterMessageWithInvocationTimePlaceholder() {
 		// Must not be able to set enter message with invocation time placeholder
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setEnterMessage(CustomizableTraceInterceptor.PLACEHOLDER_INVOCATION_TIME));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setEnterMessage(PLACEHOLDER_INVOCATION_TIME));
 	}
 
 	@Test
-	public void testSetEmptyExitMessage() {
+	void setEmptyExitMessage() {
 		// Must not be able to set empty exit message
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setExitMessage(""));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setExitMessage(""));
 	}
 
 	@Test
-	public void testSetExitMessageWithExceptionPlaceholder() {
+	void setExitMessageWithExceptionPlaceholder() {
 		// Must not be able to set exit message with exception placeholder
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setExitMessage(CustomizableTraceInterceptor.PLACEHOLDER_EXCEPTION));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setExitMessage(PLACEHOLDER_EXCEPTION));
 	}
 
 	@Test
-	public void testSetEmptyExceptionMessage() {
+	void setEmptyExceptionMessage() {
 		// Must not be able to set empty exception message
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setExceptionMessage(""));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setExceptionMessage(""));
 	}
 
 	@Test
-	public void testSetExceptionMethodWithReturnValuePlaceholder() {
+	void setExceptionMethodWithReturnValuePlaceholder() {
 		// Must not be able to set exception message with return value placeholder
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new CustomizableTraceInterceptor().setExceptionMessage(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.setExceptionMessage(PLACEHOLDER_RETURN_VALUE));
 	}
 
 	@Test
-	public void testSunnyDayPathLogsCorrectly() throws Throwable {
+	void sunnyDayPathLogsCorrectly() throws Throwable {
 		MethodInvocation methodInvocation = mock();
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(methodInvocation.getThis()).willReturn(this);
@@ -108,7 +114,7 @@ public class CustomizableTraceInterceptorTests {
 	}
 
 	@Test
-	public void testExceptionPathLogsCorrectly() throws Throwable {
+	void exceptionPathLogsCorrectly() throws Throwable {
 		MethodInvocation methodInvocation = mock();
 
 		IllegalArgumentException exception = new IllegalArgumentException();
@@ -120,15 +126,14 @@ public class CustomizableTraceInterceptorTests {
 		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				interceptor.invoke(methodInvocation));
+		assertThatIllegalArgumentException().isThrownBy(() -> interceptor.invoke(methodInvocation));
 
 		verify(log).trace(anyString());
 		verify(log).trace(anyString(), eq(exception));
 	}
 
 	@Test
-	public void testSunnyDayPathLogsCorrectlyWithPrettyMuchAllPlaceholdersMatching() throws Throwable {
+	void sunnyDayPathLogsCorrectlyWithPrettyMuchAllPlaceholdersMatching() throws Throwable {
 		MethodInvocation methodInvocation = mock();
 
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
@@ -141,18 +146,18 @@ public class CustomizableTraceInterceptorTests {
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
 		interceptor.setEnterMessage(new StringBuilder()
-			.append("Entering the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME)
-			.append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_NAME)
-			.append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS)
-			.append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES)
+			.append("Entering the '").append(PLACEHOLDER_METHOD_NAME)
+			.append("' method of the [").append(PLACEHOLDER_TARGET_CLASS_NAME)
+			.append("] class with the following args (").append(PLACEHOLDER_ARGUMENTS)
+			.append(") and arg types (").append(PLACEHOLDER_ARGUMENT_TYPES)
 			.append(").").toString());
 		interceptor.setExitMessage(new StringBuilder()
-			.append("Exiting the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME)
-			.append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME)
-			.append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS)
-			.append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES)
-			.append("), returning '").append(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE)
-			.append("' and taking '").append(CustomizableTraceInterceptor.PLACEHOLDER_INVOCATION_TIME)
+			.append("Exiting the '").append(PLACEHOLDER_METHOD_NAME)
+			.append("' method of the [").append(PLACEHOLDER_TARGET_CLASS_SHORT_NAME)
+			.append("] class with the following args (").append(PLACEHOLDER_ARGUMENTS)
+			.append(") and arg types (").append(PLACEHOLDER_ARGUMENT_TYPES)
+			.append("), returning '").append(PLACEHOLDER_RETURN_VALUE)
+			.append("' and taking '").append(PLACEHOLDER_INVOCATION_TIME)
 			.append("' this long.").toString());
 		interceptor.invoke(methodInvocation);
 
@@ -165,7 +170,7 @@ public class CustomizableTraceInterceptorTests {
 
 		private final Log log;
 
-		public StubCustomizableTraceInterceptor(Log log) {
+		StubCustomizableTraceInterceptor(Log log) {
 			super.setUseDynamicLogger(false);
 			this.log = log;
 		}
