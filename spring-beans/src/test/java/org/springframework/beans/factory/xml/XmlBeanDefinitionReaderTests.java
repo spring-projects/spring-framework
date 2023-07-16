@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -27,12 +31,16 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
+ * Tests for {@link XmlBeanDefinitionReader}.
+ *
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -127,6 +135,30 @@ class XmlBeanDefinitionReaderTests {
 		Resource resource = new ClassPathResource(resourceName, getClass());
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
 		assertThat((TestBean) factory.getBean("testBean")).isNotNull();
+	}
+
+	@Test
+	void setValidationModeNameToUnsupportedValues() {
+		assertThatIllegalArgumentException().isThrownBy(() -> reader.setValidationModeName(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> reader.setValidationModeName("   "));
+		assertThatIllegalArgumentException().isThrownBy(() -> reader.setValidationModeName("bogus"));
+	}
+
+	/**
+	 * This test effectively verifies that the internal 'constants' map is properly
+	 * configured for all VALIDATION_ constants defined in {@link XmlBeanDefinitionReader}.
+	 */
+	@Test
+	void setValidationModeNameToAllSupportedValues() {
+		streamValidationModeConstants()
+				.map(Field::getName)
+				.forEach(name -> assertThatNoException().as(name).isThrownBy(() -> reader.setValidationModeName(name)));
+	}
+
+	private static Stream<Field> streamValidationModeConstants() {
+		return Arrays.stream(XmlBeanDefinitionReader.class.getFields())
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.filter(field -> field.getName().startsWith("VALIDATION_"));
 	}
 
 }
