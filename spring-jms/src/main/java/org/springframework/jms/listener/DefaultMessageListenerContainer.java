@@ -256,8 +256,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Specify the level of caching that this listener container is allowed to apply,
-	 * in the form of the name of the corresponding constant: e.g. "CACHE_CONNECTION".
+	 * in the form of the name of the corresponding constant &mdash; for example,
+	 * {@code "CACHE_CONNECTION"}.
 	 * @see #setCacheLevel
+	 * @see #CACHE_NONE
+	 * @see #CACHE_CONNECTION
+	 * @see #CACHE_SESSION
+	 * @see #CACHE_CONSUMER
+	 * @see #CACHE_AUTO
 	 */
 	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
 		if (!constantName.startsWith("CACHE_")) {
@@ -282,6 +288,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
 	 * @see #CACHE_CONSUMER
+	 * @see #CACHE_AUTO
 	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
 	 */

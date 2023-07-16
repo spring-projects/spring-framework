@@ -38,13 +38,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link DefaultMessageListenerContainer}.
+ *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class DefaultMessageListenerContainerTests {
+class DefaultMessageListenerContainerTests {
 
 	@Test
-	public void applyBackOff() {
+	void applyBackOff() {
 		BackOff backOff = mock();
 		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(BackOffExecution.STOP);
@@ -65,7 +67,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 	@Test
-	public void applyBackOffRetry() {
+	void applyBackOffRetry() {
 		BackOff backOff = mock();
 		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(50L, BackOffExecution.STOP);
@@ -84,7 +86,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 	@Test
-	public void recoverResetBackOff() {
+	void recoverResetBackOff() {
 		BackOff backOff = mock();
 		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(50L, 50L, 50L);  // 3 attempts max
@@ -103,7 +105,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 	@Test
-	public void stopAndRestart() {
+	void stopAndRestart() {
 		DefaultMessageListenerContainer container = createRunningContainer();
 		container.stop();
 
@@ -112,7 +114,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 	@Test
-	public void stopWithCallbackAndRestart() throws InterruptedException {
+	void stopWithCallbackAndRestart() throws InterruptedException {
 		DefaultMessageListenerContainer container = createRunningContainer();
 
 		TestRunnable stopCallback = new TestRunnable();
@@ -124,7 +126,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 	@Test
-	public void stopCallbackIsInvokedEvenIfContainerIsNotRunning() throws InterruptedException {
+	void stopCallbackIsInvokedEvenIfContainerIsNotRunning() throws InterruptedException {
 		DefaultMessageListenerContainer container = createRunningContainer();
 		container.stop();
 
@@ -137,7 +139,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 
-	private DefaultMessageListenerContainer createRunningContainer() {
+	private static DefaultMessageListenerContainer createRunningContainer() {
 		DefaultMessageListenerContainer container = createContainer(createSuccessfulConnectionFactory());
 		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONNECTION);
 		container.setBackOff(new FixedBackOff(100, 1));
@@ -146,7 +148,7 @@ public class DefaultMessageListenerContainerTests {
 		return container;
 	}
 
-	private ConnectionFactory createSuccessfulConnectionFactory() {
+	private static ConnectionFactory createSuccessfulConnectionFactory() {
 		try {
 			ConnectionFactory connectionFactory = mock();
 			given(connectionFactory.createConnection()).willReturn(mock());
@@ -157,7 +159,7 @@ public class DefaultMessageListenerContainerTests {
 		}
 	}
 
-	private DefaultMessageListenerContainer createContainer(ConnectionFactory connectionFactory) {
+	private static DefaultMessageListenerContainer createContainer(ConnectionFactory connectionFactory) {
 		Destination destination = new Destination() {};
 
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
@@ -167,7 +169,7 @@ public class DefaultMessageListenerContainerTests {
 		return container;
 	}
 
-	private ConnectionFactory createFailingContainerFactory() {
+	private static ConnectionFactory createFailingContainerFactory() {
 		try {
 			ConnectionFactory connectionFactory = mock();
 			given(connectionFactory.createConnection()).will(invocation -> {
@@ -180,7 +182,7 @@ public class DefaultMessageListenerContainerTests {
 		}
 	}
 
-	private ConnectionFactory createRecoverableContainerFactory(final int failingAttempts) {
+	private static ConnectionFactory createRecoverableContainerFactory(final int failingAttempts) {
 		try {
 			ConnectionFactory connectionFactory = mock();
 			given(connectionFactory.createConnection()).will(new Answer<Object>() {
@@ -213,7 +215,7 @@ public class DefaultMessageListenerContainerTests {
 			this.countDownLatch.countDown();
 		}
 
-		public void waitForCompletion() throws InterruptedException {
+		void waitForCompletion() throws InterruptedException {
 			this.countDownLatch.await(1, TimeUnit.SECONDS);
 			assertThat(this.countDownLatch.getCount()).as("callback was not invoked").isEqualTo(0);
 		}
