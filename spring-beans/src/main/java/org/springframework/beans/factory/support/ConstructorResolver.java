@@ -833,14 +833,18 @@ class ConstructorResolver {
 				}
 				catch (BeansException ex) {
 					// Unexpected target bean mismatch for cached argument -> re-resolve
-					synchronized (descriptor) {
-						if (!descriptor.hasShortcut()) {
-							throw ex;
-						}
+					Set<String> autowiredBeanNames = null;
+					if (descriptor.hasShortcut()) {
+						// Reset shortcut and try to re-resolve it in this thread...
 						descriptor.setShortcut(null);
-						Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
-						argValue = resolveAutowiredArgument(descriptor, paramType, beanName,
-								autowiredBeanNames, converter, true);
+						autowiredBeanNames = new LinkedHashSet<>(2);
+					}
+					logger.debug("Failed to resolve cached argument", ex);
+					argValue = resolveAutowiredArgument(descriptor, paramType, beanName,
+							autowiredBeanNames, converter, true);
+					if (autowiredBeanNames != null && !descriptor.hasShortcut()) {
+						// We encountered as stale shortcut before, and the shortcut has
+						// not been re-resolved by another thread in the meantime...
 						if (argValue != null) {
 							setShortcutIfPossible(descriptor, paramType, autowiredBeanNames);
 						}

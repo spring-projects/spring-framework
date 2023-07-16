@@ -446,6 +446,22 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
 
 		bf.destroySingleton("testBean");
+		bf.registerSingleton("testBeanX", tb);
+
+		bean = bf.getBean("annotatedBean", OptionalResourceInjectionBean.class);
+		assertThat(bean.getTestBean()).isSameAs(tb);
+		assertThat(bean.getTestBean2()).isSameAs(tb);
+		assertThat(bean.getTestBean3()).isSameAs(tb);
+		assertThat(bean.getTestBean4()).isSameAs(tb);
+		assertThat(bean.getIndexedTestBean()).isSameAs(itb);
+		assertThat(bean.getNestedTestBeans()).hasSize(2);
+		assertThat(bean.getNestedTestBeans()[0]).isSameAs(ntb1);
+		assertThat(bean.getNestedTestBeans()[1]).isSameAs(ntb2);
+		assertThat(bean.nestedTestBeansField).hasSize(2);
+		assertThat(bean.nestedTestBeansField[0]).isSameAs(ntb1);
+		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
+
+		bf.destroySingleton("testBeanX");
 
 		bean = bf.getBean("annotatedBean", OptionalResourceInjectionBean.class);
 		assertThat(bean.getTestBean()).isNull();
@@ -503,6 +519,22 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
 
 		bf.removeBeanDefinition("testBean");
+		bf.registerBeanDefinition("testBeanX", new RootBeanDefinition(TestBean.class));
+
+		bean = bf.getBean("annotatedBean", OptionalResourceInjectionBean.class);
+		assertThat(bean.getTestBean()).isSameAs(bf.getBean("testBeanX"));
+		assertThat(bean.getTestBean2()).isSameAs(bf.getBean("testBeanX"));
+		assertThat(bean.getTestBean3()).isSameAs(bf.getBean("testBeanX"));
+		assertThat(bean.getTestBean4()).isSameAs(bf.getBean("testBeanX"));
+		assertThat(bean.getIndexedTestBean()).isSameAs(itb);
+		assertThat(bean.getNestedTestBeans()).hasSize(2);
+		assertThat(bean.getNestedTestBeans()[0]).isSameAs(ntb1);
+		assertThat(bean.getNestedTestBeans()[1]).isSameAs(ntb2);
+		assertThat(bean.nestedTestBeansField).hasSize(2);
+		assertThat(bean.nestedTestBeansField[0]).isSameAs(ntb1);
+		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
+
+		bf.removeBeanDefinition("testBeanX");
 
 		bean = bf.getBean("annotatedBean", OptionalResourceInjectionBean.class);
 		assertThat(bean.getTestBean()).isNull();
@@ -791,6 +823,17 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 
 		bf.destroySingleton("nestedTestBean");
+		bf.registerSingleton("nestedTestBeanX", ntb);
+
+		bean = bf.getBean("annotatedBean", ConstructorResourceInjectionBean.class);
+		assertThat(bean.getTestBean()).isSameAs(tb);
+		assertThat(bean.getTestBean2()).isSameAs(tb);
+		assertThat(bean.getTestBean3()).isSameAs(tb);
+		assertThat(bean.getTestBean4()).isSameAs(tb);
+		assertThat(bean.getNestedTestBean()).isSameAs(ntb);
+		assertThat(bean.getBeanFactory()).isSameAs(bf);
+
+		bf.destroySingleton("nestedTestBeanX");
 
 		bean = bf.getBean("annotatedBean", ConstructorResourceInjectionBean.class);
 		assertThat(bean.getTestBean()).isSameAs(tb);
@@ -829,6 +872,17 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 
 		bf.removeBeanDefinition("nestedTestBean");
+		bf.registerBeanDefinition("nestedTestBeanX", new RootBeanDefinition(NestedTestBean.class));
+
+		bean = bf.getBean("annotatedBean", ConstructorResourceInjectionBean.class);
+		assertThat(bean.getTestBean()).isSameAs(tb);
+		assertThat(bean.getTestBean2()).isSameAs(tb);
+		assertThat(bean.getTestBean3()).isSameAs(tb);
+		assertThat(bean.getTestBean4()).isSameAs(tb);
+		assertThat(bean.getNestedTestBean()).isSameAs(bf.getBean("nestedTestBeanX"));
+		assertThat(bean.getBeanFactory()).isSameAs(bf);
+
+		bf.removeBeanDefinition("nestedTestBeanX");
 
 		bean = bf.getBean("annotatedBean", ConstructorResourceInjectionBean.class);
 		assertThat(bean.getTestBean()).isSameAs(tb);
