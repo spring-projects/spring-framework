@@ -16,10 +16,17 @@
 
 package org.springframework.aop.interceptor;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.util.ReflectionUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +34,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.ALLOWED_PLACEHOLDERS;
 import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS;
 import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES;
 import static org.springframework.aop.interceptor.CustomizableTraceInterceptor.PLACEHOLDER_EXCEPTION;
@@ -162,6 +170,34 @@ class CustomizableTraceInterceptorTests {
 		interceptor.invoke(methodInvocation);
 
 		verify(log, times(2)).trace(anyString());
+	}
+
+	/**
+	 * This test effectively verifies that the internal ALLOWED_PLACEHOLDERS set
+	 * is properly configured in {@link CustomizableTraceInterceptor}.
+	 */
+	@Test
+	@SuppressWarnings("deprecation")
+	void supportedPlaceholderValues() {
+		assertThat(ALLOWED_PLACEHOLDERS).containsAll(getPlaceholderConstantValues());
+	}
+
+	private List<String> getPlaceholderConstantValues() {
+		return Arrays.stream(CustomizableTraceInterceptor.class.getFields())
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.filter(field -> field.getName().startsWith("PLACEHOLDER_"))
+				.map(this::getFieldValue)
+				.map(String.class::cast)
+				.toList();
+	}
+
+	private Object getFieldValue(Field field) {
+		try {
+			return field.get(null);
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 

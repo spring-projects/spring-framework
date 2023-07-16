@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
-import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -153,8 +152,15 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The {@code Set} of allowed placeholders.
 	 */
-	private static final Set<Object> ALLOWED_PLACEHOLDERS =
-			new Constants(CustomizableTraceInterceptor.class).getValues("PLACEHOLDER_");
+	static final Set<String> ALLOWED_PLACEHOLDERS = Set.of(
+			PLACEHOLDER_METHOD_NAME,
+			PLACEHOLDER_TARGET_CLASS_NAME,
+			PLACEHOLDER_TARGET_CLASS_SHORT_NAME,
+			PLACEHOLDER_RETURN_VALUE,
+			PLACEHOLDER_ARGUMENT_TYPES,
+			PLACEHOLDER_ARGUMENTS,
+			PLACEHOLDER_EXCEPTION,
+			PLACEHOLDER_INVOCATION_TIME);
 
 
 	/**
