@@ -89,7 +89,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 	private int priority;
 
-	private int misfireInstruction;
+	private int misfireInstruction = CronTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 	@Nullable
 	private String description;
