@@ -82,7 +82,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 	private int priority;
 
-	private int misfireInstruction;
+	private int misfireInstruction = SimpleTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 	@Nullable
 	private String description;
