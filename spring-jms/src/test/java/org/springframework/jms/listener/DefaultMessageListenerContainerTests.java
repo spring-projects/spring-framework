@@ -16,8 +16,11 @@
 
 package org.springframework.jms.listener;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -27,11 +30,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -42,6 +48,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 class DefaultMessageListenerContainerTests {
 
@@ -138,6 +145,32 @@ class DefaultMessageListenerContainerTests {
 		container.destroy();
 	}
 
+	@Test
+	void setCacheLevelNameToUnsupportedValues() {
+		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
+		assertThatIllegalArgumentException().isThrownBy(() -> container.setCacheLevelName(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> container.setCacheLevelName("   "));
+		assertThatIllegalArgumentException().isThrownBy(() -> container.setCacheLevelName("bogus"));
+	}
+
+	/**
+	 * This test effectively verifies that the internal 'constants' map is properly
+	 * configured for all cache constants defined in {@link DefaultMessageListenerContainer}.
+	 */
+	@Test
+	void setCacheLevelNameToAllSupportedValues() {
+		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
+		streamCacheConstants()
+				.map(Field::getName)
+				.forEach(name -> assertThatNoException().isThrownBy(() -> container.setCacheLevelName(name)));
+	}
+
+
+	private static Stream<Field> streamCacheConstants() {
+		return Arrays.stream(DefaultMessageListenerContainer.class.getFields())
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.filter(field -> field.getName().startsWith("CACHE_"));
+	}
 
 	private static DefaultMessageListenerContainer createRunningContainer() {
 		DefaultMessageListenerContainer container = createContainer(createSuccessfulConnectionFactory());
