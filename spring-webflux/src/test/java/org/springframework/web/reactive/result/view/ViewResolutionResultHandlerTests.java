@@ -30,6 +30,7 @@ import io.reactivex.rxjava3.core.Completable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -294,11 +295,14 @@ class ViewResolutionResultHandlerTests {
 		ViewResolutionResultHandler resultHandler = resultHandler(viewResolver);
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/account").accept(APPLICATION_JSON));
-		resultHandler.handleResult(exchange, handlerResult).block(Duration.ZERO);
 
-		MockServerHttpResponse response = exchange.getResponse();
-		assertThat(response.getStatusCode().value()).isEqualTo(303);
-		assertThat(response.getHeaders().getLocation().toString()).isEqualTo("/");
+		Mono.fromRunnable(() -> {
+			resultHandler.handleResult(exchange, handlerResult).block(Duration.ZERO);
+			MockServerHttpResponse response = exchange.getResponse();
+			assertThat(response.getStatusCode().value()).isEqualTo(303);
+			assertThat(response.getHeaders().getLocation().toString()).isEqualTo("/");
+		})
+				.subscribeOn(Schedulers.boundedElastic());
 	}
 
 
