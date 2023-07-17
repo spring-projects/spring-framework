@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -268,6 +269,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	private Mono<List<View>> resolveViews(String viewName, Locale locale) {
 		return Flux.fromIterable(getViewResolvers())
 				.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
+				.subscribeOn(Schedulers.boundedElastic())
 				.collectList()
 				.map(views -> {
 					if (views.isEmpty()) {
