@@ -31,7 +31,7 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 
 	@Test
 	fun getParameterNamesOnInterface() {
-		val method = ReflectionUtils.findMethod(MessageService::class.java,"sendMessage", String::class.java)!!
+		val method = ReflectionUtils.findMethod(MessageService::class.java, "sendMessage", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)
 		assertThat(actualParams).contains("message")
 	}
@@ -41,7 +41,7 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 		val constructor = ReflectionUtils.accessibleConstructor(MessageServiceImpl::class.java,String::class.java)
 		val actualConstructorParams = parameterNameDiscoverer.getParameterNames(constructor)
 		assertThat(actualConstructorParams).contains("message")
-		val method = ReflectionUtils.findMethod(MessageServiceImpl::class.java,"sendMessage", String::class.java)!!
+		val method = ReflectionUtils.findMethod(MessageServiceImpl::class.java, "sendMessage", String::class.java)!!
 		val actualMethodParams = parameterNameDiscoverer.getParameterNames(method)
 		assertThat(actualMethodParams).contains("message")
 	}
@@ -63,15 +63,6 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 
 	class UtilityClass {
 		fun String.identity() = this
-	}
-
-	class TestClass(name: String, age: Int) {
-		fun test(name: String, age: Int) {
-		}
-	}
-
-	interface TestInterface {
-		fun test(name: String, age: Int)
 	}
 
 }
