@@ -975,19 +975,19 @@ class ConstructorResolver {
 			Assert.state(isCompatible, () -> String.format(
 					"Incompatible target type '%s' for factory bean '%s'",
 					resolvableType.toClass().getName(), factoryBeanClass.getName()));
-			Executable executable = resolveConstructor(beanName, mbd,
+			Constructor<?> constructor = resolveConstructor(beanName, mbd,
 					() -> ResolvableType.forClass(factoryBeanClass), valueTypes);
-			if (executable != null) {
-				return executable;
+			if (constructor != null) {
+				return constructor;
 			}
 			throw new IllegalStateException("No suitable FactoryBean constructor found for " +
 					mbd + " and argument types " + valueTypes);
 
 		}
 
-		Executable resolvedConstructor = resolveConstructor(beanName, mbd, beanType, valueTypes);
-		if (resolvedConstructor != null) {
-			return resolvedConstructor;
+		Constructor<?> constructor = resolveConstructor(beanName, mbd, beanType, valueTypes);
+		if (constructor != null) {
+			return constructor;
 		}
 
 		throw new IllegalStateException("No constructor or factory method candidate found for " +
@@ -1030,7 +1030,7 @@ class ConstructorResolver {
 	}
 
 	@Nullable
-	private Executable resolveConstructor(String beanName, RootBeanDefinition mbd,
+	private Constructor<?> resolveConstructor(String beanName, RootBeanDefinition mbd,
 			Supplier<ResolvableType> beanType, List<ResolvableType> valueTypes) {
 
 		Class<?> type = ClassUtils.getUserClass(beanType.get().toClass());
@@ -1054,14 +1054,14 @@ class ConstructorResolver {
 			}
 			return types;
 		};
-		List<? extends Executable> matches = Arrays.stream(ctors)
+		List<Constructor<?>> matches = Arrays.stream(ctors)
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
 						valueTypes, FallbackMode.NONE))
 				.toList();
 		if (matches.size() == 1) {
 			return matches.get(0);
 		}
-		List<? extends Executable> assignableElementFallbackMatches = Arrays
+		List<Constructor<?>> assignableElementFallbackMatches = Arrays
 				.stream(ctors)
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
 						valueTypes, FallbackMode.ASSIGNABLE_ELEMENT))
@@ -1069,7 +1069,7 @@ class ConstructorResolver {
 		if (assignableElementFallbackMatches.size() == 1) {
 			return assignableElementFallbackMatches.get(0);
 		}
-		List<? extends Executable> typeConversionFallbackMatches = Arrays
+		List<Constructor<?>> typeConversionFallbackMatches = Arrays
 				.stream(ctors)
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
 						valueTypes, FallbackMode.TYPE_CONVERSION))
@@ -1121,7 +1121,7 @@ class ConstructorResolver {
 					}
 					return types;
 				};
-				result = (Method) resolveFactoryMethod(candidates, parameterTypesFactory, valueTypes);
+				result = resolveFactoryMethod(candidates, parameterTypesFactory, valueTypes);
 			}
 
 			if (result == null) {
@@ -1138,24 +1138,24 @@ class ConstructorResolver {
 	}
 
 	@Nullable
-	private Executable resolveFactoryMethod(List<Method> executables,
+	private Method resolveFactoryMethod(List<Method> executables,
 			Function<Method, List<ResolvableType>> parameterTypesFactory,
 			List<ResolvableType> valueTypes) {
 
-		List<? extends Executable> matches = executables.stream()
+		List<Method> matches = executables.stream()
 				.filter(executable -> match(parameterTypesFactory.apply(executable), valueTypes, FallbackMode.NONE))
 				.toList();
 		if (matches.size() == 1) {
 			return matches.get(0);
 		}
-		List<? extends Executable> assignableElementFallbackMatches = executables.stream()
+		List<Method> assignableElementFallbackMatches = executables.stream()
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
 						valueTypes, FallbackMode.ASSIGNABLE_ELEMENT))
 				.toList();
 		if (assignableElementFallbackMatches.size() == 1) {
 			return assignableElementFallbackMatches.get(0);
 		}
-		List<? extends Executable> typeConversionFallbackMatches = executables.stream()
+		List<Method> typeConversionFallbackMatches = executables.stream()
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
 						valueTypes, FallbackMode.TYPE_CONVERSION))
 				.toList();
