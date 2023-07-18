@@ -591,14 +591,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof PropertyCacheKey otherKey)) {
-				return false;
-			}
-			return (this.clazz == otherKey.clazz && this.property.equals(otherKey.property) &&
-					this.targetIsClass == otherKey.targetIsClass);
+			return (this == other || (other instanceof PropertyCacheKey that &&
+					this.clazz == that.clazz && this.property.equals(that.property) &&
+					this.targetIsClass == that.targetIsClass));
 		}
 
 		@Override

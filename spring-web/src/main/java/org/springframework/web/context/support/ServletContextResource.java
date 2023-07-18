@@ -244,13 +244,8 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 */
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ServletContextResource otherRes)) {
-			return false;
-		}
-		return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
+		return (this == other || (other instanceof ServletContextResource that &&
+				this.path.equals(that.path) && this.servletContext.equals(that.servletContext)));
 	}
 
 	/**

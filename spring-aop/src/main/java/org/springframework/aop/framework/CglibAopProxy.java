@@ -597,15 +597,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 			if (other instanceof Factory factory) {
 				Callback callback = factory.getCallback(INVOKE_EQUALS);
-				if (!(callback instanceof EqualsInterceptor equalsInterceptor)) {
-					return false;
-				}
-				AdvisedSupport otherAdvised = equalsInterceptor.advised;
-				return AopProxyUtils.equalsInProxy(this.advised, otherAdvised);
+				return (callback instanceof EqualsInterceptor that &&
+						AopProxyUtils.equalsInProxy(this.advised, that.advised));
 			}
-			else {
-				return false;
-			}
+			return false;
 		}
 	}
 
@@ -920,20 +915,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ProxyCallbackFilter otherCallbackFilter)) {
-				return false;
-			}
-			AdvisedSupport otherAdvised = otherCallbackFilter.advised;
-			return (this.advised.getAdvisorKey().equals(otherAdvised.getAdvisorKey()) &&
-					AopProxyUtils.equalsProxiedInterfaces(this.advised, otherAdvised) &&
-					ObjectUtils.nullSafeEquals(this.advised.getTargetClass(), otherAdvised.getTargetClass()) &&
-					this.advised.getTargetSource().isStatic() == otherAdvised.getTargetSource().isStatic() &&
-					this.advised.isFrozen() == otherAdvised.isFrozen() &&
-					this.advised.isExposeProxy() == otherAdvised.isExposeProxy() &&
-					this.advised.isOpaque() == otherAdvised.isOpaque());
+			return (this == other || (other instanceof ProxyCallbackFilter that &&
+					this.advised.getAdvisorKey().equals(that.advised.getAdvisorKey()) &&
+					AopProxyUtils.equalsProxiedInterfaces(this.advised, that.advised) &&
+					ObjectUtils.nullSafeEquals(this.advised.getTargetClass(), that.advised.getTargetClass()) &&
+					this.advised.getTargetSource().isStatic() == that.advised.getTargetSource().isStatic() &&
+					this.advised.isFrozen() == that.advised.isFrozen() &&
+					this.advised.isExposeProxy() == that.advised.isExposeProxy() &&
+					this.advised.isOpaque() == that.advised.isOpaque()));
 		}
 
 		@Override

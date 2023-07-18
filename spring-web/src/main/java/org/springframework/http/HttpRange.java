@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -269,14 +269,9 @@ public abstract class HttpRange {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ByteRange otherRange)) {
-				return false;
-			}
-			return (this.firstPos == otherRange.firstPos &&
-					ObjectUtils.nullSafeEquals(this.lastPos, otherRange.lastPos));
+			return (this == other || (other instanceof ByteRange that &&
+					this.firstPos == that.firstPos &&
+					ObjectUtils.nullSafeEquals(this.lastPos, that.lastPos)));
 		}
 
 		@Override
@@ -331,13 +326,8 @@ public abstract class HttpRange {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof SuffixByteRange otherRange)) {
-				return false;
-			}
-			return (this.suffixLength == otherRange.suffixLength);
+			return (this == other || (other instanceof SuffixByteRange that &&
+					this.suffixLength == that.suffixLength));
 		}
 
 		@Override

@@ -224,14 +224,9 @@ public final class CloseStatus {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof CloseStatus otherStatus)) {
-			return false;
-		}
-		return (this.code == otherStatus.code &&
-				ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
+		return (this == other || (other instanceof CloseStatus that &&
+				this.code == that.code &&
+				ObjectUtils.nullSafeEquals(this.reason, that.reason)));
 	}
 
 	@Override

@@ -243,8 +243,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
-	 * write {@code and} as "&&" (though &amp;&amp; will work).
-	 * We also allow {@code and} between two pointcut sub-expressions.
+	 * write "and" as "&&" (though {@code &amp;&amp;} will work).
+	 * <p>We also allow "and" between two pointcut sub-expressions.
 	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
@@ -516,21 +516,16 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AspectJExpressionPointcut otherPc)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
-				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
-				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
-				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, otherPc.pointcutParameterTypes);
+		return (this == other || (other instanceof AspectJExpressionPointcut that &&
+				ObjectUtils.nullSafeEquals(getExpression(), that.getExpression()) &&
+				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, that.pointcutDeclarationScope) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, that.pointcutParameterNames) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, that.pointcutParameterTypes)));
 	}
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.getExpression());
+		int hashCode = ObjectUtils.nullSafeHashCode(getExpression());
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);

@@ -752,26 +752,20 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof Map.Entry<?, ?> that &&
+					ObjectUtils.nullSafeEquals(getKey(), that.getKey()) &&
+					ObjectUtils.nullSafeEquals(getValue(), that.getValue())));
+		}
+
+		@Override
+		public int hashCode() {
+			return (ObjectUtils.nullSafeHashCode(this.key) ^ ObjectUtils.nullSafeHashCode(this.value));
+		}
+
+		@Override
 		public String toString() {
 			return (this.key + "=" + this.value);
-		}
-
-		@Override
-		@SuppressWarnings("rawtypes")
-		public final boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof Map.Entry otherEntry)) {
-				return false;
-			}
-			return (ObjectUtils.nullSafeEquals(getKey(), otherEntry.getKey()) &&
-					ObjectUtils.nullSafeEquals(getValue(), otherEntry.getValue()));
-		}
-
-		@Override
-		public final int hashCode() {
-			return (ObjectUtils.nullSafeHashCode(this.key) ^ ObjectUtils.nullSafeHashCode(this.value));
 		}
 	}
 

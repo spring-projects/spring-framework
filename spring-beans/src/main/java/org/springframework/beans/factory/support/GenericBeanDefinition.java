@@ -87,13 +87,8 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof GenericBeanDefinition that)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other));
+		return (this == other || (other instanceof GenericBeanDefinition that &&
+				ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other)));
 	}
 
 	@Override

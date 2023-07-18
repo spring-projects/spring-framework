@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,18 +167,13 @@ public abstract class ExchangeFilterFunctions {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof Credentials otherCred)) {
-				return false;
-			}
-			return (this.username.equals(otherCred.username) && this.password.equals(otherCred.password));
+			return (this == other ||(other instanceof Credentials that &&
+					this.username.equals(that.username) && this.password.equals(that.password)));
 		}
 
 		@Override
 		public int hashCode() {
-			return 31 * this.username.hashCode() + this.password.hashCode();
+			return this.username.hashCode() * 31 + this.password.hashCode();
 		}
 	}
 

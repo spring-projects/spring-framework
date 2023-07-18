@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,7 +252,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	@Override
 	public final boolean containsProperty(String name) {
 		if (this.nonOptionArgsPropertyName.equals(name)) {
-			return !this.getNonOptionArgs().isEmpty();
+			return !getNonOptionArgs().isEmpty();
 		}
 		return this.containsOption(name);
 	}
@@ -270,7 +270,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	@Nullable
 	public final String getProperty(String name) {
 		if (this.nonOptionArgsPropertyName.equals(name)) {
-			Collection<String> nonOptionArguments = this.getNonOptionArgs();
+			Collection<String> nonOptionArguments = getNonOptionArgs();
 			if (nonOptionArguments.isEmpty()) {
 				return null;
 			}
@@ -278,7 +278,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 				return StringUtils.collectionToCommaDelimitedString(nonOptionArguments);
 			}
 		}
-		Collection<String> optionValues = this.getOptionValues(name);
+		Collection<String> optionValues = getOptionValues(name);
 		if (optionValues == null) {
 			return null;
 		}

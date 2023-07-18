@@ -853,14 +853,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof CacheOperationCacheKey otherKey)) {
-				return false;
-			}
-			return (this.cacheOperation.equals(otherKey.cacheOperation) &&
-					this.methodCacheKey.equals(otherKey.methodCacheKey));
+			return (this == other || (other instanceof CacheOperationCacheKey that &&
+					this.cacheOperation.equals(that.cacheOperation) &&
+					this.methodCacheKey.equals(that.methodCacheKey)));
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,7 +234,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (this.renderFunction == null && viewConfig.getRenderFunction() != null) {
 			this.renderFunction = viewConfig.getRenderFunction();
 		}
-		if (this.getContentType() == null) {
+		if (getContentType() == null) {
 			setContentType(viewConfig.getContentType() != null ? viewConfig.getContentType() : DEFAULT_CONTENT_TYPE);
 		}
 		if (this.charset == null) {
@@ -467,18 +467,14 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof EngineKey otherKey)) {
-				return false;
-			}
-			return (this.engineName.equals(otherKey.engineName) && Arrays.equals(this.scripts, otherKey.scripts));
+			return (this == other || (other instanceof EngineKey that &&
+					this.engineName.equals(that.engineName) &&
+					Arrays.equals(this.scripts, that.scripts)));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.engineName.hashCode() * 29 + Arrays.hashCode(this.scripts));
+			return this.engineName.hashCode() * 29 + Arrays.hashCode(this.scripts);
 		}
 	}
 

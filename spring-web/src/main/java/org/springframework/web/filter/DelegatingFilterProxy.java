@@ -161,10 +161,10 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 */
 	public DelegatingFilterProxy(String targetBeanName, @Nullable WebApplicationContext wac) {
 		Assert.hasText(targetBeanName, "Target Filter bean name must not be null or empty");
-		this.setTargetBeanName(targetBeanName);
+		setTargetBeanName(targetBeanName);
 		this.webApplicationContext = wac;
 		if (wac != null) {
-			this.setEnvironment(wac.getEnvironment());
+			setEnvironment(wac.getEnvironment());
 		}
 	}
 

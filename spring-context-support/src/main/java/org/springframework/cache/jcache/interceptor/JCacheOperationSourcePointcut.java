@@ -51,13 +51,8 @@ public abstract class JCacheOperationSourcePointcut extends StaticMethodMatcherP
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof JCacheOperationSourcePointcut otherPc)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(getCacheOperationSource(), otherPc.getCacheOperationSource());
+		return (this == other || (other instanceof JCacheOperationSourcePointcut that &&
+				ObjectUtils.nullSafeEquals(getCacheOperationSource(), that.getCacheOperationSource())));
 	}
 
 	@Override

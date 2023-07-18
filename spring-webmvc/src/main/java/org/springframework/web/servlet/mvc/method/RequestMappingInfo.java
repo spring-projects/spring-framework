@@ -475,19 +475,14 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof RequestMappingInfo otherInfo)) {
-			return false;
-		}
-		return (getActivePatternsCondition().equals(otherInfo.getActivePatternsCondition()) &&
-				this.methodsCondition.equals(otherInfo.methodsCondition) &&
-				this.paramsCondition.equals(otherInfo.paramsCondition) &&
-				this.headersCondition.equals(otherInfo.headersCondition) &&
-				this.consumesCondition.equals(otherInfo.consumesCondition) &&
-				this.producesCondition.equals(otherInfo.producesCondition) &&
-				this.customConditionHolder.equals(otherInfo.customConditionHolder));
+		return (this == other || (other instanceof RequestMappingInfo that &&
+				getActivePatternsCondition().equals(that.getActivePatternsCondition()) &&
+				this.methodsCondition.equals(that.methodsCondition) &&
+				this.paramsCondition.equals(that.paramsCondition) &&
+				this.headersCondition.equals(that.headersCondition) &&
+				this.consumesCondition.equals(that.consumesCondition) &&
+				this.producesCondition.equals(that.producesCondition) &&
+				this.customConditionHolder.equals(that.customConditionHolder)));
 	}
 
 	@Override

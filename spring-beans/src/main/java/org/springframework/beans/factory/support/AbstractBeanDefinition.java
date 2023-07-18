@@ -1211,13 +1211,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AbstractBeanDefinition that)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName()) &&
+		return (this == other || (other instanceof AbstractBeanDefinition that &&
+				ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName()) &&
 				ObjectUtils.nullSafeEquals(this.scope, that.scope) &&
 				this.abstractFlag == that.abstractFlag &&
 				this.lazyInit == that.lazyInit &&
@@ -1240,7 +1235,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 				this.enforceDestroyMethod == that.enforceDestroyMethod &&
 				this.synthetic == that.synthetic &&
 				this.role == that.role &&
-				super.equals(other));
+				super.equals(other)));
 	}
 
 	private boolean equalsConstructorArgumentValues(AbstractBeanDefinition other) {

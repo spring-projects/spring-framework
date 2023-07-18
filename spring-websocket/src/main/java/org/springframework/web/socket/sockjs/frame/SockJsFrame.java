@@ -122,13 +122,8 @@ public class SockJsFrame {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SockJsFrame otherFrame)) {
-			return false;
-		}
-		return (this.type.equals(otherFrame.type) && this.content.equals(otherFrame.content));
+		return (this == other || (other instanceof SockJsFrame that &&
+				this.type.equals(that.type) && this.content.equals(that.content)));
 	}
 
 	@Override

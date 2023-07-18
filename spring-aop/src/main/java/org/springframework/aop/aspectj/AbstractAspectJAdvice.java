@@ -714,13 +714,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof AdviceExcludingMethodMatcher otherMm)) {
-				return false;
-			}
-			return this.adviceMethod.equals(otherMm.adviceMethod);
+			return (this == other || (other instanceof AdviceExcludingMethodMatcher that &&
+					this.adviceMethod.equals(that.adviceMethod)));
 		}
 
 		@Override
