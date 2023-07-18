@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * Simple {@link ConfigurableEnvironment} implementation exposing
- * {@link #setProperty(String, String)} and {@link #withProperty(String, String)}
- * methods for testing purposes.
+ * {@link #setProperty} and {@link #withProperty} methods for testing purposes.
  *
  * @author Chris Beams
  * @author Sam Brannen
@@ -31,7 +30,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 public class MockEnvironment extends AbstractEnvironment {
 
-	private MockPropertySource propertySource = new MockPropertySource();
+	private final MockPropertySource propertySource = new MockPropertySource();
+
 
 	/**
 	 * Create a new {@code MockEnvironment} with a single {@link MockPropertySource}.
@@ -39,6 +39,7 @@ public class MockEnvironment extends AbstractEnvironment {
 	public MockEnvironment() {
 		getPropertySources().addLast(this.propertySource);
 	}
+
 
 	/**
 	 * Set a property on the underlying {@link MockPropertySource} for this environment.
@@ -54,7 +55,7 @@ public class MockEnvironment extends AbstractEnvironment {
 	 * @see MockPropertySource#withProperty
 	 */
 	public MockEnvironment withProperty(String key, String value) {
-		this.setProperty(key, value);
+		setProperty(key, value);
 		return this;
 	}
 

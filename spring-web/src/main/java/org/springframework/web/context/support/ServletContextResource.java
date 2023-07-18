@@ -251,7 +251,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 			return false;
 		}
 		ServletContextResource otherRes = (ServletContextResource) other;
-		return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
+		return (this.path.equals(otherRes.path) && this.servletContext.equals(otherRes.servletContext));
 	}
 
 	/**

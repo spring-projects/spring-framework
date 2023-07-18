@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -752,27 +752,26 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		@Override
-		public String toString() {
-			return (this.key + "=" + this.value);
-		}
-
-		@Override
-		@SuppressWarnings("rawtypes")
-		public final boolean equals(@Nullable Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof Map.Entry)) {
+			if (!(other instanceof Map.Entry<?, ?>)) {
 				return false;
 			}
-			Map.Entry otherEntry = (Map.Entry) other;
+			Map.Entry<?, ?> otherEntry = (Map.Entry<?, ?>) other;
 			return (ObjectUtils.nullSafeEquals(getKey(), otherEntry.getKey()) &&
 					ObjectUtils.nullSafeEquals(getValue(), otherEntry.getValue()));
 		}
 
 		@Override
-		public final int hashCode() {
+		public int hashCode() {
 			return (ObjectUtils.nullSafeHashCode(this.key) ^ ObjectUtils.nullSafeHashCode(this.value));
+		}
+
+		@Override
+		public String toString() {
+			return (this.key + "=" + this.value);
 		}
 	}
 

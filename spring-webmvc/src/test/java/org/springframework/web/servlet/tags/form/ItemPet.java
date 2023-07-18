@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditorSupport;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Juergen Hoeller
@@ -50,7 +52,7 @@ public class ItemPet {
 			return false;
 		}
 		ItemPet otherPet = (ItemPet) other;
-		return (this.name != null && this.name.equals(otherPet.getName()));
+		return ObjectUtils.nullSafeEquals(this.name, otherPet.getName());
 	}
 
 	@Override

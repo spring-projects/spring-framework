@@ -11061,7 +11061,7 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 .Java
 ----
 	// create a startup step and start recording
-	StartupStep scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan");
 	// add tagging information to the current step
 	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
 	// perform the actual phase we're instrumenting
@@ -11073,7 +11073,7 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 .Kotlin
 ----
 	// create a startup step and start recording
-	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan")
+	val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")
 	// add tagging information to the current step
 	scanPackages.tag("packages", () -> Arrays.toString(basePackages))
 	// perform the actual phase we're instrumenting

@@ -25,6 +25,7 @@ import java.util.StringJoiner;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.http.server.PathContainer.Separator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -430,6 +431,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
 		if (!(other instanceof PathPattern)) {
 			return false;
 		}
@@ -600,13 +604,11 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private final PathMatchInfo pathMatchInfo;
 
-
 		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining) {
 			this(pathMatched, pathRemaining, PathMatchInfo.EMPTY);
 		}
 
-		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining,
-				PathMatchInfo pathMatchInfo) {
+		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining, PathMatchInfo pathMatchInfo) {
 			this.pathRemaining = pathRemaining;
 			this.pathMatched = pathMatched;
 			this.pathMatchInfo = pathMatchInfo;
@@ -726,8 +728,8 @@ public class PathPattern implements Comparable<PathPattern> {
 		 */
 		String pathElementValue(int pathIndex) {
 			Element element = (pathIndex < this.pathLength) ? this.pathElements.get(pathIndex) : null;
-			if (element instanceof PathContainer.PathSegment) {
-				return ((PathContainer.PathSegment)element).valueToMatch();
+			if (element instanceof PathSegment) {
+				return ((PathSegment) element).valueToMatch();
 			}
 			return "";
 		}

@@ -424,10 +424,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Method interceptor used for static targets with no advice chain. The call
-	 * is passed directly back to the target. Used when the proxy needs to be
-	 * exposed and it can't be determined that the method won't return
-	 * {@code this}.
+	 * Method interceptor used for static targets with no advice chain. The call is
+	 * passed directly back to the target. Used when the proxy needs to be exposed
+	 * and it can't be determined that the method won't return {@code this}.
 	 */
 	private static class StaticUnadvisedInterceptor implements MethodInterceptor, Serializable {
 

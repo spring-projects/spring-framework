@@ -159,8 +159,8 @@ public class RollbackRuleAttribute implements Serializable{
 		if (!(other instanceof RollbackRuleAttribute)) {
 			return false;
 		}
-		RollbackRuleAttribute rhs = (RollbackRuleAttribute) other;
-		return this.exceptionPattern.equals(rhs.exceptionPattern);
+		RollbackRuleAttribute otherAttr = (RollbackRuleAttribute) other;
+		return this.exceptionPattern.equals(otherAttr.exceptionPattern);
 	}
 
 	@Override

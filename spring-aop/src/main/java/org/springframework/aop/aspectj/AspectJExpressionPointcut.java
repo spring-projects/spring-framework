@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,8 +248,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
-	 * write {@code and} as "&&" (though &amp;&amp; will work).
-	 * We also allow {@code and} between two pointcut sub-expressions.
+	 * write "and" as "&&" (though {@code &amp;&amp;} will work).
+	 * <p>We also allow "and" between two pointcut sub-expressions.
 	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
@@ -527,7 +527,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return false;
 		}
 		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
-		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
+		return ObjectUtils.nullSafeEquals(getExpression(), otherPc.getExpression()) &&
 				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
 				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
 				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, otherPc.pointcutParameterTypes);
@@ -535,7 +535,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.getExpression());
+		int hashCode = ObjectUtils.nullSafeHashCode(getExpression());
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);
