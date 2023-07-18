@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	@Override
 	public void afterSingletonsInstantiated() {
 		if (getCacheResolver() == null) {
-			// Lazily initialize cache resolver via default cache manager...
+			// Lazily initialize cache resolver via default cache manager
 			Assert.state(this.beanFactory != null, "CacheResolver or BeanFactory must be set on cache aspect");
 			try {
 				setCacheManager(this.beanFactory.getBean(CacheManager.class));
@@ -307,22 +307,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Return a bean with the specified name and type. Used to resolve services that
-	 * are referenced by name in a {@link CacheOperation}.
-	 * @param beanName the name of the bean, as defined by the operation
-	 * @param expectedType type for the bean
-	 * @return the bean matching that name
+	 * Retrieve a bean with the specified name and type.
+	 * Used to resolve services that are referenced by name in a {@link CacheOperation}.
+	 * @param name the name of the bean, as defined by the cache operation
+	 * @param serviceType the type expected by the operation's service reference
+	 * @return the bean matching the expected type, qualified by the given name
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist
 	 * @see CacheOperation#getKeyGenerator()
 	 * @see CacheOperation#getCacheManager()
 	 * @see CacheOperation#getCacheResolver()
 	 */
-	protected <T> T getBean(String beanName, Class<T> expectedType) {
+	protected <T> T getBean(String name, Class<T> serviceType) {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException(
-					"BeanFactory must be set on cache aspect for " + expectedType.getSimpleName() + " retrieval");
+					"BeanFactory must be set on cache aspect for " + serviceType.getSimpleName() + " retrieval");
 		}
-		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, expectedType, beanName);
+		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, serviceType, name);
 	}
 
 	/**
@@ -388,11 +388,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			else {
-				// No caching required, only call the underlying method
+				// No caching required, just call the underlying method
 				return invokeOperation(invoker);
 			}
 		}
-
 
 		// Process any early evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true,
@@ -641,21 +640,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			if (syncEnabled) {
 				if (this.contexts.size() > 1) {
 					throw new IllegalStateException(
-							"@Cacheable(sync=true) cannot be combined with other cache operations on '" + method + "'");
+							"A sync=true operation cannot be combined with other cache operations on '" + method + "'");
 				}
 				if (cacheOperationContexts.size() > 1) {
 					throw new IllegalStateException(
-							"Only one @Cacheable(sync=true) entry is allowed on '" + method + "'");
+							"Only one sync=true operation is allowed on '" + method + "'");
 				}
 				CacheOperationContext cacheOperationContext = cacheOperationContexts.iterator().next();
-				CacheableOperation operation = (CacheableOperation) cacheOperationContext.getOperation();
+				CacheOperation operation = cacheOperationContext.getOperation();
 				if (cacheOperationContext.getCaches().size() > 1) {
 					throw new IllegalStateException(
-							"@Cacheable(sync=true) only allows a single cache on '" + operation + "'");
+							"A sync=true operation is restricted to a single cache on '" + operation + "'");
 				}
-				if (StringUtils.hasText(operation.getUnless())) {
+				if (operation instanceof CacheableOperation &&
+						StringUtils.hasText(((CacheableOperation) operation).getUnless())) {
 					throw new IllegalStateException(
-							"@Cacheable(sync=true) does not support unless attribute on '" + operation + "'");
+							"A sync=true operation does not support the unless attribute on '" + operation + "'");
 				}
 				return true;
 			}
@@ -885,13 +885,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 	}
 
+
 	/**
 	 * Internal holder class for recording that a cache method was invoked.
 	 */
 	private static class InvocationAwareResult {
 
 		boolean invoked;
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,9 +175,9 @@ public @interface Cacheable {
 	 * <li>Only one cache may be specified</li>
 	 * <li>No other cache-related operation can be combined</li>
 	 * </ol>
-	 * This is effectively a hint and the actual cache provider that you are
-	 * using may not support it in a synchronized fashion. Check your provider
-	 * documentation for more details on the actual semantics.
+	 * This is effectively a hint and the chosen cache provider might not actually
+	 * support it in a synchronized fashion. Check your provider documentation for
+	 * more details on the actual semantics.
 	 * @since 4.3
 	 * @see org.springframework.cache.Cache#get(Object, Callable)
 	 */
