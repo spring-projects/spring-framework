@@ -432,12 +432,10 @@ public class PathPattern implements Comparable<PathPattern> {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (!(other instanceof PathPattern otherPattern)) {
-			return false;
-		}
-		return (this.patternString.equals(otherPattern.getPatternString()) &&
-				getSeparator() == otherPattern.getSeparator() &&
-				this.caseSensitive == otherPattern.caseSensitive);
+		return (this == other || (other instanceof PathPattern that &&
+				this.patternString.equals(that.getPatternString()) &&
+				getSeparator() == that.getSeparator() &&
+				this.caseSensitive == that.caseSensitive));
 	}
 
 	@Override

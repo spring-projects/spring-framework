@@ -59,14 +59,9 @@ public class TestSimpSubscription implements SimpSubscription {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SimpSubscription otherSubscription)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()) &&
-				this.id.equals(otherSubscription.getId()));
+		return (this == other || (other instanceof SimpSubscription that &&
+				ObjectUtils.nullSafeEquals(getSession(), that.getSession()) &&
+				this.id.equals(that.getId())));
 	}
 
 	@Override

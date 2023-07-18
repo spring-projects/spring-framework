@@ -754,17 +754,12 @@ public class MethodParameter {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof MethodParameter otherParam)) {
-			return false;
-		}
-		return (getContainingClass() == otherParam.getContainingClass() &&
-				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
-				this.nestingLevel == otherParam.nestingLevel &&
-				this.parameterIndex == otherParam.parameterIndex &&
-				this.executable.equals(otherParam.executable));
+		return (this == other || (other instanceof MethodParameter that &&
+				getContainingClass() == that.getContainingClass() &&
+				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, that.typeIndexesPerLevel) &&
+				this.nestingLevel == that.nestingLevel &&
+				this.parameterIndex == that.parameterIndex &&
+				this.executable.equals(that.executable)));
 	}
 
 	@Override

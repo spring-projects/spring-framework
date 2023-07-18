@@ -233,18 +233,13 @@ public class ProblemDetail {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ProblemDetail otherDetail)) {
-			return false;
-		}
-		return (getType().equals(otherDetail.getType()) &&
-				ObjectUtils.nullSafeEquals(getTitle(), otherDetail.getTitle()) &&
-				this.status == otherDetail.status &&
-				ObjectUtils.nullSafeEquals(this.detail, otherDetail.detail) &&
-				ObjectUtils.nullSafeEquals(this.instance, otherDetail.instance) &&
-				ObjectUtils.nullSafeEquals(this.properties, otherDetail.properties));
+		return (this == other || (other instanceof ProblemDetail that &&
+				getType().equals(that.getType()) &&
+				ObjectUtils.nullSafeEquals(getTitle(), that.getTitle()) &&
+				this.status == that.status &&
+				ObjectUtils.nullSafeEquals(this.detail, that.detail) &&
+				ObjectUtils.nullSafeEquals(this.instance, that.instance) &&
+				ObjectUtils.nullSafeEquals(this.properties, that.properties)));
 	}
 
 	@Override

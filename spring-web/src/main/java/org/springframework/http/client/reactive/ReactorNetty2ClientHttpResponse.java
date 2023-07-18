@@ -161,7 +161,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 	}
 
 	private boolean mayHaveBody(HttpMethod method) {
-		int code = this.getStatusCode().value();
+		int code = getStatusCode().value();
 		return !((code >= 100 && code < 200) || code == 204 || code == 205 ||
 				method.equals(HttpMethod.HEAD) || getHeaders().getContentLength() == 0);
 	}

@@ -532,14 +532,9 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof SimpSubscription otherSubscription)) {
-				return false;
-			}
-			return (getId().equals(otherSubscription.getId()) &&
-					ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()));
+			return (this == other || (other instanceof SimpSubscription that &&
+					getId().equals(that.getId()) &&
+					ObjectUtils.nullSafeEquals(getSession(), that.getSession())));
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,16 +158,11 @@ public class NotificationListenerHolder {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof NotificationListenerHolder otherNlh)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.notificationListener, otherNlh.notificationListener) &&
-				ObjectUtils.nullSafeEquals(this.notificationFilter, otherNlh.notificationFilter) &&
-				ObjectUtils.nullSafeEquals(this.handback, otherNlh.handback) &&
-				ObjectUtils.nullSafeEquals(this.mappedObjectNames, otherNlh.mappedObjectNames));
+		return (this == other || (other instanceof NotificationListenerHolder that &&
+				ObjectUtils.nullSafeEquals(this.notificationListener, that.notificationListener) &&
+				ObjectUtils.nullSafeEquals(this.notificationFilter, that.notificationFilter) &&
+				ObjectUtils.nullSafeEquals(this.handback, that.handback) &&
+				ObjectUtils.nullSafeEquals(this.mappedObjectNames, that.mappedObjectNames)));
 	}
 
 	@Override

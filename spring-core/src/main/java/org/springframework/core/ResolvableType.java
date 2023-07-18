@@ -1593,14 +1593,9 @@ public class ResolvableType implements Serializable {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ParameterizedType otherType)) {
-				return false;
-			}
-			return (otherType.getOwnerType() == null && this.rawType.equals(otherType.getRawType()) &&
-					Arrays.equals(this.typeArguments, otherType.getActualTypeArguments()));
+			return (this == other || (other instanceof ParameterizedType that &&
+					that.getOwnerType() == null && this.rawType.equals(that.getRawType()) &&
+					Arrays.equals(this.typeArguments, that.getActualTypeArguments())));
 		}
 
 		@Override

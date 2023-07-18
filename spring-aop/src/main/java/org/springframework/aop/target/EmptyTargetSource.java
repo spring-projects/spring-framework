@@ -133,13 +133,9 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof EmptyTargetSource otherTs)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.targetClass, otherTs.targetClass) && this.isStatic == otherTs.isStatic);
+		return (this == other || (other instanceof EmptyTargetSource that &&
+				ObjectUtils.nullSafeEquals(this.targetClass, that.targetClass) &&
+				this.isStatic == that.isStatic));
 	}
 
 	@Override

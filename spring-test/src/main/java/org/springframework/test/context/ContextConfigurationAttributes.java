@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,20 +334,15 @@ public class ContextConfigurationAttributes {
 	 */
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ContextConfigurationAttributes otherAttr)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.declaringClass, otherAttr.declaringClass) &&
-				Arrays.equals(this.classes, otherAttr.classes)) &&
-				Arrays.equals(this.locations, otherAttr.locations) &&
-				this.inheritLocations == otherAttr.inheritLocations &&
-				Arrays.equals(this.initializers, otherAttr.initializers) &&
-				this.inheritInitializers == otherAttr.inheritInitializers &&
-				ObjectUtils.nullSafeEquals(this.name, otherAttr.name) &&
-				ObjectUtils.nullSafeEquals(this.contextLoaderClass, otherAttr.contextLoaderClass);
+		return (this == other || (other instanceof ContextConfigurationAttributes that &&
+				ObjectUtils.nullSafeEquals(this.declaringClass, that.declaringClass) &&
+				Arrays.equals(this.classes, that.classes)) &&
+				Arrays.equals(this.locations, that.locations) &&
+				this.inheritLocations == that.inheritLocations &&
+				Arrays.equals(this.initializers, that.initializers) &&
+				this.inheritInitializers == that.inheritInitializers &&
+				ObjectUtils.nullSafeEquals(this.name, that.name) &&
+				ObjectUtils.nullSafeEquals(this.contextLoaderClass, that.contextLoaderClass));
 	}
 
 	/**

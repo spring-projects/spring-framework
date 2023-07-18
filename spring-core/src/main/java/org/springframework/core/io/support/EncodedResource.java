@@ -184,15 +184,10 @@ public class EncodedResource implements InputStreamSource {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof EncodedResource otherResource)) {
-			return false;
-		}
-		return (this.resource.equals(otherResource.resource) &&
-				ObjectUtils.nullSafeEquals(this.charset, otherResource.charset) &&
-				ObjectUtils.nullSafeEquals(this.encoding, otherResource.encoding));
+		return (this == other || (other instanceof EncodedResource that &&
+				this.resource.equals(that.resource) &&
+				ObjectUtils.nullSafeEquals(this.charset, that.charset) &&
+				ObjectUtils.nullSafeEquals(this.encoding, that.encoding)));
 	}
 
 	@Override

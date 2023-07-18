@@ -340,13 +340,8 @@ public class InjectionMetadata {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof InjectedElement otherElement)) {
-				return false;
-			}
-			return this.member.equals(otherElement.member);
+			return (this == other || (other instanceof InjectedElement that &&
+					this.member.equals(that.member)));
 		}
 
 		@Override

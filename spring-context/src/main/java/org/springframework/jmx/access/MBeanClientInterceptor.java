@@ -655,13 +655,9 @@ public class MBeanClientInterceptor
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof MethodCacheKey otherKey)) {
-				return false;
-			}
-			return (this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes));
+			return (this == other || (other instanceof MethodCacheKey that &&
+					this.name.equals(that.name) &&
+					Arrays.equals(this.parameterTypes, that.parameterTypes)));
 		}
 
 		@Override

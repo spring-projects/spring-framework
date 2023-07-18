@@ -491,16 +491,11 @@ class ExtendedBeanInfo implements BeanInfo {
 		 */
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof IndexedPropertyDescriptor otherPd)) {
-				return false;
-			}
-			return (ObjectUtils.nullSafeEquals(getIndexedReadMethod(), otherPd.getIndexedReadMethod()) &&
-					ObjectUtils.nullSafeEquals(getIndexedWriteMethod(), otherPd.getIndexedWriteMethod()) &&
-					ObjectUtils.nullSafeEquals(getIndexedPropertyType(), otherPd.getIndexedPropertyType()) &&
-					PropertyDescriptorUtils.equals(this, otherPd));
+			return (this == other || (other instanceof IndexedPropertyDescriptor that &&
+					ObjectUtils.nullSafeEquals(getIndexedReadMethod(), that.getIndexedReadMethod()) &&
+					ObjectUtils.nullSafeEquals(getIndexedWriteMethod(), that.getIndexedWriteMethod()) &&
+					ObjectUtils.nullSafeEquals(getIndexedPropertyType(), that.getIndexedPropertyType()) &&
+					PropertyDescriptorUtils.equals(this, that)));
 		}
 
 		@Override

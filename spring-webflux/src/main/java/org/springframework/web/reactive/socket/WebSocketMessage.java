@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,14 +157,9 @@ public class WebSocketMessage {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof WebSocketMessage otherMessage)) {
-			return false;
-		}
-		return (this.type.equals(otherMessage.type) &&
-				ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload));
+		return (this == other || (other instanceof WebSocketMessage that &&
+				this.type.equals(that.type) &&
+				ObjectUtils.nullSafeEquals(this.payload, that.payload)));
 	}
 
 	@Override

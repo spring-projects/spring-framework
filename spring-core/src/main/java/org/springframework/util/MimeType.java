@@ -410,7 +410,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 					return (thisSuffix.equals(other.getSubtype()) || thisSuffix.equals(otherSuffix));
 				}
 				else if (other.isWildcardSubtype() && otherSuffix != null) {
-					return (this.getSubtype().equals(otherSuffix) || otherSuffix.equals(thisSuffix));
+					return (getSubtype().equals(otherSuffix) || otherSuffix.equals(thisSuffix));
 				}
 			}
 		}
@@ -451,15 +451,10 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof MimeType otherType)) {
-			return false;
-		}
-		return (this.type.equalsIgnoreCase(otherType.type) &&
+		return (this == other || (other instanceof MimeType otherType &&
+				this.type.equalsIgnoreCase(otherType.type) &&
 				this.subtype.equalsIgnoreCase(otherType.subtype) &&
-				parametersAreEqual(otherType));
+				parametersAreEqual(otherType)));
 	}
 
 	/**

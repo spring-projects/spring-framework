@@ -361,7 +361,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public String toString() {
-			return (this.typeInfo + " : " + this.converter);
+			return this.typeInfo + " : " + this.converter;
 		}
 	}
 
@@ -412,7 +412,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public String toString() {
-			return (this.typeInfo + " : " + this.converterFactory);
+			return this.typeInfo + " : " + this.converterFactory;
 		}
 	}
 
@@ -433,25 +433,19 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ConverterCacheKey otherKey)) {
-				return false;
-			}
-			return (this.sourceType.equals(otherKey.sourceType)) &&
-					this.targetType.equals(otherKey.targetType);
+			return (this == other || (other instanceof ConverterCacheKey that &&
+					this.sourceType.equals(that.sourceType)) &&
+					this.targetType.equals(that.targetType));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.sourceType.hashCode() * 29 + this.targetType.hashCode());
+			return this.sourceType.hashCode() * 29 + this.targetType.hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return ("ConverterCacheKey [sourceType = " + this.sourceType +
-					", targetType = " + this.targetType + "]");
+			return "ConverterCacheKey [sourceType = " + this.sourceType + ", targetType = " + this.targetType + "]";
 		}
 
 		@Override
