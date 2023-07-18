@@ -169,7 +169,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Nullable
 	private MethodValidator methodValidator;
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
+	private AsyncTaskExecutor taskExecutor = new MvcSimpleAsyncTaskExecutor();
 
 	@Nullable
 	private Long asyncRequestTimeout;
@@ -1039,6 +1039,39 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 		}
 		return mav;
+	}
+
+
+	/**
+	 * A default Spring MVC AsyncTaskExecutor that warns if used.
+	 */
+	@SuppressWarnings("serial")
+	private class MvcSimpleAsyncTaskExecutor extends SimpleAsyncTaskExecutor {
+
+		private static Boolean taskExecutorWarning = true;
+
+		public MvcSimpleAsyncTaskExecutor() {
+			super("MvcAsync");
+		}
+
+		@Override
+		public void execute(Runnable task) {
+			if (taskExecutorWarning && logger.isWarnEnabled()) {
+				synchronized (this) {
+					if (taskExecutorWarning) {
+						logger.warn("""
+								!!!
+								Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+								This executor is not suitable for production use under load.
+								Please, configure an AsyncTaskExecutor through the WebMvc config.
+								-------------------------------
+								!!!""");
+						taskExecutorWarning = false;
+					}
+				}
+			}
+			super.execute(task);
+		}
 	}
 
 }
