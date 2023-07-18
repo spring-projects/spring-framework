@@ -88,12 +88,6 @@ You can use this option for full JPA capabilities in a Spring-based application 
 This includes web containers such as Tomcat, stand-alone applications, and
 integration tests with sophisticated persistence requirements.
 
-NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative
-is to set up a native Hibernate `LocalSessionFactoryBean` instead of a plain JPA
-`LocalContainerEntityManagerFactoryBean`, letting it interact with JPA access code
-as well as native Hibernate access code.
-See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate setup for JPA interaction] for details.
-
 The `LocalContainerEntityManagerFactoryBean` gives full control over
 `EntityManagerFactory` configuration and is appropriate for environments where
 fine-grained customization is required. The `LocalContainerEntityManagerFactoryBean`
@@ -187,6 +181,7 @@ and automatic propagation of the weaver to all weaver-aware beans:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context:load-time-weaver/>
+
 	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		...
 	</bean>
@@ -425,20 +420,20 @@ Kotlin::
 ----
 ======
 
-The `@PersistenceContext` annotation has an optional attribute called `type`, which defaults to
-`PersistenceContextType.TRANSACTION`. You can use this default to receive a shared
+The `@PersistenceContext` annotation has an optional attribute called `type`, which defaults
+to `PersistenceContextType.TRANSACTION`. You can use this default to receive a shared
 `EntityManager` proxy. The alternative, `PersistenceContextType.EXTENDED`, is a completely
 different affair. This results in a so-called extended `EntityManager`, which is not
 thread-safe and, hence, must not be used in a concurrently accessed component, such as a
-Spring-managed singleton bean. Extended `EntityManager` instances are only supposed to be used#
+Spring-managed singleton bean. Extended `EntityManager` instances are only supposed to be used
 in stateful components that, for example, reside in a session, with the lifecycle of the
 `EntityManager` not tied to a current transaction but rather being completely up to the
 application.
 
 .Method- and field-level Injection
 ****
-You can apply annotations that indicate dependency injections (such as `@PersistenceUnit` and
-`@PersistenceContext`) on field or methods inside a class -- hence the expressions
+You can apply annotations that indicate dependency injections (such as `@PersistenceUnit`
+and `@PersistenceContext`) on field or methods inside a class -- hence the expressions
 "`method-level injection`" and "`field-level injection`". Field-level annotations are
 concise and easier to use while method-level annotations allow for further processing of the
 injected dependency. In both cases, the member visibility (public, protected, or private)
@@ -460,12 +455,53 @@ No import of any Spring class is required. Moreover, as the JPA annotations are 
 the injections are applied automatically by the Spring container. This is appealing from
 a non-invasiveness perspective and can feel more natural to JPA developers.
 
+[[orm-jpa-dao-autowired]]
+=== Implementing DAOs Based on `@Autowired` (typically with constructor-based injection)
+
+`@PersistenceUnit` and `@PersistenceContext` can only be declared on methods and fields.
+What about providing JPA resources via constructors and other `@Autowired` injection points?
+
+`EntityManagerFactory` can easily be injected via constructors and `@Autowired` fields/methods
+as long as the target is defined as a bean, e.g. via `LocalContainerEntityManagerFactoryBean`.
+The injection point matches the original `EntityManagerFactory` definition by type as-is.
+
+However, an `@PersistenceContext`-style shared `EntityManager` reference is not available for
+regular dependency injection out of the box. In order to make it available for type-based
+matching as required by `@Autowired`, consider defining a `SharedEntityManagerBean` as a
+companion for your `EntityManagerFactory` definition:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		...
+	</bean>
+
+	<bean id="em" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory" ref="emf"/>
+	</bean>
+----
+
+Alternatively, you may define an `@Bean` method based on `SharedEntityManagerCreator`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Bean("em")
+	public static EntityManager sharedEntityManager(EntityManagerFactory emf) {
+		return SharedEntityManagerCreator.createSharedEntityManager(emf);
+	}
+----
+
+In case of multiple persistence units, each `EntityManagerFactory` definition needs to be
+accompanied by a corresponding `EntityManager` bean definition, ideally with qualifiers
+that match with the distinct `EntityManagerFactory` definition in order to distinguish
+the persistence units via `@Autowired @Qualifier("...")`.
+
 
 [[orm-jpa-tx]]
-== Spring-driven JPA transactions
+== Spring-driven JPA Transactions
 
-NOTE: We strongly encourage you to read xref:data-access/transaction/declarative.adoc[Declarative Transaction Management], if you have not
-already done so, to get more detailed coverage of Spring's declarative transaction support.
+NOTE: We strongly encourage you to read xref:data-access/transaction/declarative.adoc[Declarative Transaction Management],
+if you have not already done so, to get more detailed coverage of Spring's declarative transaction support.
 
 The recommended strategy for JPA is local transactions through JPA's native transaction
 support. Spring's `JpaTransactionManager` provides many capabilities known from local
@@ -477,11 +513,6 @@ to JDBC access code that accesses the same `DataSource`, provided that the regis
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`.
 Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the xref:data-access/orm/jpa.adoc#orm-jpa-dialect[next section] for details on the `JpaDialect` mechanism.
-
-NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
-of interacting with JPA access code, adapting to several Hibernate specifics and providing
-JDBC interaction. This makes particular sense in combination with `LocalSessionFactoryBean`
-setup. See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate Setup for JPA Interaction] for details.
 
 
 [[orm-jpa-dialect]]
