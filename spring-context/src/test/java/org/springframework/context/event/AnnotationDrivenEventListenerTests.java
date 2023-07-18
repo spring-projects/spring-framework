@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,12 +164,12 @@ class AnnotationDrivenEventListenerTests {
 		ContextEventListener listener = this.context.getBean(ContextEventListener.class);
 
 		List<Object> events = this.eventCollector.getEvents(listener);
-		assertThat(events.size()).as("Wrong number of initial context events").isEqualTo(1);
+		assertThat(events).as("Wrong number of initial context events").hasSize(1);
 		assertThat(events.get(0).getClass()).isEqualTo(ContextRefreshedEvent.class);
 
 		this.context.stop();
 		List<Object> eventsAfterStop = this.eventCollector.getEvents(listener);
-		assertThat(eventsAfterStop.size()).as("Wrong number of context events on shutdown").isEqualTo(2);
+		assertThat(eventsAfterStop).as("Wrong number of context events on shutdown").hasSize(2);
 		assertThat(eventsAfterStop.get(1).getClass()).isEqualTo(ContextStoppedEvent.class);
 		this.eventCollector.assertTotalEventsCount(2);
 	}
@@ -334,7 +334,7 @@ class AnnotationDrivenEventListenerTests {
 		load(ScopedProxyTestBean.class);
 
 		SimpleService proxy = this.context.getBean(SimpleService.class);
-		assertThat(proxy instanceof Advised).as("bean should be a proxy").isTrue();
+		assertThat(proxy).as("bean should be a proxy").isInstanceOf(Advised.class);
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
 		this.context.publishEvent(new ContextRefreshedEvent(this.context));
@@ -351,7 +351,7 @@ class AnnotationDrivenEventListenerTests {
 		load(AnnotatedProxyTestBean.class);
 
 		AnnotatedSimpleService proxy = this.context.getBean(AnnotatedSimpleService.class);
-		assertThat(proxy instanceof Advised).as("bean should be a proxy").isTrue();
+		assertThat(proxy).as("bean should be a proxy").isInstanceOf(Advised.class);
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
 		this.context.publishEvent(new ContextRefreshedEvent(this.context));
@@ -517,7 +517,6 @@ class AnnotationDrivenEventListenerTests {
 		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
 		TestEventListener listener = this.context.getBean(TestEventListener.class);
 
-
 		this.eventCollector.assertNoEventReceived(listener);
 		this.eventCollector.assertNoEventReceived(replyEventListener);
 		this.context.publishEvent(event);
@@ -634,6 +633,17 @@ class AnnotationDrivenEventListenerTests {
 		assertThat(listener.order).contains("first", "second", "third");
 	}
 
+	@Test
+	void publicSubclassWithInheritedEventListener() {
+		load(PublicSubclassWithInheritedEventListener.class);
+		TestEventListener listener = this.context.getBean(PublicSubclassWithInheritedEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		this.context.publishEvent("test");
+		this.eventCollector.assertEvent(listener, "test");
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
 	@Test @Disabled  // SPR-15122
 	void listenersReceiveEarlyEvents() {
 		load(EventOnPostConstruct.class, OrderedTestListener.class);
@@ -646,7 +656,7 @@ class AnnotationDrivenEventListenerTests {
 	void missingListenerBeanIgnored() {
 		load(MissingEventListener.class);
 		context.getBean(UseMissingEventListener.class);
-		context.getBean(ApplicationEventMulticaster.class).multicastEvent(new TestEvent(this));
+		context.publishEvent(new TestEvent(this));
 	}
 
 
@@ -753,7 +763,6 @@ class AnnotationDrivenEventListenerTests {
 		public void handleContextEvent(ApplicationContextEvent event) {
 			collectEvent(event);
 		}
-
 	}
 
 
@@ -980,7 +989,6 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 
-
 	@EventListener
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ConditionalEvent {
@@ -1032,7 +1040,7 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 
-	@Configuration
+	@Component
 	static class OrderedTestListener extends TestEventListener {
 
 		public final List<String> order = new ArrayList<>();
@@ -1053,6 +1061,11 @@ class AnnotationDrivenEventListenerTests {
 		public void handleSecond(String payload) {
 			this.order.add("second");
 		}
+	}
+
+
+	@Component
+	public static class PublicSubclassWithInheritedEventListener extends TestEventListener {
 	}
 
 
