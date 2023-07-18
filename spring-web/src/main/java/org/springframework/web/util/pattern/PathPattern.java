@@ -599,13 +599,11 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private final PathMatchInfo pathMatchInfo;
 
-
 		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining) {
 			this(pathMatched, pathRemaining, PathMatchInfo.EMPTY);
 		}
 
-		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining,
-				PathMatchInfo pathMatchInfo) {
+		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining, PathMatchInfo pathMatchInfo) {
 			this.pathRemaining = pathRemaining;
 			this.pathMatched = pathMatched;
 			this.pathMatchInfo = pathMatchInfo;
