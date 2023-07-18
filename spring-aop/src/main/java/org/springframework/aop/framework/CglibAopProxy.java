@@ -370,8 +370,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof CglibAopProxy cglibAopProxy &&
-				AopProxyUtils.equalsInProxy(this.advised, cglibAopProxy.advised)));
+		return (this == other || (other instanceof CglibAopProxy that &&
+				AopProxyUtils.equalsInProxy(this.advised, that.advised)));
 	}
 
 	@Override

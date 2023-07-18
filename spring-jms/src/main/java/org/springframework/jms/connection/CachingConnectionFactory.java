@@ -559,11 +559,10 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
+		public boolean equals(@Nullable Object other) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (this == obj || (obj instanceof DestinationCacheKey otherKey &&
-					destinationEquals(otherKey)));
+			return (this == other || (other instanceof DestinationCacheKey that && destinationEquals(that)));
 		}
 
 		@Override
