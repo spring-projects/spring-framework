@@ -58,3 +58,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'spring-exampl-test'
+

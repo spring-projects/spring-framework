@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.zcc'
+version = '6.0.12-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":spring-beans"))
+    implementation(project(":spring-context"))
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
