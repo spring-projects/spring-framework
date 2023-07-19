@@ -272,7 +272,7 @@ public interface Errors {
 	boolean hasFieldErrors(String field);
 
 	/**
-	 * Return the number of errors associated with the given field.
+	 * Determine the number of errors associated with the given field.
 	 * @param field the field name
 	 * @see #getFieldErrorCount()
 	 */
@@ -310,7 +310,7 @@ public interface Errors {
 	Object getFieldValue(String field);
 
 	/**
-	 * Return the type of a given field.
+	 * Determine the type of the given field, as far as possible.
 	 * <p>Implementations should be able to determine the type even
 	 * when the field value is {@code null}, for example from some
 	 * associated descriptor.
