@@ -43,6 +43,7 @@ import static org.springframework.transaction.TransactionDefinition.ISOLATION_SE
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_MANDATORY;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRED;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_SUPPORTS;
+import static org.springframework.transaction.support.AbstractPlatformTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION;
 import static org.springframework.transaction.support.DefaultTransactionDefinition.PREFIX_ISOLATION;
 import static org.springframework.transaction.support.DefaultTransactionDefinition.PREFIX_PROPAGATION;
 
@@ -262,6 +263,53 @@ class TransactionSupportTests {
 		assertThat(template2).isNotEqualTo(template1);
 		assertThat(template3).isNotEqualTo(template1);
 		assertThat(template3).isEqualTo(template2);
+	}
+
+	@Nested
+	class AbstractPlatformTransactionManagerConfigurationTests {
+
+		private final AbstractPlatformTransactionManager tm = new TestTransactionManager(false, true);
+
+
+		@Test
+		void setTransactionSynchronizationNameToUnsupportedValues() {
+			assertThatIllegalArgumentException().isThrownBy(() -> tm.setTransactionSynchronizationName(null));
+			assertThatIllegalArgumentException().isThrownBy(() -> tm.setTransactionSynchronizationName("   "));
+			assertThatIllegalArgumentException().isThrownBy(() -> tm.setTransactionSynchronizationName("bogus"));
+		}
+
+		/**
+		 * Verify that the internal 'constants' map is properly configured for all
+		 * SYNCHRONIZATION_ constants defined in {@link AbstractPlatformTransactionManager}.
+		 */
+		@Test
+		void setTransactionSynchronizationNameToAllSupportedValues() {
+			Set<Integer> uniqueValues = new HashSet<>();
+			streamSynchronizationConstants()
+					.forEach(name -> {
+						tm.setTransactionSynchronizationName(name);
+						int transactionSynchronization = tm.getTransactionSynchronization();
+						int expected = AbstractPlatformTransactionManager.constants.get(name);
+						assertThat(transactionSynchronization).isEqualTo(expected);
+						uniqueValues.add(transactionSynchronization);
+					});
+			assertThat(uniqueValues).hasSize(AbstractPlatformTransactionManager.constants.size());
+		}
+
+		@Test
+		void setTransactionSynchronization() {
+			tm.setTransactionSynchronization(SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
+			assertThat(tm.getTransactionSynchronization()).isEqualTo(SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
+		}
+
+
+		private static Stream<String> streamSynchronizationConstants() {
+			return Arrays.stream(AbstractPlatformTransactionManager.class.getFields())
+					.filter(ReflectionUtils::isPublicStaticFinal)
+					.map(Field::getName)
+					.filter(name -> name.startsWith("SYNCHRONIZATION_"));
+		}
+
 	}
 
 	@Nested

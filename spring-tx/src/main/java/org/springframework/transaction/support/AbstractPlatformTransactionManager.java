@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -35,6 +35,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSuspensionNotSupportedException;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base class that implements Spring's standard transaction workflow,
@@ -74,6 +75,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * to Java serialization rules) if they need to restore any transient state.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.03.2003
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
@@ -107,8 +109,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public static final int SYNCHRONIZATION_NEVER = 2;
 
 
-	/** Constants instance for AbstractPlatformTransactionManager. */
-	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
+	/**
+	 * Map of constant names to constant values for the transaction synchronization
+	 * constants defined in this class.
+	 */
+	static final Map<String, Integer> constants = Map.of(
+			"SYNCHRONIZATION_ALWAYS", SYNCHRONIZATION_ALWAYS,
+			"SYNCHRONIZATION_ON_ACTUAL_TRANSACTION", SYNCHRONIZATION_ON_ACTUAL_TRANSACTION,
+			"SYNCHRONIZATION_NEVER", SYNCHRONIZATION_NEVER
+		);
 
 
 	protected transient Log logger = LogFactory.getLog(getClass());
@@ -130,12 +139,18 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Set the transaction synchronization by the name of the corresponding constant
-	 * in this class, e.g. "SYNCHRONIZATION_ALWAYS".
+	 * in this class &mdash; for example, {@code "SYNCHRONIZATION_ALWAYS"}.
 	 * @param constantName name of the constant
 	 * @see #SYNCHRONIZATION_ALWAYS
+	 * @see #SYNCHRONIZATION_ON_ACTUAL_TRANSACTION
+	 * @see #SYNCHRONIZATION_NEVER
+	 * @see #setTransactionSynchronization(int)
 	 */
 	public final void setTransactionSynchronizationName(String constantName) {
-		setTransactionSynchronization(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer transactionSynchronization = constants.get(constantName);
+		Assert.notNull(transactionSynchronization, "Only transaction synchronization constants allowed");
+		this.transactionSynchronization = transactionSynchronization;
 	}
 
 	/**
