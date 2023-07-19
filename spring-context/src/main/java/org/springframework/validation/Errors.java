@@ -39,7 +39,6 @@ import org.springframework.lang.Nullable;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #setNestedPath
  * @see Validator
  * @see ValidationUtils
  * @see SimpleErrors
@@ -231,7 +230,7 @@ public interface Errors {
 	}
 
 	/**
-	 * BReturn if there were any errors.
+	 * Determine if there were any errors.
 	 * @see #hasGlobalErrors()
 	 * @see #hasFieldErrors()
 	 */
@@ -240,7 +239,7 @@ public interface Errors {
 	}
 
 	/**
-	 * Return the total number of errors.
+	 * Determine the total number of errors.
 	 * @see #getGlobalErrorCount()
 	 * @see #getFieldErrorCount()
 	 */
@@ -250,7 +249,7 @@ public interface Errors {
 
 	/**
 	 * Get all errors, both global and field ones.
-	 * @return a list of {@link ObjectError} instances
+	 * @return a list of {@link ObjectError}/{@link FieldError} instances
 	 * @see #getGlobalErrors()
 	 * @see #getFieldErrors()
 	 */
@@ -259,8 +258,7 @@ public interface Errors {
 	}
 
 	/**
-	 * Are there any global errors?
-	 * @return {@code true} if there are any global errors
+	 * Determine if there were any global errors.
 	 * @see #hasFieldErrors()
 	 */
 	default boolean hasGlobalErrors() {
@@ -268,8 +266,7 @@ public interface Errors {
 	}
 
 	/**
-	 * Return the number of global errors.
-	 * @return the number of global errors
+	 * Determine the number of global errors.
 	 * @see #getFieldErrorCount()
 	 */
 	default int getGlobalErrorCount() {
@@ -294,8 +291,7 @@ public interface Errors {
 	}
 
 	/**
-	 * Are there any field errors?
-	 * @return {@code true} if there are any errors associated with a field
+	 * Determine if there were any errors associated with a field.
 	 * @see #hasGlobalErrors()
 	 */
 	default boolean hasFieldErrors() {
@@ -303,8 +299,7 @@ public interface Errors {
 	}
 
 	/**
-	 * Return the number of errors associated with a field.
-	 * @return the number of errors associated with a field
+	 * Determine the number of errors associated with a field.
 	 * @see #getGlobalErrorCount()
 	 */
 	default int getFieldErrorCount() {
@@ -329,9 +324,8 @@ public interface Errors {
 	}
 
 	/**
-	 * Are there any errors associated with the given field?
+	 * Determine if there were any errors associated with the given field.
 	 * @param field the field name
-	 * @return {@code true} if there were any errors associated with the given field
 	 * @see #hasFieldErrors()
 	 */
 	default boolean hasFieldErrors(String field) {
@@ -339,9 +333,8 @@ public interface Errors {
 	}
 
 	/**
-	 * Return the number of errors associated with the given field.
+	 * Determine the number of errors associated with the given field.
 	 * @param field the field name
-	 * @return the number of errors associated with the given field
 	 * @see #getFieldErrorCount()
 	 */
 	default int getFieldErrorCount(String field) {
@@ -384,7 +377,7 @@ public interface Errors {
 	Object getFieldValue(String field);
 
 	/**
-	 * Return the type of a given field.
+	 * Determine the type of the given field, as far as possible.
 	 * <p>Implementations should be able to determine the type even
 	 * when the field value is {@code null}, for example from some
 	 * associated descriptor.

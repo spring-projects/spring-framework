@@ -145,8 +145,8 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public void rejectValue(
-			@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		this.bindingResult.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
