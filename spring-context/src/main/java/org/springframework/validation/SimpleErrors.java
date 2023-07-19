@@ -125,15 +125,22 @@ public class SimpleErrors implements Errors, Serializable {
 	@Override
 	@Nullable
 	public Object getFieldValue(String field) {
+		FieldError fieldError = getFieldError(field);
+		if (fieldError != null) {
+			return fieldError.getRejectedValue();
+		}
+
 		PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(this.target.getClass(), field);
 		if (pd != null && pd.getReadMethod() != null) {
 			return ReflectionUtils.invokeMethod(pd.getReadMethod(), this.target);
 		}
+
 		Field rawField = ReflectionUtils.findField(this.target.getClass(), field);
 		if (rawField != null) {
 			ReflectionUtils.makeAccessible(rawField);
 			return ReflectionUtils.getField(rawField, this.target);
 		}
+
 		throw new IllegalArgumentException("Cannot retrieve value for field '" + field +
 				"' - neither a getter method nor a raw field found");
 	}
