@@ -1048,7 +1048,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@SuppressWarnings("serial")
 	private class MvcSimpleAsyncTaskExecutor extends SimpleAsyncTaskExecutor {
 
-		private static Boolean taskExecutorWarning = true;
+		private static boolean taskExecutorWarning = true;
 
 		public MvcSimpleAsyncTaskExecutor() {
 			super("MvcAsync");
