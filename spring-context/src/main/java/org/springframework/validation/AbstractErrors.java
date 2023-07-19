@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract implementation of the {@link Errors} interface. Provides common
- * access to evaluated errors; however, does not define concrete management
+ * Abstract implementation of the {@link Errors} interface.
+ * Provides nested path handling but does not define concrete management
  * of {@link ObjectError ObjectErrors} and {@link FieldError FieldErrors}.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 2.5.3
+ * @see AbstractBindingResult
  */
 @SuppressWarnings("serial")
 public abstract class AbstractErrors implements Errors, Serializable {
@@ -81,8 +82,8 @@ public abstract class AbstractErrors implements Errors, Serializable {
 			nestedPath = "";
 		}
 		nestedPath = canonicalFieldName(nestedPath);
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(Errors.NESTED_PATH_SEPARATOR)) {
-			nestedPath += Errors.NESTED_PATH_SEPARATOR;
+		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
+			nestedPath += NESTED_PATH_SEPARATOR;
 		}
 		this.nestedPath = nestedPath;
 	}
@@ -97,7 +98,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		}
 		else {
 			String path = getNestedPath();
-			return (path.endsWith(Errors.NESTED_PATH_SEPARATOR) ?
+			return (path.endsWith(NESTED_PATH_SEPARATOR) ?
 					path.substring(0, path.length() - NESTED_PATH_SEPARATOR.length()) : path);
 		}
 	}
@@ -112,115 +113,17 @@ public abstract class AbstractErrors implements Errors, Serializable {
 		return field;
 	}
 
-
-	@Override
-	public void reject(String errorCode) {
-		reject(errorCode, null, null);
-	}
-
-	@Override
-	public void reject(String errorCode, String defaultMessage) {
-		reject(errorCode, null, defaultMessage);
-	}
-
-	@Override
-	public void rejectValue(@Nullable String field, String errorCode) {
-		rejectValue(field, errorCode, null, null);
-	}
-
-	@Override
-	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
-		rejectValue(field, errorCode, null, defaultMessage);
-	}
-
-
-	@Override
-	public boolean hasErrors() {
-		return !getAllErrors().isEmpty();
-	}
-
-	@Override
-	public int getErrorCount() {
-		return getAllErrors().size();
-	}
-
-	@Override
-	public List<ObjectError> getAllErrors() {
-		List<ObjectError> result = new ArrayList<>();
-		result.addAll(getGlobalErrors());
-		result.addAll(getFieldErrors());
-		return Collections.unmodifiableList(result);
-	}
-
-	@Override
-	public boolean hasGlobalErrors() {
-		return (getGlobalErrorCount() > 0);
-	}
-
-	@Override
-	public int getGlobalErrorCount() {
-		return getGlobalErrors().size();
-	}
-
-	@Override
-	@Nullable
-	public ObjectError getGlobalError() {
-		List<ObjectError> globalErrors = getGlobalErrors();
-		return (!globalErrors.isEmpty() ? globalErrors.get(0) : null);
-	}
-
-	@Override
-	public boolean hasFieldErrors() {
-		return (getFieldErrorCount() > 0);
-	}
-
-	@Override
-	public int getFieldErrorCount() {
-		return getFieldErrors().size();
-	}
-
-	@Override
-	@Nullable
-	public FieldError getFieldError() {
-		List<FieldError> fieldErrors = getFieldErrors();
-		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
-	}
-
-	@Override
-	public boolean hasFieldErrors(String field) {
-		return (getFieldErrorCount(field) > 0);
-	}
-
-	@Override
-	public int getFieldErrorCount(String field) {
-		return getFieldErrors(field).size();
-	}
-
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
 		List<FieldError> fieldErrors = getFieldErrors();
 		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
-		for (FieldError error : fieldErrors) {
-			if (isMatchingFieldError(fixedField, error)) {
-				result.add(error);
+		for (FieldError fieldError : fieldErrors) {
+			if (isMatchingFieldError(fixedField, fieldError)) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);
-	}
-
-	@Override
-	@Nullable
-	public FieldError getFieldError(String field) {
-		List<FieldError> fieldErrors = getFieldErrors(field);
-		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
-	}
-
-	@Override
-	@Nullable
-	public Class<?> getFieldType(String field) {
-		Object value = getFieldValue(field);
-		return (value != null ? value.getClass() : null);
 	}
 
 	/**
