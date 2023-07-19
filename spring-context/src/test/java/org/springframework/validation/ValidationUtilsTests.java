@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 public class ValidationUtilsTests {
 
 	@Test
-	public void testInvokeValidatorWithNullValidator() throws Exception {
+	public void testInvokeValidatorWithNullValidator() {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -43,14 +43,14 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testInvokeValidatorWithNullErrors() throws Exception {
+	public void testInvokeValidatorWithNullErrors() {
 		TestBean tb = new TestBean();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ValidationUtils.invokeValidator(new EmptyValidator(), tb, null));
 	}
 
 	@Test
-	public void testInvokeValidatorSunnyDay() throws Exception {
+	public void testInvokeValidatorSunnyDay() {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.invokeValidator(new EmptyValidator(), tb, errors);
@@ -59,7 +59,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsSunnyDay() throws Exception {
+	public void testValidationUtilsSunnyDay() {
 		TestBean tb = new TestBean("");
 
 		Validator testValidator = new EmptyValidator();
@@ -75,7 +75,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsNull() throws Exception {
+	public void testValidationUtilsNull() {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		Validator testValidator = new EmptyValidator();
@@ -85,7 +85,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsEmpty() throws Exception {
+	public void testValidationUtilsEmpty() {
 		TestBean tb = new TestBean("");
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		Validator testValidator = new EmptyValidator();
@@ -113,7 +113,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsEmptyOrWhitespace() throws Exception {
+	public void testValidationUtilsEmptyOrWhitespace() {
 		TestBean tb = new TestBean();
 		Validator testValidator = new EmptyOrWhitespaceValidator();
 
