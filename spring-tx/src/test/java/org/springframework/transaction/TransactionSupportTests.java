@@ -17,6 +17,7 @@
 package org.springframework.transaction;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -32,12 +33,19 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 29.04.2003
  */
-public class TransactionSupportTests {
+class TransactionSupportTests {
+
+	@AfterEach
+	void postConditions() {
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+	}
 
 	@Test
-	public void noExistingTransaction() {
+	void noExistingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(false, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
@@ -53,7 +61,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void existingTransaction() {
+	void existingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(true, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
@@ -72,7 +80,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void commitWithoutExistingTransaction() {
+	void commitWithoutExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.commit(status);
@@ -84,7 +92,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackWithoutExistingTransaction() {
+	void rollbackWithoutExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.rollback(status);
@@ -96,7 +104,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackOnlyWithoutExistingTransaction() {
+	void rollbackOnlyWithoutExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionStatus status = tm.getTransaction(null);
 		status.setRollbackOnly();
@@ -109,7 +117,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void commitWithExistingTransaction() {
+	void commitWithExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(true, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.commit(status);
@@ -121,7 +129,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackWithExistingTransaction() {
+	void rollbackWithExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(true, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.rollback(status);
@@ -133,7 +141,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackOnlyWithExistingTransaction() {
+	void rollbackOnlyWithExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(true, true);
 		TransactionStatus status = tm.getTransaction(null);
 		status.setRollbackOnly();
@@ -146,7 +154,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplate() {
+	void transactionTemplate() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		template.execute(new TransactionCallbackWithoutResult() {
@@ -162,7 +170,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplateWithCallbackPreference() {
+	void transactionTemplateWithCallbackPreference() {
 		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
 		TransactionTemplate template = new TransactionTemplate(ptm);
 		template.execute(new TransactionCallbackWithoutResult() {
@@ -176,7 +184,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplateWithException() {
+	void transactionTemplateWithException() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		RuntimeException ex = new RuntimeException("Some application exception");
@@ -196,7 +204,7 @@ public class TransactionSupportTests {
 
 	@SuppressWarnings("serial")
 	@Test
-	public void transactionTemplateWithRollbackException() {
+	void transactionTemplateWithRollbackException() {
 		final TransactionSystemException tex = new TransactionSystemException("system exception");
 		TestTransactionManager tm = new TestTransactionManager(false, true) {
 			@Override
@@ -217,7 +225,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplateWithError() {
+	void transactionTemplateWithError() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		assertThatExceptionOfType(Error.class)
@@ -229,36 +237,7 @@ public class TransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplateInitialization() {
-		TestTransactionManager tm = new TestTransactionManager(false, true);
-		TransactionTemplate template = new TransactionTemplate();
-		template.setTransactionManager(tm);
-		assertThat(template.getTransactionManager()).as("correct transaction manager set").isSameAs(tm);
-
-		assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehaviorName("TIMEOUT_DEFAULT"));
-		template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
-		assertThat(template.getPropagationBehavior()).as("Correct propagation behavior set")
-				.isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
-
-		assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehavior(999));
-		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
-		assertThat(template.getPropagationBehavior()).as("Correct propagation behavior set")
-				.isEqualTo(TransactionDefinition.PROPAGATION_MANDATORY);
-
-		assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevelName("TIMEOUT_DEFAULT"));
-		template.setIsolationLevelName("ISOLATION_SERIALIZABLE");
-		assertThat(template.getIsolationLevel()).as("Correct isolation level set")
-				.isEqualTo(TransactionDefinition.ISOLATION_SERIALIZABLE);
-
-		assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevel(999));
-
-		template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertThat(template.getIsolationLevel()).as("Correct isolation level set")
-				.isEqualTo(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-	}
-
-	@Test
-	public void transactionTemplateEquality() {
+	void transactionTemplateEquality() {
 		TestTransactionManager tm1 = new TestTransactionManager(false, true);
 		TestTransactionManager tm2 = new TestTransactionManager(false, true);
 		TransactionTemplate template1 = new TransactionTemplate(tm1);
@@ -270,11 +249,51 @@ public class TransactionSupportTests {
 		assertThat(template3).isEqualTo(template2);
 	}
 
+	@Nested
+	class TransactionTemplateConfigurationTests {
 
-	@AfterEach
-	public void clear() {
-		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+		private final TransactionTemplate template = new TransactionTemplate();
+
+
+		@Test
+		void setTransactionManager() {
+			TestTransactionManager tm = new TestTransactionManager(false, true);
+			template.setTransactionManager(tm);
+			assertThat(template.getTransactionManager()).as("correct transaction manager set").isSameAs(tm);
+		}
+
+		@Test
+		void setPropagationBehaviorName() {
+			assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehaviorName("TIMEOUT_DEFAULT"));
+
+			template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
+			assertThat(template.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
+		}
+
+		@Test
+		void setPropagationBehavior() {
+			assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehavior(999));
+
+			template.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
+			assertThat(template.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_MANDATORY);
+		}
+
+		@Test
+		void setIsolationLevelName() {
+			assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevelName("TIMEOUT_DEFAULT"));
+
+			template.setIsolationLevelName("ISOLATION_SERIALIZABLE");
+			assertThat(template.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_SERIALIZABLE);
+		}
+
+		@Test
+		void setIsolationLevel() {
+			assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevel(999));
+
+			template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+			assertThat(template.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		}
+
 	}
 
 }
