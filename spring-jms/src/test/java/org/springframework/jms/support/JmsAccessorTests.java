@@ -25,55 +25,56 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for the {@link JmsAccessor} class.
+ * Unit tests for {@link JmsAccessor}.
  *
  * @author Rick Evans
  * @author Chris Beams
  * @author Vedran Pavic
+ * @author Sam Brannen
  */
 class JmsAccessorTests {
 
-	@Test
-	void testChokesIfConnectionFactoryIsNotSupplied() {
-		JmsAccessor accessor = new StubJmsAccessor();
-		assertThatIllegalArgumentException().isThrownBy(
-				accessor::afterPropertiesSet);
-	}
-
-	@Test
-	void testSessionTransactedModeReallyDoesDefaultToFalse() {
-		JmsAccessor accessor = new StubJmsAccessor();
-		assertThat(accessor.isSessionTransacted()).as("The [sessionTransacted] property of JmsAccessor must default to " +
-				"false. Change this test (and the attendant Javadoc) if you have " +
-				"changed the default.").isFalse();
-	}
-
-	@Test
-	void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() {
-		JmsAccessor accessor = new StubJmsAccessor();
-		assertThat(accessor.getSessionAcknowledgeMode()).as("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
-				"[Session.AUTO_ACKNOWLEDGE]. Change this test (and the attendant " +
-				"Javadoc) if you have changed the default.").isEqualTo(Session.AUTO_ACKNOWLEDGE);
-	}
-
-	@Test
-	void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!"));
-	}
-
-	@Test
-	void testCustomAcknowledgeModeIsConsideredClientAcknowledge() throws Exception {
-		Session session = mock(Session.class);
-		given(session.getAcknowledgeMode()).willReturn(100);
-		JmsAccessor accessor = new StubJmsAccessor();
-		assertThat(accessor.isClientAcknowledge(session)).isTrue();
-	}
-
 	/**
-	 * Crummy, stub, do-nothing subclass of the JmsAccessor class for use in testing.
+	 * No-op stub of the {@link JmsAccessor} class.
 	 */
-	private static final class StubJmsAccessor extends JmsAccessor {
+	private final JmsAccessor accessor = new JmsAccessor() {};
+
+
+	@Test
+	void failsIfConnectionFactoryIsNotSupplied() {
+		assertThatIllegalArgumentException().isThrownBy(accessor::afterPropertiesSet);
+	}
+
+	@Test
+	void sessionTransactedModeDefaultsToFalse() {
+		String message = """
+				The [sessionTransacted] property of JmsAccessor must default to \
+				false. Change this test (and the attendant Javadoc) if you have \
+				changed the default.""";
+		assertThat(accessor.isSessionTransacted()).as(message).isFalse();
+	}
+
+	@Test
+	void acknowledgeModeDefaultsToAutoAcknowledge() {
+		String message = """
+				The [sessionAcknowledgeMode] property of JmsAccessor must default to \
+				"[Session.AUTO_ACKNOWLEDGE]. Change this test (and the attendant \
+				"Javadoc) if you have changed the default.""";
+		assertThat(accessor.getSessionAcknowledgeMode()).as(message).isEqualTo(Session.AUTO_ACKNOWLEDGE);
+	}
+
+	@Test
+	void setSessionAcknowledgeModeNameToUnsupportedValues() {
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.setSessionAcknowledgeModeName(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.setSessionAcknowledgeModeName("   "));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.setSessionAcknowledgeModeName("bogus"));
+	}
+
+	@Test
+	void customAcknowledgeModeIsConsideredClientAcknowledge() throws Exception {
+		Session session = mock();
+		given(session.getAcknowledgeMode()).willReturn(100);
+		assertThat(accessor.isClientAcknowledge(session)).isTrue();
 	}
 
 }

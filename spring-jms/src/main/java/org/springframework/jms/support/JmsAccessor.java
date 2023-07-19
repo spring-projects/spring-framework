@@ -121,15 +121,16 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Set the JMS acknowledgement mode by the name of the corresponding constant
-	 * in the JMS {@link Session} interface, e.g. "CLIENT_ACKNOWLEDGE".
+	 * Set the JMS acknowledgement mode by the name of the corresponding constant in
+	 * the JMS {@link Session} interface &mdash; for example, {@code "CLIENT_ACKNOWLEDGE"}.
 	 * <p>If you want to use vendor-specific extensions to the acknowledgement mode,
 	 * use {@link #setSessionAcknowledgeMode(int)} instead.
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
 	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see jakarta.jms.Connection#createSession(boolean, int)
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
+	 * @see jakarta.jms.Connection#createSession(int)
 	 */
 	public void setSessionAcknowledgeModeName(String constantName) {
 		setSessionAcknowledgeMode(sessionConstants.asNumber(constantName).intValue());
@@ -149,6 +150,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 * @see jakarta.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionAcknowledgeMode(int sessionAcknowledgeMode) {
