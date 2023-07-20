@@ -36,7 +36,10 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Roy Clarkson
  * @since 4.3
+ * @deprecated since 6.1, in favor of other {@link ClientHttpRequestFactory}
+ * implementations; scheduled for removal in 6.2
  */
+@Deprecated(since = "6.1", forRemoval = true)
 public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
 	private OkHttpClient client;
@@ -128,6 +131,7 @@ public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory
 
 
 	@Override
+	@SuppressWarnings("removal")
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
 		return new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
 	}

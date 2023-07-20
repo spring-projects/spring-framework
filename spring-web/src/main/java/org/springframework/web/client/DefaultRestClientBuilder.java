@@ -32,7 +32,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -362,9 +361,6 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		}
 		else if (httpComponentsClientPresent) {
 			return new HttpComponentsClientHttpRequestFactory();
-		}
-		else if (okHttpClientPresent) {
-			return new OkHttp3ClientHttpRequestFactory();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpRequestFactory();

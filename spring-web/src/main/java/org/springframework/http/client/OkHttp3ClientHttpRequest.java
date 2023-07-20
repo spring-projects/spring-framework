@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Roy Clarkson
  * @since 4.3
  */
+@Deprecated(since = "6.1", forRemoval = true)
 class OkHttp3ClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final OkHttpClient client;
@@ -67,6 +68,7 @@ class OkHttp3ClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 
 		RequestBody requestBody;

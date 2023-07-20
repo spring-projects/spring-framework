@@ -72,6 +72,7 @@ class RestClientIntegrationTests {
 	@interface ParameterizedRestClientTest {
 	}
 
+	@SuppressWarnings("removal")
 	static Stream<Named<ClientHttpRequestFactory>> clientHttpRequestFactories() {
 		return Stream.of(
 			named("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),

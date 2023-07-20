@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  * @author Roy Clarkson
  * @since 4.3
  */
+@Deprecated(since = "6.1", forRemoval = true)
 class OkHttp3ClientHttpResponse implements ClientHttpResponse {
 
 	private final Response response;
