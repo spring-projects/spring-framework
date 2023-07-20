@@ -29,7 +29,7 @@ If you do not want to use the JSR-250 annotations but you still want to remove
 coupling, consider `init-method` and `destroy-method` bean definition metadata.
 ====
 
-Internally, the Spring Framework uses `BeanPostProcessor` implementations to process any
+Internally, the Spring Framework may use `BeanPostProcessor` or `BeanFactory` implementations to process any
 callback interfaces it can find and call the appropriate methods. If you need custom
 features or other lifecycle behavior Spring does not by default offer, you can
 implement a `BeanPostProcessor` yourself. For more information, see
