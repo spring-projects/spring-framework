@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,28 @@
 package org.springframework.cache;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines common cache operations.
  *
- * <b>Note:</b> Due to the generic use of caching, it is recommended that
- * implementations allow storage of {@code null} values (for example to
- * cache methods that return {@code null}).
+ * <p>Serves as an SPI for Spring's annotation-based caching model
+ * ({@link org.springframework.cache.annotation.Cacheable} and co)
+ * as well as an API for direct usage in applications.
+ *
+ * <p><b>Note:</b> Due to the generic use of caching, it is recommended
+ * that implementations allow storage of {@code null} values
+ * (for example to cache methods that return {@code null}).
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1
+ * @see CacheManager
+ * @see org.springframework.cache.annotation.Cacheable
  */
 public interface Cache {
 
@@ -101,6 +109,51 @@ public interface Cache {
 	<T> T get(Object key, Callable<T> valueLoader);
 
 	/**
+	 * Return the value to which this cache maps the specified key,
+	 * wrapped in a {@link CompletableFuture}. This operation must not block
+	 * but is allowed to return a completed {@link CompletableFuture} if the
+	 * corresponding value is immediately available.
+	 * <p>Returns {@code null} if the cache contains no mapping for this key;
+	 * otherwise, the cached value (which may be {@code null} itself) will
+	 * be returned in the {@link CompletableFuture}.
+	 * @param key the key whose associated value is to be returned
+	 * @return the value to which this cache maps the specified key,
+	 * contained within a {@link CompletableFuture} which may also hold
+	 * a cached {@code null} value. A straight {@code null} being
+	 * returned means that the cache contains no mapping for this key.
+	 * @since 6.1
+	 * @see #get(Object)
+	 */
+	@Nullable
+	default CompletableFuture<?> retrieve(Object key) {
+		throw new UnsupportedOperationException(
+				getClass().getName() + " does not support CompletableFuture-based retrieval");
+	}
+
+	/**
+	 * Return the value to which this cache maps the specified key, obtaining
+	 * that value from {@code valueLoader} if necessary. This method provides
+	 * a simple substitute for the conventional "if cached, return; otherwise
+	 * create, cache and return" pattern, based on {@link CompletableFuture}.
+	 * This operation must not block.
+	 * <p>If possible, implementations should ensure that the loading operation
+	 * is synchronized so that the specified {@code valueLoader} is only called
+	 * once in case of concurrent access on the same key.
+	 * <p>If the {@code valueLoader} throws an exception, it will be propagated
+	 * to the {@code CompletableFuture} handle returned from here.
+	 * @param key the key whose associated value is to be returned
+	 * @return the value to which this cache maps the specified key,
+	 * contained within a {@link CompletableFuture}
+	 * @since 6.1
+	 * @see #retrieve(Object)
+	 * @see #get(Object, Callable)
+	 */
+	default <T> CompletableFuture<T> retrieve(Object key, Supplier<CompletableFuture<T>> valueLoader) {
+		throw new UnsupportedOperationException(
+				getClass().getName() + " does not support CompletableFuture-based retrieval");
+	}
+
+	/**
 	 * Associate the specified value with the specified key in this cache.
 	 * <p>If the cache previously contained a mapping for this key, the old
 	 * value is replaced by the specified value.
@@ -108,6 +161,11 @@ public interface Cache {
 	 * fashion, with subsequent lookups possibly not seeing the entry yet.
 	 * This may for example be the case with transactional cache decorators.
 	 * Use {@link #putIfAbsent} for guaranteed immediate registration.
+	 * <p>If the cache is supposed to be compatible with {@link CompletableFuture}
+	 * and reactive interactions, the put operation needs to be effectively
+	 * non-blocking, with any backend write-through happening asynchronously.
+	 * This goes along with a cache implemented and configured to support
+	 * {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}.
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
 	 * @see #putIfAbsent(Object, Object)
@@ -156,6 +214,11 @@ public interface Cache {
 	 * fashion, with subsequent lookups possibly still seeing the entry.
 	 * This may for example be the case with transactional cache decorators.
 	 * Use {@link #evictIfPresent} for guaranteed immediate removal.
+	 * <p>If the cache is supposed to be compatible with {@link CompletableFuture}
+	 * and reactive interactions, the evict operation needs to be effectively
+	 * non-blocking, with any backend write-through happening asynchronously.
+	 * This goes along with a cache implemented and configured to support
+	 * {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}.
 	 * @param key the key whose mapping is to be removed from the cache
 	 * @see #evictIfPresent(Object)
 	 */
@@ -188,6 +251,11 @@ public interface Cache {
 	 * fashion, with subsequent lookups possibly still seeing the entries.
 	 * This may for example be the case with transactional cache decorators.
 	 * Use {@link #invalidate()} for guaranteed immediate removal of entries.
+	 * <p>If the cache is supposed to be compatible with {@link CompletableFuture}
+	 * and reactive interactions, the clear operation needs to be effectively
+	 * non-blocking, with any backend write-through happening asynchronously.
+	 * This goes along with a cache implemented and configured to support
+	 * {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}.
 	 * @see #invalidate()
 	 */
 	void clear();
