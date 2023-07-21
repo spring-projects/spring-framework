@@ -276,12 +276,12 @@ public class CaffeineCacheManager implements CacheManager {
 	 * <p>This allows for custom settings per cache (as opposed to all caches
 	 * sharing the common settings in the cache manager's configuration) and
 	 * is typically used with the Caffeine builder API:
-	 * {@code registerCustomCache("myCache", Caffeine.newBuilder().maximumSize(10).build())}
+	 * {@code registerCustomCache("myCache", Caffeine.newBuilder().maximumSize(10).buildAsync())}
 	 * <p>Note that any other caches, whether statically specified through
 	 * {@link #setCacheNames} or dynamically built on demand, still operate
 	 * with the common settings in the cache manager's configuration.
 	 * @param name the name of the cache
-	 * @param cache the custom Caffeine Cache instance to register
+	 * @param cache the custom Caffeine AsyncCache instance to register
 	 * @since 6.1
 	 * @see #adaptCaffeineCache(String, AsyncCache)
 	 */
