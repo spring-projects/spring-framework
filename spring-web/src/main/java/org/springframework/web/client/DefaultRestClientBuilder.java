@@ -63,8 +63,6 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private static final boolean httpComponentsClientPresent;
 
-	private static final boolean okHttpClientPresent;
-
 	private static final boolean jettyClientPresent;
 
 	private static final boolean jdkClientPresent;
@@ -88,7 +86,6 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		ClassLoader loader = DefaultRestClientBuilder.class.getClassLoader();
 
 		httpComponentsClientPresent = ClassUtils.isPresent("org.apache.hc.client5.http.classic.HttpClient", loader);
-		okHttpClientPresent = ClassUtils.isPresent("okhttp3.OkHttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
 		jdkClientPresent = ClassUtils.isPresent("java.net.http.HttpClient", loader);
 
