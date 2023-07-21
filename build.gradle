@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.7"
-			mavenBom "io.netty:netty-bom:4.1.94.Final"
+			mavenBom "io.netty:netty-bom:4.1.95.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.34"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.3"
