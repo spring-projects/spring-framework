@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,20 @@ import org.springframework.lang.Nullable;
 /**
  * Interface that defines common cache operations.
  *
- * <b>Note:</b> Due to the generic use of caching, it is recommended that
- * implementations allow storage of {@code null} values (for example to
- * cache methods that return {@code null}).
+ * <p>Serves as an SPI for Spring's annotation-based caching model
+ * ({@link org.springframework.cache.annotation.Cacheable} and co)
+ * as well as an API for direct usage in applications.
+ *
+ * <p><b>Note:</b> Due to the generic use of caching, it is recommended
+ * that implementations allow storage of {@code null} values
+ * (for example to cache methods that return {@code null}).
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1
+ * @see CacheManager
+ * @see org.springframework.cache.annotation.Cacheable
  */
 public interface Cache {
 

@@ -397,11 +397,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true,
 				CacheOperationExpressionEvaluator.NO_RESULT);
 
-		// Check if we have a cached item matching the conditions
+		// Check if we have a cached value matching the conditions
 		Cache.ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
 
-		// Collect puts from any @Cacheable miss, if no cached item is found
-		List<CachePutRequest> cachePutRequests = new ArrayList<>();
+		// Collect puts from any @Cacheable miss, if no cached value is found
+		List<CachePutRequest> cachePutRequests = new ArrayList<>(1);
 		if (cacheHit == null) {
 			collectPutRequests(contexts.get(CacheableOperation.class),
 					CacheOperationExpressionEvaluator.NO_RESULT, cachePutRequests);
@@ -468,7 +468,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	private boolean hasCachePut(CacheOperationContexts contexts) {
 		// Evaluate the conditions *without* the result object because we don't have it yet...
 		Collection<CacheOperationContext> cachePutContexts = contexts.get(CachePutOperation.class);
-		Collection<CacheOperationContext> excluded = new ArrayList<>();
+		Collection<CacheOperationContext> excluded = new ArrayList<>(1);
 		for (CacheOperationContext context : cachePutContexts) {
 			try {
 				if (!context.isConditionPassing(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE)) {
@@ -521,9 +521,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Find a cached item only for {@link CacheableOperation} that passes the condition.
+	 * Find a cached value only for {@link CacheableOperation} that passes the condition.
 	 * @param contexts the cacheable operations
-	 * @return a {@link Cache.ValueWrapper} holding the cached item,
+	 * @return a {@link Cache.ValueWrapper} holding the cached value,
 	 * or {@code null} if none is found
 	 */
 	@Nullable
@@ -548,9 +548,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	/**
 	 * Collect the {@link CachePutRequest} for all {@link CacheOperation} using
-	 * the specified result item.
+	 * the specified result value.
 	 * @param contexts the contexts to handle
-	 * @param result the result item (never {@code null})
+	 * @param result the result value (never {@code null})
 	 * @param putRequests the collection to update
 	 */
 	private void collectPutRequests(Collection<CacheOperationContext> contexts,
@@ -721,7 +721,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
 			this.caches = CacheAspectSupport.this.getCaches(this, metadata.cacheResolver);
-			this.cacheNames = createCacheNames(this.caches);
+			this.cacheNames = prepareCacheNames(this.caches);
 		}
 
 		@Override
@@ -809,8 +809,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			return this.cacheNames;
 		}
 
-		private Collection<String> createCacheNames(Collection<? extends Cache> caches) {
-			Collection<String> names = new ArrayList<>();
+		private Collection<String> prepareCacheNames(Collection<? extends Cache> caches) {
+			Collection<String> names = new ArrayList<>(caches.size());
 			for (Cache cache : caches) {
 				names.add(cache.getName());
 			}

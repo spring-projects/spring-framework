@@ -110,7 +110,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the Caffeine to use for building each individual
 	 * {@link CaffeineCache} instance.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#build()
+	 * @see Caffeine#build()
 	 */
 	public void setCaffeine(Caffeine<Object, Object> caffeine) {
 		Assert.notNull(caffeine, "Caffeine must not be null");
@@ -121,7 +121,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the {@link CaffeineSpec} to use for building each individual
 	 * {@link CaffeineCache} instance.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
+	 * @see Caffeine#from(CaffeineSpec)
 	 */
 	public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
 		doSetCaffeine(Caffeine.from(caffeineSpec));
@@ -132,7 +132,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * individual {@link CaffeineCache} instance. The given value needs to
 	 * comply with Caffeine's {@link CaffeineSpec} (see its javadoc).
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(String)
+	 * @see Caffeine#from(String)
 	 */
 	public void setCacheSpecification(String cacheSpecification) {
 		doSetCaffeine(Caffeine.from(cacheSpecification));
@@ -149,7 +149,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the Caffeine CacheLoader to use for building each individual
 	 * {@link CaffeineCache} instance, turning it into a LoadingCache.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
+	 * @see Caffeine#build(CacheLoader)
 	 * @see com.github.benmanes.caffeine.cache.LoadingCache
 	 */
 	public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
