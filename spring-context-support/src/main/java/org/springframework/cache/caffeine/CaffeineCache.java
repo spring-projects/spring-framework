@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	 * given internal {@link com.github.benmanes.caffeine.cache.Cache} to use.
 	 * @param name the name of the cache
 	 * @param cache the backing Caffeine Cache instance
-	 * @param allowNullValues whether to accept and convert {@code null}
-	 * values for this cache
+	 * @param allowNullValues whether to accept and convert {@code null} values
+	 * for this cache
 	 */
 	public CaffeineCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache,
 			boolean allowNullValues) {
@@ -86,7 +86,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> T get(Object key, final Callable<T> valueLoader) {
+	public <T> T get(Object key, Callable<T> valueLoader) {
 		return (T) fromStoreValue(this.cache.get(key, new LoadFunction(valueLoader)));
 	}
 
@@ -106,7 +106,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	@Override
 	@Nullable
-	public ValueWrapper putIfAbsent(Object key, @Nullable final Object value) {
+	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		PutIfAbsentFunction callable = new PutIfAbsentFunction(value);
 		Object result = this.cache.get(key, callable);
 		return (callable.called ? null : toValueWrapper(result));
@@ -140,7 +140,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		@Nullable
 		private final Object value;
 
-		private boolean called;
+		boolean called;
 
 		public PutIfAbsentFunction(@Nullable Object value) {
 			this.value = value;
@@ -159,16 +159,17 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		private final Callable<?> valueLoader;
 
 		public LoadFunction(Callable<?> valueLoader) {
+			Assert.notNull(valueLoader, "Callable must not be null");
 			this.valueLoader = valueLoader;
 		}
 
 		@Override
-		public Object apply(Object o) {
+		public Object apply(Object key) {
 			try {
 				return toStoreValue(this.valueLoader.call());
 			}
 			catch (Exception ex) {
-				throw new ValueRetrievalException(o, this.valueLoader, ex);
+				throw new ValueRetrievalException(key, this.valueLoader, ex);
 			}
 		}
 	}
