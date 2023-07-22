@@ -126,6 +126,20 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 	/**
+	 * The name of an attribute that can be
+	 * {@link org.springframework.core.AttributeAccessor#setAttribute set} on a
+	 * {@link org.springframework.beans.factory.config.BeanDefinition} so that
+	 * bean definitions can indicate one or more preferred constructors. This is
+	 * analogous to {@code @Autowired} annotated constructors on the bean class.
+	 * <p>The attribute value may be a single {@link java.lang.reflect.Constructor}
+	 * reference or an array thereof.
+	 * @since 6.1
+	 * @see org.springframework.beans.factory.annotation.Autowired
+	 * @see org.springframework.beans.factory.support.RootBeanDefinition#getPreferredConstructors()
+	 */
+	public static final String PREFERRED_CONSTRUCTORS_ATTRIBUTE = "preferredConstructors";
+
+	/**
 	 * Constant that indicates the container should attempt to infer the
 	 * {@link #setDestroyMethodName destroy method name} for a bean as opposed to
 	 * explicit specification of a method name. The value {@value} is specifically

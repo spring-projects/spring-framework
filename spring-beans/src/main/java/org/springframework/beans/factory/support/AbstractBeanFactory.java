@@ -1698,13 +1698,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	ResolvableType getTypeForFactoryBeanFromAttributes(AttributeAccessor attributes) {
 		Object attribute = attributes.getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE);
+		if (attribute == null) {
+			return ResolvableType.NONE;
+		}
 		if (attribute instanceof ResolvableType resolvableType) {
 			return resolvableType;
 		}
 		if (attribute instanceof Class<?> clazz) {
 			return ResolvableType.forClass(clazz);
 		}
-		return ResolvableType.NONE;
+		throw new IllegalArgumentException("Invalid value type for attribute '" +
+				FactoryBean.OBJECT_TYPE_ATTRIBUTE + "': " + attribute.getClass());
 	}
 
 	/**
