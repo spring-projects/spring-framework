@@ -49,6 +49,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeTypeUtils;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * {@code HttpMessageWriter} that can write a {@link Resource}.
@@ -110,7 +111,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		return Mono.from(inputStream).flatMap(resource ->
-				writeResource(resource, elementType, mediaType, message, hints));
+				writeResource(resource, elementType, mediaType, message, hints))
+				.subscribeOn(Schedulers.boundedElastic());
 	}
 
 	private Mono<Void> writeResource(Resource resource, ResolvableType type, @Nullable MediaType mediaType,
