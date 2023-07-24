@@ -81,7 +81,7 @@ public abstract class DataAccessUtils {
 			if (resultList.size() > 1) {
 				throw new IncorrectResultSizeDataAccessException(1);
 			}
-			return resultList.isEmpty() ? null : resultList.get(0);
+			return (!resultList.isEmpty() ? resultList.get(0) : null);
 		}
 	}
 
