@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#getConnection
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#releaseConnection
 	 */
-	public static Mono<Void> executeSqlScript(Connection connection, Resource resource) throws ScriptException {
+	public static Mono<Void> executeSqlScript(Connection connection, Resource resource) {
 		return executeSqlScript(connection, new EncodedResource(resource));
 	}
 
@@ -149,7 +149,7 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#getConnection
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#releaseConnection
 	 */
-	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
+	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource) {
 		return executeSqlScript(connection, resource, DefaultDataBufferFactory.sharedInstance, false, false,
 				DEFAULT_COMMENT_PREFIXES, DEFAULT_STATEMENT_SEPARATOR, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
 				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
@@ -189,7 +189,7 @@ public abstract class ScriptUtils {
 	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource,
 			DataBufferFactory dataBufferFactory, boolean continueOnError, boolean ignoreFailedDrops,
 			String commentPrefix, @Nullable String separator, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			String blockCommentEndDelimiter) {
 
 		return executeSqlScript(connection, resource, dataBufferFactory, continueOnError,
 				ignoreFailedDrops, new String[] { commentPrefix }, separator,
@@ -230,7 +230,7 @@ public abstract class ScriptUtils {
 	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource,
 			DataBufferFactory dataBufferFactory, boolean continueOnError, boolean ignoreFailedDrops,
 			String[] commentPrefixes, @Nullable String separator, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			String blockCommentEndDelimiter) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL script from " + resource);
@@ -365,7 +365,7 @@ public abstract class ScriptUtils {
 	 */
 	static boolean containsStatementSeparator(EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			String blockCommentEndDelimiter) {
 
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
@@ -448,7 +448,7 @@ public abstract class ScriptUtils {
 	 */
 	static List<String> splitSqlScript(EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter) throws ScriptException {
+			String blockCommentEndDelimiter) {
 
 		Assert.hasText(script, "'script' must not be null or empty");
 		Assert.notNull(separator, "'separator' must not be null");
