@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.rsocket.service;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
@@ -25,7 +26,9 @@ import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -45,6 +48,7 @@ import org.springframework.util.MimeTypeUtils;
  * Integration tests with RSocket Service client.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
 class RSocketServiceIntegrationTests {
 
@@ -54,10 +58,12 @@ class RSocketServiceIntegrationTests {
 
 	private static Service serviceProxy;
 
+	private static ExchangeService exchangeProxy;
+
 
 	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
-	static void setupOnce() throws Exception {
+	static void setupOnce() {
 
 		MimeType metadataMimeType = MimeTypeUtils.parseMimeType(
 				WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -77,6 +83,7 @@ class RSocketServiceIntegrationTests {
 
 		RSocketServiceProxyFactory proxyFactory = RSocketServiceProxyFactory.builder(requester).build();
 		serviceProxy = proxyFactory.createClient(Service.class);
+		exchangeProxy = proxyFactory.createClient(ExchangeService.class);
 
 		context.close();
 	}
@@ -88,11 +95,13 @@ class RSocketServiceIntegrationTests {
 		server = null;
 		requester = null;
 		serviceProxy = null;
+		exchangeProxy = null;
 	}
 
 
-	@Test
-	void echoAsync() {
+	@ParameterizedTest
+	@MethodSource("getServiceProxy")
+	void echoAsync(Service serviceProxy) {
 		Flux<String> result = Flux.range(1, 3).concatMap(i -> serviceProxy.echoAsync("Hello " + i));
 
 		StepVerifier.create(result)
@@ -101,8 +110,9 @@ class RSocketServiceIntegrationTests {
 				.verify(Duration.ofSeconds(5));
 	}
 
-	@Test
-	void echoStream() {
+	@ParameterizedTest
+	@MethodSource("getServiceProxy")
+	void echoStream(Service serviceProxy) {
 		Flux<String> result = serviceProxy.echoStream("Hello");
 
 		StepVerifier.create(result)
@@ -112,7 +122,18 @@ class RSocketServiceIntegrationTests {
 	}
 
 
-	@Controller
+	private static Stream<Arguments> getServiceProxy() {
+		return Stream.of(Arguments.of(serviceProxy),
+				Arguments.of(exchangeProxy));
+	}
+
+
+	@RSocketExchange("exchange")
+	interface ExchangeService extends Service {
+
+	}
+
+
 	interface Service {
 
 		@RSocketExchange("echo-async")
@@ -120,6 +141,23 @@ class RSocketServiceIntegrationTests {
 
 		@RSocketExchange("echo-stream")
 		Flux<String> echoStream(String payload);
+
+	}
+
+
+	@Controller
+	@RSocketExchange("exchange")
+	static class ExchangeServerController implements Service {
+
+		@Override
+		public Mono<String> echoAsync(String payload) {
+			return Mono.delay(Duration.ofMillis(10)).map(aLong -> payload + " async");
+		}
+
+		@Override
+		public Flux<String> echoStream(String payload) {
+			return Flux.interval(Duration.ofMillis(10)).map(aLong -> payload + " " + aLong);
+		}
 
 	}
 
@@ -146,6 +184,11 @@ class RSocketServiceIntegrationTests {
 		@Bean
 		ServerController controller() {
 			return new ServerController();
+		}
+
+		@Bean
+		ExchangeServerController exchangeController() {
+			return new ExchangeServerController();
 		}
 
 		@Bean
