@@ -47,7 +47,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
@@ -108,7 +107,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	@Override
-	public <T> Mono<T> inConnection(Function<Connection, Mono<T>> action) throws DataAccessException {
+	public <T> Mono<T> inConnection(Function<Connection, Mono<T>> action) {
 		Assert.notNull(action, "Callback object must not be null");
 		Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
 				connection -> new ConnectionCloseHolder(connection, this::closeConnection));
@@ -130,7 +129,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	@Override
-	public <T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action) throws DataAccessException {
+	public <T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action) {
 		Assert.notNull(action, "Callback object must not be null");
 		Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
 				connection -> new ConnectionCloseHolder(connection, this::closeConnection));
