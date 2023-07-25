@@ -301,7 +301,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the innermost target Connection, or the passed-in one if not wrapped
 	 * @see Wrapped#unwrap()
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static Connection getTargetConnection(Connection con) {
 		Object conToUse = con;
 		while (conToUse instanceof Wrapped wrapped) {

@@ -513,7 +513,7 @@ abstract class NamedParameterUtils {
 			this.parameterSource = parameterSource;
 		}
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		public void bind(BindTarget target, String identifier, Parameter parameter) {
 			List<BindMarker> bindMarkers = getBindMarkers(identifier);
 			if (bindMarkers == null) {

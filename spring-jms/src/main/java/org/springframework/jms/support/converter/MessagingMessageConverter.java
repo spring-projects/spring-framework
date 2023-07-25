@@ -113,7 +113,7 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Object fromMessage(jakarta.jms.Message message) throws JMSException, MessageConversionException {
 		Map<String, Object> mappedHeaders = extractHeaders(message);
 		Object convertedObject = extractPayload(message);

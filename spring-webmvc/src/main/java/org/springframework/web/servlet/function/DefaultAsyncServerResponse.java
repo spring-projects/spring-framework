@@ -168,7 +168,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		return result;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static AsyncServerResponse create(Object obj, @Nullable Duration timeout) {
 		Assert.notNull(obj, "Argument to async must not be null");
 

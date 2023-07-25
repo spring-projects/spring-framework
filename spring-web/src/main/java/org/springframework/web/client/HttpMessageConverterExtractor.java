@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		this(responseType, messageConverters, LogFactory.getLog(HttpMessageConverterExtractor.class));
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
@@ -84,7 +84,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes", "resource"})
+	@SuppressWarnings({"rawtypes", "unchecked", "resource"})
 	public T extractData(ClientHttpResponse response) throws IOException {
 		IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(response);
 		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
