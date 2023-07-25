@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.jdbc.core.RowMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -135,8 +133,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn()
-			throws Exception {
+	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(11);
@@ -174,11 +171,10 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("id", 3);
-		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
-				params, (RowMapper<Object>) (rs, rowNum) -> rs.getInt(1));
+		Integer value = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
+				params, (rs, rowNum) -> rs.getInt(1));
 
-		boolean condition = o instanceof Integer;
-		assertThat(condition).as("Correct result type").isTrue();
+		assertThat(value).isEqualTo(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
@@ -191,11 +187,10 @@ public class NamedParameterQueryTests {
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("id", 3);
-		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
+		Integer value = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
 				params, Integer.class);
 
-		boolean condition = o instanceof Integer;
-		assertThat(condition).as("Correct result type").isTrue();
+		assertThat(value).isEqualTo(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
@@ -208,30 +203,26 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("id", 3);
-		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
+		Integer value = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
 				params, Integer.class);
 
-		boolean condition = o instanceof Integer;
-		assertThat(condition).as("Correct result type").isTrue();
+		assertThat(value).isEqualTo(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
 
 	@Test
 	public void testQueryForObjectWithParamMapAndList() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID IN (:ids)";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID IN (?, ?)";
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("ids", Arrays.asList(3, 4));
-		Object o = template.queryForObject(sql, params, Integer.class);
+		Integer value = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID IN (:ids)", params, Integer.class);
 
-		boolean condition = o instanceof Integer;
-		assertThat(condition).as("Correct result type").isTrue();
-		verify(connection).prepareStatement(sqlToUse);
+		assertThat(value).isEqualTo(22);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID IN (?, ?)");
 		verify(preparedStatement).setObject(1, 3);
 	}
 
@@ -246,14 +237,11 @@ public class NamedParameterQueryTests {
 		l1.add(new Object[] {3, "Rod"});
 		l1.add(new Object[] {4, "Juergen"});
 		params.addValue("multiExpressionList", l1);
-		Object o = template.queryForObject(
-				"SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)",
+		Integer value = template.queryForObject("SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)",
 				params, Integer.class);
 
-		boolean condition = o instanceof Integer;
-		assertThat(condition).as("Correct result type").isTrue();
-		verify(connection).prepareStatement(
-				"SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN ((?, ?), (?, ?))");
+		assertThat(value).isEqualTo(22);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN ((?, ?), (?, ?))");
 		verify(preparedStatement).setObject(1, 3);
 	}
 
