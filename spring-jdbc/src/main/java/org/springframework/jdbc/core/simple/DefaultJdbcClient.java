@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * @see JdbcClient#create(JdbcOperations)
  * @see JdbcClient#create(NamedParameterJdbcOperations)
  */
-class DefaultJdbcClient implements JdbcClient {
+final class DefaultJdbcClient implements JdbcClient {
 
 	private final JdbcOperations classicOps;
 

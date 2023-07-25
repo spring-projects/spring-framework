@@ -59,10 +59,14 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Default implementation of {@link RestClient}.
+ * The default implementation of {@link RestClient},
+ * as created by the static factory methods.
  *
  * @author Arjen Poutsma
  * @since 6.1
+ * @see RestClient#create()
+ * @see RestClient#create(String)
+ * @see RestClient#create(RestTemplate)
  */
 final class DefaultRestClient implements RestClient {
 
@@ -94,7 +98,8 @@ final class DefaultRestClient implements RestClient {
 	private final List<HttpMessageConverter<?>> messageConverters;
 
 
-	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory, @Nullable List<ClientHttpRequestInterceptor> interceptors,
+	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory,
+			@Nullable List<ClientHttpRequestInterceptor> interceptors,
 			@Nullable List<ClientHttpRequestInitializer> initializers,
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
@@ -107,7 +112,7 @@ final class DefaultRestClient implements RestClient {
 		this.interceptors = interceptors;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
-		this.defaultStatusHandlers = (statusHandlers != null) ? new ArrayList<>(statusHandlers) : new ArrayList<>();
+		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
 		this.builder = builder;
 	}
@@ -184,7 +189,6 @@ final class DefaultRestClient implements RestClient {
 		public DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
-
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
@@ -457,6 +461,7 @@ final class DefaultRestClient implements RestClient {
 		}
 	}
 
+
 	private class DefaultResponseSpec implements ResponseSpec {
 
 		private final HttpRequest clientRequest;
@@ -466,7 +471,6 @@ final class DefaultRestClient implements RestClient {
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
 		private final int defaultStatusHandlerCount;
-
 
 		DefaultResponseSpec(HttpRequest clientRequest, ClientHttpResponse clientResponse) {
 			this.clientRequest = clientRequest;
@@ -548,7 +552,6 @@ final class DefaultRestClient implements RestClient {
 			}
 		}
 
-
 		@SuppressWarnings("unchecked")
 		private static <T> Class<T> bodyClass(Type type) {
 			if (type instanceof Class<?> clazz) {
@@ -561,8 +564,7 @@ final class DefaultRestClient implements RestClient {
 			return (Class<T>) Object.class;
 		}
 
-
-		@SuppressWarnings({"unchecked", "rawtypes"})
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		private <T> T readWithMessageConverters(Type bodyType, Class<T> bodyClass) {
 			MediaType contentType = getContentType();
 
@@ -611,7 +613,6 @@ final class DefaultRestClient implements RestClient {
 				}
 			}
 		}
-
 	}
 
 }
