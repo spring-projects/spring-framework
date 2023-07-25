@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.beans.ConstructorProperties;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
@@ -114,6 +113,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.BindParam;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -4057,8 +4057,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		private int param3;
 
-		@ConstructorProperties({"param1", "param2", "optionalParam"})
-		public DataClass(String param1, boolean p2, Optional<Integer> optionalParam) {
+		public DataClass(String param1, @BindParam("param2") boolean p2, Optional<Integer> optionalParam) {
 			this.param1 = param1;
 			this.param2 = p2;
 			Assert.notNull(optionalParam, "Optional must not be null");
@@ -4152,8 +4151,9 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		public int param3;
 
-		@ConstructorProperties({"param1", "param2", "optionalParam"})
-		public MultipartFileDataClass(MultipartFile param1, boolean p2, Optional<Integer> optionalParam) {
+		public MultipartFileDataClass(
+				MultipartFile param1, @BindParam("param2") boolean p2, Optional<Integer> optionalParam) {
+
 			this.param1 = param1;
 			this.param2 = p2;
 			Assert.notNull(optionalParam, "Optional must not be null");
@@ -4184,8 +4184,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		public int param3;
 
-		@ConstructorProperties({"param1", "param2", "optionalParam"})
-		public ServletPartDataClass(Part param1, boolean p2, Optional<Integer> optionalParam) {
+		public ServletPartDataClass(Part param1, @BindParam("param2") boolean p2, Optional<Integer> optionalParam) {
 			this.param1 = param1;
 			this.param2 = p2;
 			Assert.notNull(optionalParam, "Optional must not be null");

@@ -91,6 +91,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 			@Nullable ResolvableType type) throws Exception {
 
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
+		dataBinder.setNameResolver(new BindParamNameResolver());
 
 		if (target == null && type != null) {
 			dataBinder.setTargetType(type);
@@ -99,6 +100,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
+
 		initBinder(dataBinder, webRequest);
 
 		if (this.methodValidationApplicable && type != null) {
@@ -112,7 +114,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
 	/**
 	 * Extension point to create the WebDataBinder instance.
-	 * By default this is {@code WebRequestDataBinder}.
+	 * By default, this is {@code WebRequestDataBinder}.
 	 * @param target the binding target or {@code null} for type conversion only
 	 * @param objectName the binding target object name
 	 * @param webRequest the current request

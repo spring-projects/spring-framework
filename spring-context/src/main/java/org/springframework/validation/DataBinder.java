@@ -171,6 +171,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private String[] requiredFields;
 
 	@Nullable
+	private NameResolver nameResolver;
+
+	@Nullable
 	private ConversionService conversionService;
 
 	@Nullable
@@ -225,7 +228,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the type for the target object. When the target is {@code null},
-	 * setting the targetType allows using {@link #construct(ValueResolver)} to
+	 * setting the targetType allows using {@link #construct} to
 	 * create the target.
 	 * @param targetType the type of the target object
 	 * @since 6.1
@@ -252,7 +255,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Default is "true" on a standard DataBinder. Note that since Spring 4.1 this feature is supported
 	 * for bean property access (DataBinder's default mode) and field access.
 	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)}.
+	 * applicable to constructor binding via {@link #construct}.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
 	 */
@@ -274,7 +277,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
 	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)}.
+	 * applicable to constructor binding via {@link #construct}.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
@@ -431,8 +434,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Note that this setting only applies to <i>binding</i> operations
 	 * on this DataBinder, not to <i>retrieving</i> values via its
 	 * {@link #getBindingResult() BindingResult}.
-	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @see #bind
 	 */
@@ -456,8 +459,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Note that this setting only applies to <i>binding</i> operations
 	 * on this DataBinder, not to <i>retrieving</i> values via its
 	 * {@link #getBindingResult() BindingResult}.
-	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @see #bind
 	 */
@@ -487,8 +490,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>disallowed</i> field patterns.
-	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @param allowedFields array of allowed field patterns
 	 * @see #setDisallowedFields
@@ -526,8 +529,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
-	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @param disallowedFields array of disallowed field patterns
 	 * @see #setAllowedFields
@@ -562,8 +565,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * incoming property values, a corresponding "missing field" error
 	 * will be created, with error code "required" (by the default
 	 * binding error processor).
-	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @param requiredFields array of field names
 	 * @see #setBindingErrorProcessor
@@ -584,6 +587,28 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@Nullable
 	public String[] getRequiredFields() {
 		return this.requiredFields;
+	}
+
+	/**
+	 * Configure a resolver to determine the name of the value to bind to a
+	 * constructor parameter in {@link #construct}.
+	 * <p>If not configured, or if the name cannot be resolved, by default
+	 * {@link org.springframework.core.DefaultParameterNameDiscoverer} is used.
+	 * @param nameResolver the resolver to use
+	 * @since 6.1
+	 */
+	public void setNameResolver(NameResolver nameResolver) {
+		this.nameResolver = nameResolver;
+	}
+
+	/**
+	 * Return the {@link #setNameResolver configured} name resolver for
+	 * constructor parameters.
+	 * @since 6.1
+	 */
+	@Nullable
+	public NameResolver getNameResolver() {
+		return this.nameResolver;
 	}
 
 	/**
@@ -885,11 +910,19 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			Set<String> failedParamNames = new HashSet<>(4);
 
 			for (int i = 0; i < paramNames.length; i++) {
-				String paramPath = nestedPath + paramNames[i];
+				MethodParameter param = MethodParameter.forFieldAwareConstructor(ctor, i, paramNames[i]);
+				String lookupName = null;
+				if (this.nameResolver != null) {
+					lookupName = this.nameResolver.resolveName(param);
+				}
+				if (lookupName == null) {
+					lookupName = paramNames[i];
+				}
+
+				String paramPath = nestedPath + lookupName;
 				Class<?> paramType = paramTypes[i];
 				Object value = valueResolver.resolveValue(paramPath, paramType);
 
-				MethodParameter param = MethodParameter.forFieldAwareConstructor(ctor, i, paramNames[i]);
 				if (value == null && !BeanUtils.isSimpleValueType(param.nestedIfOptional().getNestedParameterType())) {
 					ResolvableType type = ResolvableType.forMethodParameter(param);
 					args[i]  = createObject(type, paramPath + ".", valueResolver);
@@ -1188,16 +1221,36 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 
 	/**
-	 * Contract to resolve a value in {@link #construct(ValueResolver)}.
+	 * Strategy to determine the name of the value to bind to a method parameter.
+	 * Supported on constructor parameters with {@link #construct constructor
+	 * binding} which performs lookups via {@link ValueResolver#resolveValue}.
+	 */
+	public interface NameResolver {
+
+		/**
+		 * Return the name to use for the given method parameter, or {@code null}
+		 * if unresolved. For constructor parameters, the name is determined via
+		 * {@link org.springframework.core.DefaultParameterNameDiscoverer} if
+		 * unresolved.
+		 */
+		@Nullable
+		String resolveName(MethodParameter parameter);
+
+	}
+
+	/**
+	 * Strategy for {@link #construct constructor binding} to look up the values
+	 * to bind to a given constructor parameter.
 	 */
 	@FunctionalInterface
 	public interface ValueResolver {
 
 		/**
-		 * Look up the value for a constructor argument.
-		 * @param name the argument name
-		 * @param type the argument type
-		 * @return the resolved value, possibly {@code null}
+		 * Resolve the value for the given name and target parameter type.
+		 * @param name the name to use for the lookup, possibly a nested path
+		 * for constructor parameters on nested objects
+		 * @param type the target type, based on the constructor parameter type
+		 * @return the resolved value, possibly {@code null} if none found
 		 */
 		@Nullable
 		Object resolveValue(String name, Class<?> type);
@@ -1216,6 +1269,5 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			copyCustomEditorsTo(registry, null);
 		}
 	}
-
 
 }

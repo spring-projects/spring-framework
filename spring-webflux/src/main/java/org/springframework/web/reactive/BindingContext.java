@@ -32,6 +32,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
+import org.springframework.web.bind.support.BindParamNameResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.server.ServerErrorException;
@@ -138,6 +139,8 @@ public class BindingContext {
 			ServerWebExchange exchange, @Nullable Object target, String name, @Nullable ResolvableType targetType) {
 
 		WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(target, name);
+		dataBinder.setNameResolver(new BindParamNameResolver());
+
 		if (target == null && targetType != null) {
 			dataBinder.setTargetType(targetType);
 		}
@@ -145,6 +148,7 @@ public class BindingContext {
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
+
 		dataBinder = initDataBinder(dataBinder, exchange);
 
 		if (this.methodValidationApplicable && targetType != null) {
