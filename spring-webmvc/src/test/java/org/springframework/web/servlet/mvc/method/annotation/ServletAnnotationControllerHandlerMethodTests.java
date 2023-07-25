@@ -2057,6 +2057,26 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 	}
 
 	@PathPatternsParameterizedTest
+	void dataClassBindingWithAdditionalSetterInDeclarativeBindingMode(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(DataClassController.class, usePathPatterns, wac -> {
+			ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+			initializer.setDeclarativeBinding(true);
+
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+			mappingDef.getPropertyValues().add("webBindingInitializer", initializer);
+			wac.registerBeanDefinition("handlerAdapter", mappingDef);
+		});
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("param3", "3");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-0");
+	}
+
+	@PathPatternsParameterizedTest
 	void dataClassBindingWithResult(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(ValidatedDataClassController.class, usePathPatterns);
 

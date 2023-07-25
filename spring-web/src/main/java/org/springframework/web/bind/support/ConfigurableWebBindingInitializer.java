@@ -45,6 +45,9 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	private boolean directFieldAccess = false;
 
 	@Nullable
+	private Boolean declarativeBinding;
+
+	@Nullable
 	private MessageCodesResolver messageCodesResolver;
 
 	@Nullable
@@ -97,6 +100,23 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 */
 	public boolean isDirectFieldAccess() {
 		return this.directFieldAccess;
+	}
+
+	/**
+	 * Set whether to bind only fields intended for binding as described in
+	 * {@link org.springframework.validation.DataBinder#setDeclarativeBinding}.
+	 * @since 6.1
+	 */
+	public void setDeclarativeBinding(boolean declarativeBinding) {
+		this.declarativeBinding = declarativeBinding;
+	}
+
+	/**
+	 * Return whether to bind only fields intended for binding.
+	 * @since 6.1
+	 */
+	public boolean isDeclarativeBinding() {
+		return (this.declarativeBinding != null ? this.declarativeBinding : false);
 	}
 
 	/**
@@ -196,6 +216,9 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 		binder.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 		if (this.directFieldAccess) {
 			binder.initDirectFieldAccess();
+		}
+		if (this.declarativeBinding != null) {
+			binder.setDeclarativeBinding(this.declarativeBinding);
 		}
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);

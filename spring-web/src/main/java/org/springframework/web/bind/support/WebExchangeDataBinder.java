@@ -93,6 +93,9 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	 * @return a {@code Mono<Void>} that completes when binding is complete
 	 */
 	public Mono<Void> bind(ServerWebExchange exchange) {
+		if (shouldNotBindPropertyValues()) {
+			return Mono.empty();
+		}
 		return getValuesToBind(exchange)
 				.doOnNext(map -> doBind(new MutablePropertyValues(map)))
 				.then();

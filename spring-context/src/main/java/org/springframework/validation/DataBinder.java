@@ -153,6 +153,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@Nullable
 	private ExtendedTypeConverter typeConverter;
 
+	private boolean declarativeBinding = false;
+
 	private boolean ignoreUnknownFields = true;
 
 	private boolean ignoreInvalidFields = false;
@@ -425,6 +427,28 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return getInternalBindingResult();
 	}
 
+	/**
+	 * Set whether to bind only fields explicitly intended for binding including:
+	 * <ul>
+	 * <li>Constructor binding via {@link #construct}.
+	 * <li>Property binding with configured
+	 * {@link #setAllowedFields(String...) allowedFields}.
+	 * </ul>
+	 * <p>Default is "false". Turn this on to limit binding to constructor
+	 * parameters and allowed fields.
+	 * @since 6.1
+	 */
+	public void setDeclarativeBinding(boolean declarativeBinding) {
+		this.declarativeBinding = declarativeBinding;
+	}
+
+	/**
+	 * Return whether to bind only fields intended for binding.
+	 * @since 6.1
+	 */
+	public boolean isDeclarativeBinding() {
+		return this.declarativeBinding;
+	}
 
 	/**
 	 * Set whether to ignore unknown fields, that is, whether to ignore bind
@@ -1031,9 +1055,22 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #doBind(org.springframework.beans.MutablePropertyValues)
 	 */
 	public void bind(PropertyValues pvs) {
+		if (shouldNotBindPropertyValues()) {
+			return;
+		}
 		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues mutablePropertyValues ?
 				mutablePropertyValues : new MutablePropertyValues(pvs));
 		doBind(mpvs);
+	}
+
+	/**
+	 * Whether to not bind parameters to properties. Returns "true" if
+	 * {@link #isDeclarativeBinding()} is on, and
+	 * {@link #setAllowedFields(String...) allowedFields} are not configured.
+	 * @since 6.1
+	 */
+	protected boolean shouldNotBindPropertyValues() {
+		return (isDeclarativeBinding() && ObjectUtils.isEmpty(this.allowedFields));
 	}
 
 	/**

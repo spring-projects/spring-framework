@@ -138,6 +138,9 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(WebRequest request) {
+		if (shouldNotBindPropertyValues()) {
+			return;
+		}
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
 		if (request instanceof NativeWebRequest nativeRequest) {
 			MultipartRequest multipartRequest = nativeRequest.getNativeRequest(MultipartRequest.class);

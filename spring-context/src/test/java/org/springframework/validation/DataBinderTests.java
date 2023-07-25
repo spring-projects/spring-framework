@@ -682,6 +682,23 @@ class DataBinderTests {
 	}
 
 	@Test
+	void bindingInDeclarativeMode() throws BindException {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod);
+		binder.setDeclarativeBinding(true);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
+
+		binder.bind(pvs);
+		binder.close();
+
+		assertThat(rod.getName()).isNull();
+		assertThat(rod.getAge()).isEqualTo(0);
+	}
+
+	@Test
 	void bindingWithAllowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
