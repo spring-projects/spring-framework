@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,16 +55,25 @@ import org.springframework.util.ConcurrentLruCache;
  * done at execution time. It also allows for expanding a {@link java.util.List}
  * of values to the appropriate number of placeholders.
  *
- * <p>The underlying {@link org.springframework.jdbc.core.JdbcTemplate} is
+ * <p>An instance of this template class is thread-safe once configured.
+ * The underlying {@link org.springframework.jdbc.core.JdbcTemplate} is
  * exposed to allow for convenient access to the traditional
  * {@link org.springframework.jdbc.core.JdbcTemplate} methods.
  *
- * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
+ * <p><b>NOTE: As of 6.1, there is a unified JDBC access facade available in
+ * the form of {@link org.springframework.jdbc.core.simple.JdbcClient}.</b>
+ * {@code JdbcClient} provides a fluent API style for common JDBC queries/updates
+ * with flexible use of indexed or named parameters. It delegates to a
+ * {@code JdbcTemplate}/{@code NamedParameterJdbcTemplate} for actual execution.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.0
  * @see NamedParameterJdbcOperations
+ * @see SqlParameterSource
+ * @see ResultSetExtractor
+ * @see RowCallbackHandler
+ * @see RowMapper
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,19 @@ import org.springframework.lang.Nullable;
  * <p>Alternatively, the standard JDBC infrastructure can be mocked.
  * However, mocking this interface constitutes significantly less work.
  * As an alternative to a mock objects approach to testing data access code,
- * consider the powerful integration testing support provided via the <em>Spring
- * TestContext Framework</em>, in the {@code spring-test} artifact.
+ * consider the powerful integration testing support provided via the
+ * <em>Spring TestContext Framework</em>, in the {@code spring-test} artifact.
+ *
+ * <p><b>NOTE: As of 6.1, there is a unified JDBC access facade available in
+ * the form of {@link org.springframework.jdbc.core.simple.JdbcClient}.</b>
+ * {@code JdbcClient} provides a fluent API style for common JDBC queries/updates
+ * with flexible use of indexed or named parameters. It delegates to
+ * {@code JdbcOperations}/{@code NamedParameterJdbcOperations} for actual execution.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see JdbcTemplate
+ * @see org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
  */
 public interface JdbcOperations {
 

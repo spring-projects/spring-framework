@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,12 @@ import org.springframework.lang.Nullable;
  * implemented by {@link NamedParameterJdbcTemplate}. This interface is not
  * often used directly, but provides a useful option to enhance testability,
  * as it can easily be mocked or stubbed.
+ *
+ * <p><b>NOTE: As of 6.1, there is a unified JDBC access facade available in
+ * the form of {@link org.springframework.jdbc.core.simple.JdbcClient}.</b>
+ * {@code JdbcClient} provides a fluent API style for common JDBC queries/updates
+ * with flexible use of indexed or named parameters. It delegates to
+ * {@code JdbcOperations}/{@code NamedParameterJdbcOperations} for actual execution.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller

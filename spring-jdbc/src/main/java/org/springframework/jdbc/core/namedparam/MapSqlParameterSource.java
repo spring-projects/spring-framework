@@ -144,6 +144,14 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	/**
+	 * Return whether this parameter source has been configured with any values.
+	 * @since 6.1
+	 */
+	public boolean hasValues() {
+		return !this.values.isEmpty();
+	}
+
+	/**
 	 * Expose the current parameter values as read-only Map.
 	 */
 	public Map<String, Object> getValues() {
