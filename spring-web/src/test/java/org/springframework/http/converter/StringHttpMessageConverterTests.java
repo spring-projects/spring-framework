@@ -70,6 +70,17 @@ public class StringHttpMessageConverterTests {
 		assertThat(result).as("Invalid result").isEqualTo(body);
 	}
 
+	@Test
+	public void readWithContentLengthHeader() throws IOException {
+		String body = "Hello World";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentLength(body.length());
+		inputMessage.getHeaders().setContentType(TEXT_PLAIN_UTF_8);
+		String result = this.converter.read(String.class, inputMessage);
+
+		assertThat(result).as("Invalid result").isEqualTo(body);
+	}
+
 	@Test // gh-24123
 	public void readJson() throws IOException {
 		String body = "{\"result\":\"\u0414\u0410\"}";
