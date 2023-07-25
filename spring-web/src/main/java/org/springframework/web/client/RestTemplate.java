@@ -1044,7 +1044,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
 			Object requestBody = this.requestEntity.getBody();

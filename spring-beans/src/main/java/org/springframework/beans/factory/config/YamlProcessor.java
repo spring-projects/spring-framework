@@ -226,7 +226,7 @@ public abstract class YamlProcessor {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private Map<String, Object> asMap(Object object) {
 		// YAML can have numbers as keys
 		Map<String, Object> result = new LinkedHashMap<>();
@@ -305,7 +305,7 @@ public abstract class YamlProcessor {
 		return result;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
 		source.forEach((key, value) -> {
 			if (StringUtils.hasText(path)) {

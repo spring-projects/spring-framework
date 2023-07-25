@@ -59,7 +59,7 @@ public abstract class SqlParameterSourceUtils {
 	 * @see BeanPropertySqlParameterSource
 	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[])
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static SqlParameterSource[] createBatch(Collection<?> candidates) {
 		SqlParameterSource[] batch = new SqlParameterSource[candidates.size()];
 		int i = 0;

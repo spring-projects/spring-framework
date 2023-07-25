@@ -53,7 +53,7 @@ public class StandardTypeComparator implements TypeComparator {
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public int compare(@Nullable Object left, @Nullable Object right) throws SpelEvaluationException {
 		// If one is null, check if the other is
 		if (left == null) {

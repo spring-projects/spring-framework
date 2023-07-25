@@ -588,7 +588,7 @@ public abstract class DataBufferUtils {
 	 * @throws DataBufferLimitException if maxByteCount is exceeded
 	 * @since 5.1.11
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> buffers, int maxByteCount) {
 		Assert.notNull(buffers, "'buffers' must not be null");
 

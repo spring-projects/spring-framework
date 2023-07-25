@@ -65,8 +65,7 @@ import org.springframework.util.StringUtils;
  * It executes core JDBC workflow, leaving application code to provide SQL
  * and extract results. This class executes SQL queries or updates, initiating
  * iteration over ResultSets and catching JDBC exceptions and translating
- * them to the generic, more informative exception hierarchy defined in the
- * {@code org.springframework.dao} package.
+ * them to the common {@code org.springframework.dao} exception hierarchy.
  *
  * <p>Code using this class need only implement callback interfaces, giving
  * them a clearly defined contract. The {@link PreparedStatementCreator} callback
@@ -75,7 +74,8 @@ import org.springframework.util.StringUtils;
  * values from a ResultSet. See also {@link PreparedStatementSetter} and
  * {@link RowMapper} for two popular alternative callback interfaces.
  *
- * <p>Can be used within a service implementation via direct instantiation
+ * <p>An instance of this template class is thread-safe once configured.
+ * Can be used within a service implementation via direct instantiation
  * with a DataSource reference, or get prepared in an application context
  * and given to services as bean reference. Note: The DataSource should
  * always be configured as a bean in the application context, in the first case
@@ -88,12 +88,11 @@ import org.springframework.util.StringUtils;
  * <p>All SQL operations performed by this class are logged at debug level,
  * using "org.springframework.jdbc.core.JdbcTemplate" as log category.
  *
- * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
  * @since May 3, 2001
+ * @see JdbcOperations
  * @see PreparedStatementCreator
  * @see PreparedStatementSetter
  * @see CallableStatementCreator
@@ -103,6 +102,7 @@ import org.springframework.util.StringUtils;
  * @see RowCallbackHandler
  * @see RowMapper
  * @see org.springframework.jdbc.support.SQLExceptionTranslator
+ * @see org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
