@@ -132,6 +132,7 @@ public class SimpleErrors implements Errors, Serializable {
 
 		PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(this.target.getClass(), field);
 		if (pd != null && pd.getReadMethod() != null) {
+			ReflectionUtils.makeAccessible(pd.getReadMethod());
 			return ReflectionUtils.invokeMethod(pd.getReadMethod(), this.target);
 		}
 
