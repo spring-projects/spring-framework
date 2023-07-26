@@ -6033,7 +6033,7 @@ confirm the exclusion.
 
 
 [[cache-annotations-evict]]
-==== The `@CacheEvict` annotation
+==== The `@CacheEvict` Annotation
 
 The cache abstraction allows not just population of a cache store but also eviction.
 This process is useful for removing stale or unused data from the cache. As opposed to
@@ -6091,7 +6091,7 @@ The following example uses two `@CacheEvict` annotations:
 
 
 [[cache-annotations-config]]
-==== The `@CacheConfig` annotation
+==== The `@CacheConfig` Annotation
 
 So far, we have seen that caching operations offer many customization options and that
 you can set these options for each operation. However, some of the customization options

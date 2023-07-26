@@ -3636,11 +3636,8 @@ parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 	}
 
 	public int countOfActorsByFirstName(String firstName) {
-
-		String sql = "select count(*) from T_ACTOR where first_name = :first_name";
-
+		String sql = "select count(*) from t_actor where first_name = :first_name";
 		SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
-
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
@@ -3651,7 +3648,7 @@ parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
 	fun countOfActorsByFirstName(firstName: String): Int {
-		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val sql = "select count(*) from t_actor where first_name = :first_name"
 		val namedParameters = MapSqlParameterSource("first_name", firstName)
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
@@ -3679,11 +3676,8 @@ The following example shows the use of the `Map`-based style:
 	}
 
 	public int countOfActorsByFirstName(String firstName) {
-
-		String sql = "select count(*) from T_ACTOR where first_name = :first_name";
-
+		String sql = "select count(*) from t_actor where first_name = :first_name";
 		Map<String, String> namedParameters = Collections.singletonMap("first_name", firstName);
-
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
 	}
 ----
@@ -3694,7 +3688,7 @@ The following example shows the use of the `Map`-based style:
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
 	fun countOfActorsByFirstName(firstName: String): Int {
-		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val sql = "select count(*) from t_actor where first_name = :first_name"
 		val namedParameters = mapOf("first_name" to firstName)
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
@@ -3761,12 +3755,9 @@ members of the class shown in the preceding example:
 	}
 
 	public int countOfActors(Actor exampleActor) {
-
 		// notice how the named parameters match the properties of the above 'Actor' class
-		String sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName";
-
+		String sql = "select count(*) from t_actor where first_name = :firstName and last_name = :lastName";
 		SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
-
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
@@ -3780,7 +3771,7 @@ members of the class shown in the preceding example:
 
 	fun countOfActors(exampleActor: Actor): Int {
 		// notice how the named parameters match the properties of the above 'Actor' class
-		val sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName"
+		val sql = "select count(*) from t_actor where first_name = :firstName and last_name = :lastName"
 		val namedParameters = BeanPropertySqlParameterSource(exampleActor)
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
@@ -6089,7 +6080,7 @@ The following example shows how to do so:
 ==== Passing in Lists of Values for IN Clause
 
 The SQL standard allows for selecting rows based on an expression that includes a
-variable list of values. A typical example would be `select * from T_ACTOR where id in
+variable list of values. A typical example would be `select * from t_actor where id in
 (1, 2, 3)`. This variable list is not directly supported for prepared statements by the
 JDBC standard. You cannot declare a variable number of placeholders. You need a number
 of variations with the desired number of placeholders prepared, or you need to generate
@@ -6106,7 +6097,7 @@ limit is 1000.
 
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list can support multiple expressions being defined for the `in`
-clause, such as `+++select * from T_ACTOR where (id, last_name) in ((1, 'Johnson'), (2,
+clause, such as `+++select * from t_actor where (id, last_name) in ((1, 'Johnson'), (2,
 'Harrop'))+++`. This, of course, requires that your database supports this syntax.
 
 
