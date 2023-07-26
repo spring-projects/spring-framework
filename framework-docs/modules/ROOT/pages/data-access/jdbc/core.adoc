@@ -501,8 +501,8 @@ extend from it, your sub-class inherits a `setDataSource(..)` method from the
 Regardless of which of the above template initialization styles you choose to use (or
 not), it is seldom necessary to create a new instance of a `JdbcTemplate` class each
 time you want to run SQL. Once configured, a `JdbcTemplate` instance is thread-safe.
-If your application accesses multiple
-databases, you may want multiple `JdbcTemplate` instances, which requires multiple `DataSources` and, subsequently, multiple differently
+If your application accesses multiple databases, you may want multiple `JdbcTemplate`
+instances, which requires multiple `DataSources` and, subsequently, multiple differently
 configured `JdbcTemplate` instances.
 
 
@@ -531,11 +531,8 @@ Java::
 	}
 
 	public int countOfActorsByFirstName(String firstName) {
-
-		String sql = "select count(*) from T_ACTOR where first_name = :first_name";
-
+		String sql = "select count(*) from t_actor where first_name = :first_name";
 		SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
-
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
@@ -547,7 +544,7 @@ Kotlin::
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
 	fun countOfActorsByFirstName(firstName: String): Int {
-		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val sql = "select count(*) from t_actor where first_name = :first_name"
 		val namedParameters = MapSqlParameterSource("first_name", firstName)
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
@@ -579,12 +576,9 @@ Java::
 	}
 
 	public int countOfActorsByFirstName(String firstName) {
-
-		String sql = "select count(*) from T_ACTOR where first_name = :first_name";
-
+		String sql = "select count(*) from t_actor where first_name = :first_name";
 		Map<String, String> namedParameters = Collections.singletonMap("first_name", firstName);
-
-		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
 
@@ -596,7 +590,7 @@ Kotlin::
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
 	fun countOfActorsByFirstName(firstName: String): Int {
-		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val sql = "select count(*) from t_actor where first_name = :first_name"
 		val namedParameters = mapOf("first_name" to firstName)
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
@@ -644,7 +638,6 @@ Java::
 		}
 
 		// setters omitted...
-
 	}
 ----
 
@@ -673,12 +666,9 @@ Java::
 	}
 
 	public int countOfActors(Actor exampleActor) {
-
 		// notice how the named parameters match the properties of the above 'Actor' class
-		String sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName";
-
+		String sql = "select count(*) from t_actor where first_name = :firstName and last_name = :lastName";
 		SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
-
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
@@ -694,7 +684,7 @@ Kotlin::
 
 	fun countOfActors(exampleActor: Actor): Int {
 		// notice how the named parameters match the properties of the above 'Actor' class
-		val sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName"
+		val sql = "select count(*) from t_actor where first_name = :firstName and last_name = :lastName"
 		val namedParameters = BeanPropertySqlParameterSource(exampleActor)
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
@@ -707,8 +697,8 @@ functionality that is present only in the `JdbcTemplate` class, you can use the
 `getJdbcOperations()` method to access the wrapped `JdbcTemplate` through the
 `JdbcOperations` interface.
 
-See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate` Best Practices] for guidelines on using the
-`NamedParameterJdbcTemplate` class in the context of an application.
+See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate` Best Practices]
+for guidelines on using the `NamedParameterJdbcTemplate` class in the context of an application.
 
 
 [[jdbc-SQLExceptionTranslator]]

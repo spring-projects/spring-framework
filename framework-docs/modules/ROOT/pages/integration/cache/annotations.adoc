@@ -98,9 +98,9 @@ through its `key` attribute. You can use xref:core/expressions.adoc[SpEL] to pic
 arguments of interest (or their nested properties), perform operations, or even
 invoke arbitrary methods without having to write any code or implement any interface.
 This is the recommended approach over the
-xref:integration/cache/annotations.adoc#cache-annotations-cacheable-default-key[default generator], since methods tend to be
-quite different in signatures as the code base grows. While the default strategy might
-work for some methods, it rarely works for all methods.
+xref:integration/cache/annotations.adoc#cache-annotations-cacheable-default-key[default generator],
+since methods tend to be quite different in signatures as the code base grows. While the
+default strategy might work for some methods, it rarely works for all methods.
 
 The following examples use various SpEL declarations (if you are not familiar with SpEL,
 do yourself a favor and read xref:core/expressions.adoc[Spring Expression Language]):
@@ -137,9 +137,8 @@ that specifies both results in an exception.
 [[cache-annotations-cacheable-default-cache-resolver]]
 === Default Cache Resolution
 
-The caching abstraction uses a simple `CacheResolver` that
-retrieves the caches defined at the operation level by using the configured
-`CacheManager`.
+The caching abstraction uses a simple `CacheResolver` that retrieves the caches
+defined at the operation level by using the configured `CacheManager`.
 
 To provide a different default cache resolver, you need to implement the
 `org.springframework.cache.interceptor.CacheResolver` interface.
@@ -160,12 +159,11 @@ For applications that work with several cache managers, you can set the
 ----
 <1> Specifying `anotherCacheManager`.
 
-
 You can also replace the `CacheResolver` entirely in a fashion similar to that of
-replacing xref:integration/cache/annotations.adoc#cache-annotations-cacheable-key[key generation]. The resolution is
-requested for every cache operation, letting the implementation actually resolve
-the caches to use based on runtime arguments. The following example shows how to
-specify a `CacheResolver`:
+replacing xref:integration/cache/annotations.adoc#cache-annotations-cacheable-key[key generation].
+The resolution is requested for every cache operation, letting the implementation
+actually resolve the caches to use based on runtime arguments. The following example
+shows how to specify a `CacheResolver`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -173,7 +171,6 @@ specify a `CacheResolver`:
 	public Book findBook(ISBN isbn) {...}
 ----
 <1> Specifying the `CacheResolver`.
-
 
 [NOTE]
 ====
@@ -229,7 +226,6 @@ argument `name` has a length shorter than 32:
 ----
 <1> Setting a condition on `@Cacheable`.
 
-
 In addition to the `condition` parameter, you can use the `unless` parameter to veto the
 adding of a value to the cache. Unlike `condition`, `unless` expressions are evaluated
 after the method has been invoked. To expand on the previous example, perhaps we only
@@ -241,7 +237,6 @@ want to cache paperback books, as the following example does:
 	public Book findBook(String name)
 ----
 <1> Using the `unless` attribute to block hardbacks.
-
 
 The cache abstraction supports `java.util.Optional` return types. If an `Optional` value
 is _present_, it will be stored in the associated cache. If an `Optional` value is not
@@ -344,7 +339,7 @@ confirm the exclusion.
 
 
 [[cache-annotations-evict]]
-== The `@CacheEvict` annotation
+== The `@CacheEvict` Annotation
 
 The cache abstraction allows not just population of a cache store but also eviction.
 This process is useful for removing stale or unused data from the cache. As opposed to
@@ -402,7 +397,7 @@ The following example uses two `@CacheEvict` annotations:
 
 
 [[cache-annotations-config]]
-== The `@CacheConfig` annotation
+== The `@CacheConfig` Annotation
 
 So far, we have seen that caching operations offer many customization options and that
 you can set these options for each operation. However, some of the customization options
