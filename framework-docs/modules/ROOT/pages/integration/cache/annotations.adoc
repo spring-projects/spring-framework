@@ -98,9 +98,9 @@ through its `key` attribute. You can use xref:core/expressions.adoc[SpEL] to pic
 arguments of interest (or their nested properties), perform operations, or even
 invoke arbitrary methods without having to write any code or implement any interface.
 This is the recommended approach over the
-xref:integration/cache/annotations.adoc#cache-annotations-cacheable-default-key[default generator], since methods tend to be
-quite different in signatures as the code base grows. While the default strategy might
-work for some methods, it rarely works for all methods.
+xref:integration/cache/annotations.adoc#cache-annotations-cacheable-default-key[default generator],
+since methods tend to be quite different in signatures as the code base grows. While the
+default strategy might work for some methods, it rarely works for all methods.
 
 The following examples use various SpEL declarations (if you are not familiar with SpEL,
 do yourself a favor and read xref:core/expressions.adoc[Spring Expression Language]):
@@ -137,9 +137,8 @@ that specifies both results in an exception.
 [[cache-annotations-cacheable-default-cache-resolver]]
 === Default Cache Resolution
 
-The caching abstraction uses a simple `CacheResolver` that
-retrieves the caches defined at the operation level by using the configured
-`CacheManager`.
+The caching abstraction uses a simple `CacheResolver` that retrieves the caches
+defined at the operation level by using the configured `CacheManager`.
 
 To provide a different default cache resolver, you need to implement the
 `org.springframework.cache.interceptor.CacheResolver` interface.
@@ -160,12 +159,11 @@ For applications that work with several cache managers, you can set the
 ----
 <1> Specifying `anotherCacheManager`.
 
-
 You can also replace the `CacheResolver` entirely in a fashion similar to that of
-replacing xref:integration/cache/annotations.adoc#cache-annotations-cacheable-key[key generation]. The resolution is
-requested for every cache operation, letting the implementation actually resolve
-the caches to use based on runtime arguments. The following example shows how to
-specify a `CacheResolver`:
+replacing xref:integration/cache/annotations.adoc#cache-annotations-cacheable-key[key generation].
+The resolution is requested for every cache operation, letting the implementation
+actually resolve the caches to use based on runtime arguments. The following example
+shows how to specify a `CacheResolver`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -173,7 +171,6 @@ specify a `CacheResolver`:
 	public Book findBook(ISBN isbn) {...}
 ----
 <1> Specifying the `CacheResolver`.
-
 
 [NOTE]
 ====
@@ -211,6 +208,65 @@ NOTE: This is an optional feature, and your favorite cache library may not suppo
 All `CacheManager` implementations provided by the core framework support it. See the
 documentation of your cache provider for more details.
 
+[[cache-annotations-cacheable-reactive]]
+=== Caching with CompletableFuture and Reactive Return Types
+
+As of 6.1, cache annotations take `CompletableFuture` and reactive return types
+into account, automatically adapting the cache interaction accordingly.
+
+For a method returning a `CompletableFuture`, the object produced by that future
+will be cached whenever it is complete, and the cache lookup for a cache hit will
+be retrieved via a `CompletableFuture`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable("books")
+	public CompletableFuture<Book> findBook(ISBN isbn) {...}
+----
+
+For a method returning a Reactor `Mono`, the object emitted by that Reactive Streams
+publisher will be cached whenever it is available, and the cache lookup for a cache
+hit will be retrieved as a `Mono` (backed by a `CompletableFuture`):
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable("books")
+	public Mono<Book> findBook(ISBN isbn) {...}
+----
+
+For a method returning a Reactor `Flux`, the objects emitted by that Reactive Streams
+publisher will be collected into a `List` and cached whenever that list is complete,
+and the cache lookup for a cache hit will be retrieved as a `Flux` (backed by a
+`CompletableFuture` for the cached `List` value):
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable("books")
+	public Flux<Book> findBooks(String author) {...}
+----
+
+Such `CompletableFuture` and reactive adaptation also works for synchronized caching,
+computing the value only once in case of a concurrent cache miss:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="foos", sync=true) <1>
+	public CompletableFuture<Foo> executeExpensiveOperation(String id) {...}
+----
+<1> Using the `sync` attribute.
+
+NOTE: In order for such an arrangement to work at runtime, the configured cache
+needs to be capable of `CompletableFuture`-based retrieval. The Spring-provided
+`ConcurrentMapCacheManager` automatically adapts to that retrieval style, and
+`CaffeineCacheManager` natively supports it when its asynchronous cache mode is
+enabled: set `setAsyncCacheMode(true)` on your `CaffeineCacheManager` instance.
+
+Last but not least, be aware that annotation-driven caching is not appropriate
+for sophisticated reactive interactions involving composition and back pressure.
+If you choose to declare `@Cacheable` on specific reactive methods, consider the
+impact of the rather coarse-granular cache interaction which simply stores the
+emitted object for a `Mono` or even a pre-collected list of objects for a `Flux`.
+
 [[cache-annotations-cacheable-condition]]
 === Conditional Caching
 
@@ -229,7 +285,6 @@ argument `name` has a length shorter than 32:
 ----
 <1> Setting a condition on `@Cacheable`.
 
-
 In addition to the `condition` parameter, you can use the `unless` parameter to veto the
 adding of a value to the cache. Unlike `condition`, `unless` expressions are evaluated
 after the method has been invoked. To expand on the previous example, perhaps we only
@@ -241,7 +296,6 @@ want to cache paperback books, as the following example does:
 	public Book findBook(String name)
 ----
 <1> Using the `unless` attribute to block hardbacks.
-
 
 The cache abstraction supports `java.util.Optional` return types. If an `Optional` value
 is _present_, it will be stored in the associated cache. If an `Optional` value is not
@@ -342,9 +396,12 @@ other), such declarations should be avoided. Note also that such conditions shou
 on the result object (that is, the `#result` variable), as these are validated up-front to
 confirm the exclusion.
 
+As of 6.1, `@CachePut` takes `CompletableFuture` and reactive return types into account,
+performing the put operation whenever the produced object is available.
+
 
 [[cache-annotations-evict]]
-== The `@CacheEvict` annotation
+== The `@CacheEvict` Annotation
 
 The cache abstraction allows not just population of a cache store but also eviction.
 This process is useful for removing stale or unused data from the cache. As opposed to
@@ -384,6 +441,9 @@ trigger, the return values are ignored (as they do not interact with the cache).
 not the case with `@Cacheable` which adds data to the cache or updates data in the cache
 and, thus, requires a result.
 
+As of 6.1, `@CacheEvict` takes `CompletableFuture` and reactive return types into account,
+performing an after-invocation evict operation whenever processing has completed.
+
 
 [[cache-annotations-caching]]
 == The `@Caching` Annotation
@@ -402,7 +462,7 @@ The following example uses two `@CacheEvict` annotations:
 
 
 [[cache-annotations-config]]
-== The `@CacheConfig` annotation
+== The `@CacheConfig` Annotation
 
 So far, we have seen that caching operations offer many customization options and that
 you can set these options for each operation. However, some of the customization options
