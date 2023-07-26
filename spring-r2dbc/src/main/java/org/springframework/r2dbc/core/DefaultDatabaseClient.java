@@ -163,8 +163,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 	/**
 	 * Release the {@link Connection}.
 	 * @param connection to close.
-	 * @return a {@link Publisher} that completes successfully when the connection is
-	 * closed
+	 * @return a {@link Publisher} that completes successfully when the connection is closed
 	 */
 	private Publisher<Void> closeConnection(Connection connection) {
 		return ConnectionFactoryUtils.currentConnectionFactory(
