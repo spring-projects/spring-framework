@@ -31,17 +31,19 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * {@link TaskExecutor} implementation that fires up a new Thread for each task,
- * executing it asynchronously.
+ * executing it asynchronously. Supports a virtual thread option on JDK 21.
  *
  * <p>Supports limiting concurrent threads through the "concurrencyLimit"
  * bean property. By default, the number of concurrent threads is unlimited.
  *
  * <p><b>NOTE: This implementation does not reuse threads!</b> Consider a
  * thread-pooling TaskExecutor implementation instead, in particular for
- * executing a large number of short-lived tasks.
+ * executing a large number of short-lived tasks. Alternatively, on JDK 21,
+ * consider setting {@link #setVirtualThreads} to {@code true}.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setVirtualThreads
  * @see #setConcurrencyLimit
  * @see SyncTaskExecutor
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
@@ -251,18 +253,28 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * Template method for the actual execution of a task.
 	 * <p>The default implementation creates a new Thread and starts it.
 	 * @param task the Runnable to execute
+	 * @see #newThread
+	 * @see Thread#start()
+	 */
+	protected void doExecute(Runnable task) {
+		newThread(task).start();
+	}
+
+	/**
+	 * Create a new Thread for the given task.
+	 * @param task the Runnable to create a Thread for
+	 * @return the new Thread instance
+	 * @since 6.1
 	 * @see #setVirtualThreads
 	 * @see #setThreadFactory
 	 * @see #createThread
-	 * @see java.lang.Thread#start()
 	 */
-	protected void doExecute(Runnable task) {
+	protected Thread newThread(Runnable task) {
 		if (this.virtualThreadDelegate != null) {
-			this.virtualThreadDelegate.startVirtualThread(nextThreadName(), task);
+			return this.virtualThreadDelegate.newVirtualThread(nextThreadName(), task);
 		}
 		else {
-			Thread thread = (this.threadFactory != null ? this.threadFactory.newThread(task) : createThread(task));
-			thread.start();
+			return (this.threadFactory != null ? this.threadFactory.newThread(task) : createThread(task));
 		}
 	}
 

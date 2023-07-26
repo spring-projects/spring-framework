@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadFactory;
  * @since 6.1
  * @see VirtualThreadTaskExecutor
  */
-class VirtualThreadDelegate {
+final class VirtualThreadDelegate {
 
 	public VirtualThreadDelegate() {
 		throw new UnsupportedOperationException("Virtual threads not supported on JDK <21");
@@ -40,7 +40,7 @@ class VirtualThreadDelegate {
 		throw new UnsupportedOperationException();
 	}
 
-	public Thread startVirtualThread(String name, Runnable task) {
+	public Thread newVirtualThread(String name, Runnable task) {
 		throw new UnsupportedOperationException();
 	}
 

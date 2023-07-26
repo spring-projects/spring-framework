@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -33,6 +35,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
@@ -47,6 +50,7 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class EnableSchedulingTests {
@@ -62,39 +66,31 @@ public class EnableSchedulingTests {
 	}
 
 
-	@Test
+	@ParameterizedTest
+	@ValueSource(classes = {FixedRateTaskConfig.class, FixedRateTaskConfigSubclass.class})
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void withFixedRateTask() throws InterruptedException {
-		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig.class);
+	public void withFixedRateTask(Class<?> configClass) throws InterruptedException {
+		ctx = new AnnotationConfigApplicationContext(configClass);
 		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(2);
 
 		Thread.sleep(110);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
 	}
 
-	@Test
+	@ParameterizedTest
+	@ValueSource(classes = {ExplicitSchedulerConfig.class, ExplicitSchedulerConfigSubclass.class})
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void withSubclass() throws InterruptedException {
-		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfigSubclass.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(2);
-
-		Thread.sleep(110);
-		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
-	}
-
-	@Test
-	@EnabledForTestGroups(LONG_RUNNING)
-	public void withExplicitScheduler() throws InterruptedException {
-		ctx = new AnnotationConfigApplicationContext(ExplicitSchedulerConfig.class);
+	public void withExplicitScheduler(Class<?> configClass) throws InterruptedException {
+		ctx = new AnnotationConfigApplicationContext(configClass);
 		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(1);
 
 		Thread.sleep(110);
 		ctx.stop();
 		int count1 = ctx.getBean(AtomicInteger.class).get();
-		assertThat(count1).isGreaterThanOrEqualTo(10);
+		assertThat(count1).isGreaterThanOrEqualTo(10).isLessThan(20);
 		Thread.sleep(110);
 		int count2 = ctx.getBean(AtomicInteger.class).get();
-		assertThat(count2).isEqualTo(count1);
+		assertThat(count2).isGreaterThanOrEqualTo(10).isLessThan(20);
 		ctx.start();
 		Thread.sleep(110);
 		int count3 = ctx.getBean(AtomicInteger.class).get();
@@ -241,7 +237,7 @@ public class EnableSchedulingTests {
 
 		@Bean
 		public TaskScheduler myTaskScheduler() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler-");
 			return scheduler;
 		}
@@ -260,12 +256,25 @@ public class EnableSchedulingTests {
 
 
 	@Configuration
+	static class ExplicitSchedulerConfigSubclass extends ExplicitSchedulerConfig {
+
+		@Bean
+		@Override
+		public TaskScheduler myTaskScheduler() {
+			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			scheduler.setThreadNamePrefix("explicitScheduler-");
+			return scheduler;
+		}
+	}
+
+
+	@Configuration
 	@EnableScheduling
 	static class AmbiguousExplicitSchedulerConfig {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
 			return scheduler;
 		}
@@ -291,7 +300,7 @@ public class EnableSchedulingTests {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
 			return scheduler;
 		}
@@ -329,7 +338,7 @@ public class EnableSchedulingTests {
 
 		@Bean @Qualifier("myScheduler")
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
 			return scheduler;
 		}
@@ -362,7 +371,7 @@ public class EnableSchedulingTests {
 
 		@Bean @Qualifier("myScheduler")
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
 			return scheduler;
 		}
@@ -402,7 +411,7 @@ public class EnableSchedulingTests {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
 			return scheduler;
 		}
@@ -426,7 +435,7 @@ public class EnableSchedulingTests {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
 			return scheduler;
 		}
@@ -467,7 +476,7 @@ public class EnableSchedulingTests {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1-");
 			return scheduler;
 		}
@@ -497,7 +506,7 @@ public class EnableSchedulingTests {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1-");
 			return scheduler;
 		}

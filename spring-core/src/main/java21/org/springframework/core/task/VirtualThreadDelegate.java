@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadFactory;
  * @since 6.1
  * @see VirtualThreadTaskExecutor
  */
-class VirtualThreadDelegate {
+final class VirtualThreadDelegate {
 
 	private final Thread.Builder threadBuilder = Thread.ofVirtual();
 
@@ -38,8 +38,8 @@ class VirtualThreadDelegate {
 		return this.threadBuilder.name(threadNamePrefix, 0).factory();
 	}
 
-	public Thread startVirtualThread(String name, Runnable task) {
-		return this.threadBuilder.name(name).start(task);
+	public Thread newVirtualThread(String name, Runnable task) {
+		return this.threadBuilder.name(name).unstarted(task);
 	}
 
 }

@@ -23,8 +23,6 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,16 +83,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	@Nullable
 	private ExecutorService executor;
 
-	private final ReentrantLock pauseLock = new ReentrantLock();
-
-	private final Condition unpaused = this.pauseLock.newCondition();
-
-	private volatile boolean paused;
-
-	private int executingTaskCount = 0;
-
 	@Nullable
-	private Runnable stopCallback;
+	private ExecutorLifecycleDelegate lifecycleDelegate;
 
 
 	/**
@@ -258,6 +248,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 			setThreadNamePrefix(this.beanName + "-");
 		}
 		this.executor = initializeExecutor(this.threadFactory, this.rejectedExecutionHandler);
+		this.lifecycleDelegate = new ExecutorLifecycleDelegate(this.executor);
 	}
 
 	/**
@@ -372,13 +363,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public void start() {
-		this.pauseLock.lock();
-		try {
-			this.paused = false;
-			this.unpaused.signalAll();
-		}
-		finally {
-			this.pauseLock.unlock();
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.start();
 		}
 	}
 
@@ -388,13 +374,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public void stop() {
-		this.pauseLock.lock();
-		try {
-			this.paused = true;
-			this.stopCallback = null;
-		}
-		finally {
-			this.pauseLock.unlock();
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.stop();
 		}
 	}
 
@@ -405,19 +386,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public void stop(Runnable callback) {
-		this.pauseLock.lock();
-		try {
-			this.paused = true;
-			if (this.executingTaskCount == 0) {
-				this.stopCallback = null;
-				callback.run();
-			}
-			else {
-				this.stopCallback = callback;
-			}
-		}
-		finally {
-			this.pauseLock.unlock();
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.stop(callback);
 		}
 	}
 
@@ -429,7 +399,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public boolean isRunning() {
-		return (this.executor != null && !this.executor.isShutdown() & !this.paused);
+		return (this.lifecycleDelegate != null && this.lifecycleDelegate.isRunning());
 	}
 
 	/**
@@ -442,18 +412,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see ThreadPoolExecutor#beforeExecute(Thread, Runnable)
 	 */
 	protected void beforeExecute(Thread thread, Runnable task) {
-		this.pauseLock.lock();
-		try {
-			while (this.paused && this.executor != null && !this.executor.isShutdown()) {
-				this.unpaused.await();
-			}
-		}
-		catch (InterruptedException ex) {
-			thread.interrupt();
-		}
-		finally {
-			this.executingTaskCount++;
-			this.pauseLock.unlock();
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.beforeExecute(thread);
 		}
 	}
 
@@ -467,19 +427,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see ThreadPoolExecutor#afterExecute(Runnable, Throwable)
 	 */
 	protected void afterExecute(Runnable task, @Nullable Throwable ex) {
-		this.pauseLock.lock();
-		try {
-			this.executingTaskCount--;
-			if (this.executingTaskCount == 0) {
-				Runnable callback = this.stopCallback;
-				if (callback != null) {
-					callback.run();
-					this.stopCallback = null;
-				}
-			}
-		}
-		finally {
-			this.pauseLock.unlock();
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.afterExecute();
 		}
 	}
 
