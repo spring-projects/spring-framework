@@ -16,8 +16,6 @@
 
 package org.springframework.r2dbc.core;
 
-import java.util.Objects;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -111,20 +109,15 @@ public final class Parameter {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Parameter other)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.value, other.value) &&
-				ObjectUtils.nullSafeEquals(this.type, other.type));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof Parameter that &&
+				ObjectUtils.nullSafeEquals(this.value, that.value) &&
+				ObjectUtils.nullSafeEquals(this.type, that.type)));
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.value, this.type);
+		return ObjectUtils.nullSafeHashCode(this.value) + ObjectUtils.nullSafeHashCode(this.type);
 	}
 
 	@Override

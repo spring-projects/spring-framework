@@ -62,14 +62,17 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Default implementation of {@link WebClient}.
+ * The default implementation of {@link WebClient},
+ * as created by the static factory methods.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
  * @since 5.0
+ * @see WebClient#create()
+ * @see WebClient#create(String)
  */
-class DefaultWebClient implements WebClient {
+final class DefaultWebClient implements WebClient {
 
 	private static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName() + ".uriTemplate";
 
@@ -104,9 +107,9 @@ class DefaultWebClient implements WebClient {
 	private final DefaultWebClientBuilder builder;
 
 
-	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable ExchangeFilterFunction filterFunctions, UriBuilderFactory uriBuilderFactory,
-			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
-			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
+	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable ExchangeFilterFunction filterFunctions,
+			UriBuilderFactory uriBuilderFactory, @Nullable HttpHeaders defaultHeaders,
+			@Nullable MultiValueMap<String, String> defaultCookies, @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
 			ObservationRegistry observationRegistry, @Nullable ClientRequestObservationConvention observationConvention,
 			DefaultWebClientBuilder builder) {
@@ -215,11 +218,9 @@ class DefaultWebClient implements WebClient {
 		@Nullable
 		private Consumer<ClientHttpRequest> httpRequestConsumer;
 
-
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
-
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
@@ -338,8 +339,8 @@ class DefaultWebClient implements WebClient {
 			return this;
 		}
 
-		@Override
 		@SuppressWarnings("deprecation")
+		@Override
 		public RequestBodySpec context(Function<Context, Context> contextModifier) {
 			this.contextModifier = (this.contextModifier != null ?
 					this.contextModifier.andThen(contextModifier) : contextModifier);
@@ -431,8 +432,8 @@ class DefaultWebClient implements WebClient {
 			});
 		}
 
-		@Override
 		@SuppressWarnings("deprecation")
+		@Override
 		public Mono<ClientResponse> exchange() {
 			ClientRequestObservationContext observationContext = new ClientRequestObservationContext();
 			ClientRequest.Builder requestBuilder = initRequestBuilder();
@@ -519,7 +520,6 @@ class DefaultWebClient implements WebClient {
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
 
-
 		private final HttpMethod httpMethod;
 
 		private final URI uri;
@@ -530,9 +530,7 @@ class DefaultWebClient implements WebClient {
 
 		private final int defaultStatusHandlerCount;
 
-
-		DefaultResponseSpec(
-				HttpMethod httpMethod, URI uri, Mono<ClientResponse> responseMono,
+		DefaultResponseSpec(HttpMethod httpMethod, URI uri, Mono<ClientResponse> responseMono,
 				List<StatusHandler> defaultStatusHandlers) {
 
 			this.httpMethod = httpMethod;
@@ -542,7 +540,6 @@ class DefaultWebClient implements WebClient {
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 			this.defaultStatusHandlerCount = this.statusHandlers.size();
 		}
-
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusCodePredicate,
@@ -734,6 +731,7 @@ class DefaultWebClient implements WebClient {
 		}
 	}
 
+
 	private static class ObservationFilterFunction implements ExchangeFilterFunction {
 
 		private final ClientRequestObservationContext observationContext;
@@ -744,8 +742,7 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
-			return next.exchange(request)
-						.doOnNext(this.observationContext::setResponse);
+			return next.exchange(request).doOnNext(this.observationContext::setResponse);
 		}
 	}
 

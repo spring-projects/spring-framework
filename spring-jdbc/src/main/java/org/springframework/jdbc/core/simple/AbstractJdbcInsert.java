@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Abstract class to provide base functionality for easy inserts
+ * Abstract class to provide base functionality for easy (batch) inserts
  * based on configuration options and database meta-data.
  *
- * <p>This class provides the base SPI for {@link SimpleJdbcInsert}.
+ * <p>This class provides the processing arrangement for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -409,7 +409,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Delegate method to execute the insert, generating a single key.
 	 */
-	private Number executeInsertAndReturnKeyInternal(final List<?> values) {
+	private Number executeInsertAndReturnKeyInternal(List<?> values) {
 		KeyHolder kh = executeInsertAndReturnKeyHolderInternal(values);
 		if (kh.getKey() != null) {
 			return kh.getKey();
@@ -423,11 +423,11 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Delegate method to execute the insert, generating any number of keys.
 	 */
-	private KeyHolder executeInsertAndReturnKeyHolderInternal(final List<?> values) {
+	private KeyHolder executeInsertAndReturnKeyHolderInternal(List<?> values) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
 		}
-		final KeyHolder keyHolder = new GeneratedKeyHolder();
+		KeyHolder keyHolder = new GeneratedKeyHolder();
 
 		if (this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
 			getJdbcTemplate().update(
@@ -455,7 +455,7 @@ public abstract class AbstractJdbcInsert {
 			}
 
 			Assert.state(getTableName() != null, "No table name set");
-			final String keyQuery = this.tableMetaDataContext.getSimpleQueryForGetGeneratedKey(
+			String keyQuery = this.tableMetaDataContext.getSimpleQueryForGetGeneratedKey(
 					getTableName(), getGeneratedKeyNames()[0]);
 			Assert.state(keyQuery != null, "Query for simulating get generated keys must not be null");
 
@@ -535,8 +535,8 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Delegate method that executes a batch insert using the passed-in Maps of parameters.
-	 * @param batch array of Maps with parameter names and values to be used in batch insert
-	 * @return array of number of rows affected
+	 * @param batch maps with parameter names and values to be used in the batch insert
+	 * @return an array of number of rows affected
 	 */
 	@SuppressWarnings("unchecked")
 	protected int[] doExecuteBatch(Map<String, ?>... batch) {
@@ -549,9 +549,10 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Delegate method that executes a batch insert using the passed-in {@link SqlParameterSource SqlParameterSources}.
-	 * @param batch array of SqlParameterSource with parameter names and values to be used in insert
-	 * @return array of number of rows affected
+	 * Delegate method that executes a batch insert using the passed-in
+	 * {@link SqlParameterSource SqlParameterSources}.
+	 * @param batch parameter sources with names and values to be used in the batch insert
+	 * @return an array of number of rows affected
 	 */
 	protected int[] doExecuteBatch(SqlParameterSource... batch) {
 		checkCompiled();
@@ -606,7 +607,7 @@ public abstract class AbstractJdbcInsert {
 	 * Match the provided in parameter values with registered parameters and parameters
 	 * defined via meta-data processing.
 	 * @param parameterSource the parameter values provided as a {@link SqlParameterSource}
-	 * @return a Map with parameter names and values
+	 * @return a List of values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
 		return this.tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
@@ -615,8 +616,8 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Match the provided in parameter values with registered parameters and parameters
 	 * defined via meta-data processing.
-	 * @param args the parameter values provided in a Map
-	 * @return a Map with parameter names and values
+	 * @param args the parameter values provided as a Map
+	 * @return a List of values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> args) {
 		return this.tableMetaDataContext.matchInParameterValuesWithInsertColumns(args);

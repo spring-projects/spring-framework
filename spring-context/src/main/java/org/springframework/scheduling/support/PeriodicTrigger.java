@@ -19,13 +19,13 @@ package org.springframework.scheduling.support;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A trigger for periodic task execution. The period may be applied as either
@@ -250,7 +250,7 @@ public class PeriodicTrigger implements Trigger {
 		return (this == other || (other instanceof PeriodicTrigger that &&
 				this.fixedRate == that.fixedRate &&
 				this.period.equals(that.period) &&
-				Objects.equals(this.initialDelay, that.initialDelay)));
+				ObjectUtils.nullSafeEquals(this.initialDelay, that.initialDelay)));
 	}
 
 	@Override

@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -380,6 +379,7 @@ abstract class NamedParameterUtils {
 		private final int endIndex;
 
 		ParameterHolder(String parameterName, int startIndex, int endIndex) {
+			Assert.notNull(parameterName, "Parameter name must not be null");
 			this.parameterName = parameterName;
 			this.startIndex = startIndex;
 			this.endIndex = endIndex;
@@ -398,20 +398,15 @@ abstract class NamedParameterUtils {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (!(o instanceof ParameterHolder that)) {
-				return false;
-			}
-			return this.startIndex == that.startIndex && this.endIndex == that.endIndex
-					&& Objects.equals(this.parameterName, that.parameterName);
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof ParameterHolder that &&
+					this.startIndex == that.startIndex && this.endIndex == that.endIndex &&
+					this.parameterName.equals(that.parameterName)));
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.parameterName, this.startIndex, this.endIndex);
+			return this.parameterName.hashCode();
 		}
 	}
 

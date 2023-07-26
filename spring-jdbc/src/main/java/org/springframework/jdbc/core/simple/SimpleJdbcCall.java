@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * any meta-data processing if you want to use parameter names that do not
  * match what is declared during the stored procedure compilation.
  *
- * <p>The actual insert is being handled using Spring's {@link JdbcTemplate}.
+ * <p>The actual call is being handled using Spring's {@link JdbcTemplate}.
  *
  * <p>Many of the configuration methods return the current instance of the
  * SimpleJdbcCall in order to provide the ability to chain multiple ones

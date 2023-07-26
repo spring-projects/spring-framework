@@ -57,15 +57,17 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of {@link DatabaseClient}.
+ * The default implementation of {@link DatabaseClient},
+ * as created by the static factory method.
  *
  * @author Mark Paluch
  * @author Mingyuan Wu
  * @author Bogdan Ilchyshyn
  * @author Simon Baslé
  * @since 5.3
+ * @see DatabaseClient#create(ConnectionFactory)
  */
-class DefaultDatabaseClient implements DatabaseClient {
+final class DefaultDatabaseClient implements DatabaseClient {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -251,11 +253,12 @@ class DefaultDatabaseClient implements DatabaseClient {
 					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-			if (value instanceof Parameter p) {
-				byIndex.put(index, p);
+			if (value instanceof Parameter param) {
+				byIndex.put(index, param);
 			}
-			else if (value instanceof org.springframework.r2dbc.core.Parameter p) {
-				byIndex.put(index, p.hasValue() ? Parameters.in(p.getValue()) : Parameters.in(p.getType()));
+			else if (value instanceof org.springframework.r2dbc.core.Parameter param) {
+				Object pv = param.getValue();
+				byIndex.put(index, (pv != null ? Parameters.in(pv) : Parameters.in(param.getType())));
 			}
 			else {
 				byIndex.put(index, Parameters.in(value));
