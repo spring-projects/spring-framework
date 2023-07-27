@@ -139,8 +139,10 @@ The `spring-messaging` module contains the following:
 
 * xref:rsocket.adoc#rsocket-requester[RSocketRequester] -- fluent API to make requests through an `io.rsocket.RSocket`
   with data and metadata encoding/decoding.
-* xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders] -- `@MessageMapping` annotated handler methods for
-  responding.
+* xref:rsocket.adoc#rsocket-interface[RSocket Interfaces] -- `@RSocketExchange` annotated
+interfaces for making requests.
+* xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders] -- `@MessageMapping`
+  and `@RSocketExchange` annotated handler methods for responding.
 
 The `spring-web` module contains `Encoder` and `Decoder` implementations such as Jackson
 CBOR/JSON, and Protobuf that RSocket applications will likely need. It also contains the
@@ -862,6 +864,59 @@ interaction type(s):
 |===
 
 
+[[rsocket-annot-rsocketexchange]]
+=== @RSocketExchange
+
+While `@MessageMapping` is only supported for responding,  `@RSocketExchange`
+can be used both to create an annotated responder
+and xref:rsocket.adoc#rsocket-interface[an RSocket Interface] that allows
+making requests.
+
+`@RSocketExchange` can be used as follows to create responder methods:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class RadarsController {
+
+		@RSocketExchange("locate.radars.within")
+		public Flux<AirportLocation> radars(MapRequest request) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+@Controller
+class RadarsController {
+
+	@RSocketExchange("locate.radars.within")
+	fun radars(request: MapRequest): Flow<AirportLocation> {
+		// ...
+	}
+}
+----
+======
+
+`@RSocketExhange` supports a very similar method signature to `@MessageMapping`,
+however, since it needs to be suitable both for requester and responder use,
+there are slight differences. Notably, while `@MessageMapping` accepts
+a `String` array as its `value` parameter, only a single `String` can be passed
+as the `value` of `@RSocketExchange`.
+
+When it comes to possible return values and the way we establish supported
+RSocket interaction types, it works in the same way as with `@MessageMapping`.
+
+Similarly to `@MessageMapping`, `@RSocketExchange` can also be used at class
+level to specify a common prefix for all the method routes within the class.
+
 
 [[rsocket-annot-connectmapping]]
 === @ConnectMapping
@@ -1025,6 +1080,9 @@ Two, create a proxy that will perform the declared RSocket exchanges:
 
 	RepositoryService service = factory.createClient(RadarService.class);
 ----
+
+NOTE: Apart from RSocket interface services, `@RSocketExchange` can also
+be used to create xref:rsocket.adoc#rsocket-annot-rsocketexchange[annotated responders].
 
 
 [[rsocket-interface-method-parameters]]
