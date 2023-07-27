@@ -139,6 +139,8 @@ The `spring-messaging` module contains the following:
 
 * xref:rsocket.adoc#rsocket-requester[RSocketRequester] -- fluent API to make requests through an `io.rsocket.RSocket`
   with data and metadata encoding/decoding.
+* xref:rsocket.adoc#rsocket-interface[RSocket Interfaces] -- `@RSocketExchange` annotated
+interfaces for making requests.
 * xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders] -- `@MessageMapping`
   and `@RSocketExchange` annotated handler methods for responding.
 
@@ -301,8 +303,7 @@ Java::
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
     route matching.
-<2> Create a responder from a class with `@MessageMapping`/`@RSocketExchange`
-and/or `@ConnectMapping` methods.
+<2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
 <3> Register the responder.
 
 Kotlin::
@@ -322,8 +323,7 @@ Kotlin::
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
 route matching.
-<2> Create a responder from a class with `@MessageMapping`/`@RSocketExchange`
-and/or `@ConnectMapping` methods.
+<2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
 <3> Register the responder.
 ======
 
@@ -409,8 +409,7 @@ Kotlin::
 To make requests from a server to connected clients is a matter of obtaining the
 requester for the connected client from the server.
 
-In xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders], `@ConnectMapping`,
-`@MessageMapping` and `@RSocketExchange` methods support an
+In xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders], `@ConnectMapping` and `@MessageMapping` methods support an
 `RSocketRequester` argument. Use it to access the requester for the connection. Keep in
 mind that `@ConnectMapping` methods are essentially handlers of the `SETUP` frame which
 must be handled before requests can begin. Therefore, requests at the very start must be
@@ -583,9 +582,8 @@ For `Metadata-Push` use the `sendMetadata()` method with a `Mono<Void>` return v
 [[rsocket-annot-responders]]
 == Annotated Responders
 
-RSocket responders can be implemented as `@MessageMapping` or `@RSocketExchange` methods,
-and `@ConnectMapping` methods.
-`@MessageMapping` and `@RSocketExchange` methods handle individual requests while `@ConnectMapping` methods handle
+RSocket responders can be implemented as `@MessageMapping` and `@ConnectMapping` methods.
+`@MessageMapping` methods handle individual requests while `@ConnectMapping` methods handle
 connection-level events (setup and metadata push). Annotated responders are supported
 symmetrically, for responding from the server side and for responding from the client side.
 
@@ -595,8 +593,8 @@ symmetrically, for responding from the server side and for responding from the c
 === Server Responders
 
 To use annotated responders on the server side, add `RSocketMessageHandler` to your Spring
-configuration to detect `@Controller` beans with `@MessageMapping`,
-`@RSocketExchange` and `@ConnectMapping` methods:
+configuration to detect `@Controller` beans with `@MessageMapping` and `@ConnectMapping`
+methods:
 
 [tabs]
 ======
@@ -742,13 +740,12 @@ xref:rsocket.adoc#rsocket-requester-client-responder[Client Responders].
 
 
 
-[[rsocket-annot-messagemapping-rsocketexchange]]
-=== `@MessageMapping` and `@RSocketExchange`
+[[rsocket-annot-messagemapping]]
+=== @MessageMapping
 
 Once xref:rsocket.adoc#rsocket-annot-responders-server[server] or
-xref:rsocket.adoc#rsocket-annot-responders-client[client] responder configuration is in place, annotated server-side methods can be used as follows:
-
-* `@MessageMapping` methods
+xref:rsocket.adoc#rsocket-annot-responders-client[client] responder configuration is in place,
+`@MessageMapping` methods can be used as follows:
 
 [tabs]
 ======
@@ -781,44 +778,8 @@ class RadarsController {
 ----
 ======
 
-* `@RSocketExchange` methods
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Controller
-	public class RadarsController {
-
-		@RSocketExchange("locate.radars.within")
-		public Flux<AirportLocation> radars(MapRequest request) {
-			// ...
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-@Controller
-class RadarsController {
-
-	@RSocketExchange("locate.radars.within")
-	fun radars(request: MapRequest): Flow<AirportLocation> {
-		// ...
-	}
-}
-----
-======
-
-The above annotated methods respond to a Request-Stream interaction having the
-route "locate.radars.within".
-
-
-They support flexible method signatures with the option to
+The above `@MessageMapping` method responds to a Request-Stream interaction having the
+route "locate.radars.within". It supports a flexible method signature with the option to
 use the following method arguments:
 
 [cols="1,3",options="header"]
@@ -852,7 +813,7 @@ The return value is expected to be one or more Objects to be serialized as respo
 payloads. That can be asynchronous types like `Mono` or `Flux`, a concrete value, or
 either `void` or a no-value asynchronous type such as `Mono<Void>`.
 
-The RSocket interaction type that an annotated method supports is determined from
+The RSocket interaction type that an `@MessageMapping` method supports is determined from
 the cardinality of the input (i.e. `@Payload` argument) and of the output, where
 cardinality means the following:
 
@@ -902,13 +863,60 @@ interaction type(s):
 
 |===
 
-NOTE: The `@MessageMapping` and `@RSocketExchange` annotations for server
-responders can be used nearly interchangeably, with the exception that
-while `@MessageMapping` accepts a `String` array as its `value` parameter,
-only a single `String` can be passed as the `value` of `@RSocketExchange`.
 
-TIP: Both `@MessageMapping` and `@RSocketExchange` annotations can also be used at
-class level to specify a common prefix for all the method routes.
+[[rsocket-annot-rsocketexchange]]
+=== @RSocketExchange
+
+While `@MessageMapping` is only supported for responding,  `@RSocketExchange`
+can be used both to create an annotated responder
+and xref:rsocket.adoc#rsocket-interface[an RSocket Interface] that allows
+making requests.
+
+`@RSocketExchange` can be used as follows to create responder methods:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class RadarsController {
+
+		@RSocketExchange("locate.radars.within")
+		public Flux<AirportLocation> radars(MapRequest request) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+@Controller
+class RadarsController {
+
+	@RSocketExchange("locate.radars.within")
+	fun radars(request: MapRequest): Flow<AirportLocation> {
+		// ...
+	}
+}
+----
+======
+
+`@RSocketExhange` supports a very similar method signature to `@MessageMapping`,
+however, since it needs to be suitable both for requester and responder use,
+there are slight differences. Notably, while `@MessageMapping` accepts
+a `String` array as its `value` parameter, only a single `String` can be passed
+as the `value` of `@RSocketExchange`.
+
+When it comes to possible return values and the way we establish supported
+RSocket interaction types, it works in the same way as with `@MessageMapping`.
+
+Similarly to `@MessageMapping`, `@RSocketExchange` can also be used at class
+level to specify a common prefix for all the method routes within the class.
+
 
 [[rsocket-annot-connectmapping]]
 === @ConnectMapping
@@ -918,8 +926,7 @@ any subsequent metadata push notifications through the `METADATA_PUSH` frame, i.
 `metadataPush(Payload)` in `io.rsocket.RSocket`.
 
 `@ConnectMapping` methods support the same arguments as
-xref:rsocket.adoc#rsocket-annot-messagemapping-rsocketexchange[@MessageMapping or @RSocketExchange]
-but based on metadata and data from the `SETUP` and
+xref:rsocket.adoc#rsocket-annot-messagemapping[@MessageMapping] but based on metadata and data from the `SETUP` and
 `METADATA_PUSH` frames. `@ConnectMapping` can have a pattern to narrow handling to
 specific connections that have a route in the metadata, or if no patterns are declared
 then all connections match.
@@ -1073,6 +1080,9 @@ Two, create a proxy that will perform the declared RSocket exchanges:
 
 	RepositoryService service = factory.createClient(RadarService.class);
 ----
+
+NOTE: Apart from RSocket interface services, `@RSocketExchange` can also
+be used to create xref:rsocket.adoc#rsocket-annot-rsocketexchange[annotated responders].
 
 
 [[rsocket-interface-method-parameters]]
