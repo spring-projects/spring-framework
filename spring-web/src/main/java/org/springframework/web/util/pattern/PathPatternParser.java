@@ -134,7 +134,7 @@ public class PathPatternParser {
 	 * Shared, read-only instance of {@code PathPatternParser}. Uses default settings:
 	 * <ul>
 	 * <li>{@code matchOptionalTrailingSeparator=true}
-	 * <li>{@code caseSensitivetrue}
+	 * <li>{@code caseSensitive=true}
 	 * <li>{@code pathOptions=PathContainer.Options.HTTP_PATH}
 	 * </ul>
 	 */
