@@ -41,7 +41,6 @@ import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -54,7 +53,6 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.pattern.PathPattern;
@@ -403,7 +401,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
 					logger.debug(exchange.getLogPrefix() + "Resource not found");
-					return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND));
+					return Mono.error(new NoResourceFoundException(getResourcePath(exchange)));
 				}))
 				.flatMap(resource -> {
 					try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -96,6 +97,25 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	public void setMappedHandlerClasses(Class<?>... mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
+	}
+
+	/**
+	 * Add a mapped handler class.
+	 * @since 6.1
+	 */
+	public void addMappedHandlerClass(Class<?> mappedHandlerClass) {
+		this.mappedHandlerClasses = (this.mappedHandlerClasses != null ?
+				ObjectUtils.addObjectToArray(this.mappedHandlerClasses, mappedHandlerClass) :
+				new Class<?>[] {mappedHandlerClass});
+	}
+
+	/**
+	 * Return the {@link #setMappedHandlerClasses(Class[]) configured} mapped
+	 * handler classes.
+	 */
+	@Nullable
+	protected Class<?>[] getMappedHandlerClasses() {
+		return this.mappedHandlerClasses;
 	}
 
 	/**
