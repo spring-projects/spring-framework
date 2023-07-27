@@ -29,7 +29,8 @@ import org.springframework.web.server.ServerWebExchange;
  * a {@link HandlerAdapter} to apply its exception handling to deferred exceptions
  * from asynchronous return values, and to response rendering.
  * <li>Implemented by a {@link HandlerAdapter} in order to handle exceptions that
- * occur before a request is mapped to a handler.
+ * occur before a request is mapped to a handler, or for unhandled errors from a
+ * handler..
  * </ul>
  *
  * @author Rossen Stoyanchev
