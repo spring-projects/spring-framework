@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * {@link TaskExecutor} implementation that fires up a new Thread for each task,
  * executing it asynchronously.
  *
- * <p>Supports limiting concurrent threads through the "concurrencyLimit"
- * bean property. By default, the number of concurrent threads is unlimited.
+ * <p>Supports limiting concurrent threads through {@link #setConcurrencyLimit}.
+ * By default, the number of concurrent task executions is unlimited.
  *
  * <p><b>NOTE: This implementation does not reuse threads!</b> Consider a
  * thread-pooling TaskExecutor implementation instead, in particular for
@@ -133,33 +133,31 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * have to cast it and call {@code Future#get} to evaluate exceptions.
 	 * @since 4.3
 	 */
-	public final void setTaskDecorator(TaskDecorator taskDecorator) {
+	public void setTaskDecorator(TaskDecorator taskDecorator) {
 		this.taskDecorator = taskDecorator;
 	}
 
 	/**
-	 * Set the maximum number of parallel accesses allowed.
-	 * -1 indicates no concurrency limit at all.
-	 * <p>In principle, this limit can be changed at runtime,
-	 * although it is generally designed as a config time setting.
-	 * NOTE: Do not switch between -1 and any concrete limit at runtime,
-	 * as this will lead to inconsistent concurrency counts: A limit
-	 * of -1 effectively turns off concurrency counting completely.
+	 * Set the maximum number of parallel task executions allowed.
+	 * The default of -1 indicates no concurrency limit at all.
+	 * <p>This is the equivalent of a maximum pool size in a thread pool,
+	 * preventing temporary overload of the thread management system.
 	 * @see #UNBOUNDED_CONCURRENCY
+	 * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor#setMaxPoolSize
 	 */
 	public void setConcurrencyLimit(int concurrencyLimit) {
 		this.concurrencyThrottle.setConcurrencyLimit(concurrencyLimit);
 	}
 
 	/**
-	 * Return the maximum number of parallel accesses allowed.
+	 * Return the maximum number of parallel task executions allowed.
 	 */
 	public final int getConcurrencyLimit() {
 		return this.concurrencyThrottle.getConcurrencyLimit();
 	}
 
 	/**
-	 * Return whether this throttle is currently active.
+	 * Return whether the concurrency throttle is currently active.
 	 * @return {@code true} if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
 	 * @see #setConcurrencyLimit
