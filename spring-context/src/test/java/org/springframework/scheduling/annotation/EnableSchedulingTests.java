@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -33,6 +34,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
@@ -66,6 +68,10 @@ public class EnableSchedulingTests {
 	}
 
 
+	/*
+	 * Tests compatibility between default executor in TaskSchedulerRouter
+	 * and explicit ThreadPoolTaskScheduler in configuration subclass.
+	 */
 	@ParameterizedTest
 	@ValueSource(classes = {FixedRateTaskConfig.class, FixedRateTaskConfigSubclass.class})
 	@EnabledForTestGroups(LONG_RUNNING)
@@ -77,8 +83,14 @@ public class EnableSchedulingTests {
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
 	}
 
+	/*
+	 * Tests compatibility between SimpleAsyncTaskScheduler in regular configuration
+	 * and explicit ThreadPoolTaskScheduler in configuration subclass. This includes
+	 * pause/resume behavior and a controlled shutdown with a 1s termination timeout.
+	 */
 	@ParameterizedTest
 	@ValueSource(classes = {ExplicitSchedulerConfig.class, ExplicitSchedulerConfigSubclass.class})
+	@Timeout(2)  // should actually complete within 1s
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withExplicitScheduler(Class<?> configClass) throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(configClass);
@@ -96,9 +108,35 @@ public class EnableSchedulingTests {
 		int count3 = ctx.getBean(AtomicInteger.class).get();
 		assertThat(count3).isGreaterThanOrEqualTo(20);
 
+		TaskExecutor executor = ctx.getBean(TaskExecutor.class);
+		AtomicInteger count = new AtomicInteger(0);
+		for (int i = 0; i < 2; i++) {
+			executor.execute(() -> {
+				try {
+					Thread.sleep(10000);  // try to break test timeout
+				}
+				catch (InterruptedException ex) {
+					// expected during executor shutdown
+					try {
+						Thread.sleep(500);
+						// should get here within task termination timeout (1000)
+						count.incrementAndGet();
+					}
+					catch (InterruptedException ex2) {
+						// not expected
+					}
+				}
+			});
+		}
+
 		assertThat(ctx.getBean(ExplicitSchedulerConfig.class).threadName).startsWith("explicitScheduler-");
-		assertThat(Arrays.asList(ctx.getDefaultListableBeanFactory().getDependentBeans("myTaskScheduler")).contains(
-				TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
+		assertThat(Arrays.asList(ctx.getDefaultListableBeanFactory().getDependentBeans("myTaskScheduler"))
+				.contains(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
+
+		// Include executor shutdown in test timeout (2 seconds),
+		// expecting interruption of the sleeping thread...
+		ctx.close();
+		assertThat(count.intValue()).isEqualTo(2);
 	}
 
 	@Test
@@ -226,6 +264,11 @@ public class EnableSchedulingTests {
 
 	@Configuration
 	static class FixedRateTaskConfigSubclass extends FixedRateTaskConfig {
+
+		@Bean
+		public TaskScheduler taskScheduler() {
+			return new ThreadPoolTaskScheduler();
+		}
 	}
 
 
@@ -239,6 +282,7 @@ public class EnableSchedulingTests {
 		public TaskScheduler myTaskScheduler() {
 			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler-");
+			scheduler.setTaskTerminationTimeout(1000);
 			return scheduler;
 		}
 
@@ -263,6 +307,8 @@ public class EnableSchedulingTests {
 		public TaskScheduler myTaskScheduler() {
 			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler-");
+			scheduler.setAwaitTerminationMillis(1000);
+			scheduler.setPoolSize(2);
 			return scheduler;
 		}
 	}
@@ -437,6 +483,7 @@ public class EnableSchedulingTests {
 		public TaskScheduler taskScheduler1() {
 			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1");
+			scheduler.setConcurrencyLimit(1);
 			return scheduler;
 		}
 
@@ -478,6 +525,7 @@ public class EnableSchedulingTests {
 		public TaskScheduler taskScheduler1() {
 			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1-");
+			scheduler.setConcurrencyLimit(1);
 			return scheduler;
 		}
 
@@ -508,6 +556,7 @@ public class EnableSchedulingTests {
 		public TaskScheduler taskScheduler1() {
 			SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler1-");
+			scheduler.setConcurrencyLimit(1);
 			return scheduler;
 		}
 

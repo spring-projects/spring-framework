@@ -44,7 +44,19 @@ import org.springframework.util.ErrorHandler;
  * A simple implementation of Spring's {@link TaskScheduler} interface, using
  * a single scheduler thread and executing every scheduled task in an individual
  * separate thread. This is an attractive choice with virtual threads on JDK 21,
- * so it is commonly used with {@link #setVirtualThreads setVirtualThreads(true)}.
+ * expecting common usage with {@link #setVirtualThreads setVirtualThreads(true)}.
+ *
+ * <p>Supports a graceful shutdown through {@link #setTaskTerminationTimeout},
+ * at the expense of task tracking overhead per execution thread at runtime.
+ * Supports limiting concurrent threads through {@link #setConcurrencyLimit}.
+ * By default, the number of concurrent task executions is unlimited.
+ * This allows for dynamic concurrency of scheduled task executions, in contrast
+ * to {@link ThreadPoolTaskScheduler} which requires a fixed pool size.
+ *
+ * <p><b>NOTE: This implementation does not reuse threads!</b> Consider a
+ * thread-pooling TaskScheduler implementation instead, in particular for
+ * scheduling a large number of short-lived tasks. Alternatively, on JDK 21,
+ * consider setting {@link #setVirtualThreads} to {@code true}.
  *
  * <p>Extends {@link SimpleAsyncTaskExecutor} and can serve as a fully capable
  * replacement for it, e.g. as a single shared instance serving as a
@@ -64,13 +76,14 @@ import org.springframework.util.ErrorHandler;
  * @author Juergen Hoeller
  * @since 6.1
  * @see #setVirtualThreads
- * @see #setTargetTaskExecutor
+ * @see #setTaskTerminationTimeout
+ * @see #setConcurrencyLimit
  * @see SimpleAsyncTaskExecutor
  * @see ThreadPoolTaskScheduler
  */
 @SuppressWarnings("serial")
 public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements TaskScheduler,
-		ApplicationContextAware, SmartLifecycle, ApplicationListener<ContextClosedEvent>, AutoCloseable {
+		ApplicationContextAware, SmartLifecycle, ApplicationListener<ContextClosedEvent> {
 
 	private static final TimeUnit NANO = TimeUnit.NANOSECONDS;
 
@@ -275,6 +288,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 				future.cancel(true);
 			}
 		}
+		super.close();
 	}
 
 }

@@ -62,22 +62,27 @@ The variants that Spring provides are as follows:
   `ConcurrentTaskExecutor` directly. However, if the `ThreadPoolTaskExecutor` is not
   flexible enough for your needs, `ConcurrentTaskExecutor` is an alternative.
 * `ThreadPoolTaskExecutor`:
-  This implementation is most commonly used. It exposes bean properties for
-  configuring a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
-  If you need to adapt to a different kind of `java.util.concurrent.Executor`, we
-  recommend that you use a `ConcurrentTaskExecutor` instead.
+  This implementation is most commonly used. It exposes bean properties for configuring
+  a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
+  If you need to adapt to a different kind of `java.util.concurrent.Executor`,
+  we recommend that you use a `ConcurrentTaskExecutor` instead.
 * `DefaultManagedTaskExecutor`:
   This implementation uses a JNDI-obtained `ManagedExecutorService` in a JSR-236
   compatible runtime environment (such as a Jakarta EE application server),
   replacing a CommonJ WorkManager for that purpose.
 
+As of 6.1, `ThreadPoolTaskExecutor` provides a pause/resume capability and graceful
+shutdown through Spring's lifecycle management. There is also a new "virtualThreads"
+option on `SimpleAsyncTaskExecutor` which is aligned with JDK 21's Virtual Threads,
+as well as a graceful shutdown capability for `SimpleAsyncTaskExecutor` as well.
+
 
 [[scheduling-task-executor-usage]]
 === Using a `TaskExecutor`
 
-Spring's `TaskExecutor` implementations are used as simple JavaBeans. In the following example,
-we define a bean that uses the `ThreadPoolTaskExecutor` to asynchronously print
-out a set of messages:
+Spring's `TaskExecutor` implementations are commonly used with dependency injection.
+In the following example, we define a bean that uses the `ThreadPoolTaskExecutor`
+to asynchronously print out a set of messages:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -227,8 +232,8 @@ fixed delay, those methods should be used directly whenever possible. The value 
 `PeriodicTrigger` implementation is that you can use it within components that rely on
 the `Trigger` abstraction. For example, it may be convenient to allow periodic triggers,
 cron-based triggers, and even custom trigger implementations to be used interchangeably.
-Such a component could take advantage of dependency injection so that you can configure such `Triggers`
-externally and, therefore, easily modify or extend them.
+Such a component could take advantage of dependency injection so that you can configure
+such `Triggers` externally and, therefore, easily modify or extend them.
 
 
 [[scheduling-task-scheduler-implementations]]
@@ -238,10 +243,8 @@ As with Spring's `TaskExecutor` abstraction, the primary benefit of the `TaskSch
 arrangement is that an application's scheduling needs are decoupled from the deployment
 environment. This abstraction level is particularly relevant when deploying to an
 application server environment where threads should not be created directly by the
-application itself. For such scenarios, Spring provides a `TimerManagerTaskScheduler`
-that delegates to a CommonJ `TimerManager` on WebLogic or WebSphere as well as a more recent
-`DefaultManagedTaskScheduler` that delegates to a JSR-236 `ManagedScheduledExecutorService`
-in a Jakarta EE environment. Both are typically configured with a JNDI lookup.
+application itself. For such scenarios, Spring provides a `DefaultManagedTaskScheduler`
+that delegates to a JSR-236 `ManagedScheduledExecutorService` in a Jakarta EE environment.
 
 Whenever external thread management is not a requirement, a simpler alternative is
 a local `ScheduledExecutorService` setup within the application, which can be adapted
@@ -250,6 +253,11 @@ through Spring's `ConcurrentTaskScheduler`. As a convenience, Spring also provid
 to provide common bean-style configuration along the lines of `ThreadPoolTaskExecutor`.
 These variants work perfectly fine for locally embedded thread pool setups in lenient
 application server environments, as well -- in particular on Tomcat and Jetty.
+
+As of 6.1, `ThreadPoolTaskScheduler` provides a pause/resume capability and graceful
+shutdown through Spring's lifecycle management. There is also a new option called
+`SimpleAsyncTaskScheduler` which is aligned with JDK 21's Virtual Threads, using a
+single scheduler thread but firing up a new thread for every scheduled task execution.
 
 
 
