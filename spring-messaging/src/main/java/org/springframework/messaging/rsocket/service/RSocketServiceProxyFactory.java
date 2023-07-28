@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Factory for creating a client proxy given an RSocket service interface with
+ * Factory to create a client proxy from an RSocket service interface with
  * {@link RSocketExchange @RSocketExchange} methods.
  *
  * <p>To create an instance, use static methods to obtain a

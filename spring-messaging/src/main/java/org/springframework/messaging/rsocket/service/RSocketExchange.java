@@ -25,8 +25,12 @@ import java.lang.annotation.Target;
 import org.springframework.aot.hint.annotation.Reflective;
 
 /**
- * Annotation to declare a method on an RSocket service interface as an RSocket
- * endpoint. The endpoint route is determined through the annotation attribute,
+ * Annotation to declare an RSocket endpoint on an RSocket service interface.
+ * Supported for use as an RSocket requester via
+ * {@link RSocketServiceProxyFactory}, and as a responder by implementing the
+ * interface to handle requests.
+ *
+ * <p>The endpoint route is determined through the annotation attribute,
  * and through the method arguments.
  *
  * <p>The annotation is supported at the type level to express a common route,

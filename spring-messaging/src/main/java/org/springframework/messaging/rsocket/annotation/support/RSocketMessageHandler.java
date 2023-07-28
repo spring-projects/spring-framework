@@ -60,10 +60,10 @@ import org.springframework.util.RouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * Extension of {@link MessageMappingMessageHandler} for handling RSocket
- * requests with {@link ConnectMapping @ConnectMapping},
- * {@link MessageMapping @MessageMapping}
- * and {@link RSocketExchange @RSocketExchange} methods.
+ * Extension of {@link MessageMappingMessageHandler} to handle RSocket
+ * requests with {@link MessageMapping @MessageMapping} and
+ * {@link ConnectMapping @ConnectMapping} methods, also supporting use of
+ * {@link RSocketExchange @RSocketExchange}.
  *
  * <p>For server scenarios this class can be declared as a bean in Spring
  * configuration and that would detect {@code @MessageMapping} methods in
