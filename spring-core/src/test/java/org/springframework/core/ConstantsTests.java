@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rick Evans
  * @since 28.04.2003
  */
+@SuppressWarnings("deprecation")
 class ConstantsTests {
 
 	@Test

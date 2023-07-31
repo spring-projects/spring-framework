@@ -43,7 +43,10 @@ import org.springframework.util.ReflectionUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16.03.2003
+ * @deprecated since 6.1 with no replacement; use an enum, map, or similar custom
+ * solution instead
  */
+@Deprecated(since = "6.1")
 public class Constants {
 
 	/** The name of the introspected class. */
