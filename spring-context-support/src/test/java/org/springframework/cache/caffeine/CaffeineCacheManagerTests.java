@@ -36,10 +36,11 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class CaffeineCacheManagerTests {
+class CaffeineCacheManagerTests {
 
 	@Test
-	public void testDynamicMode() {
+	@SuppressWarnings("cast")
+	void dynamicMode() {
 		CacheManager cm = new CaffeineCacheManager();
 
 		Cache cache1 = cm.getCache("c1");
@@ -77,7 +78,8 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void testStaticMode() {
+	@SuppressWarnings("cast")
+	void staticMode() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1", "c2");
 
 		Cache cache1 = cm.getCache("c1");
@@ -136,7 +138,8 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void testAsyncMode() {
+	@SuppressWarnings("cast")
+	void asyncMode() {
 		CaffeineCacheManager cm = new CaffeineCacheManager();
 		cm.setAsyncCacheMode(true);
 
@@ -182,7 +185,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void changeCaffeineRecreateCache() {
+	void changeCaffeineRecreateCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
@@ -197,7 +200,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void changeCaffeineSpecRecreateCache() {
+	void changeCaffeineSpecRecreateCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
@@ -207,7 +210,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void changeCacheSpecificationRecreateCache() {
+	void changeCacheSpecificationRecreateCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
@@ -217,7 +220,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void changeCacheLoaderRecreateCache() {
+	void changeCacheLoaderRecreateCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
@@ -234,7 +237,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void setCacheNameNullRestoreDynamicMode() {
+	void setCacheNameNullRestoreDynamicMode() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		assertThat(cm.getCache("someCache")).isNull();
 		cm.setCacheNames(null);
@@ -242,7 +245,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void cacheLoaderUseLoadingCache() {
+	void cacheLoaderUseLoadingCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		cm.setCacheLoader(key -> {
 			if ("ping".equals(key)) {
@@ -260,7 +263,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void customCacheRegistration() {
+	void customCacheRegistration() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		com.github.benmanes.caffeine.cache.Cache<Object, Object> nc = Caffeine.newBuilder().build();
 		cm.registerCustomCache("c2", nc);
