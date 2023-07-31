@@ -28,6 +28,13 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW;
+import static org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT;
+import static org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT;
+import static org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT;
+import static org.quartz.SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT;
+import static org.quartz.Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY;
+import static org.quartz.Trigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 /**
  * Tests for {@link SimpleTriggerFactoryBean}.
@@ -68,6 +75,20 @@ class SimpleTriggerFactoryBeanTests {
 				.map(Field::getName)
 				.forEach(name -> assertThatNoException().as(name).isThrownBy(() -> factory.setMisfireInstructionName(name)));
 	}
+
+	@Test
+	void setMisfireInstruction() {
+		assertThatIllegalArgumentException().isThrownBy(() -> factory.setMisfireInstruction(999));
+
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_SMART_POLICY));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_FIRE_NOW));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT));
+	}
+
 
 	private static Stream<Field> streamMisfireInstructionConstants() {
 		return Arrays.stream(SimpleTrigger.class.getFields())

@@ -204,6 +204,8 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	 * Specify the misfire instruction for this trigger.
 	 */
 	public void setMisfireInstruction(int misfireInstruction) {
+		Assert.isTrue(constants.containsValue(misfireInstruction),
+				"Only values of misfire instruction constants allowed");
 		this.misfireInstruction = misfireInstruction;
 	}
 
