@@ -495,11 +495,10 @@ method parameters:
 [[rest-http-interface-return-values]]
 === Return Values
 
-The supported return values vary depending on whether you are using
-`HttpExchangeAdapter` or `ReactorHttpExchangeAdapter`.
+The supported return values depend on the underlying client.
 
-When using `HttpExchangeAdapter`, annotated HTTP exchange methods support
-the following return values:
+Clients adapted to `HttpExchangeAdapter` such as `RestClient` and `RestTemplate`
+support synchronous return values:
 
 [cols="1,2", options="header"]
 |===
@@ -523,9 +522,9 @@ the following return values:
 
 |===
 
-When using `ReactorHttpExchangeAdapter`, annotated HTTP exchange methods support
-all the same values as the ones supported by `HttpExchangeAdapter`
-and also the following ones:
+Clients adapted to `ReactorHttpExchangeAdapter` such as `WebClient`, support all of above
+as well as reactive variants. The table below shows Reactor types, but you can also use
+other reactive types that are supported through the `ReactiveAdapterRegistry`:
 
 [cols="1,2", options="header"]
 |===
@@ -560,16 +559,10 @@ response body stream.
 
 |===
 
-TIP: You can also use any other async or reactive types registered in the
-`ReactiveAdapterRegistry`.
-
-While using the `ReactorHttpExchangeAdapter`, by default, the behavior
-of HTTP service methods with synchronous (blocking) method
-signature depends on connection and timeout settings of the underlying HTTP client.
-`HttpServiceProxyFactory.Builder` does expose a `blockTimeout` option that also lets you
-configure the maximum time to block for a response, but we recommend configuring timeout
-values directly on the underlying HTTP client, which likely provides more control over
-such settings.
+By default, the timeout for synchronous return values with `ReactorHttpExchangeAdapter`
+depends on how the underlying HTTP client is configured. You can set a `blockTimeout`
+value on the adapter level as well, but we recommend relying on timeout settings of the
+underlying HTTP client, which operates at a lower level and provides more control.
 
 
 [[rest-http-interface-exceptions]]
