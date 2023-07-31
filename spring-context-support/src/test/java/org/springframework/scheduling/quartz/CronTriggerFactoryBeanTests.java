@@ -29,6 +29,8 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.quartz.Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY;
+import static org.quartz.Trigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 /**
  * Tests for {@link CronTriggerFactoryBean}.
@@ -67,6 +69,17 @@ class CronTriggerFactoryBeanTests {
 				.map(Field::getName)
 				.forEach(name -> assertThatNoException().as(name).isThrownBy(() -> factory.setMisfireInstructionName(name)));
 	}
+
+	@Test
+	void setMisfireInstruction() {
+		assertThatIllegalArgumentException().isThrownBy(() -> factory.setMisfireInstruction(999));
+
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_SMART_POLICY));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW));
+		assertThatNoException().isThrownBy(() -> factory.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING));
+	}
+
 
 	private static Stream<Field> streamMisfireInstructionConstants() {
 		return Arrays.stream(CronTrigger.class.getFields())
