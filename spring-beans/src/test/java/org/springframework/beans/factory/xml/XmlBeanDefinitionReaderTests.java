@@ -155,6 +155,17 @@ class XmlBeanDefinitionReaderTests {
 				.forEach(name -> assertThatNoException().as(name).isThrownBy(() -> reader.setValidationModeName(name)));
 	}
 
+	@Test
+	void setValidationMode() {
+		assertThatIllegalArgumentException().isThrownBy(() -> reader.setValidationMode(999));
+
+		assertThatNoException().isThrownBy(() -> reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE));
+		assertThatNoException().isThrownBy(() -> reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO));
+		assertThatNoException().isThrownBy(() -> reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_DTD));
+		assertThatNoException().isThrownBy(() -> reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD));
+	}
+
+
 	private static Stream<Field> streamValidationModeConstants() {
 		return Arrays.stream(XmlBeanDefinitionReader.class.getFields())
 				.filter(ReflectionUtils::isPublicStaticFinal)
