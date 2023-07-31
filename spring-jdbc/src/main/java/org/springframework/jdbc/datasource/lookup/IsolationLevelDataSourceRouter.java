@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,22 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * DataSource that routes to one of various target DataSources based on the
  * current transaction isolation level. The target DataSources need to be
  * configured with the isolation level name as key, as defined on the
- * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition interface}.
+ * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition}
+ * interface.
  *
  * <p>This is particularly useful in combination with JTA transaction management
  * (typically through Spring's {@link org.springframework.transaction.jta.JtaTransactionManager}).
  * Standard JTA does not support transaction-specific isolation levels. Some JTA
  * providers support isolation levels as a vendor-specific extension (e.g. WebLogic),
- * which is the preferred way of addressing this. As alternative (e.g. on WebSphere),
+ * which is the preferred way of addressing this. As an alternative (e.g. on WebSphere),
  * the target database can be represented through multiple JNDI DataSources, each
  * configured with a different isolation level (for the entire DataSource).
- * The present DataSource router allows to transparently switch to the
+ * {@code IsolationLevelDataSourceRouter} allows to transparently switch to the
  * appropriate DataSource based on the current transaction's isolation level.
  *
- * <p>The configuration can for example look like this, assuming that the target
- * DataSources are defined as individual Spring beans with names
- * "myRepeatableReadDataSource", "mySerializableDataSource" and "myDefaultDataSource":
+ * <p>For example, the configuration can look like the following, assuming that
+ * the target DataSources are defined as individual Spring beans with names
+ * "myRepeatableReadDataSource", "mySerializableDataSource", and "myDefaultDataSource":
  *
  * <pre class="code">
  * &lt;bean id="dataSourceRouter" class="org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter"&gt;
