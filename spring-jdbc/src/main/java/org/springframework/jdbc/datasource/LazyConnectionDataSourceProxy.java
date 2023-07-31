@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,25 +122,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	}
 
 	/**
-	 * Set the default transaction isolation level to expose when no target Connection
-	 * has been fetched yet (when the actual JDBC Connection default is not known yet).
-	 * <p>This property accepts the int constant value (e.g. 8) as defined in the
-	 * {@link java.sql.Connection} interface; it is mainly intended for programmatic
-	 * use. Consider using the "defaultTransactionIsolationName" property for setting
-	 * the value by name (e.g. "TRANSACTION_SERIALIZABLE").
-	 * <p>If not specified, the default gets determined by checking a target
-	 * Connection on startup. If that check fails, the default will be determined
-	 * lazily on first access of a Connection.
-	 * @see #setDefaultTransactionIsolationName
-	 * @see java.sql.Connection#setTransactionIsolation
-	 */
-	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
-		this.defaultTransactionIsolation = defaultTransactionIsolation;
-	}
-
-	/**
 	 * Set the default transaction isolation level by the name of the corresponding
-	 * constant in {@link java.sql.Connection}, e.g. "TRANSACTION_SERIALIZABLE".
+	 * constant in {@link java.sql.Connection} &mdash; for example,
+	 * {@code "TRANSACTION_SERIALIZABLE"}.
 	 * @param constantName name of the constant
 	 * @see #setDefaultTransactionIsolation
 	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
@@ -150,6 +134,23 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 */
 	public void setDefaultTransactionIsolationName(String constantName) {
 		setDefaultTransactionIsolation(constants.asNumber(constantName).intValue());
+	}
+
+	/**
+	 * Set the default transaction isolation level to expose when no target Connection
+	 * has been fetched yet (when the actual JDBC Connection default is not known yet).
+	 * <p>This property accepts the int constant value (e.g. 8) as defined in the
+	 * {@link java.sql.Connection} interface; it is mainly intended for programmatic
+	 * use. Consider using the "defaultTransactionIsolationName" property for setting
+	 * the value by name (for example, {@code "TRANSACTION_SERIALIZABLE"}).
+	 * <p>If not specified, the default gets determined by checking a target
+	 * Connection on startup. If that check fails, the default will be determined
+	 * lazily on first access of a Connection.
+	 * @see #setDefaultTransactionIsolationName
+	 * @see java.sql.Connection#setTransactionIsolation
+	 */
+	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
+		this.defaultTransactionIsolation = defaultTransactionIsolation;
 	}
 
 
