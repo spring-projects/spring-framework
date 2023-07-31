@@ -23,14 +23,15 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Proxy for a target DataSource, fetching actual JDBC Connections lazily,
@@ -75,13 +76,22 @@ import org.springframework.lang.Nullable;
  * to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.1.4
  * @see DataSourceTransactionManager
  */
 public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
-	/** Constants instance for TransactionDefinition. */
-	private static final Constants constants = new Constants(Connection.class);
+	/**
+	 * Map of constant names to constant values for the isolation constants
+	 * defined in {@link java.sql.Connection}.
+	 */
+	static final Map<String, Integer> constants = Map.of(
+			"TRANSACTION_READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED,
+			"TRANSACTION_READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED,
+			"TRANSACTION_REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ,
+			"TRANSACTION_SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE
+		);
 
 	private static final Log logger = LogFactory.getLog(LazyConnectionDataSourceProxy.class);
 
@@ -133,7 +143,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
 	 */
 	public void setDefaultTransactionIsolationName(String constantName) {
-		setDefaultTransactionIsolation(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer defaultTransactionIsolation = constants.get(constantName);
+		Assert.notNull(defaultTransactionIsolation, "Only transaction isolation constants allowed");
+		this.defaultTransactionIsolation = defaultTransactionIsolation;
 	}
 
 	/**
