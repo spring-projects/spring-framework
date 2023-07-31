@@ -29,6 +29,9 @@ import org.springframework.util.ReflectionUtils;
 
 import static java.sql.Connection.TRANSACTION_NONE;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -75,16 +78,20 @@ class LazyConnectionDataSourceProxyTests {
 
 	@Test
 	void setDefaultTransactionIsolation() {
-		// unsupported values are not checked:
-		proxy.setDefaultTransactionIsolation(-999);
-		assertThat(proxy.defaultTransactionIsolation()).isEqualTo(-999);
-
-		// TRANSACTION_NONE should not be supported, but we currently do not check that.
-		proxy.setDefaultTransactionIsolation(TRANSACTION_NONE);
-		assertThat(proxy.defaultTransactionIsolation()).isEqualTo(TRANSACTION_NONE);
+		assertThatIllegalArgumentException().isThrownBy(() -> proxy.setDefaultTransactionIsolation(-999));
+		assertThatIllegalArgumentException().isThrownBy(() -> proxy.setDefaultTransactionIsolation(TRANSACTION_NONE));
 
 		proxy.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
 		assertThat(proxy.defaultTransactionIsolation()).isEqualTo(TRANSACTION_READ_COMMITTED);
+
+		proxy.setDefaultTransactionIsolation(TRANSACTION_READ_UNCOMMITTED);
+		assertThat(proxy.defaultTransactionIsolation()).isEqualTo(TRANSACTION_READ_UNCOMMITTED);
+
+		proxy.setDefaultTransactionIsolation(TRANSACTION_REPEATABLE_READ);
+		assertThat(proxy.defaultTransactionIsolation()).isEqualTo(TRANSACTION_REPEATABLE_READ);
+
+		proxy.setDefaultTransactionIsolation(TRANSACTION_SERIALIZABLE);
+		assertThat(proxy.defaultTransactionIsolation()).isEqualTo(TRANSACTION_SERIALIZABLE);
 	}
 
 

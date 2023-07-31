@@ -163,6 +163,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @see java.sql.Connection#setTransactionIsolation
 	 */
 	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
+		Assert.isTrue(constants.containsValue(defaultTransactionIsolation),
+				"Only values of transaction isolation constants allowed");
 		this.defaultTransactionIsolation = defaultTransactionIsolation;
 	}
 
