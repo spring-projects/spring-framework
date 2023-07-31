@@ -332,21 +332,27 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	private static String getPropagationBehaviorName(int propagationBehavior) {
-		for (Map.Entry<String, Integer> entry : propagationConstants.entrySet()) {
-			if (entry.getValue().equals(propagationBehavior)) {
-				return entry.getKey();
-			}
-		}
-		throw new IllegalArgumentException("Unsupported propagation behavior: " + propagationBehavior);
+		return switch(propagationBehavior) {
+			case TransactionDefinition.PROPAGATION_REQUIRED -> "PROPAGATION_REQUIRED";
+			case TransactionDefinition.PROPAGATION_SUPPORTS -> "PROPAGATION_SUPPORTS";
+			case TransactionDefinition.PROPAGATION_MANDATORY -> "PROPAGATION_MANDATORY";
+			case TransactionDefinition.PROPAGATION_REQUIRES_NEW -> "PROPAGATION_REQUIRES_NEW";
+			case TransactionDefinition.PROPAGATION_NOT_SUPPORTED -> "PROPAGATION_NOT_SUPPORTED";
+			case TransactionDefinition.PROPAGATION_NEVER -> "PROPAGATION_NEVER";
+			case TransactionDefinition.PROPAGATION_NESTED -> "PROPAGATION_NESTED";
+			default -> throw new IllegalArgumentException("Unsupported propagation behavior: " + propagationBehavior);
+		};
 	}
 
 	static String getIsolationLevelName(int isolationLevel) {
-		for (Map.Entry<String, Integer> entry : isolationConstants.entrySet()) {
-			if (entry.getValue().equals(isolationLevel)) {
-				return entry.getKey();
-			}
-		}
-		throw new IllegalArgumentException("Unsupported isolation level: " + isolationLevel);
+		return switch(isolationLevel) {
+			case TransactionDefinition.ISOLATION_DEFAULT -> "ISOLATION_DEFAULT";
+			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED -> "ISOLATION_READ_UNCOMMITTED";
+			case TransactionDefinition.ISOLATION_READ_COMMITTED -> "ISOLATION_READ_COMMITTED";
+			case TransactionDefinition.ISOLATION_REPEATABLE_READ -> "ISOLATION_REPEATABLE_READ";
+			case TransactionDefinition.ISOLATION_SERIALIZABLE -> "ISOLATION_SERIALIZABLE";
+			default -> throw new IllegalArgumentException("Unsupported isolation level: " + isolationLevel);
+		};
 	}
 
 }
