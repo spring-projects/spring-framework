@@ -65,6 +65,23 @@ class JmsActivationSpecConfigTests {
 		assertThat(uniqueValues).hasSize(4);
 	}
 
+	@Test
+	void setSessionAcknowledgeMode() {
+		assertThatIllegalArgumentException().isThrownBy(() -> specConfig.setAcknowledgeMode(999));
+
+		specConfig.setAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+		assertThat(specConfig.getAcknowledgeMode()).isEqualTo(Session.AUTO_ACKNOWLEDGE);
+
+		specConfig.setAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+		assertThat(specConfig.getAcknowledgeMode()).isEqualTo(Session.CLIENT_ACKNOWLEDGE);
+
+		specConfig.setAcknowledgeMode(Session.DUPS_OK_ACKNOWLEDGE);
+		assertThat(specConfig.getAcknowledgeMode()).isEqualTo(Session.DUPS_OK_ACKNOWLEDGE);
+
+		specConfig.setAcknowledgeMode(Session.SESSION_TRANSACTED);
+		assertThat(specConfig.getAcknowledgeMode()).isEqualTo(Session.SESSION_TRANSACTED);
+	}
+
 
 	private static Stream<String> streamAcknowledgeModeConstants() {
 		return Arrays.stream(Session.class.getFields())

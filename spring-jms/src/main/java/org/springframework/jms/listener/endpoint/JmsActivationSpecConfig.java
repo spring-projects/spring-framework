@@ -206,7 +206,7 @@ public class JmsActivationSpecConfig {
 		Assert.hasText(constantName, "'constantName' must not be null or blank");
 		Integer acknowledgeMode = sessionConstants.get(constantName);
 		Assert.notNull(acknowledgeMode, "Only acknowledge mode constants allowed");
-		setAcknowledgeMode(acknowledgeMode);
+		this.acknowledgeMode = acknowledgeMode;
 	}
 
 	/**
@@ -217,6 +217,8 @@ public class JmsActivationSpecConfig {
 	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 */
 	public void setAcknowledgeMode(int acknowledgeMode) {
+		Assert.isTrue(sessionConstants.containsValue(acknowledgeMode),
+				"Only values of acknowledge mode constants allowed");
 		this.acknowledgeMode = acknowledgeMode;
 	}
 
