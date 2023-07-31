@@ -18,6 +18,8 @@ package org.springframework.jms.support;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import jakarta.jms.Session;
@@ -27,7 +29,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -84,15 +85,22 @@ class JmsAccessorTests {
 	 */
 	@Test
 	void setSessionAcknowledgeModeNameToAllSupportedValues() {
+		Set<Integer> uniqueValues = new HashSet<>();
 		streamAcknowledgeModeConstants()
-				.map(Field::getName)
-				.forEach(name -> assertThatNoException().isThrownBy(() -> accessor.setSessionAcknowledgeModeName(name)));
+				.forEach(name -> {
+					accessor.setSessionAcknowledgeModeName(name);
+					int sessionAcknowledgeMode = accessor.getSessionAcknowledgeMode();
+					assertThat(sessionAcknowledgeMode).isBetween(0, 3);
+					uniqueValues.add(sessionAcknowledgeMode);
+				});
+		assertThat(uniqueValues).hasSize(4);
 	}
 
 
-	private static Stream<Field> streamAcknowledgeModeConstants() {
+	private static Stream<String> streamAcknowledgeModeConstants() {
 		return Arrays.stream(Session.class.getFields())
-				.filter(ReflectionUtils::isPublicStaticFinal);
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.map(Field::getName);
 	}
 
 	@Test

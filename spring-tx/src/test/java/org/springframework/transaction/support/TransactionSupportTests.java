@@ -293,7 +293,7 @@ class TransactionSupportTests {
 						assertThat(transactionSynchronization).isEqualTo(expected);
 						uniqueValues.add(transactionSynchronization);
 					});
-			assertThat(uniqueValues).hasSize(AbstractPlatformTransactionManager.constants.size());
+			assertThat(uniqueValues).containsExactlyInAnyOrderElementsOf(AbstractPlatformTransactionManager.constants.values());
 		}
 
 		@Test
@@ -348,7 +348,7 @@ class TransactionSupportTests {
 						assertThat(propagationBehavior).isEqualTo(expected);
 						uniqueValues.add(propagationBehavior);
 					});
-			assertThat(uniqueValues).hasSize(DefaultTransactionDefinition.propagationConstants.size());
+			assertThat(uniqueValues).containsExactlyInAnyOrderElementsOf(DefaultTransactionDefinition.propagationConstants.values());
 		}
 
 		@Test
@@ -383,7 +383,7 @@ class TransactionSupportTests {
 						assertThat(isolationLevel).isEqualTo(expected);
 						uniqueValues.add(isolationLevel);
 					});
-			assertThat(uniqueValues).hasSize(DefaultTransactionDefinition.isolationConstants.size());
+			assertThat(uniqueValues).containsExactlyInAnyOrderElementsOf(DefaultTransactionDefinition.isolationConstants.values());
 		}
 
 		@Test

@@ -18,6 +18,8 @@ package org.springframework.jms.listener;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -37,7 +39,6 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -160,16 +161,23 @@ class DefaultMessageListenerContainerTests {
 	@Test
 	void setCacheLevelNameToAllSupportedValues() {
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
+		Set<Integer> uniqueValues = new HashSet<>();
 		streamCacheConstants()
-				.map(Field::getName)
-				.forEach(name -> assertThatNoException().isThrownBy(() -> container.setCacheLevelName(name)));
+				.forEach(name -> {
+					container.setCacheLevelName(name);
+					int cacheLevel = container.getCacheLevel();
+					assertThat(cacheLevel).isBetween(0, 4);
+					uniqueValues.add(cacheLevel);
+				});
+		assertThat(uniqueValues).hasSize(5);
 	}
 
 
-	private static Stream<Field> streamCacheConstants() {
+	private static Stream<String> streamCacheConstants() {
 		return Arrays.stream(DefaultMessageListenerContainer.class.getFields())
 				.filter(ReflectionUtils::isPublicStaticFinal)
-				.filter(field -> field.getName().startsWith("CACHE_"));
+				.filter(field -> field.getName().startsWith("CACHE_"))
+				.map(Field::getName);
 	}
 
 	private static DefaultMessageListenerContainer createRunningContainer() {

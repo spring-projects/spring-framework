@@ -18,6 +18,8 @@ package org.springframework.jms.listener.endpoint;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import jakarta.jms.Session;
@@ -25,8 +27,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link JmsActivationSpecConfig}.
@@ -53,15 +55,21 @@ class JmsActivationSpecConfigTests {
 	 */
 	@Test
 	void setAcknowledgeModeNameToAllSupportedValues() {
-		streamAcknowledgeModeConstants()
-				.map(Field::getName)
-				.forEach(name -> assertThatNoException().isThrownBy(() -> specConfig.setAcknowledgeModeName(name)));
+		Set<Integer> uniqueValues = new HashSet<>();
+		streamAcknowledgeModeConstants().forEach(name -> {
+			specConfig.setAcknowledgeModeName(name);
+			int acknowledgeMode = specConfig.getAcknowledgeMode();
+			assertThat(acknowledgeMode).isBetween(0, 3);
+			uniqueValues.add(acknowledgeMode);
+		});
+		assertThat(uniqueValues).hasSize(4);
 	}
 
 
-	private static Stream<Field> streamAcknowledgeModeConstants() {
+	private static Stream<String> streamAcknowledgeModeConstants() {
 		return Arrays.stream(Session.class.getFields())
-				.filter(ReflectionUtils::isPublicStaticFinal);
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.map(Field::getName);
 	}
 
 }

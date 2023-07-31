@@ -63,14 +63,15 @@ class IsolationLevelDataSourceAdapterTests {
 					Integer isolationLevel = adapter.getIsolationLevel();
 					if ("ISOLATION_DEFAULT".equals(name)) {
 						assertThat(isolationLevel).isNull();
+						uniqueValues.add(ISOLATION_DEFAULT);
 					}
 					else {
 						Integer expected = IsolationLevelDataSourceAdapter.constants.get(name);
 						assertThat(isolationLevel).isEqualTo(expected);
+						uniqueValues.add(isolationLevel);
 					}
-					uniqueValues.add(isolationLevel);
 				});
-		assertThat(uniqueValues).hasSize(IsolationLevelDataSourceAdapter.constants.size());
+		assertThat(uniqueValues).containsExactlyInAnyOrderElementsOf(IsolationLevelDataSourceAdapter.constants.values());
 	}
 
 	@Test

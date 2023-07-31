@@ -179,7 +179,7 @@ class CustomizableTraceInterceptorTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void supportedPlaceholderValues() {
-		assertThat(ALLOWED_PLACEHOLDERS).containsAll(getPlaceholderConstantValues());
+		assertThat(ALLOWED_PLACEHOLDERS).containsExactlyInAnyOrderElementsOf(getPlaceholderConstantValues());
 	}
 
 	private List<String> getPlaceholderConstantValues() {
