@@ -172,6 +172,28 @@ class DefaultMessageListenerContainerTests {
 		assertThat(uniqueValues).hasSize(5);
 	}
 
+	@Test
+	void setCacheLevel() {
+		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
+
+		assertThatIllegalArgumentException().isThrownBy(() -> container.setCacheLevel(999));
+
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_NONE);
+		assertThat(container.getCacheLevel()).isEqualTo(DefaultMessageListenerContainer.CACHE_NONE);
+
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONNECTION);
+		assertThat(container.getCacheLevel()).isEqualTo(DefaultMessageListenerContainer.CACHE_CONNECTION);
+
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_SESSION);
+		assertThat(container.getCacheLevel()).isEqualTo(DefaultMessageListenerContainer.CACHE_SESSION);
+
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONSUMER);
+		assertThat(container.getCacheLevel()).isEqualTo(DefaultMessageListenerContainer.CACHE_CONSUMER);
+
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_AUTO);
+		assertThat(container.getCacheLevel()).isEqualTo(DefaultMessageListenerContainer.CACHE_AUTO);
+	}
+
 
 	private static Stream<String> streamCacheConstants() {
 		return Arrays.stream(DefaultMessageListenerContainer.class.getFields())

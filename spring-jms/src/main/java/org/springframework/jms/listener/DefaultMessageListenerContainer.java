@@ -280,7 +280,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		Assert.hasText(constantName, "'constantName' must not be null or blank");
 		Integer cacheLevel = constants.get(constantName);
 		Assert.notNull(cacheLevel, "Only cache constants allowed");
-		setCacheLevel(cacheLevel);
+		this.cacheLevel = cacheLevel;
 	}
 
 	/**
@@ -304,6 +304,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setTransactionManager
 	 */
 	public void setCacheLevel(int cacheLevel) {
+		Assert.isTrue(constants.containsValue(cacheLevel), "Only values of cache constants allowed");
 		this.cacheLevel = cacheLevel;
 	}
 
