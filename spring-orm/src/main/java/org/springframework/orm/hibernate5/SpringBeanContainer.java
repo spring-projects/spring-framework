@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
+import org.hibernate.type.spi.TypeBootstrapContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -180,14 +181,28 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
+				Object bean = null;
+				if (fallbackProducer instanceof TypeBootstrapContext) {
+					// Special Hibernate type construction rules, including TypeBootstrapContext resolution.
+					bean = fallbackProducer.produceBeanInstance(name, beanType);
+				}
 				if (this.beanFactory.containsBean(name)) {
-					Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+					if (bean == null) {
+						bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+					}
 					this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 					this.beanFactory.applyBeanPropertyValues(bean, name);
 					bean = this.beanFactory.initializeBean(bean, name);
 					return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
 				}
+				else if (bean != null) {
+					// No bean found by name but constructed with TypeBootstrapContext rules
+					this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+					bean = this.beanFactory.initializeBean(bean, name);
+					return new SpringContainedBean<>(bean, this.beanFactory::destroyBean);
+				}
 				else {
+					// No bean found by name -> construct by type using createBean
 					return new SpringContainedBean<>(
 							this.beanFactory.createBean(beanType),
 							this.beanFactory::destroyBean);

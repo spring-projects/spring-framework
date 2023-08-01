@@ -60,7 +60,7 @@ import org.springframework.web.util.pattern.PatternParseException;
  */
 public final class MappedInterceptor implements HandlerInterceptor {
 
-	private static PathMatcher defaultPathMatcher = new AntPathMatcher();
+	private static final PathMatcher defaultPathMatcher = new AntPathMatcher();
 
 
 	@Nullable
