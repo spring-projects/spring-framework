@@ -12,6 +12,9 @@ dependencies {
 	optional("com.github.ben-manes.caffeine:caffeine")
 	optional("org.quartz-scheduler:quartz")
 	optional("org.freemarker:freemarker")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.mockito:mockito-core")
 	testImplementation(project(":spring-context"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
@@ -23,7 +26,4 @@ dependencies {
 	testRuntimeOnly("org.ehcache:ehcache")
 	testRuntimeOnly("org.glassfish:jakarta.el")
 	testRuntimeOnly("com.sun.mail:jakarta.mail")
-	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
-	testFixturesImplementation("org.assertj:assertj-core")
-	testFixturesImplementation("org.mockito:mockito-core")
 }

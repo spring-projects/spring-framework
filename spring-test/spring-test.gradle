@@ -25,20 +25,23 @@ dependencies {
 	optional("jakarta.servlet:jakarta.servlet-api")
 	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
 	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
-	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")
+	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("junit:junit")
-	optional("org.apache.tomcat.embed:tomcat-embed-core")
-	optional("org.junit.platform:junit-platform-launcher")  // for AOT processing
-	optional("org.junit.jupiter:junit-jupiter-api")
-	optional("org.testng:testng")
-	optional("org.aspectj:aspectjweaver")
-	optional("org.apache.groovy:groovy")
-	optional("org.hamcrest:hamcrest")
 	optional("net.sourceforge.htmlunit:htmlunit") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
+	optional("org.apache.groovy:groovy")
+	optional("org.apache.tomcat.embed:tomcat-embed-core")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.hamcrest:hamcrest")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("org.junit.jupiter:junit-jupiter-api")
+	optional("org.junit.platform:junit-platform-launcher")  // for AOT processing
 	optional("org.seleniumhq.selenium:htmlunit-driver") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "net.bytebuddy", module: "byte-buddy"
@@ -46,45 +49,42 @@ dependencies {
 	optional("org.seleniumhq.selenium:selenium-java") {
 		exclude group: "net.bytebuddy", module: "byte-buddy"
 	}
-	optional("org.xmlunit:xmlunit-matchers")
 	optional("org.skyscreamer:jsonassert")
-	optional("org.jetbrains.kotlin:kotlin-reflect")
-	optional("org.jetbrains.kotlin:kotlin-stdlib")
-	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-	testImplementation(project(":spring-core-test"))
+	optional("org.testng:testng")
+	optional("org.xmlunit:xmlunit-matchers")
 	testImplementation(project(":spring-context-support"))
+	testImplementation(project(":spring-core-test"))
 	testImplementation(project(":spring-oxm"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-tx")))
 	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("com.fasterxml.jackson.core:jackson-databind")
+	testImplementation("com.rometools:rome")
+	testImplementation("com.thoughtworks.xstream:xstream")
 	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
+	testImplementation("io.projectreactor.netty:reactor-netty-http")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("jakarta.ejb:jakarta.ejb-api")
 	testImplementation("jakarta.interceptor:jakarta.interceptor-api")
 	testImplementation("jakarta.mail:jakarta.mail-api")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("javax.cache:cache-api")
-	testImplementation("org.hibernate:hibernate-core-jakarta")
-	testImplementation("org.hibernate:hibernate-validator")
-	testImplementation("org.junit.platform:junit-platform-testkit")
-	testImplementation("com.fasterxml.jackson.core:jackson-databind")
-	testImplementation("com.thoughtworks.xstream:xstream")
-	testImplementation("com.rometools:rome")
-	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.apache.httpcomponents:httpclient") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	testImplementation("io.projectreactor.netty:reactor-netty-http")
+	testImplementation("org.hibernate:hibernate-core-jakarta")
+	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hsqldb:hsqldb")
+	testImplementation("org.junit.platform:junit-platform-testkit")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("org.junit.support:testng-engine")
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
-	testRuntimeOnly("org.junit.support:testng-engine")
-	testRuntimeOnly("org.glassfish:jakarta.el")
-	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
-	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 }
 
 // Prevent xml-apis from being used so that the corresponding XML APIs from

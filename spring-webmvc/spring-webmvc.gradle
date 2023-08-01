@@ -38,18 +38,15 @@ dependencies {
 	optional("org.reactivestreams:reactive-streams")
 	optional("org.webjars:webjars-locator-core")
 	testImplementation(testFixtures(project(":spring-beans")))
-	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))
-	testImplementation("jakarta.servlet:jakarta.servlet-api")
-	testImplementation("org.eclipse.jetty:jetty-servlet") {
-		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
-	}
-	testImplementation("org.eclipse.jetty:jetty-server") {
-		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
-	}
 	testImplementation("commons-io:commons-io")
-	testImplementation("org.mozilla:rhino")
+	testImplementation("io.projectreactor:reactor-core")
+	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation("jakarta.servlet:jakarta.servlet-api")
+	testImplementation("jakarta.validation:jakarta.validation-api")
+	testImplementation("jaxen:jaxen")
 	testImplementation("org.dom4j:dom4j") {
 		exclude group: "javax.xml.bind", module: "jaxb-api"
 		exclude group: "jaxen", module: "jaxen"
@@ -57,22 +54,25 @@ dependencies {
 		exclude group: "pull-parser", module: "pull-parser"
 		exclude group: "xpp3", module: "xpp3"
 	}
-	testImplementation("io.projectreactor:reactor-core")
-	testImplementation("io.reactivex.rxjava3:rxjava")
-	testImplementation("jakarta.validation:jakarta.validation-api")
-	testImplementation("jaxen:jaxen")
+	testImplementation("org.eclipse.jetty:jetty-server") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
+	}
+	testImplementation("org.eclipse.jetty:jetty-servlet") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
+	}
 	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
+	testImplementation("org.mozilla:rhino")
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
+	testRuntimeOnly("com.sun.activation:jakarta.activation")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("org.apache.httpcomponents.client5:httpclient5")
+	testRuntimeOnly("org.glassfish:jakarta.el")
 	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")
 	testRuntimeOnly("org.webjars:underscorejs")
-	testRuntimeOnly("org.glassfish:jakarta.el")
-	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
-	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
-	testRuntimeOnly("com.sun.activation:jakarta.activation")
 }
