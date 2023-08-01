@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,11 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * to invoke each listener with.
 	 * <p>Default is equivalent to {@link org.springframework.core.task.SyncTaskExecutor},
 	 * executing all listeners synchronously in the calling thread.
-	 * <p>Consider specifying an asynchronous task executor here to not block the
-	 * caller until all listeners have been executed. However, note that asynchronous
-	 * execution will not participate in the caller's thread context (class loader,
-	 * transaction association) unless the TaskExecutor explicitly supports this.
+	 * <p>Consider specifying an asynchronous task executor here to not block the caller
+	 * until all listeners have been executed. However, note that asynchronous execution
+	 * will not participate in the caller's thread context (class loader, transaction context)
+	 * unless the TaskExecutor explicitly supports this.
+	 * @since 2.0
 	 * @see org.springframework.core.task.SyncTaskExecutor
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 */
@@ -92,6 +93,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	/**
 	 * Return the current task executor for this multicaster.
+	 * @since 2.0
 	 */
 	@Nullable
 	protected Executor getTaskExecutor() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Mono<Connection> getConnection(ConnectionFactory connectionFactory) {
 		return doGetConnection(connectionFactory)
-				.onErrorMap(e -> new DataAccessResourceFailureException("Failed to obtain R2DBC Connection", e));
+				.onErrorMap(ex -> new DataAccessResourceFailureException("Failed to obtain R2DBC Connection", ex));
 	}
 
 	/**
@@ -124,17 +124,17 @@ public abstract class ConnectionFactoryUtils {
 						holderToUse.setConnection(conn);
 					}
 					holderToUse.requested();
-					synchronizationManager
-							.registerSynchronization(new ConnectionSynchronization(holderToUse, connectionFactory));
+					synchronizationManager.registerSynchronization(
+							new ConnectionSynchronization(holderToUse, connectionFactory));
 					holderToUse.setSynchronizedWithTransaction(true);
 					if (holderToUse != conHolder) {
 						synchronizationManager.bindResource(connectionFactory, holderToUse);
 					}
 				})      // Unexpected exception from external delegation call -> close Connection and rethrow.
-				.onErrorResume(e -> releaseConnection(connection, connectionFactory).then(Mono.error(e))));
+				.onErrorResume(ex -> releaseConnection(connection, connectionFactory).then(Mono.error(ex))));
 			}
 			return con;
-		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connectionFactory.create()));
+		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connectionFactory.create()));
 	}
 
 	/**
@@ -159,7 +159,7 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Mono<Void> releaseConnection(Connection con, ConnectionFactory connectionFactory) {
 		return doReleaseConnection(con, connectionFactory)
-				.onErrorMap(e -> new DataAccessResourceFailureException("Failed to close R2DBC Connection", e));
+				.onErrorMap(ex -> new DataAccessResourceFailureException("Failed to close R2DBC Connection", ex));
 	}
 
 	/**
@@ -171,15 +171,14 @@ public abstract class ConnectionFactoryUtils {
 	 * @see #doGetConnection
 	 */
 	public static Mono<Void> doReleaseConnection(Connection connection, ConnectionFactory connectionFactory) {
-		return TransactionSynchronizationManager.forCurrentTransaction()
-				.flatMap(synchronizationManager -> {
+		return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 			ConnectionHolder conHolder = (ConnectionHolder) synchronizationManager.getResource(connectionFactory);
 			if (conHolder != null && connectionEquals(conHolder, connection)) {
 				// It's the transactional Connection: Don't close it.
 				conHolder.released();
 			}
 			return Mono.from(connection.close());
-		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connection.close()));
+		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connection.close()));
 	}
 
 	/**
@@ -268,7 +267,8 @@ public abstract class ConnectionFactoryUtils {
 		Connection heldCon = conHolder.getConnection();
 		// Explicitly check for identity too: for Connection handles that do not implement
 		// "equals" properly).
-		return (heldCon == passedInCon || heldCon.equals(passedInCon) || getTargetConnection(heldCon).equals(passedInCon));
+		return (heldCon == passedInCon || heldCon.equals(passedInCon) ||
+				getTargetConnection(heldCon).equals(passedInCon));
 	}
 
 	/**
