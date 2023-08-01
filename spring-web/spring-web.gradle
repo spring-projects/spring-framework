@@ -11,7 +11,6 @@ dependencies {
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
-	optional("com.fasterxml:aalto-xml")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
@@ -65,6 +64,7 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-cbor")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
+	optional("com.fasterxml:aalto-xml")  // out of order to avoid XML parser override
 	testFixturesApi("jakarta.servlet:jakarta.servlet-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
