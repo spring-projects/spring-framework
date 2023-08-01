@@ -472,11 +472,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
 			return existingBean;
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
 			return existingBean;

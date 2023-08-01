@@ -297,7 +297,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @throws BeansException if any post-processing failed
 	 * @see BeanPostProcessor#postProcessBeforeInitialization
 	 * @see #ORIGINAL_INSTANCE_SUFFIX
+	 * @deprecated as of 6.1, in favor of implicit post-processing through
+	 * {@link #initializeBean(Object, String)}
 	 */
+	@Deprecated(since = "6.1")
 	Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException;
 
@@ -314,7 +317,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @throws BeansException if any post-processing failed
 	 * @see BeanPostProcessor#postProcessAfterInitialization
 	 * @see #ORIGINAL_INSTANCE_SUFFIX
+	 * @deprecated as of 6.1, in favor of implicit post-processing through
+	 * {@link #initializeBean(Object, String)}
 	 */
+	@Deprecated(since = "6.1")
 	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException;
 

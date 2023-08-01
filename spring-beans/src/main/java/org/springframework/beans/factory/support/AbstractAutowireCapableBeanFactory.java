@@ -411,6 +411,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return initializeBean(beanName, existingBean, null);
 	}
 
+	@Deprecated(since = "6.1")
 	@Override
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException {
@@ -426,6 +427,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	@Deprecated(since = "6.1")
 	@Override
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
@@ -1092,6 +1094,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @return the shortcut-determined bean instance, or {@code null} if none
 	 */
+	@SuppressWarnings("deprecation")
 	@Nullable
 	protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd) {
 		Object bean = null;
@@ -1755,6 +1758,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #invokeInitMethods
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
+	@SuppressWarnings("deprecation")
 	protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 		invokeAwareMethods(beanName, bean);
 
@@ -1886,6 +1890,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * object obtained from FactoryBeans (for example, to auto-proxy them).
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {
 		return applyBeanPostProcessorsAfterInitialization(object, beanName);
