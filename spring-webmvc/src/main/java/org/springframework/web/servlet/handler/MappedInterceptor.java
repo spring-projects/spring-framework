@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,18 +137,21 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 
 	/**
-	 * Return the patterns this interceptor is mapped to.
+	 * Get the include path patterns this interceptor is mapped to.
+	 * @see #getIncludePathPatterns()
+	 * @see #getExcludePathPatterns()
+	 * @deprecated since 6.1 in favor of {@link #getIncludePathPatterns()}
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.1", forRemoval = true)
 	public String[] getPathPatterns() {
-		return (!ObjectUtils.isEmpty(this.includePatterns) ?
-				Arrays.stream(this.includePatterns).map(PatternAdapter::getPatternString).toArray(String[]::new) :
-				null);
+		return getIncludePathPatterns();
 	}
 
 	/**
-	 * Return the include path patterns this interceptor is mapped to.
+	 * Get the include path patterns this interceptor is mapped to.
+	 * @since 6.1
+	 * @see #getExcludePathPatterns()
 	 */
 	@Nullable
 	public String[] getIncludePathPatterns() {
@@ -158,7 +161,9 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * Return the exclude path patterns this interceptor is mapped to.
+	 * Get the exclude path patterns this interceptor is mapped to.
+	 * @since 6.1
+	 * @see #getIncludePathPatterns()
 	 */
 	@Nullable
 	public String[] getExcludePathPatterns() {
