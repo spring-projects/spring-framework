@@ -97,7 +97,7 @@ dependencies {
 }
 
 jar {
-	manifest.attributes["Dependencies"] = "jdk.unsupported"  // for WildFly (-> Objenesis 3.2)
+	manifest.attributes["Dependencies"] = "jdk.unsupported,org.jboss.vfs" // for WildFly (Objenesis and VfsUtils)
 
 	dependsOn javapoetRepackJar
 	from(zipTree(javapoetRepackJar.archiveFile)) {
