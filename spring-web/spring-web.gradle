@@ -30,7 +30,10 @@ dependencies {
 	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("io.projectreactor.netty:reactor-netty5-http")
 	optional("io.undertow:undertow-core")
+	optional("org.apache.httpcomponents.client5:httpclient5")
+	optional("org.apache.httpcomponents.core5:httpcore5-reactive")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
+	optional("org.eclipse.jetty:jetty-reactive-httpclient")
 	optional("org.eclipse.jetty:jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
@@ -44,9 +47,6 @@ dependencies {
 		exclude group: "org.eclipse.jetty", module: "jetty-server"
 		exclude group: "org.eclipse.jetty", module: "jetty-servlet"
 	}
-	optional("org.eclipse.jetty:jetty-reactive-httpclient")
-	optional('org.apache.httpcomponents.client5:httpclient5')
-	optional('org.apache.httpcomponents.core5:httpcore5-reactive')
 	optional("com.squareup.okhttp3:okhttp")
 	optional("com.fasterxml.woodstox:woodstox-core")
 	optional("com.fasterxml:aalto-xml")

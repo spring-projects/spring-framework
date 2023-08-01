@@ -126,8 +126,8 @@ public abstract class ConnectionFactoryUtils {
 						holderToUse.setConnection(conn);
 					}
 					holderToUse.requested();
-					synchronizationManager
-							.registerSynchronization(new ConnectionSynchronization(holderToUse, connectionFactory));
+					synchronizationManager.registerSynchronization(
+							new ConnectionSynchronization(holderToUse, connectionFactory));
 					holderToUse.setSynchronizedWithTransaction(true);
 					if (holderToUse != conHolder) {
 						synchronizationManager.bindResource(connectionFactory, holderToUse);
@@ -173,8 +173,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @see #doGetConnection
 	 */
 	public static Mono<Void> doReleaseConnection(Connection connection, ConnectionFactory connectionFactory) {
-		return TransactionSynchronizationManager.forCurrentTransaction()
-				.flatMap(synchronizationManager -> {
+		return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 			ConnectionHolder conHolder = (ConnectionHolder) synchronizationManager.getResource(connectionFactory);
 			if (conHolder != null && connectionEquals(conHolder, connection)) {
 				// It's the transactional Connection: Don't close it.
@@ -289,7 +288,8 @@ public abstract class ConnectionFactoryUtils {
 		Connection heldCon = conHolder.getConnection();
 		// Explicitly check for identity too: for Connection handles that do not implement
 		// "equals" properly).
-		return (heldCon == passedInCon || heldCon.equals(passedInCon) || getTargetConnection(heldCon).equals(passedInCon));
+		return (heldCon == passedInCon || heldCon.equals(passedInCon) ||
+				getTargetConnection(heldCon).equals(passedInCon));
 	}
 
 	/**
