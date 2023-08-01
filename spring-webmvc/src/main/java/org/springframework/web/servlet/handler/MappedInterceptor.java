@@ -140,9 +140,30 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * Return the patterns this interceptor is mapped to.
 	 */
 	@Nullable
+	@Deprecated
 	public String[] getPathPatterns() {
 		return (!ObjectUtils.isEmpty(this.includePatterns) ?
 				Arrays.stream(this.includePatterns).map(PatternAdapter::getPatternString).toArray(String[]::new) :
+				null);
+	}
+
+	/**
+	 * Return the include path patterns this interceptor is mapped to.
+	 */
+	@Nullable
+	public String[] getIncludePathPatterns() {
+		return (!ObjectUtils.isEmpty(this.includePatterns) ?
+				Arrays.stream(this.includePatterns).map(PatternAdapter::getPatternString).toArray(String[]::new) :
+				null);
+	}
+
+	/**
+	 * Return the exclude path patterns this interceptor is mapped to.
+	 */
+	@Nullable
+	public String[] getExcludePathPatterns() {
+		return (!ObjectUtils.isEmpty(this.excludePatterns) ?
+				Arrays.stream(this.excludePatterns).map(PatternAdapter::getPatternString).toArray(String[]::new) :
 				null);
 	}
 
