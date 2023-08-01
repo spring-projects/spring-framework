@@ -57,10 +57,14 @@ attribute of the annotation to `true`.
 
 [NOTE]
 ====
-`@TransactionalEventListener` only works with thread-bound transactions managed by
-`PlatformTransactionManager`. A reactive transaction managed by `ReactiveTransactionManager`
-uses the Reactor context instead of thread-local attributes, so from the perspective of
-an event listener, there is no compatible active transaction that it can participate in.
+As of 6.1, `@TransactionalEventListener` can work with thread-bound transactions managed by
+`PlatformTransactionManager` as well as reactive transactions managed by `ReactiveTransactionManager`.
+For the former, listeners are guaranteed to see the current thread-bound transaction.
+Since the latter uses the Reactor context instead of thread-local variables, the transaction
+context needs to be included in the published event instance as the event source.
+See the
+{api-spring-framework}/transaction/reactive/TransactionalEventPublisher.html[`TransactionalEventPublisher`]
+javadoc for details.
 ====
 
 
