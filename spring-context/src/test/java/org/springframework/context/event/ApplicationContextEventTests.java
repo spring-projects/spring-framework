@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -137,17 +139,42 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void simpleApplicationEventMulticasterWithTaskExecutor() {
 		@SuppressWarnings("unchecked")
 		ApplicationListener<ApplicationEvent> listener = mock();
+		willReturn(true).given(listener).supportsAsyncExecution();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		AtomicBoolean invoked = new AtomicBoolean();
 		smc.setTaskExecutor(command -> {
+			invoked.set(true);
 			command.run();
 			command.run();
 		});
 		smc.addApplicationListener(listener);
 
 		smc.multicastEvent(evt);
+		assertThat(invoked.get()).isTrue();
 		verify(listener, times(2)).onApplicationEvent(evt);
+	}
+
+	@Test
+	public void simpleApplicationEventMulticasterWithTaskExecutorAndNonAsyncListener() {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener = mock();
+		willReturn(false).given(listener).supportsAsyncExecution();
+		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		AtomicBoolean invoked = new AtomicBoolean();
+		smc.setTaskExecutor(command -> {
+			invoked.set(true);
+			command.run();
+			command.run();
+		});
+		smc.addApplicationListener(listener);
+
+		smc.multicastEvent(evt);
+		assertThat(invoked.get()).isFalse();
+		verify(listener, times(1)).onApplicationEvent(evt);
 	}
 
 	@Test
