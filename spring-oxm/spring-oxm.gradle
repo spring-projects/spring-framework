@@ -17,9 +17,9 @@ sourceSets {
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
-	optional("jakarta.xml.bind:jakarta.xml.bind-api")
-	optional("jakarta.activation:jakarta.activation-api")
 	optional("com.thoughtworks.xstream:xstream")
+	optional("jakarta.activation:jakarta.activation-api")
+	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation(project(":spring-context"))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("org.codehaus.jettison:jettison") {
