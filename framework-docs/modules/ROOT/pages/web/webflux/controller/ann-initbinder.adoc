@@ -3,23 +3,21 @@
 
 [.small]#xref:web/webmvc/mvc-controller/ann-initbinder.adoc[See equivalent in the Servlet stack]#
 
-`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods, to
-initialize instances of `WebDataBinder`. Those, in turn, are used to:
+`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods to
+initialize `WebDataBinder` instances that in turn can:
 
-* Bind request parameters (that is, form data or query) to a model object.
-* Convert `String`-based request values (such as request parameters, path variables,
-headers, cookies, and others) to the target type of controller method arguments.
-* Format model object values as `String` values when rendering HTML forms.
+* Bind request parameters to a model object.
+* Convert request values from string to object property types.
+* Format model object properties as strings when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
-Spring `Converter` and `Formatter` components. In addition, you can use the
-xref:web/webflux/config.adoc#webflux-config-conversion[WebFlux Java configuration] to register `Converter` and
-`Formatter` types in a globally shared `FormattingConversionService`.
+In an `@Controller`, `DataBinder` customizations apply locally within the controller,
+or even to a specific model attribute referenced by name through the annotation.
+In an `@ControllerAdvice` customizations can apply to all or a subset of controllers.
 
-`@InitBinder` methods support many of the same arguments that `@RequestMapping` methods
-do, except for `@ModelAttribute` (command object) arguments. Typically, they are declared
-with a `WebDataBinder` argument, for registrations, and a `void` return value.
-The following example uses the `@InitBinder` annotation:
+You can register `PropertyEditor`, `Converter`, and `Formatter` components in the
+`DataBinder` for type conversion. Alternatively, you can use the
+xref:web/webflux/config.adoc#webflux-config-conversion[WebFlux config] to register
+`Converter` and `Formatter` components  in a globally shared `FormattingConversionService`.
 
 --
 [tabs]
@@ -112,4 +110,5 @@ Kotlin::
 == Model Design
 [.small]#xref:web/webmvc/mvc-controller/ann-initbinder.adoc#mvc-ann-initbinder-model-design[See equivalent in the Servlet stack]#
 
+include::partial$web/web-data-binding-model-design.adoc[]
 
