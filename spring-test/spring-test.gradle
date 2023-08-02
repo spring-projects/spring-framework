@@ -15,7 +15,6 @@ dependencies {
 	optional(project(":spring-webmvc"))
 	optional(project(":spring-websocket"))
 	optional("com.jayway.jsonpath:json-path")
-	optional("info.picocli:picocli")
 	optional("io.micrometer:context-propagation")
 	optional("io.micrometer:micrometer-observation")
 	optional("io.projectreactor:reactor-test")
