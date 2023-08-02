@@ -131,11 +131,12 @@ public class PathPatternParser {
 
 
 	/**
-	 * Shared, read-only instance of {@code PathPatternParser}. Uses default settings:
+	 * Shared, read-only instance of {@code PathPatternParser}.
+	 * <p>Uses default settings:
 	 * <ul>
-	 * <li>{@code matchOptionalTrailingSeparator=true}
-	 * <li>{@code caseSensitivetrue}
-	 * <li>{@code pathOptions=PathContainer.Options.HTTP_PATH}
+	 * <li>{@code matchOptionalTrailingSeparator = false}
+	 * <li>{@code caseSensitive = true}
+	 * <li>{@code pathOptions = PathContainer.Options.HTTP_PATH}
 	 * </ul>
 	 */
 	public final static PathPatternParser defaultInstance = new PathPatternParser() {
