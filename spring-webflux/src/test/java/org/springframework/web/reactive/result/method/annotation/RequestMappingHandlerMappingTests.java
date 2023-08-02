@@ -44,8 +44,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
+import org.springframework.web.reactive.result.condition.MediaTypeExpression;
 import org.springframework.web.reactive.result.condition.PatternsRequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -56,6 +58,7 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link RequestMappingHandlerMapping}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
 class RequestMappingHandlerMappingTests {
 
@@ -150,6 +153,52 @@ class RequestMappingHandlerMappingTests {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(
+				HttpExchangeController.class.getMethod("defaultValuesExchange"),
+				HttpExchangeController.class);
+
+		assertThat(mappingInfo.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::toString)
+				.containsOnly("/exchange");
+		assertThat(mappingInfo.getMethodsCondition().getMethods()).isEmpty();
+		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getConsumesCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getProducesCondition().getExpressions()).isEmpty();
+	}
+
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void httpExchangeWithCustomValues() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(
+				HttpExchangeController.class.getMethod("customValuesExchange"),
+				HttpExchangeController.class);
+
+		assertThat(mappingInfo.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::toString)
+				.containsOnly("/exchange/custom");
+		assertThat(mappingInfo.getMethodsCondition().getMethods())
+				.containsOnly(RequestMethod.POST);
+		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getConsumesCondition().getExpressions())
+				.extracting(MediaTypeExpression::getMediaType)
+				.containsOnly(MediaType.APPLICATION_JSON);
+		assertThat(mappingInfo.getProducesCondition().getExpressions())
+				.extracting(MediaTypeExpression::getMediaType)
+				.containsOnly(MediaType.valueOf("text/plain;charset=UTF-8"));
+	}
 
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) throws Exception {
 		String methodName = requestMethod.name().toLowerCase();
@@ -236,6 +285,18 @@ class RequestMappingHandlerMappingTests {
 		public Principal getUser() {
 			return mock();
 		}
+	}
+
+	@RestController
+	@HttpExchange("/exchange")
+	static class HttpExchangeController {
+
+		@HttpExchange
+		public void defaultValuesExchange(){}
+
+		@HttpExchange(value = "/custom", accept = "text/plain;charset=UTF-8",
+				method = "POST", contentType =  "application/json")
+		public void customValuesExchange(){}
 	}
 
 }

@@ -46,6 +46,7 @@ import org.springframework.web.reactive.result.condition.ConsumesRequestConditio
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -54,6 +55,7 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Olga Maciaszek-Sharma
  * @since 5.0
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
@@ -171,18 +173,27 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
-	 * supplying the appropriate custom {@link RequestCondition} depending on whether
+	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)}
+	 * or {@link #createRequestMappingInfo(HttpExchange, RequestCondition)},
+	 * depending on which annotation is found on the element being processed,
+	 * and supplying the appropriate custom {@link RequestCondition} depending on whether
 	 * the supplied {@code annotatedElement} is a class or method.
 	 * @see #getCustomTypeCondition(Class)
 	 * @see #getCustomMethodCondition(Method)
-	 */
+	*/
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
-		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
-		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
+		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
+		if(requestMapping != null){
+			return createRequestMappingInfo(requestMapping, condition);
+		}
+		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(element, HttpExchange.class);
+		if(httpExchange != null){
+			return createRequestMappingInfo(httpExchange, condition);
+		}
+		return null;
 	}
 
 	/**
@@ -247,6 +258,28 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * Create a {@link RequestMappingInfo} from the supplied
+	 * {@link HttpExchange @HttpExchange} annotation, which is either
+	 * a directly declared annotation, a meta-annotation, or the synthesized
+	 * result of merging annotation attributes within an annotation hierarchy.
+	 */
+	protected RequestMappingInfo createRequestMappingInfo(
+			HttpExchange httpExchange,
+			@Nullable RequestCondition<?> customCondition) {
+
+		RequestMappingInfo.Builder builder = RequestMappingInfo
+				.paths(resolveEmbeddedValuesInPatterns(
+						toTextArray(httpExchange.value())))
+				.methods(toMethodArray(httpExchange.method()))
+				.consumes(toTextArray(httpExchange.contentType()))
+				.produces(httpExchange.accept());
+		if (customCondition != null) {
+			builder.customCondition(customCondition);
+		}
+		return builder.options(this.config).build();
+	}
+
+	/**
 	 * Resolve placeholder values in the given array of patterns.
 	 * @return a new array with updated patterns
 	 */
@@ -262,6 +295,24 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return resolvedPatterns;
 		}
 	}
+
+
+	private static String[] toTextArray(String string) {
+		if (StringUtils.hasText(string)) {
+			return new String[] { string };
+		}
+		return new String[] {};
+	}
+
+	private static RequestMethod[] toMethodArray(String method) {
+		RequestMethod requestMethod = null;
+		if (StringUtils.hasText(method)) {
+			requestMethod = RequestMethod.resolve(method);
+		}
+		return requestMethod != null ? new RequestMethod[] { requestMethod }
+				: new RequestMethod[] {};
+	}
+
 
 	@Override
 	public void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {
