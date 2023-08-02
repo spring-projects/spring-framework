@@ -43,7 +43,7 @@ public class PathPatternParser {
 
 
 	/**
-	 * Whether a {@link PathPattern} produced by this parser should
+	 * Configure whether a {@link PathPattern} produced by this parser should
 	 * automatically match request paths with a trailing slash.
 	 * <p>If set to {@code true} a {@code PathPattern} without a trailing slash
 	 * will also match request paths with a trailing slash. If set to
@@ -70,7 +70,7 @@ public class PathPatternParser {
 	}
 
 	/**
-	 * Whether path pattern matching should be case-sensitive.
+	 * Configure whether path pattern matching should be case-sensitive.
 	 * <p>The default is {@code true}.
 	 */
 	public void setCaseSensitive(boolean caseSensitive) {
@@ -96,7 +96,7 @@ public class PathPatternParser {
 	}
 
 	/**
-	 * Return the {@link #setPathOptions configured} pattern parsing options.
+	 * Get the {@link #setPathOptions configured} pattern parsing options.
 	 * @since 5.2
 	 */
 	public PathContainer.Options getPathOptions() {
@@ -160,5 +160,7 @@ public class PathPatternParser {
 			throw new UnsupportedOperationException(
 					"This is a read-only, shared instance that cannot be modified");
 		}
+
 	};
+
 }
