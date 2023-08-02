@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mock;
 public class CaffeineCacheManagerTests {
 
 	@Test
+	@SuppressWarnings("cast")
 	public void testDynamicMode() {
 		CacheManager cm = new CaffeineCacheManager();
 
