@@ -38,9 +38,16 @@ the properties required for the input:
 	}
 ----
 
-If a dedicated model object is not feasible, we strongy recommend registering
-`allowedFields` patterns (case sensitive) on `WebDataBinder` in order to prevent other
-properties from being set. For example:
+Another good practice is to apply
+xref:core/validation/beans-beans.adoc#beans-constructor-binding[constructor binding],
+which uses only the request parameters it needs for constructor arguments, and any other
+input is ignored. This is in contrast to property binding which by default binds every
+request parameter for which there is a matching property.
+
+If neither a dedicated model object nor constructor binding is sufficient, and you must
+use property binding, we strongy recommend registering `allowedFields` patterns (case
+sensitive) on `WebDataBinder` in order to prevent unexpected properties from being set.
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -60,3 +67,25 @@ properties from being set. For example:
 You can also register `disallowedFields`  patterns (case insensitive). However,
 "allowed" configuration is preferred over "disallowed" as it is more explicit and less
 prone to mistakes.
+
+By default, constructor and property binding are both used. If you want to use
+constructor binding only, you can set the `declarativeBinding` flag on `WebDataBinder`
+through an `@InitBinder` method either locally within a controller or globally through an
+`@ControllerAdvice`. Turning this flag on ensures that only constructor binding is used
+and that property binding is not used unless `allowedFields` patterns are configured.
+For example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyController {
+
+		@InitBinder
+		void initBinder(WebDataBinder binder) {
+			binder.setDeclarativeBinding(true);
+		}
+
+		// @RequestMapping methods, etc.
+
+	}
+----

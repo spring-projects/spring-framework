@@ -1,5 +1,5 @@
 [[mvc-ann-initbinder]]
-= `DataBinder`
+= `@InitBinder`
 
 [.small]#xref:web/webflux/controller/ann-initbinder.adoc[See equivalent in the Reactive stack]#
 

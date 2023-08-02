@@ -38,12 +38,44 @@ The `Pet` instance may be:
 request parameters. Argument names are determined through runtime-retained parameter
 names in the bytecode.
 
-Once a model attribute instance is available, `WebDataBinder` binds request parameters to
-properties of the target `Object` with type conversion where necessary.
-For more on data binding and validation, see
-xref:web/webmvc/mvc-config/validation.adoc[Validation].
-For more on customizing data binding, see
-xref:web/webmvc/mvc-controller/ann-initbinder.adoc[DataBinder].
+By default, both constructor and property
+xref:core/validation/beans-beans.adoc#beans-binding[data binding] are applied. However,
+model object design requires careful consideration, and for security reasons it is
+recommended either to use an object tailored specifically for web binding, or to apply
+constructor binding only. If property binding must still be used, then _allowedFields_
+patterns should be set to limit which properties can be set. For further details on this
+and example configuration, see
+xref:web/webflux/controller/ann-initbinder.adoc#webflux-ann-initbinder-model-design[model design].
+
+When using constructor binding, you can customize request parameter names through an
+`@BindParam` annotation. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class Account {
+
+	    private final String firstName;
+
+		public Account(@BindParam("first-name") String firstName) {
+			this.firstName = firstName;
+		}
+	}
+----
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Account(@BindParam("first-name") val firstName: String)
+----
+======
+
+NOTE: The `@BindParam` may also be placed on the fields that correspond to constructor
+parameters. While `@BindParam` is supported out of the box, you can also use a
+different annotation by setting a `DataBinder.NameResolver` on `DataBinder`
 
 WebFlux, unlike Spring MVC, supports reactive types in the model, e.g. `Mono<Account>`.
 You can declare a `@ModelAttribute` argument with or without a reactive type wrapper, and
