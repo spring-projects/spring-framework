@@ -256,6 +256,13 @@ Java::
 
 If you are registering bean definitions programmatically, consider using `RootBeanBefinition` as it allows to specify a `ResolvableType` that handles generics.
 
+[[aot.bestpractices.constructors]]
+=== Avoid Multiple Constructors
+The container is able to choose the most appropriate constructor to use based on several candidates.
+However, this is not a best practice and flagging the preferred constructor with `@Autowired` if necessary is preferred.
+
+In case you are working on a code base that you can't modify, you can set the {api-spring-framework}/beans/factory/support/AbstractBeanDefinition.html#PREFERRED_CONSTRUCTORS_ATTRIBUTE[`preferredConstructors` attribute] on the related bean definition to indicate which constructor should be used.
+
 [[aot.bestpractices.factory-bean]]
 === FactoryBean
 
