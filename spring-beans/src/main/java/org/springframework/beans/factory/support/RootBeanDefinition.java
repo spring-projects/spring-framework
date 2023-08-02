@@ -405,7 +405,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			return (Constructor<?>[]) attribute;
 		}
 		throw new IllegalArgumentException("Invalid value type for attribute '" +
-				PREFERRED_CONSTRUCTORS_ATTRIBUTE + "': " + attribute.getClass());
+				PREFERRED_CONSTRUCTORS_ATTRIBUTE + "': " + attribute.getClass().getName());
 	}
 
 	/**

@@ -1708,7 +1708,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return ResolvableType.forClass(clazz);
 		}
 		throw new IllegalArgumentException("Invalid value type for attribute '" +
-				FactoryBean.OBJECT_TYPE_ATTRIBUTE + "': " + attribute.getClass());
+				FactoryBean.OBJECT_TYPE_ATTRIBUTE + "': " + attribute.getClass().getName());
 	}
 
 	/**
