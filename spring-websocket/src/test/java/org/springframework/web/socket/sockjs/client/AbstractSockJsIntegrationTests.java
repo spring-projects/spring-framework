@@ -113,8 +113,9 @@ abstract class AbstractSockJsIntegrationTests {
 		this.baseUrl = "http://localhost:" + this.server.getPort();
 	}
 
+
 	@AfterEach
-	void teardown() throws Exception {
+	void teardown() {
 		try {
 			this.sockJsClient.stop();
 		}
@@ -141,6 +142,7 @@ abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
+
 	protected abstract Class<?> upgradeStrategyConfigClass();
 
 	protected abstract WebSocketTestServer createWebSocketTestServer();
@@ -153,6 +155,7 @@ abstract class AbstractSockJsIntegrationTests {
 		this.sockJsClient = new SockJsClient(Arrays.asList(transports));
 		this.sockJsClient.start();
 	}
+
 
 	@Test
 	void echoWebSocket() throws Exception {
@@ -305,8 +308,8 @@ abstract class AbstractSockJsIntegrationTests {
 			try {
 				Thread.sleep(timeToSleep);
 			}
-			catch (InterruptedException e) {
-				throw new IllegalStateException("Interrupted while waiting for " + description, e);
+			catch (InterruptedException ex) {
+				throw new IllegalStateException("Interrupted while waiting for " + description, ex);
 			}
 		}
 		throw new IllegalStateException("Timed out waiting for " + description);
@@ -333,6 +336,7 @@ abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
+
 	private static class TestClientHandler extends TextWebSocketHandler {
 
 		private final BlockingQueue<TextMessage> receivedMessages = new LinkedBlockingQueue<>();
@@ -340,7 +344,6 @@ abstract class AbstractSockJsIntegrationTests {
 		private volatile WebSocketSession session;
 
 		private volatile Throwable transportError;
-
 
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -376,6 +379,7 @@ abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
+
 	private static class EchoHandler extends TextWebSocketHandler {
 
 		@Override
@@ -384,20 +388,22 @@ abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
+
 	private static class TestServerHandler extends TextWebSocketHandler {
 
 		private WebSocketSession session;
 
 		@Override
-		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		public void afterConnectionEstablished(WebSocketSession session) {
 			this.session = session;
 		}
 
-		public WebSocketSession awaitSession(long timeToWait) throws InterruptedException {
+		public WebSocketSession awaitSession(long timeToWait) {
 			awaitEvent(() -> this.session != null, timeToWait, " session");
 			return this.session;
 		}
 	}
+
 
 	private static class TestFilter implements Filter {
 
@@ -406,7 +412,6 @@ abstract class AbstractSockJsIntegrationTests {
 		private final Map<String, Long> sleepDelayMap = new HashMap<>();
 
 		private final Map<String, Integer> sendErrorMap = new HashMap<>();
-
 
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -418,18 +423,18 @@ abstract class AbstractSockJsIntegrationTests {
 			this.requests.put(uri, headers);
 
 			for (String suffix : this.sleepDelayMap.keySet()) {
-				if ((httpRequest).getRequestURI().endsWith(suffix)) {
+				if (httpRequest.getRequestURI().endsWith(suffix)) {
 					try {
 						Thread.sleep(this.sleepDelayMap.get(suffix));
 						break;
 					}
-					catch (InterruptedException e) {
-						e.printStackTrace();
+					catch (InterruptedException ex) {
+						ex.printStackTrace();
 					}
 				}
 			}
 			for (String suffix : this.sendErrorMap.keySet()) {
-				if ((httpRequest).getRequestURI().endsWith(suffix)) {
+				if (httpRequest.getRequestURI().endsWith(suffix)) {
 					((HttpServletResponse) response).sendError(this.sendErrorMap.get(suffix));
 					return;
 				}
