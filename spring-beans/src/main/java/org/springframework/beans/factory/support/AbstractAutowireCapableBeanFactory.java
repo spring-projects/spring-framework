@@ -908,6 +908,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// static factory method signature or from class inheritance hierarchy...
 			return getTypeForFactoryBeanFromMethod(mbd.getBeanClass(), factoryMethodName);
 		}
+
+		result = getFactoryBeanGeneric(mbd.targetType);
+		if (result.resolve() != null) {
+			return result;
+		}
 		result = getFactoryBeanGeneric(beanType);
 		if (result.resolve() != null) {
 			return result;
