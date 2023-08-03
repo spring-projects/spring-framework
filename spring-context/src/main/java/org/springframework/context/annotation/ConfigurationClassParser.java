@@ -403,11 +403,14 @@ class ConfigurationClassParser {
 						this.metadataReaderFactory.getMetadataReader(original.getClassName()).getAnnotationMetadata();
 				Set<MethodMetadata> asmMethods = asm.getAnnotatedMethods(Bean.class.getName());
 				if (asmMethods.size() >= beanMethods.size()) {
+					Set<MethodMetadata> candidateMethods = new LinkedHashSet<>(beanMethods);
 					Set<MethodMetadata> selectedMethods = new LinkedHashSet<>(asmMethods.size());
 					for (MethodMetadata asmMethod : asmMethods) {
-						for (MethodMetadata beanMethod : beanMethods) {
+						for (Iterator<MethodMetadata> it = candidateMethods.iterator(); it.hasNext();) {
+							MethodMetadata beanMethod = it.next();
 							if (beanMethod.getMethodName().equals(asmMethod.getMethodName())) {
 								selectedMethods.add(beanMethod);
+								it.remove();
 								break;
 							}
 						}
