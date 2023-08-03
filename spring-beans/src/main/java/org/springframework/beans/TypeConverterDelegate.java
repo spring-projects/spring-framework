@@ -35,6 +35,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -139,13 +140,17 @@ class TypeConverterDelegate {
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
-					convertedValue instanceof String text) {
+			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType)) {
 				TypeDescriptor elementTypeDesc = typeDescriptor.getElementTypeDescriptor();
 				if (elementTypeDesc != null) {
 					Class<?> elementType = elementTypeDesc.getType();
-					if (Class.class == elementType || Enum.class.isAssignableFrom(elementType)) {
-						convertedValue = StringUtils.commaDelimitedListToStringArray(text);
+					if (convertedValue instanceof String text) {
+						if (Class.class == elementType || Enum.class.isAssignableFrom(elementType)) {
+							convertedValue = StringUtils.commaDelimitedListToStringArray(text);
+						}
+						if (editor == null && String.class != elementType) {
+							editor = findDefaultEditor(Array.newInstance(elementType, 0).getClass());
+						}
 					}
 				}
 			}
@@ -166,10 +171,22 @@ class TypeConverterDelegate {
 				}
 				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
-					if (convertedValue instanceof String text && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
+					if (convertedValue instanceof String text &&
+							Enum.class.isAssignableFrom(requiredType.getComponentType())) {
 						convertedValue = StringUtils.commaDelimitedListToStringArray(text);
 					}
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
+				}
+				else if (convertedValue.getClass().isArray()) {
+					if (Array.getLength(convertedValue) == 1) {
+						convertedValue = Array.get(convertedValue, 0);
+						standardConversion = true;
+					}
+					else if (Collection.class.isAssignableFrom(requiredType)) {
+						convertedValue = convertToTypedCollection(CollectionUtils.arrayToList(convertedValue),
+								propertyName, requiredType, typeDescriptor);
+						standardConversion = true;
+					}
 				}
 				else if (convertedValue instanceof Collection<?> coll) {
 					// Convert elements to target type, if determined.
@@ -179,10 +196,6 @@ class TypeConverterDelegate {
 				else if (convertedValue instanceof Map<?, ?> map) {
 					// Convert keys and values to respective target type, if determined.
 					convertedValue = convertToTypedMap(map, propertyName, requiredType, typeDescriptor);
-					standardConversion = true;
-				}
-				if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
-					convertedValue = Array.get(convertedValue, 0);
 					standardConversion = true;
 				}
 				if (String.class == requiredType && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
@@ -501,12 +514,11 @@ class TypeConverterDelegate {
 
 		Collection<Object> convertedCopy;
 		try {
-			if (approximable) {
+			if (approximable && requiredType.isInstance(original)) {
 				convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			}
 			else {
-				convertedCopy = (Collection<Object>)
-						ReflectionUtils.accessibleConstructor(requiredType).newInstance();
+				convertedCopy = CollectionFactory.createCollection(requiredType, original.size());
 			}
 		}
 		catch (Throwable ex) {
@@ -576,12 +588,11 @@ class TypeConverterDelegate {
 
 		Map<Object, Object> convertedCopy;
 		try {
-			if (approximable) {
+			if (approximable && requiredType.isInstance(original)) {
 				convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			}
 			else {
-				convertedCopy = (Map<Object, Object>)
-						ReflectionUtils.accessibleConstructor(requiredType).newInstance();
+				convertedCopy = CollectionFactory.createMap(requiredType, original.size());
 			}
 		}
 		catch (Throwable ex) {

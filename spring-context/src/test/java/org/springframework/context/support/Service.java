@@ -16,6 +16,8 @@
 
 package org.springframework.context.support;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.BeanCreationNotAllowedException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +38,8 @@ public class Service implements ApplicationContextAware, MessageSourceAware, Dis
 	private MessageSource messageSource;
 
 	private Resource[] resources;
+
+	private Set<Resource> resourceSet;
 
 	private boolean properlyDestroyed = false;
 
@@ -63,6 +67,14 @@ public class Service implements ApplicationContextAware, MessageSourceAware, Dis
 
 	public Resource[] getResources() {
 		return resources;
+	}
+
+	public void setResourceSet(Set<Resource> resourceSet) {
+		this.resourceSet = resourceSet;
+	}
+
+	public Set<Resource> getResourceSet() {
+		return resourceSet;
 	}
 
 

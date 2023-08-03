@@ -118,7 +118,7 @@ class ConversionServiceFactoryBeanTests {
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(fileName, getClass());
 		ResourceTestBean tb = ctx.getBean("resourceTestBean", ResourceTestBean.class);
 		assertThat(resourceClass.isInstance(tb.getResource())).isTrue();
-		assertThat(tb.getResourceArray()).isNotEmpty();
+		assertThat(tb.getResourceArray()).hasSize(1);
 		assertThat(resourceClass.isInstance(tb.getResourceArray()[0])).isTrue();
 		assertThat(tb.getResourceMap()).hasSize(1);
 		assertThat(resourceClass.isInstance(tb.getResourceMap().get("key1"))).isTrue();

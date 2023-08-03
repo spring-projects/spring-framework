@@ -222,11 +222,12 @@ public class ClassPathXmlApplicationContextTests {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(CONTEXT_WILDCARD);
 		Service service = ctx.getBean("service", Service.class);
 		assertThat(service.getResources()).containsExactlyInAnyOrder(contextA, contextB, contextC);
+		assertThat(service.getResourceSet()).containsExactlyInAnyOrder(contextA, contextB, contextC);
 		ctx.close();
 	}
 
 	@Test
-	void childWithProxy() throws Exception {
+	void childWithProxy() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(CONTEXT_WILDCARD);
 		ClassPathXmlApplicationContext child = new ClassPathXmlApplicationContext(
 				new String[] {CHILD_WITH_PROXY_CONTEXT}, ctx);
@@ -337,8 +338,7 @@ public class ClassPathXmlApplicationContextTests {
 		};
 		ResourceTestBean resource1 = (ResourceTestBean) ctx.getBean("resource1");
 		ResourceTestBean resource2 = (ResourceTestBean) ctx.getBean("resource2");
-		boolean condition = resource1.getResource() instanceof ClassPathResource;
-		assertThat(condition).isTrue();
+		assertThat(resource1.getResource()).isInstanceOf(ClassPathResource.class);
 		StringWriter writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource1.getResource().getInputStream()), writer);
 		assertThat(writer.toString()).isEqualTo("contexttest");
