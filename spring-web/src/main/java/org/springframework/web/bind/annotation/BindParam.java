@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * @since 6.1
  * @see org.springframework.web.bind.WebDataBinder#construct
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface BindParam {
