@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,11 +409,14 @@ class ConfigurationClassParser {
 						this.metadataReaderFactory.getMetadataReader(original.getClassName()).getAnnotationMetadata();
 				Set<MethodMetadata> asmMethods = asm.getAnnotatedMethods(Bean.class.getName());
 				if (asmMethods.size() >= beanMethods.size()) {
+					Set<MethodMetadata> candidateMethods = new LinkedHashSet<>(beanMethods);
 					Set<MethodMetadata> selectedMethods = new LinkedHashSet<>(asmMethods.size());
 					for (MethodMetadata asmMethod : asmMethods) {
-						for (MethodMetadata beanMethod : beanMethods) {
+						for (Iterator<MethodMetadata> it = candidateMethods.iterator(); it.hasNext();) {
+							MethodMetadata beanMethod = it.next();
 							if (beanMethod.getMethodName().equals(asmMethod.getMethodName())) {
 								selectedMethods.add(beanMethod);
+								it.remove();
 								break;
 							}
 						}

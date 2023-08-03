@@ -73,6 +73,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -2620,13 +2621,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Autowired(required = false)
 		private TestBean testBean;
 
-		private TestBean testBean2;
+		TestBean testBean2;
 
 		@Autowired
 		public void setTestBean2(TestBean testBean2) {
-			if (this.testBean2 != null) {
-				throw new IllegalStateException("Already called");
-			}
+			Assert.state(this.testBean != null, "Wrong initialization order");
+			Assert.state(this.testBean2 == null, "Already called");
 			this.testBean2 = testBean2;
 		}
 
@@ -2661,7 +2661,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Required
 		@SuppressWarnings("deprecation")
 		public void setTestBean2(TestBean testBean2) {
-			super.setTestBean2(testBean2);
+			this.testBean2 = testBean2;
 		}
 
 		@Autowired
@@ -2677,6 +2677,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Autowired
 		protected void initBeanFactory(BeanFactory beanFactory) {
+			Assert.state(this.baseInjected, "Wrong initialization order");
 			this.beanFactory = beanFactory;
 		}
 
@@ -4100,9 +4101,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		private RT obj;
 
 		protected void setObj(RT obj) {
-			if (this.obj != null) {
-				throw new IllegalStateException("Already called");
-			}
+			Assert.state(this.obj == null, "Already called");
 			this.obj = obj;
 		}
 	}
