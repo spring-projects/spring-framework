@@ -57,8 +57,7 @@ for details.
 
 | `spring.test.constructor.autowire.mode`
 | The default _test constructor autowire mode_ to use if `@TestConstructor` is not present
-on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[Changing the default test constructor autowire mode]
-.
+on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[Changing the default test constructor autowire mode].
 
 | `spring.test.context.cache.maxSize`
 | The maximum size of the context cache in the _Spring TestContext Framework_. See
@@ -72,7 +71,6 @@ xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context
 | `spring.test.enclosing.configuration`
 | The default _enclosing configuration inheritance mode_ to use if
 `@NestedTestConfiguration` is not present on a test class. See
-xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[Changing the default enclosing configuration inheritance mode]
-.
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[Changing the default enclosing configuration inheritance mode].
 
 |===
