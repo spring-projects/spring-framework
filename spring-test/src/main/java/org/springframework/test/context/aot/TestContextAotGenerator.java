@@ -43,6 +43,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -56,6 +57,7 @@ import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
@@ -70,7 +72,25 @@ import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
  */
 public class TestContextAotGenerator {
 
+	/**
+	 * JVM system property used to set the {@code failOnError} flag: {@value}.
+	 * <p>The {@code failOnError} flag controls whether errors encountered during
+	 * AOT processing in the <em>Spring TestContext Framework</em> should result
+	 * in an exception that fails the overall process.
+	 * <p>Defaults to {@code true}.
+	 * <p>Supported values include {@code true} or {@code false}, ignoring case.
+	 * For example, the default may be changed to {@code false} by supplying
+	 * the following JVM system property via the command line.
+	 * <pre style="code">-Dspring.test.aot.processing.failOnError=false</pre>
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties SpringProperties}
+	 * mechanism.
+	 * @since 6.1
+	 */
+	public static final String FAIL_ON_ERROR_PROPERTY_NAME = "spring.test.aot.processing.failOnError";
+
 	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
+
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
 
@@ -85,13 +105,14 @@ public class TestContextAotGenerator {
 
 	private final RuntimeHints runtimeHints;
 
-	private final boolean failOnError;
+	final boolean failOnError;
 
 
 	/**
 	 * Create a new {@link TestContextAotGenerator} that uses the supplied
 	 * {@link GeneratedFiles}.
 	 * @param generatedFiles the {@code GeneratedFiles} to use
+	 * @see #TestContextAotGenerator(GeneratedFiles, RuntimeHints)
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles) {
 		this(generatedFiles, new RuntimeHints());
@@ -100,11 +121,15 @@ public class TestContextAotGenerator {
 	/**
 	 * Create a new {@link TestContextAotGenerator} that uses the supplied
 	 * {@link GeneratedFiles} and {@link RuntimeHints}.
+	 * <p>This constructor looks up the value of the {@code failOnError} flag via
+	 * the {@value #FAIL_ON_ERROR_PROPERTY_NAME} property, defaulting to
+	 * {@code true} if the property is not set.
 	 * @param generatedFiles the {@code GeneratedFiles} to use
 	 * @param runtimeHints the {@code RuntimeHints} to use
+	 * @see #TestContextAotGenerator(GeneratedFiles, RuntimeHints, boolean)
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
-		this(generatedFiles, runtimeHints, false);
+		this(generatedFiles, runtimeHints, getFailOnErrorFlag());
 	}
 
 	/**
@@ -114,9 +139,9 @@ public class TestContextAotGenerator {
 	 * @param runtimeHints the {@code RuntimeHints} to use
 	 * @param failOnError {@code true} if errors encountered during AOT processing
 	 * should result in an exception that fails the overall process
-	 * @since 6.0.12
+	 * @since 6.1
 	 */
-	TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints, boolean failOnError) {
+	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints, boolean failOnError) {
 		this.testRuntimeHintsRegistrars = AotServices.factories().load(TestRuntimeHintsRegistrar.class);
 		this.generatedFiles = generatedFiles;
 		this.runtimeHints = runtimeHints;
@@ -366,6 +391,14 @@ public class TestContextAotGenerator {
 
 	private void registerDeclaredConstructors(Class<?> type) {
 		this.runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
+	}
+
+	private static boolean getFailOnErrorFlag() {
+		String failOnError = SpringProperties.getProperty(FAIL_ON_ERROR_PROPERTY_NAME);
+		if (StringUtils.hasText(failOnError)) {
+			return Boolean.parseBoolean(failOnError.trim());
+		}
+		return true;
 	}
 
 }

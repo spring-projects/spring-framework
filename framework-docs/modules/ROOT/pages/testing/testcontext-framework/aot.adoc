@@ -19,7 +19,22 @@ following features.
   use an AOT-optimized `ApplicationContext` that participates transparently with the
   xref:testing/testcontext-framework/ctx-management/caching.adoc[context cache].
 
-[WARNING]
+[TIP]
+====
+By default, if an error is encountered during build-time AOT processing, an exception
+will be thrown, and the overall process will fail immediately.
+
+If you would prefer that build-time AOT processing continue after errors are encountered,
+you can disable the `failOnError` mode which results in errors being logged at `WARN`
+level or with greater detail at `DEBUG` level.
+
+The `failOnError` mode can be disabled from the command line or a build script by setting
+a JVM system property named `spring.test.aot.processing.failOnError` to `false`. As an
+alternative, you can set the same property via the
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
+====
+
+[NOTE]
 ====
 The `@ContextHierarchy` annotation is currently not supported in AOT mode.
 ====

@@ -55,6 +55,11 @@ for details.
 {api-spring-framework}++/objenesis/SpringObjenesis.html#IGNORE_OBJENESIS_PROPERTY_NAME++[`SpringObjenesis`]
 for details.
 
+| `spring.test.aot.processing.failOnError`
+| A boolean flag that controls whether errors encountered during AOT processing in the
+_Spring TestContext Framework_ should result in an exception that fails the overall process.
+See xref:testing/testcontext-framework/aot.adoc[Ahead of Time Support for Tests].
+
 | `spring.test.constructor.autowire.mode`
 | The default _test constructor autowire mode_ to use if `@TestConstructor` is not present
 on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[Changing the default test constructor autowire mode].

@@ -87,7 +87,7 @@ class AotIntegrationTests extends AbstractAotTests {
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), true);
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints());
 		generator.processAheadOfTime(testClasses);
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
