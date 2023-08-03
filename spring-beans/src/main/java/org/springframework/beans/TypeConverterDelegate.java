@@ -166,7 +166,8 @@ class TypeConverterDelegate {
 				}
 				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
-					if (convertedValue instanceof String text && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
+					if (convertedValue instanceof String text &&
+							Enum.class.isAssignableFrom(requiredType.getComponentType())) {
 						convertedValue = StringUtils.commaDelimitedListToStringArray(text);
 					}
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
