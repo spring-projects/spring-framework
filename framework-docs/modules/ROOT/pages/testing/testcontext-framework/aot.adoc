@@ -14,7 +14,7 @@ following features.
     testing annotations -- as long as the tests are run using a JUnit Platform
     `TestEngine` that is registered for the current project.
 * Build-time AOT processing: each unique test `ApplicationContext` in the current project
-  will be xref:core/aot.adoc#refresh[refreshed for AOT processing].
+  will be xref:core/aot.adoc#aot.refresh[refreshed for AOT processing].
 * Runtime AOT support: when executing in AOT runtime mode, a Spring integration test will
   use an AOT-optimized `ApplicationContext` that participates transparently with the
   xref:testing/testcontext-framework/ctx-management/caching.adoc[context cache].
@@ -50,7 +50,7 @@ the following options.
   via {api-spring-framework}/context/annotation/ImportRuntimeHints.html[`@ImportRuntimeHints`].
 * Annotate a test class with {api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] or
   {api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`].
-* See xref:core/aot.adoc#hints[Runtime Hints] for details on Spring's core runtime hints
+* See xref:core/aot.adoc#aot.hints[Runtime Hints] for details on Spring's core runtime hints
   and annotation support.
 
 [TIP]
