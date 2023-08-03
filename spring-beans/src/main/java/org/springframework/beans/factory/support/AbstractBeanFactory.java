@@ -383,6 +383,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 			finally {
 				beanCreation.end();
+				if (!isCacheBeanMetadata()) {
+					clearMergedBeanDefinition(beanName);
+				}
 			}
 		}
 
@@ -582,7 +585,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
 				new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
-
 
 		// Attempt to predict the bean type
 		Class<?> predictedType = null;
@@ -1409,7 +1411,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Cache the merged bean definition for the time being
 				// (it might still get re-merged later on in order to pick up metadata changes)
-				if (containingBd == null && isCacheBeanMetadata()) {
+				if (containingBd == null && (isCacheBeanMetadata() || isBeanEligibleForMetadataCaching(beanName))) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
@@ -1432,6 +1434,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				mbd.resolvedTargetType = previous.resolvedTargetType;
 				mbd.factoryMethodReturnType = previous.factoryMethodReturnType;
 				mbd.factoryMethodToIntrospect = previous.factoryMethodToIntrospect;
+			}
+			if (previous.hasMethodOverrides()) {
+				mbd.setMethodOverrides(new MethodOverrides(previous.getMethodOverrides()));
 			}
 		}
 	}
