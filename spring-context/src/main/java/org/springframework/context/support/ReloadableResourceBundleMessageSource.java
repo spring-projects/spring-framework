@@ -21,9 +21,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -34,6 +36,8 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
@@ -74,6 +78,7 @@ import org.springframework.util.StringUtils;
  * this message source!
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @see #setCacheSeconds
  * @see #setBasenames
  * @see #setDefaultEncoding
@@ -87,10 +92,10 @@ import org.springframework.util.StringUtils;
 public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource
 		implements ResourceLoaderAware {
 
-	private static final String PROPERTIES_SUFFIX = ".properties";
+	private static final String XML_EXTENSION = ".xml";
 
-	private static final String XML_SUFFIX = ".xml";
 
+	private List<String> fileExtensions = List.of(".properties", XML_EXTENSION);
 
 	@Nullable
 	private Properties fileEncodings;
@@ -110,6 +115,22 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	// Cache to hold already loaded properties per filename
 	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
 
+
+	/**
+	 * Set the list of supported file extensions.
+	 * <p>The default is a list containing {@code .properties} and {@code .xml}.
+	 * @param fileExtensions the file extensions (starts with a dot)
+	 * @since 6.1.0
+	 */
+	public void setFileExtensions(List<String> fileExtensions) {
+		Assert.isTrue(!CollectionUtils.isEmpty(fileExtensions), "At least one file extension is required");
+		for (String extension : fileExtensions) {
+			if (!extension.startsWith(".")) {
+				throw new IllegalArgumentException("File extension '" + extension + "' should start with '.'");
+			}
+		}
+		this.fileExtensions = Collections.unmodifiableList(fileExtensions);
+	}
 
 	/**
 	 * Set per-file charsets to use for parsing properties files.
@@ -471,9 +492,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * JSON.
 	 * <p>The default implementation delegates to the configured
 	 * {@link #setResourceLoader(ResourceLoader) ResourceLoader} to resolve
-	 * resources, first checking for an existing {@code Resource} with a
-	 * {@code .properties} extension, and otherwise returning a {@code Resource}
-	 * with a {@code .xml} extension.
+	 * resources, checking in order for existing {@code Resource} with extensions defined
+	 * by {@link #setFileExtensions(List)} ({@code .properties} and {@code .xml}
+	 * by default).
 	 * <p>When overriding this method, {@link #loadProperties(Resource, String)}
 	 * <strong>must</strong> be capable of loading properties from any type of
 	 * {@code Resource} returned by this method. As a consequence, implementors
@@ -491,11 +512,14 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @since 6.1
 	 */
 	protected Resource resolveResource(String filename) {
-		Resource propertiesResource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
-		if (propertiesResource.exists()) {
-			return propertiesResource;
+		Resource resource = null;
+		for (String fileExtension : this.fileExtensions) {
+			resource = this.resourceLoader.getResource(filename + fileExtension);
+			if (resource.exists()) {
+				return resource;
+			}
 		}
-		return this.resourceLoader.getResource(filename + XML_SUFFIX);
+		return Objects.requireNonNull(resource);
 	}
 
 	/**
@@ -509,7 +533,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		Properties props = newProperties();
 		try (InputStream is = resource.getInputStream()) {
 			String resourceFilename = resource.getFilename();
-			if (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {
+			if (resourceFilename != null && resourceFilename.endsWith(XML_EXTENSION)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Loading properties [" + resource.getFilename() + "]");
 				}

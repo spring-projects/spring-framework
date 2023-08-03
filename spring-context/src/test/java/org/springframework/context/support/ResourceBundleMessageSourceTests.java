@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -31,9 +32,11 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 03.02.2004
  */
 class ResourceBundleMessageSourceTests {
@@ -415,6 +418,31 @@ class ResourceBundleMessageSourceTests {
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
 		assertThat(filenames).isEmpty();
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceWithCustomFileExtensions() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setFileExtensions(List.of(".toskip", ".custom"));
+		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
+		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceWithEmptyCustomFileExtensions() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		assertThatThrownBy(() -> ms.setFileExtensions(Collections.emptyList()))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("At least one file extension is required");
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceWithInvalidCustomFileExtensions() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		assertThatThrownBy(() -> ms.setFileExtensions(List.of("invalid")))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("File extension 'invalid' should start with '.'");
 	}
 
 	@Test
