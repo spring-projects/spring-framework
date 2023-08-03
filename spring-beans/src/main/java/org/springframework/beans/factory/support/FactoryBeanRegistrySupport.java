@@ -24,6 +24,8 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
+import org.springframework.core.AttributeAccessor;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -59,6 +61,34 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 					"that it should return null if the type of its object cannot be determined yet", ex);
 			return null;
 		}
+	}
+
+	/**
+	 * Determine the bean type for a FactoryBean by inspecting its attributes for a
+	 * {@link FactoryBean#OBJECT_TYPE_ATTRIBUTE} value.
+	 * @param attributes the attributes to inspect
+	 * @return a {@link ResolvableType} extracted from the attributes or
+	 * {@code ResolvableType.NONE}
+	 * @since 5.2
+	 */
+	ResolvableType getTypeForFactoryBeanFromAttributes(AttributeAccessor attributes) {
+		Object attribute = attributes.getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE);
+		if (attribute instanceof ResolvableType resolvableType) {
+			return resolvableType;
+		}
+		if (attribute instanceof Class<?> clazz) {
+			return ResolvableType.forClass(clazz);
+		}
+		return ResolvableType.NONE;
+	}
+
+	/**
+	 * Determine the FactoryBean object type from the given generic declaration.
+	 * @param type the FactoryBean type
+	 * @return the nested object type, or {@code NONE} if not resolvable
+	 */
+	ResolvableType getFactoryBeanGeneric(@Nullable ResolvableType type) {
+		return (type != null ? type.as(FactoryBean.class).getGeneric() : ResolvableType.NONE);
 	}
 
 	/**

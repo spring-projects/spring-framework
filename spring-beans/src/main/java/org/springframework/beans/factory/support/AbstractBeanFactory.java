@@ -64,7 +64,6 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.core.AttributeAccessor;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ResolvableType;
@@ -1684,25 +1683,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				onSuppressedException(ex);
 			}
 		}
-		return ResolvableType.NONE;
-	}
 
-	/**
-	 * Determine the bean type for a FactoryBean by inspecting its attributes for a
-	 * {@link FactoryBean#OBJECT_TYPE_ATTRIBUTE} value.
-	 * @param attributes the attributes to inspect
-	 * @return a {@link ResolvableType} extracted from the attributes or
-	 * {@code ResolvableType.NONE}
-	 * @since 5.2
-	 */
-	ResolvableType getTypeForFactoryBeanFromAttributes(AttributeAccessor attributes) {
-		Object attribute = attributes.getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE);
-		if (attribute instanceof ResolvableType resolvableType) {
-			return resolvableType;
-		}
-		if (attribute instanceof Class<?> clazz) {
-			return ResolvableType.forClass(clazz);
-		}
+		// FactoryBean type not resolvable
 		return ResolvableType.NONE;
 	}
 
