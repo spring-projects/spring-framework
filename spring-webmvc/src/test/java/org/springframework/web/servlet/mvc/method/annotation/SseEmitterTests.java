@@ -20,12 +20,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
@@ -60,6 +62,7 @@ public class SseEmitterTests {
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
 		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
 	}
 
 	@Test
@@ -69,12 +72,14 @@ public class SseEmitterTests {
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo", MediaType.TEXT_PLAIN);
 		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
 	}
 
 	@Test
 	public void sendEventEmpty() throws Exception {
 		this.emitter.send(event());
 		this.handler.assertSentObjectCount(0);
+		this.handler.assertWriteCount(0);
 	}
 
 	@Test
@@ -84,6 +89,7 @@ public class SseEmitterTests {
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
 		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
 	}
 
 	@Test
@@ -95,6 +101,7 @@ public class SseEmitterTests {
 		this.handler.assertObject(2, "\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(3, "bar");
 		this.handler.assertObject(4, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
 	}
 
 	@Test
@@ -104,6 +111,7 @@ public class SseEmitterTests {
 		this.handler.assertObject(0, ":blah\nevent:test\nretry:5000\nid:1\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
 		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
 	}
 
 	@Test
@@ -115,14 +123,17 @@ public class SseEmitterTests {
 		this.handler.assertObject(2, "\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(3, "bar");
 		this.handler.assertObject(4, "\nevent:test\nretry:5000\nid:1\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
 	}
 
 
 	private static class TestHandler implements ResponseBodyEmitter.Handler {
 
-		private List<Object> objects = new ArrayList<>();
+		private final List<Object> objects = new ArrayList<>();
 
-		private List<MediaType> mediaTypes = new ArrayList<>();
+		private final List<MediaType> mediaTypes = new ArrayList<>();
+
+		private int writeCount;
 
 
 		public void assertSentObjectCount(int size) {
@@ -139,10 +150,24 @@ public class SseEmitterTests {
 			assertThat(this.mediaTypes.get(index)).isEqualTo(mediaType);
 		}
 
+		public void assertWriteCount(int writeCount) {
+			assertThat(this.writeCount).isEqualTo(writeCount);
+		}
+
 		@Override
-		public void send(Object data, MediaType mediaType) throws IOException {
+		public void send(Object data, @Nullable MediaType mediaType) throws IOException {
 			this.objects.add(data);
 			this.mediaTypes.add(mediaType);
+			this.writeCount++;
+		}
+
+		@Override
+		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) throws IOException {
+			for (ResponseBodyEmitter.DataWithMediaType item : items) {
+				this.objects.add(item.getData());
+				this.mediaTypes.add(item.getMediaType());
+			}
+			this.writeCount++;
 		}
 
 		@Override

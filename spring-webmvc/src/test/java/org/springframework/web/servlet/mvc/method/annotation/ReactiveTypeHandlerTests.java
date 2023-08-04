@@ -366,6 +366,11 @@ public class ReactiveTypeHandlerTests {
 		}
 
 		@Override
+		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) throws IOException {
+			items.forEach(item -> this.values.add(item.getData()));
+		}
+
+		@Override
 		public void complete() {
 		}
 
