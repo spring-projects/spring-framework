@@ -241,7 +241,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
 		Method method = getBridgedMethod();
+		ClassLoader beforeClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
+			Thread.currentThread().setContextClassLoader(getBean().getClass().getClassLoader());
 			if (KotlinDetector.isKotlinReflectPresent()) {
 				if (KotlinDetector.isSuspendingFunction(method)) {
 					return invokeSuspendingFunction(method, getBean(), args);
@@ -273,6 +275,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			else {
 				throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
 			}
+		} finally {
+			Thread.currentThread().setContextClassLoader(beforeClassLoader);
 		}
 	}
 
