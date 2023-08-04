@@ -74,8 +74,8 @@ final class DefaultPathContainer implements PathContainer {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj) || (obj instanceof PathContainer that && value().equals(that.value()));
+	public boolean equals(@Nullable Object other) {
+		return (this == other) || (other instanceof PathContainer that && value().equals(that.value()));
 	}
 
 	@Override
@@ -281,8 +281,8 @@ final class DefaultPathContainer implements PathContainer {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj) || (obj instanceof PathSegment that && value().equals(that.value()));
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof PathSegment that && this.value.equals(that.value())));
 		}
 
 		@Override

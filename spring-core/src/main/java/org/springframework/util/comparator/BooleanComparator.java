@@ -69,8 +69,8 @@ public class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof BooleanComparator that && this.trueLow == that.trueLow));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof BooleanComparator that && this.trueLow == that.trueLow));
 	}
 
 	@Override

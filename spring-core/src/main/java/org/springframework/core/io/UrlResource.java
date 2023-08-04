@@ -341,8 +341,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying URL references.
 	 */
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof UrlResource that &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof UrlResource that &&
 				getCleanedUrl().equals(that.getCleanedUrl())));
 	}
 

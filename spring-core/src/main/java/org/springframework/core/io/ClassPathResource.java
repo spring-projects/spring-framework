@@ -272,13 +272,10 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * @see #getClassLoader()
 	 */
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		return (obj instanceof ClassPathResource that &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ClassPathResource that &&
 				this.absolutePath.equals(that.absolutePath) &&
-				ObjectUtils.nullSafeEquals(getClassLoader(), that.getClassLoader()));
+				ObjectUtils.nullSafeEquals(getClassLoader(), that.getClassLoader())));
 	}
 
 	/**

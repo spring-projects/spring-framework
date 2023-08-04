@@ -779,8 +779,8 @@ public class TypeDescriptor implements Serializable {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof AnnotatedElementAdapter that &&
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof AnnotatedElementAdapter that &&
 					Arrays.equals(this.annotations, that.annotations)));
 		}
 

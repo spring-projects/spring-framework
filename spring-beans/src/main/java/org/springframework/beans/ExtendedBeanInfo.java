@@ -338,8 +338,8 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof PropertyDescriptor that &&
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof PropertyDescriptor that &&
 					PropertyDescriptorUtils.equals(this, that)));
 		}
 

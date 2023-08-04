@@ -337,8 +337,8 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof Netty5DataBuffer that && this.buffer.equals(that.buffer)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof Netty5DataBuffer that && this.buffer.equals(that.buffer)));
 	}
 
 	@Override
@@ -361,7 +361,6 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 
 		@Nullable
 		private T next;
-
 
 		public BufferComponentIterator(ComponentIterator<T> delegate, boolean readable) {
 			Assert.notNull(delegate, "Delegate must not be null");

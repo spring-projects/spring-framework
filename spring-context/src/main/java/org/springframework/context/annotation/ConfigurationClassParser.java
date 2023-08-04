@@ -211,8 +211,8 @@ class ConfigurationClassParser {
 	}
 
 	List<PropertySourceDescriptor> getPropertySourceDescriptors() {
-		return (this.propertySourceRegistry != null ? this.propertySourceRegistry.getDescriptors()
-				: Collections.emptyList());
+		return (this.propertySourceRegistry != null ? this.propertySourceRegistry.getDescriptors() :
+				Collections.emptyList());
 	}
 
 	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
@@ -1005,8 +1005,8 @@ class ConfigurationClassParser {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof SourceClass that &&
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof SourceClass that &&
 					this.metadata.getClassName().equals(that.metadata.getClassName())));
 		}
 

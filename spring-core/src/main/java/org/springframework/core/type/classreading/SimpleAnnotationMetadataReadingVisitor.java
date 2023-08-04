@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,6 +164,7 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 		return (access & Opcodes.ACC_INTERFACE) != 0;
 	}
 
+
 	/**
 	 * {@link MergedAnnotation} source.
 	 */
@@ -176,26 +177,19 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 		}
 
 		@Override
-		public int hashCode() {
-			return this.className.hashCode();
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof Source that && this.className.equals(that.className)));
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null || getClass() != obj.getClass()) {
-				return false;
-			}
-			return this.className.equals(((Source) obj).className);
+		public int hashCode() {
+			return this.className.hashCode();
 		}
 
 		@Override
 		public String toString() {
 			return this.className;
 		}
-
 	}
 
 }

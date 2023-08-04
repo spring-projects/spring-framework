@@ -27,8 +27,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @since 6.0
  */
-final class DefaultHttpStatusCode
-		implements HttpStatusCode, Comparable<HttpStatusCode>, Serializable {
+final class DefaultHttpStatusCode implements HttpStatusCode, Comparable<HttpStatusCode>, Serializable {
 
 	private static final long serialVersionUID = 7017664779360718111L;
 
@@ -79,19 +78,20 @@ final class DefaultHttpStatusCode
 		return this.value / 100;
 	}
 
+
 	@Override
 	public int compareTo(@NonNull HttpStatusCode o) {
 		return Integer.compare(this.value, o.value());
 	}
 
 	@Override
-	public int hashCode() {
-		return this.value;
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof HttpStatusCode that && this.value == that.value()));
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj) || (obj instanceof HttpStatusCode that && this.value == that.value());
+	public int hashCode() {
+		return this.value;
 	}
 
 	@Override
