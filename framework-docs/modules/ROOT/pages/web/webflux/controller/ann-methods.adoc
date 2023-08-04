@@ -4,7 +4,7 @@
 
 [.small]#xref:web/webmvc/mvc-controller/ann-methods.adoc[See equivalent in the Servlet stack]#
 
-`@RequestMapping` and `@HttpExchange` handler methods have a flexible signature and can choose from a range of
+`@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.
 
 

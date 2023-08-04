@@ -871,7 +871,7 @@ interaction type(s):
 As an alternative to  `@MessageMapping`, you can also handle requests with
 `@RSocketExchange` methods. Such methods are declared on an
 xref:rsocket-interface[RSocket Interface] and can be used as a requester via
-`RSocketServiceProxyFactory` or as a responder.
+`RSocketServiceProxyFactory` or implemented by a responder.
 
 For example, to handle requests as a responder:
 

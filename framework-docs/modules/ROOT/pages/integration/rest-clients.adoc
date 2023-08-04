@@ -363,12 +363,13 @@ If necessary the `Content-Type` may also be set explicitly.
 [[rest-http-interface]]
 == HTTP Interface
 
-The Spring Framework lets you define an HTTP service as a Java interface with annotated
-methods for HTTP exchanges. You can then generate a proxy that implements this interface
-and performs the exchanges. This helps to simplify HTTP remote access which often
-involves a facade that wraps the details of using the underlying HTTP client.
+The Spring Framework lets you define an HTTP service as a Java interface with
+`@HttpExchange` methods. You can pass such an interface to `HttpServiceProxyFactory`
+to create a proxy which performs requests through an HTTP client such as `RestClient`
+or `WebClient`. You can also implement the interface from an `@Controller` for server
+request handling.
 
-One, declare an interface with `@HttpExchange` methods:
+Start by creating the interface with `@HttpExchange` methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -382,19 +383,9 @@ One, declare an interface with `@HttpExchange` methods:
 	}
 ----
 
-Two, create a proxy that will perform the declared HTTP exchanges,
-either using `WebClient`:
+Now you can create a proxy that performs requests when methods are called.
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
-	WebClientAdapter adapter = WebClientAdapter.forClient(webClient)
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-
-	RepositoryService service = factory.createClient(RepositoryService.class);
-----
-
-using `RestClient`:
+For `RestClient`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -405,7 +396,18 @@ using `RestClient`:
 	RepositoryService service = factory.createClient(RepositoryService.class);
 ----
 
-or using `RestTemplate`:
+For `WebClient`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
+	WebClientAdapter adapter = WebClientAdapter.forClient(webClient)
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+
+	RepositoryService service = factory.createClient(RepositoryService.class);
+----
+
+For `RestTemplate`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
