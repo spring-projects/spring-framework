@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,12 +94,9 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		long length = inputMessage.getHeaders().getContentLength();
-		final byte[] bytes;
-		if (length >= 0 && length <= Integer.MAX_VALUE) {
-			bytes = inputMessage.getBody().readNBytes((int) length);
-		} else {
-			bytes = inputMessage.getBody().readAllBytes();
-		}
+		byte[] bytes = (length >= 0 && length <= Integer.MAX_VALUE ?
+				inputMessage.getBody().readNBytes((int) length) :
+				inputMessage.getBody().readAllBytes());
 		return new String(bytes, charset);
 	}
 
