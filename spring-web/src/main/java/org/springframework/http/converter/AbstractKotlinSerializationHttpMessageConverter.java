@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends SerialFormat> extends AbstractGenericHttpMessageConverter<Object> {
 
-	private static final Map<Type, KSerializer<Object>> serializerCache = new ConcurrentReferenceHashMap<>();
-
+	private final Map<Type, KSerializer<Object>> serializerCache = new ConcurrentReferenceHashMap<>();
 
 	private final T format;
 
@@ -149,10 +148,10 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	 */
 	@Nullable
 	private KSerializer<Object> serializer(Type type) {
-		KSerializer<Object> serializer = serializerCache.get(type);
+		KSerializer<Object> serializer = this.serializerCache.get(type);
 		if (serializer == null) {
 			try {
-				serializer = SerializersKt.serializerOrNull(type);
+				serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
 			}
 			catch (IllegalArgumentException ignored) {
 			}
@@ -160,7 +159,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 				if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
 					return null;
 				}
-				serializerCache.put(type, serializer);
+				this.serializerCache.put(type, serializer);
 			}
 		}
 		return serializer;
