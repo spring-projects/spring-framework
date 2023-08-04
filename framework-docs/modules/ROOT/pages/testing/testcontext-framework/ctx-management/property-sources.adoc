@@ -35,8 +35,8 @@ in which the test class is defined. A path starting with a slash is treated as a
 absolute classpath resource (for example: `"/org/example/test.xml"`). A path that
 references a URL (for example, a path prefixed with `classpath:`, `file:`, or `http:`) is
 loaded by using the specified resource protocol. Resource location wildcards (such as
-`**/*.properties`) are not permitted: Each location must evaluate to exactly one
-`.properties` or `.xml` resource.
+`{asterisk}{asterisk}/{asterisk}.properties`) are not permitted: Each location must
+evaluate to exactly one `.properties` or `.xml` resource.
 
 The following example uses a test properties file:
 
