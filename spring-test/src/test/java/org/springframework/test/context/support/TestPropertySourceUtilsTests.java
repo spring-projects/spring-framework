@@ -18,7 +18,9 @@ package org.springframework.test.context.support;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -295,7 +298,9 @@ class TestPropertySourceUtilsTests {
 		MergedTestPropertySources mergedPropertySources = buildMergedTestPropertySources(testClass);
 		SoftAssertions.assertSoftly(softly -> {
 			softly.assertThat(mergedPropertySources).isNotNull();
-			softly.assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
+			Stream<String> locations = mergedPropertySources.getPropertySourceDescriptors().stream()
+					.map(PropertySourceDescriptor::locations).flatMap(List::stream);
+			softly.assertThat(locations).containsExactly(expectedLocations);
 			softly.assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
 		});
 	}

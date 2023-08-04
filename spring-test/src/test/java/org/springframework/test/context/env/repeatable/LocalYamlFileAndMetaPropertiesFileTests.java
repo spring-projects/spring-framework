@@ -18,28 +18,26 @@ package org.springframework.test.context.env.repeatable;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.env.YamlTestProperties;
 
 /**
- * Integration tests for {@link TestPropertySource @TestPropertySource} as a
- * repeatable annotation.
+ * Analogous to {@link LocalPropertiesFileAndMetaPropertiesFileTests} except
+ * that the local file is YAML.
  *
- * <p>Verify a property value is defined both in the properties file which is declared
- * via {@link MetaFileTestProperty @MetaFileTestProperty} and in the properties file
- * which is declared locally via {@code @TestPropertySource}.
- *
- * @author Anatoliy Korovin
  * @author Sam Brannen
- * @since 5.2
+ * @since 6.1
  */
-@TestPropertySource("local.properties")
+@YamlTestProperties("local.yaml")
 @MetaFileTestProperty
-class LocalPropertiesFileAndMetaPropertiesFileTests extends AbstractRepeatableTestPropertySourceTests {
+class LocalYamlFileAndMetaPropertiesFileTests extends AbstractRepeatableTestPropertySourceTests {
 
 	@Test
 	void test() {
 		assertEnvironmentValue("key1", "local file");
 		assertEnvironmentValue("key2", "meta file");
+
+		assertEnvironmentValue("environments.dev.url", "https://dev.example.com");
+		assertEnvironmentValue("environments.dev.name", "Developer Setup");
 	}
 
 }

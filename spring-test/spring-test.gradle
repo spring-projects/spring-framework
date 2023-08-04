@@ -85,6 +85,7 @@ dependencies {
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
+	testRuntimeOnly("org.yaml:snakeyaml")
 }
 
 // Prevent xml-apis from being used so that the corresponding XML APIs from

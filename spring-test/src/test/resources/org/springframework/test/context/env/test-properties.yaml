@@ -1,0 +1,7 @@
+environments:
+  dev:
+    url: https://dev.example.com
+    name: Developer Setup
+  prod:
+    url: https://prod.example.com
+    name: My Cool App

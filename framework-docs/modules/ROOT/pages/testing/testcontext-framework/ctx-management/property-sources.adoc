@@ -16,7 +16,7 @@ SPI, but `@TestPropertySource` is not supported with implementations of the olde
 `ContextLoader` SPI.
 
 Implementations of `SmartContextLoader` gain access to merged test property source values
-through the `getPropertySourceLocations()` and `getPropertySourceProperties()` methods in
+through the `getPropertySourceDescriptors()` and `getPropertySourceProperties()` methods in
 `MergedContextConfiguration`.
 ====
 
@@ -26,8 +26,11 @@ through the `getPropertySourceLocations()` and `getPropertySourceProperties()` m
 You can configure test properties files by using the `locations` or `value` attribute of
 `@TestPropertySource`.
 
-Both traditional and XML-based properties file formats are supported -- for example,
-`"classpath:/com/example/test.properties"` or `"file:///path/to/file.xml"`.
+By default, both traditional and XML-based `java.util.Properties` file formats are
+supported -- for example, `"classpath:/com/example/test.properties"` or
+`"file:///path/to/file.xml"`. As of Spring Framework 6.1, you can configure a custom
+`PropertySourceFactory` via the `factory` attribute in `@TestPropertySource` in order to
+support a different file format such as JSON, YAML, etc.
 
 Each path is interpreted as a Spring `Resource`. A plain path (for example,
 `"test.properties"`) is treated as a classpath resource that is relative to the package
@@ -35,8 +38,8 @@ in which the test class is defined. A path starting with a slash is treated as a
 absolute classpath resource (for example: `"/org/example/test.xml"`). A path that
 references a URL (for example, a path prefixed with `classpath:`, `file:`, or `http:`) is
 loaded by using the specified resource protocol. Resource location wildcards (such as
-`**/*.properties`) are not permitted: Each location must evaluate to exactly one
-`.properties` or `.xml` resource.
+`{asterisk}{asterisk}/{asterisk}.properties`) are not permitted: Each location must
+evaluate to exactly one properties resource.
 
 The following example uses a test properties file:
 

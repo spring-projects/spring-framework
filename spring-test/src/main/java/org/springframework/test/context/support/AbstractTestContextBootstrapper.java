@@ -368,7 +368,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				StringUtils.toStringArray(locations), ClassUtils.toClassArray(classes),
 				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),
 				ActiveProfilesUtils.resolveActiveProfiles(testClass),
-				mergedTestPropertySources.getLocations(),
+				mergedTestPropertySources.getPropertySourceDescriptors(),
 				mergedTestPropertySources.getProperties(),
 				contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
 

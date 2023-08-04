@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -37,15 +38,18 @@ import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.ResourcePropertySource;
+import org.springframework.core.io.support.DefaultPropertySourceFactory;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertySourceDescriptor;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -70,6 +74,8 @@ public abstract class TestPropertySourceUtils {
 	 * @see #addInlinedPropertiesToEnvironment
 	 */
 	public static final String INLINED_PROPERTIES_PROPERTY_SOURCE_NAME = "Inlined Test Properties";
+
+	private static final PropertySourceFactory defaultPropertySourceFactory = new DefaultPropertySourceFactory();
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
@@ -139,20 +145,18 @@ public abstract class TestPropertySourceUtils {
 		return duplicationDetected;
 	}
 
-	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
-		List<String> locations = new ArrayList<>();
+	private static List<PropertySourceDescriptor> mergeLocations(List<TestPropertySourceAttributes> attributesList) {
+		List<PropertySourceDescriptor> descriptors = new ArrayList<>();
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Processing locations for " + attrs);
 			}
-			String[] locationsArray = TestContextResourceUtils.convertToClasspathResourcePaths(
-					attrs.getDeclaringClass(), true, attrs.getLocations());
-			locations.addAll(0, Arrays.asList(locationsArray));
+			descriptors.addAll(0, attrs.getPropertySourceDescriptors());
 			if (!attrs.isInheritLocations()) {
 				break;
 			}
 		}
-		return StringUtils.toStringArray(locations);
+		return descriptors;
 	}
 
 	private static String[] mergeProperties(List<TestPropertySourceAttributes> attributesList) {
@@ -181,9 +185,10 @@ public abstract class TestPropertySourceUtils {
 	 * to the environment; potentially empty but never {@code null}
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 * @since 4.1.5
-	 * @see ResourcePropertySource
+	 * @see org.springframework.core.io.support.ResourcePropertySource
 	 * @see TestPropertySource#locations
 	 * @see #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)
+	 * @see #addPropertySourcesToEnvironment(ConfigurableApplicationContext, List)
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context, String... locations) {
 		Assert.notNull(context, "'context' must not be null");
@@ -197,7 +202,8 @@ public abstract class TestPropertySourceUtils {
 	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
 	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
 	 * against the {@code Environment}.
-	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
+	 * <p>Each properties file will be converted to a
+	 * {@link org.springframework.core.io.support.ResourcePropertySource ResourcePropertySource}
 	 * that will be added to the {@link PropertySources} of the environment with
 	 * the highest precedence.
 	 * @param environment the environment to update; never {@code null}
@@ -207,21 +213,95 @@ public abstract class TestPropertySourceUtils {
 	 * to the environment; potentially empty but never {@code null}
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 * @since 4.3
-	 * @see ResourcePropertySource
+	 * @see org.springframework.core.io.support.ResourcePropertySource
 	 * @see TestPropertySource#locations
 	 * @see #addPropertiesFilesToEnvironment(ConfigurableApplicationContext, String...)
+	 * @see #addPropertySourcesToEnvironment(ConfigurableApplicationContext, List)
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableEnvironment environment,
 			ResourceLoader resourceLoader, String... locations) {
 
+		Assert.notNull(locations, "'locations' must not be null");
+		addPropertySourcesToEnvironment(environment, resourceLoader,
+				List.of(new PropertySourceDescriptor(locations)));
+	}
+
+	/**
+	 * Add property sources for the given {@code descriptors} to the
+	 * {@link Environment} of the supplied {@code context}.
+	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
+	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
+	 * <p>Each {@link PropertySource} will be created via the configured
+	 * {@link PropertySourceDescriptor#propertySourceFactory() PropertySourceFactory}
+	 * (or the {@link DefaultPropertySourceFactory} if no factory is configured)
+	 * and added to the {@link PropertySources} of the environment with the highest
+	 * precedence.
+	 * @param context the application context whose environment should be updated;
+	 * never {@code null}
+	 * @param descriptors the property source descriptors to process; potentially
+	 * empty but never {@code null}
+	 * @throws IllegalStateException if an error occurs while processing the
+	 * descriptors and registering property sources
+	 * @since 6.1
+	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#factory
+	 * @see PropertySourceFactory
+	 */
+	public static void addPropertySourcesToEnvironment(ConfigurableApplicationContext context,
+			List<PropertySourceDescriptor> descriptors) {
+
+		Assert.notNull(context, "'context' must not be null");
+		Assert.notNull(descriptors, "'descriptors' must not be null");
+		addPropertySourcesToEnvironment(context.getEnvironment(), context, descriptors);
+	}
+
+	/**
+	 * Add property sources for the given {@code descriptors} to the supplied
+	 * {@link ConfigurableEnvironment environment}.
+	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
+	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
+	 * <p>Each {@link PropertySource} will be created via the configured
+	 * {@link PropertySourceDescriptor#propertySourceFactory() PropertySourceFactory}
+	 * (or the {@link DefaultPropertySourceFactory} if no factory is configured)
+	 * and added to the {@link PropertySources} of the environment with the highest
+	 * precedence.
+	 * @param environment the environment to update; never {@code null}
+	 * @param resourceLoader the {@code ResourceLoader} to use to load each resource;
+	 * never {@code null}
+	 * @param descriptors the property source descriptors to process; potentially
+	 * empty but never {@code null}
+	 * @throws IllegalStateException if an error occurs while processing the
+	 * descriptors and registering property sources
+	 * @since 6.1
+	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#factory
+	 * @see PropertySourceFactory
+	 */
+	private static void addPropertySourcesToEnvironment(ConfigurableEnvironment environment,
+			ResourceLoader resourceLoader, List<PropertySourceDescriptor> descriptors) {
+
 		Assert.notNull(environment, "'environment' must not be null");
 		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
-		Assert.notNull(locations, "'locations' must not be null");
+		Assert.notNull(descriptors, "'descriptors' must not be null");
+		MutablePropertySources propertySources = environment.getPropertySources();
 		try {
-			for (String location : locations) {
-				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
-				Resource resource = resourceLoader.getResource(resolvedLocation);
-				environment.getPropertySources().addFirst(new ResourcePropertySource(resource));
+			for (PropertySourceDescriptor descriptor : descriptors) {
+				if (!descriptor.locations().isEmpty()) {
+					Class<? extends PropertySourceFactory> factoryClass = descriptor.propertySourceFactory();
+					PropertySourceFactory factory =
+							(factoryClass != null && factoryClass != PropertySourceFactory.class ?
+							BeanUtils.instantiateClass(factoryClass) : defaultPropertySourceFactory);
+
+					for (String location : descriptor.locations()) {
+						String resolvedLocation = environment.resolveRequiredPlaceholders(location);
+						Resource resource = resourceLoader.getResource(resolvedLocation);
+						PropertySource<?> propertySource = factory.createPropertySource(descriptor.name(),
+								new EncodedResource(resource, descriptor.encoding()));
+						propertySources.addFirst(propertySource);
+					}
+				}
 			}
 		}
 		catch (IOException ex) {

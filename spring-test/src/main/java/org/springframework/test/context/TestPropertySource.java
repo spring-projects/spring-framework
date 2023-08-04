@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
  * {@code @TestPropertySource} is a class-level annotation that is used to
@@ -113,9 +114,10 @@ public @interface TestPropertySource {
 	 * will be added to the enclosing {@code Environment} as its own property
 	 * source, in the order declared.
 	 * <h4>Supported File Formats</h4>
-	 * <p>Both traditional and XML-based properties file formats are supported
-	 * &mdash; for example, {@code "classpath:/com/example/test.properties"}
-	 * or {@code "file:/path/to/file.xml"}.
+	 * <p>By default, both traditional and XML-based properties file formats are
+	 * supported &mdash; for example, {@code "classpath:/com/example/test.properties"}
+	 * or {@code "file:/path/to/file.xml"}. To support a different file format,
+	 * configure an appropriate {@link #factory() PropertySourceFactory}.
 	 * <h4>Path Resource Semantics</h4>
 	 * <p>Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path
@@ -129,9 +131,8 @@ public @interface TestPropertySource {
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
 	 * Resource location wildcards (e.g. <code>*&#42;/*.properties</code>)
-	 * are not permitted: each location must evaluate to exactly one
-	 * {@code .properties} or {@code .xml} resource. Property placeholders
-	 * in paths (i.e., <code>${...}</code>) will be
+	 * are not permitted: each location must evaluate to exactly one properties
+	 * resource. Property placeholders in paths (i.e., <code>${...}</code>) will be
 	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String) resolved}
 	 * against the {@code Environment}.
 	 * <h4>Default Properties File Detection</h4>
@@ -144,6 +145,7 @@ public @interface TestPropertySource {
 	 * @see #inheritLocations
 	 * @see #value
 	 * @see #properties
+	 * @see #factory
 	 * @see org.springframework.core.env.PropertySource
 	 */
 	@AliasFor("value")
@@ -277,5 +279,16 @@ public @interface TestPropertySource {
 	 * @see #properties
 	 */
 	boolean inheritProperties() default true;
+
+	/**
+	 * Specify a custom {@link PropertySourceFactory}, if any.
+	 * <p>By default, a factory for standard resource files will be used which
+	 * supports {@code *.properties} and {@code *.xml} file formats for
+	 * {@link java.util.Properties}.
+	 * @since 6.1
+	 * @see org.springframework.core.io.support.DefaultPropertySourceFactory
+	 * @see org.springframework.core.io.support.ResourcePropertySource
+	 */
+	Class<? extends PropertySourceFactory> factory() default PropertySourceFactory.class;
 
 }
