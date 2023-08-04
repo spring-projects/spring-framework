@@ -28,8 +28,8 @@ import org.springframework.lang.Nullable;
  * @param ignoreResourceNotFound whether a failure to find a property resource
  * should be ignored
  * @param name the name of the property source, or {@code null} to infer one
- * @param propertySourceFactory the {@link PropertySourceFactory} to use, or
- * {@code null} to use the default
+ * @param propertySourceFactory the type of {@link PropertySourceFactory} to use,
+ * or {@code null} to use the default
  * @param encoding the encoding, or {@code null} to use the default encoding
  * @author Stephane Nicoll
  * @since 6.0
