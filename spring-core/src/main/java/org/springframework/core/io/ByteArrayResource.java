@@ -129,8 +129,8 @@ public class ByteArrayResource extends AbstractResource {
 	 * @see java.util.Arrays#equals(byte[], byte[])
 	 */
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof ByteArrayResource that &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ByteArrayResource that &&
 				Arrays.equals(this.byteArray, that.byteArray)));
 	}
 

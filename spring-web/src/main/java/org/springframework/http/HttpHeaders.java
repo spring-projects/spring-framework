@@ -1834,21 +1834,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof HttpHeaders other)) {
-			return false;
-		}
-		return unwrap(this).equals(unwrap(other));
-	}
-
-	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
-		while (headers.headers instanceof HttpHeaders httpHeaders) {
-			headers = httpHeaders;
-		}
-		return headers.headers;
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof HttpHeaders that && unwrap(this).equals(unwrap(that))));
 	}
 
 	@Override
@@ -1953,6 +1940,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String credentialsString = username + ":" + password;
 		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
 		return new String(encodedBytes, charset);
+	}
+
+
+	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
+		while (headers.headers instanceof HttpHeaders httpHeaders) {
+			headers = httpHeaders;
+		}
+		return headers.headers;
 	}
 
 	// Package-private: used in ResponseCookie

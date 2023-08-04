@@ -477,8 +477,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof Subscription that && this.id.equals(that.id)));
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof Subscription that && this.id.equals(that.id)));
 		}
 
 		@Override

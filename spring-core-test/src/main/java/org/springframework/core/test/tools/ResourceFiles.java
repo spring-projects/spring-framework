@@ -130,15 +130,10 @@ public final class ResourceFiles implements Iterable<ResourceFile> {
 		return this.files.getSingle();
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		return this.files.equals(((ResourceFiles) obj).files);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ResourceFiles that && this.files.equals(that.files)));
 	}
 
 	@Override

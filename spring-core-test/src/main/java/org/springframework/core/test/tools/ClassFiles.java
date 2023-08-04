@@ -61,6 +61,7 @@ public final class ClassFiles implements Iterable<ClassFile> {
 		return none().and(ClassFiles);
 	}
 
+
 	/**
 	 * Return a new {@link ClassFiles} instance that merges classes from
 	 * another array of {@link ClassFile} instances.
@@ -116,15 +117,10 @@ public final class ClassFiles implements Iterable<ClassFile> {
 		return this.files.get(name);
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		return this.files.equals(((ClassFiles) obj).files);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ClassFiles that && this.files.equals(that.files)));
 	}
 
 	@Override
