@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ final class BeanMethod extends ConfigurationMethod {
 		super(metadata, configurationClass);
 	}
 
+
 	@Override
 	public void validate(ProblemReporter problemReporter) {
 		if (getMetadata().isStatic()) {
@@ -55,9 +56,9 @@ final class BeanMethod extends ConfigurationMethod {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return ((this == obj) || ((obj instanceof BeanMethod) &&
-				this.metadata.equals(((BeanMethod) obj).metadata)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof BeanMethod &&
+				this.metadata.equals(((BeanMethod) other).metadata)));
 	}
 
 	@Override
@@ -69,6 +70,7 @@ final class BeanMethod extends ConfigurationMethod {
 	public String toString() {
 		return "BeanMethod: " + this.metadata;
 	}
+
 
 	private class NonOverridableMethodError extends Problem {
 

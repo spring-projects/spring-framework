@@ -169,19 +169,11 @@ final class ProfilesParser {
 		}
 
 		@Override
-		public int hashCode() {
-			return this.expressions.hashCode();
-		}
-
-		@Override
 		public boolean equals(Object obj) {
 			if (this == obj) {
 				return true;
 			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
+			if (obj == null || getClass() != obj.getClass()) {
 				return false;
 			}
 			ParsedProfiles that = (ParsedProfiles) obj;
@@ -189,10 +181,14 @@ final class ProfilesParser {
 		}
 
 		@Override
+		public int hashCode() {
+			return this.expressions.hashCode();
+		}
+
+		@Override
 		public String toString() {
 			return StringUtils.collectionToDelimitedString(this.expressions, " or ");
 		}
-
 	}
 
 }
