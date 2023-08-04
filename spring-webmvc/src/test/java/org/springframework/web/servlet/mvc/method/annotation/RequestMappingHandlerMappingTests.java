@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.MediaTypeExpression;
@@ -237,7 +238,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // SPR-14988
-	void getMappingOverridesConsumesFromTypeLevelAnnotation() throws Exception {
+	void getMappingOverridesConsumesFromTypeLevelAnnotation() {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
@@ -258,27 +259,27 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	void getMapping() throws Exception {
+	void getMapping() {
 		assertComposedAnnotationMapping(RequestMethod.GET);
 	}
 
 	@Test
-	void postMapping() throws Exception {
+	void postMapping() {
 		assertComposedAnnotationMapping(RequestMethod.POST);
 	}
 
 	@Test
-	void putMapping() throws Exception {
+	void putMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PUT);
 	}
 
 	@Test
-	void deleteMapping() throws Exception {
+	void deleteMapping() {
 		assertComposedAnnotationMapping(RequestMethod.DELETE);
 	}
 
 	@Test
-	void patchMapping() throws Exception {
+	void patchMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
@@ -296,6 +297,7 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(mappingInfo.getPathPatternsCondition().getPatterns())
 				.extracting(PathPattern::toString)
 				.containsOnly("/exchange");
+
 		assertThat(mappingInfo.getMethodsCondition().getMethods()).isEmpty();
 		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
 		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
@@ -305,7 +307,7 @@ public class RequestMappingHandlerMappingTests {
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
-	void httpExchangeWithCustomValues() throws NoSuchMethodException {
+	void httpExchangeWithCustomValues() throws Exception {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 		mapping.afterPropertiesSet();
@@ -317,20 +319,21 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(mappingInfo.getPathPatternsCondition().getPatterns())
 				.extracting(PathPattern::toString)
 				.containsOnly("/exchange/custom");
-		assertThat(mappingInfo.getMethodsCondition().getMethods())
-				.containsOnly(RequestMethod.POST);
+
+		assertThat(mappingInfo.getMethodsCondition().getMethods()).containsOnly(RequestMethod.POST);
 		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
 		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
+
 		assertThat(mappingInfo.getConsumesCondition().getExpressions())
 				.extracting(MediaTypeExpression::getMediaType)
 				.containsOnly(MediaType.APPLICATION_JSON);
+
 		assertThat(mappingInfo.getProducesCondition().getExpressions())
 				.extracting(MediaTypeExpression::getMediaType)
 				.containsOnly(MediaType.valueOf("text/plain;charset=UTF-8"));
 	}
 
-	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) throws Exception {
-
+	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 
@@ -418,15 +421,15 @@ public class RequestMappingHandlerMappingTests {
 		}
 	}
 
+
 	@RestController
 	@HttpExchange("/exchange")
 	static class HttpExchangeController {
 
 		@HttpExchange
-		public void defaultValuesExchange(){}
+		public void defaultValuesExchange() {}
 
-		@HttpExchange(value = "/custom", accept = "text/plain;charset=UTF-8",
-				method = "POST", contentType =  "application/json")
+		@PostExchange(url = "/custom", contentType = "application/json", accept = "text/plain;charset=UTF-8")
 		public void customValuesExchange(){}
 	}
 

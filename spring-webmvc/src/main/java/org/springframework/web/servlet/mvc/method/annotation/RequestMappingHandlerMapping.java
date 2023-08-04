@@ -333,27 +333,21 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return null;
 	}
 
-	/**
-	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)}
-	 * or {@link #createRequestMappingInfo(HttpExchange, RequestCondition)},
-	 * depending on which annotation is found on the element being processed,
-	 * and supplying the appropriate custom {@link RequestCondition} depending on whether
-	 * the supplied {@code annotatedElement} is a class or method.
-	 * @see #getCustomTypeCondition(Class)
-	 * @see #getCustomMethodCondition(Method)
-	 */
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
-		RequestCondition<?> condition = (element instanceof Class<?> clazz ?
+		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
+
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		if(requestMapping != null){
-			return createRequestMappingInfo(requestMapping, condition);
+			return createRequestMappingInfo(requestMapping, customCondition);
 		}
+
 		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(element, HttpExchange.class);
 		if(httpExchange != null){
-			return createRequestMappingInfo(httpExchange, condition);
+			return createRequestMappingInfo(httpExchange, customCondition);
 		}
+
 		return null;
 	}
 
@@ -391,9 +385,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Create a {@link RequestMappingInfo} from the supplied
-	 * {@link RequestMapping @RequestMapping} annotation, which is either
-	 * a directly declared annotation, a meta-annotation, or the synthesized
-	 * result of merging annotation attributes within an annotation hierarchy.
+	 * {@link RequestMapping @RequestMapping} annotation, or meta-annotation,
+	 * or synthesized result of merging annotation attributes within an
+	 * annotation hierarchy.
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
 			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
@@ -406,31 +400,34 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
 				.mappingName(requestMapping.name());
+
 		if (customCondition != null) {
 			builder.customCondition(customCondition);
 		}
+
 		return builder.options(this.config).build();
 	}
 
 	/**
 	 * Create a {@link RequestMappingInfo} from the supplied
-	 * {@link HttpExchange @HttpExchange} annotation, which is either
-	 * a directly declared annotation, a meta-annotation, or the synthesized
-	 * result of merging annotation attributes within an annotation hierarchy.
+	 * {@link HttpExchange @HttpExchange} annotation, or meta-annotation,
+	 * or synthesized result of merging annotation attributes within an
+	 * annotation hierarchy.
+	 * @since 6.1
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
-			HttpExchange httpExchange,
-			@Nullable RequestCondition<?> customCondition) {
+			HttpExchange httpExchange, @Nullable RequestCondition<?> customCondition) {
 
 		RequestMappingInfo.Builder builder = RequestMappingInfo
-				.paths(resolveEmbeddedValuesInPatterns(
-						toTextArray(httpExchange.value())))
+				.paths(resolveEmbeddedValuesInPatterns(toStringArray(httpExchange.value())))
 				.methods(toMethodArray(httpExchange.method()))
-				.consumes(toTextArray(httpExchange.contentType()))
+				.consumes(toStringArray(httpExchange.contentType()))
 				.produces(httpExchange.accept());
+
 		if (customCondition != null) {
 			builder.customCondition(customCondition);
 		}
+
 		return builder.options(this.config).build();
 	}
 
@@ -452,22 +449,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 
-	private static String[] toTextArray(String string) {
-		if (StringUtils.hasText(string)) {
-			return new String[] { string };
-		}
-		return new String[] {};
+	private static String[] toStringArray(String value) {
+		return (StringUtils.hasText(value) ? new String[] {value} : new String[] {});
 	}
 
 	private static RequestMethod[] toMethodArray(String method) {
-		RequestMethod requestMethod = null;
-		if (StringUtils.hasText(method)) {
-			requestMethod = RequestMethod.resolve(method);
-		}
-		return requestMethod != null ? new RequestMethod[] { requestMethod }
-				: new RequestMethod[] {};
+		return (StringUtils.hasText(method) ?
+				new RequestMethod[] {RequestMethod.valueOf(method)} : new RequestMethod[] {});
 	}
-
 
 	@Override
 	public void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {
