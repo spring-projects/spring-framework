@@ -34,6 +34,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -44,6 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * single {@link PropertySource} rather than creating dedicated ones.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  * @see PropertySourceDescriptor
  */
@@ -88,9 +90,10 @@ public class PropertySourceProcessor {
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
-			catch (IllegalArgumentException | FileNotFoundException | UnknownHostException | SocketException ex) {
-				// Placeholders not resolvable or resource not found when trying to open it
-				if (ignoreResourceNotFound) {
+			catch (RuntimeException | IOException ex) {
+				// Placeholders not resolvable (IllegalArgumentException) or resource not found when trying to open it
+				if (ignoreResourceNotFound && (ex instanceof IllegalArgumentException || isIgnorableException(ex) ||
+						isIgnorableException(ex.getCause()))) {
 					if (logger.isInfoEnabled()) {
 						logger.info("Properties location [" + location + "] not resolvable: " + ex.getMessage());
 					}
@@ -148,6 +151,16 @@ public class PropertySourceProcessor {
 		catch (Exception ex) {
 			throw new IllegalStateException("Failed to instantiate " + type, ex);
 		}
+	}
+
+	/**
+	 * Determine if the supplied exception can be ignored according to
+	 * {@code ignoreResourceNotFound} semantics.
+	 */
+	private static boolean isIgnorableException(@Nullable Throwable ex) {
+		return (ex instanceof FileNotFoundException ||
+				ex instanceof UnknownHostException ||
+				ex instanceof SocketException);
 	}
 
 }
