@@ -61,6 +61,11 @@ import org.springframework.web.service.annotation.HttpExchange;
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements EmbeddedValueResolverAware {
 
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+	private static final RequestMethod[] EMPTY_REQUEST_METHOD_ARRAY = new RequestMethod[0];
+
+
 	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
@@ -178,12 +183,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
 
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
-		if (requestMapping != null){
+		if (requestMapping != null) {
 			return createRequestMappingInfo(requestMapping, customCondition);
 		}
 
 		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(element, HttpExchange.class);
-		if (httpExchange != null){
+		if (httpExchange != null) {
 			return createRequestMappingInfo(httpExchange, customCondition);
 		}
 
@@ -294,12 +299,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	private static String[] toStringArray(String value) {
-		return StringUtils.hasText(value) ? new String[] {value} : new String[] {};
+		return (StringUtils.hasText(value) ? new String[] {value} : EMPTY_STRING_ARRAY);
 	}
 
 	private static RequestMethod[] toMethodArray(String method) {
 		return (StringUtils.hasText(method) ?
-				new RequestMethod[] {RequestMethod.valueOf(method)} : new RequestMethod[] {});
+				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
 	}
 
 	@Override
