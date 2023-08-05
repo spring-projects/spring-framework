@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,22 @@ package org.springframework.core.io.support;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.core.env.PropertySource;
 import org.springframework.lang.Nullable;
 
 /**
- * Describe a {@link PropertySource}.
+ * Descriptor for a {@link org.springframework.core.env.PropertySource PropertySource}.
  *
  * @param locations the locations to consider
- * @param ignoreResourceNotFound whether to fail if a location does not exist
+ * @param ignoreResourceNotFound whether a failure to find a property resource
+ * should be ignored
  * @param name the name of the property source, or {@code null} to infer one
- * @param propertySourceFactory the {@link PropertySourceFactory} to use, or
- * {@code null} to use the default
+ * @param propertySourceFactory the type of {@link PropertySourceFactory} to use,
+ * or {@code null} to use the default
  * @param encoding the encoding, or {@code null} to use the default encoding
  * @author Stephane Nicoll
  * @since 6.0
+ * @see org.springframework.core.env.PropertySource
+ * @see org.springframework.context.annotation.PropertySource
  */
 public record PropertySourceDescriptor(List<String> locations, boolean ignoreResourceNotFound,
 		@Nullable String name, @Nullable Class<? extends PropertySourceFactory> propertySourceFactory,
