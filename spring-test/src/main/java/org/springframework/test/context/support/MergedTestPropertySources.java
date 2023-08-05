@@ -70,7 +70,9 @@ class MergedTestPropertySources {
 
 	/**
 	 * Get the descriptors for resource locations of properties files.
-	 * @see TestPropertySource#locations()
+	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#encoding
+	 * @see TestPropertySource#factory
 	 */
 	List<PropertySourceDescriptor> getPropertySourceDescriptors() {
 		return this.descriptors;

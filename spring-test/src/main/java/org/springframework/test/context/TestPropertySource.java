@@ -145,6 +145,7 @@ public @interface TestPropertySource {
 	 * @see #inheritLocations
 	 * @see #value
 	 * @see #properties
+	 * @see #encoding
 	 * @see #factory
 	 * @see org.springframework.core.env.PropertySource
 	 */
@@ -279,6 +280,14 @@ public @interface TestPropertySource {
 	 * @see #properties
 	 */
 	boolean inheritProperties() default true;
+
+	/**
+	 * Specify the character encoding for the given {@linkplain #locations resources}
+	 * &mdash; for example, "UTF-8".
+	 * <p>If not specified, the default character encoding of the JVM will be used.
+	 * @since 6.1
+	 */
+	String encoding() default "";
 
 	/**
 	 * Specify a custom {@link PropertySourceFactory}, if any.

@@ -395,6 +395,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@code PropertySources}.
 	 * @since 6.1
 	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#encoding
 	 * @see TestPropertySource#factory
 	 */
 	public List<PropertySourceDescriptor> getPropertySourceDescriptors() {

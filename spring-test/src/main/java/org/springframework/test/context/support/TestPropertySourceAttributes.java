@@ -126,22 +126,28 @@ class TestPropertySourceAttributes {
 				TestContextResourceUtils.convertToClasspathResourcePaths(declaringClass, true, locations);
 		Class<? extends PropertySourceFactory> factoryClass =
 				(Class<? extends PropertySourceFactory>) mergedAnnotation.getClass("factory");
+		String encoding = mergedAnnotation.getString("encoding");
+		if (encoding.isBlank()) {
+			encoding = null; // default encoding will be inferred
+		}
 		PropertySourceDescriptor descriptor = new PropertySourceDescriptor(
-				Arrays.asList(convertedLocations), false, null, factoryClass, null);
-		addPropertiesAndLocations(List.of(descriptor), properties, declaringClass, false);
+				List.of(convertedLocations), false, null, factoryClass, encoding);
+		addPropertiesAndLocations(List.of(descriptor), properties, declaringClass, encoding, false);
 	}
 
 	private void mergePropertiesAndLocationsFrom(TestPropertySourceAttributes attributes) {
 		addPropertiesAndLocations(attributes.getPropertySourceDescriptors(), attributes.getProperties(),
-				attributes.getDeclaringClass(), true);
+				attributes.getDeclaringClass(), null, true);
 	}
 
 	private void addPropertiesAndLocations(List<PropertySourceDescriptor> descriptors, String[] properties,
-			Class<?> declaringClass, boolean prepend) {
+			Class<?> declaringClass, String encoding, boolean prepend) {
 
 		if (hasNoLocations(descriptors) && ObjectUtils.isEmpty(properties)) {
 			String defaultPropertiesFile = detectDefaultPropertiesFile(declaringClass);
-			addAll(prepend, this.descriptors, List.of(new PropertySourceDescriptor(defaultPropertiesFile)));
+			PropertySourceDescriptor descriptor = new PropertySourceDescriptor(
+					List.of(defaultPropertiesFile), false, null, null, encoding);
+			addAll(prepend, this.descriptors, List.of(descriptor));
 		}
 		else {
 			addAll(prepend, this.descriptors, descriptors);
