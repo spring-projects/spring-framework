@@ -17,7 +17,7 @@
 package org.springframework.transaction;
 
 /**
- * Representation of an ongoing reactive transaction.
+ * Representation of an ongoing {@link ReactiveTransactionManager} transaction.
  * This is currently a marker interface extending {@link TransactionExecution}
  * but may acquire further methods in a future revision.
  *

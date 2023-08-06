@@ -24,8 +24,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 
-import kotlinx.coroutines.CompletableDeferredKt;
-import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
 import reactor.adapter.JdkFlowAdapter;
 import reactor.blockhound.BlockHound;
@@ -38,13 +36,14 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * A registry of adapters to adapt Reactive Streams {@link Publisher} to/from
- * various async/reactive types such as {@code CompletableFuture}, RxJava
- * {@code Flowable}, and others.
+ * A registry of adapters to adapt Reactive Streams {@link Publisher} to/from various
+ * async/reactive types such as {@code CompletableFuture}, RxJava {@code Flowable}, etc.
+ * This is designed to complement Spring's Reactor {@code Mono}/{@code Flux} support while
+ * also being usable without Reactor, e.g. just for {@code org.reactivestreams} bridging.
  *
- * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 3, {@link CompletableFuture}, {@code Flow.Publisher},
- * and Kotlin Coroutines' {@code Deferred} and {@code Flow}.
+ * <p>By default, depending on classpath availability, adapters are registered for Reactor
+ * (including {@code CompletableFuture} and {@code Flow.Publisher} adapters), RxJava 3,
+ * Kotlin Coroutines' {@code Deferred} (bridged via Reactor) and SmallRye Mutiny 1.x.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -304,9 +303,9 @@ public class ReactiveAdapterRegistry {
 		@SuppressWarnings("KotlinInternalInJava")
 		void registerAdapters(ReactiveAdapterRegistry registry) {
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(Deferred.class,
-							() -> CompletableDeferredKt.CompletableDeferred(null)),
-					source -> CoroutinesUtils.deferredToMono((Deferred<?>) source),
+					ReactiveTypeDescriptor.singleOptionalValue(kotlinx.coroutines.Deferred.class,
+							() -> kotlinx.coroutines.CompletableDeferredKt.CompletableDeferred(null)),
+					source -> CoroutinesUtils.deferredToMono((kotlinx.coroutines.Deferred<?>) source),
 					source -> CoroutinesUtils.monoToDeferred(Mono.from(source)));
 
 			registry.registerReactiveType(
