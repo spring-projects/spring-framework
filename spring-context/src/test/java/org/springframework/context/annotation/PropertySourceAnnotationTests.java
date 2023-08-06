@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.Environment;
@@ -240,6 +241,14 @@ class PropertySourceAnnotationTests {
 	}
 
 	@Test
+	void multipleComposedPropertySourceAnnotations() {  // gh-30941
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MultipleComposedAnnotationsConfig.class);
+		ctx.getBean(MultipleComposedAnnotationsConfig.class);
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2", "from.p3", "from.p4", "from.p5");
+		ctx.close();
+	}
+
+	@Test
 	void withNamedPropertySources() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNamedPropertySources.class);
 		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
@@ -302,6 +311,17 @@ class PropertySourceAnnotationTests {
 		ctxWithoutName.refresh();
 		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name")).isEqualTo("myTestBean");
 		ctxWithoutName.close();
+	}
+
+
+	private static void assertEnvironmentContainsProperties(ApplicationContext ctx, String... names) {
+		for (String name : names) {
+			assertThat(ctx.getEnvironment().containsProperty(name)).as("environment contains property " + name).isTrue();
+		}
+	}
+
+	private static void assertEnvironmentContainsProperty(ApplicationContext ctx, String name) {
+		assertThat(ctx.getEnvironment().containsProperty(name)).as("environment contains property " + name).isTrue();
 	}
 
 
@@ -496,6 +516,28 @@ class PropertySourceAnnotationTests {
 	static class ConfigWithRepeatedPropertySourceAnnotationsOnComposedAnnotation {
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
+	@interface PropertySource1 {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p3.properties"),
+	})
+	@interface PropertySource23 {
+	}
+
+	@Configuration
+	@PropertySource1
+	@PropertySource23
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p4.properties")
+	})
+	@PropertySource("classpath:org/springframework/context/annotation/p5.properties")
+	static class MultipleComposedAnnotationsConfig {
+	}
 
 	@Configuration
 	@PropertySources({

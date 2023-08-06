@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -141,6 +142,15 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat(ctx.containsBean("simpleComponent")).as("@ComponentScan annotated @Configuration class registered directly against " +
 				"AnnotationConfigApplicationContext did not trigger component scanning as expected")
 			.isTrue();
+	}
+
+	@Test
+	void multipleComposedComponentScanAnnotations() {  // gh-30941
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MultipleComposedAnnotationsConfig.class);
+		ctx.getBean(MultipleComposedAnnotationsConfig.class);
+		assertContextContainsBean(ctx, "componentScanAnnotationIntegrationTests.MultipleComposedAnnotationsConfig");
+		assertContextContainsBean(ctx, "simpleComponent");
+		assertContextContainsBean(ctx, "barComponent");
 	}
 
 	@Test
@@ -267,6 +277,10 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat(ctx.containsBean("fooServiceImpl")).isTrue();
 	}
 
+	private static void assertContextContainsBean(ApplicationContext ctx, String beanName) {
+		assertThat(ctx.containsBean(beanName)).as("context contains bean " + beanName).isTrue();
+	}
+
 
 	@Configuration
 	@ComponentScan
@@ -278,8 +292,23 @@ public class ComponentScanAnnotationIntegrationTests {
 		String[] basePackages() default {};
 	}
 
+	@Configuration
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public @interface ComposedConfiguration2 {
+
+		@AliasFor(annotation = ComponentScan.class)
+		String[] basePackages() default {};
+	}
+
 	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
 	public static class ComposedAnnotationConfig {
+	}
+
+	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
+	@ComposedConfiguration2(basePackages = "example.scannable.sub")
+	static class MultipleComposedAnnotationsConfig {
 	}
 
 	public static class AwareTypeFilter implements TypeFilter, EnvironmentAware,

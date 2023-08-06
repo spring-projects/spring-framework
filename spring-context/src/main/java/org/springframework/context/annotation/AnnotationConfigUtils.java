@@ -17,9 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -51,6 +49,7 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see ContextAnnotationAutowireCandidateResolver
  * @see ConfigurationClassPostProcessor
@@ -281,33 +280,10 @@ public abstract class AnnotationConfigUtils {
 		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationTypeName));
 	}
 
-	@SuppressWarnings("unchecked")
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
-			Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
+			Class<? extends Annotation> annotationType, Class<? extends Annotation> containerType) {
 
-		Set<AnnotationAttributes> result = new LinkedHashSet<>();
-
-		// Direct annotation present or meta-present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationType.getName()));
-
-		// Container annotation present or meta-present?
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerType.getName());
-		if (container != null && container.containsKey("value")) {
-			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
-				addAttributesIfNotNull(result, containedAttributes);
-			}
-		}
-
-		// Return merged result
-		return Collections.unmodifiableSet(result);
-	}
-
-	private static void addAttributesIfNotNull(
-			Set<AnnotationAttributes> result, @Nullable Map<String, Object> attributes) {
-
-		if (attributes != null) {
-			result.add(AnnotationAttributes.fromMap(attributes));
-		}
+		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, false);
 	}
 
 }
