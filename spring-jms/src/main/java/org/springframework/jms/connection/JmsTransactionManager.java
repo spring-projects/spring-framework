@@ -448,11 +448,6 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		public boolean isRollbackOnly() {
 			return (this.resourceHolder != null && this.resourceHolder.isRollbackOnly());
 		}
-
-		@Override
-		public void flush() {
-			// no-op
-		}
 	}
 
 }

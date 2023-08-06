@@ -16,8 +16,11 @@
 
 package org.springframework.transaction.reactive;
 
+import java.util.function.Function;
+
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -26,6 +29,7 @@ import org.springframework.transaction.TransactionDefinition;
  * Test implementation of a {@link ReactiveTransactionManager}.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
 class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager {
@@ -36,7 +40,11 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 	private final boolean canCreateTransaction;
 
-	private final boolean forceFailOnCommit;
+	@Nullable
+	private Function<String, RuntimeException> forceFailOnCommit;
+
+	@Nullable
+	private Function<String, RuntimeException> forceFailOnRollback;
 
 	protected boolean begin = false;
 
@@ -50,13 +58,15 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 
 	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction) {
-		this(existingTransaction, canCreateTransaction, false);
-	}
-
-	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction, boolean forceFailOnCommit) {
 		this.existingTransaction = existingTransaction;
 		this.canCreateTransaction = canCreateTransaction;
+	}
+
+	ReactiveTestTransactionManager(boolean existingTransaction, @Nullable Function<String, RuntimeException> forceFailOnCommit, @Nullable Function<String, RuntimeException> forceFailOnRollback) {
+		this.existingTransaction = existingTransaction;
+		this.canCreateTransaction = true;
 		this.forceFailOnCommit = forceFailOnCommit;
+		this.forceFailOnRollback = forceFailOnRollback;
 	}
 
 
@@ -88,8 +98,8 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		}
 		return Mono.fromRunnable(() -> {
 			this.commit = true;
-			if (this.forceFailOnCommit) {
-				throw new IllegalArgumentException("Forced failure on commit");
+			if (this.forceFailOnCommit != null) {
+				throw this.forceFailOnCommit.apply("Forced failure on commit");
 			}
 		});
 	}
@@ -99,7 +109,12 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			return Mono.error(new IllegalArgumentException("Not the same transaction object"));
 		}
-		return Mono.fromRunnable(() -> this.rollback = true);
+		return Mono.fromRunnable(() -> {
+			this.rollback = true;
+			if (this.forceFailOnRollback != null) {
+				throw this.forceFailOnRollback.apply("Forced failure on rollback");
+			}
+		});
 	}
 
 	@Override

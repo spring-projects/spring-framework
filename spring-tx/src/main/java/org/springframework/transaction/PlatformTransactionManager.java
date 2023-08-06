@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.ReactiveTransactionManager
+ * @see ConfigurableTransactionManager
  */
 public interface PlatformTransactionManager extends TransactionManager {
 
@@ -68,8 +69,7 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
-			throws TransactionException;
+	TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction

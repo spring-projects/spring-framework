@@ -72,10 +72,17 @@ public class JtaTransactionManagerTests {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
+				assertThat(status.getTransactionName()).isEqualTo("txName");
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isFalse();
+				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 				TransactionSynchronizationManager.registerSynchronization(synch);
 				assertThat(TransactionSynchronizationManager.getCurrentTransactionName()).isEqualTo("txName");
 				assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+				assertThat(status.isRollbackOnly()).isFalse();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -105,8 +112,15 @@ public class JtaTransactionManagerTests {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
+				assertThat(status.getTransactionName()).isEmpty();
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isFalse();
+				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 				TransactionSynchronizationManager.registerSynchronization(synch);
+				assertThat(status.isRollbackOnly()).isFalse();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -134,7 +148,14 @@ public class JtaTransactionManagerTests {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertThat(status.getTransactionName()).isEmpty();
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isFalse();
+				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+				assertThat(status.isRollbackOnly()).isFalse();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -160,11 +181,18 @@ public class JtaTransactionManagerTests {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertThat(status.getTransactionName()).isEqualTo("txName");
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isFalse();
+				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 				TransactionSynchronizationManager.registerSynchronization(synch);
 				assertThat(TransactionSynchronizationManager.getCurrentTransactionName()).isEqualTo("txName");
 				assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
 				status.setRollbackOnly();
+				assertThat(status.isRollbackOnly()).isTrue();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -192,9 +220,16 @@ public class JtaTransactionManagerTests {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertThat(status.getTransactionName()).isEmpty();
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isFalse();
+				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 				TransactionSynchronizationManager.registerSynchronization(synch);
 				status.setRollbackOnly();
+				assertThat(status.isRollbackOnly()).isTrue();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -221,8 +256,16 @@ public class JtaTransactionManagerTests {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertThat(status.getTransactionName()).isEmpty();
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isFalse();
+				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+				assertThat(status.isRollbackOnly()).isFalse();
 				status.setRollbackOnly();
+				assertThat(status.isRollbackOnly()).isTrue();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -808,6 +851,13 @@ public class JtaTransactionManagerTests {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
+				assertThat(status.getTransactionName()).isEmpty();
+				assertThat(status.hasTransaction()).isTrue();
+				assertThat(status.isNewTransaction()).isTrue();
+				assertThat(status.isNested()).isTrue();
+				assertThat(status.isReadOnly()).isFalse();
+				assertThat(status.isRollbackOnly()).isFalse();
+				assertThat(status.isCompleted()).isFalse();
 			}
 		});
 
@@ -859,8 +909,11 @@ public class JtaTransactionManagerTests {
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION);
 		willThrow(new SystemException("system exception")).given(ut).begin();
 
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
+		ptm.addListener(tl);
+
 		assertThatExceptionOfType(CannotCreateTransactionException.class).isThrownBy(() -> {
-			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				@Override
@@ -869,6 +922,16 @@ public class JtaTransactionManagerTests {
 				}
 			});
 		});
+
+		assertThat(tl.beforeBeginCalled).isTrue();
+		assertThat(tl.afterBeginCalled).isTrue();
+		assertThat(tl.beginFailure).isInstanceOf(CannotCreateTransactionException.class);
+		assertThat(tl.beforeCommitCalled).isFalse();
+		assertThat(tl.afterCommitCalled).isFalse();
+		assertThat(tl.commitFailure).isNull();
+		assertThat(tl.beforeRollbackCalled).isFalse();
+		assertThat(tl.afterRollbackCalled).isFalse();
+		assertThat(tl.rollbackFailure).isNull();
 	}
 
 	@Test
@@ -878,8 +941,11 @@ public class JtaTransactionManagerTests {
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 		willThrow(new RollbackException("unexpected rollback")).given(ut).commit();
 
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
+		ptm.addListener(tl);
+
 		assertThatExceptionOfType(UnexpectedRollbackException.class).isThrownBy(() -> {
-			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				@Override
@@ -895,6 +961,16 @@ public class JtaTransactionManagerTests {
 				}
 			});
 		});
+
+		assertThat(tl.beforeBeginCalled).isTrue();
+		assertThat(tl.afterBeginCalled).isTrue();
+		assertThat(tl.beginFailure).isNull();
+		assertThat(tl.beforeCommitCalled).isTrue();
+		assertThat(tl.afterCommitCalled).isFalse();
+		assertThat(tl.commitFailure).isNull();
+		assertThat(tl.beforeRollbackCalled).isFalse();
+		assertThat(tl.afterRollbackCalled).isTrue();
+		assertThat(tl.rollbackFailure).isNull();
 
 		verify(ut).begin();
 	}
@@ -1023,8 +1099,11 @@ public class JtaTransactionManagerTests {
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 		willThrow(new SystemException("system exception")).given(ut).commit();
 
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
+		ptm.addListener(tl);
+
 		assertThatExceptionOfType(TransactionSystemException.class).isThrownBy(() -> {
-			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				@Override
@@ -1041,6 +1120,16 @@ public class JtaTransactionManagerTests {
 			});
 		});
 
+		assertThat(tl.beforeBeginCalled).isTrue();
+		assertThat(tl.afterBeginCalled).isTrue();
+		assertThat(tl.beginFailure).isNull();
+		assertThat(tl.beforeCommitCalled).isTrue();
+		assertThat(tl.afterCommitCalled).isTrue();
+		assertThat(tl.commitFailure).isInstanceOf(TransactionSystemException.class);
+		assertThat(tl.beforeRollbackCalled).isFalse();
+		assertThat(tl.afterRollbackCalled).isFalse();
+		assertThat(tl.rollbackFailure).isNull();
+
 		verify(ut).begin();
 	}
 
@@ -1050,8 +1139,11 @@ public class JtaTransactionManagerTests {
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 		willThrow(new SystemException("system exception")).given(ut).rollback();
 
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
+		ptm.addListener(tl);
+
 		assertThatExceptionOfType(TransactionSystemException.class).isThrownBy(() -> {
-			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				@Override
@@ -1067,6 +1159,16 @@ public class JtaTransactionManagerTests {
 				}
 			});
 		});
+
+		assertThat(tl.beforeBeginCalled).isTrue();
+		assertThat(tl.afterBeginCalled).isTrue();
+		assertThat(tl.beginFailure).isNull();
+		assertThat(tl.beforeCommitCalled).isFalse();
+		assertThat(tl.afterCommitCalled).isFalse();
+		assertThat(tl.commitFailure).isNull();
+		assertThat(tl.beforeRollbackCalled).isTrue();
+		assertThat(tl.afterRollbackCalled).isTrue();
+		assertThat(tl.rollbackFailure).isInstanceOf(TransactionSystemException.class);
 
 		verify(ut).begin();
 	}

@@ -131,11 +131,6 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		return this.savepointAllowed;
 	}
 
-	@Override
-	public void flush() {
-		// no-op
-	}
-
 
 	//---------------------------------------------------------------------
 	// Implementation of SavepointManager
