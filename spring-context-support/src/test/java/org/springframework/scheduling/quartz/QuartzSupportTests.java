@@ -114,7 +114,7 @@ class QuartzSupportTests {
 		trigger.setName("myTrigger");
 		trigger.setJobDetail(jobDetail);
 		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
+		trigger.setRepeatInterval(100);
 		trigger.setRepeatCount(1);
 		trigger.afterPropertiesSet();
 
@@ -133,7 +133,7 @@ class QuartzSupportTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	void jobDetailWithRunnableInsteadOfJob() {
 		JobDetailImpl jobDetail = new JobDetailImpl();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -156,7 +156,7 @@ class QuartzSupportTests {
 		trigger.setName("myTrigger");
 		trigger.setJobDetail(jobDetail);
 		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
+		trigger.setRepeatInterval(100);
 		trigger.setRepeatCount(1);
 		trigger.afterPropertiesSet();
 
@@ -190,7 +190,7 @@ class QuartzSupportTests {
 		trigger.setName("myTrigger");
 		trigger.setJobDetail(jobDetail);
 		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
+		trigger.setRepeatInterval(100);
 		trigger.setRepeatCount(1);
 		trigger.afterPropertiesSet();
 
@@ -225,7 +225,7 @@ class QuartzSupportTests {
 		trigger.setName("myTrigger");
 		trigger.setJobDetail(jobDetail);
 		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
+		trigger.setRepeatInterval(100);
 		trigger.setRepeatCount(1);
 		trigger.afterPropertiesSet();
 
@@ -260,7 +260,7 @@ class QuartzSupportTests {
 		trigger.setName("myTrigger");
 		trigger.setJobDetail(jobDetail);
 		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
+		trigger.setRepeatInterval(100);
 		trigger.setRepeatCount(1);
 		trigger.afterPropertiesSet();
 
