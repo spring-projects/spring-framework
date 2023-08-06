@@ -329,21 +329,31 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return {@code true} if the bean can be registered as-is;
 	 * {@code false} if it should be skipped because there is an
 	 * existing, compatible bean definition for the specified name
-	 * @throws ConflictingBeanDefinitionException if an existing, incompatible
-	 * bean definition has been found for the specified name
+	 * @throws IllegalStateException if an existing, incompatible bean definition
+	 * has been found for the specified name
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}
+
 		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
 		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
 		if (originatingDef != null) {
 			existingDef = originatingDef;
 		}
+
+		// Explicitly registered overriding bean?
+		if (!(existingDef instanceof ScannedGenericBeanDefinition) &&
+				this.registry.isBeanDefinitionOverridable(beanName)) {
+			return false;
+		}
+
+		// Scanned same file or equivalent class twice?
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
+
 		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +
 				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
 				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
@@ -354,16 +364,15 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * the given existing bean definition.
 	 * <p>The default implementation considers them as compatible when the existing
 	 * bean definition comes from the same source or from a non-scanning source.
-	 * @param newDefinition the new bean definition, originated from scanning
-	 * @param existingDefinition the existing bean definition, potentially an
+	 * @param newDef the new bean definition, originated from scanning
+	 * @param existingDef the existing bean definition, potentially an
 	 * explicitly defined one or a previously generated one from scanning
 	 * @return whether the definitions are considered as compatible, with the
 	 * new definition to be skipped in favor of the existing definition
 	 */
-	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
-		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
-				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
+	protected boolean isCompatible(BeanDefinition newDef, BeanDefinition existingDef) {
+		return ((newDef.getSource() != null && newDef.getSource().equals(existingDef.getSource())) ||
+				newDef.equals(existingDef));
 	}
 
 

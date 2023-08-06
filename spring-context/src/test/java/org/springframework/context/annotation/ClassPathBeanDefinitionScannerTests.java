@@ -197,8 +197,22 @@ public class ClassPathBeanDefinitionScannerTests {
 		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
+
 		// should not fail!
 		scanner.scan(BASE_PACKAGE);
+	}
+
+	@Test
+	public void testSimpleScanWithDefaultFiltersAndOverridingBeanNotAllowed() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getDefaultListableBeanFactory().setAllowBeanDefinitionOverriding(false);
+		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(false);
+
+		assertThatIllegalStateException().isThrownBy(() -> scanner.scan(BASE_PACKAGE))
+				.withMessageContaining("stubFooDao")
+				.withMessageContaining(StubFooDao.class.getName());
 	}
 
 	@Test
@@ -207,6 +221,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
 		scanner.scan("org.springframework.context.annotation3");
+
 		assertThatIllegalStateException().isThrownBy(() -> scanner.scan(BASE_PACKAGE))
 				.withMessageContaining("stubFooDao")
 				.withMessageContaining(StubFooDao.class.getName());

@@ -1011,7 +1011,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
-			if (!isAllowBeanDefinitionOverriding()) {
+			if (!isBeanDefinitionOverridable(beanName)) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
@@ -1040,8 +1040,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		else {
 			if (isAlias(beanName)) {
-				if (!isAllowBeanDefinitionOverriding()) {
-					String aliasedName = canonicalName(beanName);
+				String aliasedName = canonicalName(beanName);
+				if (!isBeanDefinitionOverridable(aliasedName)) {
 					if (containsBeanDefinition(aliasedName)) {  // alias for existing bean definition
 						throw new BeanDefinitionOverrideException(
 								beanName, beanDefinition, getBeanDefinition(aliasedName));
@@ -1151,7 +1151,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
+	 * This implementation returns {@code true} if bean definition overriding
+	 * is generally allowed.
+	 * @see #setAllowBeanDefinitionOverriding
+	 */
+	@Override
+	public boolean isBeanDefinitionOverridable(String beanName) {
+		return isAllowBeanDefinitionOverriding();
+	}
+
+	/**
 	 * Only allows alias overriding if bean definition overriding is allowed.
+	 * @see #setAllowBeanDefinitionOverriding
 	 */
 	@Override
 	protected boolean allowAliasOverriding() {
@@ -1164,7 +1175,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	protected void checkForAliasCircle(String name, String alias) {
 		super.checkForAliasCircle(name, alias);
-		if (!isAllowBeanDefinitionOverriding() && containsBeanDefinition(alias)) {
+		if (!isBeanDefinitionOverridable(alias) && containsBeanDefinition(alias)) {
 			throw new IllegalStateException("Cannot register alias '" + alias +
 					"' for name '" + name + "': Alias would override bean definition '" + alias + "'");
 		}

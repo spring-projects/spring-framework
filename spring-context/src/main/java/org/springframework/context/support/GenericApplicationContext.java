@@ -361,6 +361,11 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
+	public boolean isBeanDefinitionOverridable(String beanName) {
+		return this.beanFactory.isBeanDefinitionOverridable(beanName);
+	}
+
+	@Override
 	public boolean isBeanNameInUse(String beanName) {
 		return this.beanFactory.isBeanNameInUse(beanName);
 	}

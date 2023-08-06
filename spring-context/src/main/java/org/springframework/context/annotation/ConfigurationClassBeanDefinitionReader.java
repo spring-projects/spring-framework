@@ -314,7 +314,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// At this point, it's a top-level override (probably XML), just having been parsed
 		// before configuration class processing kicks in...
-		if (this.registry instanceof DefaultListableBeanFactory dlbf && !dlbf.isAllowBeanDefinitionOverriding()) {
+		if (this.registry instanceof DefaultListableBeanFactory dlbf && !dlbf.isBeanDefinitionOverridable(beanName)) {
 			throw new BeanDefinitionStoreException(beanMethod.getConfigurationClass().getResource().getDescription(),
 					beanName, "@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}

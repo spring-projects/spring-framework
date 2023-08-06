@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,19 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	 * @return the number of beans defined in the registry
 	 */
 	int getBeanDefinitionCount();
+
+	/**
+	 * Determine whether the bean definition for the given name is overridable,
+	 * i.e. whether {@link #registerBeanDefinition} would successfully return
+	 * against an existing definition of the same name.
+	 * <p>The default implementation returns {@code true}.
+	 * @param beanName the name to check
+	 * @return whether the definition for the given bean name is overridable
+	 * @since 6.1
+	 */
+	default boolean isBeanDefinitionOverridable(String beanName) {
+		return true;
+	}
 
 	/**
 	 * Determine whether the given bean name is already in use within this registry,
