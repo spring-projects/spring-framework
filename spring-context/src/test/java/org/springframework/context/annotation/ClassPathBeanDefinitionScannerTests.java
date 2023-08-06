@@ -197,6 +197,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
+
 		// should not fail!
 		scanner.scan(BASE_PACKAGE);
 	}
@@ -207,6 +208,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
 		scanner.scan("org.springframework.context.annotation3");
+
 		assertThatIllegalStateException().isThrownBy(() -> scanner.scan(BASE_PACKAGE))
 				.withMessageContaining("stubFooDao")
 				.withMessageContaining(StubFooDao.class.getName());

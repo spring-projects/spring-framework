@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public final class ReactiveTypeDescriptor {
 	private final boolean noValue;
 
 	@Nullable
-	private final Supplier<?> emptyValueSupplier;
+	private final Supplier<?> emptySupplier;
 
 	private final boolean deferred;
 
@@ -55,7 +55,7 @@ public final class ReactiveTypeDescriptor {
 		this.reactiveType = reactiveType;
 		this.multiValue = multiValue;
 		this.noValue = noValue;
-		this.emptyValueSupplier = emptySupplier;
+		this.emptySupplier = emptySupplier;
 		this.deferred = deferred;
 	}
 
@@ -89,16 +89,16 @@ public final class ReactiveTypeDescriptor {
 	 * Return {@code true} if the reactive type can complete with no values.
 	 */
 	public boolean supportsEmpty() {
-		return (this.emptyValueSupplier != null);
+		return (this.emptySupplier != null);
 	}
 
 	/**
 	 * Return an empty-value instance for the underlying reactive or async type.
-	 * Use of this type implies {@link #supportsEmpty()} is {@code true}.
+	 * <p>Use of this type implies {@link #supportsEmpty()} is {@code true}.
 	 */
 	public Object getEmptyValue() {
-		Assert.state(this.emptyValueSupplier != null, "Empty values not supported");
-		return this.emptyValueSupplier.get();
+		Assert.state(this.emptySupplier != null, "Empty values not supported");
+		return this.emptySupplier.get();
 	}
 
 	/**
