@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Deferred;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import reactor.adapter.JdkFlowAdapter;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -110,6 +112,16 @@ class ReactiveAdapterRegistryTests {
 			Object target = getAdapter(Mono.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Mono.class);
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
+		}
+
+		@Test
+		void toFlowPublisher() {
+			List<Integer> sequence = Arrays.asList(1, 2, 3);
+			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
+			Object target = getAdapter(Flow.Publisher.class).fromPublisher(source);
+			assertThat(target).isInstanceOf(Flow.Publisher.class);
+			assertThat(JdkFlowAdapter.flowPublisherToFlux((Flow.Publisher<Integer>) target)
+					.collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test
