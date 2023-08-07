@@ -344,7 +344,7 @@ public class WebDataBinder extends DataBinder {
 			}
 			else if (fieldType.isArray()) {
 				// Special handling of array property.
-				return Array.newInstance(fieldType.getComponentType(), 0);
+				return Array.newInstance(fieldType.componentType(), 0);
 			}
 			else if (Collection.class.isAssignableFrom(fieldType)) {
 				return CollectionFactory.createCollection(fieldType, 0);

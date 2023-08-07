@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ final class AnnotationTypeMapping {
 	}
 
 	private boolean isCompatibleReturnType(Class<?> attributeType, Class<?> targetType) {
-		return (attributeType == targetType || attributeType == targetType.getComponentType());
+		return (attributeType == targetType || attributeType == targetType.componentType());
 	}
 
 	private void processAliases() {
@@ -399,9 +399,9 @@ final class AnnotationTypeMapping {
 			for (int i = 0; i < attributeMethods.size(); i++) {
 				Method method = attributeMethods.get(i);
 				Class<?> type = method.getReturnType();
-				if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
+				if (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation())) {
 					Class<? extends Annotation> annotationType =
-							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.getComponentType());
+							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.componentType());
 					AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
 					if (mapping.isSynthesizable()) {
 						return true;

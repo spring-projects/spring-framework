@@ -266,7 +266,7 @@ public abstract class AopProxyUtils {
 				if (varargArray instanceof Object[] && !varargType.isInstance(varargArray)) {
 					Object[] newArguments = new Object[arguments.length];
 					System.arraycopy(arguments, 0, newArguments, 0, varargIndex);
-					Class<?> targetElementType = varargType.getComponentType();
+					Class<?> targetElementType = varargType.componentType();
 					int varargLength = Array.getLength(varargArray);
 					Object newVarargArray = Array.newInstance(targetElementType, varargLength);
 					System.arraycopy(varargArray, 0, newVarargArray, 0, varargLength);

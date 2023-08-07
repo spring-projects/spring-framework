@@ -260,7 +260,7 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 
 		assertThat(newArray).hasSize(1);
 		Object firstParam = newArray[0];
-		assertThat(firstParam.getClass().getComponentType()).isEqualTo(String.class);
+		assertThat(firstParam.getClass().componentType()).isEqualTo(String.class);
 		Object[] firstParamArray = (Object[]) firstParam;
 		assertThat(firstParamArray).containsExactly("a", "b", "c");
 	}

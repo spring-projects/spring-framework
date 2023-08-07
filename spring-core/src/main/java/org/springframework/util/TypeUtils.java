@@ -75,7 +75,7 @@ public abstract class TypeUtils {
 			else if (lhsClass.isArray() && rhsType instanceof GenericArrayType rhsGenericArrayType) {
 				Type rhsComponent = rhsGenericArrayType.getGenericComponentType();
 
-				return isAssignable(lhsClass.getComponentType(), rhsComponent);
+				return isAssignable(lhsClass.componentType(), rhsComponent);
 			}
 		}
 
@@ -97,7 +97,7 @@ public abstract class TypeUtils {
 			Type lhsComponent = lhsGenericArrayType.getGenericComponentType();
 
 			if (rhsType instanceof Class<?> rhsClass && rhsClass.isArray()) {
-				return isAssignable(lhsComponent, rhsClass.getComponentType());
+				return isAssignable(lhsComponent, rhsClass.componentType());
 			}
 			else if (rhsType instanceof GenericArrayType rhsGenericArrayType) {
 				Type rhsComponent = rhsGenericArrayType.getGenericComponentType();

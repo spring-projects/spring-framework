@@ -654,7 +654,7 @@ public abstract class BeanUtils {
 	 */
 	public static boolean isSimpleProperty(Class<?> type) {
 		Assert.notNull(type, "'type' must not be null");
-		return isSimpleValueType(type) || (type.isArray() && isSimpleValueType(type.getComponentType()));
+		return isSimpleValueType(type) || (type.isArray() && isSimpleValueType(type.componentType()));
 	}
 
 	/**

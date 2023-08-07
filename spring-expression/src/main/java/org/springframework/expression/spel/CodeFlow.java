@@ -450,7 +450,7 @@ public class CodeFlow implements Opcodes {
 		if (clazz.isArray()) {
 			while (clazz.isArray()) {
 				sb.append('[');
-				clazz = clazz.getComponentType();
+				clazz = clazz.componentType();
 			}
 		}
 		if (clazz.isPrimitive()) {

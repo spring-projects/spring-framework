@@ -373,7 +373,7 @@ public abstract class ReflectionHelper {
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
-			final Class<?> varArgClass = methodHandleArgumentTypes.lastParameterType().getComponentType();
+			final Class<?> varArgClass = methodHandleArgumentTypes.lastParameterType().componentType();
 			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
 			TypeDescriptor varArgContentType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
 
@@ -431,11 +431,11 @@ public abstract class ReflectionHelper {
 		}
 		Class<?> type = possibleArray.getClass();
 		if (!type.isArray() || Array.getLength(possibleArray) == 0 ||
-				!ClassUtils.isAssignableValue(type.getComponentType(), value)) {
+				!ClassUtils.isAssignableValue(type.componentType(), value)) {
 			return false;
 		}
 		Object arrayValue = Array.get(possibleArray, 0);
-		return (type.getComponentType().isPrimitive() ? arrayValue.equals(value) : arrayValue == value);
+		return (type.componentType().isPrimitive() ? arrayValue.equals(value) : arrayValue == value);
 	}
 
 	/**
@@ -468,7 +468,7 @@ public abstract class ReflectionHelper {
 			if (argumentCount >= parameterCount) {
 				varargsArraySize = argumentCount - (parameterCount - 1);
 			}
-			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
+			Class<?> componentType = requiredParameterTypes[parameterCount - 1].componentType();
 			Object varargsArray = Array.newInstance(componentType, varargsArraySize);
 			for (int i = 0; i < varargsArraySize; i++) {
 				Array.set(varargsArray, i, args[parameterCount - 1 + i]);

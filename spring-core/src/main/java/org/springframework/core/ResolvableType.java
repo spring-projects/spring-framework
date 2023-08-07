@@ -396,7 +396,7 @@ public class ResolvableType implements Serializable {
 			return this.componentType;
 		}
 		if (this.type instanceof Class<?> clazz) {
-			Class<?> componentType = clazz.getComponentType();
+			Class<?> componentType = clazz.componentType();
 			return forType(componentType, this.variableResolver);
 		}
 		if (this.type instanceof GenericArrayType genericArrayType) {

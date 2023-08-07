@@ -174,7 +174,7 @@ public abstract class RepeatableContainers {
 			if (method != null) {
 				Class<?> returnType = method.getReturnType();
 				if (returnType.isArray()) {
-					Class<?> componentType = returnType.getComponentType();
+					Class<?> componentType = returnType.componentType();
 					if (Annotation.class.isAssignableFrom(componentType) &&
 							componentType.isAnnotationPresent(Repeatable.class)) {
 						return method;
@@ -211,7 +211,7 @@ public abstract class RepeatableContainers {
 					throw new NoSuchMethodException("No value method found");
 				}
 				Class<?> returnType = valueMethod.getReturnType();
-				if (!returnType.isArray() || returnType.getComponentType() != repeatable) {
+				if (!returnType.isArray() || returnType.componentType() != repeatable) {
 					throw new AnnotationConfigurationException(
 							"Container type [%s] must declare a 'value' attribute for an array of type [%s]"
 								.formatted(container.getName(), repeatable.getName()));

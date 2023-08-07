@@ -145,7 +145,7 @@ class BeanUtilsTests {
 		for (PropertyDescriptor descriptor : descriptors) {
 			if ("containedBeans".equals(descriptor.getName())) {
 				assertThat(descriptor.getPropertyType().isArray()).as("Property should be an array").isTrue();
-				assertThat(ContainedBean.class).isEqualTo(descriptor.getPropertyType().getComponentType());
+				assertThat(ContainedBean.class).isEqualTo(descriptor.getPropertyType().componentType());
 			}
 		}
 	}

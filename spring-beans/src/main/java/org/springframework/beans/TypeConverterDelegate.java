@@ -172,10 +172,10 @@ class TypeConverterDelegate {
 				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
 					if (convertedValue instanceof String text &&
-							Enum.class.isAssignableFrom(requiredType.getComponentType())) {
+							Enum.class.isAssignableFrom(requiredType.componentType())) {
 						convertedValue = StringUtils.commaDelimitedListToStringArray(text);
 					}
-					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
+					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.componentType());
 				}
 				else if (convertedValue.getClass().isArray()) {
 					if (Array.getLength(convertedValue) == 1) {
@@ -453,7 +453,7 @@ class TypeConverterDelegate {
 		}
 		else if (input.getClass().isArray()) {
 			// Convert array elements, if necessary.
-			if (componentType.equals(input.getClass().getComponentType()) &&
+			if (componentType.equals(input.getClass().componentType()) &&
 					!this.propertyEditorRegistry.hasCustomEditorForElement(componentType, propertyName)) {
 				return input;
 			}

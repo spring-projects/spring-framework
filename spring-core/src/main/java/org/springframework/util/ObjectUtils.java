@@ -244,7 +244,7 @@ public abstract class ObjectUtils {
 			}
 		}
 		throw new IllegalArgumentException("Constant [" + constant + "] does not exist in enum type " +
-				enumValues.getClass().getComponentType().getName());
+				enumValues.getClass().componentType().getName());
 	}
 
 	/**
@@ -270,7 +270,7 @@ public abstract class ObjectUtils {
 	public static <A, O extends A> A[] addObjectToArray(@Nullable A[] array, @Nullable O obj, int position) {
 		Class<?> componentType = Object.class;
 		if (array != null) {
-			componentType = array.getClass().getComponentType();
+			componentType = array.getClass().componentType();
 		}
 		else if (obj != null) {
 			componentType = obj.getClass();

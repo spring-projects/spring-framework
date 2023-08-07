@@ -516,7 +516,7 @@ public abstract class ClassUtils {
 	 */
 	public static boolean isPrimitiveArray(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
+		return (clazz.isArray() && clazz.componentType().isPrimitive());
 	}
 
 	/**
@@ -527,7 +527,7 @@ public abstract class ClassUtils {
 	 */
 	public static boolean isPrimitiveWrapperArray(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+		return (clazz.isArray() && isPrimitiveWrapper(clazz.componentType()));
 	}
 
 	/**

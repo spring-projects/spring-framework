@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,14 +178,14 @@ public class DefaultValueStyler implements ValueStyler {
 	 */
 	protected String styleArray(Object[] array) {
 		if (array.length == 0) {
-			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + EMPTY;
+			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().componentType()) + '>' + EMPTY;
 		}
 
 		StringJoiner result = new StringJoiner(", ", "[", "]");
 		for (Object element : array) {
 			result.add(style(element));
 		}
-		return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + result;
+		return ARRAY + '<' + ClassUtils.getShortName(array.getClass().componentType()) + '>' + result;
 	}
 
 	/**

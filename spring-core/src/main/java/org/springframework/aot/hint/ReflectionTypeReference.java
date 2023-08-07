@@ -37,7 +37,7 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 
 	@Nullable
 	private static TypeReference getEnclosingClass(Class<?> type) {
-		Class<?> candidate = (type.isArray() ? type.getComponentType().getEnclosingClass() :
+		Class<?> candidate = (type.isArray() ? type.componentType().getEnclosingClass() :
 				type.getEnclosingClass());
 		return (candidate != null ? new ReflectionTypeReference(candidate) : null);
 	}
@@ -56,7 +56,7 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 	@Override
 	protected boolean isPrimitive() {
 		return this.type.isPrimitive() ||
-				(this.type.isArray() && this.type.getComponentType().isPrimitive());
+				(this.type.isArray() && this.type.componentType().isPrimitive());
 	}
 
 }

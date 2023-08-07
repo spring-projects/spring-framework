@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,7 +228,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 		int attributeIndex = getAttributeIndex(attributeName, true);
 		Method attribute = this.mapping.getAttributes().get(attributeIndex);
-		Class<?> componentType = attribute.getReturnType().getComponentType();
+		Class<?> componentType = attribute.getReturnType().componentType();
 		Assert.notNull(type, "Type must not be null");
 		Assert.notNull(componentType, () -> "Attribute " + attributeName + " is not an array");
 		Assert.isAssignable(type, componentType, () -> "Attribute " + attributeName + " component type mismatch:");
@@ -286,7 +286,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private Class<?> getTypeForMapOptions(Method attribute, Adapt[] adaptations) {
 		Class<?> attributeType = attribute.getReturnType();
-		Class<?> componentType = (attributeType.isArray() ? attributeType.getComponentType() : attributeType);
+		Class<?> componentType = (attributeType.isArray() ? attributeType.componentType() : attributeType);
 		if (Adapt.CLASS_TO_STRING.isIn(adaptations) && componentType == Class.class) {
 			return (attributeType.isArray() ? String[].class : String.class);
 		}
@@ -309,7 +309,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 				return result;
 			}
 			Object result = Array.newInstance(
-					attribute.getReturnType().getComponentType(), annotations.length);
+					attribute.getReturnType().componentType(), annotations.length);
 			for (int i = 0; i < annotations.length; i++) {
 				Array.set(result, i, annotations[i].synthesize());
 			}
@@ -470,8 +470,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			value = annotation.synthesize();
 		}
 		else if (value instanceof MergedAnnotation<?>[] annotations &&
-				type.isArray() && type.getComponentType().isAnnotation()) {
-			Object array = Array.newInstance(type.getComponentType(), annotations.length);
+				type.isArray() && type.componentType().isAnnotation()) {
+			Object array = Array.newInstance(type.componentType(), annotations.length);
 			for (int i = 0; i < annotations.length; i++) {
 				Array.set(array, i, annotations[i].synthesize());
 			}
@@ -495,11 +495,11 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (attributeType.isAnnotation()) {
 			return adaptToMergedAnnotation(value, (Class<? extends Annotation>) attributeType);
 		}
-		if (attributeType.isArray() && attributeType.getComponentType().isAnnotation()) {
+		if (attributeType.isArray() && attributeType.componentType().isAnnotation()) {
 			MergedAnnotation<?>[] result = new MergedAnnotation<?>[Array.getLength(value)];
 			for (int i = 0; i < result.length; i++) {
 				result[i] = adaptToMergedAnnotation(Array.get(value, i),
-						(Class<? extends Annotation>) attributeType.getComponentType());
+						(Class<? extends Annotation>) attributeType.componentType());
 			}
 			return result;
 		}
@@ -510,7 +510,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			return value;
 		}
 		if (attributeType.isArray() && isEmptyObjectArray(value)) {
-			return emptyArray(attributeType.getComponentType());
+			return emptyArray(attributeType.componentType());
 		}
 		if (!attributeType.isInstance(value)) {
 			throw new IllegalStateException("Attribute '" + attribute.getName() +
@@ -561,7 +561,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (attributeType.isAnnotation()) {
 			return (Class<T>) MergedAnnotation.class;
 		}
-		if (attributeType.isArray() && attributeType.getComponentType().isAnnotation()) {
+		if (attributeType.isArray() && attributeType.componentType().isAnnotation()) {
 			return (Class<T>) MergedAnnotation[].class;
 		}
 		return (Class<T>) ClassUtils.resolvePrimitiveIfNecessary(attributeType);

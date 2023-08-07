@@ -917,7 +917,7 @@ class ConstructorResolver {
 				// Single constructor or factory method -> let's return an empty array/collection
 				// for e.g. a vararg or a non-null List/Set/Map parameter.
 				if (paramType.isArray()) {
-					return Array.newInstance(paramType.getComponentType(), 0);
+					return Array.newInstance(paramType.componentType(), 0);
 				}
 				else if (CollectionFactory.isApproximableCollectionType(paramType)) {
 					return CollectionFactory.createCollection(paramType, 0);

@@ -614,7 +614,7 @@ public final class Type {
     Class<?> currentClass = clazz;
     while (currentClass.isArray()) {
       stringBuilder.append('[');
-      currentClass = currentClass.getComponentType();
+      currentClass = currentClass.componentType();
     }
     if (currentClass.isPrimitive()) {
       char descriptor;

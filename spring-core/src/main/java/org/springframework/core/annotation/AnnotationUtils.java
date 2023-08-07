@@ -1011,7 +1011,7 @@ public abstract class AnnotationUtils {
 		}
 		if (value instanceof Annotation[] annotations) {
 			Annotation[] synthesized = (Annotation[]) Array.newInstance(
-					annotations.getClass().getComponentType(), annotations.length);
+					annotations.getClass().componentType(), annotations.length);
 			for (int i = 0; i < annotations.length; i++) {
 				synthesized[i] = MergedAnnotation.from(annotatedElement, annotations[i]).synthesize();
 			}
@@ -1292,7 +1292,7 @@ public abstract class AnnotationUtils {
 			return annotations;
 		}
 		Annotation[] synthesized = (Annotation[]) Array.newInstance(
-				annotations.getClass().getComponentType(), annotations.length);
+				annotations.getClass().componentType(), annotations.length);
 		for (int i = 0; i < annotations.length; i++) {
 			synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
 		}
