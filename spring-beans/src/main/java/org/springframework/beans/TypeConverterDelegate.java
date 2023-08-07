@@ -149,7 +149,7 @@ class TypeConverterDelegate {
 							convertedValue = StringUtils.commaDelimitedListToStringArray(text);
 						}
 						if (editor == null && String.class != elementType) {
-							editor = findDefaultEditor(Array.newInstance(elementType, 0).getClass());
+							editor = findDefaultEditor(elementType.arrayType());
 						}
 					}
 				}

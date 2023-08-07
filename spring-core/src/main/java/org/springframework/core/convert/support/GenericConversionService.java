@@ -16,7 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
@@ -584,7 +583,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 				List<Class<?>> hierarchy, Set<Class<?>> visited) {
 
 			if (asArray) {
-				type = Array.newInstance(type, 0).getClass();
+				type = type.arrayType();
 			}
 			if (visited.add(type)) {
 				hierarchy.add(index, type);

@@ -17,7 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -164,8 +163,7 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 	@SuppressWarnings("unchecked")
 	public <E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type) {
 		Assert.notNull(type, "Type must not be null");
-		Class<?> arrayType = Array.newInstance(type, 0).getClass();
-		return (E[]) getRequiredAttributeValue(attributeName, arrayType);
+		return (E[]) getRequiredAttributeValue(attributeName, type.arrayType());
 	}
 
 	@Override

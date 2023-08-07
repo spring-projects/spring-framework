@@ -327,8 +327,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	@SuppressWarnings("unchecked")
 	public <A extends Annotation> A[] getAnnotationArray(String attributeName, Class<A> annotationType) {
-		Object array = Array.newInstance(annotationType, 0);
-		return (A[]) getRequiredAttribute(attributeName, array.getClass());
+		return (A[]) getRequiredAttribute(attributeName, annotationType.arrayType());
 	}
 
 	/**
