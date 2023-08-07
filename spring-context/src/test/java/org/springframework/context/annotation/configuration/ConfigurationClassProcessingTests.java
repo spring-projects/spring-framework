@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,12 @@ class ConfigurationClassProcessingTests {
 	void finalBeanMethod() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
 				initBeanFactory(ConfigWithFinalBean.class));
+	}
+
+	@Test  // gh-31007
+	void voidBeanMethod() {
+		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
+				initBeanFactory(ConfigWithVoidBean.class));
 	}
 
 	@Test
@@ -428,6 +434,14 @@ class ConfigurationClassProcessingTests {
 
 		public final @Bean TestBean testBean() {
 			return new TestBean();
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithVoidBean {
+
+		public @Bean void testBean() {
 		}
 	}
 
