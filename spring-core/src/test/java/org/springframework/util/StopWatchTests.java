@@ -47,7 +47,7 @@ class StopWatchTests {
 
 	@Test
 	void failureToStartBeforeGettingTimings() {
-		assertThatIllegalStateException().isThrownBy(stopWatch::getLastTaskInfo);
+		assertThatIllegalStateException().isThrownBy(stopWatch::lastTaskInfo);
 	}
 
 	@Test

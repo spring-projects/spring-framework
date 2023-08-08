@@ -60,9 +60,8 @@ public class StopWatch {
 	 */
 	private final String id;
 
-	private boolean keepTaskList = true;
-
-	private final List<TaskInfo> taskList = new ArrayList<>(1);
+	@Nullable
+	private List<TaskInfo> taskList = new ArrayList<>(1);
 
 	/** Start time of the current task. */
 	private long startTimeNanos;
@@ -117,7 +116,7 @@ public class StopWatch {
 	 * <p>Default is {@code true}.
 	 */
 	public void setKeepTaskList(boolean keepTaskList) {
-		this.keepTaskList = keepTaskList;
+		this.taskList = (keepTaskList ? new ArrayList<>() : null);
 	}
 
 
@@ -162,7 +161,7 @@ public class StopWatch {
 		long lastTime = System.nanoTime() - this.startTimeNanos;
 		this.totalTimeNanos += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
-		if (this.keepTaskList) {
+		if (this.taskList != null) {
 			this.taskList.add(this.lastTaskInfo);
 		}
 		++this.taskCount;
@@ -188,49 +187,61 @@ public class StopWatch {
 	}
 
 	/**
+	 * Get the last task as a {@link TaskInfo} object.
+	 * @throws IllegalStateException if no tasks have run yet
+	 * @since 6.1
+	 */
+	public TaskInfo lastTaskInfo() throws IllegalStateException {
+		Assert.state(this.lastTaskInfo != null, "No tasks run");
+		return this.lastTaskInfo;
+	}
+
+	/**
+	 * Get the last task as a {@link TaskInfo} object.
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
+	 */
+	@Deprecated(since = "6.1")
+	public TaskInfo getLastTaskInfo() throws IllegalStateException {
+		return lastTaskInfo();
+	}
+
+	/**
 	 * Get the name of the last task.
 	 * @see TaskInfo#getTaskName()
-	 * @deprecated as of 6.1, in favor of {@link #getLastTaskInfo()}
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
 	 */
 	@Deprecated(since = "6.1")
 	public String getLastTaskName() throws IllegalStateException {
-		return getLastTaskInfo().getTaskName();
+		return lastTaskInfo().getTaskName();
 	}
 
 	/**
 	 * Get the time taken by the last task in nanoseconds.
 	 * @since 5.2
 	 * @see TaskInfo#getTimeNanos()
-	 * @deprecated as of 6.1, in favor of {@link #getLastTaskInfo()}
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
 	 */
 	@Deprecated(since = "6.1")
 	public long getLastTaskTimeNanos() throws IllegalStateException {
-		return getLastTaskInfo().getTimeNanos();
+		return lastTaskInfo().getTimeNanos();
 	}
 
 	/**
 	 * Get the time taken by the last task in milliseconds.
 	 * @see TaskInfo#getTimeMillis()
-	 * @deprecated as of 6.1, in favor of {@link #getLastTaskInfo()}
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
 	 */
 	@Deprecated(since = "6.1")
 	public long getLastTaskTimeMillis() throws IllegalStateException {
-		return getLastTaskInfo().getTimeMillis();
-	}
-
-	/**
-	 * Get the last task as a {@link TaskInfo} object.
-	 */
-	public TaskInfo getLastTaskInfo() throws IllegalStateException {
-		Assert.state(this.lastTaskInfo != null, "No tasks run");
-		return this.lastTaskInfo;
+		return lastTaskInfo().getTimeMillis();
 	}
 
 	/**
 	 * Get an array of the data for tasks performed.
+	 * @see #setKeepTaskList
 	 */
 	public TaskInfo[] getTaskInfo() {
-		if (!this.keepTaskList) {
+		if (this.taskList == null) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
 		return this.taskList.toArray(new TaskInfo[0]);
@@ -321,10 +332,7 @@ public class StopWatch {
 		int width = Math.max(sb.length(), 40);
 		sb.append("\n");
 
-		if (!this.keepTaskList) {
-			sb.append("No task info kept");
-		}
-		else {
+		if (this.taskList != null) {
 			String line = "-".repeat(width) + "\n";
 			String unitName = timeUnit.name();
 			unitName = unitName.charAt(0) + unitName.substring(1).toLowerCase(Locale.ENGLISH);
@@ -332,6 +340,7 @@ public class StopWatch {
 			sb.append(line);
 			sb.append(unitName).append("  %       Task name\n");
 			sb.append(line);
+
 			int digits = total.indexOf('.');
 			if (digits < 0) {
 				digits = total.length();
@@ -339,13 +348,16 @@ public class StopWatch {
 			nf.setMinimumIntegerDigits(digits);
 			nf.setMaximumFractionDigits(10 - digits);
 
-			for (TaskInfo task : getTaskInfo()) {
+			for (TaskInfo task : this.taskList) {
 				sb.append(String.format("%-14s", (timeUnit == TimeUnit.NANOSECONDS ?
 						nf.format(task.getTimeNanos()) : nf.format(task.getTime(timeUnit)))));
 				sb.append(String.format("%-8s",
 						pf.format(task.getTimeSeconds() / getTotalTimeSeconds())));
 				sb.append(task.getTaskName()).append('\n');
 			}
+		}
+		else {
+			sb.append("No task info kept");
 		}
 
 		return sb.toString();
@@ -368,8 +380,8 @@ public class StopWatch {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(shortSummary());
-		if (this.keepTaskList) {
-			for (TaskInfo task : getTaskInfo()) {
+		if (this.taskList != null) {
+			for (TaskInfo task : this.taskList) {
 				sb.append("; [").append(task.getTaskName()).append("] took ").append(task.getTimeSeconds()).append(" seconds");
 				long percent = Math.round(100.0 * task.getTimeSeconds() / getTotalTimeSeconds());
 				sb.append(" = ").append(percent).append('%');
