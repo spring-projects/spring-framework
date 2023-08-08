@@ -176,7 +176,7 @@ Kotlin::
 		@AfterReturning(
 			pointcut = "execution(* com.xyz.dao.*.*(..))",
 			returning = "retVal")
-		fun doAccessCheck(retVal: Any) {
+		fun doAccessCheck(retVal: Any?) {
 			// ...
 		}
 	}
@@ -448,7 +448,7 @@ Kotlin::
 	class AroundExample {
 
 		@Around("execution(* com.xyz..service.*.*(..))")
-		fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
+		fun doBasicProfiling(pjp: ProceedingJoinPoint): Any? {
 			// start stopwatch
 			val retVal = pjp.proceed()
 			// stop stopwatch
@@ -893,7 +893,7 @@ Kotlin::
 			"com.xyz.CommonPointcuts.inDataAccessLayer() && " +
 			"args(accountHolderNamePattern)") // <1>
 	fun preProcessQueryPattern(pjp: ProceedingJoinPoint,
-							accountHolderNamePattern: String): Any {
+							accountHolderNamePattern: String): Any? {
 		val newPattern = preProcess(accountHolderNamePattern)
 		return pjp.proceed(arrayOf<Any>(newPattern))
 	}

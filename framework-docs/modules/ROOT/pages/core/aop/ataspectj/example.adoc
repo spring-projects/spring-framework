@@ -85,7 +85,7 @@ Kotlin::
 		}
 
 		@Around("com.xyz.CommonPointcuts.businessService()") // <1>
-		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
+		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any? {
 			var numAttempts = 0
 			var lockFailureException: PessimisticLockingFailureException
 			do {
@@ -173,7 +173,7 @@ Kotlin::
 ----
 	@Around("execution(* com.xyz..service.*.*(..)) && " +
 			"@annotation(com.xyz.service.Idempotent)")
-	fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
+	fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any? {
 		// ...
 	}
 ----
