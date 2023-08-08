@@ -245,8 +245,10 @@ public abstract class TestPropertySourceUtils {
 	 * descriptors and registering property sources
 	 * @since 6.1
 	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#encoding
 	 * @see TestPropertySource#factory
 	 * @see PropertySourceFactory
+	 * @see #addPropertySourcesToEnvironment(ConfigurableEnvironment, ResourceLoader, List)
 	 */
 	public static void addPropertySourcesToEnvironment(ConfigurableApplicationContext context,
 			List<PropertySourceDescriptor> descriptors) {
@@ -276,10 +278,11 @@ public abstract class TestPropertySourceUtils {
 	 * descriptors and registering property sources
 	 * @since 6.1
 	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#encoding
 	 * @see TestPropertySource#factory
 	 * @see PropertySourceFactory
 	 */
-	private static void addPropertySourcesToEnvironment(ConfigurableEnvironment environment,
+	public static void addPropertySourcesToEnvironment(ConfigurableEnvironment environment,
 			ResourceLoader resourceLoader, List<PropertySourceDescriptor> descriptors) {
 
 		Assert.notNull(environment, "'environment' must not be null");
