@@ -86,7 +86,6 @@ public class ReactiveAdapterRegistry {
 	 * Create a registry and auto-register default adapters.
 	 * @see #getSharedInstance()
 	 */
-	@SuppressWarnings("unchecked")
 	public ReactiveAdapterRegistry() {
 		// Defensive guard for the Reactive Streams API itself
 		if (!reactiveStreamsPresent) {
@@ -115,10 +114,7 @@ public class ReactiveAdapterRegistry {
 
 		// Simple Flow.Publisher bridge if Reactor is not present
 		if (!reactorPresent) {
-			this.adapters.add(new ReactiveAdapter(
-					ReactiveTypeDescriptor.multiValue(Flow.Publisher.class, () -> PublisherToRS.EMPTY_FLOW),
-					source -> new PublisherToRS<>((Flow.Publisher<Object>) source),
-					source -> new PublisherToFlow<>((Publisher<Object>) source)));
+			new FlowBridgeRegistrar().registerAdapter(this);
 		}
 	}
 
@@ -371,6 +367,18 @@ public class ReactiveAdapterRegistry {
 						multi -> (io.smallrye.mutiny.Multi<?>) multi,
 						publisher -> io.smallrye.mutiny.Multi.createFrom().publisher(publisher));
 			}
+		}
+	}
+
+
+	private static class FlowBridgeRegistrar {
+
+		@SuppressWarnings("unchecked")
+		void registerAdapter(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(Flow.Publisher.class, () -> PublisherToRS.EMPTY_FLOW),
+					source -> new PublisherToRS<>((Flow.Publisher<Object>) source),
+					source -> new PublisherToFlow<>((Publisher<Object>) source));
 		}
 	}
 
