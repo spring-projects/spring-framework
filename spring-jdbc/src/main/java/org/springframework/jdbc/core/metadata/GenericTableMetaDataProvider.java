@@ -20,11 +20,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -321,6 +317,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				tmd.setCatalogName(tables.getString("TABLE_CAT"));
 				tmd.setSchemaName(tables.getString("TABLE_SCHEM"));
 				tmd.setTableName(tables.getString("TABLE_NAME"));
+				if(!Objects.equals(tmd.catalogName, tables.getString("TABLE_CAT"))){
+					continue;
+				}
 				if (tmd.getSchemaName() == null) {
 					tableMeta.put(this.userName != null ? this.userName.toUpperCase() : "", tmd);
 				}
