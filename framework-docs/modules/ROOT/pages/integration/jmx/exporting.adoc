@@ -183,18 +183,21 @@ as the following example shows:
 
 If you configure a bean with an `MBeanExporter` that is also configured for lazy
 initialization, the `MBeanExporter` does not break this contract and avoids
-instantiating the bean. Instead, it registers a proxy with the `MBeanServer` and
-defers obtaining the bean from the container until the first invocation on the proxy
-occurs.
+instantiating the bean. Instead, it registers a proxy with the `MBeanServer` and defers
+obtaining the bean from the container until the first invocation on the proxy occurs.
+
+This also affects `FactoryBean` resolution where `MBeanExporter` will regularly
+introspect the produced object, effectively triggering `FactoryBean.getObject()`.
+In order to avoid this, mark the corresponding bean definition as lazy-init.
 
 
 [[jmx-exporting-auto]]
 == Automatic Registration of MBeans
 
-Any beans that are exported through the `MBeanExporter` and are already valid MBeans are
-registered as-is with the `MBeanServer` without further intervention from Spring. You can cause MBeans
-to be automatically detected by the `MBeanExporter` by setting the `autodetect`
-property to `true`, as the following example shows:
+Any beans that are exported through the `MBeanExporter` and are already valid MBeans
+are registered as-is with the `MBeanServer` without further intervention from Spring.
+You can cause MBeans to be automatically detected by the `MBeanExporter` by setting
+the `autodetect` property to `true`, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
