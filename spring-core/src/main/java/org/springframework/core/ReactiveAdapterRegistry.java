@@ -102,13 +102,6 @@ public class ReactiveAdapterRegistry {
 
 
 	/**
-	 * Whether the registry has any adapters.
-	 */
-	public boolean hasAdapters() {
-		return !this.adapters.isEmpty();
-	}
-
-	/**
 	 * Register a reactive type along with functions to adapt to and from a
 	 * Reactive Streams {@link Publisher}. The function arguments assume that
 	 * their input is neither {@code null} nor {@link Optional}.
@@ -122,6 +115,13 @@ public class ReactiveAdapterRegistry {
 		else {
 			this.adapters.add(new ReactiveAdapter(descriptor, toAdapter, fromAdapter));
 		}
+	}
+
+	/**
+	 * Return whether the registry has any adapters.
+	 */
+	public boolean hasAdapters() {
+		return !this.adapters.isEmpty();
 	}
 
 	/**

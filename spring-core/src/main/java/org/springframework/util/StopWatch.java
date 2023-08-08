@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,8 @@ public class StopWatch {
 	}
 
 	/**
-	 * Construct a new {@code StopWatch} with the given ID.
-	 * <p>The ID is handy when we have output from multiple stop watches and need
+	 * Construct a new {@code StopWatch} with the given id.
+	 * <p>The id is handy when we have output from multiple stop watches and need
 	 * to distinguish between them.
 	 * <p>Does not start any task.
 	 * @param id identifier for this stop watch
@@ -94,8 +94,8 @@ public class StopWatch {
 
 
 	/**
-	 * Get the ID of this {@code StopWatch}, as specified on construction.
-	 * @return the ID (empty String by default)
+	 * Get the id of this {@code StopWatch}, as specified on construction.
+	 * @return the id (empty String by default)
 	 * @since 4.2.2
 	 * @see #StopWatch(String)
 	 */
@@ -105,9 +105,8 @@ public class StopWatch {
 
 	/**
 	 * Configure whether the {@link TaskInfo} array is built over time.
-	 * <p>Set this to {@code false} when using a {@code StopWatch} for millions
-	 * of intervals; otherwise, the {@code TaskInfo} structure will consume
-	 * excessive memory.
+	 * <p>Set this to {@code false} when using a {@code StopWatch} for millions of
+	 * tasks; otherwise, the {@code TaskInfo} structure will consume excessive memory.
 	 * <p>Default is {@code true}.
 	 */
 	public void setKeepTaskList(boolean keepTaskList) {
@@ -226,7 +225,7 @@ public class StopWatch {
 
 
 	/**
-	 * Get the total time in nanoseconds for all tasks.
+	 * Get the total time for all tasks in nanoseconds.
 	 * @since 5.2
 	 * @see #getTotalTimeMillis()
 	 * @see #getTotalTimeSeconds()
@@ -236,7 +235,7 @@ public class StopWatch {
 	}
 
 	/**
-	 * Get the total time in milliseconds for all tasks.
+	 * Get the total time for all tasks in milliseconds.
 	 * @see #getTotalTimeNanos()
 	 * @see #getTotalTimeSeconds()
 	 */
@@ -245,7 +244,7 @@ public class StopWatch {
 	}
 
 	/**
-	 * Get the total time in seconds for all tasks.
+	 * Get the total time for all tasks in seconds.
 	 * @see #getTotalTimeNanos()
 	 * @see #getTotalTimeMillis()
 	 */
@@ -361,7 +360,7 @@ public class StopWatch {
 		}
 
 		/**
-		 * Get the time in nanoseconds this task took.
+		 * Get the time this task took in nanoseconds.
 		 * @since 5.2
 		 * @see #getTimeMillis()
 		 * @see #getTimeSeconds()
@@ -371,7 +370,7 @@ public class StopWatch {
 		}
 
 		/**
-		 * Get the time in milliseconds this task took.
+		 * Get the time this task took in milliseconds.
 		 * @see #getTimeNanos()
 		 * @see #getTimeSeconds()
 		 */
@@ -380,14 +379,13 @@ public class StopWatch {
 		}
 
 		/**
-		 * Get the time in seconds this task took.
+		 * Get the time this task took in seconds.
 		 * @see #getTimeMillis()
 		 * @see #getTimeNanos()
 		 */
 		public double getTimeSeconds() {
 			return nanosToSeconds(this.timeNanos);
 		}
-
 	}
 
 }
