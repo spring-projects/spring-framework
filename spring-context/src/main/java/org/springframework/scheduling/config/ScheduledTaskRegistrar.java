@@ -553,7 +553,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	@Override
 	public void destroy() {
 		for (ScheduledTask task : this.scheduledTasks) {
-			task.cancel();
+			task.cancel(false);
 		}
 		if (this.localExecutor != null) {
 			this.localExecutor.shutdownNow();
