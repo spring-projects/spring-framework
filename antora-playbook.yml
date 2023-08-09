@@ -2,6 +2,7 @@ antora:
   extensions:
   - '@springio/antora-extensions/partial-build-extension'
   - require: '@springio/antora-extensions/latest-version-extension'
+  - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
   - '@antora/collector-extension'
   - '@antora/atlas-extension'
   - '@opendevise/antora-release-line-extension'
