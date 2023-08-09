@@ -8,7 +8,7 @@ antora:
     root_component_name: 'framework'
 site:
   title: Spring Framework
-  url: https://docs.spring.io/spring-security/reference
+  url: https://docs.spring.io/spring-framework/reference
   robots: allow
 git:
   ensure_git_suffix: false
