@@ -1,5 +1,6 @@
 antora:
   extensions:
+  - '@springio/antora-extensions/partial-build-extension'
   - require: '@springio/antora-extensions/latest-version-extension'
   - '@antora/collector-extension'
   - '@antora/atlas-extension'
