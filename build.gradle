@@ -5,7 +5,7 @@ plugins {
 
 antora {
     version = '3.2.0-alpha.2'
-	options = ['--clean', '--fetch', '--stacktrace']
+	options = [clean: true, fetch: true, stacktrace: true]
 	environment = [
 		'ALGOLIA_API_KEY': '042f6aaab6ce998d2ea29e60167e1660',
 		'ALGOLIA_APP_ID': 'WB1FQYI187',
