@@ -90,6 +90,45 @@ class BeanUtilsKotlinTests {
 		BeanUtils.instantiateClass(PrivateClass::class.java.getDeclaredConstructor())
 	}
 
+	@Test
+	fun `Instantiate value class`() {
+		val constructor = BeanUtils.findPrimaryConstructor(ValueClass::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = "Hello value class!"
+		val instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(ValueClass(value))
+	}
+
+	@Test
+	fun `Instantiate value class with multiple constructors`() {
+		val constructor = BeanUtils.findPrimaryConstructor(ValueClassWithMultipleConstructors::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = "Hello value class!"
+		val instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(ValueClassWithMultipleConstructors(value))
+	}
+
+	@Test
+	fun `Instantiate class with value class parameter`() {
+		val constructor = BeanUtils.findPrimaryConstructor(OneConstructorWithValueClass::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = ValueClass("Hello value class!")
+		val instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(OneConstructorWithValueClass(value))
+	}
+
+	@Test
+	fun `Instantiate class with nullable value class parameter`() {
+		val constructor = BeanUtils.findPrimaryConstructor(OneConstructorWithNullableValueClass::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = ValueClass("Hello value class!")
+		var instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(OneConstructorWithNullableValueClass(value))
+		instance = BeanUtils.instantiateClass(constructor, null)
+		assertThat(instance).isEqualTo(OneConstructorWithNullableValueClass(null))
+	}
+
+
 	class Foo(val param1: String, val param2: Int)
 
 	class Bar(val param1: String, val param2: Int = 12)
@@ -127,5 +166,18 @@ class BeanUtilsKotlinTests {
 	open class ProtectedConstructor protected constructor()
 
 	private class PrivateClass
+
+	@JvmInline
+	value class ValueClass(private val value: String)
+
+	@JvmInline
+	value class ValueClassWithMultipleConstructors(private val value: String) {
+		constructor() : this("Fail")
+		constructor(part1: String, part2: String) : this("Fail")
+	}
+
+	data class OneConstructorWithValueClass(val value: ValueClass)
+
+	data class OneConstructorWithNullableValueClass(val value: ValueClass?)
 
 }

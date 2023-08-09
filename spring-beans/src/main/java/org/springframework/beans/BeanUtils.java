@@ -31,8 +31,11 @@ import java.util.Map;
 import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
+import kotlin.jvm.JvmInline;
+import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.full.KAnnotatedElements;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -835,12 +838,21 @@ public abstract class BeanUtils {
 		 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">
 		 * https://kotlinlang.org/docs/reference/classes.html#constructors</a>
 		 */
+		@SuppressWarnings("unchecked")
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 			try {
-				KFunction<T> primaryCtor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
+				KClass<T> kClass = JvmClassMappingKt.getKotlinClass(clazz);
+				KFunction<T> primaryCtor = KClasses.getPrimaryConstructor(kClass);
 				if (primaryCtor == null) {
 					return null;
+				}
+				if (kClass.isValue() && !KAnnotatedElements
+						.findAnnotations(kClass, JvmClassMappingKt.getKotlinClass(JvmInline.class)).isEmpty()) {
+					Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+					Assert.state(constructors.length == 1,
+							"Kotlin value classes annotated with @JvmInline are expected to have a single JVM constructor");
+					return (Constructor<T>) constructors[0];
 				}
 				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryCtor);
 				if (constructor == null) {
