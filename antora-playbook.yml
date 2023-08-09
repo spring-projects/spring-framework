@@ -1,9 +1,9 @@
 antora:
   extensions:
+  - require: '@springio/antora-extensions/latest-version-extension'
   - '@antora/collector-extension'
   - '@antora/atlas-extension'
   - '@opendevise/antora-release-line-extension'
-  - '@springio/antora-extensions/latest-version-extension'
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: 'framework'
 site:
