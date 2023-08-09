@@ -128,6 +128,35 @@ class BeanUtilsKotlinTests {
 		assertThat(instance).isEqualTo(OneConstructorWithNullableValueClass(null))
 	}
 
+	@Test
+	fun `Instantiate primitive value class`() {
+		val constructor = BeanUtils.findPrimaryConstructor(PrimitiveValueClass::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = 0
+		val instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(PrimitiveValueClass(value))
+	}
+
+	@Test
+	fun `Instantiate class with primitive value class parameter`() {
+		val constructor = BeanUtils.findPrimaryConstructor(OneConstructorWithPrimitiveValueClass::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = PrimitiveValueClass(0)
+		val instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(OneConstructorWithPrimitiveValueClass(value))
+	}
+
+	@Test
+	fun `Instantiate class with nullable primitive value class parameter`() {
+		val constructor = BeanUtils.findPrimaryConstructor(OneConstructorWithNullablePrimitiveValueClass::class.java)!!
+		assertThat(constructor).isNotNull()
+		val value = PrimitiveValueClass(0)
+		var instance = BeanUtils.instantiateClass(constructor, value)
+		assertThat(instance).isEqualTo(OneConstructorWithNullablePrimitiveValueClass(value))
+		instance = BeanUtils.instantiateClass(constructor, null)
+		assertThat(instance).isEqualTo(OneConstructorWithNullablePrimitiveValueClass(null))
+	}
+
 
 	class Foo(val param1: String, val param2: Int)
 
@@ -179,5 +208,12 @@ class BeanUtilsKotlinTests {
 	data class OneConstructorWithValueClass(val value: ValueClass)
 
 	data class OneConstructorWithNullableValueClass(val value: ValueClass?)
+
+	@JvmInline
+	value class PrimitiveValueClass(private val value: Int)
+
+	data class OneConstructorWithPrimitiveValueClass(val value: PrimitiveValueClass)
+
+	data class OneConstructorWithNullablePrimitiveValueClass(val value: PrimitiveValueClass?)
 
 }
