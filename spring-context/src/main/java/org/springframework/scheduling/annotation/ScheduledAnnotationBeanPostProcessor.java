@@ -597,7 +597,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
-				task.cancel();
+				task.cancel(false);
 			}
 		}
 		if (liveSubscriptions != null) {
@@ -620,7 +620,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
 			for (Set<ScheduledTask> tasks : allTasks) {
 				for (ScheduledTask task : tasks) {
-					task.cancel();
+					task.cancel(false);
 				}
 			}
 			this.scheduledTasks.clear();

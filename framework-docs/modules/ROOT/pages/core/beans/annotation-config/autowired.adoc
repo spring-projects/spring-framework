@@ -364,8 +364,6 @@ ignored if it cannot be autowired. This allows properties to be assigned default
 that can be optionally overridden via dependency injection.
 ====
 
-
-
 [[beans-autowired-annotation-constructor-resolution]]
 Injected constructor and factory method arguments are a special case since the `required`
 attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor

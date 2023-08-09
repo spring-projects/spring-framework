@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
@@ -104,19 +105,19 @@ class AnnotationConfigApplicationContextTests {
 
 		// attempt to retrieve a bean that does not exist
 		Class<?> targetType = Pattern.class;
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				context.getBean(targetType))
-			.withMessageContaining(format("No qualifying bean of type '%s'", targetType.getName()));
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> context.getBean(targetType))
+				.withMessageContaining(format("No qualifying bean of type '%s'", targetType.getName()));
 	}
 
 	@Test
 	void getBeanByTypeAmbiguityRaisesException() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				context.getBean(TestBean.class))
-			.withMessageContaining("No qualifying bean of type '" + TestBean.class.getName() + "'")
-			.withMessageContaining("tb1")
-			.withMessageContaining("tb2");
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> context.getBean(TestBean.class))
+				.withMessageContaining("No qualifying bean of type '" + TestBean.class.getName() + "'")
+				.withMessageContaining("tb1")
+				.withMessageContaining("tb2");
 	}
 
 	/**
@@ -309,8 +310,8 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next()).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next()).isSameAs(context.getBean(BeanC.class));
 
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				context.getBeanFactory().resolveNamedBean(BeanA.class));
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> context.getBeanFactory().resolveNamedBean(BeanA.class));
 		assertThat(context.getBeanFactory().resolveNamedBean(BeanB.class).getBeanInstance()).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBeanFactory().resolveNamedBean(BeanC.class).getBeanInstance()).isSameAs(context.getBean(BeanC.class));
 	}
@@ -601,7 +602,6 @@ class AnnotationConfigApplicationContextTests {
 		BeanB b;
 		BeanC c;
 
-
 		@Autowired
 		BeanA(BeanB b, BeanC c) {
 			this.b = b;
@@ -720,39 +720,18 @@ class AnnotationConfigApplicationContextTests {
 	}
 }
 
+
 class TestBean {
 
 	String name;
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (name == null ? 0 : name.hashCode());
-		return result;
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof TestBean that && Objects.equals(this.name, that.name)));
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		TestBean other = (TestBean) obj;
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		}
-		else if (!name.equals(other.name)) {
-			return false;
-		}
-		return true;
+	public int hashCode() {
+		return this.name.hashCode();
 	}
-
 }
