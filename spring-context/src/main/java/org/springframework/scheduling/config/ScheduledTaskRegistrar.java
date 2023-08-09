@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import org.springframework.util.CollectionUtils;
  * Helper bean for registering tasks with a {@link TaskScheduler}, typically using cron
  * expressions.
  *
- * <p>As of Spring 3.1, {@code ScheduledTaskRegistrar} has a more prominent user-facing
- * role when used in conjunction with the {@link
+ * <p>{@code ScheduledTaskRegistrar} has a more prominent user-facing role when used in
+ * conjunction with the {@link
  * org.springframework.scheduling.annotation.EnableAsync @EnableAsync} annotation and its
  * {@link org.springframework.scheduling.annotation.SchedulingConfigurer
  * SchedulingConfigurer} callback interface.
@@ -552,7 +552,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	@Override
 	public void destroy() {
 		for (ScheduledTask task : this.scheduledTasks) {
-			task.cancel();
+			task.cancel(false);
 		}
 		if (this.localExecutor != null) {
 			this.localExecutor.shutdownNow();

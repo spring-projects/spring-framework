@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @since 5.1
 	 */
 	public ScheduledAnnotationBeanPostProcessor(ScheduledTaskRegistrar registrar) {
-		Assert.notNull(registrar, "ScheduledTaskRegistrar is required");
+		Assert.notNull(registrar, "ScheduledTaskRegistrar must not be null");
 		this.registrar = registrar;
 	}
 
@@ -580,7 +580,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
-				task.cancel();
+				task.cancel(false);
 			}
 		}
 	}
@@ -598,7 +598,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
 			for (Set<ScheduledTask> tasks : allTasks) {
 				for (ScheduledTask task : tasks) {
-					task.cancel();
+					task.cancel(false);
 				}
 			}
 			this.scheduledTasks.clear();
