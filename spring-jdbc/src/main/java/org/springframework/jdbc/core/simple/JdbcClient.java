@@ -37,7 +37,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
- * A fluent {@link JdbcClient} with common JDBC query and update operations,
+ * A fluent {@code JdbcClient} with common JDBC query and update operations,
  * supporting JDBC-style positional as well as Spring-style named parameters
  * with a convenient unified facade for JDBC PreparedStatement execution.
  *
