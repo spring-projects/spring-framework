@@ -132,12 +132,6 @@ public class ProblemDetail {
 	 */
 	@Nullable
 	public String getTitle() {
-		if (this.title == null) {
-			HttpStatus httpStatus = HttpStatus.resolve(this.status);
-			if (httpStatus != null) {
-				return httpStatus.getReasonPhrase();
-			}
-		}
 		return this.title;
 	}
 
