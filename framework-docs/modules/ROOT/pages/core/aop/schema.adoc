@@ -435,7 +435,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 ----
-	fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
+	fun doBasicProfiling(pjp: ProceedingJoinPoint): Any? {
 		// start stopwatch
 		val retVal = pjp.proceed()
 		// stop stopwatch
@@ -554,7 +554,7 @@ Kotlin::
 
 	class SimpleProfiler {
 
-		fun profile(call: ProceedingJoinPoint, name: String, age: Int): Any {
+		fun profile(call: ProceedingJoinPoint, name: String, age: Int): Any? {
 			val clock = StopWatch("Profiling for '$name' and '$age'")
 			try {
 				clock.start(call.toShortString())
@@ -890,7 +890,7 @@ Kotlin::
 			this.order = order
 		}
 
-		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
+		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any? {
 			var numAttempts = 0
 			var lockFailureException: PessimisticLockingFailureException
 			do {

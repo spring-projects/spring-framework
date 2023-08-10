@@ -493,7 +493,7 @@ Kotlin::
 	class ProfilingAspect {
 
 		@Around("methodsToBeProfiled()")
-		fun profile(pjp: ProceedingJoinPoint): Any {
+		fun profile(pjp: ProceedingJoinPoint): Any? {
 			val sw = StopWatch(javaClass.simpleName)
 			try {
 				sw.start(pjp.getSignature().getName())
