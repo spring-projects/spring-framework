@@ -33,15 +33,17 @@ jobs:
         echo BUILD_VERSION=$(git cat-file --textconv FETCH_HEAD:gradle.properties | sed -n '/^version=/ { s/^version=//;p }') >> $GITHUB_ENV
     - name: Run Antora
       run: ./gradlew antora
+    - name: Copy the cache to be included in the site
+      run: cp -rf build/antora/inject-collector-cache-config-extension/.cache build/site/
     - name: Publish Docs
-      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.8
+      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.11
       with:
         docs-username: ${{ secrets.DOCS_USERNAME }}
         docs-host: ${{ secrets.DOCS_HOST }}
         docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
         docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
     - name: Bust Clouflare Cache
-      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.8
+      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.11
       with:
         context-root: spring-framework
         cloudflare-zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
