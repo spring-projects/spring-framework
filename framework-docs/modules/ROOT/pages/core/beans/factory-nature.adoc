@@ -189,24 +189,28 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-	public class ExampleBean {
+	public class ExampleBean implements DisposableBean {
+        public void destroy() throws Exception {
+            // do some destruction work (like releasing pooled connections)
+        }
+    }
 
-		public void cleanup() {
-			// do some destruction work (like releasing pooled connections)
-		}
-	}
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	class ExampleBean {
+	class ExampleBean : DisposableBean {
+        override fun destroy() {
+            // Perform cleanup and destruction tasks, e.g., releasing pooled connections
+        }
 
-		fun cleanup() {
-			// do some destruction work (like releasing pooled connections)
-		}
-	}
+        fun cleanup() {
+            // This function can still be used for cleanup tasks
+        }
+    }
+
 ----
 ======
 
