@@ -3,8 +3,10 @@ description = "Spring Expression Language (SpEL)"
 apply plugin: "kotlin"
 
 dependencies {
-	api(project(":spring-core"))
-	testImplementation(testFixtures(project(":spring-core")))
-	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
-	testImplementation("org.jetbrains.kotlin:kotlin-stdlib")
+	compile(project(":spring-core"))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile("org.jetbrains.kotlin:kotlin-reflect")
+	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile("com.fasterxml.jackson.core:jackson-databind")
+	testCompile("com.fasterxml.jackson.core:jackson-core")
 }
