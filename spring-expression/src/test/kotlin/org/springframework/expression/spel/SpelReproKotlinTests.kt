@@ -55,6 +55,20 @@ class SpelReproKotlinTests {
 		assertThat(expr.getValue(context, Boolean::class.java)).isFalse()
 	}
 
+	@Test
+	fun `gh-30468 Unmangle Kotlin inlined class getter`() {
+		context.setVariable("something", Something(UUID(123), "name"))
+		val expr = parser.parseExpression("#something.id")
+		assertThat(expr.getValue(context, Int::class.java)).isEqualTo(123)
+	}
+
+	@Test
+	fun `gh-30468 Unmangle Kotlin inlined class setter`() {
+		context.setVariable("something", Something(UUID(123), "name"))
+		val expr = parser.parseExpression("#something.id = 456")
+		assertThat(expr.getValue(context, Int::class.java)).isEqualTo(456)
+	}
+
 	@Suppress("UNUSED_PARAMETER")
 	class Config {
 
@@ -71,4 +85,11 @@ class SpelReproKotlinTests {
 		}
 
 	}
+
+	@JvmInline value class UUID(val value: Int)
+
+	data class Something(
+		var id: UUID,
+		var name: String,
+	)
 }
