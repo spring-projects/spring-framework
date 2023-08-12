@@ -69,8 +69,10 @@ public interface AnnotatedTypeMetadata {
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
-	 * defined on the underlying element, as direct annotation or meta-annotation),
-	 * also taking attribute overrides on composed annotations into account.
+	 * defined on the underlying element, as direct annotation or meta-annotation).
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
+	 * are fully supported, both within a single annotation and within annotation
+	 * hierarchies.
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @return a {@link Map} of attributes, with each annotation attribute name
@@ -84,8 +86,10 @@ public interface AnnotatedTypeMetadata {
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type, if any (i.e. if
-	 * defined on the underlying element, as direct annotation or meta-annotation),
-	 * also taking attribute overrides on composed annotations into account.
+	 * defined on the underlying element, as direct annotation or meta-annotation).
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
+	 * are fully supported, both within a single annotation and within annotation
+	 * hierarchies.
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @param classValuesAsString whether to convert class references to String

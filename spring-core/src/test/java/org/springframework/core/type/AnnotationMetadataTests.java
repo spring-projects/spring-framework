@@ -214,8 +214,8 @@ class AnnotationMetadataTests {
 	private void assertMetaAnnotationOverrides(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes = (AnnotationAttributes) metadata.getAnnotationAttributes(
 				TestComponentScan.class.getName(), false);
+		assertThat(attributes.getStringArray("value")).containsExactly("org.example.componentscan");
 		assertThat(attributes.getStringArray("basePackages")).containsExactly("org.example.componentscan");
-		assertThat(attributes.getStringArray("value")).isEmpty();
 		assertThat(attributes.getClassArray("basePackageClasses")).isEmpty();
 	}
 
@@ -536,8 +536,10 @@ class AnnotationMetadataTests {
 	@Target(ElementType.TYPE)
 	public @interface TestComponentScan {
 
+		@AliasFor("basePackages")
 		String[] value() default {};
 
+		@AliasFor("value")
 		String[] basePackages() default {};
 
 		Class<?>[] basePackageClasses() default {};
