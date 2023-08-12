@@ -48,9 +48,9 @@ import org.springframework.util.Assert;
 public class TransactionalApplicationListenerMethodAdapter extends ApplicationListenerMethodAdapter
 		implements TransactionalApplicationListener<ApplicationEvent> {
 
-	private final TransactionalEventListener annotation;
-
 	private final TransactionPhase transactionPhase;
+
+	private final boolean fallbackExecution;
 
 	private final List<SynchronizationCallback> callbacks = new CopyOnWriteArrayList<>();
 
@@ -68,8 +68,8 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 		if (eventAnn == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
 		}
-		this.annotation = eventAnn;
 		this.transactionPhase = eventAnn.phase();
+		this.fallbackExecution = eventAnn.fallbackExecution();
 	}
 
 
@@ -92,8 +92,8 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 			TransactionSynchronizationManager.registerSynchronization(
 					new TransactionalApplicationListenerSynchronization<>(event, this, this.callbacks));
 		}
-		else if (this.annotation.fallbackExecution()) {
-			if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
+		else if (this.fallbackExecution) {
+			if (getTransactionPhase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
 				logger.warn("Processing " + event + " as a fallback execution on AFTER_ROLLBACK phase");
 			}
 			processEvent(event);
