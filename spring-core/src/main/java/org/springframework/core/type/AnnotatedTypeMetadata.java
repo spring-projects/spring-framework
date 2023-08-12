@@ -31,7 +31,8 @@ import org.springframework.util.MultiValueMap;
 /**
  * Defines access to the annotations of a specific type ({@link AnnotationMetadata class}
  * or {@link MethodMetadata method}), in a form that does not necessarily require
- * class loading.
+ * class loading of the types being inspected. Note, however, that classes for
+ * encountered annotations will be loaded.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -48,7 +49,7 @@ public interface AnnotatedTypeMetadata {
 	/**
 	 * Get annotation details based on the direct annotations and meta-annotations
 	 * of the underlying element.
-	 * @return merged annotations based on the direct annotations
+	 * @return merged annotations based on the direct annotations and meta-annotations
 	 * @since 5.2
 	 */
 	MergedAnnotations getAnnotations();

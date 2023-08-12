@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -271,32 +272,26 @@ public abstract class AnnotationConfigUtils {
 	}
 
 	@Nullable
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationClass) {
-		return attributesFor(metadata, annotationClass.getName());
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationType) {
+		return attributesFor(metadata, annotationType.getName());
 	}
 
 	@Nullable
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
-		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName));
-	}
-
-	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
-			Class<?> containerClass, Class<?> annotationClass) {
-
-		return attributesForRepeatable(metadata, containerClass.getName(), annotationClass.getName());
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationTypeName) {
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationTypeName));
 	}
 
 	@SuppressWarnings("unchecked")
-	static Set<AnnotationAttributes> attributesForRepeatable(
-			AnnotationMetadata metadata, String containerClassName, String annotationClassName) {
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
-		// Direct annotation present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName));
+		// Direct annotation present or meta-present?
+		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationType.getName()));
 
-		// Container annotation present?
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName);
+		// Container annotation present or meta-present?
+		Map<String, Object> container = metadata.getAnnotationAttributes(containerType.getName());
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);
