@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,13 +63,13 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 	 */
 	public TransactionalApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		super(beanName, targetClass, method);
-		TransactionalEventListener ann =
-				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
-		if (ann == null) {
+		TransactionalEventListener eventAnn =
+				AnnotatedElementUtils.findMergedAnnotation(getTargetMethod(), TransactionalEventListener.class);
+		if (eventAnn == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
 		}
-		this.annotation = ann;
-		this.transactionPhase = ann.phase();
+		this.annotation = eventAnn;
+		this.transactionPhase = eventAnn.phase();
 	}
 
 
