@@ -453,10 +453,9 @@ on rollback rule semantics, patterns, and warnings regarding possible unintentio
 matches for pattern-based rollback rules.
 
 Currently, you cannot have explicit control over the name of a transaction, where 'name'
-means the transaction name that appears in a transaction monitor, if applicable
-(for example, WebLogic's transaction monitor), and in logging output. For declarative
-transactions, the transaction name is always the fully-qualified class name + `.`
-+ the method name of the transactionally advised class. For example, if the
+means the transaction name that appears in a transaction monitor and in logging output.
+For declarative transactions, the transaction name is always the fully-qualified class
+name + `.` + the method name of the transactionally advised class. For example, if the
 `handlePayment(..)` method of the `BusinessService` class started a transaction, the
 name of the transaction would be: `com.example.BusinessService.handlePayment`.
 

@@ -828,13 +828,6 @@ The following table summarizes various `LoadTimeWeaver` implementations:
 | Running in Red Hat's https://www.jboss.org/jbossas/[JBoss AS] or https://www.wildfly.org/[WildFly]
 | `JBossLoadTimeWeaver`
 
-| Running in IBM's https://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
-| `WebSphereLoadTimeWeaver`
-
-| Running in Oracle's
-  https://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
-| `WebLogicLoadTimeWeaver`
-
 | JVM started with Spring `InstrumentationSavingAgent`
   (`java -javaagent:path/to/spring-instrument.jar`)
 | `InstrumentationLoadTimeWeaver`
@@ -949,11 +942,11 @@ when you use Spring's LTW support in environments such as application servers an
 containers.
 
 [[aop-aj-ltw-environments-tomcat-jboss-etc]]
-==== Tomcat, JBoss, WebSphere, WebLogic
+==== Tomcat, JBoss, WildFly
 
-Tomcat, JBoss/WildFly, IBM WebSphere Application Server and Oracle WebLogic Server all
-provide a general app `ClassLoader` that is capable of local instrumentation. Spring's
-native LTW may leverage those ClassLoader implementations to provide AspectJ weaving.
+Tomcat and JBoss/WildFly provide a general app `ClassLoader` that is capable of local
+instrumentation. Spring's native LTW may leverage those ClassLoader implementations
+to provide AspectJ weaving.
 You can simply enable load-time weaving, as xref:core/aop/using-aspectj.adoc[described earlier].
 Specifically, you do not need to modify the JVM launch script to add
 `-javaagent:path/to/spring-instrument.jar`.

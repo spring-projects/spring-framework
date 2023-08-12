@@ -56,14 +56,13 @@ locally, as the following example shows:
 ----
 
 The specified `WorkManager` can also point to an environment-specific thread pool --
-typically through a `SimpleTaskWorkManager` instance's `asyncTaskExecutor` property. Consider
-defining a shared thread pool for all your `ResourceAdapter` instances if you happen to
-use multiple adapters.
+typically through a `SimpleTaskWorkManager` instance's `asyncTaskExecutor` property.
+Consider defining a shared thread pool for all your `ResourceAdapter` instances
+if you happen to use multiple adapters.
 
-In some environments (such as WebLogic 9 or above), you can instead obtain the entire `ResourceAdapter` object
-from JNDI (by using `<jee:jndi-lookup>`). The Spring-based message
-listeners can then interact with the server-hosted `ResourceAdapter`, which also use the
-server's built-in `WorkManager`.
+In some environments, you can instead obtain the entire `ResourceAdapter` object from JNDI
+(by using `<jee:jndi-lookup>`). The Spring-based message listeners can then interact with
+the server-hosted `ResourceAdapter`, which also use the server's built-in `WorkManager`.
 
 See the javadoc for {api-spring-framework}/jms/listener/endpoint/JmsMessageEndpointManager.html[`JmsMessageEndpointManager`],
 {api-spring-framework}/jms/listener/endpoint/JmsActivationSpecConfig.html[`JmsActivationSpecConfig`],
