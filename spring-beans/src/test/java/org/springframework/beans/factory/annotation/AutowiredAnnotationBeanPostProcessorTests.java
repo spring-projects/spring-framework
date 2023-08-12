@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1404,6 +1406,20 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	void constructorInjectionWithSortedMapFallback() {
+		RootBeanDefinition bd = new RootBeanDefinition(SortedMapConstructorInjectionBean.class);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		bf.registerSingleton("testBean2", tb2);
+
+		SortedMapConstructorInjectionBean bean = bf.getBean("annotatedBean", SortedMapConstructorInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).containsEntry("testBean1", tb1);
+		assertThat(bean.getTestBeanMap()).containsEntry("testBean2", tb2);
+	}
+
+	@Test
 	void constructorInjectionWithTypedSetAsBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(SetConstructorInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -1444,11 +1460,26 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tbs = new RootBeanDefinition(CustomCollectionFactoryMethods.class);
 		tbs.setUniqueFactoryMethodName("testBeanSet");
 		bf.registerBeanDefinition("myTestBeanSet", tbs);
+		bf.registerSingleton("testBean1", new TestBean());
+		bf.registerSingleton("testBean2", new TestBean());
 
 		CustomSetConstructorInjectionBean bean = bf.getBean("annotatedBean", CustomSetConstructorInjectionBean.class);
 		assertThat(bean.getTestBeanSet()).isSameAs(bf.getBean("myTestBeanSet"));
 		bean = bf.getBean("annotatedBean", CustomSetConstructorInjectionBean.class);
 		assertThat(bean.getTestBeanSet()).isSameAs(bf.getBean("myTestBeanSet"));
+	}
+
+	@Test
+	void constructorInjectionWithSortedSetFallback() {
+		RootBeanDefinition bd = new RootBeanDefinition(SortedSetConstructorInjectionBean.class);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		bf.registerSingleton("testBean2", tb2);
+
+		SortedSetConstructorInjectionBean bean = bf.getBean("annotatedBean", SortedSetConstructorInjectionBean.class);
+		assertThat(bean.getTestBeanSet()).contains(tb1, tb2);
 	}
 
 	@Test
@@ -3116,6 +3147,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class SortedMapConstructorInjectionBean {
+
+		private SortedMap<String, TestBean> testBeanMap;
+
+		@Autowired
+		public SortedMapConstructorInjectionBean(SortedMap<String, TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
+		}
+
+		public SortedMap<String, TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
 	public static class QualifiedMapConstructorInjectionBean {
 
 		private Map<String, TestBean> testBeanMap;
@@ -3141,6 +3187,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public Set<TestBean> getTestBeanSet() {
+			return this.testBeanSet;
+		}
+	}
+
+
+	public static class SortedSetConstructorInjectionBean {
+
+		private SortedSet<TestBean> testBeanSet;
+
+		@Autowired
+		public SortedSetConstructorInjectionBean(SortedSet<TestBean> testBeanSet) {
+			this.testBeanSet = testBeanSet;
+		}
+
+		public SortedSet<TestBean> getTestBeanSet() {
 			return this.testBeanSet;
 		}
 	}
