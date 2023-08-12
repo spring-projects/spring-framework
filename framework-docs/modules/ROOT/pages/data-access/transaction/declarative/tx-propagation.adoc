@@ -59,6 +59,14 @@ status and with an inner transaction's locks released immediately after its comp
 Such an independent inner transaction can also declare its own isolation level, timeout,
 and read-only settings and not inherit an outer transaction's characteristics.
 
+NOTE: The resources attached to the outer transaction will remain bound there while
+the inner transaction acquires its own resources such as a new database connection.
+This may lead to exhaustion of the connection pool and potentially to a deadlock if
+several threads have an active outer transaction and wait to acquire a new connection
+for their inner transaction, with the pool not being able to hand out any such inner
+connection anymore. Do not use `PROPAGATION_REQUIRES_NEW` unless your connection pool
+is appropriately sized, exceeding the number of concurrent threads by at least 1.
+
 [[tx-propagation-nested]]
 == Understanding `PROPAGATION_NESTED`
 
