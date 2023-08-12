@@ -159,6 +159,17 @@ public class TransactionalEventListenerTests {
 	}
 
 	@Test
+	public void afterCommitWithTransactionalComponentListenerWithInterfaceProxy() {
+		load(TransactionalComponentTestListenerWithInterface.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().publishEvent("SKIP");
+			getEventCollector().assertNoEventReceived();
+			return null;
+		});
+		getEventCollector().assertNoEventReceived();
+	}
+
+	@Test
 	public void afterRollback() {
 		load(AfterCompletionExplicitTestListener.class);
 		this.transactionTemplate.execute(status -> {
@@ -545,6 +556,25 @@ public class TransactionalEventListenerTests {
 	static class TransactionalComponentTestListener extends BaseTransactionalTestListener implements
 			TransactionalComponentTestListenerInterface {
 
+		@Override
+		public void handleAfterCommit(String data) {
+			handleEvent(EventCollector.AFTER_COMMIT, data);
+		}
+	}
+
+
+	interface TransactionalComponentTestInterface {
+
+		void handleAfterCommit(String data);
+	}
+
+
+	@Transactional
+	@Component
+	static class TransactionalComponentTestListenerWithInterface extends BaseTransactionalTestListener implements
+			TransactionalComponentTestInterface {
+
+		@TransactionalEventListener(condition = "!'SKIP'.equals(#data)")
 		@Override
 		public void handleAfterCommit(String data) {
 			handleEvent(EventCollector.AFTER_COMMIT, data);
