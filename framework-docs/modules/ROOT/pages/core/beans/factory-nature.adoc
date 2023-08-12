@@ -180,7 +180,7 @@ xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receivi
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/>
+	<bean id="exampleDestructionBean" class="examples.ExampleBean" destroy-method="cleanup"/>
 ----
 
 [tabs]
@@ -214,7 +214,7 @@ The preceding definition has almost exactly the same effect as the following def
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
+	<bean id="exampleDestructionBean" class="examples.AnotherExampleBean"/>
 ----
 
 [tabs]
