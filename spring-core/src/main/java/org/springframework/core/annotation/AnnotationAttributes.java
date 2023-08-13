@@ -53,7 +53,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	final String displayName;
 
-	boolean validated = false;
+	final boolean validated;
 
 
 	/**
@@ -62,6 +62,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	public AnnotationAttributes() {
 		this.annotationType = null;
 		this.displayName = UNKNOWN;
+		this.validated = false;
 	}
 
 	/**
@@ -73,6 +74,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		super(initialCapacity);
 		this.annotationType = null;
 		this.displayName = UNKNOWN;
+		this.validated = false;
 	}
 
 	/**
@@ -85,6 +87,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		super(map);
 		this.annotationType = null;
 		this.displayName = UNKNOWN;
+		this.validated = false;
 	}
 
 	/**
@@ -108,9 +111,20 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * @since 4.2
 	 */
 	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-		this.annotationType = annotationType;
-		this.displayName = annotationType.getName();
+		this(annotationType, false);
+	}
+
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the annotation type name represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @param classLoader the ClassLoader to try to load the annotation type on,
+	 * or {@code null} to just store the annotation type name
+	 * @since 4.3.2
+	 */
+	public AnnotationAttributes(String annotationType, @Nullable ClassLoader classLoader) {
+		this(getAnnotationType(annotationType, classLoader), false);
 	}
 
 	/**
@@ -129,20 +143,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		this.validated = validated;
 	}
 
-	/**
-	 * Create a new, empty {@link AnnotationAttributes} instance for the
-	 * specified {@code annotationType}.
-	 * @param annotationType the annotation type name represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param classLoader the ClassLoader to try to load the annotation type on,
-	 * or {@code null} to just store the annotation type name
-	 * @since 4.3.2
-	 */
-	public AnnotationAttributes(String annotationType, @Nullable ClassLoader classLoader) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-		this.annotationType = getAnnotationType(annotationType, classLoader);
-		this.displayName = annotationType;
-	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
