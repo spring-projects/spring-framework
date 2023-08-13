@@ -27,6 +27,12 @@ As outlined xref:integration/observability.adoc[at the beginning of this section
 |xref:integration/observability.adoc#observability.http-server[`"http.server.requests"`]
 |Processing time for HTTP server exchanges at the Framework level
 
+|xref:integration/observability.adoc#observability.jms.publish[`"jms.message.publish"`]
+|Time spent sending a JMS message to a destination by a message producer.
+
+|xref:integration/observability.adoc#observability.jms.process[`"jms.message.process"`]
+|Processing time for a JMS message that was previously received by a message consumer.
+
 |xref:integration/observability.adoc#observability.tasks-scheduled[`"tasks.scheduled.execution"`]
 |Processing time for an execution of a `@Scheduled` task
 |===
@@ -107,6 +113,72 @@ By default, the following `KeyValues` are created:
 |`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution).
 |===
 
+
+[[observability.jms]]
+== JMS messaging instrumentation
+
+Spring Framework uses the Jakarta JMS instrumentation provided by Micrometer if the `io.micrometer:micrometer-core` dependency is on the classpath.
+The `io.micrometer.core.instrument.binder.jms.JmsInstrumentation` instruments `jakarta.jms.Session` and records the relevant observations.
+
+This instrumentation will create 2 types of observations:
+
+* `"jms.message.publish"` when a JMS message is sent to the broker, typically with `JmsTemplate`.
+* `"jms.message.process"` when a JMS message is processed by the application, typically with a `MessageListener` or a `@JmsListener` annotated method.
+
+NOTE: currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the reception of a message.
+Such an integration would typically instrument `MessageConsumer#receive` method calls. But once those return, the processing time is not measured and the trace scope cannot be propagated to the application.
+
+By default, both observations share the same set of possible `KeyValues`:
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`exception` |Class name of the exception thrown during the messaging operation (or "none").
+|`messaging.destination.temporary` _(required)_|Whether the destination is a `TemporaryQueue` or `TemporaryTopic` (values: `"true"` or `"false"`).
+|`messaging.operation` _(required)_|Name of JMS operation being performed (values: `"publish"` or `"process"`).
+|===
+
+.High cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`messaging.message.conversation_id` |The correlation ID of the JMS message.
+|`messaging.destination.name` |The name of destination the current message was sent to.
+|`messaging.message.id` |Value used by the messaging system as an identifier for the message.
+|===
+
+[[observability.jms.publish]]
+=== JMS message Publication instrumentation
+
+`"jms.message.publish"` observations are recorded when a JMS message is sent to the broker.
+They measure the time spent sending the message and propagate the tracing information with outgoing JMS message headers.
+
+You will need to configure the `ObservationRegistry` on the `JmsTemplate` to enable observations:
+
+include-code::./JmsTemplatePublish[]
+
+It uses the `io.micrometer.core.instrument.binder.jms.DefaultJmsPublishObservationConvention` by default, backed by the `io.micrometer.core.instrument.binder.jms.JmsPublishObservationContext`.
+
+[[observability.jms.process]]
+=== JMS message Processing instrumentation
+
+`"jms.message.process"` observations are recorded when a JMS message is processed by the application.
+They measure the time spent processing the message and propagate the tracing context with incoming JMS message headers.
+
+Most applications will use the xref:integration/jms/annotated.adoc#jms-annotated[`@JmsListener` annotated methods] mechanism to process incoming messages.
+You will need to ensure that the `ObservationRegistry` is configured on the dedicated `JmsListenerContainerFactory`:
+
+include-code::./JmsConfiguration[]
+
+A xref:integration/jms/annotated.adoc#jms-annotated-support[default container factory is required to enable the annotation support],
+but note that `@JmsListener` annotations can refer to specific container factory beans for specific purposes.
+In all cases, Observations are only recorded if the observation registry is configured on the container factory.
+
+Similar observations are recorded with `JmsTemplate` when messages are processed by a `MessageListener`.
+Such listeners are set on a  `MessageConsumer` within a session callback (see `JmsTemplate.execute(SessionCallback<T>)`).
+
+This observation uses the `io.micrometer.core.instrument.binder.jms.DefaultJmsProcessObservationConvention` by default, backed by the `io.micrometer.core.instrument.binder.jms.JmsProcessObservationContext`.
 
 [[observability.http-server]]
 == HTTP Server instrumentation

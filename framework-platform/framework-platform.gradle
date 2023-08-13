@@ -8,7 +8,7 @@ javaPlatform {
 
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.15.2"))
-	api(platform("io.micrometer:micrometer-bom:1.12.0-M1"))
+	api(platform("io.micrometer:micrometer-bom:1.12.0-SNAPSHOT"))
 	api(platform("io.netty:netty-bom:4.1.96.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
 	api(platform("io.projectreactor:reactor-bom:2023.0.0-M1"))
@@ -92,6 +92,8 @@ dependencies {
 		api("org.apache.activemq:activemq-broker:5.17.4")
 		api("org.apache.activemq:activemq-kahadb-store:5.17.4")
 		api("org.apache.activemq:activemq-stomp:5.17.4")
+		api("org.apache.activemq:artemis-junit-5:2.29.0")
+		api("org.apache.activemq:artemis-jakarta-client:2.29.0")
 		api("org.apache.commons:commons-pool2:2.9.0")
 		api("org.apache.derby:derby:10.16.1.1")
 		api("org.apache.derby:derbyclient:10.16.1.1")

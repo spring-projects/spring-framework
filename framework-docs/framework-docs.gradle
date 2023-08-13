@@ -61,7 +61,9 @@ repositories {
 
 dependencies {
 	api(project(":spring-context"))
+	api(project(":spring-jms"))
 	api(project(":spring-web"))
+	api("jakarta.jms:jakarta.jms-api")
 	api("jakarta.servlet:jakarta.servlet-api")
 
 	implementation(project(":spring-core-test"))
