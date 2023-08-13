@@ -22,8 +22,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import jakarta.inject.Inject;
@@ -57,21 +56,13 @@ class PropertySourceAnnotationTests {
 
 	@Test
 	void withExplicitName() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ConfigWithExplicitName.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithExplicitName.class);
 		assertThat(ctx.getEnvironment().getPropertySources().contains("p1")).as("property source p1 was not added").isTrue();
 		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("p1TestBean");
 
 		// assert that the property source was added last to the set of sources
-		String name;
 		MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
-		Iterator<org.springframework.core.env.PropertySource<?>> iterator = sources.iterator();
-		do {
-			name = iterator.next().getName();
-		}
-		while (iterator.hasNext());
-
+		String name = sources.stream().toList().get(sources.size() - 1).getName();
 		assertThat(name).isEqualTo("p1");
 		ctx.close();
 	}
@@ -79,7 +70,9 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withImplicitName() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithImplicitName.class);
-		assertThat(ctx.getEnvironment().getPropertySources().contains("class path resource [org/springframework/context/annotation/p1.properties]")).as("property source p1 was not added").isTrue();
+		String name = "class path resource [org/springframework/context/annotation/p1.properties]";
+		assertThat(ctx.getEnvironment().getPropertySources().contains(name))
+				.as("property source p1 was not added").isTrue();
 		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("p1TestBean");
 		ctx.close();
 	}
@@ -177,40 +170,36 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withNameAndMultipleResourceLocations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
-		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-		assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 		// p2 should 'win' as it was registered last
-		assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		ctx.close();
 	}
 
 	@Test
 	void withMultipleResourceLocations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
-		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-		assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 		// p2 should 'win' as it was registered last
-		assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		ctx.close();
 	}
 
 	@Test
 	void withRepeatedPropertySourcesInContainerAnnotation() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithPropertySources.class);
-		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-		assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 		// p2 should 'win' as it was registered last
-		assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		ctx.close();
 	}
 
 	@Test
 	void withRepeatedPropertySources() {
 		try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithRepeatedPropertySourceAnnotations.class)) {
-			assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-			assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+			assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 			// p2 should 'win' as it was registered last
-			assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+			assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		}
 	}
 
@@ -221,19 +210,16 @@ class PropertySourceAnnotationTests {
 
 		System.clearProperty(key);
 		try (ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(configClass)) {
-			assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-			assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+			assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 			// p2 should 'win' as it was registered last
-			assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+			assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		}
 
 		System.setProperty(key, "org/springframework/context/annotation");
 		try (ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(configClass)) {
-			assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-			assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
-			assertThat(ctx.getEnvironment().containsProperty("from.p3")).isTrue();
+			assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2", "from.p3");
 			// p3 should 'win' as it was registered last
-			assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p3TestBean");
+			assertEnvironmentProperty(ctx, "testbean.name", "p3TestBean");
 		}
 		finally {
 			System.clearProperty(key);
@@ -251,10 +237,9 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withNamedPropertySources() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNamedPropertySources.class);
-		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-		assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 		// p2 should 'win' as it was registered last
-		assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		ctx.close();
 	}
 
@@ -268,17 +253,15 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withIgnoredPropertySource() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithIgnoredPropertySource.class);
-		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-		assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
 		ctx.close();
 	}
 
 	@Test
 	void withSameSourceImportedInDifferentOrder() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithSameSourceImportedInDifferentOrder.class);
-		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
-		assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
-		assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2");
+		assertEnvironmentProperty(ctx, "testbean.name", "p2TestBean");
 		ctx.close();
 	}
 
@@ -287,8 +270,8 @@ class PropertySourceAnnotationTests {
 		// SPR-10820: p2 should 'win' as it was registered last
 		AnnotationConfigApplicationContext ctxWithName = new AnnotationConfigApplicationContext(ConfigWithNameAndMultipleResourceLocations.class);
 		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithMultipleResourceLocations.class);
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
-		assertThat(ctxWithName.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		assertEnvironmentProperty(ctxWithName, "testbean.name", "p2TestBean");
+		assertEnvironmentProperty(ctxWithoutName, "testbean.name", "p2TestBean");
 		ctxWithName.close();
 		ctxWithoutName.close();
 	}
@@ -297,7 +280,7 @@ class PropertySourceAnnotationTests {
 	void orderingWithAndWithoutNameAndFourResourceLocations() {
 		// SPR-12198: p4 should 'win' as it was registered last
 		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext(ConfigWithFourResourceLocations.class);
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name")).isEqualTo("p4TestBean");
+		assertEnvironmentProperty(ctxWithoutName, "testbean.name", "p4TestBean");
 		ctxWithoutName.close();
 	}
 
@@ -305,11 +288,11 @@ class PropertySourceAnnotationTests {
 	void orderingDoesntReplaceExisting() throws Exception {
 		// SPR-12198: mySource should 'win' as it was registered manually
 		AnnotationConfigApplicationContext ctxWithoutName = new AnnotationConfigApplicationContext();
-		MapPropertySource mySource = new MapPropertySource("mine", Collections.singletonMap("testbean.name", "myTestBean"));
+		MapPropertySource mySource = new MapPropertySource("mine", Map.of("testbean.name", "myTestBean"));
 		ctxWithoutName.getEnvironment().getPropertySources().addLast(mySource);
 		ctxWithoutName.register(ConfigWithFourResourceLocations.class);
 		ctxWithoutName.refresh();
-		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name")).isEqualTo("myTestBean");
+		assertEnvironmentProperty(ctxWithoutName, "testbean.name", "myTestBean");
 		ctxWithoutName.close();
 	}
 
@@ -320,8 +303,8 @@ class PropertySourceAnnotationTests {
 		}
 	}
 
-	private static void assertEnvironmentContainsProperty(ApplicationContext ctx, String name) {
-		assertThat(ctx.getEnvironment().containsProperty(name)).as("environment contains property " + name).isTrue();
+	private static void assertEnvironmentProperty(ApplicationContext ctx, String name, Object value) {
+		assertThat(ctx.getEnvironment().getProperty(name)).isEqualTo(value);
 	}
 
 
@@ -582,7 +565,6 @@ class PropertySourceAnnotationTests {
 	})
 	@Configuration
 	static class ConfigWithSameSourceImportedInDifferentOrder {
-
 	}
 
 
