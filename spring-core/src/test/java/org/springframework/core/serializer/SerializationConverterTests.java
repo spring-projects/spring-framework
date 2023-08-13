@@ -31,11 +31,12 @@ import org.springframework.core.serializer.support.SerializingConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.mockito.BDDMockito.given;
 
-
 /**
+ * Unit tests for {@link SerializingConverter} and {@link DeserializingConverter}.
+ *
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
@@ -43,7 +44,7 @@ import static org.mockito.BDDMockito.given;
 class SerializationConverterTests {
 
 	@Test
-	void serializeAndDeserializeString() {
+	void serializeAndDeserializeStringWithDefaultSerializer() {
 		SerializingConverter toBytes = new SerializingConverter();
 		byte[] bytes = toBytes.convert("Testing");
 		DeserializingConverter fromBytes = new DeserializingConverter();
@@ -51,7 +52,7 @@ class SerializationConverterTests {
 	}
 
 	@Test
-	void serializeAndDeserializeStringWithCustomSerializer() {
+	void serializeAndDeserializeStringWithExplicitSerializer() {
 		SerializingConverter toBytes = new SerializingConverter(new DefaultSerializer());
 		byte[] bytes = toBytes.convert("Testing");
 		DeserializingConverter fromBytes = new DeserializingConverter();
@@ -63,7 +64,9 @@ class SerializationConverterTests {
 		SerializingConverter toBytes = new SerializingConverter();
 		assertThatExceptionOfType(SerializationFailedException.class)
 				.isThrownBy(() -> toBytes.convert(new Object()))
-				.withCauseInstanceOf(IllegalArgumentException.class);
+				.havingCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessageContaining("requires a Serializable payload");
 	}
 
 	@Test
@@ -82,15 +85,15 @@ class SerializationConverterTests {
 	}
 
 	@Test
-	void deserializationWithClassLoader() {
-		DeserializingConverter fromBytes = new DeserializingConverter(this.getClass().getClassLoader());
+	void deserializationWithExplicitClassLoader() {
+		DeserializingConverter fromBytes = new DeserializingConverter(getClass().getClassLoader());
 		SerializingConverter toBytes = new SerializingConverter();
 		String expected = "SPRING FRAMEWORK";
 		assertThat(fromBytes.convert(toBytes.convert(expected))).isEqualTo(expected);
 	}
 
 	@Test
-	void deserializationWithDeserializer() {
+	void deserializationWithExplicitDeserializer() {
 		DeserializingConverter fromBytes = new DeserializingConverter(new DefaultDeserializer());
 		SerializingConverter toBytes = new SerializingConverter();
 		String expected = "SPRING FRAMEWORK";
@@ -99,24 +102,26 @@ class SerializationConverterTests {
 
 	@Test
 	void deserializationIOException() {
-		try (MockedConstruction<ConfigurableObjectInputStream> mocked = Mockito.mockConstruction(
-				ConfigurableObjectInputStream.class, (mock, context) -> given(mock.readObject())
-						.willThrow(new ClassNotFoundException()))) {
-			DefaultDeserializer defaultSerializer = new DefaultDeserializer(this.getClass().getClassLoader());
+		ClassNotFoundException classNotFoundException = new ClassNotFoundException();
+		try (MockedConstruction<ConfigurableObjectInputStream> mocked =
+				Mockito.mockConstruction(ConfigurableObjectInputStream.class,
+					(mock, context) -> given(mock.readObject()).willThrow(classNotFoundException))) {
+			DefaultDeserializer defaultSerializer = new DefaultDeserializer(getClass().getClassLoader());
 			assertThat(mocked).isNotNull();
-			assertThatThrownBy(() -> defaultSerializer.deserialize(
-					new ByteArrayInputStream("test".getBytes())))
-					.hasMessage("Failed to deserialize object type");
+			assertThatIOException()
+					.isThrownBy(() -> defaultSerializer.deserialize(new ByteArrayInputStream("test".getBytes())))
+					.withMessage("Failed to deserialize object type")
+					.havingCause().isSameAs(classNotFoundException);
 		}
 	}
 
 
-	class UnSerializable implements Serializable {
+	static class UnSerializable implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 
 		@SuppressWarnings({"unused", "serial"})
-		private Object object;
+		private Object object = new Object();
 	}
 
 }

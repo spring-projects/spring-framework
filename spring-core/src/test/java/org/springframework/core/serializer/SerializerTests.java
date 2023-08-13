@@ -27,7 +27,11 @@ import org.springframework.core.serializer.support.SerializationDelegate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
+/**
+ * Unit tests for {@link Serializer}, {@link Deserializer}, and {@link SerializationDelegate}.
+ *
+ * @since 6.1
+ */
 class SerializerTests {
 
 	private static final String SPRING_FRAMEWORK = "Spring Framework";
@@ -35,21 +39,47 @@ class SerializerTests {
 
 	@Test
 	void serializeToByteArray() throws IOException {
-		SpyStringSerializer serializer = new SpyStringSerializer<String>();
+
+		class SpyStringSerializer implements Serializer<String> {
+
+			String expectedObject;
+			OutputStream expectedOutputStream;
+
+			@Override
+			public void serialize(String object, OutputStream outputStream) {
+				this.expectedObject = object;
+				this.expectedOutputStream = outputStream;
+			}
+		}
+
+		SpyStringSerializer serializer = new SpyStringSerializer();
 		serializer.serializeToByteArray(SPRING_FRAMEWORK);
 		assertThat(serializer.expectedObject).isEqualTo(SPRING_FRAMEWORK);
-		assertThat(serializer.expectedOs).isNotNull();
+		assertThat(serializer.expectedOutputStream).isNotNull();
 	}
 
 	@Test
 	void deserializeToByteArray() throws IOException {
+
+		class SpyStringDeserializer implements Deserializer<String> {
+
+			InputStream expectedInputStream;
+
+			@Override
+			public String deserialize(InputStream inputStream) {
+				this.expectedInputStream = inputStream;
+				return SPRING_FRAMEWORK;
+			}
+		}
+
 		SpyStringDeserializer deserializer = new SpyStringDeserializer();
-		deserializer.deserializeFromByteArray(SPRING_FRAMEWORK.getBytes());
-		assertThat(deserializer.expectedObject).isEqualTo(SPRING_FRAMEWORK);
+		Object deserializedObj = deserializer.deserializeFromByteArray(SPRING_FRAMEWORK.getBytes());
+		assertThat(deserializedObj).isEqualTo(SPRING_FRAMEWORK);
+		assertThat(deserializer.expectedInputStream).isNotNull();
 	}
 
 	@Test
-	void serializationDelegate() throws IOException {
+	void serializationDelegateWithExplicitSerializerAndDeserializer() throws IOException {
 		SerializationDelegate delegate = new SerializationDelegate(new DefaultSerializer(), new DefaultDeserializer());
 		byte[] serializedObj = delegate.serializeToByteArray(SPRING_FRAMEWORK);
 		Object deserializedObj = delegate.deserialize(new ByteArrayInputStream(serializedObj));
@@ -57,32 +87,11 @@ class SerializerTests {
 	}
 
 	@Test
-	void serializationDelegateWithClassLoader() throws IOException {
-		SerializationDelegate delegate = new SerializationDelegate(this.getClass().getClassLoader());
+	void serializationDelegateWithExplicitClassLoader() throws IOException {
+		SerializationDelegate delegate = new SerializationDelegate(getClass().getClassLoader());
 		byte[] serializedObj = delegate.serializeToByteArray(SPRING_FRAMEWORK);
 		Object deserializedObj = delegate.deserialize(new ByteArrayInputStream(serializedObj));
 		assertThat(deserializedObj).isEqualTo(SPRING_FRAMEWORK);
 	}
 
-	static class SpyStringSerializer<T> implements Serializer<T> {
-		T expectedObject;
-		OutputStream expectedOs;
-
-		@Override
-		public void serialize(T object, OutputStream outputStream) {
-			expectedObject = object;
-			expectedOs = outputStream;
-		}
-	}
-
-	static class SpyStringDeserializer implements Deserializer<Object> {
-		Object expectedObject;
-
-
-		@Override
-		public String deserialize(InputStream inputStream) {
-			expectedObject = SPRING_FRAMEWORK;
-			return SPRING_FRAMEWORK;
-		}
-	}
 }
