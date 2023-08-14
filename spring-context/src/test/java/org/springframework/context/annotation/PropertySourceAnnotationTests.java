@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Properties;
 
 import jakarta.inject.Inject;
@@ -56,21 +55,13 @@ class PropertySourceAnnotationTests {
 
 	@Test
 	void withExplicitName() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ConfigWithExplicitName.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithExplicitName.class);
 		assertThat(ctx.getEnvironment().getPropertySources().contains("p1")).as("property source p1 was not added").isTrue();
 		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("p1TestBean");
 
 		// assert that the property source was added last to the set of sources
-		String name;
 		MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
-		Iterator<org.springframework.core.env.PropertySource<?>> iterator = sources.iterator();
-		do {
-			name = iterator.next().getName();
-		}
-		while (iterator.hasNext());
-
+		String name = sources.stream().toList().get(sources.size() - 1).getName();
 		assertThat(name).isEqualTo("p1");
 		ctx.close();
 	}
@@ -78,7 +69,9 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withImplicitName() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithImplicitName.class);
-		assertThat(ctx.getEnvironment().getPropertySources().contains("class path resource [org/springframework/context/annotation/p1.properties]")).as("property source p1 was not added").isTrue();
+		String name = "class path resource [org/springframework/context/annotation/p1.properties]";
+		assertThat(ctx.getEnvironment().getPropertySources().contains(name))
+				.as("property source p1 was not added").isTrue();
 		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("p1TestBean");
 		ctx.close();
 	}
@@ -540,7 +533,6 @@ class PropertySourceAnnotationTests {
 	})
 	@Configuration
 	static class ConfigWithSameSourceImportedInDifferentOrder {
-
 	}
 
 

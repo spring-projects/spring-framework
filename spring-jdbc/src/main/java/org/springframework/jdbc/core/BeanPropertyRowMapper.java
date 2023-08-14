@@ -343,7 +343,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 						bw.setPropertyValue(pd.getName(), value);
 					}
 					catch (TypeMismatchException ex) {
-						if (value == null && this.primitivesDefaultedForNullValue) {
+						if (value == null && isPrimitivesDefaultedForNullValue()) {
 							if (logger.isDebugEnabled()) {
 								String propertyType = ClassUtils.getQualifiedName(pd.getPropertyType());
 								logger.debug("""

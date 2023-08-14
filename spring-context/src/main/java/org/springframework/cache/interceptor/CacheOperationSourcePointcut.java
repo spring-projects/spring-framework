@@ -58,8 +58,8 @@ class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut implement
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof CacheOperationSourcePointcut otherPc &&
-				ObjectUtils.nullSafeEquals(this.cacheOperationSource, otherPc.cacheOperationSource)));
+		return (this == other || (other instanceof CacheOperationSourcePointcut that &&
+				ObjectUtils.nullSafeEquals(this.cacheOperationSource, that.cacheOperationSource)));
 	}
 
 	@Override
