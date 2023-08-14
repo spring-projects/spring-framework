@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import io.micrometer.observation.tck.TestObservationRegistry;
-import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
@@ -35,6 +34,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.jms.core.JmsTemplate;
 
 import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Observation tests for {@link AbstractMessageListenerContainer} implementations.
@@ -47,7 +48,7 @@ class MessageListenerContainerObservationTests {
 
 	TestObservationRegistry registry = TestObservationRegistry.create();
 
-	private ActiveMQConnectionFactory connectionFactory;
+	ActiveMQConnectionFactory connectionFactory;
 
 	@BeforeEach
 	void setupServer() {
@@ -55,21 +56,16 @@ class MessageListenerContainerObservationTests {
 		connectionFactory = new ActiveMQConnectionFactory(server.getVmURL());
 	}
 
-	@ParameterizedTest(name = "{index} {0}")
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("listenerContainers")
-	void shouldRecordJmsProcessObservations(String implementationClass, AbstractMessageListenerContainer listenerContainer) throws Exception {
+	void shouldRecordJmsProcessObservations(AbstractMessageListenerContainer listenerContainer) throws Exception {
 		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
 		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		CountDownLatch latch = new CountDownLatch(1);
 		listenerContainer.setConnectionFactory(connectionFactory);
 		listenerContainer.setObservationRegistry(registry);
 		listenerContainer.setDestinationName("spring.test.observation");
-		listenerContainer.setMessageListener(new MessageListener() {
-			@Override
-			public void onMessage(Message message) {
-				latch.countDown();
-			}
-		});
+		listenerContainer.setMessageListener((MessageListener) message -> latch.countDown());
 		listenerContainer.afterPropertiesSet();
 		listenerContainer.start();
 		latch.await(2, TimeUnit.SECONDS);
@@ -82,8 +78,8 @@ class MessageListenerContainerObservationTests {
 
 	static Stream<Arguments> listenerContainers() {
 		return Stream.of(
-				Arguments.of(DefaultMessageListenerContainer.class.getSimpleName(), new DefaultMessageListenerContainer()),
-				Arguments.of(SimpleMessageListenerContainer.class.getSimpleName(), new SimpleMessageListenerContainer())
+				arguments(named(DefaultMessageListenerContainer.class.getSimpleName(), new DefaultMessageListenerContainer())),
+				arguments(named(SimpleMessageListenerContainer.class.getSimpleName(), new SimpleMessageListenerContainer()))
 		);
 	}
 
@@ -92,4 +88,5 @@ class MessageListenerContainerObservationTests {
 		connectionFactory.close();
 		server.stop();
 	}
+
 }
