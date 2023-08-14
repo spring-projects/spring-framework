@@ -37,6 +37,7 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -149,7 +150,8 @@ import org.springframework.util.ErrorHandler;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
-	private static final JmsProcessObservationConvention DEFAULT_CONVENTION = new DefaultJmsProcessObservationConvention();
+	private static final boolean micrometerCorePresent = ClassUtils.isPresent(
+			"io.micrometer.core.instrument.binder.jms.JmsInstrumentation", AbstractMessageListenerContainer.class.getClassLoader());
 
 	@Nullable
 	private volatile Object destination;
@@ -703,8 +705,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		}
 
 		try {
-			Observation observation = JmsObservationDocumentation.JMS_MESSAGE_PROCESS
-					.observation(null, DEFAULT_CONVENTION, () -> new JmsProcessObservationContext(message), this.observationRegistry);
+			Observation observation = createObservation(message);
 			observation.observeChecked(() -> invokeListener(session, message));
 		}
 		catch (JMSException | RuntimeException | Error ex) {
@@ -712,6 +713,15 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			throw ex;
 		}
 		commitIfNecessary(session, message);
+	}
+
+	private Observation createObservation(Message message) {
+		if (micrometerCorePresent) {
+			return ObservationFactory.create(this.observationRegistry, message);
+		}
+		else {
+			return Observation.NOOP;
+		}
 	}
 
 	/**
@@ -758,8 +768,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 		Connection conToClose = null;
 		Session sessionToClose = null;
-		Observation observation = JmsObservationDocumentation.JMS_MESSAGE_PROCESS
-				.observation(null, DEFAULT_CONVENTION, () -> new JmsProcessObservationContext(message), this.observationRegistry);
+		Observation observation = createObservation(message);
 		try {
 			Session sessionToUse = session;
 			if (!isExposeListenerSession()) {
@@ -980,6 +989,16 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@SuppressWarnings("serial")
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
+	}
+
+	private static abstract class ObservationFactory {
+
+		private static final JmsProcessObservationConvention DEFAULT_CONVENTION = new DefaultJmsProcessObservationConvention();
+
+		static Observation create(@Nullable ObservationRegistry registry, Message message) {
+			return JmsObservationDocumentation.JMS_MESSAGE_PROCESS
+					.observation(null, DEFAULT_CONVENTION, () -> new JmsProcessObservationContext(message), registry);
+		}
 	}
 
 }
