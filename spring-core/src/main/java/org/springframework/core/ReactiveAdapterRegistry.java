@@ -135,16 +135,45 @@ public class ReactiveAdapterRegistry {
 	 * Register a reactive type along with functions to adapt to and from a
 	 * Reactive Streams {@link Publisher}. The function arguments assume that
 	 * their input is neither {@code null} nor {@link Optional}.
+	 * <p>This variant registers the new adapter after existing adapters.
+	 * It will be matched for the exact reactive type if no earlier adapter was
+	 * registered for the specific type, and it will be matched for assignability
+	 * in a second pass if no earlier adapter had an assignable type before.
+	 * @see #registerReactiveTypeOverride
+	 * @see #getAdapter
 	 */
 	public void registerReactiveType(ReactiveTypeDescriptor descriptor,
 			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
 
-		if (reactorPresent) {
-			this.adapters.add(new ReactorAdapter(descriptor, toAdapter, fromAdapter));
-		}
-		else {
-			this.adapters.add(new ReactiveAdapter(descriptor, toAdapter, fromAdapter));
-		}
+		this.adapters.add(buildAdapter(descriptor, toAdapter, fromAdapter));
+	}
+
+	/**
+	 * Register a reactive type along with functions to adapt to and from a
+	 * Reactive Streams {@link Publisher}. The function arguments assume that
+	 * their input is neither {@code null} nor {@link Optional}.
+	 * <p>This variant registers the new adapter first, effectively overriding
+	 * any previously registered adapters for the same reactive type. This allows
+	 * for overriding existing adapters, in particular default adapters.
+	 * <p>Note that existing adapters for specific types will still match before
+	 * an assignability match with the new adapter. In order to override all
+	 * existing matches, a new reactive type adapter needs to be registered
+	 * for every specific type, not relying on subtype assignability matches.
+	 * @since 5.3.30
+	 * @see #registerReactiveType
+	 * @see #getAdapter
+	 */
+	public void registerReactiveTypeOverride(ReactiveTypeDescriptor descriptor,
+			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
+
+		this.adapters.add(0, buildAdapter(descriptor, toAdapter, fromAdapter));
+	}
+
+	private ReactiveAdapter buildAdapter(ReactiveTypeDescriptor descriptor,
+			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
+
+		return (reactorPresent ? new ReactorAdapter(descriptor, toAdapter, fromAdapter) :
+				new ReactiveAdapter(descriptor, toAdapter, fromAdapter));
 	}
 
 	/**
