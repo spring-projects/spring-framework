@@ -307,12 +307,12 @@ class PropertySourceAnnotationTests {
 
 	private static void assertEnvironmentContainsProperties(ApplicationContext ctx, String... names) {
 		for (String name : names) {
-			assertThat(ctx.getEnvironment().containsProperty(name)).as("environment contains property " + name).isTrue();
+			assertThat(ctx.getEnvironment().containsProperty(name)).as("environment contains property '%s'", name).isTrue();
 		}
 	}
 
 	private static void assertEnvironmentProperty(ApplicationContext ctx, String name, Object value) {
-		assertThat(ctx.getEnvironment().getProperty(name)).isEqualTo(value);
+		assertThat(ctx.getEnvironment().getProperty(name)).as("environment property '%s'", name).isEqualTo(value);
 	}
 
 
