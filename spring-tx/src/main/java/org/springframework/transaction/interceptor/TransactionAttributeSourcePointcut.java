@@ -57,8 +57,8 @@ class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut imp
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof TransactionAttributeSourcePointcut otherPc &&
-				ObjectUtils.nullSafeEquals(this.transactionAttributeSource, otherPc.transactionAttributeSource)));
+		return (this == other || (other instanceof TransactionAttributeSourcePointcut that &&
+				ObjectUtils.nullSafeEquals(this.transactionAttributeSource, that.transactionAttributeSource)));
 	}
 
 	@Override
