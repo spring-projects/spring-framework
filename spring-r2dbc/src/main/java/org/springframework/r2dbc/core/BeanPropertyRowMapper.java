@@ -330,7 +330,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 					bw.setPropertyValue(pd.getName(), value);
 				}
 				catch (TypeMismatchException ex) {
-					if (value == null && this.primitivesDefaultedForNullValue) {
+					if (value == null && isPrimitivesDefaultedForNullValue()) {
 						if (logger.isDebugEnabled()) {
 							String propertyType = ClassUtils.getQualifiedName(pd.getPropertyType());
 							//here too, we miss the rowNumber information

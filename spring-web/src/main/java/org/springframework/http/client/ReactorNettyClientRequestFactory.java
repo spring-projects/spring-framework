@@ -36,11 +36,9 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 
 	private final HttpClient httpClient;
 
-
 	private Duration exchangeTimeout = Duration.ofSeconds(5);
 
 	private Duration readTimeout = Duration.ofSeconds(10);
-
 
 
 	/**
@@ -60,6 +58,7 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 		Assert.notNull(httpClient, "HttpClient must not be null");
 		this.httpClient = httpClient;
 	}
+
 
 	/**
 	 * Set the underlying connect timeout in milliseconds.
@@ -125,9 +124,9 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	}
 
 
-
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		return new ReactorNettyClientRequest(this.httpClient, uri, httpMethod, this.exchangeTimeout, this.readTimeout);
 	}
+
 }

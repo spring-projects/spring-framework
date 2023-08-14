@@ -141,11 +141,9 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 
 		private final ByteBufAllocator allocator;
 
-
 		public ByteBufMapper(ByteBufAllocator allocator) {
 			this.allocator = allocator;
 		}
-
 
 		@Override
 		public ByteBuf map(int b) {
@@ -161,4 +159,5 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 			return byteBuf;
 		}
 	}
+
 }

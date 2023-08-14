@@ -51,25 +51,6 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private static final Set<String> DISALLOWED_HEADERS = disallowedHeaders();
 
-	/**
-	 * By default, {@link HttpRequest} does not allow {@code Connection},
-	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
-	 * headers to be set, but this can be overriden with the
-	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
-	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
-	 */
-	private static Set<String> disallowedHeaders() {
-		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
-
-		String headersToAllow = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
-		if (headersToAllow != null) {
-			Set<String> toAllow = StringUtils.commaDelimitedListToSet(headersToAllow);
-			headers.removeAll(toAllow);
-		}
-		return Collections.unmodifiableSet(headers);
-	}
-
 
 	private final HttpClient httpClient;
 
@@ -85,12 +66,14 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
 			@Nullable Duration readTimeout) {
+
 		this.httpClient = httpClient;
 		this.uri = uri;
 		this.method = method;
 		this.executor = executor;
 		this.timeout = readTimeout;
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
@@ -107,7 +90,8 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		try {
 			HttpRequest request = buildRequest(headers, body);
-			HttpResponse<InputStream> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+			HttpResponse<InputStream> response =
+					this.httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			return new JdkClientHttpResponse(response);
 		}
 		catch (UncheckedIOException ex) {
@@ -121,9 +105,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
-		HttpRequest.Builder builder = HttpRequest.newBuilder()
-				.uri(this.uri);
-
+		HttpRequest.Builder builder = HttpRequest.newBuilder().uri(this.uri);
 		if (this.timeout != null) {
 			builder.timeout(this.timeout);
 		}
@@ -144,8 +126,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		if (body != null) {
 			Flow.Publisher<ByteBuffer> outputStreamPublisher = OutputStreamPublisher.create(
 					outputStream -> body.writeTo(StreamUtils.nonClosing(outputStream)),
-					BYTE_MAPPER,
-					this.executor);
+					BYTE_MAPPER, this.executor);
 
 			long contentLength = headers.getContentLength();
 			if (contentLength != -1) {
@@ -158,6 +139,25 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		else {
 			return HttpRequest.BodyPublishers.noBody();
 		}
+	}
+
+	/**
+	 * By default, {@link HttpRequest} does not allow {@code Connection},
+	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
+	 * headers to be set, but this can be overriden with the
+	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
+	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
+	 */
+	private static Set<String> disallowedHeaders() {
+		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
+
+		String headersToAllow = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
+		if (headersToAllow != null) {
+			Set<String> toAllow = StringUtils.commaDelimitedListToSet(headersToAllow);
+			headers.removeAll(toAllow);
+		}
+		return Collections.unmodifiableSet(headers);
 	}
 
 
@@ -178,7 +178,6 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			byteBuffer.flip();
 			return byteBuffer;
 		}
-
 	}
 
 }

@@ -48,13 +48,13 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 	private volatile InputStream body;
 
 
-
 	public ReactorNettyClientResponse(HttpClientResponse response, Connection connection, Duration readTimeout) {
 		this.response = response;
 		this.connection = connection;
 		this.readTimeout = readTimeout;
 		this.headers = HttpHeaders.readOnlyHttpHeaders(new Netty4HeadersAdapter(response.responseHeaders()));
 	}
+
 
 	@Override
 	public HttpStatusCode getStatusCode() {
@@ -73,21 +73,23 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 
 	@Override
 	public InputStream getBody() throws IOException {
-		if (this.body == null) {
-			InputStream body = this.connection.inbound().receive()
-					.aggregate().asInputStream().block(this.readTimeout);
-			if (body != null) {
-				this.body = body;
-			}
-			else {
-				throw new IOException("Could not receive body");
-			}
+		InputStream body = this.body;
+		if (body != null) {
+			return body;
 		}
-		return this.body;
+
+		body = this.connection.inbound().receive()
+				.aggregate().asInputStream().block(this.readTimeout);
+		if (body == null) {
+			throw new IOException("Could not receive body");
+		}
+		this.body = body;
+		return body;
 	}
 
 	@Override
 	public void close() {
 		this.connection.dispose();
 	}
+
 }

@@ -27,7 +27,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-
 /**
  * {@link ClientHttpRequestFactory} implementation based on the Java
  * {@link HttpClient}.

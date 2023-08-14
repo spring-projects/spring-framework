@@ -52,7 +52,7 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 		this.response = response;
 		this.headers = adaptHeaders(response);
 		InputStream inputStream = response.body();
-		this.body = (inputStream != null) ? inputStream : InputStream.nullInputStream();
+		this.body = (inputStream != null ? inputStream : InputStream.nullInputStream());
 	}
 
 	private static HttpHeaders adaptHeaders(HttpResponse<?> response) {
@@ -103,4 +103,5 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 		catch (IOException ignored) {
 		}
 	}
+
 }
