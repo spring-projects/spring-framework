@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.server
+package org.springframework.web.server
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.http.codec.multipart.Part
 import org.springframework.util.MultiValueMap
-import org.springframework.web.server.ServerWebExchange
-import org.springframework.web.server.WebSession
 import java.security.Principal
 
 /**
  * Coroutines variant of [ServerWebExchange.getFormData].
  *
  * @author Sebastien Deleuze
- * @since 5.2
+ * @since 6.1
  */
-@Deprecated(
-	message = "Use the variant with the org.springframework.web.server package instead.",
-	ReplaceWith("awaitFormData()", "org.springframework.web.server.awaitFormData"),
-)
 suspend fun ServerWebExchange.awaitFormData(): MultiValueMap<String, String> =
 		this.formData.awaitSingle()
 
@@ -42,12 +36,8 @@ suspend fun ServerWebExchange.awaitFormData(): MultiValueMap<String, String> =
  * Coroutines variant of [ServerWebExchange.getMultipartData].
  *
  * @author Sebastien Deleuze
- * @since 5.2
+ * @since 6.1
  */
-@Deprecated(
-	message = "Use the variant with the org.springframework.web.server package instead.",
-	ReplaceWith("awaitMultipartData()", "org.springframework.web.server.awaitMultipartData"),
-)
 suspend fun ServerWebExchange.awaitMultipartData(): MultiValueMap<String, Part> =
 		this.multipartData.awaitSingle()
 
@@ -55,12 +45,8 @@ suspend fun ServerWebExchange.awaitMultipartData(): MultiValueMap<String, Part> 
  * Coroutines variant of [ServerWebExchange.getPrincipal].
  *
  * @author Sebastien Deleuze
- * @since 5.2
+ * @since 6.1
  */
-@Deprecated(
-	message = "Use the variant with the org.springframework.web.server package instead.",
-	ReplaceWith("awaitPrincipal<T>()", "org.springframework.web.server.awaitPrincipal"),
-)
 suspend fun <T : Principal> ServerWebExchange.awaitPrincipal(): T =
 		this.getPrincipal<T>().awaitSingle()
 
@@ -68,12 +54,8 @@ suspend fun <T : Principal> ServerWebExchange.awaitPrincipal(): T =
  * Coroutines variant of [ServerWebExchange.getSession].
  *
  * @author Sebastien Deleuze
- * @since 5.2
+ * @since 6.1
  */
-@Deprecated(
-	message = "Use the variant with the org.springframework.web.server package instead.",
-	ReplaceWith("awaitSession()", "org.springframework.web.server.awaitSession"),
-)
 suspend fun ServerWebExchange.awaitSession(): WebSession =
 		this.session.awaitSingle()
 
@@ -81,11 +63,7 @@ suspend fun ServerWebExchange.awaitSession(): WebSession =
  * Coroutines variant of [ServerWebExchange.Builder.principal].
  *
  * @author Sebastien Deleuze
- * @since 5.2
+ * @since 6.1
  */
-@Deprecated(
-	message = "Use the variant with the org.springframework.web.server package instead.",
-	ReplaceWith("principal(supplier)", "org.springframework.web.server.principal"),
-)
 fun ServerWebExchange.Builder.principal(supplier: suspend () -> Principal): ServerWebExchange.Builder
         = principal(mono(Dispatchers.Unconfined) { supplier.invoke() })
