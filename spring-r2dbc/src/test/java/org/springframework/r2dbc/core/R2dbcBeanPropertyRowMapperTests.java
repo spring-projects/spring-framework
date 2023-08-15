@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -37,6 +36,8 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 /**
  * Tests for R2DBC-based {@link BeanPropertyRowMapper}.
  *
+ * @author Simon Baslé
+ * @author Juergen Hoeller
  * @since 6.1
  */
 class R2dbcBeanPropertyRowMapperTests {
@@ -93,20 +94,6 @@ class R2dbcBeanPropertyRowMapperTests {
 	}
 
 	@Test
-	void mappingRowMissingAttributeRejected() {
-		Class<ExtendedPerson> mappedClass = ExtendedPerson.class;
-		MockRow mockRow = SIMPLE_PERSON_ROW;
-		BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(mappedClass, true);
-
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-				.isThrownBy(() -> mapper.apply(mockRow))
-				.withMessage("Given readable does not contain all items necessary to populate object of %s"
-						+ ": [firstName, lastName, address, age]", mappedClass);
-	}
-
-	// TODO cannot trigger a mapping of a read-only property, as mappedProperties don't include properties without a setter.
-
-	@Test
 	void rowTypeAndMappingTypeMisaligned() {
 		MockRow mockRow = EXTENDED_PERSON_ROW;
 		BeanPropertyRowMapper<TypeMismatchExtendedPerson> mapper = new BeanPropertyRowMapper<>(TypeMismatchExtendedPerson.class);
@@ -115,27 +102,6 @@ class R2dbcBeanPropertyRowMapperTests {
 				.isThrownBy(() -> mapper.apply(mockRow))
 				.withMessage("Failed to convert property value of type 'java.lang.String' to required type "
 						+ "'java.lang.String' for property 'address'; simulating type mismatch for address");
-	}
-
-	@Test
-	void usePrimitiveDefaultWithNullValueFromRow() {
-		MockRow mockRow = MockRow.builder()
-				.metadata(MockRowMetadata.builder()
-						.columnMetadata(MockColumnMetadata.builder().name("firstName").javaType(String.class).build())
-						.columnMetadata(MockColumnMetadata.builder().name("lastName").javaType(String.class).build())
-						.columnMetadata(MockColumnMetadata.builder().name("age").javaType(Integer.class).build())
-						.build())
-				.identified(0, String.class, "John")
-				.identified(1, String.class, "Doe")
-				.identified(2, int.class, null)
-				.identified(3, String.class, "123 Sesame Street")
-				.build();
-		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
-		mapper.setPrimitivesDefaultedForNullValue(true);
-
-		Person result = mapper.apply(mockRow);
-
-		assertThat(result.getAge()).isZero();
 	}
 
 	@ParameterizedTest

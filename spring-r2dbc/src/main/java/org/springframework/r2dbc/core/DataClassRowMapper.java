@@ -27,9 +27,8 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Mapping {@code Function} implementation that converts an R2DBC {@link Readable}
@@ -63,17 +62,13 @@ import org.springframework.util.Assert;
  * @since 6.1
  * @param <T> the result type
  */
-// Note: this class is adapted from the DataClassRowMapper in spring-jdbc
 public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 
-	@Nullable
-	private Constructor<T> mappedConstructor;
+	private final Constructor<T> mappedConstructor;
 
-	@Nullable
-	private String[] constructorParameterNames;
+	private final String[] constructorParameterNames;
 
-	@Nullable
-	private TypeDescriptor[] constructorParameterTypes;
+	private final TypeDescriptor[] constructorParameterTypes;
 
 
 	/**
@@ -81,57 +76,47 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public DataClassRowMapper(Class<T> mappedClass) {
-		super(mappedClass);
+		this(mappedClass, DefaultConversionService.getSharedInstance());
 	}
 
-
-	@Override
-	protected void initialize(Class<T> mappedClass) {
-		super.initialize(mappedClass);
+	public DataClassRowMapper(Class<T> mappedClass, ConversionService conversionService) {
+		super(mappedClass, conversionService);
 
 		this.mappedConstructor = BeanUtils.getResolvableConstructor(mappedClass);
 		int paramCount = this.mappedConstructor.getParameterCount();
-		if (paramCount > 0) {
-			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
-			for (String name : this.constructorParameterNames) {
-				suppressProperty(name);
-			}
-			this.constructorParameterTypes = new TypeDescriptor[paramCount];
-			for (int i = 0; i < paramCount; i++) {
-				this.constructorParameterTypes[i] = new TypeDescriptor(new MethodParameter(this.mappedConstructor, i));
-			}
+		this.constructorParameterNames = (paramCount > 0 ?
+				BeanUtils.getParameterNames(this.mappedConstructor) : new String[0]);
+		for (String name : this.constructorParameterNames) {
+			suppressProperty(name);
+		}
+		this.constructorParameterTypes = new TypeDescriptor[paramCount];
+		for (int i = 0; i < paramCount; i++) {
+			this.constructorParameterTypes[i] = new TypeDescriptor(new MethodParameter(this.mappedConstructor, i));
 		}
 	}
+
 
 	@Override
 	protected T constructMappedInstance(Readable readable, List<? extends ReadableMetadata> itemMetadatas, TypeConverter tc) {
-		Assert.state(this.mappedConstructor != null, "Mapped constructor was not initialized");
-
-		Object[] args;
-		if (this.constructorParameterNames != null && this.constructorParameterTypes != null) {
-			args = new Object[this.constructorParameterNames.length];
-			for (int i = 0; i < args.length; i++) {
-				String name = this.constructorParameterNames[i];
-				int index = findIndex(readable, itemMetadatas, lowerCaseName(name));
-				if (index == -1) {
-					index = findIndex(readable, itemMetadatas, underscoreName(name));
-				}
-				if (index == -1) {
-					throw new DataRetrievalFailureException("Unable to map constructor parameter '" + name + "' to a column or out-parameter");
-				}
-				TypeDescriptor td = this.constructorParameterTypes[i];
-				Object value = getItemValue(readable, index, td.getType());
-				args[i] = tc.convertIfNecessary(value, td.getType(), td);
+		Object[] args = new Object[this.constructorParameterNames.length];
+		for (int i = 0; i < args.length; i++) {
+			String name = this.constructorParameterNames[i];
+			int index = findIndex(itemMetadatas, lowerCaseName(name));
+			if (index == -1) {
+				index = findIndex(itemMetadatas, underscoreName(name));
 			}
+			if (index == -1) {
+				throw new DataRetrievalFailureException(
+						"Unable to map constructor parameter '" + name + "' to a column or out-parameter");
+			}
+			TypeDescriptor td = this.constructorParameterTypes[i];
+			Object value = getItemValue(readable, index, td.getType());
+			args[i] = tc.convertIfNecessary(value, td.getType(), td);
 		}
-		else {
-			args = new Object[0];
-		}
-
 		return BeanUtils.instantiateClass(this.mappedConstructor, args);
 	}
 
-	private int findIndex(Readable readable, List<? extends ReadableMetadata> itemMetadatas, String name) {
+	private int findIndex(List<? extends ReadableMetadata> itemMetadatas, String name) {
 		int index = 0;
 		for (ReadableMetadata itemMetadata : itemMetadatas) {
 			// we use equalsIgnoreCase, similar to RowMetadata#contains(String)
@@ -141,32 +126,6 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 			index++;
 		}
 		return -1;
-	}
-
-
-	/**
-	 * Static factory method to create a new {@code DataClassRowMapper}.
-	 * @param mappedClass the class that each row should be mapped to
-	 * @see #newInstance(Class, ConversionService)
-	 */
-	public static <T> DataClassRowMapper<T> newInstance(Class<T> mappedClass) {
-		return new DataClassRowMapper<>(mappedClass);
-	}
-
-	/**
-	 * Static factory method to create a new {@code DataClassRowMapper}.
-	 * @param mappedClass the class that each row should be mapped to
-	 * @param conversionService the {@link ConversionService} for binding
-	 * R2DBC values to bean properties, or {@code null} for none
-	 * @see #newInstance(Class)
-	 * @see #setConversionService
-	 */
-	public static <T> DataClassRowMapper<T> newInstance(
-			Class<T> mappedClass, @Nullable ConversionService conversionService) {
-
-		DataClassRowMapper<T> rowMapper = newInstance(mappedClass);
-		rowMapper.setConversionService(conversionService);
-		return rowMapper;
 	}
 
 }

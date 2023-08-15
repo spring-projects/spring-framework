@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  * @author Mingyuan Wu
+ * @author Juergen Hoeller
  */
 abstract class AbstractDatabaseClientIntegrationTests {
 
@@ -93,6 +94,25 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	@Test
+	public void executeInsertWithRecords() {
+		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
+				.bindProperties(new ParameterRecord(42055, "SCHAUFELRADBAGGER", null))
+				.fetch().rowsUpdated()
+				.as(StepVerifier::create)
+				.expectNext(1L)
+				.verifyComplete();
+
+		databaseClient.sql("SELECT id FROM legoset")
+				.mapProperties(ResultRecord.class)
+				.first()
+				.as(StepVerifier::create)
+				.assertNext(actual -> assertThat(actual.id()).isEqualTo(42055))
+				.verifyComplete();
+	}
+
+	@Test
 	public void shouldTranslateDuplicateKeyException() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
@@ -145,6 +165,13 @@ abstract class AbstractDatabaseClientIntegrationTests {
 				.as(StepVerifier::create)
 				.expectNextCount(1)
 				.verifyComplete();
+	}
+
+
+	record ParameterRecord(int id, String name, Integer manual) {
+	}
+
+	record ResultRecord(int id) {
 	}
 
 }

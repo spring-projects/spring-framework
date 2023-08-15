@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -47,6 +48,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
@@ -54,6 +56,7 @@ import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -64,6 +67,7 @@ import org.springframework.util.StringUtils;
  * @author Mingyuan Wu
  * @author Bogdan Ilchyshyn
  * @author Simon Baslé
+ * @author Juergen Hoeller
  * @since 5.3
  * @see DatabaseClient#create(ConnectionFactory)
  */
@@ -311,6 +315,23 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@Override
+		public DefaultGenericExecuteSpec bindProperties(Object source) {
+			assertNotPreparedOperation();
+			Assert.notNull(source, "Parameter source must not be null");
+
+			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
+			for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(source.getClass())) {
+				if (pd.getReadMethod() != null && pd.getReadMethod().getDeclaringClass() != Object.class) {
+					ReflectionUtils.makeAccessible(pd.getReadMethod());
+					Object value = ReflectionUtils.invokeMethod(pd.getReadMethod(), source);
+					byName.put(pd.getName(), (value != null ? Parameters.in(value) : Parameters.in(pd.getPropertyType())));
+				}
+			}
+
+			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
+		}
+
+		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
 			Assert.notNull(filter, "StatementFilterFunction must not be null");
 			return new DefaultGenericExecuteSpec(
@@ -327,6 +348,18 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		public <R> FetchSpec<R> map(BiFunction<Row, RowMetadata, R> mappingFunction) {
 			Assert.notNull(mappingFunction, "Mapping function must not be null");
 			return execute(this.sqlSupplier, result -> result.map(mappingFunction));
+		}
+
+		@Override
+		public <R> RowsFetchSpec<R> mapValue(Class<R> mappedClass) {
+			Assert.notNull(mappedClass, "Mapped class must not be null");
+			return execute(this.sqlSupplier, result -> result.map(row -> row.get(0, mappedClass)));
+		}
+
+		@Override
+		public <R> FetchSpec<R> mapProperties(Class<R> mappedClass) {
+			Assert.notNull(mappedClass, "Mapped class must not be null");
+			return execute(this.sqlSupplier, result -> result.map(new DataClassRowMapper<R>(mappedClass)));
 		}
 
 		@Override
@@ -392,24 +425,20 @@ final class DefaultDatabaseClient implements DatabaseClient {
 				return statement;
 			};
 
-			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction, DefaultDatabaseClient.this.executeFunction);
+			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction,
+					DefaultDatabaseClient.this.executeFunction);
 		}
 
 		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> resultAdapter) {
 			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-
-			return new DefaultFetchSpec<>(
-					DefaultDatabaseClient.this,
-					resultHandler,
-					connection -> sumRowsUpdated(resultHandler, connection),
-					resultAdapter);
+			return new DefaultFetchSpec<>(DefaultDatabaseClient.this, resultHandler,
+					connection -> sumRowsUpdated(resultHandler, connection), resultAdapter);
 		}
 
 		private <T> Flux<T> flatMap(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> mappingFunction) {
 			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-			ConnectionFunction<Flux<T>> connectionFunction = new DelegateConnectionFunction<>(resultHandler, cx -> resultHandler
-					.apply(cx)
-					.flatMap(mappingFunction));
+			ConnectionFunction<Flux<T>> connectionFunction = new DelegateConnectionFunction<>(resultHandler,
+					cx -> resultHandler.apply(cx).flatMap(mappingFunction));
 			return inConnectionMany(connectionFunction);
 		}
 
@@ -448,8 +477,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 		private void assertNotPreparedOperation() {
 			if (this.sqlSupplier instanceof PreparedOperation<?>) {
-				throw new InvalidDataAccessApiUsageException(
-						"Cannot add bindings to a PreparedOperation");
+				throw new InvalidDataAccessApiUsageException("Cannot add bindings to a PreparedOperation");
 			}
 		}
 
@@ -497,8 +525,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 					return this.target;
 				case "close":
 					// Handle close method: suppress, not valid.
-					return Mono.error(
-							new UnsupportedOperationException("Close is not supported!"));
+					return Mono.error(new UnsupportedOperationException("Close is not supported!"));
 			}
 
 			// Invoke method on target Connection.

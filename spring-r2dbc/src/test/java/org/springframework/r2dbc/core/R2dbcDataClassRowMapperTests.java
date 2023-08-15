@@ -30,6 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test for R2DBC-based {@link DataClassRowMapper}.
  *
+ * @author Simon Baslé
+ * @author Juergen Hoeller
  * @since 6.1
  */
 class R2dbcDataClassRowMapperTests {

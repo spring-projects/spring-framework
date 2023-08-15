@@ -55,6 +55,7 @@ import org.springframework.util.Assert;
  *     .first();</pre>
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.3
  */
 public interface DatabaseClient extends ConnectionAccessor {
@@ -192,6 +193,14 @@ public interface DatabaseClient extends ConnectionAccessor {
 		GenericExecuteSpec bindNull(String name, Class<?> type);
 
 		/**
+		 * Bind the bean properties or record components from the given
+		 * source object, registering each as a named parameter.
+		 * @param source the source object (a JavaBean or record)
+		 * @since 6.1
+		 */
+		GenericExecuteSpec bindProperties(Object source);
+
+		/**
 		 * Add the given filter to the end of the filter chain.
 		 * <p>Filter functions are typically used to invoke methods on the Statement
 		 * before it is executed. For example:
@@ -222,7 +231,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Configure a result mapping {@link Function function} and enter the execution stage.
 		 * @param mappingFunction a function that maps from {@link Readable} to the result type
 		 * @param <R> the result type
-		 * @return a {@link FetchSpec} for configuration what to fetch
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
 		 * @since 6.0
 		 */
 		<R> RowsFetchSpec<R> map(Function<? super Readable, R> mappingFunction);
@@ -232,12 +241,33 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @param mappingFunction a function that maps from {@link Row} and {@link RowMetadata}
 		 * to the result type
 		 * @param <R> the result type
-		 * @return a {@link FetchSpec} for configuration what to fetch
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
 		 */
 		<R> RowsFetchSpec<R> map(BiFunction<Row, RowMetadata, R> mappingFunction);
 
 		/**
-		 * Perform the SQL call and apply {@link BiFunction function} to the {@link  Result}.
+		 * Configure a mapping for values in the first column and enter the execution stage.
+		 * @param mappedClass the target class (a database-supported value class)
+		 * @param <R> the result type
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
+		 * @since 6.1
+		 * @see Readable#get(int, Class)
+		 */
+		<R> RowsFetchSpec<R> mapValue(Class<R> mappedClass);
+
+		/**
+		 * Configure a row mapper for the given mapped class and enter the execution stage.
+		 * @param mappedClass the target class (a JavaBean or record) with properties to
+		 * map to (bean properties or record components)
+		 * @param <R> the result type
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
+		 * @since 6.1
+		 * @see DataClassRowMapper
+		 */
+		<R> RowsFetchSpec<R> mapProperties(Class<R> mappedClass);
+
+		/**
+		 * Perform the SQL call and apply {@link BiFunction function} to the {@link Result}.
 		 * @param mappingFunction a function that maps from {@link Result} into a result publisher
 		 * @param <R> the result type
 		 * @return a {@link Flux} that emits mapped elements

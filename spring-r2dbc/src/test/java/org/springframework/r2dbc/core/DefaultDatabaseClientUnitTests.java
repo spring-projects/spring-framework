@@ -103,7 +103,7 @@ class DefaultDatabaseClientUnitTests {
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder.build();
 		Flux<Object> flux = databaseClient.inConnectionMany(connection -> Flux.empty());
 
-		flux.subscribe(new CoreSubscriber<Object>() {
+		flux.subscribe(new CoreSubscriber<>() {
 
 			Subscription subscription;
 
@@ -136,13 +136,15 @@ class DefaultDatabaseClientUnitTests {
 
 		DatabaseClient databaseClient = databaseClientBuilder.namedParameters(false).build();
 
-		databaseClient.sql("SELECT * FROM table WHERE key = $1").bindNull(0,
-				String.class).then().as(StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = $1")
+				.bindNull(0, String.class)
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind(0, Parameters.in(String.class));
 
-		databaseClient.sql("SELECT * FROM table WHERE key = $1").bindNull("$1",
-				String.class).then().as(StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = $1")
+				.bindNull("$1", String.class)
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind("$1", Parameters.in(String.class));
 	}
@@ -153,15 +155,15 @@ class DefaultDatabaseClientUnitTests {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 		DatabaseClient databaseClient = databaseClientBuilder.namedParameters(false).build();
 
-		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind(0,
-				Parameter.empty(String.class)).then().as(
-						StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = $1")
+				.bind(0, Parameter.empty(String.class))
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind(0, Parameters.in(String.class));
 
-		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind("$1",
-				Parameter.empty(String.class)).then().as(
-						StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = $1")
+				.bind("$1", Parameter.empty(String.class))
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind("$1", Parameters.in(String.class));
 	}
@@ -171,8 +173,9 @@ class DefaultDatabaseClientUnitTests {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
-		databaseClient.sql("SELECT * FROM table WHERE key = :key").bindNull("key",
-				String.class).then().as(StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = :key")
+				.bindNull("key", String.class)
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind(0, Parameters.in(String.class));
 	}
@@ -185,9 +188,9 @@ class DefaultDatabaseClientUnitTests {
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
 		databaseClient.sql(
-				"SELECT id, name, manual FROM legoset WHERE name IN (:name)").bind(0,
-						Arrays.asList("unknown", "dunno", "other")).then().as(
-								StepVerifier::create).verifyComplete();
+				"SELECT id, name, manual FROM legoset WHERE name IN (:name)")
+				.bind(0, Arrays.asList("unknown", "dunno", "other"))
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind(0, "unknown");
 		verify(statement).bind(1, "dunno");
@@ -207,8 +210,9 @@ class DefaultDatabaseClientUnitTests {
 
 		verify(statement).bind(0, Parameters.in("foo"));
 
-		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind("$1",
-				"foo").then().as(StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = $1")
+				.bind("$1", "foo")
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind("$1", Parameters.in("foo"));
 	}
@@ -218,8 +222,33 @@ class DefaultDatabaseClientUnitTests {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
-		databaseClient.sql("SELECT * FROM table WHERE key = :key").bind("key",
-				"foo").then().as(StepVerifier::create).verifyComplete();
+		databaseClient.sql("SELECT * FROM table WHERE key = :key")
+				.bind("key", "foo")
+				.then().as(StepVerifier::create).verifyComplete();
+
+		verify(statement).bind(0, Parameters.in("foo"));
+	}
+
+	@Test
+	void executeShouldBindBeanByIndex() {
+		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
+		DatabaseClient databaseClient = databaseClientBuilder.build();
+
+		databaseClient.sql("SELECT * FROM table WHERE key = :key")
+				.bindProperties(new ParameterBean("foo"))
+				.then().as(StepVerifier::create).verifyComplete();
+
+		verify(statement).bind(0, Parameters.in("foo"));
+	}
+
+	@Test
+	void executeShouldBindRecordByIndex() {
+		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
+		DatabaseClient databaseClient = databaseClientBuilder.build();
+
+		databaseClient.sql("SELECT * FROM table WHERE key = :key")
+				.bindProperties(new ParameterRecord("foo"))
+				.then().as(StepVerifier::create).verifyComplete();
 
 		verify(statement).bind(0, Parameters.in("foo"));
 	}
@@ -249,15 +278,15 @@ class DefaultDatabaseClientUnitTests {
 				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult result = MockResult.builder().row(
-					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
-					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+					MockRow.builder().identified(0, String.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, String.class, "White").metadata(metadata).build()
 				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
-		databaseClient.sql("SELECT * FROM person").map(row -> row.get(0))
+		databaseClient.sql("SELECT * FROM person").mapValue(String.class)
 				.first()
 				.as(StepVerifier::create)
 				.expectNext("Walter")
@@ -270,15 +299,15 @@ class DefaultDatabaseClientUnitTests {
 				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult result = MockResult.builder().row(
-					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
-					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+					MockRow.builder().identified(0, String.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, String.class, "White").metadata(metadata).build()
 				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
-		databaseClient.sql("SELECT * FROM person").map(row -> row.get(0))
+		databaseClient.sql("SELECT * FROM person").mapValue(String.class)
 				.all()
 				.as(StepVerifier::create)
 				.expectNext("Walter")
@@ -292,15 +321,15 @@ class DefaultDatabaseClientUnitTests {
 				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
 		MockResult result = MockResult.builder().row(
-					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
-					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+					MockRow.builder().identified(0, String.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, String.class, "White").metadata(metadata).build()
 				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
-		databaseClient.sql("SELECT * FROM person").map(row -> row.get(0))
+		databaseClient.sql("SELECT * FROM person").mapValue(String.class)
 				.one()
 				.as(StepVerifier::create)
 				.verifyError(IncorrectResultSizeDataAccessException.class);
@@ -467,6 +496,24 @@ class DefaultDatabaseClientUnitTests {
 			resultBuilder = resultBuilder.row(row.metadata(metadata).build());
 		}
 		return resultBuilder.build();
+	}
+
+
+	static class ParameterBean {
+
+		private final String key;
+
+		public ParameterBean(String key) {
+			this.key = key;
+		}
+
+		public String getKey() {
+			return key;
+		}
+	}
+
+
+	record ParameterRecord(String key) {
 	}
 
 }
