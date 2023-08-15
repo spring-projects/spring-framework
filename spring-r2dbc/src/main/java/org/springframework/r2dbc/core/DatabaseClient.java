@@ -222,7 +222,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Configure a result mapping {@link Function function} and enter the execution stage.
 		 * @param mappingFunction a function that maps from {@link Readable} to the result type
 		 * @param <R> the result type
-		 * @return a {@link FetchSpec} for configuration what to fetch
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
 		 * @since 6.0
 		 */
 		<R> RowsFetchSpec<R> map(Function<? super Readable, R> mappingFunction);
@@ -232,12 +232,12 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @param mappingFunction a function that maps from {@link Row} and {@link RowMetadata}
 		 * to the result type
 		 * @param <R> the result type
-		 * @return a {@link FetchSpec} for configuration what to fetch
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
 		 */
 		<R> RowsFetchSpec<R> map(BiFunction<Row, RowMetadata, R> mappingFunction);
 
 		/**
-		 * Perform the SQL call and apply {@link BiFunction function} to the {@link  Result}.
+		 * Perform the SQL call and apply {@link BiFunction function} to the {@link Result}.
 		 * @param mappingFunction a function that maps from {@link Result} into a result publisher
 		 * @param <R> the result type
 		 * @return a {@link Flux} that emits mapped elements

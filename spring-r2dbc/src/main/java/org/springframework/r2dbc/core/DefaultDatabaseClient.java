@@ -392,24 +392,20 @@ final class DefaultDatabaseClient implements DatabaseClient {
 				return statement;
 			};
 
-			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction, DefaultDatabaseClient.this.executeFunction);
+			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction,
+					DefaultDatabaseClient.this.executeFunction);
 		}
 
 		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> resultAdapter) {
 			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-
-			return new DefaultFetchSpec<>(
-					DefaultDatabaseClient.this,
-					resultHandler,
-					connection -> sumRowsUpdated(resultHandler, connection),
-					resultAdapter);
+			return new DefaultFetchSpec<>(DefaultDatabaseClient.this, resultHandler,
+					connection -> sumRowsUpdated(resultHandler, connection), resultAdapter);
 		}
 
 		private <T> Flux<T> flatMap(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> mappingFunction) {
 			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-			ConnectionFunction<Flux<T>> connectionFunction = new DelegateConnectionFunction<>(resultHandler, cx -> resultHandler
-					.apply(cx)
-					.flatMap(mappingFunction));
+			ConnectionFunction<Flux<T>> connectionFunction = new DelegateConnectionFunction<>(resultHandler,
+					cx -> resultHandler.apply(cx).flatMap(mappingFunction));
 			return inConnectionMany(connectionFunction);
 		}
 
@@ -448,8 +444,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 		private void assertNotPreparedOperation() {
 			if (this.sqlSupplier instanceof PreparedOperation<?>) {
-				throw new InvalidDataAccessApiUsageException(
-						"Cannot add bindings to a PreparedOperation");
+				throw new InvalidDataAccessApiUsageException("Cannot add bindings to a PreparedOperation");
 			}
 		}
 
@@ -497,8 +492,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 					return this.target;
 				case "close":
 					// Handle close method: suppress, not valid.
-					return Mono.error(
-							new UnsupportedOperationException("Close is not supported!"));
+					return Mono.error(new UnsupportedOperationException("Close is not supported!"));
 			}
 
 			// Invoke method on target Connection.
