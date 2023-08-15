@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -510,34 +510,64 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Convert a column name with underscores to the corresponding property name using "camel case".
-	 * A name like "customer_number" would match a "customerNumber" property name.
-	 * @param name the column name to be converted
-	 * @return the name using "camel case"
+	 * Convert a property name using "camelCase" to a corresponding column name with underscores.
+	 * A name like "customerNumber" would match a "customer_number" column name.
+	 * @param name the property name to be converted
+	 * @return the column name using underscores
+	 * @since 6.1
+	 * @see #convertUnderscoreNameToPropertyName
 	 */
-	public static String convertUnderscoreNameToPropertyName(@Nullable String name) {
+	public static String convertPropertyNameToUnderscoreName(@Nullable String name) {
+		if (!StringUtils.hasLength(name)) {
+			return "";
+		}
+
 		StringBuilder result = new StringBuilder();
-		boolean nextIsUpper = false;
-		if (name != null && name.length() > 0) {
-			if (name.length() > 1 && name.charAt(1) == '_') {
-				result.append(Character.toUpperCase(name.charAt(0)));
+		result.append(Character.toLowerCase(name.charAt(0)));
+		for (int i = 1; i < name.length(); i++) {
+			char c = name.charAt(i);
+			if (Character.isUpperCase(c)) {
+				result.append('_').append(Character.toLowerCase(c));
 			}
 			else {
-				result.append(Character.toLowerCase(name.charAt(0)));
+				result.append(c);
 			}
-			for (int i = 1; i < name.length(); i++) {
-				char c = name.charAt(i);
-				if (c == '_') {
-					nextIsUpper = true;
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Convert a column name with underscores to the corresponding property name using "camelCase".
+	 * A name like "customer_number" would match a "customerNumber" property name.
+	 * @param name the potentially underscores-based column name to be converted
+	 * @return the name using "camelCase"
+	 * @see #convertPropertyNameToUnderscoreName
+	 */
+	public static String convertUnderscoreNameToPropertyName(@Nullable String name) {
+		if (!StringUtils.hasLength(name)) {
+			return "";
+		}
+
+		StringBuilder result = new StringBuilder();
+		boolean nextIsUpper = false;
+		if (name.length() > 1 && name.charAt(1) == '_') {
+			result.append(Character.toUpperCase(name.charAt(0)));
+		}
+		else {
+			result.append(Character.toLowerCase(name.charAt(0)));
+		}
+		for (int i = 1; i < name.length(); i++) {
+			char c = name.charAt(i);
+			if (c == '_') {
+				nextIsUpper = true;
+			}
+			else {
+				if (nextIsUpper) {
+					result.append(Character.toUpperCase(c));
+					nextIsUpper = false;
 				}
 				else {
-					if (nextIsUpper) {
-						result.append(Character.toUpperCase(c));
-						nextIsUpper = false;
-					}
-					else {
-						result.append(Character.toLowerCase(c));
-					}
+					result.append(Character.toLowerCase(c));
 				}
 			}
 		}

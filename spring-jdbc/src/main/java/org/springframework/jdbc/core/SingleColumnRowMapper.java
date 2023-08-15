@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	@Nullable
 	private ConversionService conversionService = DefaultConversionService.getSharedInstance();
 
+
 	/**
 	 * Create a new {@code SingleColumnRowMapper} for bean-style configuration.
 	 * @see #setRequiredType
@@ -65,7 +66,9 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * @param requiredType the type that each result object is expected to match
 	 */
 	public SingleColumnRowMapper(Class<T> requiredType) {
-		setRequiredType(requiredType);
+		if (requiredType != Object.class) {
+			setRequiredType(requiredType);
+		}
 	}
 
 

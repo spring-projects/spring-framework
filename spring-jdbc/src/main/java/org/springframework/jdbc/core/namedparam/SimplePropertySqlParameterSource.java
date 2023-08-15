@@ -18,8 +18,8 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.StatementCreatorUtils;
@@ -44,12 +44,16 @@ import org.springframework.util.ReflectionUtils;
  * @since 6.1
  * @see NamedParameterJdbcTemplate
  * @see BeanPropertySqlParameterSource
+ * @see org.springframework.jdbc.core.simple.JdbcClient.StatementSpec#paramSource(Object)
+ * @see org.springframework.jdbc.core.SimplePropertyRowMapper
  */
 public class SimplePropertySqlParameterSource extends AbstractSqlParameterSource {
 
+	private static final Object NO_DESCRIPTOR = new Object();
+
 	private final Object paramObject;
 
-	private final Map<String, Object> descriptorMap = new HashMap<>();
+	private final Map<String, Object> propertyDescriptors = new ConcurrentHashMap<>();
 
 
 	/**
@@ -64,7 +68,7 @@ public class SimplePropertySqlParameterSource extends AbstractSqlParameterSource
 
 	@Override
 	public boolean hasValue(String paramName) {
-		return (getDescriptor(paramName) != null);
+		return (getDescriptor(paramName) != NO_DESCRIPTOR);
 	}
 
 	@Override
@@ -103,14 +107,17 @@ public class SimplePropertySqlParameterSource extends AbstractSqlParameterSource
 		return TYPE_UNKNOWN;
 	}
 
-	@Nullable
 	private Object getDescriptor(String paramName) {
-		return this.descriptorMap.computeIfAbsent(paramName, name -> {
-			Object pd = BeanUtils.getPropertyDescriptor(this.paramObject.getClass(), name);
-			if (pd == null) {
-				pd = ReflectionUtils.findField(this.paramObject.getClass(), name);
+		return this.propertyDescriptors.computeIfAbsent(paramName, name -> {
+			PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(this.paramObject.getClass(), name);
+			if (pd != null && pd.getReadMethod() != null) {
+				return pd;
 			}
-			return pd;
+			Field field = ReflectionUtils.findField(this.paramObject.getClass(), name);
+			if (field != null) {
+				return field;
+			}
+			return NO_DESCRIPTOR;
 		});
 	}
 

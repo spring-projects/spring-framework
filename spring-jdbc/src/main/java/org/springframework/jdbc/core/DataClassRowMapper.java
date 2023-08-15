@@ -57,6 +57,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 5.3
  * @param <T> the result type
+ * @see SimplePropertyRowMapper
  */
 public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 

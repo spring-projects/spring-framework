@@ -21,6 +21,7 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.ConstructorPersonWithGenerics;
 import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
@@ -28,20 +29,19 @@ import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DataClassRowMapper}.
+ * Tests for {@link SimplePropertyRowMapper}.
  *
  * @author Juergen Hoeller
- * @author Sam Brannen
- * @since 5.3
+ * @since 6.1
  */
-class DataClassRowMapperTests extends AbstractRowMapperTests {
+class SimplePropertyRowMapperTests extends AbstractRowMapperTests {
 
 	@Test
 	void staticQueryWithDataClass() throws Exception {
 		Mock mock = new Mock();
 		ConstructorPerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
-				new DataClassRowMapper<>(ConstructorPerson.class));
+				new SimplePropertyRowMapper<>(ConstructorPerson.class));
 		verifyPerson(person);
 
 		mock.verifyClosed();
@@ -52,7 +52,7 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 		Mock mock = new Mock();
 		ConstructorPersonWithGenerics person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
-				new DataClassRowMapper<>(ConstructorPersonWithGenerics.class));
+				new SimplePropertyRowMapper<>(ConstructorPersonWithGenerics.class));
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
 		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
@@ -66,7 +66,7 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 		Mock mock = new Mock(MockType.FOUR);
 		ConstructorPersonWithSetters person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birthdate, balance from people",
-				new DataClassRowMapper<>(ConstructorPersonWithSetters.class));
+				new SimplePropertyRowMapper<>(ConstructorPersonWithSetters.class));
 		assertThat(person.name()).isEqualTo("BUBBA");
 		assertThat(person.age()).isEqualTo(22L);
 		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
@@ -76,15 +76,49 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 	}
 
 	@Test
-	void staticQueryWithDataRecord() throws Exception {
+	void staticQueryWithPlainSetters() throws Exception {
 		Mock mock = new Mock();
-		RecordPerson person = mock.getJdbcTemplate().queryForObject(
+		ConcretePerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
-				new DataClassRowMapper<>(RecordPerson.class));
+				new SimplePropertyRowMapper<>(ConcretePerson.class));
 		verifyPerson(person);
 
 		mock.verifyClosed();
 	}
+
+	@Test
+	void staticQueryWithDataRecord() throws Exception {
+		Mock mock = new Mock();
+		RecordPerson person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birth_date, balance from people",
+				new SimplePropertyRowMapper<>(RecordPerson.class));
+		verifyPerson(person);
+
+		mock.verifyClosed();
+	}
+
+	@Test
+	void staticQueryWithDataFields() throws Exception {
+		Mock mock = new Mock();
+		FieldPerson person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birth_date, balance from people",
+				new SimplePropertyRowMapper<>(FieldPerson.class));
+		verifyPerson(person);
+
+		mock.verifyClosed();
+	}
+
+	@Test
+	void staticQueryWithIncompleteDataFields() throws Exception {
+		Mock mock = new Mock();
+		IncompleteFieldPerson person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birth_date, balance from people",
+				new SimplePropertyRowMapper<>(IncompleteFieldPerson.class));
+		verifyPerson(person);
+
+		mock.verifyClosed();
+	}
+
 
 	protected void verifyPerson(RecordPerson person) {
 		assertThat(person.name()).isEqualTo("Bubba");
@@ -94,8 +128,38 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 		verifyPersonViaBeanWrapper(person);
 	}
 
+	protected void verifyPerson(FieldPerson person) {
+		assertThat(person.name).isEqualTo("Bubba");
+		assertThat(person.age).isEqualTo(22L);
+		assertThat(person.birth_date).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
+		assertThat(person.balance).isEqualTo(new BigDecimal("1234.56"));
+	}
+
+	protected void verifyPerson(IncompleteFieldPerson person) {
+		assertThat(person.name).isEqualTo("Bubba");
+		assertThat(person.age).isEqualTo(22L);
+		assertThat(person.balance).isEqualTo(new BigDecimal("1234.56"));
+	}
+
 
 	record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
+	}
+
+
+	static class FieldPerson {
+
+		String name;
+		long age;
+		Date birth_date;
+		BigDecimal balance;
+	}
+
+
+	static class IncompleteFieldPerson {
+
+		String name;
+		long age;
+		BigDecimal balance;
 	}
 
 }

@@ -193,8 +193,10 @@ public interface JdbcClient {
 		 * based on its JavaBean properties, record components or raw fields.
 		 * A Map instance can be provided as a complete parameter source as well.
 		 * @param namedParamObject a custom parameter object (e.g. a JavaBean or
-		 * record class) with named properties serving as statement parameters
+		 * record class or field holder) with named properties serving as
+		 * statement parameters
 		 * @return this statement specification (for chaining)
+		 * @see #paramSource(SqlParameterSource)
 		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 		 * @see org.springframework.jdbc.core.namedparam.SimplePropertySqlParameterSource
 		 */
@@ -217,6 +219,19 @@ public interface JdbcClient {
 		 * @see java.sql.PreparedStatement#executeQuery()
 		 */
 		ResultQuerySpec query();
+
+		/**
+		 * Proceed towards execution of a mapped query, with several options
+		 * available in the returned query specification.
+		 * @param mappedClass the target class to apply a RowMapper for
+		 * (either a simple value type for a single column mapping or a
+		 * JavaBean / record class / field holder for a multi-column mapping)
+		 * @return the mapped query specification
+		 * @see #query(RowMapper)
+		 * @see org.springframework.jdbc.core.SingleColumnRowMapper
+		 * @see org.springframework.jdbc.core.SimplePropertyRowMapper
+		 */
+		<T> MappedQuerySpec<T> query(Class<T> mappedClass);
 
 		/**
 		 * Proceed towards execution of a mapped query, with several options
@@ -296,7 +311,7 @@ public interface JdbcClient {
 		 * @return a (potentially empty) list of rows, with each
 		 * row represented as a column value of the given type
 		 */
-		<T> List<T> singleColumn(Class<T> requiredType);
+		<T> List<T> singleColumn();
 
 		/**
 		 * Retrieve a single value result.
@@ -304,8 +319,8 @@ public interface JdbcClient {
 		 * column value of the given type
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
-		default <T> T singleValue(Class<T> requiredType) {
-			return DataAccessUtils.requiredSingleResult(singleColumn(requiredType));
+		default <T> T singleValue() {
+			return DataAccessUtils.requiredSingleResult(singleColumn());
 		}
 	}
 
