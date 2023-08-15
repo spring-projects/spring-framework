@@ -367,18 +367,22 @@ public abstract class TestPropertySourceUtils {
 
 	/**
 	 * Convert the supplied <em>inlined properties</em> (in the form of <em>key-value</em>
-	 * pairs) into a map keyed by property name, preserving the ordering of property names
-	 * in the returned map.
-	 * <p>Parsing of the key-value pairs is achieved by converting all pairs
-	 * into <em>virtual</em> properties files in memory and delegating to
+	 * pairs) into a map keyed by property name.
+	 * <p>Parsing of the key-value pairs is achieved by converting all supplied
+	 * strings into <em>virtual</em> properties files in memory and delegating to
 	 * {@link Properties#load(java.io.Reader)} to parse each virtual file.
+	 * <p>Generally speaking, the ordering of property names will be preserved in
+	 * the returned map, analogous to the order in which the key-value pairs are
+	 * supplied to this method. However, if a single string contains multiple
+	 * key-value pairs separated by newlines &mdash; for example, when supplied by
+	 * a user via a <em>text block</em> &mdash; the ordering of property names for
+	 * those particular key-value pairs cannot be guaranteed in the returned map.
 	 * <p>For a full discussion of <em>inlined properties</em>, consult the Javadoc
 	 * for {@link TestPropertySource#properties}.
 	 * @param inlinedProperties the inlined properties to convert; potentially empty
 	 * but never {@code null}
 	 * @return a new, ordered map containing the converted properties
-	 * @throws IllegalStateException if a given key-value pair cannot be parsed, or if
-	 * a given inlined property contains multiple key-value pairs
+	 * @throws IllegalStateException if a given key-value pair cannot be parsed
 	 * @since 4.1.5
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
@@ -395,9 +399,8 @@ public abstract class TestPropertySourceUtils {
 				props.load(new StringReader(pair));
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Failed to load test environment property from [" + pair + "]", ex);
+				throw new IllegalStateException("Failed to load test environment properties from [" + pair + "]", ex);
 			}
-			Assert.state(props.size() == 1, () -> "Failed to load exactly one test environment property from [" + pair + "]");
 			for (String name : props.stringPropertyNames()) {
 				map.put(name, props.getProperty(name));
 			}

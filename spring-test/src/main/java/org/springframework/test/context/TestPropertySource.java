@@ -211,7 +211,8 @@ public @interface TestPropertySource {
 	 * {@link org.springframework.core.env.Environment Environment} before the
 	 * {@code ApplicationContext} is loaded for the test. All key-value pairs
 	 * will be added to the enclosing {@code Environment} as a single test
-	 * {@code PropertySource} with the highest precedence.
+	 * {@code PropertySource} with the highest precedence. As of Spring Framework
+	 * 6.1, multiple key-value pairs may be specified via a single <em>text block</em>.
 	 * <h4>Supported Syntax</h4>
 	 * <p>The supported syntax for key-value pairs is the same as the
 	 * syntax defined for entries in a Java
@@ -221,6 +222,28 @@ public @interface TestPropertySource {
 	 * <li>{@code "key:value"}</li>
 	 * <li>{@code "key value"}</li>
 	 * </ul>
+	 * <h4>Examples</h4>
+	 * <pre class="code">
+	 * &#47;&#47; Using an array of strings
+	 * &#064;TestPropertySource(properties = {
+	 *     "key1 = value1",
+	 *     "key2 = value2"
+	 * })
+	 * &#064;ContextConfiguration
+	 * class MyTests {
+	 *   // ...
+	 * }</pre>
+	 * <pre class="code">
+	 * &#47;&#47; Using a single text block
+	 * &#064;TestPropertySource(properties = """
+	 *     key1 = value1
+	 *     key2 = value2
+	 *     """
+	 * )
+	 * &#064;ContextConfiguration
+	 * class MyTests {
+	 *   // ...
+	 * }</pre>
 	 * <h4>Precedence</h4>
 	 * <p>Properties declared via this attribute have higher precedence than
 	 * properties loaded from resource {@link #locations}.
