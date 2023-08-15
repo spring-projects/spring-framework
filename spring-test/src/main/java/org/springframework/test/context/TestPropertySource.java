@@ -173,13 +173,13 @@ public @interface TestPropertySource {
 	 * <strong>and</strong> {@code "extended.properties"} files as test property
 	 * source locations.
 	 * <pre class="code">
-	 * &#064;TestPropertySource(&quot;base.properties&quot;)
+	 * &#064;TestPropertySource("base.properties")
 	 * &#064;ContextConfiguration
 	 * public class BaseTest {
 	 *   // ...
 	 * }
 	 *
-	 * &#064;TestPropertySource(&quot;extended.properties&quot;)
+	 * &#064;TestPropertySource("extended.properties")
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
@@ -250,12 +250,12 @@ public @interface TestPropertySource {
 	 * {@code ExtendedTest} will be loaded using the inlined {@code key1}
 	 * <strong>and</strong> {@code key2} properties.
 	 * <pre class="code">
-	 * &#064;TestPropertySource(properties = &quot;key1 = value1&quot;)
+	 * &#064;TestPropertySource(properties = "key1 = value1")
 	 * &#064;ContextConfiguration
 	 * public class BaseTest {
 	 *   // ...
 	 * }
-	 * &#064;TestPropertySource(properties = &quot;key2 = value2&quot;)
+	 * &#064;TestPropertySource(properties = "key2 = value2")
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
