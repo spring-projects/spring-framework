@@ -433,15 +433,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			boolean readOnly, @Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout)
 			implements io.r2dbc.spi.TransactionDefinition {
 
-		private ExtendedTransactionDefinition(@Nullable String transactionName, boolean readOnly,
-				@Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout) {
-
-			this.transactionName = transactionName;
-			this.readOnly = readOnly;
-			this.isolationLevel = isolationLevel;
-			this.lockWaitTimeout = lockWaitTimeout;
-		}
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T getAttribute(Option<T> option) {
@@ -459,8 +450,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			if (io.r2dbc.spi.TransactionDefinition.READ_ONLY.equals(option)) {
 				return this.readOnly;
 			}
-			if (io.r2dbc.spi.TransactionDefinition.LOCK_WAIT_TIMEOUT.equals(option)
-				&& !this.lockWaitTimeout.isZero()) {
+			if (io.r2dbc.spi.TransactionDefinition.LOCK_WAIT_TIMEOUT.equals(option) &&
+					!this.lockWaitTimeout.isZero()) {
 				return this.lockWaitTimeout;
 			}
 			return null;
@@ -468,7 +459,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder(128);
 			sb.append(getClass().getSimpleName());
 			sb.append(" [transactionName='").append(this.transactionName).append('\'');
 			sb.append(", readOnly=").append(this.readOnly);
