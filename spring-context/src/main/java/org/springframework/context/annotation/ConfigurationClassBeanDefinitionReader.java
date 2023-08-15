@@ -301,8 +301,12 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		// A bean definition resulting from a component scan can be silently overridden
-		// by an @Bean method, as of 4.2...
-		if (existingBeanDef instanceof ScannedGenericBeanDefinition) {
+		// by an @Bean method - and as of 6.1, even when general overriding is disabled
+		// as long as the bean class is the same.
+		if (existingBeanDef instanceof ScannedGenericBeanDefinition scannedBeanDef) {
+			if (beanMethod.getMetadata().getReturnTypeName().equals(scannedBeanDef.getBeanClassName())) {
+				this.registry.removeBeanDefinition(beanName);
+			}
 			return false;
 		}
 

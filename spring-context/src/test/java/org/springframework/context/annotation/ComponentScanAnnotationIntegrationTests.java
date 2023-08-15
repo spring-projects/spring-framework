@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -209,7 +208,7 @@ class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	void withScopedProxyThroughRegex() throws IOException, ClassNotFoundException {
+	void withScopedProxyThroughRegex() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithScopedProxyThroughRegex.class);
 		ctx.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -221,7 +220,7 @@ class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	void withScopedProxyThroughAspectJPattern() throws IOException, ClassNotFoundException {
+	void withScopedProxyThroughAspectJPattern() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithScopedProxyThroughAspectJPattern.class);
 		ctx.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -233,7 +232,7 @@ class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	void withMultipleAnnotationIncludeFilters1() throws IOException, ClassNotFoundException {
+	void withMultipleAnnotationIncludeFilters1() {
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(ComponentScanWithMultipleAnnotationIncludeFilters1.class);
 		ctx.getBean(DefaultNamedComponent.class); // @CustomStereotype-annotated
@@ -241,11 +240,28 @@ class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	void withMultipleAnnotationIncludeFilters2() throws IOException, ClassNotFoundException {
+	void withMultipleAnnotationIncludeFilters2() {
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(ComponentScanWithMultipleAnnotationIncludeFilters2.class);
 		ctx.getBean(DefaultNamedComponent.class); // @CustomStereotype-annotated
 		ctx.getBean(MessageBean.class);           // @CustomComponent-annotated
+	}
+
+	@Test
+	void withBeanMethodOverride() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters3.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(DefaultNamedComponent.class).toString()).isEqualTo("overridden");
+	}
+
+	@Test
+	void withBeanMethodOverrideAndGeneralOverridingDisabled() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getDefaultListableBeanFactory().setAllowBeanDefinitionOverriding(false);
+		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters3.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(DefaultNamedComponent.class).toString()).isEqualTo("overridden");
 	}
 
 	@Test
@@ -292,6 +308,7 @@ class ComponentScanAnnotationIntegrationTests {
 	static class MultipleComposedAnnotationsConfig {
 	}
 
+
 	static class AwareTypeFilter implements TypeFilter, EnvironmentAware,
 			ResourceLoaderAware, BeanClassLoaderAware, BeanFactoryAware {
 
@@ -329,9 +346,7 @@ class ComponentScanAnnotationIntegrationTests {
 			assertThat(this.environment).isNotNull();
 			return false;
 		}
-
 	}
-
 
 }
 
@@ -462,10 +477,26 @@ class ComponentScanWithMultipleAnnotationIncludeFilters1 {}
 class ComponentScanWithMultipleAnnotationIncludeFilters2 {}
 
 @Configuration
+@ComponentScan(basePackages = "example.scannable",
+		useDefaultFilters = false,
+		includeFilters = @Filter({CustomStereotype.class, CustomComponent.class})
+)
+class ComponentScanWithMultipleAnnotationIncludeFilters3 {
+
+	@Bean
+	public DefaultNamedComponent thoreau() {
+		return new DefaultNamedComponent() {
+			@Override
+			public String toString() {
+				return "overridden";
+			}
+		};
+	}
+}
+
+@Configuration
 @ComponentScan(
 		value = "example.scannable",
 		basePackages = "example.scannable",
 		basePackageClasses = example.scannable.PackageMarker.class)
 class ComponentScanWithBasePackagesAndValueAlias {}
-
-
