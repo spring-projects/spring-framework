@@ -709,19 +709,6 @@ As of 6.1, the named parameter statements of `NamedParameterJdbcTemplate` and th
 parameter statements of a regular `JdbcTemplate` are available through a unified client API
 with a fluent interaction model.
 
-E.g. with named parameters:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	private JdbcClient jdbcClient = JdbcClient.create(dataSource);
-
-	public int countOfActorsByFirstName(String firstName) {
-		return this.jdbcClient.sql("select count(*) from t_actor where first_name = :first_name")
-                .param("first_name", firstName);
-                .query().singleValue(Integer.class);
-	}
-----
-
 E.g. with positional parameters:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -731,7 +718,20 @@ E.g. with positional parameters:
 	public int countOfActorsByFirstName(String firstName) {
 		return this.jdbcClient.sql("select count(*) from t_actor where first_name = ?")
                 .param(firstName);
-                .query().singleValue(Integer.class);
+                .query(Integer.class).single();
+	}
+----
+
+E.g. with named parameters:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	private JdbcClient jdbcClient = JdbcClient.create(dataSource);
+
+	public int countOfActorsByFirstName(String firstName) {
+		return this.jdbcClient.sql("select count(*) from t_actor where first_name = :firstName")
+                .param("firstName", firstName);
+                .query(Integer.class).single();
 	}
 ----
 
@@ -744,13 +744,24 @@ E.g. with positional parameters:
 			.list();
 ----
 
+Instead of a custom `RowMapper`, you may also specify a class to map to.
+E.g. assuming that `Actor` has `firstName` and `lastName` properties
+as a record class, a custom constructor, bean properties, or plain fields:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	List<Actor> actors = this.jdbcClient.sql("select first_name, last_name from t_actor")
+			.query(Actor.class)
+			.list();
+----
+
 With a required single object result:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Actor actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
             .param(1212L);
-			.query((rs, rowNum) -> new Actor(rs.getString("first_name"), rs.getString("last_name")))
+			.query(Actor.class)
 			.single();
 ----
 
@@ -760,7 +771,7 @@ With a `java.util.Optional` result:
 ----
 	Optional<Actor> actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
             .param(1212L);
-			.query((rs, rowNum) -> new Actor(rs.getString("first_name"), rs.getString("last_name")))
+			.query(Actor.class)
 			.optional();
 ----
 
@@ -772,6 +783,32 @@ And for an update statement:
 			.param("Leonor").param("Watling");
 			.update();
 ----
+
+Or an update statement with named parameters:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
+			.param("firstName", "Leonor").param("lastName", "Watling");
+			.update();
+----
+
+Instead of individual named parameters, you may also specify a parameter source object,
+e.g. a record class or a class with bean properties or a plain field holder which
+provides `firstName` and `lastName` properties, such as the `Actor` class from above:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
+			.paramSource(new Actor("Leonor", "Watling");
+			.update();
+----
+
+The automatic `Actor` class mapping for parameters as well as the query results above is
+provided through implicit `SimplePropertySqlParameterSource` and `SimplePropertyRowMapper`
+strategies which are also available for direct use. They can serve as a common replacement
+for `BeanPropertySqlParameterSource` and `BeanPropertyRowMapper`/`DataClassRowMapper`,
+also with `JdbcTemplate` and `NamedParameterJdbcTemplate` themselves.
 
 NOTE: `JdbcClient` is a flexible but simplified facade for JDBC query/update statements.
 Advanced capabilities such as batch inserts and stored procedure calls typically require
