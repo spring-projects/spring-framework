@@ -110,7 +110,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see jakarta.servlet.http.Part
+	 * @see javax.servlet.http.Part
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(ServletRequest request) {
