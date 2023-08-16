@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -55,17 +54,17 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.Validator;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 
 /**
  * A resolver to extract and decode the payload of a message using a
- * {@link Decoder}, where the payload is expected to be a {@link Publisher} of
- * {@link DataBuffer DataBuffer}.
+ * {@link Decoder}, where the payload is expected to be a {@link Publisher}
+ * of {@link DataBuffer DataBuffer}.
  *
  * <p>Validation is applied if the method argument is annotated with
- * {@code @javax.validation.Valid} or
- * {@link org.springframework.validation.annotation.Validated}. Validation
- * failure results in an {@link MethodArgumentNotValidException}.
+ * {@link org.springframework.validation.annotation.Validated} or
+ * {@code @javax.validation.Valid}. Validation failure results in an
+ * {@link MethodArgumentNotValidException}.
  *
  * <p>This resolver should be ordered last if {@link #useDefaultResolution} is
  * set to {@code true} since in that case it supports all types and does not
@@ -287,10 +286,8 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			return null;
 		}
 		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
-			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
+			if (validationHints != null) {
 				String name = Conventions.getVariableNameForParameter(parameter);
 				return target -> {
 					BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, name);
