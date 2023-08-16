@@ -33,6 +33,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -345,7 +346,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 		// Explicitly registered overriding bean?
 		if (!(existingDef instanceof ScannedGenericBeanDefinition) &&
-				this.registry.isBeanDefinitionOverridable(beanName)) {
+				(this.registry.isBeanDefinitionOverridable(beanName) || ObjectUtils.nullSafeEquals(
+						beanDefinition.getBeanClassName(), existingDef.getBeanClassName()))) {
 			return false;
 		}
 

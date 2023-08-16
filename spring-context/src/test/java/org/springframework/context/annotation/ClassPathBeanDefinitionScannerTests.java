@@ -216,6 +216,18 @@ public class ClassPathBeanDefinitionScannerTests {
 	}
 
 	@Test
+	public void testSimpleScanWithDefaultFiltersAndOverridingBeanAcceptedForSameBeanClass() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getDefaultListableBeanFactory().setAllowBeanDefinitionOverriding(false);
+		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(StubFooDao.class));
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(false);
+
+		// should not fail!
+		scanner.scan(BASE_PACKAGE);
+	}
+
+	@Test
 	public void testSimpleScanWithDefaultFiltersAndDefaultBeanNameClash() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
