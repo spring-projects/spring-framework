@@ -177,7 +177,7 @@ public abstract class TestPropertySourceUtils {
 	/**
 	 * Add the {@link Properties} files from the given resource {@code locations}
 	 * to the {@link Environment} of the supplied {@code context}.
-	 * <p>This method simply delegates to
+	 * <p>This method delegates to
 	 * {@link #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)}.
 	 * @param context the application context whose environment should be updated;
 	 * never {@code null}
@@ -229,14 +229,8 @@ public abstract class TestPropertySourceUtils {
 	/**
 	 * Add property sources for the given {@code descriptors} to the
 	 * {@link Environment} of the supplied {@code context}.
-	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
-	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
-	 * against the {@code Environment}.
-	 * <p>Each {@link PropertySource} will be created via the configured
-	 * {@link PropertySourceDescriptor#propertySourceFactory() PropertySourceFactory}
-	 * (or the {@link DefaultPropertySourceFactory} if no factory is configured)
-	 * and added to the {@link PropertySources} of the environment with the highest
-	 * precedence.
+	 * <p>This method delegates to
+	 * {@link #addPropertySourcesToEnvironment(ConfigurableEnvironment, ResourceLoader, List)}.
 	 * @param context the application context whose environment should be updated;
 	 * never {@code null}
 	 * @param descriptors the property source descriptors to process; potentially

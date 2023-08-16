@@ -20,7 +20,7 @@ framework uses the following configuration parameters to build the context cache
 * `contextLoader` (from `@ContextConfiguration`)
 * `parent` (from `@ContextHierarchy`)
 * `activeProfiles` (from `@ActiveProfiles`)
-* `propertySourceLocations` (from `@TestPropertySource`)
+* `propertySourceDescriptors` (from `@TestPropertySource`)
 * `propertySourceProperties` (from `@TestPropertySource`)
 * `resourceBasePath` (from `@WebAppConfiguration`)
 
