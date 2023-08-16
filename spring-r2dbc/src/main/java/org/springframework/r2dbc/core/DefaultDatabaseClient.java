@@ -284,7 +284,6 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
 
-		@SuppressWarnings("deprecation")
 		@Override
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
