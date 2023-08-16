@@ -110,9 +110,10 @@ public @interface TestPropertySource {
 
 	/**
 	 * The resource locations of properties files to be loaded into the
-	 * {@code Environment}'s set of {@code PropertySources}. Each location
-	 * will be added to the enclosing {@code Environment} as its own property
-	 * source, in the order declared.
+	 * {@code Environment}'s set of {@code PropertySources}.
+	 * <p>Each location will be added to the enclosing {@code Environment} as its
+	 * own property source, in the order declared (or in the order in which resource
+	 * locations are resolved when location wildcards are used).
 	 * <h4>Supported File Formats</h4>
 	 * <p>By default, both traditional and XML-based properties file formats are
 	 * supported &mdash; for example, {@code "classpath:/com/example/test.properties"}
@@ -130,11 +131,19 @@ public @interface TestPropertySource {
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
-	 * Resource location wildcards (e.g. <code>*&#42;/*.properties</code>)
-	 * are not permitted: each location must evaluate to exactly one properties
-	 * resource. Property placeholders in paths (i.e., <code>${...}</code>) will be
-	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String) resolved}
-	 * against the {@code Environment}.
+	 * <p>Property placeholders in paths (i.e., <code>${...}</code>) will be
+	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)
+	 * resolved} against the {@code Environment}.
+	 * <p>As of Spring Framework 6.1, resource location patterns are also
+	 * supported &mdash; for example, {@code "classpath*:/config/*.properties"}.
+	 * <p><strong>WARNING</strong>: a pattern such as {@code "classpath*:/config/*.properties"}
+	 * may be effectively equivalent to an explicit enumeration of resource locations such as
+	 * <code>{"classpath:/config/mail.properties", classpath:/config/order.properties"}</code>;
+	 * however, the two declarations will result in different keys for the context
+	 * cache since the pattern cannot be eagerly resolved to concrete locations.
+	 * Consequently, to benefit from the context cache you must ensure that you
+	 * consistently use either patterns or explicit enumerations of resource
+	 * locations within your test suite.
 	 * <h4>Default Properties File Detection</h4>
 	 * <p>See the class-level Javadoc for a discussion on detection of defaults.
 	 * <h4>Precedence</h4>

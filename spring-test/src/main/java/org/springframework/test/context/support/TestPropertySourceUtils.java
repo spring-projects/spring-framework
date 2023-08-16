@@ -47,6 +47,8 @@ import org.springframework.core.io.support.DefaultPropertySourceFactory;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.core.io.support.PropertySourceFactory;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestPropertySource;
@@ -202,6 +204,8 @@ public abstract class TestPropertySourceUtils {
 	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
 	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
 	 * against the {@code Environment}.
+	 * <p>A {@link ResourcePatternResolver} will be used to resolve resource
+	 * location patterns into multiple resource locations.
 	 * <p>Each properties file will be converted to a
 	 * {@link org.springframework.core.io.support.ResourcePropertySource ResourcePropertySource}
 	 * that will be added to the {@link PropertySources} of the environment with
@@ -258,13 +262,15 @@ public abstract class TestPropertySourceUtils {
 	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
 	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
 	 * against the {@code Environment}.
+	 * <p>A {@link ResourcePatternResolver} will be used to resolve resource
+	 * location patterns into multiple resource locations.
 	 * <p>Each {@link PropertySource} will be created via the configured
 	 * {@link PropertySourceDescriptor#propertySourceFactory() PropertySourceFactory}
 	 * (or the {@link DefaultPropertySourceFactory} if no factory is configured)
 	 * and added to the {@link PropertySources} of the environment with the highest
 	 * precedence.
 	 * @param environment the environment to update; never {@code null}
-	 * @param resourceLoader the {@code ResourceLoader} to use to load each resource;
+	 * @param resourceLoader the {@code ResourceLoader} to use to load resources;
 	 * never {@code null}
 	 * @param descriptors the property source descriptors to process; potentially
 	 * empty but never {@code null}
@@ -282,6 +288,8 @@ public abstract class TestPropertySourceUtils {
 		Assert.notNull(environment, "'environment' must not be null");
 		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
 		Assert.notNull(descriptors, "'descriptors' must not be null");
+		ResourcePatternResolver resourcePatternResolver =
+				ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		MutablePropertySources propertySources = environment.getPropertySources();
 		try {
 			for (PropertySourceDescriptor descriptor : descriptors) {
@@ -292,10 +300,11 @@ public abstract class TestPropertySourceUtils {
 
 					for (String location : descriptor.locations()) {
 						String resolvedLocation = environment.resolveRequiredPlaceholders(location);
-						Resource resource = resourceLoader.getResource(resolvedLocation);
-						PropertySource<?> propertySource = factory.createPropertySource(descriptor.name(),
-								new EncodedResource(resource, descriptor.encoding()));
-						propertySources.addFirst(propertySource);
+						for (Resource resource : resourcePatternResolver.getResources(resolvedLocation)) {
+							PropertySource<?> propertySource = factory.createPropertySource(descriptor.name(),
+									new EncodedResource(resource, descriptor.encoding()));
+							propertySources.addFirst(propertySource);
+						}
 					}
 				}
 			}

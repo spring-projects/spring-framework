@@ -37,9 +37,12 @@ Each path is interpreted as a Spring `Resource`. A plain path (for example,
 in which the test class is defined. A path starting with a slash is treated as an
 absolute classpath resource (for example: `"/org/example/test.xml"`). A path that
 references a URL (for example, a path prefixed with `classpath:`, `file:`, or `http:`) is
-loaded by using the specified resource protocol. Resource location wildcards (such as
-`{asterisk}{asterisk}/{asterisk}.properties`) are not permitted: Each location must
-evaluate to exactly one properties resource.
+loaded by using the specified resource protocol.
+
+Property placeholders in paths (such as `${...}`) will be resolved against the `Environment`.
+
+As of Spring Framework 6.1, resource location patterns are also supported — for
+example, `"classpath*:/config/*.properties"`.
 
 The following example uses a test properties file:
 
