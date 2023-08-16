@@ -389,7 +389,9 @@ public abstract class TestPropertySourceUtils {
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
-		SequencedProperties sequencedProperties = new SequencedProperties();
+
+		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+		SequencedProperties sequencedProperties = new SequencedProperties(map);
 
 		for (String input : inlinedProperties) {
 			if (!StringUtils.hasText(input)) {
@@ -403,7 +405,7 @@ public abstract class TestPropertySourceUtils {
 			}
 		}
 
-		return sequencedProperties.map;
+		return map;
 	}
 
 	private static <T extends Annotation> List<List<MergedAnnotation<T>>> findRepeatableAnnotations(
@@ -452,14 +454,17 @@ public abstract class TestPropertySourceUtils {
 
 	/**
 	 * Extension of {@link Properties} that mimics a {@code SequencedMap} by
-	 * tracking all added properties in a {@link LinkedHashMap} that can be
-	 * accessed directly via the {@code map} field.
+	 * tracking all added properties in the supplied {@link LinkedHashMap}.
 	 * @since 6.1
 	 */
 	@SuppressWarnings("serial")
 	private static class SequencedProperties extends Properties {
 
-		final Map<String, Object> map = new LinkedHashMap<>();
+		private final LinkedHashMap<String, Object> map;
+
+		SequencedProperties(LinkedHashMap<String, Object> map) {
+			this.map = map;
+		}
 
 		@Override
 		public synchronized Object put(Object key, Object value) {
