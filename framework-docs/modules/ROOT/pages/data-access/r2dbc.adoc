@@ -11,11 +11,13 @@ specification effort to standardize access to SQL databases using reactive patte
 The Spring Framework's R2DBC abstraction framework consists of two different packages:
 
 * `core`: The `org.springframework.r2dbc.core` package contains the `DatabaseClient`
-class plus a variety of related classes. See xref:data-access/r2dbc.adoc#r2dbc-core[Using the R2DBC Core Classes to Control Basic R2DBC Processing and Error Handling].
+class plus a variety of related classes. See
+xref:data-access/r2dbc.adoc#r2dbc-core[Using the R2DBC Core Classes to Control Basic R2DBC Processing and Error Handling].
 
 * `connection`: The `org.springframework.r2dbc.connection` package contains a utility class
 for easy `ConnectionFactory` access and various simple `ConnectionFactory` implementations
-that you can use for testing and running unmodified R2DBC. See xref:data-access/r2dbc.adoc#r2dbc-connections[Controlling Database Connections].
+that you can use for testing and running unmodified R2DBC. See
+xref:data-access/r2dbc.adoc#r2dbc-connections[Controlling Database Connections].
 
 
 [[r2dbc-core]]
@@ -31,6 +33,7 @@ including error handling. It includes the following topics:
 * xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-filter[Statement Filters]
 * xref:data-access/r2dbc.adoc#r2dbc-auto-generated-keys[Retrieving Auto-generated Keys]
 
+
 [[r2dbc-DatabaseClient]]
 === Using `DatabaseClient`
 
@@ -43,8 +46,9 @@ SQL and extract results. The `DatabaseClient` class:
 * Runs SQL queries
 * Update statements and stored procedure calls
 * Performs iteration over `Result` instances
-* Catches R2DBC exceptions and translates them to the generic, more informative, exception
-hierarchy defined in the `org.springframework.dao` package. (See xref:data-access/dao.adoc#dao-exceptions[Consistent Exception Hierarchy].)
+* Catches R2DBC exceptions and translates them to the generic, more informative,
+exception hierarchy defined in the `org.springframework.dao` package.
+(See xref:data-access/dao.adoc#dao-exceptions[Consistent Exception Hierarchy].)
 
 The client has a functional, fluent API using reactive types for declarative composition.
 
@@ -250,7 +254,6 @@ Kotlin::
 ----
 ======
 
-
 [[r2dbc-DatabaseClient-mapping-null]]
 .What about `null`?
 ****
@@ -315,10 +318,10 @@ The following example shows parameter binding for a query:
 
 [source,java]
 ----
-db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
-    .bind("id", "joe")
-    .bind("name", "Joe")
-    .bind("age", 34);
+    db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+	    	.bind("id", "joe")
+	    	.bind("name", "Joe")
+			.bind("age", 34);
 ----
 
 .R2DBC Native Bind Markers
@@ -327,7 +330,7 @@ R2DBC uses database-native bind markers that depend on the actual database vendo
 As an example, Postgres uses indexed markers, such as `$1`, `$2`, `$n`.
 Another example is SQL Server, which uses named bind markers prefixed with `@`.
 
-This is different from JDBC, which requires `?` as bind markers.
+This is different from JDBC which requires `?` as bind markers.
 In JDBC, the actual drivers translate `?` bind markers to database-native
 markers as part of their statement execution.
 
@@ -363,7 +366,7 @@ Java::
 	tuples.add(new Object[] {"Ann",  50});
 
 	client.sql("SELECT id, name, state FROM table WHERE (name, age) IN (:tuples)")
-	    .bind("tuples", tuples);
+		    .bind("tuples", tuples);
 ----
 
 Kotlin::
@@ -375,7 +378,7 @@ Kotlin::
 	tuples.add(arrayOf("Ann", 50))
 
 	client.sql("SELECT id, name, state FROM table WHERE (name, age) IN (:tuples)")
-	    .bind("tuples", tuples)
+		    .bind("tuples", tuples)
 ----
 ======
 
@@ -390,7 +393,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	client.sql("SELECT id, name, state FROM table WHERE age IN (:ages)")
-	    .bind("ages", Arrays.asList(35, 50));
+		    .bind("ages", Arrays.asList(35, 50));
 ----
 
 Kotlin::
@@ -402,7 +405,7 @@ Kotlin::
 	tuples.add(arrayOf("Ann", 50))
 
 	client.sql("SELECT id, name, state FROM table WHERE age IN (:ages)")
-	    .bind("tuples", arrayOf(35, 50))
+		    .bind("tuples", arrayOf(35, 50))
 ----
 ======
 
@@ -429,9 +432,9 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-	    .filter((s, next) -> next.execute(s.returnGeneratedValues("id")))
-	    .bind("name", …)
-	    .bind("state", …);
+		    .filter((s, next) -> next.execute(s.returnGeneratedValues("id")))
+		    .bind("name", …)
+		    .bind("state", …);
 ----
 
 Kotlin::
@@ -439,9 +442,9 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-				.filter { s: Statement, next: ExecuteFunction -> next.execute(s.returnGeneratedValues("id")) }
-				.bind("name", …)
-				.bind("state", …)
+			.filter { s: Statement, next: ExecuteFunction -> next.execute(s.returnGeneratedValues("id")) }
+			.bind("name", …)
+			.bind("state", …)
 ----
 ======
 
@@ -455,10 +458,10 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-	    .filter(statement -> s.returnGeneratedValues("id"));
+		    .filter(statement -> s.returnGeneratedValues("id"));
 
 	client.sql("SELECT id, name, state FROM table")
-	    .filter(statement -> s.fetchSize(25));
+		    .filter(statement -> s.fetchSize(25));
 ----
 
 Kotlin::
@@ -466,10 +469,10 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-	    .filter { statement -> s.returnGeneratedValues("id") }
+		    .filter { statement -> s.returnGeneratedValues("id") }
 
 	client.sql("SELECT id, name, state FROM table")
-	    .filter { statement -> s.fetchSize(25) }
+		    .filter { statement -> s.fetchSize(25) }
 ----
 ======
 
@@ -593,7 +596,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	Mono<Integer> generatedId = client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-	    .filter(statement -> s.returnGeneratedValues("id"))
+			.filter(statement -> s.returnGeneratedValues("id"))
 			.map(row -> row.get("id", Integer.class))
 			.first();
 
@@ -605,7 +608,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	val generatedId = client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-	    .filter { statement -> s.returnGeneratedValues("id") }
+			.filter { statement -> s.returnGeneratedValues("id") }
 			.map { row -> row.get("id", Integer.class) }
 			.awaitOne()
 
@@ -671,7 +674,6 @@ Kotlin::
 
 [[r2dbc-ConnectionFactoryUtils]]
 === Using `ConnectionFactoryUtils`
-
 
 The `ConnectionFactoryUtils` class is a convenient and powerful helper class
 that provides `static` methods to obtain connections from `ConnectionFactory`
