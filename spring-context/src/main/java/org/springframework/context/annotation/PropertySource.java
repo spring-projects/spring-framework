@@ -184,13 +184,14 @@ public @interface PropertySource {
 	 * <p>The default {@link #factory() factory} supports both traditional and
 	 * XML-based properties file formats &mdash; for example,
 	 * {@code "classpath:/com/myco/app.properties"} or {@code "file:/path/to/file.xml"}.
-	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
-	 * each location must evaluate to exactly one resource.
-	 * <p>${...} placeholders will be resolved against property sources already
+	 * <p>As of Spring Framework 6.1, resource location wildcards are also
+	 * supported &mdash; for example, {@code "classpath*:/config/*.properties"}.
+	 * <p>{@code ${...}} placeholders will be resolved against property sources already
 	 * registered with the {@code Environment}. See {@linkplain PropertySource above}
 	 * for examples.
 	 * <p>Each location will be added to the enclosing {@code Environment} as its own
-	 * property source, and in the order declared.
+	 * property source, and in the order declared (or in the order in which resource
+	 * locations are resolved when location wildcards are used).
 	 */
 	String[] value();
 
