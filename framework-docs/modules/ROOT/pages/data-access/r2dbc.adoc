@@ -254,6 +254,25 @@ Kotlin::
 ----
 ======
 
+Alternatively, there is a shortcut for mapping to a single value:
+
+[source,java]
+----
+	Flux<String> names = client.sql("SELECT name FROM person")
+			.mapValue(String.class)
+			.all();
+----
+
+Or you may map to a result object with bean properties or record components:
+
+[source,java]
+----
+	// assuming a name property on Person
+	Flux<Person> persons = client.sql("SELECT name FROM person")
+			.mapProperties(Person.class)
+			.all();
+----
+
 [[r2dbc-DatabaseClient-mapping-null]]
 .What about `null`?
 ****
@@ -322,6 +341,27 @@ The following example shows parameter binding for a query:
 	    	.bind("id", "joe")
 	    	.bind("name", "Joe")
 			.bind("age", 34);
+----
+
+Alternatively, you may pass in a map of names and values:
+
+[source,java]
+----
+	Map<String, Object> params = new LinkedHashMap<>();
+	params.put("id", "joe");
+	params.put("name", "Joe");
+	params.put("age", 34);
+	db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+			.bindValues(params);
+----
+
+Or you may pass in a parameter object with bean properties or record components:
+
+[source,java]
+----
+	// assuming id, name, age properties on Person
+	db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+			.bindProperties(new Person("joe", "Joe", 34);
 ----
 
 .R2DBC Native Bind Markers
