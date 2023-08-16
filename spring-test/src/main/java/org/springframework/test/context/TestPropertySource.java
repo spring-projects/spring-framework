@@ -231,6 +231,17 @@ public @interface TestPropertySource {
 	 * <li>{@code "key:value"}</li>
 	 * <li>{@code "key value"}</li>
 	 * </ul>
+	 * <p><strong>WARNING</strong>: although properties can be defined using any
+	 * of the above syntax variants and any number of spaces between the key and
+	 * the value, it is recommended that you use one syntax variant and consistent
+	 * spacing within your test suite &mdash; for example, consider always using
+	 * {@code "key = value"} instead of {@code "key= value"}, {@code "key=value"},
+	 * etc. Similarly, if you define inlined properties using <em>text blocks</em>
+	 * you should consistently use text blocks for inlined properties throughout
+	 * your test suite. The reason is that the exact strings you provide will be
+	 * used to determine the key for the context cache. Consequently, to benefit
+	 * from the context cache you must ensure that you define inlined properties
+	 * consistently.
 	 * <h4>Examples</h4>
 	 * <pre class="code">
 	 * &#47;&#47; Using an array of strings

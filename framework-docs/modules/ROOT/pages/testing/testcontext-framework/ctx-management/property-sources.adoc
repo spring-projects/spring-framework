@@ -86,6 +86,20 @@ a Java properties file:
 * `key:value`
 * `key value`
 
+[TIP]
+====
+Although properties can be defined using any of the above syntax variants and any number
+of spaces between the key and the value, it is recommended that you use one syntax
+variant and consistent spacing within your test suite — for example, consider always
+using `key = value` instead of `key= value`, `key=value`, etc. Similarly, if you define
+inlined properties using text blocks you should consistently use text blocks for inlined
+properties throughout your test suite.
+
+The reason is that the exact strings you provide will be used to determine the key for
+the context cache. Consequently, to benefit from the context cache you must ensure that
+you define inlined properties consistently.
+====
+
 The following example sets two inlined properties:
 
 [tabs]
@@ -95,24 +109,61 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@ContextConfiguration
-	@TestPropertySource(properties = {"timezone = GMT", "port: 4242"}) // <1>
+	@TestPropertySource(properties = {"timezone = GMT", "port = 4242"}) // <1>
 	class MyIntegrationTests {
 		// class body...
 	}
 ----
-<1> Setting two properties by using two variations of the key-value syntax.
+<1> Setting two properties via an array of strings.
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@ContextConfiguration
-	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>
+	@TestPropertySource(properties = ["timezone = GMT", "port = 4242"]) // <1>
 	class MyIntegrationTests {
 		// class body...
 	}
 ----
-<1> Setting two properties by using two variations of the key-value syntax.
+<1> Setting two properties via an array of strings.
+======
+
+As of Spring Framework 6.1, you can use _text blocks_ to define multiple inlined
+properties in a single `String`. The following example sets two inlined properties using
+a text block:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = """
+		timezone = GMT
+		port = 4242
+		""") // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Setting two properties via a text block.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = ["""
+		timezone = GMT
+		port = 4242
+		"""]) // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Setting two properties via a text block.
 ======
 
 [NOTE]
@@ -172,7 +223,7 @@ Java::
 	@ContextConfiguration
 	@TestPropertySource(
 		locations = "/test.properties",
-		properties = {"timezone = GMT", "port: 4242"}
+		properties = {"timezone = GMT", "port = 4242"}
 	)
 	class MyIntegrationTests {
 		// class body...
@@ -185,7 +236,7 @@ Kotlin::
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties",
-			properties = ["timezone = GMT", "port: 4242"]
+			properties = ["timezone = GMT", "port = 4242"]
 	)
 	class MyIntegrationTests {
 		// class body...
