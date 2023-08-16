@@ -1309,8 +1309,8 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isSynthesizedAnnotation(@Nullable Annotation annotation) {
 		try {
-			return ((annotation != null) && Proxy.isProxyClass(annotation.getClass()) &&
-					(Proxy.getInvocationHandler(annotation) instanceof SynthesizedMergedAnnotationInvocationHandler));
+			return (annotation != null && Proxy.isProxyClass(annotation.getClass()) &&
+					Proxy.getInvocationHandler(annotation) instanceof SynthesizedMergedAnnotationInvocationHandler);
 		}
 		catch (SecurityException ex) {
 			// Security settings disallow reflective access to the InvocationHandler:
