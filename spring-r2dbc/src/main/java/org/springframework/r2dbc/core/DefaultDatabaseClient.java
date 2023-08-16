@@ -245,6 +245,19 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@SuppressWarnings("deprecation")
+		private Parameter resolveParameter(Object value) {
+			if (value instanceof Parameter param) {
+				return param;
+			}
+			else if (value instanceof org.springframework.r2dbc.core.Parameter param) {
+				Object paramValue = param.getValue();
+				return (paramValue != null ? Parameters.in(paramValue) : Parameters.in(param.getType()));
+			}
+			else {
+				return Parameters.in(value);
+			}
+		}
+
 		@Override
 		public DefaultGenericExecuteSpec bind(int index, Object value) {
 			assertNotPreparedOperation();
@@ -252,16 +265,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-			if (value instanceof Parameter param) {
-				byIndex.put(index, param);
-			}
-			else if (value instanceof org.springframework.r2dbc.core.Parameter param) {
-				Object pv = param.getValue();
-				byIndex.put(index, (pv != null ? Parameters.in(pv) : Parameters.in(param.getType())));
-			}
-			else {
-				byIndex.put(index, Parameters.in(value));
-			}
+			byIndex.put(index, resolveParameter(value));
 
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
@@ -276,7 +280,6 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
 
-		@SuppressWarnings("deprecation")
 		@Override
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
@@ -286,15 +289,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-			if (value instanceof Parameter p) {
-				byName.put(name, p);
-			}
-			else if (value instanceof org.springframework.r2dbc.core.Parameter p) {
-				byName.put(name, p.hasValue() ? Parameters.in(p.getValue()) : Parameters.in(p.getType()));
-			}
-			else {
-				byName.put(name, Parameters.in(value));
-			}
+			byName.put(name, resolveParameter(value));
 
 			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
 		}

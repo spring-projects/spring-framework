@@ -163,10 +163,9 @@ public interface DatabaseClient extends ConnectionAccessor {
 	interface GenericExecuteSpec {
 
 		/**
-		 * Bind a non-{@code null} value to a parameter identified by its
-		 * {@code index}. {@code value} can be either a scalar value or {@link io.r2dbc.spi.Parameter}.
+		 * Bind a non-{@code null} value to a parameter identified by its {@code index}.
 		 * @param index zero based index to bind the parameter to
-		 * @param value either a scalar value or {@link io.r2dbc.spi.Parameter}
+		 * @param value either a scalar value or a {@link io.r2dbc.spi.Parameter}
 		 */
 		GenericExecuteSpec bind(int index, Object value);
 
@@ -180,7 +179,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		/**
 		 * Bind a non-{@code null} value to a parameter identified by its {@code name}.
 		 * @param name the name of the parameter
-		 * @param value the value to bind
+		 * @param value either a scalar value or a {@link io.r2dbc.spi.Parameter}
 		 */
 		GenericExecuteSpec bind(String name, Object value);
 
