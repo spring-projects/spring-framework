@@ -78,16 +78,12 @@ class InlinedPropertiesWithTextBlockTestPropertySourceTests {
 			assertEnvironmentProperty(this.env, "key.value.3", "key:value");
 		}
 
-		/**
-		 * Not necessarily preserved because the properties are all added at the
-		 * same time.
-		 */
 		@Test
 		@SuppressWarnings("rawtypes")
-		void propertyNameOrderingIsNotNecessarilyPreservedInEnvironment() {
+		void propertyNameOrderingIsPreservedInEnvironment() {
 			EnumerablePropertySource eps = (EnumerablePropertySource) env.getPropertySources().get(
 					INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
-			assertThat(eps.getPropertyNames()).containsExactlyInAnyOrder("foo", "baz", "enigma", "x.y.z",
+			assertThat(eps.getPropertyNames()).containsExactly("foo", "baz", "enigma", "x.y.z",
 					"server.url", "key.value.1", "key.value.2", "key.value.3");
 		}
 

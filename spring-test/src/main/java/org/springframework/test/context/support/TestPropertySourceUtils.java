@@ -373,12 +373,11 @@ public abstract class TestPropertySourceUtils {
 	 * <p>Parsing of the key-value pairs is achieved by converting all supplied
 	 * strings into <em>virtual</em> properties files in memory and delegating to
 	 * {@link Properties#load(java.io.Reader)} to parse each virtual file.
-	 * <p>Generally speaking, the ordering of property names will be preserved in
-	 * the returned map, analogous to the order in which the key-value pairs are
-	 * supplied to this method. However, if a single string contains multiple
-	 * key-value pairs separated by newlines &mdash; for example, when supplied by
-	 * a user via a <em>text block</em> &mdash; the ordering of property names for
-	 * those particular key-value pairs cannot be guaranteed in the returned map.
+	 * <p>The ordering of property names will be preserved in the returned map,
+	 * analogous to the order in which the key-value pairs are supplied to this
+	 * method. This also applies if a single string contains multiple key-value
+	 * pairs separated by newlines &mdash; for example, when supplied by a user
+	 * via a <em>text block</em>.
 	 * <p>For a full discussion of <em>inlined properties</em>, consult the Javadoc
 	 * for {@link TestPropertySource#properties}.
 	 * @param inlinedProperties the inlined properties to convert; potentially empty
@@ -390,26 +389,21 @@ public abstract class TestPropertySourceUtils {
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
-		Map<String, Object> map = new LinkedHashMap<>();
-		Properties props = new Properties();
+		SequencedProperties sequencedProperties = new SequencedProperties();
 
-		for (String pair : inlinedProperties) {
-			if (!StringUtils.hasText(pair)) {
+		for (String input : inlinedProperties) {
+			if (!StringUtils.hasText(input)) {
 				continue;
 			}
 			try {
-				props.load(new StringReader(pair));
+				sequencedProperties.load(new StringReader(input));
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Failed to load test environment properties from [" + pair + "]", ex);
+				throw new IllegalStateException("Failed to load test environment properties from [" + input + "]", ex);
 			}
-			for (String name : props.stringPropertyNames()) {
-				map.put(name, props.getProperty(name));
-			}
-			props.clear();
 		}
 
-		return map;
+		return sequencedProperties.map;
 	}
 
 	private static <T extends Annotation> List<List<MergedAnnotation<T>>> findRepeatableAnnotations(
@@ -454,6 +448,26 @@ public abstract class TestPropertySourceUtils {
 
 	private static <A extends Annotation> Comparator<MergedAnnotation<A>> highMetaDistancesFirst() {
 		return Comparator.<MergedAnnotation<A>> comparingInt(MergedAnnotation::getDistance).reversed();
+	}
+
+	/**
+	 * Extension of {@link Properties} that mimics a {@code SequencedMap} by
+	 * tracking all added properties in a {@link LinkedHashMap} that can be
+	 * accessed directly via the {@code map} field.
+	 * @since 6.1
+	 */
+	@SuppressWarnings("serial")
+	private static class SequencedProperties extends Properties {
+
+		final Map<String, Object> map = new LinkedHashMap<>();
+
+		@Override
+		public synchronized Object put(Object key, Object value) {
+			if (key instanceof String str) {
+				this.map.put(str, value);
+			}
+			return super.put(key, value);
+		}
 	}
 
 }
