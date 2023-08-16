@@ -126,6 +126,9 @@ class TestPropertySourceAttributes {
 				TestContextResourceUtils.convertToClasspathResourcePaths(declaringClass, true, locations);
 		Class<? extends PropertySourceFactory> factoryClass =
 				(Class<? extends PropertySourceFactory>) mergedAnnotation.getClass("factory");
+		if (factoryClass == PropertySourceFactory.class) {
+			factoryClass = null; // default factory type will be inferred
+		}
 		String encoding = mergedAnnotation.getString("encoding");
 		if (encoding.isBlank()) {
 			encoding = null; // default encoding will be inferred

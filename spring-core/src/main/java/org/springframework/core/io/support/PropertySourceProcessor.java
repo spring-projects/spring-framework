@@ -137,8 +137,8 @@ public class PropertySourceProcessor {
 			propertySources.addLast(propertySource);
 		}
 		else {
-			String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
-			propertySources.addBefore(firstProcessed, propertySource);
+			String lastAdded = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
+			propertySources.addBefore(lastAdded, propertySource);
 		}
 		this.propertySourceNames.add(name);
 	}

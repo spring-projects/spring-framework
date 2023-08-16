@@ -293,8 +293,7 @@ public abstract class TestPropertySourceUtils {
 			for (PropertySourceDescriptor descriptor : descriptors) {
 				if (!descriptor.locations().isEmpty()) {
 					Class<? extends PropertySourceFactory> factoryClass = descriptor.propertySourceFactory();
-					PropertySourceFactory factory =
-							(factoryClass != null && factoryClass != PropertySourceFactory.class ?
+					PropertySourceFactory factory = (factoryClass != null ?
 							BeanUtils.instantiateClass(factoryClass) : defaultPropertySourceFactory);
 
 					for (String location : descriptor.locations()) {
