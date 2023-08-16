@@ -167,7 +167,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Bind a non-{@code null} value to a parameter identified by its
 		 * {@code index}. {@code value} can be either a scalar value or {@link io.r2dbc.spi.Parameter}.
 		 * @param index zero based index to bind the parameter to
-		 * @param value either a scalar value or {@link io.r2dbc.spi.Parameter}
+		 * @param value either a scalar value or a {@link io.r2dbc.spi.Parameter}
 		 */
 		GenericExecuteSpec bind(int index, Object value);
 
@@ -181,7 +181,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		/**
 		 * Bind a non-{@code null} value to a parameter identified by its {@code name}.
 		 * @param name the name of the parameter
-		 * @param value the value to bind
+		 * @param value either a scalar value or a {@link io.r2dbc.spi.Parameter}
 		 */
 		GenericExecuteSpec bind(String name, Object value);
 
@@ -193,10 +193,21 @@ public interface DatabaseClient extends ConnectionAccessor {
 		GenericExecuteSpec bindNull(String name, Class<?> type);
 
 		/**
+		 * Bind the parameter values from the given source map,
+		 * registering each as a parameter with the map key as name.
+		 * @param source the source map of parameters, with keys as names and
+		 * each value either a scalar value or a {@link io.r2dbc.spi.Parameter}
+		 * @since 6.1
+		 * @see #bindProperties
+		 */
+		GenericExecuteSpec bindValues(Map<String, ?> source);
+
+		/**
 		 * Bind the bean properties or record components from the given
 		 * source object, registering each as a named parameter.
 		 * @param source the source object (a JavaBean or record)
 		 * @since 6.1
+		 * @see #mapProperties
 		 */
 		GenericExecuteSpec bindProperties(Object source);
 
