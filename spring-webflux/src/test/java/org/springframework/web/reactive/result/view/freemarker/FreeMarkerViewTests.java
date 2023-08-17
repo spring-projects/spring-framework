@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.view.freemarker;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
@@ -28,7 +27,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
@@ -102,6 +100,26 @@ class FreeMarkerViewTests {
 	}
 
 	@Test
+	void resourceExists() {
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("test.ftl");
+
+		StepVerifier.create(freeMarkerView.resourceExists(Locale.US))
+				.assertNext(b -> assertThat(b).isTrue())
+				.verifyComplete();
+	}
+
+	@Test
+	void resourceDoesNotExists() {
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("foo-bar.ftl");
+
+		StepVerifier.create(freeMarkerView.resourceExists(Locale.US))
+				.assertNext(b -> assertThat(b).isFalse())
+				.verifyComplete();
+	}
+
+	@Test
 	void render() {
 		freeMarkerView.setApplicationContext(this.context);
 		freeMarkerView.setConfiguration(this.freeMarkerConfig);
@@ -112,7 +130,8 @@ class FreeMarkerViewTests {
 		freeMarkerView.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertThat(asString(buf)).isEqualTo("<html><body>hi FreeMarker</body></html>"))
+				.consumeNextWith(buf -> assertThat(buf.toString(StandardCharsets.UTF_8))
+						.isEqualTo("<html><body>hi FreeMarker</body></html>"))
 				.expectComplete()
 				.verify();
 	}
@@ -135,15 +154,6 @@ class FreeMarkerViewTests {
 
 		response.cancelWrite();
 		response.checkForLeaks();
-	}
-
-
-	private static String asString(DataBuffer dataBuffer) {
-		@SuppressWarnings("deprecation")
-		ByteBuffer byteBuffer = dataBuffer.toByteBuffer();
-		byte[] bytes = new byte[byteBuffer.remaining()];
-		byteBuffer.get(bytes);
-		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 

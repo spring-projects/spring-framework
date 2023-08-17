@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,12 +238,8 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 		}
 
 		View view = applyLifecycleMethods(viewName, urlBasedView);
-		try {
-			return (urlBasedView.checkResourceExists(locale) ? Mono.just(view) : Mono.empty());
-		}
-		catch (Exception ex) {
-			return Mono.error(ex);
-		}
+		return urlBasedView.resourceExists(locale)
+				.flatMap(exists -> exists ? Mono.just(view) : Mono.empty());
 	}
 
 	/**
