@@ -193,47 +193,39 @@ Kotlin::
 ======
 
 Note that there are special considerations for the returned `Publisher` with regards to
-Reactive Streams cancellation signals. See the xref:data-access/transaction/programmatic.adoc#tx-prog-operator-cancel[Cancel Signals] section under
-"Using the TransactionalOperator" for more details.
-
+Reactive Streams cancellation signals. See the
+xref:data-access/transaction/programmatic.adoc#tx-prog-operator-cancel[Cancel Signals]
+section under "Using the TransactionalOperator" for more details.
 
 [[transaction-declarative-annotations-method-visibility]]
-.Method visibility and `@Transactional`
+.Method visibility and `@Transactional` in proxy mode
 [NOTE]
 ====
-When you use transactional proxies with Spring's standard configuration, you should apply
-the `@Transactional` annotation only to methods with `public` visibility. If you do
-annotate `protected`, `private`, or package-visible methods with the `@Transactional`
-annotation, no error is raised, but the annotated method does not exhibit the configured
-transactional settings. If you need to annotate non-public methods, consider the tip in
-the following paragraph for class-based proxies or consider using AspectJ compile-time or
-load-time weaving (described later).
+The `@Transactional` annotation is typically used on methods with `public` visibility.
+As of 6.0, `protected` or package-visible methods can also be made transactional for
+class-based proxies by default. Note that transactional methods in interface-based
+proxies must always be `public` and defined in the proxied interface. For both kinds
+of proxies, only external method calls coming in through the proxy are intercepted.
 
-When using `@EnableTransactionManagement` in a `@Configuration` class, `protected` or
-package-visible methods can also be made transactional for class-based proxies by
-registering a custom `transactionAttributeSource` bean like in the following example.
-Note, however, that transactional methods in interface-based proxies must always be
-`public` and defined in the proxied interface.
+If you prefer consistent treatment of method visibility across the different kinds of
+proxies (which was the default up until 5.3), consider specifying `publicMethodsOnly`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	/**
 	 * Register a custom AnnotationTransactionAttributeSource with the
-	 * publicMethodsOnly flag set to false to enable support for
-	 * protected and package-private @Transactional methods in
-	 * class-based proxies.
-	 *
+	 * publicMethodsOnly flag set to true to consistently ignore non-public methods.
 	 * @see ProxyTransactionManagementConfiguration#transactionAttributeSource()
 	 */
 	@Bean
 	TransactionAttributeSource transactionAttributeSource() {
-		return new AnnotationTransactionAttributeSource(false);
+		return new AnnotationTransactionAttributeSource(true);
 	}
 ----
 
-The _Spring TestContext Framework_ supports non-private `@Transactional` test methods by
-default. See xref:testing/testcontext-framework/tx.adoc[Transaction Management] in the testing
-chapter for examples.
+The _Spring TestContext Framework_ supports non-private `@Transactional` test methods
+by default as well. See xref:testing/testcontext-framework/tx.adoc[Transaction Management]
+in the testing chapter for examples.
 ====
 
 You can apply the `@Transactional` annotation to an interface definition, a method
@@ -373,7 +365,6 @@ Kotlin::
 	}
 ----
 ======
-
 
 [[transaction-declarative-attransactional-settings]]
 == `@Transactional` Settings
