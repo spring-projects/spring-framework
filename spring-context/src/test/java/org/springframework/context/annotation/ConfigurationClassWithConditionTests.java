@@ -26,7 +26,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
@@ -147,6 +149,12 @@ public class ConfigurationClassWithConditionTests {
 		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
 		assertThat(beans).hasSize(1);
 		assertThat(beans.keySet().iterator().next()).isEqualTo("baz");
+	}
+
+	@Test
+	public void conditionOnOverloadedMethodHonored() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithOverloadedConditionalBean.class);
+		assertThat(context.getBeansOfType(ExampleBean.class)).isNotEmpty();
 	}
 
 	@Test
@@ -383,4 +391,19 @@ public class ConfigurationClassWithConditionTests {
 		}
 	}
 
+	@Configuration(enforceUniqueMethods = false)
+	static class ConfigWithOverloadedConditionalBean {
+
+		@Bean
+		@Conditional(NeverCondition.class)
+		ExampleBean user() {
+			return new ExampleBean();
+		}
+
+		@Bean
+		@Conditional(AlwaysCondition.class)
+		ExampleBean user(ApplicationContext context, Environment environment) {
+			return new ExampleBean();
+		}
+	}
 }

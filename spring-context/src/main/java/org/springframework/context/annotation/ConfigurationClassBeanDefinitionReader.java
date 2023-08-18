@@ -17,12 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -178,13 +173,14 @@ class ConfigurationClassBeanDefinitionReader {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 		String methodName = metadata.getMethodName();
+		String methodSignature = this.getMethodSignature(metadata);
 
 		// Do we need to mark the bean as skipped by its condition?
 		if (this.conditionEvaluator.shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN)) {
-			configClass.skippedBeanMethods.add(methodName);
+			configClass.skippedBeanMethods.add(methodSignature);
 			return;
 		}
-		if (configClass.skippedBeanMethods.contains(methodName)) {
+		if (configClass.skippedBeanMethods.contains(methodSignature)) {
 			return;
 		}
 
@@ -376,6 +372,22 @@ class ConfigurationClassBeanDefinitionReader {
 				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));
 	}
 
+	private String getMethodSignature(MethodMetadata metadata){
+		Objects.requireNonNull(metadata);
+		var signature = new StringBuilder(metadata.getMethodName());
+		signature.append("(");
+		if(metadata instanceof StandardMethodMetadata method){
+			var methodParameters = method.getIntrospectedMethod().getParameters();
+			for(int i = 0; i < methodParameters.length; i++){
+				var parameterType = methodParameters[i].getType().descriptorString();
+				signature.append(parameterType, 0, parameterType.length()-1);
+				if(i+1 < methodParameters.length){
+					signature.append(",");
+				}
+			}
+		}
+		return signature.append(")").toString();
+	}
 
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
