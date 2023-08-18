@@ -38,6 +38,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -50,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 class ModelAttributeMethodArgumentResolverTests {
 
@@ -386,6 +388,16 @@ class ModelAttributeMethodArgumentResolverTests {
 		assertThat(model).hasSize(2);
 		assertThat(model.get(modelKey)).isSameAs(dataClass);
 		assertThat(model.get(bindingResultKey)).isInstanceOf(BindingResult.class);
+	}
+
+	@Test
+	void bindDataClassError() {
+		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(DataClass.class);
+		Mono<Object> mono = createResolver().resolveArgument(parameter, this.bindContext, postForm("name=Robert&age=invalid&count=1"));
+		StepVerifier.create(mono)
+				.expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify();
 	}
 
 	// TODO: SPR-15871, SPR-15542
