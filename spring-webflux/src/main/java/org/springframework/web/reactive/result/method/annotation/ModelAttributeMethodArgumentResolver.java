@@ -103,8 +103,14 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 		String name = ModelInitializer.getNameForParameter(parameter);
 
-		Mono<WebExchangeDataBinder> dataBinderMono = initDataBinder(
-				name, (adapter != null ? parameter.nested() : parameter), context, exchange);
+		Mono<WebExchangeDataBinder> dataBinderMono =
+				initDataBinder(name, (adapter != null ? parameter.nested() : parameter), context, exchange)
+						.doOnNext(binder -> {
+							BindingResult errors = binder.getBindingResult();
+							if (errors.hasErrors()) {
+								throw new WebExchangeBindException(parameter, errors);
+							}
+						});
 
 		// unsafe() is OK: source is Reactive Streams Publisher
 		Sinks.One<BindingResult> bindingResultSink = Sinks.unsafe().one();
