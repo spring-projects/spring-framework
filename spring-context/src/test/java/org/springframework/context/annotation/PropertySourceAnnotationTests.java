@@ -231,6 +231,8 @@ class PropertySourceAnnotationTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MultipleComposedAnnotationsConfig.class);
 		ctx.getBean(MultipleComposedAnnotationsConfig.class);
 		assertEnvironmentContainsProperties(ctx, "from.p1", "from.p2", "from.p3", "from.p4", "from.p5");
+		// p5 should 'win' as it is registered via the last "locally declared" direct annotation
+		assertEnvironmentProperty(ctx, "testbean.name", "p5TestBean");
 		ctx.close();
 	}
 

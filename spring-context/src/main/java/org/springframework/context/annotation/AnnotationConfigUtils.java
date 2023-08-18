@@ -286,4 +286,11 @@ public abstract class AnnotationConfigUtils {
 		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, false);
 	}
 
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			Class<? extends Annotation> annotationType, Class<? extends Annotation> containerType,
+			boolean sortByReversedMetaDistance) {
+
+		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, false, sortByReversedMetaDistance);
+	}
+
 }

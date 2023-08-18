@@ -263,6 +263,20 @@ class AnnotationMetadataTests {
 		assertRepeatableAnnotations(metadata);
 	}
 
+	@Test  // gh-31074
+	void multipleComposedRepeatableAnnotationsSortedByReversedMetaDistanceUsingStandardAnnotationMetadata() {
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(MultipleComposedRepeatableAnnotationsClass.class);
+		assertRepeatableAnnotationsSortedByReversedMetaDistance(metadata);
+	}
+
+	@Test  // gh-31074
+	void multipleComposedRepeatableAnnotationsSortedByReversedMetaDistanceUsingSimpleAnnotationMetadata() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(MultipleComposedRepeatableAnnotationsClass.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		assertRepeatableAnnotationsSortedByReversedMetaDistance(metadata);
+	}
+
 	@Test  // gh-31041
 	void multipleRepeatableAnnotationsInContainersUsingStandardAnnotationMetadata() {
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(MultipleRepeatableAnnotationsInContainersClass.class);
@@ -316,6 +330,18 @@ class AnnotationMetadataTests {
 				.containsExactly("A", "B", "C", "D");
 		assertThat(attributesSet.stream().map(attributes -> attributes.getStringArray("basePackages")).flatMap(Arrays::stream))
 				.containsExactly("A", "B", "C", "D");
+	}
+
+	private static void assertRepeatableAnnotationsSortedByReversedMetaDistance(AnnotationMetadata metadata) {
+		// Note: although the real @ComponentScan annotation is not looked up using
+		// "sortByReversedMetaDistance" semantics, we can still use @TestComponentScan
+		// to verify the expected behavior.
+		Set<AnnotationAttributes> attributesSet =
+				metadata.getMergedRepeatableAnnotationAttributes(TestComponentScan.class, TestComponentScans.class, false, true);
+		assertThat(attributesSet.stream().map(attributes -> attributes.getStringArray("value")).flatMap(Arrays::stream))
+				.containsExactly("C", "D", "A", "B");
+		assertThat(attributesSet.stream().map(attributes -> attributes.getStringArray("basePackages")).flatMap(Arrays::stream))
+				.containsExactly("C", "D", "A", "B");
 	}
 
 	private static void assertRepeatableAnnotations(Set<TestComponentScan> annotations) {

@@ -268,7 +268,7 @@ class ConfigurationClassParser {
 		// Process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class,
-				PropertySources.class)) {
+				PropertySources.class, true)) {
 			if (this.propertySourceRegistry != null) {
 				this.propertySourceRegistry.processPropertySource(propertySource);
 			}
