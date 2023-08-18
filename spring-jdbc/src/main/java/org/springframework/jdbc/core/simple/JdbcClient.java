@@ -39,11 +39,11 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 /**
  * A fluent {@code JdbcClient} with common JDBC query and update operations,
  * supporting JDBC-style positional as well as Spring-style named parameters
- * with a convenient unified facade for JDBC PreparedStatement execution.
+ * with a convenient unified facade for JDBC {@code PreparedStatement} execution.
  *
  * <p>An example for retrieving a query result as a {@code java.util.Optional}:
  * <pre class="code">
- * Optional&lt;Integer&gt; value = client.sql("SELECT AGE FROM CUSTMR WHERE ID = :id")
+ * Optional&lt;Integer&gt; value = client.sql("SELECT AGE FROM CUSTOMER WHERE ID = :id")
  *     .param("id", 3)
  *     .query((rs, rowNum) -> rs.getInt(1))
  *     .optional();
@@ -51,9 +51,9 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  *
  * <p>Delegates to {@link org.springframework.jdbc.core.JdbcTemplate} and
  * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}.
- * For complex JDBC operations, e.g. batch inserts and stored procedure calls,
- * you may use those lower-level template classes directly - or alternatively,
- * {@link SimpleJdbcInsert} and {@link SimpleJdbcCall}.
+ * For complex JDBC operations &mdash; for example, batch inserts and stored
+ * procedure calls &mdash; you may use those lower-level template classes directly,
+ * or alternatively {@link SimpleJdbcInsert} and {@link SimpleJdbcCall}.
  *
  * @author Juergen Hoeller
  * @since 6.1
@@ -87,8 +87,8 @@ public interface JdbcClient {
 
 	/**
 	 * Create a {@code JdbcClient} for the given {@link JdbcOperations} delegate,
-	 * typically a {@link org.springframework.jdbc.core.JdbcTemplate}.
-	 * <p>Use this factory method for reusing existing {@code JdbcTemplate} configuration,
+	 * typically an {@link org.springframework.jdbc.core.JdbcTemplate}.
+	 * <p>Use this factory method to reuse existing {@code JdbcTemplate} configuration,
 	 * including its {@code DataSource}.
 	 * @param jdbcTemplate the delegate to perform operations on
 	 */
@@ -98,9 +98,9 @@ public interface JdbcClient {
 
 	/**
 	 * Create a {@code JdbcClient} for the given {@link NamedParameterJdbcOperations} delegate,
-	 * typically a {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}.
-	 * <p>Use this factory method for reusing existing {@code NamedParameterJdbcTemplate}
-	 * configuration, including its underlying {@code JdbcTemplate} and the {@code DataSource}.
+	 * typically an {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}.
+	 * <p>Use this factory method to reuse existing {@code NamedParameterJdbcTemplate}
+	 * configuration, including its underlying {@code JdbcTemplate} and {@code DataSource}.
 	 * @param jdbcTemplate the delegate to perform operations on
 	 */
 	static JdbcClient create(NamedParameterJdbcOperations jdbcTemplate) {
@@ -116,9 +116,9 @@ public interface JdbcClient {
 		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
 		 * by implicit order of parameter value registration.
-		 * <p>This is primarily intended for statements with a single or very few
-		 * parameters, registering each parameter value in the order of the
-		 * parameter's occurrence in the SQL statement.
+		 * <p>This is primarily intended for statements with a single parameter
+		 * or very few parameters, registering each parameter value in the order
+		 * of the parameter's occurrence in the SQL statement.
 		 * @param value the parameter value to bind
 		 * @return this statement specification (for chaining)
 		 * @see java.sql.PreparedStatement#setObject(int, Object)
@@ -190,10 +190,10 @@ public interface JdbcClient {
 		/**
 		 * Bind named statement parameters for ":x" placeholder resolution.
 		 * <p>The given parameter object will define all named parameters
-		 * based on its JavaBean properties, record components or raw fields.
+		 * based on its JavaBean properties, record components, or raw fields.
 		 * A Map instance can be provided as a complete parameter source as well.
-		 * @param namedParamObject a custom parameter object (e.g. a JavaBean or
-		 * record class or field holder) with named properties serving as
+		 * @param namedParamObject a custom parameter object (e.g. a JavaBean,
+		 * record class, or field holder) with named properties serving as
 		 * statement parameters
 		 * @return this statement specification (for chaining)
 		 * @see #paramSource(SqlParameterSource)
