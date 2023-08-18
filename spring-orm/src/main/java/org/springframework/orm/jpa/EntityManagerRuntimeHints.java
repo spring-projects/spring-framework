@@ -39,6 +39,8 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final String QUERY_SQM_IMPL_CLASS_NAME = "org.hibernate.query.sqm.internal.QuerySqmImpl";
 
+	private static final String NATIVE_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sql.internal.NativeQueryImpl";
+
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		if (ClassUtils.isPresent(HIBERNATE_SESSION_FACTORY_CLASS_NAME, classLoader)) {
@@ -57,6 +59,12 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 		}
 		try {
 			Class<?> clazz = ClassUtils.forName(QUERY_SQM_IMPL_CLASS_NAME, classLoader);
+			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
+		}
+		catch (ClassNotFoundException ignored) {
+		}
+		try {
+			Class<?> clazz = ClassUtils.forName(NATIVE_QUERY_IMPL_CLASS_NAME, classLoader);
 			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
 		}
 		catch (ClassNotFoundException ignored) {
