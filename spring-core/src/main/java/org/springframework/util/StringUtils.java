@@ -159,7 +159,21 @@ public abstract class StringUtils {
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
-		return (str != null && str.length() > 0 && containsText(str));
+		if (str == null) {
+			return false;
+		}
+
+		int strLen = str.length();
+		if (strLen == 0) {
+			return false;
+		}
+
+		for (int i = 0; i < strLen; i++) {
+			if (!Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -175,17 +189,7 @@ public abstract class StringUtils {
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable String str) {
-		return (str != null && !str.isEmpty() && containsText(str));
-	}
-
-	private static boolean containsText(CharSequence str) {
-		int strLen = str.length();
-		for (int i = 0; i < strLen; i++) {
-			if (!Character.isWhitespace(str.charAt(i))) {
-				return true;
-			}
-		}
-		return false;
+		return (str != null && !str.isBlank());
 	}
 
 	/**
@@ -239,26 +243,26 @@ public abstract class StringUtils {
 	/**
 	 * Trim <em>all</em> whitespace from the given {@code CharSequence}:
 	 * leading, trailing, and in between characters.
-	 * @param text the {@code CharSequence} to check
+	 * @param str the {@code CharSequence} to check
 	 * @return the trimmed {@code CharSequence}
 	 * @since 5.3.22
 	 * @see #trimAllWhitespace(String)
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static CharSequence trimAllWhitespace(CharSequence text) {
-		if (!hasLength(text)) {
-			return text;
+	public static CharSequence trimAllWhitespace(CharSequence str) {
+		if (!hasLength(str)) {
+			return str;
 		}
 
-		int len = text.length();
-		StringBuilder sb = new StringBuilder(text.length());
+		int len = str.length();
+		StringBuilder sb = new StringBuilder(str.length());
 		for (int i = 0; i < len; i++) {
-			char c = text.charAt(i);
+			char c = str.charAt(i);
 			if (!Character.isWhitespace(c)) {
 				sb.append(c);
 			}
 		}
-		return sb.toString();
+		return sb;
 	}
 
 	/**
@@ -270,9 +274,10 @@ public abstract class StringUtils {
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimAllWhitespace(String str) {
-		if (str == null) {
-			return null;
+		if (!hasLength(str)) {
+			return str;
 		}
+
 		return trimAllWhitespace((CharSequence) str).toString();
 	}
 
@@ -514,7 +519,7 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Object quoteIfString(@Nullable Object obj) {
-		return (obj instanceof String text ? quote(text) : obj);
+		return (obj instanceof String str ? quote(str) : obj);
 	}
 
 	/**
@@ -868,36 +873,40 @@ public abstract class StringUtils {
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
 		if (localeString.equals("")) {
 			return null;
 		}
+
 		String delimiter = "_";
 		if (!localeString.contains("_") && localeString.contains(" ")) {
 			delimiter = " ";
 		}
-		final String[] tokens = localeString.split(delimiter, -1);
+
+		String[] tokens = localeString.split(delimiter, -1);
 		if (tokens.length == 1) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
 			return new Locale(language);
 		}
 		else if (tokens.length == 2) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
-			final String country = tokens[1];
+			String country = tokens[1];
 			validateLocalePart(country);
 			return new Locale(language, country);
 		}
 		else if (tokens.length > 2) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
-			final String country = tokens[1];
+			String country = tokens[1];
 			validateLocalePart(country);
-			final String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
 			return new Locale(language, country, variant);
 		}
+
 		throw new IllegalArgumentException("Invalid locale format: '" + localeString + "'");
 	}
 
