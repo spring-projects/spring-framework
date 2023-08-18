@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.simple;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,6 +48,7 @@ import org.springframework.util.Assert;
  * as created by the static factory methods.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @see JdbcClient#create(DataSource)
  * @see JdbcClient#create(JdbcOperations)
@@ -138,6 +140,12 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public StatementSpec param(String name, Object value, int sqlType) {
 			this.namedParams.addValue(name, value, sqlType);
+			return this;
+		}
+
+		@Override
+		public StatementSpec params(Object... values) {
+			Collections.addAll(this.indexedParams, values);
 			return this;
 		}
 

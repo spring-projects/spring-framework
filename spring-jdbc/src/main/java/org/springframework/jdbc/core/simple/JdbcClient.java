@@ -56,6 +56,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * or alternatively {@link SimpleJdbcInsert} and {@link SimpleJdbcCall}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -166,6 +167,18 @@ public interface JdbcClient {
 		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource#addValue(String, Object, int)
 		 */
 		StatementSpec param(String name, Object value, int sqlType);
+
+		/**
+		 * Bind a var-args list of positional parameters for "?" placeholder resolution.
+		 * <p>The given list will be added to existing positional parameters, if any.
+		 * Each element from the complete list will be bound as a JDBC positional
+		 * parameter with a corresponding JDBC index (i.e. list index + 1).
+		 * @param values the parameter values to bind
+		 * @return this statement specification (for chaining)
+		 * @see #param(Object)
+		 * @see #params(List)
+		 */
+		StatementSpec params(Object... values);
 
 		/**
 		 * Bind a list of positional parameters for "?" placeholder resolution.
