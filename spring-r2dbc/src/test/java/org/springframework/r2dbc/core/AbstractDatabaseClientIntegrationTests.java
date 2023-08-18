@@ -102,7 +102,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
 				.bindValues(Map.of("id", 42055,
-						"name", Parameter.from("SCHAUFELRADBAGGER"),
+						"name", Parameters.in("SCHAUFELRADBAGGER"),
 						"manual", Parameters.in(Integer.class)))
 				.fetch().rowsUpdated()
 				.as(StepVerifier::create)
