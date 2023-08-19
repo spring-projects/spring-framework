@@ -399,7 +399,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	protected String formatMappingName() {
-		return this.beanName != null ? "'" + this.beanName + "'" : getClass().getName();
+		return (this.beanName != null ? "'" + this.beanName + "'" : getClass().getName());
 	}
 
 
@@ -589,9 +589,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private RequestPath getRequestPath(HttpServletRequest request) {
 		// Expect pre-parsed path with DispatcherServlet,
 		// but otherwise parse per handler lookup + cache for handling
-		return request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null ?
+		return (request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null ?
 				ServletRequestPathUtils.getParsedRequestPath(request) :
-				ServletRequestPathUtils.parseAndCache(request);
+				ServletRequestPathUtils.parseAndCache(request));
 	}
 
 	/**

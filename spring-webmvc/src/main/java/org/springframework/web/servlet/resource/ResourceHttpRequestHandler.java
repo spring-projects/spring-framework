@@ -676,7 +676,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				prev = curr;
 			}
 		}
-		return sb != null ? sb.toString() : path;
+		return (sb != null ? sb.toString() : path);
 	}
 
 	private String cleanLeadingSlash(String path) {
