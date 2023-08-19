@@ -74,11 +74,12 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * <li>{@code @TestPropertySource} can be used as a <em>{@linkplain Repeatable
  * repeatable}</em> annotation.</li>
  * <li>This annotation may be used as a <em>meta-annotation</em> to create
- * custom <em>composed annotations</em>; however, caution should be taken if
+ * custom <em>composed annotations</em>, but caution should be taken if
  * this annotation and {@code @ContextConfiguration} are combined on a composed
  * annotation since the {@code locations} and {@code inheritLocations} attributes
  * of both annotations can lead to ambiguity during the attribute resolution
- * process.</li>
+ * process. Note, however, that ambiguity can be avoided via explicit annotation
+ * attribute overrides using {@link AliasFor @AliasFor}.</li>
  * <li>As of Spring Framework 5.3, this annotation will be inherited from an
  * enclosing test class by default. See
  * {@link NestedTestConfiguration @NestedTestConfiguration} for details.</li>
