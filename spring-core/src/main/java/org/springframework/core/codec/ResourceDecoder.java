@@ -76,7 +76,7 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		}
 
 		Class<?> clazz = elementType.toClass();
-		String filename = hints != null ? (String) hints.get(FILENAME_HINT) : null;
+		String filename = (hints != null ? (String) hints.get(FILENAME_HINT) : null);
 		if (clazz == InputStreamResource.class) {
 			return new InputStreamResource(new ByteArrayInputStream(bytes)) {
 				@Override
