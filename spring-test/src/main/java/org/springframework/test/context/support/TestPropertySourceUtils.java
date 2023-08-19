@@ -393,9 +393,7 @@ public abstract class TestPropertySourceUtils {
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
 
-		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-		SequencedProperties sequencedProperties = new SequencedProperties(map);
-
+		SequencedProperties sequencedProperties = new SequencedProperties();
 		for (String input : inlinedProperties) {
 			if (!StringUtils.hasText(input)) {
 				continue;
@@ -407,8 +405,7 @@ public abstract class TestPropertySourceUtils {
 				throw new IllegalStateException("Failed to load test environment properties from [" + input + "]", ex);
 			}
 		}
-
-		return map;
+		return sequencedProperties.getSequencedMap();
 	}
 
 	private static <T extends Annotation> List<List<MergedAnnotation<T>>> findRepeatableAnnotations(
@@ -452,26 +449,28 @@ public abstract class TestPropertySourceUtils {
 	}
 
 	/**
-	 * Extension of {@link Properties} that mimics a {@code SequencedMap} by
-	 * tracking all added properties in the supplied {@link LinkedHashMap}.
+	 * Extension of {@link Properties} that mimics a {@code SequencedMap} by tracking
+	 * all added properties with a {@link String} key in a {@link LinkedHashMap}.
 	 * @since 6.1
 	 */
 	@SuppressWarnings("serial")
 	private static class SequencedProperties extends Properties {
 
-		private final LinkedHashMap<String, Object> map;
-
-		SequencedProperties(LinkedHashMap<String, Object> map) {
-			this.map = map;
-		}
+		private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
 		@Override
-		public synchronized Object put(Object key, Object value) {
+		public Object put(Object key, Object value) {
 			if (key instanceof String str) {
-				this.map.put(str, value);
+				return this.map.put(str, value);
 			}
-			return super.put(key, value);
+			// No need to invoke super.put(key, value);
+			return null;
 		}
+
+		public Map<String, Object> getSequencedMap() {
+			return this.map;
+		}
+
 	}
 
 }
