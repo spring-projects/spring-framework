@@ -166,4 +166,10 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return this.introspectedMethod.toString();
 	}
 
+	@Override
+	public String getMethodSignature(){
+		var stringify = this.toString();
+		return this.introspectedMethod.getName()
+				.concat(stringify.substring(stringify.indexOf('('), stringify.indexOf(')')+1));
+	}
 }

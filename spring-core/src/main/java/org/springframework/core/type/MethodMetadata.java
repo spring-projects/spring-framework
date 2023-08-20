@@ -71,4 +71,9 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	 */
 	boolean isOverridable();
 
+	/**
+	 *
+	 * @return the underlying method's signature
+	 */
+	String getMethodSignature();
 }

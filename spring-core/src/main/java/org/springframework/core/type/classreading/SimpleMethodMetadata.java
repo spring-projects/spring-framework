@@ -116,4 +116,10 @@ final class SimpleMethodMetadata implements MethodMetadata {
 		return this.source.toString();
 	}
 
+	@Override
+	public String getMethodSignature(){
+		var stringify = this.toString();
+		return this.methodName
+				.concat(stringify.substring(stringify.indexOf('('), stringify.indexOf(')')+1));
+	}
 }
