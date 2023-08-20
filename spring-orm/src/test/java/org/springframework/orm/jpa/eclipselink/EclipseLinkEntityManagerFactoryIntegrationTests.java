@@ -18,20 +18,17 @@ package org.springframework.orm.jpa.eclipselink;
 
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_18;
 
 /**
  * EclipseLink-specific JPA tests.
  *
  * @author Juergen Hoeller
  */
-@DisabledForJreRange(min = JAVA_18, disabledReason = "These JPA tests don't pass on Java 18+")
 public class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Test
