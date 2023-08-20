@@ -37,21 +37,21 @@ import org.springframework.util.Assert;
  */
 public class InlineMap extends SpelNodeImpl {
 
-	// If the map is purely literals, it is a constant value and can be computed and cached
 	@Nullable
 	private final TypedValue constant;
 
 
 	public InlineMap(int startPos, int endPos, SpelNodeImpl... args) {
 		super(startPos, endPos, args);
-		this.constant =	computeConstantValue();
+		this.constant = computeConstantValue();
 	}
 
 
 	/**
 	 * If all the components of the map are constants, or lists/maps that themselves
 	 * contain constants, then a constant list can be built to represent this node.
-	 * This will speed up later getValue calls and reduce the amount of garbage created.
+	 * <p>This will speed up later getValue calls and reduce the amount of garbage
+	 * created.
 	 */
 	@Nullable
 	private TypedValue computeConstantValue() {
@@ -78,9 +78,7 @@ public class InlineMap extends SpelNodeImpl {
 		int childCount = getChildCount();
 		for (int c = 0; c < childCount; c++) {
 			SpelNode keyChild = getChild(c++);
-			SpelNode valueChild = getChild(c);
 			Object key;
-			Object value = null;
 			if (keyChild instanceof Literal literal) {
 				key = literal.getLiteralValue().getValue();
 			}
@@ -90,6 +88,9 @@ public class InlineMap extends SpelNodeImpl {
 			else {
 				return null;
 			}
+
+			SpelNode valueChild = getChild(c);
+			Object value = null;
 			if (valueChild instanceof Literal literal) {
 				value = literal.getLiteralValue().getValue();
 			}
@@ -113,7 +114,6 @@ public class InlineMap extends SpelNodeImpl {
 			Map<Object, Object> returnValue = new LinkedHashMap<>();
 			int childcount = getChildCount();
 			for (int c = 0; c < childcount; c++) {
-				// TODO allow for key being PropertyOrFieldReference like Indexer on maps
 				SpelNode keyChild = getChild(c++);
 				Object key = null;
 				if (keyChild instanceof PropertyOrFieldReference reference) {
@@ -146,7 +146,7 @@ public class InlineMap extends SpelNodeImpl {
 	}
 
 	/**
-	 * Return whether this list is a constant value.
+	 * Return whether this map is a constant value.
 	 */
 	public boolean isConstant() {
 		return this.constant != null;

@@ -40,7 +40,6 @@ import org.springframework.util.Assert;
  */
 public class InlineList extends SpelNodeImpl {
 
-	// If the list is purely literals, it is a constant value and can be computed and cached
 	@Nullable
 	private final TypedValue constant;
 
@@ -52,10 +51,9 @@ public class InlineList extends SpelNodeImpl {
 
 
 	/**
-	 * If all the components of the list are constants, or lists
-	 * that themselves contain constants, then a constant list
-	 * can be built to represent this node. This will speed up
-	 * later getValue calls and reduce the amount of garbage
+	 * If all the components of the list are constants, or lists that themselves
+	 * contain constants, then a constant list can be built to represent this node.
+	 * <p>This will speed up later getValue calls and reduce the amount of garbage
 	 * created.
 	 */
 	@Nullable
