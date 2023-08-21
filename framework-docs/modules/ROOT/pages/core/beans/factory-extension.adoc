@@ -23,9 +23,8 @@ You can set this property only if the `BeanPostProcessor` implements the `Ordere
 interface. If you write your own `BeanPostProcessor`, you should consider implementing
 the `Ordered` interface, too. For further details, see the javadoc of the
 {api-spring-framework}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`]
-and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces. See also the note
-on xref:core/beans/factory-extension.adoc#beans-factory-programmatically-registering-beanpostprocessors[programmatic registration of `BeanPostProcessor` instances]
-.
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces. See also the note on
+xref:core/beans/factory-extension.adoc#beans-factory-programmatically-registering-beanpostprocessors[programmatic registration of `BeanPostProcessor` instances].
 
 [NOTE]
 ====
@@ -280,11 +279,12 @@ and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more deta
 ====
 If you want to change the actual bean instances (that is, the objects that are created
 from the configuration metadata), then you instead need to use a `BeanPostProcessor`
-(described earlier in xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[Customizing Beans by Using a `BeanPostProcessor`]). While it is technically possible
-to work with bean instances within a `BeanFactoryPostProcessor` (for example, by using
-`BeanFactory.getBean()`), doing so causes premature bean instantiation, violating the
-standard container lifecycle. This may cause negative side effects, such as bypassing
-bean post processing.
+(described earlier in
+xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[Customizing Beans by Using a `BeanPostProcessor`]).
+While it is technically possible to work with bean instances within a `BeanFactoryPostProcessor`
+(for example, by using `BeanFactory.getBean()`), doing so causes premature bean instantiation,
+violating the standard container lifecycle. This may cause negative side effects, such as
+bypassing bean post processing.
 
 Also, `BeanFactoryPostProcessor` instances are scoped per-container. This is only relevant
 if you use container hierarchies. If you define a `BeanFactoryPostProcessor` in one
@@ -331,8 +331,7 @@ with placeholder values is defined:
 		<property name="locations" value="classpath:com/something/jdbc.properties"/>
 	</bean>
 
-	<bean id="dataSource" destroy-method="close"
-			class="org.apache.commons.dbcp.BasicDataSource">
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${jdbc.driverClassName}"/>
 		<property name="url" value="${jdbc.url}"/>
 		<property name="username" value="${jdbc.username}"/>
@@ -433,8 +432,8 @@ This example file can be used with a container definition that contains a bean c
 
 Compound property names are also supported, as long as every component of the path
 except the final property being overridden is already non-null (presumably initialized
-by the constructors). In the following example, the `sammy` property of the `bob` property of the `fred` property of the `tom` bean
-is set to the scalar value `123`:
+by the constructors). In the following example, the `sammy` property of the `bob`
+property of the `fred` property of the `tom` bean is set to the scalar value `123`:
 
 [literal,subs="verbatim,quotes"]
 ----

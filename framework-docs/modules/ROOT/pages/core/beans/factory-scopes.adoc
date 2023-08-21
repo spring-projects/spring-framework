@@ -125,8 +125,8 @@ objects regardless of scope, in the case of prototypes, configured destruction
 lifecycle callbacks are not called. The client code must clean up prototype-scoped
 objects and release expensive resources that the prototype beans hold. To get
 the Spring container to release resources held by prototype-scoped beans, try using a
-custom xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[bean post-processor], which holds a reference to
-beans that need to be cleaned up.
+custom xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[bean post-processor]
+which holds a reference to beans that need to be cleaned up.
 
 In some respects, the Spring container's role in regard to a prototype-scoped bean is a
 replacement for the Java `new` operator. All lifecycle management past that point must
@@ -449,12 +449,13 @@ understand the "`why`" as well as the "`how`" behind it:
 ----
 <1> The line that defines the proxy.
 
+To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a
+scoped bean definition (see
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection-proxies[Choosing the Type of Proxy to Create]
+and xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration]).
 
-To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
-bean definition (see xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection-proxies[Choosing the Type of Proxy to Create] and
-xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration]).
 Why do definitions of beans scoped at the `request`, `session` and custom-scope
-levels require the `<aop:scoped-proxy/>` element?
+levels require the `<aop:scoped-proxy/>` element in common scenarios?
 Consider the following singleton bean definition and contrast it with
 what you need to define for the aforementioned scopes (note that the following
 `userPreferences` bean definition as it stands is incomplete):

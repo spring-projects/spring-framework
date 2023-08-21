@@ -484,13 +484,14 @@ custom event (`BlockedListEvent` in the preceding example). This means that the
 You can register as many event listeners as you wish, but note that, by default, event
 listeners receive events synchronously. This means that the `publishEvent()` method
 blocks until all listeners have finished processing the event. One advantage of this
-synchronous and single-threaded approach is that, when a listener receives an event, it
-operates inside the transaction context of the publisher if a transaction context is
-available. If another strategy for event publication becomes necessary, see the javadoc
-for Spring's
+synchronous and single-threaded approach is that, when a listener receives an event,
+it operates inside the transaction context of the publisher if a transaction context
+is available. If another strategy for event publication becomes necessary, e.g.
+asynchronous event processing by default, see the javadoc for Spring's
 {api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
 and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`]
-implementation for configuration options.
+implementation for configuration options which can be applied to a custom
+"applicationEventMulticaster" bean definition.
 
 The following example shows the bean definitions used to register and configure each of
 the classes above:
@@ -509,6 +510,12 @@ the classes above:
 
 	<bean id="blockedListNotifier" class="example.BlockedListNotifier">
 		<property name="notificationAddress" value="blockedlist@example.org"/>
+	</bean>
+
+    <!-- optional: a custom ApplicationEventMulticaster definition -->
+	<bean id="applicationEventMulticaster" class="org.springframework.context.event.SimpleApplicationEventMulticaster">
+		<property name="taskExecutor" ref="..."/>
+		<property name="errorHandler" ref="..."/>
 	</bean>
 ----
 
@@ -848,6 +855,23 @@ Kotlin::
 
 TIP: This works not only for `ApplicationEvent` but any arbitrary object that you send as
 an event.
+
+Finally, as with classic `ApplicationListener` implementations, the actual multicasting
+happens via a context-wide `ApplicationEventMulticaster` at runtime. By default, this is a
+`SimpleApplicationEventMulticaster` with synchronous event publication in the caller thread.
+This can be replaced/customized through an "applicationEventMulticaster" bean definition,
+e.g. for processing all events asynchronously and/or for handling listener exceptions:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Bean
+	ApplicationEventMulticaster applicationEventMulticaster() {
+		SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
+		multicaster.setTaskExecutor(...);
+		multicaster.setErrorHandler(...);
+		return multicaster;
+	}
+----
 
 
 

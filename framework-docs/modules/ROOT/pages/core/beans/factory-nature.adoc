@@ -247,14 +247,17 @@ Kotlin::
 
 However, the first of the two preceding definitions does not couple the code to Spring.
 
-TIP: You can assign the `destroy-method` attribute of a `<bean>` element a special
-`(inferred)` value, which instructs Spring to automatically detect a public `close`
-or `shutdown` method on the specific bean class. (Any class that implements
-`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match.) You can also
-set this special `(inferred)` value on the `default-destroy-method` attribute of a
-`<beans>` element to apply this behavior to an entire set of beans (see
+Note that Spring also supports inference of destroy methods, detecting a public `close` or
+`shutdown` method. This is the default behavior for `@Bean` methods in Java configuration
+classes and automatically matches `java.lang.AutoCloseable` or `java.io.Closeable`
+implementations, not coupling the destruction logic to Spring either.
+
+TIP: For destroy method inference with XML, you may assign the `destroy-method` attribute
+of a `<bean>` element a special `(inferred)` value, which instructs Spring to automatically
+detect a public `close` or `shutdown` method on the bean class for a specific bean definition.
+You can also set this special `(inferred)` value on the `default-destroy-method` attribute
+of a `<beans>` element to apply this behavior to an entire set of bean definitions (see
 xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]).
-Note that this is the default behavior for `@Bean` methods in Java configuration classes.
 
 [NOTE]
 ====
