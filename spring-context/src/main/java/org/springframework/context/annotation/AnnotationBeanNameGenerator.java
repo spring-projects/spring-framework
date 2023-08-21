@@ -107,12 +107,12 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				});
 				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
 					Object value = attributes.get("value");
-					if (value instanceof String strVal && !strVal.isEmpty()) {
-						if (beanName != null && !strVal.equals(beanName)) {
+					if (value instanceof String currentName && !currentName.isBlank()) {
+						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-									"component names: '" + beanName + "' versus '" + strVal + "'");
+									"component names: '" + beanName + "' versus '" + currentName + "'");
 						}
-						beanName = strVal;
+						beanName = currentName;
 					}
 				}
 			}
@@ -122,7 +122,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * Check whether the given annotation is a stereotype that is allowed
-	 * to suggest a component name through its annotation {@code value()}.
+	 * to suggest a component name through its {@code value()} attribute.
 	 * @param annotationType the name of the annotation class to check
 	 * @param metaAnnotationTypes the names of meta-annotations on the given annotation
 	 * @param attributes the map of attributes for the given annotation
