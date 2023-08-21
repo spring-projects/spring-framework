@@ -62,7 +62,9 @@ public class ArgumentPreparedStatementSetter implements PreparedStatementSetter,
 	 * @param argValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
-	protected void doSetValue(PreparedStatement ps, int parameterPosition, Object argValue) throws SQLException {
+	protected void doSetValue(PreparedStatement ps, int parameterPosition, @Nullable Object argValue)
+			throws SQLException {
+
 		if (argValue instanceof SqlParameterValue paramValue) {
 			StatementCreatorUtils.setParameterValue(ps, parameterPosition, paramValue, paramValue.getValue());
 		}
