@@ -180,9 +180,10 @@ Kotlin::
 ----
 ======
 
-
 The resolution mechanism is pretty much identical to constructor-based dependency
-injection. See xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[the relevant section] for more details.
+injection. See
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[the relevant section]
+for more details.
 
 
 [[beans-java-lifecycle-callbacks]]
@@ -317,8 +318,9 @@ type, making it harder to use for cross-reference calls in other `@Bean` methods
 intend to refer to the provided resource here).
 =====
 
-In the case of `BeanOne` from the example above the preceding note, it would be equally valid to call the `init()`
-method directly during construction, as the following example shows:
+In the case of `BeanOne` from the example above the preceding note, it would be
+equally valid to call the `init()` method directly during construction, as the
+following example shows:
 
 [tabs]
 ======
@@ -506,10 +508,10 @@ Kotlin::
 [[beans-java-bean-aliasing]]
 == Bean Aliasing
 
-As discussed in xref:core/beans/definition.adoc#beans-beanname[Naming Beans], it is sometimes desirable to give a single bean
-multiple names, otherwise known as bean aliasing. The `name` attribute of the `@Bean`
-annotation accepts a String array for this purpose. The following example shows how to set
-a number of aliases for a bean:
+As discussed in xref:core/beans/definition.adoc#beans-beanname[Naming Beans], it is
+sometimes desirable to give a single bean multiple names, otherwise known as bean aliasing.
+The `name` attribute of the `@Bean` annotation accepts a String array for this purpose.
+The following example shows how to set a number of aliases for a bean:
 
 [tabs]
 ======
