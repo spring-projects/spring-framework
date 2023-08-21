@@ -55,6 +55,11 @@ class DynamicPropertiesContextCustomizerFactory implements ContextCustomizerFact
 	}
 
 	private void findMethods(Class<?> testClass, Set<Method> methods) {
+		// Beginning with Java 16, inner classes may contain static members.
+		// We therefore need to search for @DynamicPropertySource methods in the
+		// current class after searching enclosing classes so that a local
+		// @DynamicPropertySource method can override properties registered in
+		// an enclosing class.
 		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
 			findMethods(testClass.getEnclosingClass(), methods);
 		}
