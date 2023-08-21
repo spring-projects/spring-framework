@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.test.context.TestContextAnnotationUtils;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 5.2.5
  * @see DynamicPropertiesContextCustomizer
  */
@@ -54,10 +55,10 @@ class DynamicPropertiesContextCustomizerFactory implements ContextCustomizerFact
 	}
 
 	private void findMethods(Class<?> testClass, Set<Method> methods) {
-		methods.addAll(MethodIntrospector.selectMethods(testClass, this::isAnnotated));
 		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
 			findMethods(testClass.getEnclosingClass(), methods);
 		}
+		methods.addAll(MethodIntrospector.selectMethods(testClass, this::isAnnotated));
 	}
 
 	private boolean isAnnotated(Method method) {
