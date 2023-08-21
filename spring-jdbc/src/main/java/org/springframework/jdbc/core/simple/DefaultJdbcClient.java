@@ -41,6 +41,7 @@ import org.springframework.jdbc.core.namedparam.SimplePropertySqlParameterSource
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -102,13 +103,13 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
-		public StatementSpec param(Object value) {
+		public StatementSpec param(@Nullable Object value) {
 			this.indexedParams.add(value);
 			return this;
 		}
 
 		@Override
-		public StatementSpec param(int jdbcIndex, Object value) {
+		public StatementSpec param(int jdbcIndex, @Nullable Object value) {
 			if (jdbcIndex < 1) {
 				throw new IllegalArgumentException("Invalid JDBC index: needs to start at 1");
 			}
@@ -127,18 +128,18 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
-		public StatementSpec param(int jdbcIndex, Object value, int sqlType) {
+		public StatementSpec param(int jdbcIndex, @Nullable Object value, int sqlType) {
 			return param(jdbcIndex, new SqlParameterValue(sqlType, value));
 		}
 
 		@Override
-		public StatementSpec param(String name, Object value) {
+		public StatementSpec param(String name, @Nullable Object value) {
 			this.namedParams.addValue(name, value);
 			return this;
 		}
 
 		@Override
-		public StatementSpec param(String name, Object value, int sqlType) {
+		public StatementSpec param(String name, @Nullable Object value, int sqlType) {
 			this.namedParams.addValue(name, value, sqlType);
 			return this;
 		}
