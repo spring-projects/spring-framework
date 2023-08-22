@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,17 @@ import java.lang.annotation.Target;
  * when using annotation-based configuration and classpath scanning.
  *
  * <p>Other class-level annotations may be considered as identifying
- * a component as well, typically a special kind of component:
- * e.g. the {@link Repository @Repository} annotation or AspectJ's
+ * a component as well, typically a special kind of component &mdash;
+ * for example, the {@link Repository @Repository} annotation or AspectJ's
  * {@link org.aspectj.lang.annotation.Aspect @Aspect} annotation.
  *
+ * <p>As of Spring Framework 6.1, custom component stereotype annotations should
+ * use {@link org.springframework.core.annotation.AliasFor @AliasFor} to declare
+ * an explicit alias for this annotation's {@link #value} attribute. See the
+ * source code declaration of {@link Repository#value()} for a concrete example.
+ *
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 2.5
  * @see Repository
  * @see Service
@@ -47,7 +53,7 @@ public @interface Component {
 
 	/**
 	 * The value may indicate a suggestion for a logical component name,
-	 * to be turned into a Spring bean in case of an autodetected component.
+	 * to be turned into a Spring bean name in case of an autodetected component.
 	 * @return the suggested component name, if any (or empty String otherwise)
 	 */
 	String value() default "";

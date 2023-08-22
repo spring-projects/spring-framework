@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 import example.scannable.DefaultNamedComponent;
 import example.scannable.JakartaManagedBeanComponent;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefiniti
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -74,8 +76,22 @@ class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
+	void generateBeanNameForConventionBasedComponentWithDuplicateIdenticalNames() {
+		assertGeneratedName(ConventionBasedComponentWithDuplicateIdenticalNames.class, "myComponent");
+	}
+
+	@Test
 	void generateBeanNameForComponentWithDuplicateIdenticalNames() {
 		assertGeneratedName(ComponentWithDuplicateIdenticalNames.class, "myComponent");
+	}
+
+	@Test
+	void generateBeanNameForConventionBasedComponentWithConflictingNames() {
+		BeanDefinition bd = annotatedBeanDef(ConventionBasedComponentWithMultipleConflictingNames.class);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> generateBeanName(bd))
+				.withMessage("Stereotype annotations suggest inconsistent component names: '%s' versus '%s'",
+						"myComponent", "myService");
 	}
 
 	@Test
@@ -83,8 +99,8 @@ class AnnotationBeanNameGeneratorTests {
 		BeanDefinition bd = annotatedBeanDef(ComponentWithMultipleConflictingNames.class);
 		assertThatIllegalStateException()
 				.isThrownBy(() -> generateBeanName(bd))
-				.withMessage("Stereotype annotations suggest inconsistent component names: '%s' versus '%s'",
-						"myComponent", "myService");
+				.withMessage("Stereotype annotations suggest inconsistent component names: " +
+						List.of("myComponent", "myService"));
 	}
 
 	@Test
@@ -142,6 +158,16 @@ class AnnotationBeanNameGeneratorTests {
 		assertGeneratedName(ComposedControllerAnnotationWithStringValue.class, "restController");
 	}
 
+	@Test  // gh-31089
+	void generateBeanNameFromStereotypeAnnotationWithStringArrayValueAndExplicitComponentNameAlias() {
+		assertGeneratedName(ControllerAdviceClass.class, "myControllerAdvice");
+	}
+
+	@Test  // gh-31089
+	void generateBeanNameFromSubStereotypeAnnotationWithStringArrayValueAndExplicitComponentNameAlias() {
+		assertGeneratedName(RestControllerAdviceClass.class, "myRestControllerAdvice");
+	}
+
 
 	private void assertGeneratedName(Class<?> clazz, String expectedName) {
 		BeanDefinition bd = annotatedBeanDef(clazz);
@@ -179,6 +205,28 @@ class AnnotationBeanNameGeneratorTests {
 	@Component("myComponent")
 	@Service("myService")
 	static class ComponentWithMultipleConflictingNames {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Component
+	@interface ConventionBasedComponent1 {
+		String value() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Component
+	@interface ConventionBasedComponent2 {
+		String value() default "";
+	}
+
+	@ConventionBasedComponent1("myComponent")
+	@ConventionBasedComponent2("myComponent")
+	static class ConventionBasedComponentWithDuplicateIdenticalNames {
+	}
+
+	@ConventionBasedComponent1("myComponent")
+	@ConventionBasedComponent2("myService")
+	static class ConventionBasedComponentWithMultipleConflictingNames {
 	}
 
 	@Component
@@ -222,6 +270,57 @@ class AnnotationBeanNameGeneratorTests {
 
 	@TestRestController("restController")
 	static class ComposedControllerAnnotationWithStringValue {
+	}
+
+	/**
+	 * Mock of {@code org.springframework.web.bind.annotation.ControllerAdvice},
+	 * which also has a {@code value} attribute that is NOT a {@code String} that
+	 * is meant to be used for the component name.
+	 * <p>Declares a custom {@link #name} that explicitly aliases {@link Component#value()}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Component
+	@interface TestControllerAdvice {
+
+		@AliasFor(annotation = Component.class, attribute = "value")
+		String name() default "";
+
+		@AliasFor("basePackages")
+		String[] value() default {};
+
+		@AliasFor("value")
+		String[] basePackages() default {};
+	}
+
+	/**
+	 * Mock of {@code org.springframework.web.bind.annotation.RestControllerAdvice},
+	 * which also has a {@code value} attribute that is NOT a {@code String} that
+	 * is meant to be used for the component name.
+	 * <p>Declares a custom {@link #name} that explicitly aliases
+	 * {@link TestControllerAdvice#name()} instead of {@link Component#value()}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@TestControllerAdvice
+	@interface TestRestControllerAdvice {
+
+		@AliasFor(annotation = TestControllerAdvice.class)
+		String name() default "";
+
+		@AliasFor(annotation = TestControllerAdvice.class)
+		String[] value() default {};
+
+		@AliasFor(annotation = TestControllerAdvice.class)
+		String[] basePackages() default {};
+	}
+
+
+	@TestControllerAdvice(basePackages = "com.example", name = "myControllerAdvice")
+	static class ControllerAdviceClass {
+	}
+
+	@TestRestControllerAdvice(basePackages = "com.example", name = "myRestControllerAdvice")
+	static class RestControllerAdviceClass {
 	}
 
 }
