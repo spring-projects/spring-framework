@@ -1007,7 +1007,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			hints.reflection().registerField(field);
 			CodeBlock resolver = CodeBlock.of("$T.$L($S)",
 					AutowiredFieldValueResolver.class,
-					(!required) ? "forField" : "forRequiredField", field.getName());
+					(!required ? "forField" : "forRequiredField"), field.getName());
 			AccessControl accessControl = AccessControl.forMember(field);
 			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
@@ -1022,7 +1022,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.$L", AutowiredMethodArgumentsResolver.class,
-					(!required) ? "forMethod" : "forRequiredMethod");
+					(!required ? "forMethod" : "forRequiredMethod"));
 			code.add("($S", method.getName());
 			if (method.getParameterCount() > 0) {
 				code.add(", $L", generateParameterTypesCode(method.getParameterTypes()));
@@ -1047,7 +1047,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes) {
 			CodeBlock.Builder code = CodeBlock.builder();
 			for (int i = 0; i < parameterTypes.length; i++) {
-				code.add(i != 0 ? ", " : "");
+				code.add((i != 0 ? ", " : ""));
 				code.add("$T.class", parameterTypes[i]);
 			}
 			return code.build();

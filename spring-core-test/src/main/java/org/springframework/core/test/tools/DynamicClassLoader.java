@@ -139,7 +139,7 @@ public class DynamicClassLoader extends ClassLoader {
 			return classFile.getContent();
 		}
 		DynamicClassFileObject dynamicClassFile = this.dynamicClassFiles.get(name);
-		return (dynamicClassFile != null) ? dynamicClassFile.getBytes() : null;
+		return (dynamicClassFile != null ? dynamicClassFile.getBytes() : null);
 	}
 
 	@SuppressWarnings("deprecation")  // on JDK 20

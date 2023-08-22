@@ -70,7 +70,7 @@ final class CompileWithForkedClassLoaderClassLoader extends ClassLoader {
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		byte[] bytes = findClassBytes(name);
-		return (bytes != null) ? defineClass(name, bytes, 0, bytes.length, null) : super.findClass(name);
+		return (bytes != null ? defineClass(name, bytes, 0, bytes.length, null) : super.findClass(name));
 	}
 
 	@Nullable

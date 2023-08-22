@@ -225,7 +225,7 @@ public class MethodValidationAdapter implements MethodValidator {
 		}
 
 		return adaptViolations(target, method, violations,
-				i -> parameters != null ? parameters[i] : initMethodParameter(method, i),
+				i -> (parameters != null ? parameters[i] : initMethodParameter(method, i)),
 				i -> arguments[i]);
 	}
 
@@ -263,7 +263,7 @@ public class MethodValidationAdapter implements MethodValidator {
 		}
 
 		return adaptViolations(target, method, violations,
-				i -> returnType != null ? returnType : initMethodParameter(method, -1),
+				i -> (returnType != null ? returnType : initMethodParameter(method, -1)),
 				i -> returnValue);
 	}
 
