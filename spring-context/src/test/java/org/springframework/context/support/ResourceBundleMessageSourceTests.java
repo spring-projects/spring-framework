@@ -132,7 +132,7 @@ class ResourceBundleMessageSourceTests {
 
 		Locale.setDefault(expectGermanFallback ? Locale.GERMAN : Locale.CANADA);
 		assertThat(ac.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
-		Object expected = fallbackToSystemLocale && expectGermanFallback ? "nachricht2" : "message2";
+		Object expected = (fallbackToSystemLocale && expectGermanFallback ? "nachricht2" : "message2");
 		assertThat(ac.getMessage("code2", null, Locale.ENGLISH)).isEqualTo(expected);
 
 		assertThat(ac.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");

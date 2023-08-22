@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -468,7 +468,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		public int getCount(String attribute) {
 			Integer count = (Integer) this.attributeCounts.get(attribute);
-			return (count == null) ? 0 : count;
+			return (count == null ? 0 : count);
 		}
 
 		public Object getLastHandback(String attributeName) {

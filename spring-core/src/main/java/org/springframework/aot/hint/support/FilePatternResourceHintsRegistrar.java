@@ -73,7 +73,7 @@ public class FilePatternResourceHintsRegistrar {
 
 	@Deprecated(since = "6.0.12", forRemoval = true)
 	public void registerHints(ResourceHints hints, @Nullable ClassLoader classLoader) {
-		ClassLoader classLoaderToUse = (classLoader != null) ? classLoader : getClass().getClassLoader();
+		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : getClass().getClassLoader());
 		List<String> includes = new ArrayList<>();
 		for (String location : this.locations) {
 			if (classLoaderToUse.getResource(location) != null) {
