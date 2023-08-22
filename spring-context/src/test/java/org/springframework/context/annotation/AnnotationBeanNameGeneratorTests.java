@@ -22,6 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import example.scannable.DefaultNamedComponent;
+import example.scannable.JakartaManagedBeanComponent;
+import example.scannable.JakartaNamedComponent;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -61,6 +63,16 @@ class AnnotationBeanNameGeneratorTests {
 	@Test
 	void generateBeanNameWithNamedComponent() {
 		assertGeneratedName(ComponentWithName.class, "walden");
+	}
+
+	@Test
+	void generateBeanNameWithJakartaNamedComponent() {
+		assertGeneratedName(JakartaNamedComponent.class, "myJakartaNamedComponent");
+	}
+
+	@Test
+	void generateBeanNameWithJakartaManagedBeanComponent() {
+		assertGeneratedName(JakartaManagedBeanComponent.class, "myJakartaManagedBeanComponent");
 	}
 
 	@Test
