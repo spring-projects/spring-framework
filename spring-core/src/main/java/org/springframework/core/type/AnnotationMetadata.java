@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
 /**
  * Interface that defines abstract access to the annotations of a specific
@@ -64,7 +63,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 		if (!annotation.isPresent()) {
 			return Collections.emptySet();
 		}
-		return MergedAnnotations.from(annotation.getType(), SearchStrategy.INHERITED_ANNOTATIONS).stream()
+		return MergedAnnotations.from(annotation.getType()).stream()
 				.map(mergedAnnotation -> mergedAnnotation.getType().getName())
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
