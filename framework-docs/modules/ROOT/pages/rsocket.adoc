@@ -1023,7 +1023,7 @@ Two, create a proxy that will perform the declared RSocket exchanges:
 	RSocketRequester requester = ... ;
 	RSocketServiceProxyFactory factory = RSocketServiceProxyFactory.builder(requester).build();
 
-	RepositoryService service = factory.createClient(RadarService.class);
+	RadarService service = factory.createClient(RadarService.class);
 ----
 
 
