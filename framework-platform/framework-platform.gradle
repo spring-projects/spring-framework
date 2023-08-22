@@ -83,6 +83,7 @@ dependencies {
 		api("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
 		api("javax.annotation:javax.annotation-api:1.3.2")
 		api("javax.cache:cache-api:1.1.1")
+		api("javax.inject:javax.inject:1")
 		api("javax.money:money-api:1.1")
 		api("jaxen:jaxen:1.2.0")
 		api("junit:junit:4.13.2")
