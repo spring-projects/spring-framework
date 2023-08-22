@@ -93,10 +93,9 @@ public class MethodValidationAdapter implements MethodValidator {
 	/**
 	 * Create an instance using a default JSR-303 validator underneath.
 	 */
-	@SuppressWarnings("DataFlowIssue")
 	public MethodValidationAdapter() {
 		this.validator = SingletonSupplier.of(() -> Validation.buildDefaultValidatorFactory().getValidator());
-		this.validatorAdapter = SingletonSupplier.of(() -> new SpringValidatorAdapter(this.validator.get()));
+		this.validatorAdapter = initValidatorAdapter(this.validator);
 	}
 
 	/**
@@ -105,8 +104,14 @@ public class MethodValidationAdapter implements MethodValidator {
 	 */
 	@SuppressWarnings("DataFlowIssue")
 	public MethodValidationAdapter(ValidatorFactory validatorFactory) {
-		this.validator = SingletonSupplier.of(validatorFactory::getValidator);
-		this.validatorAdapter = SingletonSupplier.of(() -> new SpringValidatorAdapter(this.validator.get()));
+		if (validatorFactory instanceof SpringValidatorAdapter adapter) {
+			this.validator = () -> adapter;
+			this.validatorAdapter = () -> adapter;
+		}
+		else {
+			this.validator = SingletonSupplier.of(validatorFactory::getValidator);
+			this.validatorAdapter = SingletonSupplier.of(() -> new SpringValidatorAdapter(this.validator.get()));
+		}
 	}
 
 	/**
@@ -115,7 +120,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 */
 	public MethodValidationAdapter(Validator validator) {
 		this.validator = () -> validator;
-		this.validatorAdapter = () -> new SpringValidatorAdapter(validator);
+		this.validatorAdapter = initValidatorAdapter(this.validator);
 	}
 
 	/**
@@ -124,7 +129,13 @@ public class MethodValidationAdapter implements MethodValidator {
 	 */
 	public MethodValidationAdapter(Supplier<Validator> validator) {
 		this.validator = validator;
-		this.validatorAdapter = () -> new SpringValidatorAdapter(this.validator.get());
+		this.validatorAdapter = initValidatorAdapter(validator);
+	}
+
+	private static Supplier<SpringValidatorAdapter> initValidatorAdapter(Supplier<Validator> validatorSupplier) {
+		Validator validator = validatorSupplier.get();
+		return (validator instanceof SpringValidatorAdapter validatorAdapter ?
+				(() -> validatorAdapter) : SingletonSupplier.of(() -> new SpringValidatorAdapter(validator)));
 	}
 
 
