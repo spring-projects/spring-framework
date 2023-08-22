@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.stream.Stream;
 
 import okhttp3.mockwebserver.Dispatcher;
@@ -375,6 +376,19 @@ class ResourceTests {
 			RecordedRequest request = this.server.takeRequest();
 			assertThat(request.getMethod()).isEqualTo("GET");
 			assertThat(request.getHeader("Framework-Name")).isEqualTo("Spring");
+		}
+
+		@Test
+		void useUserInfoToSetBasicAuth() throws Exception {
+			startServer();
+			UrlResource resource = new UrlResource("http://alice:secret@localhost:"
+					+ this.server.getPort() + "/resource");
+			assertThat(resource.getInputStream()).hasContent("Spring");
+			RecordedRequest request = this.server.takeRequest();
+			String authorization = request.getHeader("Authorization");
+			assertThat(authorization).isNotNull().startsWith("Basic ");
+			assertThat(new String(Base64.getDecoder().decode(
+					authorization.substring(6)), StandardCharsets.ISO_8859_1)).isEqualTo("alice:secret");
 		}
 
 		@AfterEach

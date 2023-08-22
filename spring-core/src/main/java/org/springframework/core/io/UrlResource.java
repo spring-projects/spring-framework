@@ -28,10 +28,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -42,11 +42,12 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @author Denis Kostin
  * @since 28.12.2003
  * @see java.net.URL
  */
 public class UrlResource extends AbstractFileResolvingResource {
+
+	private static final String AUTHORIZATION = "Authorization";
 
 	/**
 	 * Original URI, if available; used for URI and File access.
@@ -227,11 +228,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
 		customizeConnection(con);
-
-		if (this.url.getUserInfo() != null) {
-			String basicAuth = "Basic " + Base64Utils.encodeToString(url.getUserInfo().getBytes());
-			con.setRequestProperty("Authorization", basicAuth);
-		}
 		try {
 			return con.getInputStream();
 		}
@@ -241,6 +237,16 @@ public class UrlResource extends AbstractFileResolvingResource {
 				httpConn.disconnect();
 			}
 			throw ex;
+		}
+	}
+
+	@Override
+	protected void customizeConnection(URLConnection con) throws IOException {
+		super.customizeConnection(con);
+		String userInfo = this.url.getUserInfo();
+		if (userInfo != null) {
+			String encodedCredentials = Base64.getUrlEncoder().encodeToString(userInfo.getBytes());
+			con.setRequestProperty(AUTHORIZATION, "Basic " + encodedCredentials);
 		}
 	}
 
