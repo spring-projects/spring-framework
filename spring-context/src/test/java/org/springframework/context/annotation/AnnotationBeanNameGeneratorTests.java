@@ -36,6 +36,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link AnnotationBeanNameGenerator}.
@@ -68,6 +69,20 @@ class AnnotationBeanNameGeneratorTests {
 	@Test
 	void generateBeanNameWithNamedComponentWhereTheNameIsBlank() {
 		assertGeneratedNameIsDefault(ComponentWithBlankName.class);
+	}
+
+	@Test
+	void generateBeanNameForComponentWithDuplicateIdenticalNames() {
+		assertGeneratedName(ComponentWithDuplicateIdenticalNames.class, "myComponent");
+	}
+
+	@Test
+	void generateBeanNameForComponentWithConflictingNames() {
+		BeanDefinition bd = annotatedBeanDef(ComponentWithMultipleConflictingNames.class);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> generateBeanName(bd))
+				.withMessage("Stereotype annotations suggest inconsistent component names: '%s' versus '%s'",
+						"myComponent", "myService");
 	}
 
 	@Test
@@ -142,6 +157,16 @@ class AnnotationBeanNameGeneratorTests {
 
 	@Component(" ")
 	private static class ComponentWithBlankName {
+	}
+
+	@Component("myComponent")
+	@Service("myComponent")
+	static class ComponentWithDuplicateIdenticalNames {
+	}
+
+	@Component("myComponent")
+	@Service("myService")
+	static class ComponentWithMultipleConflictingNames {
 	}
 
 	@Component
