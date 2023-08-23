@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,11 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 	/**
 	 * Creates a named thread local variable. The initial value of the variable is
 	 * determined by invoking the {@code get} method on the {@code Supplier}.
-	 *
 	 * @param <S> the type of the named thread local's value
+	 * @param name a descriptive name for the thread local
 	 * @param supplier the supplier to be used to determine the initial value
-	 * @return a new named thread local variable
-	 * @throws NullPointerException if the specified supplier is null
-	 * @since 5.2.5
+	 * @return a new named thread local
+	 * @since 6.1
 	 */
 	public static <S> ThreadLocal<S> withInitial(String name, Supplier<? extends S> supplier) {
 		return new SuppliedNamedThreadLocal<>(name, supplier);
@@ -83,6 +82,7 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 		protected T initialValue() {
 			return this.supplier.get();
 		}
+
 	}
 
 }
