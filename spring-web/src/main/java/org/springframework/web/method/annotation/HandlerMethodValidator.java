@@ -27,6 +27,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
+import org.springframework.validation.SmartValidator;
 import org.springframework.validation.beanvalidation.MethodValidationAdapter;
 import org.springframework.validation.method.MethodValidationResult;
 import org.springframework.validation.method.MethodValidator;
@@ -144,7 +145,8 @@ public final class HandlerMethodValidator implements MethodValidator {
 			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		if (initializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
-			if (configurableInitializer.getValidator() instanceof Validator validator) {
+			Validator validator = getValidator(configurableInitializer);
+			if (validator != null) {
 				MethodValidationAdapter adapter = new MethodValidationAdapter(validator);
 				adapter.setObjectNameResolver(objectNameResolver);
 				if (paramNameDiscoverer != null) {
@@ -156,6 +158,17 @@ public final class HandlerMethodValidator implements MethodValidator {
 				}
 				return new HandlerMethodValidator(adapter, modelAttribitePredicate, requestParamPredicate);
 			}
+		}
+		return null;
+	}
+
+	@Nullable
+	private static Validator getValidator(ConfigurableWebBindingInitializer initializer) {
+		if (initializer.getValidator() instanceof Validator validator) {
+			return validator;
+		}
+		if (initializer.getValidator() instanceof SmartValidator smartValidator) {
+			return smartValidator.unwrap(Validator.class);
 		}
 		return null;
 	}
