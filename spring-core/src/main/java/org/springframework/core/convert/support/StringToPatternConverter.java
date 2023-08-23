@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,19 @@ import java.util.regex.Pattern;
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Convert a String to a {@link Pattern}.
+ * Converts from a String to a {@link java.util.regex.Pattern}.
  *
  * @author Valery Yatsynovich
- * @since 5.2
+ * @author Stephane Nicoll
+ * @since 6.1
  */
-class StringToPatternConverter implements Converter<String, Pattern> {
+final class StringToPatternConverter implements Converter<String, Pattern> {
 
 	@Override
 	public Pattern convert(String source) {
+		if (source.isEmpty()) {
+			return null;
+		}
 		return Pattern.compile(source);
 	}
 

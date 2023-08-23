@@ -320,9 +320,15 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test
+	void stringToPatternEmptyString() {
+		assertThat(conversionService.convert("", Pattern.class)).isNull();
+	}
+
+	@Test
 	void stringToPattern() {
-		String regex = "\\s";
-		assertThat(conversionService.convert(regex, Pattern.class)).extracting(Pattern::pattern).isEqualTo(regex);
+		String pattern = "\\s";
+		assertThat(conversionService.convert(pattern, Pattern.class))
+				.isInstanceOfSatisfying(Pattern.class, regex -> assertThat(regex.pattern()).isEqualTo(pattern));
 	}
 
 	@Test
