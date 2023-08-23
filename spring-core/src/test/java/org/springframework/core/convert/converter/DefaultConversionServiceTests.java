@@ -40,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -316,6 +317,24 @@ class DefaultConversionServiceTests {
 		String convertToString = conversionService.convert(uuid, String.class);
 		UUID convertToUUID = conversionService.convert(convertToString, UUID.class);
 		assertThat(convertToUUID).isEqualTo(uuid);
+	}
+
+	@Test
+	void stringToPatternEmptyString() {
+		assertThat(conversionService.convert("", Pattern.class)).isNull();
+	}
+
+	@Test
+	void stringToPattern() {
+		String pattern = "\\s";
+		assertThat(conversionService.convert(pattern, Pattern.class))
+				.isInstanceOfSatisfying(Pattern.class, regex -> assertThat(regex.pattern()).isEqualTo(pattern));
+	}
+
+	@Test
+	void patternToString() {
+		String regex = "\\d";
+		assertThat(conversionService.convert(Pattern.compile(regex), String.class)).isEqualTo(regex);
 	}
 
 	@Test
