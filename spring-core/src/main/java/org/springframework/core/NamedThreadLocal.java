@@ -45,8 +45,14 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 		this.name = name;
 	}
 
+	@Override
+	public String toString() {
+		return this.name;
+	}
+
+
 	/**
-	 * Creates a named thread local variable. The initial value of the variable is
+	 * Create a named thread local variable. The initial value of the variable is
 	 * determined by invoking the {@code get} method on the {@code Supplier}.
 	 * @param <S> the type of the named thread local's value
 	 * @param name a descriptive name for the thread local
@@ -58,18 +64,13 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 		return new SuppliedNamedThreadLocal<>(name, supplier);
 	}
 
-	@Override
-	public String toString() {
-		return this.name;
-	}
-
 
 	/**
 	 * An extension of NamedThreadLocal that obtains its initial value from
 	 * the specified {@code Supplier}.
 	 * @param <T> the type of the named thread local's value
 	 */
-	static final class SuppliedNamedThreadLocal<T> extends NamedThreadLocal<T> {
+	private static final class SuppliedNamedThreadLocal<T> extends NamedThreadLocal<T> {
 
 		private final Supplier<? extends T> supplier;
 
@@ -82,7 +83,6 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 		protected T initialValue() {
 			return this.supplier.get();
 		}
-
 	}
 
 }
