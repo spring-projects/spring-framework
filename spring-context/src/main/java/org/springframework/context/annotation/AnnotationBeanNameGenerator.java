@@ -95,17 +95,17 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 */
 	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
-		AnnotationMetadata amd = annotatedDef.getMetadata();
-		Set<String> types = amd.getAnnotationTypes();
+		AnnotationMetadata metadata = annotatedDef.getMetadata();
+		Set<String> annotationTypes = metadata.getAnnotationTypes();
 		String beanName = null;
-		for (String type : types) {
-			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
+		for (String annotationType : annotationTypes) {
+			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, annotationType);
 			if (attributes != null) {
-				Set<String> metaTypes = this.metaAnnotationTypesCache.computeIfAbsent(type, key -> {
-					Set<String> result = amd.getMetaAnnotationTypes(key);
+				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType, key -> {
+					Set<String> result = metadata.getMetaAnnotationTypes(key);
 					return (result.isEmpty() ? Collections.emptySet() : result);
 				});
-				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
+				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
 					Object value = attributes.get("value");
 					if (value instanceof String currentName && !currentName.isBlank()) {
 						if (beanName != null && !currentName.equals(beanName)) {

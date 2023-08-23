@@ -66,6 +66,11 @@ class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
+	void generateBeanNameWithNamedComponentWhereTheNameIsBlank() {
+		assertGeneratedNameIsDefault(ComponentWithBlankName.class);
+	}
+
+	@Test
 	void generateBeanNameWithJakartaNamedComponent() {
 		assertGeneratedName(JakartaNamedComponent.class, "myJakartaNamedComponent");
 	}
@@ -78,11 +83,6 @@ class AnnotationBeanNameGeneratorTests {
 	@Test
 	void generateBeanNameWithCustomStereotypeComponent() {
 		assertGeneratedName(DefaultNamedComponent.class, "thoreau");
-	}
-
-	@Test
-	void generateBeanNameWithNamedComponentWhereTheNameIsBlank() {
-		assertGeneratedNameIsDefault(ComponentWithBlankName.class);
 	}
 
 	@Test
