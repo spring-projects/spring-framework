@@ -462,14 +462,15 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (StringUtils.hasLength(fixedDelayString)) {
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
-					try {
-						fixedDelay = toDuration(fixedDelayString, scheduled.timeUnit());
+					if (!Scheduled.CRON_DISABLED.equals(fixedDelayString)) {
+						try {
+							fixedDelay = toDuration(fixedDelayString, scheduled.timeUnit());
+						} catch (RuntimeException ex) {
+							throw new IllegalArgumentException(
+									"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
+						}
+						tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
 					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
-					}
-					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
 				}
 			}
 
@@ -488,14 +489,15 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (StringUtils.hasLength(fixedRateString)) {
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
-					try {
-						fixedRate = toDuration(fixedRateString, scheduled.timeUnit());
+					if (!Scheduled.CRON_DISABLED.equals(fixedRateString)) {
+						try {
+							fixedRate = toDuration(fixedRateString, scheduled.timeUnit());
+						} catch (RuntimeException ex) {
+							throw new IllegalArgumentException(
+									"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
+						}
+						tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
 					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
-					}
-					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
 				}
 			}
 

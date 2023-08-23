@@ -519,6 +519,23 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
+		InactiveCron
+		InactiveFixedDelay
+		InactiveFixedRate
+	""")
+	void inactiveTask(@NameToClass Class<?> beanClass) {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks().isEmpty()).isTrue();
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
 		PropertyPlaceholderWithFixedDelay, 5000, 1000, 5_000, 1_000
 		PropertyPlaceholderWithFixedDelay, PT5S, PT1S, 5_000, 1_000
 		PropertyPlaceholderWithFixedDelayInSeconds, 5000, 1000, 5_000_000, 1_000_000
@@ -1049,6 +1066,27 @@ class ScheduledAnnotationBeanPostProcessorTests {
 					throw new ArgumentConversionException("Failed to convert class name to Class", ex);
 				}
 			}
+		}
+	}
+
+	static class InactiveCron {
+
+		@Scheduled(cron = "-")
+		void inactive() {
+		}
+	}
+
+	static class InactiveFixedDelay {
+
+		@Scheduled(fixedDelayString = "-")
+		void inactive() {
+		}
+	}
+
+	static class InactiveFixedRate {
+
+		@Scheduled(fixedRateString = "-")
+		void inactive() {
 		}
 	}
 
