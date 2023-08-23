@@ -63,6 +63,7 @@ import org.springframework.lang.Nullable;
  * @author Keith Donald
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -95,6 +96,12 @@ public abstract class ClassUtils {
 
 	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
+
+	/** Precomputed value for the combination of private, static and final modifiers. */
+	private static final int NON_OVERRIDABLE_MODIFIER = Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL;
+
+	/** Precomputed value for the combination of public and protected modifiers. */
+	private static final int OVERRIDABLE_MODIFIER = Modifier.PUBLIC | Modifier.PROTECTED;
 
 
 	/**
@@ -1448,10 +1455,10 @@ public abstract class ClassUtils {
 	 * @param targetClass the target class to check against
 	 */
 	private static boolean isOverridable(Method method, @Nullable Class<?> targetClass) {
-		if (Modifier.isPrivate(method.getModifiers())) {
+		if ((method.getModifiers() & NON_OVERRIDABLE_MODIFIER) != 0) {
 			return false;
 		}
-		if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
+		if ((method.getModifiers() & OVERRIDABLE_MODIFIER) != 0) {
 			return true;
 		}
 		return (targetClass == null ||
