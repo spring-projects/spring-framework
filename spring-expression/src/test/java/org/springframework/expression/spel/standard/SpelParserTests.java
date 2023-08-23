@@ -39,7 +39,9 @@ import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_DO
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_QUOTED_STRING;
 import static org.springframework.expression.spel.SpelMessage.NOT_AN_INTEGER;
 import static org.springframework.expression.spel.SpelMessage.NOT_A_LONG;
+import static org.springframework.expression.spel.SpelMessage.OOD;
 import static org.springframework.expression.spel.SpelMessage.REAL_CANNOT_BE_LONG;
+import static org.springframework.expression.spel.SpelMessage.RIGHT_OPERAND_PROBLEM;
 import static org.springframework.expression.spel.SpelMessage.RUN_OUT_OF_ARGUMENTS;
 import static org.springframework.expression.spel.SpelMessage.UNEXPECTED_DATA_AFTER_DOT;
 import static org.springframework.expression.spel.SpelMessage.UNEXPECTED_ESCAPE_CHAR;
@@ -76,8 +78,8 @@ class SpelParserTests {
 
 	private static void assertNullOrEmptyExpressionIsRejected(ThrowingCallable throwingCallable) {
 		assertThatIllegalArgumentException()
-			.isThrownBy(throwingCallable)
-			.withMessage("'expressionString' must not be null or blank");
+				.isThrownBy(throwingCallable)
+				.withMessage("'expressionString' must not be null or blank");
 	}
 
 	@Test
@@ -152,7 +154,13 @@ class SpelParserTests {
 		assertParseException(() -> parser.parseRaw("new String(3"), RUN_OUT_OF_ARGUMENTS, 10);
 		assertParseException(() -> parser.parseRaw("new String("), RUN_OUT_OF_ARGUMENTS, 10);
 		assertParseException(() -> parser.parseRaw("\"abc"), NON_TERMINATING_DOUBLE_QUOTED_STRING, 0);
+		assertParseException(() -> parser.parseRaw("abc\""), NON_TERMINATING_DOUBLE_QUOTED_STRING, 3);
 		assertParseException(() -> parser.parseRaw("'abc"), NON_TERMINATING_QUOTED_STRING, 0);
+		assertParseException(() -> parser.parseRaw("abc'"), NON_TERMINATING_QUOTED_STRING, 3);
+		assertParseException(() -> parser.parseRaw("("), OOD, 0);
+		assertParseException(() -> parser.parseRaw(")"), OOD, 0);
+		assertParseException(() -> parser.parseRaw("+"), OOD, 0);
+		assertParseException(() -> parser.parseRaw("1+"), RIGHT_OPERAND_PROBLEM, 1);
 	}
 
 	@Test
@@ -377,7 +385,7 @@ class SpelParserTests {
 
 	private void checkNumberError(String expression, SpelMessage expectedMessage) {
 		assertParseExceptionThrownBy(() -> parser.parseRaw(expression))
-			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(expectedMessage));
+				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(expectedMessage));
 	}
 
 	private static ThrowableAssertAlternative<SpelParseException> assertParseExceptionThrownBy(ThrowingCallable throwingCallable) {
@@ -386,15 +394,18 @@ class SpelParserTests {
 
 	private static void assertParseException(ThrowingCallable throwingCallable, SpelMessage expectedMessage, int expectedPosition) {
 		assertParseExceptionThrownBy(throwingCallable)
-			.satisfies(parseExceptionRequirements(expectedMessage, expectedPosition));
+				.satisfies(parseExceptionRequirements(expectedMessage, expectedPosition));
 	}
 
 	private static <E extends SpelParseException> Consumer<E> parseExceptionRequirements(
 			SpelMessage expectedMessage, int expectedPosition) {
+
 		return ex -> {
 			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
 			assertThat(ex.getPosition()).isEqualTo(expectedPosition);
-			assertThat(ex.getMessage()).contains(ex.getExpressionString());
+			if (ex.getExpressionString() != null) {
+				assertThat(ex.getMessage()).contains(ex.getExpressionString());
+			}
 		};
 	}
 
