@@ -47,6 +47,7 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.KotlinDetector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -75,6 +76,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @author Dave Syer
+ * @author Sebastien Deleuze
  * @see org.springframework.cglib.proxy.Enhancer
  * @see AdvisedSupport#setProxyTargetClass
  * @see DefaultAopProxyFactory
@@ -97,6 +99,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 	/** Keeps track of the Classes that we have validated for final methods. */
 	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<>();
+
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 
 	/** The configuration used to configure this proxy. */
@@ -399,10 +403,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 	/**
 	 * Process a return value. Wraps a return of {@code this} if necessary to be the
 	 * {@code proxy} and also verifies that {@code null} is not returned as a primitive.
+	 * Also takes care of the conversion from {@code Mono} to Kotlin Coroutines if needed.
 	 */
 	@Nullable
 	private static Object processReturnType(
-			Object proxy, @Nullable Object target, Method method, @Nullable Object returnValue) {
+			Object proxy, @Nullable Object target, Method method, Object[] arguments, @Nullable Object returnValue) {
 
 		// Massage return value if necessary
 		if (returnValue != null && returnValue == target &&
@@ -415,6 +420,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 		if (returnValue == null && returnType != Void.TYPE && returnType.isPrimitive()) {
 			throw new AopInvocationException(
 					"Null return value from advice does not match primitive return type for: " + method);
+		}
+		if (KotlinDetector.isSuspendingFunction(method)) {
+			return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
+					CoroutinesUtils.asFlow(returnValue) :
+					CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
 		}
 		return returnValue;
 	}
@@ -446,7 +456,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object retVal = AopUtils.invokeJoinpointUsingReflection(this.target, method, args);
-			return processReturnType(proxy, this.target, method, retVal);
+			return processReturnType(proxy, this.target, method, args, retVal);
 		}
 	}
 
@@ -471,7 +481,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object retVal = AopUtils.invokeJoinpointUsingReflection(this.target, method, args);
-				return processReturnType(proxy, this.target, method, retVal);
+				return processReturnType(proxy, this.target, method, args, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -499,7 +509,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Object target = this.targetSource.getTarget();
 			try {
 				Object retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
-				return processReturnType(proxy, target, method, retVal);
+				return processReturnType(proxy, target, method, args, retVal);
 			}
 			finally {
 				if (target != null) {
@@ -529,7 +539,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
-				return processReturnType(proxy, target, method, retVal);
+				return processReturnType(proxy, target, method, args, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -656,7 +666,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					proxy, this.target, method, args, this.targetClass, this.adviceChain, methodProxy);
 			// If we get here, we need to create a MethodInvocation.
 			Object retVal = invocation.proceed();
-			retVal = processReturnType(proxy, this.target, method, retVal);
+			retVal = processReturnType(proxy, this.target, method, args, retVal);
 			return retVal;
 		}
 	}
@@ -706,7 +716,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// We need to create a method invocation...
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
-				return processReturnType(proxy, target, method, retVal);
+				return processReturnType(proxy, target, method, args, retVal);
 			}
 			finally {
 				if (target != null && !targetSource.isStatic()) {

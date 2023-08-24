@@ -31,6 +31,8 @@ import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.DecoratingProxy;
+import org.springframework.core.KotlinDetector;
+import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -58,6 +60,7 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @author Dave Syer
  * @author Sergey Tsypanov
+ * @author Sebastien Deleuze
  * @see java.lang.reflect.Proxy
  * @see AdvisedSupport
  * @see ProxyFactory
@@ -79,6 +82,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	/** We use a static Log to avoid serialization issues. */
 	private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
+
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	/** Config used to configure this proxy. */
 	private final AdvisedSupport advised;
@@ -257,6 +262,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			else if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
 				throw new AopInvocationException(
 						"Null return value from advice does not match primitive return type for: " + method);
+			}
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
+						CoroutinesUtils.asFlow(retVal) : CoroutinesUtils.awaitSingleOrNull(retVal, args[args.length - 1]);
 			}
 			return retVal;
 		}

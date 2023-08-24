@@ -26,8 +26,6 @@ import io.vavr.control.Try;
 import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
 import kotlinx.coroutines.Job;
-import kotlinx.coroutines.reactive.ReactiveFlowKt;
-import kotlinx.coroutines.reactor.MonoKt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -370,12 +368,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			if (corInv != null) {
 				callback = () -> KotlinDelegate.invokeSuspendingFunction(method, corInv);
 			}
-			Object result = txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, rtm);
-			if (corInv != null) {
-				return (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow((Publisher<?>) result) :
-						KotlinDelegate.awaitSingleOrNull((Mono<?>) result, corInv.getContinuation()));
-			}
-			return result;
+			return txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, rtm);
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
@@ -895,16 +888,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
 	private static class KotlinDelegate {
-
-		private static Object asFlow(Publisher<?> publisher) {
-			return ReactiveFlowKt.asFlow(publisher);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Nullable
-		private static Object awaitSingleOrNull(Mono<?> publisher, Object continuation) {
-			return MonoKt.awaitSingleOrNull(publisher, (Continuation<Object>) continuation);
-		}
 
 		public static Publisher<?> invokeSuspendingFunction(Method method, CoroutinesInvocationCallback callback) {
 			CoroutineContext coroutineContext = ((Continuation<?>) callback.getContinuation()).getContext().minusKey(Job.Key);
