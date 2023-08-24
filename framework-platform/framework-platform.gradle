@@ -17,7 +17,7 @@ dependencies {
 	api(platform("org.apache.logging.log4j:log4j-bom:2.20.0"))
 	api(platform("org.eclipse.jetty:jetty-bom:11.0.15"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.2"))
-	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.1"))
+	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.6.0"))
 	api(platform("org.junit:junit-bom:5.10.0"))
 	api(platform("org.mockito:mockito-bom:5.4.0"))
 
