@@ -394,21 +394,24 @@ class ClassUtilsTests {
 	@Test
 	void getMostSpecificMethod() throws NoSuchMethodException {
 		Method defaultPrintMethod = ClassUtils.getMethod(MethodsInterface.class, "defaultPrint");
-		assertThat(ClassUtils.getMostSpecificMethod(defaultPrintMethod, MethodsInterfaceImplementation.class)).isEqualTo(defaultPrintMethod);
-		assertThat(ClassUtils.getMostSpecificMethod(defaultPrintMethod, SubMethodsInterfaceImplementation.class)).isEqualTo(defaultPrintMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(defaultPrintMethod, MethodsInterfaceImplementation.class))
+				.isEqualTo(defaultPrintMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(defaultPrintMethod, SubMethodsInterfaceImplementation.class))
+				.isEqualTo(defaultPrintMethod);
 
 		Method printMethod = ClassUtils.getMethod(MethodsInterface.class, "print", String.class);
-		assertThat(ClassUtils.getMostSpecificMethod(printMethod, MethodsInterfaceImplementation.class)).isNotEqualTo(printMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(printMethod, MethodsInterfaceImplementation.class))
+				.isNotEqualTo(printMethod);
 		assertThat(ClassUtils.getMostSpecificMethod(printMethod, MethodsInterfaceImplementation.class))
 				.isEqualTo(ClassUtils.getMethod(MethodsInterfaceImplementation.class, "print", String.class));
 		assertThat(ClassUtils.getMostSpecificMethod(printMethod, SubMethodsInterfaceImplementation.class))
 				.isEqualTo(ClassUtils.getMethod(MethodsInterfaceImplementation.class, "print", String.class));
 
 		Method protectedPrintMethod = MethodsInterfaceImplementation.class.getDeclaredMethod("protectedPrint");
-		assertThat(ClassUtils.getMostSpecificMethod(protectedPrintMethod, MethodsInterfaceImplementation.class)).isEqualTo(protectedPrintMethod);
+		assertThat(ClassUtils.getMostSpecificMethod(protectedPrintMethod, MethodsInterfaceImplementation.class))
+				.isEqualTo(protectedPrintMethod);
 		assertThat(ClassUtils.getMostSpecificMethod(protectedPrintMethod, SubMethodsInterfaceImplementation.class))
 				.isEqualTo(SubMethodsInterfaceImplementation.class.getDeclaredMethod("protectedPrint"));
-
 
 		Method packageAccessiblePrintMethod = MethodsInterfaceImplementation.class.getDeclaredMethod("packageAccessiblePrint");
 		assertThat(ClassUtils.getMostSpecificMethod(packageAccessiblePrintMethod, MethodsInterfaceImplementation.class))
@@ -585,40 +588,41 @@ class ClassUtilsTests {
 	}
 
 	@SuppressWarnings("unused")
-	private interface MethodsInterface{
+	private interface MethodsInterface {
 
-		default void defaultPrint(){
+		default void defaultPrint() {
 
 		}
+
 		void print(String messages);
 	}
 
 	@SuppressWarnings("unused")
-	private class MethodsInterfaceImplementation implements MethodsInterface{
+	private class MethodsInterfaceImplementation implements MethodsInterface {
 
 		@Override
 		public void print(String message) {
 
 		}
 
-		protected void protectedPrint(){
+		protected void protectedPrint() {
 
 		}
 
-		void packageAccessiblePrint(){
+		void packageAccessiblePrint() {
 
 		}
 	}
 
 	@SuppressWarnings("unused")
-	private class SubMethodsInterfaceImplementation extends MethodsInterfaceImplementation{
+	private class SubMethodsInterfaceImplementation extends MethodsInterfaceImplementation {
 
 		@Override
-		protected void protectedPrint(){
+		protected void protectedPrint() {
 
 		}
 
-		public void packageAccessiblePrint(){
+		public void packageAccessiblePrint() {
 
 		}
 
