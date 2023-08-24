@@ -436,6 +436,24 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("DefaultTestExceptionResolver: IllegalStateException");
 	}
 
+	@Test // gh-30702
+	void attemptToResetResponseBeforeResolveException() throws UnsupportedEncodingException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setMappedHandlerClasses(HttpRequestHandler.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		IllegalStateException ex = new IllegalStateException();
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
+		mockHttpServletResponse.getWriter().print("test");
+		ModelAndView mav = this.resolver.resolveException(this.request, mockHttpServletResponse, handler, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(mockHttpServletResponse.getContentAsString()).isEqualTo("DefaultTestExceptionResolver: IllegalStateException");
+	}
+
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertThat(this.resolver.getArgumentResolvers().getResolvers()).hasSize(resolverCount);
