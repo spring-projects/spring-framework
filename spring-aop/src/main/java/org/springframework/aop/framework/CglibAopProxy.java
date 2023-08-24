@@ -331,8 +331,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 				aopInterceptor,  // for normal advice
 				targetInterceptor,  // invoke target without considering advice, if optimized
 				new SerializableNoOp(),  // no override for methods mapped to this
-				targetDispatcher,
-				this.advisedDispatcher,
+				targetDispatcher, this.advisedDispatcher,
 				new EqualsInterceptor(this.advised),
 				new HashCodeInterceptor(this.advised)
 		};
@@ -343,14 +342,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			int methodsCount = methods.length;
-			ArrayList<Callback> fixedCallbacks = new ArrayList<>(methodsCount);
+			List<Callback> fixedCallbacks = new ArrayList<>(methodsCount);
 			this.fixedInterceptorMap = CollectionUtils.newHashMap(methodsCount);
 
 			int advicedMethodCount = methodsCount;
 			for (int x = 0; x < methodsCount; x++) {
 				Method method = methods[x];
 				//do not create advices for non-overridden methods of java.lang.Object
-				if (notOverriddenOfObject(method)) {
+				if (method.getDeclaringClass() == Object.class) {
 					advicedMethodCount--;
 					continue;
 				}
@@ -364,24 +363,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 			// and fixedCallbacks into the callbacks array.
 			Callback[] callbacks = new Callback[mainCallbacks.length + advicedMethodCount];
 			System.arraycopy(mainCallbacks, 0, callbacks, 0, mainCallbacks.length);
-			System.arraycopy(fixedCallbacks.toArray(), 0, callbacks, mainCallbacks.length, advicedMethodCount);
+			System.arraycopy(fixedCallbacks.toArray(Callback[]::new), 0, callbacks,
+					mainCallbacks.length, advicedMethodCount);
 			this.fixedInterceptorOffset = mainCallbacks.length;
 			return callbacks;
 		}
-
 		return mainCallbacks;
 	}
 
-	/**
-	 * Returns true if param is inherited from {@link Object} and not overridden in declaring class.
-	 * We use this to detect {@link Object#notify()}, {@link Object#notifyAll()}, {@link Object#getClass()} etc.
-	 * to skip creation of useless advices for them.
-	 * @param method to be checked
-	 * @return true in case {@code method} belongs to {@link Object}
-	 */
-	private static boolean notOverriddenOfObject(Method method) {
-		return method.getDeclaringClass() == Object.class;
-	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
