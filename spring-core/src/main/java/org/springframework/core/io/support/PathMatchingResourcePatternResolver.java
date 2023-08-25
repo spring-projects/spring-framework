@@ -792,6 +792,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			rootPath = Path.of(rootDirResource.getFile().getAbsolutePath());
 		}
 
+		if (!Files.exists(rootPath)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Skipping search for files matching pattern [%s]: directory [%s] does not exist"
+						.formatted(subPattern, rootPath.toAbsolutePath()));
+			}
+			return result;
+		}
+
 		String rootDir = StringUtils.cleanPath(rootPath.toString());
 		if (!rootDir.endsWith("/")) {
 			rootDir += "/";
