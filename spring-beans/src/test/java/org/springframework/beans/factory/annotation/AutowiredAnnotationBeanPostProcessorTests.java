@@ -2602,20 +2602,20 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testMethodInjectionWithMultiMixedNullableArgs(){
-		bf.registerBeanDefinition("nonNullBean", new RootBeanDefinition(
-				NonNullBean.class));
-		bf.registerBeanDefinition("mixedNullableInjectionBean", new RootBeanDefinition(MixedNullableInjectionBean.class));
+	public void mixedNullableArgMethodInjection(){
+		bf.registerSingleton("nonNullBean", "Test");
+		bf.registerBeanDefinition("mixedNullableInjectionBean",
+				new RootBeanDefinition(MixedNullableInjectionBean.class));
 		MixedNullableInjectionBean mixedNullableInjectionBean = bf.getBean(MixedNullableInjectionBean.class);
 		assertThat(mixedNullableInjectionBean.nonNullBean).isNotNull();
 		assertThat(mixedNullableInjectionBean.nullableBean).isNull();
 	}
 
 	@Test
-	public void testMethodInjectionWithMultiMixedOptionalArgs(){
-		bf.registerBeanDefinition("nonNullBean", new RootBeanDefinition(
-				NonNullBean.class));
-		bf.registerBeanDefinition("mixedOptionalInjectionBean", new RootBeanDefinition(MixedOptionalInjectionBean.class));
+	public void mixedOptionalArgMethodInjection(){
+		bf.registerSingleton("nonNullBean", "Test");
+		bf.registerBeanDefinition("mixedOptionalInjectionBean",
+				new RootBeanDefinition(MixedOptionalInjectionBean.class));
 		MixedOptionalInjectionBean mixedOptionalInjectionBean = bf.getBean(MixedOptionalInjectionBean.class);
 		assertThat(mixedOptionalInjectionBean.nonNullBean).isNotNull();
 		assertThat(mixedOptionalInjectionBean.nullableBean).isNull();
@@ -4367,32 +4367,31 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 	}
 
-	static class NullableBean {
 
-	}
-	static class NonNullBean {
+	static class MixedNullableInjectionBean {
 
-	}
+		@Nullable
+		public Integer nullableBean;
 
-	static class MixedNullableInjectionBean{
-		public NonNullBean nonNullBean;
-		public NullableBean nullableBean;
+		public String nonNullBean;
 
 		@Autowired(required = false)
-		public void nullabilityInjection(@Nullable NullableBean nullableBean, NonNullBean nonNullBean){
-			if(nullableBean != null){
-				this.nullableBean = nullableBean;
-			}
+		public void nullabilityInjection(@Nullable Integer nullableBean, String nonNullBean) {
+			this.nullableBean = nullableBean;
 			this.nonNullBean = nonNullBean;
 		}
 	}
 
-	static class MixedOptionalInjectionBean{
-		public NonNullBean nonNullBean;
-		public NullableBean nullableBean;
+
+	static class MixedOptionalInjectionBean {
+
+		@Nullable
+		public Integer nullableBean;
+
+		public String nonNullBean;
 
 		@Autowired(required = false)
-		public void optionalInjection(Optional<NullableBean> optionalBean, NonNullBean nonNullBean){
+		public void optionalInjection(Optional<Integer> optionalBean, String nonNullBean) {
 			optionalBean.ifPresent(bean -> this.nullableBean = bean);
 			this.nonNullBean = nonNullBean;
 		}
