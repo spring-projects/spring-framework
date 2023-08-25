@@ -98,7 +98,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	@Override
 	public int hashCode() {
 		// Using nullSafeHashCode for proper array hashCode handling
-		return ObjectUtils.nullSafeHashCode(this.payload) * 23 + this.headers.hashCode();
+		return ObjectUtils.nullSafeHash(this.payload, this.headers);
 	}
 
 	@Override

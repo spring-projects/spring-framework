@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -91,7 +92,7 @@ public abstract class RepeatableContainers {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.parent);
+		return Objects.hashCode(this.parent);
 	}
 
 

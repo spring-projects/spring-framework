@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -404,7 +405,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 		@Override
 		public int hashCode() {
-			return this.eventType.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.sourceType);
+			return Objects.hash(this.eventType, this.sourceType);
 		}
 
 		@Override

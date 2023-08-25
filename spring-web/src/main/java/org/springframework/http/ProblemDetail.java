@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -244,13 +245,8 @@ public class ProblemDetail {
 
 	@Override
 	public int hashCode() {
-		int result = this.type.hashCode();
-		result = 31 * result + ObjectUtils.nullSafeHashCode(getTitle());
-		result = 31 * result + this.status;
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.detail);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.instance);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.properties);
-		return result;
+		return Objects.hash(this.type, getTitle(), this.status, this.detail,
+				this.instance, this.properties);
 	}
 
 	@Override

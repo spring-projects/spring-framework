@@ -129,7 +129,7 @@ public abstract class ClassFilters {
 
 		@Override
 		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.filters);
+			return Arrays.hashCode(this.filters);
 		}
 
 		@Override
@@ -170,7 +170,7 @@ public abstract class ClassFilters {
 
 		@Override
 		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.filters);
+			return Arrays.hashCode(this.filters);
 		}
 
 		@Override

@@ -173,10 +173,8 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 
 	@Override
 	public int hashCode() {
-		int hashCode = this.beanDefinition.hashCode();
-		hashCode = 29 * hashCode + this.beanName.hashCode();
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.aliases);
-		return hashCode;
+		return ObjectUtils.nullSafeHash(this.beanDefinition, this.beanName,
+				this.aliases);
 	}
 
 }

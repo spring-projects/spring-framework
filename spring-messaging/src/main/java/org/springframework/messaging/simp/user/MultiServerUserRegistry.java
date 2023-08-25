@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -539,7 +540,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public int hashCode() {
-			return getId().hashCode() * 31 + ObjectUtils.nullSafeHashCode(getSession());
+			return Objects.hash(getId(), getSession());
 		}
 
 		@Override

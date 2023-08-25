@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.user;
 
+import java.util.Objects;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -66,7 +68,7 @@ public class TestSimpSubscription implements SimpSubscription {
 
 	@Override
 	public int hashCode() {
-		return this.id.hashCode() * 31 + ObjectUtils.nullSafeHashCode(getSession());
+		return Objects.hash(this.id, getSession());
 	}
 
 	@Override

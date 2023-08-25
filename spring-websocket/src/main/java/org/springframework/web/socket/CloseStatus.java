@@ -17,6 +17,7 @@
 package org.springframework.web.socket;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -213,7 +214,7 @@ public final class CloseStatus implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return this.code * 29 + ObjectUtils.nullSafeHashCode(this.reason);
+		return Objects.hash(this.code, this.reason);
 	}
 
 	@Override

@@ -223,7 +223,7 @@ public class TypedStringValue implements BeanMetadataElement {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.targetType);
+		return ObjectUtils.nullSafeHash(this.value, this.targetType);
 	}
 
 	@Override

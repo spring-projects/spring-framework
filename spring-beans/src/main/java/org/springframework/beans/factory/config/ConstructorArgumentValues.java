@@ -606,7 +606,7 @@ public class ConstructorArgumentValues {
 		 * same content to reside in the same Set.
 		 */
 		private int contentHashCode() {
-			return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.type);
+			return ObjectUtils.nullSafeHash(this.value, this.type);
 		}
 
 		/**

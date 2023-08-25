@@ -20,6 +20,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +31,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -172,10 +172,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	@Override
 	public int hashCode() {
-		int hashCode = getBeanClass().hashCode();
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getReadMethod());
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getWriteMethod());
-		return hashCode;
+		return Objects.hash(getBeanClass(), getReadMethod(), getWriteMethod());
 	}
 
 }

@@ -179,10 +179,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(getCodes());
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getArguments());
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getDefaultMessage());
-		return hashCode;
+		return ObjectUtils.nullSafeHash(getCode(), getArguments(), getDefaultMessage());
 	}
 
 }

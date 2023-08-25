@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.TimeZone;
@@ -390,21 +391,32 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return as hash code for the given object; typically the value of
+	 * Return a hash code for the given elements, delegating to
+	 * {@link #nullSafeHashCode(Object)} for each element. Contrary
+	 * to {@link Objects#hash(Object...)}, this method handle an
+	 * element that is an array.
+	 * @param elements the elements to be hashed
+	 * @return a hash value of the elements
+	 * @since 6.1
+	 */
+	public static int nullSafeHash(@Nullable Object... elements) {
+		if (elements == null) {
+			return 0;
+		}
+		int result = 1;
+		for (Object element : elements) {
+			result = 31 * result + nullSafeHashCode(element);
+		}
+		return result;
+	}
+
+	/**
+	 * Return a hash code for the given object; typically the value of
 	 * {@code Object#hashCode()}}. If the object is an array,
-	 * this method will delegate to any of the {@code nullSafeHashCode}
-	 * methods for arrays in this class. If the object is {@code null},
-	 * this method returns 0.
+	 * this method will delegate to any of the {@code Arrays#hasCode}
+	 * methods. If the object is {@code null}, this method returns 0.
 	 * @see Object#hashCode()
-	 * @see #nullSafeHashCode(Object[])
-	 * @see #nullSafeHashCode(boolean[])
-	 * @see #nullSafeHashCode(byte[])
-	 * @see #nullSafeHashCode(char[])
-	 * @see #nullSafeHashCode(double[])
-	 * @see #nullSafeHashCode(float[])
-	 * @see #nullSafeHashCode(int[])
-	 * @see #nullSafeHashCode(long[])
-	 * @see #nullSafeHashCode(short[])
+	 * @see Arrays
 	 */
 	public static int nullSafeHashCode(@Nullable Object obj) {
 		if (obj == null) {
@@ -412,31 +424,31 @@ public abstract class ObjectUtils {
 		}
 		if (obj.getClass().isArray()) {
 			if (obj instanceof Object[] objects) {
-				return nullSafeHashCode(objects);
+				return Arrays.hashCode(objects);
 			}
 			if (obj instanceof boolean[] booleans) {
-				return nullSafeHashCode(booleans);
+				return Arrays.hashCode(booleans);
 			}
 			if (obj instanceof byte[] bytes) {
-				return nullSafeHashCode(bytes);
+				return Arrays.hashCode(bytes);
 			}
 			if (obj instanceof char[] chars) {
-				return nullSafeHashCode(chars);
+				return Arrays.hashCode(chars);
 			}
 			if (obj instanceof double[] doubles) {
-				return nullSafeHashCode(doubles);
+				return Arrays.hashCode(doubles);
 			}
 			if (obj instanceof float[] floats) {
-				return nullSafeHashCode(floats);
+				return Arrays.hashCode(floats);
 			}
 			if (obj instanceof int[] ints) {
-				return nullSafeHashCode(ints);
+				return Arrays.hashCode(ints);
 			}
 			if (obj instanceof long[] longs) {
-				return nullSafeHashCode(longs);
+				return Arrays.hashCode(longs);
 			}
 			if (obj instanceof short[] shorts) {
-				return nullSafeHashCode(shorts);
+				return Arrays.hashCode(shorts);
 			}
 		}
 		return obj.hashCode();
@@ -445,136 +457,91 @@ public abstract class ObjectUtils {
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(Object[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable Object[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (Object element : array) {
-			hash = MULTIPLIER * hash + nullSafeHashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(boolean[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable boolean[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (boolean element : array) {
-			hash = MULTIPLIER * hash + Boolean.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(byte[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable byte[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (byte element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(char[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable char[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (char element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(double[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable double[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (double element : array) {
-			hash = MULTIPLIER * hash + Double.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(float[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable float[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (float element : array) {
-			hash = MULTIPLIER * hash + Float.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(int[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable int[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (int element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(long[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable long[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (long element : array) {
-			hash = MULTIPLIER * hash + Long.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(short[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable short[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (short element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 

@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -269,7 +270,7 @@ public final class Property {
 
 	@Override
 	public int hashCode() {
-		return (ObjectUtils.nullSafeHashCode(this.objectType) * 31 + ObjectUtils.nullSafeHashCode(this.name));
+		return Objects.hash(this.objectType, this.name);
 	}
 
 }

@@ -167,11 +167,8 @@ public class NotificationListenerHolder {
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.notificationListener);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.notificationFilter);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.handback);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.mappedObjectNames);
-		return hashCode;
+		return ObjectUtils.nullSafeHash(this.notificationListener, this.notificationFilter,
+				this.handback, this.mappedObjectNames);
 	}
 
 }

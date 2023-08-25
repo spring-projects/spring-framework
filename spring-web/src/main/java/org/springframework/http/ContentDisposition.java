@@ -240,15 +240,8 @@ public final class ContentDisposition {
 
 	@Override
 	public int hashCode() {
-		int result = ObjectUtils.nullSafeHashCode(this.type);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.name);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.creationDate);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.modificationDate);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.readDate);
-		return result;
+		return ObjectUtils.nullSafeHash(this.type, this.name,this.filename,
+				this.charset, this.size, this.creationDate, this.modificationDate, this.readDate);
 	}
 
 	/**

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import org.springframework.core.io.InputStreamResource;
@@ -276,8 +277,7 @@ public abstract class HttpRange {
 
 		@Override
 		public int hashCode() {
-			return (ObjectUtils.nullSafeHashCode(this.firstPos) * 31 +
-					ObjectUtils.nullSafeHashCode(this.lastPos));
+			return Objects.hash(this.firstPos, this.lastPos);
 		}
 
 		@Override

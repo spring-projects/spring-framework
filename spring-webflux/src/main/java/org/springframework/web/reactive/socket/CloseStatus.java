@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.socket;
 
+import java.util.Objects;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -231,7 +233,7 @@ public final class CloseStatus {
 
 	@Override
 	public int hashCode() {
-		return this.code * 29 + ObjectUtils.nullSafeHashCode(this.reason);
+		return Objects.hash(this.code, this.reason);
 	}
 
 	@Override

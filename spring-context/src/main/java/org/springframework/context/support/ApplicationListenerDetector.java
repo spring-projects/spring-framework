@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 
 /**
  * {@code BeanPostProcessor} that detects beans which implement the {@code ApplicationListener}
@@ -120,7 +120,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.applicationContext);
+		return Objects.hashCode(this.applicationContext);
 	}
 
 }
