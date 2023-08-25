@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +35,8 @@ import org.springframework.lang.Nullable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link CollectionUtils}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -209,6 +212,30 @@ class CollectionUtilsTests {
 
 		list = new ArrayList<>();
 		assertThat(CollectionUtils.hasUniqueObject(list)).isFalse();
+	}
+
+	@Test
+	void conversionOfEmptyMap() {
+		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(new HashMap<>());
+		assertThat(asMultiValueMap.isEmpty()).isTrue();
+		assertThat(asMultiValueMap).isEmpty();
+	}
+
+	@Test
+	void conversionOfNonEmptyMap() {
+		Map<String, List<String>> wrapped = new HashMap<>();
+		wrapped.put("key", Arrays.asList("first", "second"));
+		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(wrapped);
+		assertThat(asMultiValueMap).containsAllEntriesOf(wrapped);
+	}
+
+	@Test
+	void changesValueByReference() {
+		Map<String, List<String>> wrapped = new HashMap<>();
+		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(wrapped);
+		assertThat(asMultiValueMap).doesNotContainKeys("key");
+		wrapped.put("key", new ArrayList<>());
+		assertThat(asMultiValueMap).containsKey("key");
 	}
 
 
