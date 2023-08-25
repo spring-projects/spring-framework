@@ -30,7 +30,10 @@ import org.springframework.util.Assert;
  * @since 1.2.2
  * @param <T> the type of objects that may be compared by this comparator
  * @see Comparable
+ * @see Comparators
+ * @deprecated as of 6.1 in favor of {@link Comparator#nullsLast} and {@link Comparator#nullsFirst}
  */
+@Deprecated(since = "6.1")
 public class NullSafeComparator<T> implements Comparator<T> {
 
 	/**
@@ -48,6 +51,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator<>(false);
+
 
 	private final Comparator<T> nonNullComparator;
 
@@ -68,9 +72,8 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * @see #NULLS_LOW
 	 * @see #NULLS_HIGH
 	 */
-	@SuppressWarnings("unchecked")
 	private NullSafeComparator(boolean nullsLow) {
-		this.nonNullComparator = (Comparator<T>) Comparator.naturalOrder();
+		this.nonNullComparator = Comparators.comparable();
 		this.nullsLow = nullsLow;
 	}
 

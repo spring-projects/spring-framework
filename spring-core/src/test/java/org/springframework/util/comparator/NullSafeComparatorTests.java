@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Phillip Webb
  */
+@Deprecated
 class NullSafeComparatorTests {
 
 	@SuppressWarnings("unchecked")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.util.comparator.ComparableComparator;
+import org.springframework.util.comparator.Comparators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -95,17 +95,17 @@ class ConvertingComparatorTests {
 	}
 
 	@Test
-	void shouldGetMapEntryKeys() throws Exception {
+	void shouldGetMapEntryKeys() {
 		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
-		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryKeys(new ComparableComparator<String>());
+		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryKeys(Comparators.comparable());
 		list.sort(comparator);
 		assertThat(list.get(0).getKey()).isEqualTo("a");
 	}
 
 	@Test
-	void shouldGetMapEntryValues() throws Exception {
+	void shouldGetMapEntryValues() {
 		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
-		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryValues(new ComparableComparator<Integer>());
+		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryValues(Comparators.comparable());
 		list.sort(comparator);
 		assertThat(list.get(0).getValue()).isEqualTo(1);
 	}
@@ -130,7 +130,7 @@ class ConvertingComparatorTests {
 	}
 
 
-	private static class TestComparator extends ComparableComparator<Integer> {
+	private static class TestComparator implements Comparator<Integer> {
 
 		private boolean called;
 
@@ -139,7 +139,7 @@ class ConvertingComparatorTests {
 			assertThat(o1).isInstanceOf(Integer.class);
 			assertThat(o2).isInstanceOf(Integer.class);
 			this.called = true;
-			return super.compare(o1, o2);
+			return Comparators.comparable().compare(o1, o2);
 		}
 
 		public void assertCalled() {

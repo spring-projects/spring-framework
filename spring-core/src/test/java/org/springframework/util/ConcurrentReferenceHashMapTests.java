@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap.Entry;
 import org.springframework.util.ConcurrentReferenceHashMap.Reference;
 import org.springframework.util.ConcurrentReferenceHashMap.Restructure;
-import org.springframework.util.comparator.ComparableComparator;
-import org.springframework.util.comparator.NullSafeComparator;
+import org.springframework.util.comparator.Comparators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -51,8 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class ConcurrentReferenceHashMapTests {
 
-	private static final Comparator<? super String> NULL_SAFE_STRING_SORT = new NullSafeComparator<>(
-			new ComparableComparator<String>(), true);
+	private static final Comparator<? super String> NULL_SAFE_STRING_SORT = Comparators.nullsLow();
 
 	private TestWeakConcurrentCache<Integer, String> map = new TestWeakConcurrentCache<>();
 
