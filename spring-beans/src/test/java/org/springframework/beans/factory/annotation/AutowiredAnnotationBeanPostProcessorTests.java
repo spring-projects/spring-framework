@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -2600,6 +2601,26 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.testBean).isSameAs(bf.getBean("annotatedBean"));
 	}
 
+	@Test
+	public void mixedNullableArgMethodInjection(){
+		bf.registerSingleton("nonNullBean", "Test");
+		bf.registerBeanDefinition("mixedNullableInjectionBean",
+				new RootBeanDefinition(MixedNullableInjectionBean.class));
+		MixedNullableInjectionBean mixedNullableInjectionBean = bf.getBean(MixedNullableInjectionBean.class);
+		assertThat(mixedNullableInjectionBean.nonNullBean).isNotNull();
+		assertThat(mixedNullableInjectionBean.nullableBean).isNull();
+	}
+
+	@Test
+	public void mixedOptionalArgMethodInjection(){
+		bf.registerSingleton("nonNullBean", "Test");
+		bf.registerBeanDefinition("mixedOptionalInjectionBean",
+				new RootBeanDefinition(MixedOptionalInjectionBean.class));
+		MixedOptionalInjectionBean mixedOptionalInjectionBean = bf.getBean(MixedOptionalInjectionBean.class);
+		assertThat(mixedOptionalInjectionBean.nonNullBean).isNotNull();
+		assertThat(mixedOptionalInjectionBean.nullableBean).isNull();
+	}
+
 	private <E extends UnsatisfiedDependencyException> Consumer<E> methodParameterDeclaredOn(
 			Class<?> expected) {
 		return declaredOn(
@@ -4343,6 +4364,36 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Order(0)
 		public static TestBean newTestBean2() {
 			return new TestBean();
+		}
+	}
+
+
+	static class MixedNullableInjectionBean {
+
+		@Nullable
+		public Integer nullableBean;
+
+		public String nonNullBean;
+
+		@Autowired(required = false)
+		public void nullabilityInjection(@Nullable Integer nullableBean, String nonNullBean) {
+			this.nullableBean = nullableBean;
+			this.nonNullBean = nonNullBean;
+		}
+	}
+
+
+	static class MixedOptionalInjectionBean {
+
+		@Nullable
+		public Integer nullableBean;
+
+		public String nonNullBean;
+
+		@Autowired(required = false)
+		public void optionalInjection(Optional<Integer> optionalBean, String nonNullBean) {
+			optionalBean.ifPresent(bean -> this.nullableBean = bean);
+			this.nonNullBean = nonNullBean;
 		}
 	}
 
