@@ -90,6 +90,19 @@ class PathMatchingResourcePatternResolverTests {
 			assertFilenames(pattern, expectedFilenames);
 		}
 
+		@Test  // gh-31111
+		void usingFileProtocolWithWildcardInPatternAndNonexistentRootPath() throws IOException {
+			Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+			String pattern = String.format("file:%s/example/bogus/**", testResourcesDir);
+			assertThat(resolver.getResources(pattern)).isEmpty();
+			// When the log level for the resolver is set to at least INFO, we should see
+			// a log entry similar to the following.
+			//
+			// [main] INFO  o.s.c.i.s.PathMatchingResourcePatternResolver -
+			// Skipping search for files matching pattern [**]: directory
+			// [/<...>/spring-core/src/test/resources/example/bogus] does not exist
+		}
+
 		@Test
 		void encodedHashtagInPath() throws IOException {
 			Path rootDir = Paths.get("src/test/resources/custom%23root").toAbsolutePath();
