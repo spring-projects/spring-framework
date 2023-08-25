@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,34 +29,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Keith Donald
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Eugene Rabii
  */
 class BooleanComparatorTests {
 
 	@Test
 	void shouldCompareWithTrueLow() {
 		Comparator<Boolean> c = new BooleanComparator(true);
-		assertThat(c.compare(true, false)).isEqualTo(-1);
+		assertThat(c.compare(true, false)).isLessThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
 	@Test
 	void shouldCompareWithTrueHigh() {
 		Comparator<Boolean> c = new BooleanComparator(false);
-		assertThat(c.compare(true, false)).isEqualTo(1);
+		assertThat(c.compare(true, false)).isGreaterThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
 	@Test
 	void shouldCompareFromTrueLow() {
 		Comparator<Boolean> c = BooleanComparator.TRUE_LOW;
-		assertThat(c.compare(true, false)).isEqualTo(-1);
+		assertThat(c.compare(true, false)).isLessThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
 	@Test
 	void shouldCompareFromTrueHigh() {
 		Comparator<Boolean> c = BooleanComparator.TRUE_HIGH;
-		assertThat(c.compare(true, false)).isEqualTo(1);
+		assertThat(c.compare(true, false)).isGreaterThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
