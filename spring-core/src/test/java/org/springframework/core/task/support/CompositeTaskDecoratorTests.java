@@ -58,7 +58,7 @@ class CompositeTaskDecoratorTests {
 		TaskDecorator second = mockNoOpTaskDecorator();
 		TaskDecorator third = mockNoOpTaskDecorator();
 		CompositeTaskDecorator taskDecorator = new CompositeTaskDecorator(List.of(first, second, third));
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		taskDecorator.decorate(runnable);
 		InOrder ordered = inOrder(first, second, third);
 		ordered.verify(first).decorate(runnable);
@@ -67,13 +67,13 @@ class CompositeTaskDecoratorTests {
 	}
 
 	@Test
-	void decorateReuseResultOfPreviousRun() {
-		Runnable original = mock(Runnable.class);
-		Runnable firstDecorated = mock(Runnable.class);
-		TaskDecorator first = mock(TaskDecorator.class);
+	void decorateReusesResultOfPreviousRun() {
+		Runnable original = mock();
+		Runnable firstDecorated = mock();
+		TaskDecorator first = mock();
 		given(first.decorate(original)).willReturn(firstDecorated);
-		Runnable secondDecorated = mock(Runnable.class);
-		TaskDecorator second = mock(TaskDecorator.class);
+		Runnable secondDecorated = mock();
+		TaskDecorator second = mock();
 		given(second.decorate(firstDecorated)).willReturn(secondDecorated);
 		Runnable result = new CompositeTaskDecorator(List.of(first, second)).decorate(original);
 		assertThat(result).isSameAs(secondDecorated);
@@ -82,7 +82,7 @@ class CompositeTaskDecoratorTests {
 	}
 
 	private TaskDecorator mockNoOpTaskDecorator() {
-		TaskDecorator mock = mock(TaskDecorator.class);
+		TaskDecorator mock = mock();
 		given(mock.decorate(any())).willAnswer(invocation -> invocation.getArguments()[0]);
 		return mock;
 	}
