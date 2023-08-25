@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,11 +233,7 @@ public final class SpelCompiler implements Opcodes {
 		if (compiler == null) {
 			// Full lock now since we're creating a child ClassLoader
 			synchronized (compilers) {
-				compiler = compilers.get(clToUse);
-				if (compiler == null) {
-					compiler = new SpelCompiler(clToUse);
-					compilers.put(clToUse, compiler);
-				}
+				return compilers.computeIfAbsent(clToUse, SpelCompiler::new);
 			}
 		}
 		return compiler;
