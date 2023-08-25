@@ -78,7 +78,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Check whether the given exception is compatible with the specified
-	 * exception types, as declared in a throws clause.
+	 * exception types, as declared in a {@code throws} clause.
 	 * @param ex the exception to check
 	 * @param declaredExceptions the exception types declared in the throws clause
 	 * @return whether the given exception is compatible
@@ -143,7 +143,7 @@ public abstract class ObjectUtils {
 		}
 
 		if (obj instanceof Optional<?> optional) {
-			return !optional.isPresent();
+			return optional.isEmpty();
 		}
 		if (obj instanceof CharSequence charSequence) {
 			return charSequence.length() == 0;
@@ -172,7 +172,7 @@ public abstract class ObjectUtils {
 	@Nullable
 	public static Object unwrapOptional(@Nullable Object obj) {
 		if (obj instanceof Optional<?> optional) {
-			if (!optional.isPresent()) {
+			if (optional.isEmpty()) {
 				return null;
 			}
 			Object result = optional.get();
@@ -900,10 +900,10 @@ public abstract class ObjectUtils {
 	 * <p>Returns:
 	 * <ul>
 	 * <li>{@code "null"} if {@code obj} is {@code null}</li>
-	 * <li>{@code"Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
-	 * <li>{@code"Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
-	 * where {@code <concise-string>} is the result of invoking {@link #nullSafeConciseToString}
-	 * on the object contained in the {@code Optional}</li>
+	 * <li>{@code "Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
+	 * <li>{@code "Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
+	 * where {@code <concise-string>} is the result of invoking this method on the object
+	 * contained in the {@code Optional}</li>
 	 * <li>{@code "{}"} if {@code obj} is an empty array</li>
 	 * <li>{@code "{...}"} if {@code obj} is a {@link Map} or a non-empty array</li>
 	 * <li>{@code "[...]"} if {@code obj} is a {@link Collection}</li>
