@@ -294,6 +294,32 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 |===
 
 
+[[observability.http-client.restclient]]
+=== RestClient
+
+Applications must configure an `ObservationRegistry` on the `RestClient.Builder` to enable the instrumentation; without that, observations are "no-ops".
+
+Instrumentation uses the `org.springframework.http.client.observation.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
+|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
+|`client.name` _(required)_|Client name derived from the request URI host.
+|`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
+|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|===
+
+.High cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`http.url` _(required)_|HTTP request URI.
+|===
+
 
 [[observability.http-client.webclient]]
 === WebClient

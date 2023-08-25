@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationRegistry;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -128,6 +130,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	@Nullable
 	private List<ClientHttpRequestInitializer> initializers;
 
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
 
 	public DefaultRestClientBuilder() {
 	}
@@ -156,6 +160,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
+		this.observationRegistry = other.observationRegistry;
 	}
 
 	public DefaultRestClientBuilder(RestTemplate restTemplate) {
@@ -176,6 +181,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		if (!CollectionUtils.isEmpty(restTemplate.getClientHttpRequestInitializers())) {
 			this.initializers = new ArrayList<>(restTemplate.getClientHttpRequestInitializers());
 		}
+		this.observationRegistry = restTemplate.getObservationRegistry();
 	}
 
 
@@ -295,6 +301,13 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
+	public RestClient.Builder observationRegistry(ObservationRegistry observationRegistry) {
+		Assert.notNull(observationRegistry, "observationRegistry must not be null");
+		this.observationRegistry = observationRegistry;
+		return this;
+	}
+
+	@Override
 	public RestClient.Builder apply(Consumer<RestClient.Builder> builderConsumer) {
 		builderConsumer.accept(this);
 		return this;
@@ -348,6 +361,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				defaultHeaders,
 				this.statusHandlers,
 				messageConverters,
+				this.observationRegistry,
 				new DefaultRestClientBuilder(this)
 				);
 	}
