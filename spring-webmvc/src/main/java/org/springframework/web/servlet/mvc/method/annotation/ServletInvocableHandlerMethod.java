@@ -61,6 +61,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 3.1
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
@@ -124,10 +125,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				mavContainer.setRequestHandled(true);
 				return;
 			}
-		}
-		else if (StringUtils.hasText(getResponseStatusReason())) {
-			mavContainer.setRequestHandled(true);
-			return;
 		}
 
 		mavContainer.setRequestHandled(false);

@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
@@ -73,6 +74,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Kazuki Shimizu
  * @author Brian Clozel
  * @author Rodolphe Lecocq
+ * @author Yanming Zhou
  * @since 3.1
  */
 @SuppressWarnings("unused")
@@ -361,6 +363,28 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
+	@Test //gh-27156
+	void resolveExceptionWithReasonAndResponseBody() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		StaticApplicationContext context = new StaticApplicationContext(ctx);
+		Locale locale = Locale.ENGLISH;
+		context.addMessage("bad.gateway", locale, "Bad Gateway");
+		context.refresh();
+		LocaleContextHolder.setLocale(locale);
+		this.resolver.setApplicationContext(context);
+		this.resolver.afterPropertiesSet();
+
+		HttpServerErrorException ex = HttpServerErrorException.create(HttpStatus.BAD_GATEWAY, "", null, null, null);
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_GATEWAY.value());
+		assertThat(this.response.getErrorMessage()).isEqualTo("Bad Gateway");
+		assertThat(this.response.getContentAsString()).isEqualTo("BAD GATEWAY");
+	}
+
 	@Test
 	void resolveExceptionControllerAdviceHandler() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
@@ -566,6 +590,12 @@ public class ExceptionHandlerExceptionResolverTests {
 		@ResponseStatus(code = HttpStatus.GATEWAY_TIMEOUT, reason = "gateway.timeout")
 		public void handleException(SocketTimeoutException ex) {
 
+		}
+
+		@ExceptionHandler(HttpServerErrorException.BadGateway.class)
+		@ResponseStatus(code = HttpStatus.BAD_GATEWAY, reason = "bad.gateway")
+		public String handleException() {
+			return "BAD GATEWAY";
 		}
 	}
 
