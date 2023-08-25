@@ -35,6 +35,8 @@ import org.springframework.lang.Nullable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link CollectionUtils}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -214,7 +216,7 @@ class CollectionUtilsTests {
 
 	@Test
 	void conversionOfEmptyMap() {
-		MultiValueMap<String,  List<String>> asMultiValueMap = CollectionUtils.toMultiValueMap(new HashMap<>());
+		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(new HashMap<>());
 		assertThat(asMultiValueMap.isEmpty()).isTrue();
 		assertThat(asMultiValueMap).isEmpty();
 	}
@@ -233,7 +235,6 @@ class CollectionUtilsTests {
 		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(wrapped);
 		assertThat(asMultiValueMap).doesNotContainKeys("key");
 		wrapped.put("key", new ArrayList<>());
-
 		assertThat(asMultiValueMap).containsKey("key");
 	}
 
