@@ -754,6 +754,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
 			throws IOException {
 
+		Set<Resource> result = new LinkedHashSet<>();
 		URI rootDirUri;
 		try {
 			rootDirUri = rootDirResource.getURI();
@@ -762,7 +763,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (logger.isWarnEnabled()) {
 				logger.warn("Failed to resolve directory [%s] as URI: %s".formatted(rootDirResource, ex));
 			}
-			return Collections.emptySet();
+			return result;
 		}
 
 		Path rootPath = null;
@@ -806,7 +807,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					.formatted(rootPath.toAbsolutePath(), subPattern));
 		}
 
-		Set<Resource> result = new LinkedHashSet<>();
 		try (Stream<Path> files = Files.walk(rootPath)) {
 			files.filter(isMatchingFile).sorted().map(FileSystemResource::new).forEach(result::add);
 		}
