@@ -42,7 +42,7 @@ import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Arjen Poutsma
@@ -331,7 +331,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 						assertThat(numberType).isEqualTo(JsonParser.NumberType.BIG_DECIMAL);
 					}
 					catch (IOException ex) {
-						fail(ex);
+						fail(ex.getMessage(), ex);
 					}
 				})
 				.verifyComplete();
