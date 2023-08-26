@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,11 @@ import org.springframework.util.Assert;
  * 10             30000
  * </pre>
  *
- * <p>Note that the default max elapsed time is {@link Long#MAX_VALUE}. Use
- * {@link #setMaxElapsedTime(long)} to limit the maximum length of time
- * that an instance should accumulate before returning
- * {@link BackOffExecution#STOP}. Or use {@link #setMaxAttempts} to limit
- * the number of attempts.
+ * <p>Note that the default max elapsed time and maximum number of attempts are both
+ * {@link Long#MAX_VALUE}. Use {@link #setMaxElapsedTime(long)} to limit the maximum
+ * length of time that an instance should accumulate before returning
+ * {@link BackOffExecution#STOP}. Alternatively, use {@link #setMaxAttempts} to limit
+ * the number of attempts. The execution stops when any of those two limit is reached.
  *
  * @author Stephane Nicoll
  * @author Gary Russell
@@ -161,7 +161,7 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * The maximum elapsed time in milliseconds after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
-	 * @param maxElapsedTime the maxElapsedTime.
+	 * @param maxElapsedTime the maximum elapsed time
 	 * @see #setMaxAttempts(int)
 	 */
 	public void setMaxElapsedTime(long maxElapsedTime) {
@@ -171,7 +171,7 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * Return the maximum elapsed time in milliseconds after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
-	 * @return the maxElapsedTime.
+	 * @return the maximum elapsed time
 	 * @see #getMaxAttempts()
 	 */
 	public long getMaxElapsedTime() {
@@ -181,8 +181,8 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * The maximum number of attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
-	 * @param maxAttempts the maxAttempts.
-	 * @since 5.3.8
+	 * @param maxAttempts the maximum number of attempts.
+	 * @since 6.1
 	 * @see #setMaxElapsedTime(long)
 	 */
 	public void setMaxAttempts(int maxAttempts) {
@@ -192,8 +192,8 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * Return the maximum number of attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
-	 * @return the maxAttempts.
-	 * @since 5.3.8
+	 * @return the maximum number of attempts
+	 * @since 6.1
 	 * @see #getMaxElapsedTime()
 	 */
 	public int getMaxAttempts() {
@@ -221,7 +221,8 @@ public class ExponentialBackOff implements BackOff {
 
 		@Override
 		public long nextBackOff() {
-			if (this.currentElapsedTime >= maxElapsedTime || this.attempts >= maxAttempts) {
+			if (this.currentElapsedTime >= getMaxElapsedTime()
+					|| this.attempts >= getMaxAttempts()) {
 				return STOP;
 			}
 
