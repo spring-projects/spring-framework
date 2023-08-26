@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -92,8 +91,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 
 	@Test
-	@Ignore("Fails against TestNG 6.11")
-	public void runTestAndAssertCounters() throws Exception {
+	public void runTestAndAssertCounters() {
 		TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		TestNG testNG = new TestNG();
 		testNG.addListener(listener);
