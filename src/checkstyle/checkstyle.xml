@@ -233,14 +233,14 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
 			<property name="id" value="junit4Assertions"/>
 			<property name="maximum" value="0"/>
-			<property name="format" value="org\.junit\.Assert\.assert"/>
+			<property name="format" value="org\.junit\.Assert"/>
 			<property name="message" value="Please use AssertJ assertions."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
 			<property name="id" value="junitJupiterAssertions"/>
 			<property name="maximum" value="0"/>
-			<property name="format" value="org\.junit\.jupiter\.api\.Assertions\.assert"/>
+			<property name="format" value="org\.junit\.jupiter\.api\.Assertions"/>
 			<property name="message" value="Please use AssertJ assertions."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
@@ -248,7 +248,7 @@
 			<property name="id" value="testNGAssertions"/>
 			<property name="maximum" value="0"/>
 			<!-- should cover org.testng.Assert and org.testng.AssertJUnit -->
-			<property name="format" value="org\.testng\.Assert(JUnit)?\.assert"/>
+			<property name="format" value="org\.testng\.Assert(JUnit)?"/>
 			<property name="message" value="Please use AssertJ assertions."/>
 			<property name="ignoreComments" value="true"/>
 		</module>

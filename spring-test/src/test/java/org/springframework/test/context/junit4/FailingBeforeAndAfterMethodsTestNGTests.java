@@ -34,6 +34,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests which verify that '<i>before</i>' and '<i>after</i>'
@@ -112,7 +113,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void beforeTestClass(TestContext testContext) {
-			org.testng.Assert.fail("always failing beforeTestClass()");
+			fail("always failing beforeTestClass()");
 		}
 	}
 
@@ -120,7 +121,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void afterTestClass(TestContext testContext) {
-			org.testng.Assert.fail("always failing afterTestClass()");
+			fail("always failing afterTestClass()");
 		}
 	}
 
@@ -128,7 +129,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void prepareTestInstance(TestContext testContext) throws Exception {
-			org.testng.Assert.fail("always failing prepareTestInstance()");
+			fail("always failing prepareTestInstance()");
 		}
 	}
 
@@ -136,7 +137,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void beforeTestMethod(TestContext testContext) {
-			org.testng.Assert.fail("always failing beforeTestMethod()");
+			fail("always failing beforeTestMethod()");
 		}
 	}
 
@@ -144,7 +145,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void beforeTestExecution(TestContext testContext) {
-			org.testng.Assert.fail("always failing beforeTestExecution()");
+			fail("always failing beforeTestExecution()");
 		}
 	}
 
@@ -152,7 +153,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void afterTestExecution(TestContext testContext) {
-			org.testng.Assert.fail("always failing afterTestExecution()");
+			fail("always failing afterTestExecution()");
 		}
 	}
 
@@ -160,7 +161,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@Override
 		public void afterTestMethod(TestContext testContext) {
-			org.testng.Assert.fail("always failing afterTestMethod()");
+			fail("always failing afterTestMethod()");
 		}
 	}
 
@@ -210,7 +211,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@BeforeTransaction
 		public void beforeTransaction() {
-			org.testng.Assert.fail("always failing beforeTransaction()");
+			fail("always failing beforeTransaction()");
 		}
 	}
 
@@ -223,7 +224,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 		@AfterTransaction
 		public void afterTransaction() {
-			org.testng.Assert.fail("always failing afterTransaction()");
+			fail("always failing afterTransaction()");
 		}
 	}
 
