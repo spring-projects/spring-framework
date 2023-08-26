@@ -64,7 +64,7 @@ class PropertySourceRegistry {
 			encoding = null;
 		}
 		String[] locations = propertySource.getStringArray("value");
-		Assert.isTrue(locations.length > 0, "At least one @PropertySource(value) location is required");
+		Assert.notEmpty(locations, "At least one @PropertySource(value) location is required");
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 
 		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");

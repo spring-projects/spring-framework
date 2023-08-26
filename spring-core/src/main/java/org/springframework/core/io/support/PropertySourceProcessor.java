@@ -80,7 +80,7 @@ public class PropertySourceProcessor {
 		String name = descriptor.name();
 		String encoding = descriptor.encoding();
 		List<String> locations = descriptor.locations();
-		Assert.isTrue(locations.size() > 0, "At least one @PropertySource(value) location is required");
+		Assert.notEmpty(locations, "At least one @PropertySource(value) location is required");
 		boolean ignoreResourceNotFound = descriptor.ignoreResourceNotFound();
 		PropertySourceFactory factory = (descriptor.propertySourceFactory() != null ?
 				instantiateClass(descriptor.propertySourceFactory()) : defaultPropertySourceFactory);

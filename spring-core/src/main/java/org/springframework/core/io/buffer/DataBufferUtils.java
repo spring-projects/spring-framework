@@ -622,7 +622,7 @@ public abstract class DataBufferUtils {
 	 * @since 5.2
 	 */
 	public static Matcher matcher(byte[]... delimiters) {
-		Assert.isTrue(delimiters.length > 0, "Delimiters must not be empty");
+		Assert.notEmpty(delimiters, "Delimiters must not be empty");
 		return (delimiters.length == 1 ? createMatcher(delimiters[0]) : new CompositeMatcher(delimiters));
 	}
 
