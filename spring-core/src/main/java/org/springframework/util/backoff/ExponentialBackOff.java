@@ -20,12 +20,12 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link BackOff} that increases the back off period for each
- * retry attempt. When the interval has reached the {@link #setMaxInterval(long)
+ * retry attempt. When the interval has reached the {@linkplain #setMaxInterval(long)
  * max interval}, it is no longer increased. Stops retrying once the
- * {@link #setMaxElapsedTime(long) max elapsed time} has been reached.
+ * {@linkplain #setMaxElapsedTime(long) max elapsed time} has been reached.
  *
- * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms,
- * the default multiplier is {@value #DEFAULT_MULTIPLIER}, and the default max
+ * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms;
+ * the default multiplier is {@value #DEFAULT_MULTIPLIER}; and the default max
  * interval is {@value #DEFAULT_MAX_INTERVAL}. For 10 attempts the sequence will be
  * as follows:
  *
@@ -44,11 +44,12 @@ import org.springframework.util.Assert;
  * 10             30000
  * </pre>
  *
- * <p>Note that the default max elapsed time and maximum number of attempts are both
- * {@link Long#MAX_VALUE}. Use {@link #setMaxElapsedTime(long)} to limit the maximum
- * length of time that an instance should accumulate before returning
- * {@link BackOffExecution#STOP}. Alternatively, use {@link #setMaxAttempts} to limit
- * the number of attempts. The execution stops when any of those two limit is reached.
+ * <p>Note that the default max elapsed time is {@link Long#MAX_VALUE}, and the
+ * default maximum number of attempts is {@link Integer#MAX_VALUE}. Use
+ * {@link #setMaxElapsedTime(long)} to limit the length of time that an instance
+ * should accumulate before returning {@link BackOffExecution#STOP}. Alternatively,
+ * use {@link #setMaxAttempts(int)} to limit the number of attempts. The execution
+ * stops when either of those two limits is reached.
  *
  * @author Stephane Nicoll
  * @author Gary Russell
@@ -181,7 +182,7 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * The maximum number of attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
-	 * @param maxAttempts the maximum number of attempts.
+	 * @param maxAttempts the maximum number of attempts
 	 * @since 6.1
 	 * @see #setMaxElapsedTime(long)
 	 */
