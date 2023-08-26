@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -139,30 +140,31 @@ class MultiValueMapTests {
 		assertThat(map).isEqualTo(map2);
 	}
 
-	@ParameterizedMultiValueMapTest
-	void canNotChangeAnUnmodifiableMultiValueMap(MultiValueMap<String, String> map) {
-		MultiValueMap<String, String> asUnmodifiableMultiValueMap = CollectionUtils.unmodifiableMultiValueMap(map);
+	@Test
+	void canNotChangeAnUnmodifiableMultiValueMap() {
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		MultiValueMap<String, String> unmodifiableMap = CollectionUtils.unmodifiableMultiValueMap(map);
 		assertSoftly(softly -> {
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.add("key", "value"));
+					.isThrownBy(() -> unmodifiableMap.add("key", "value"));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.addIfAbsent("key", "value"));
+					.isThrownBy(() -> unmodifiableMap.addIfAbsent("key", "value"));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.addAll("key", exampleListOfValues()));
+					.isThrownBy(() -> unmodifiableMap.addAll("key", exampleListOfValues()));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.addAll(exampleMultiValueMap()));
+					.isThrownBy(() -> unmodifiableMap.addAll(exampleMultiValueMap()));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.set("key", "value"));
+					.isThrownBy(() -> unmodifiableMap.set("key", "value"));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.setAll(exampleHashMap()));
+					.isThrownBy(() -> unmodifiableMap.setAll(exampleHashMap()));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.put("key", exampleListOfValues()));
+					.isThrownBy(() -> unmodifiableMap.put("key", exampleListOfValues()));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.putIfAbsent("key", exampleListOfValues()));
+					.isThrownBy(() -> unmodifiableMap.putIfAbsent("key", exampleListOfValues()));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.putAll(exampleMultiValueMap()));
+					.isThrownBy(() -> unmodifiableMap.putAll(exampleMultiValueMap()));
 			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> asUnmodifiableMultiValueMap.remove("key1"));
+					.isThrownBy(() -> unmodifiableMap.remove("key1"));
 		});
 	}
 
