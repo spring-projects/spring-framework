@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -142,27 +142,28 @@ class MultiValueMapTests {
 	@ParameterizedMultiValueMapTest
 	void canNotChangeAnUnmodifiableMultiValueMap(MultiValueMap<String, String> map) {
 		MultiValueMap<String, String> asUnmodifiableMultiValueMap = CollectionUtils.unmodifiableMultiValueMap(map);
-		Assertions.assertAll(
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.add("key", "value")),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.addIfAbsent("key", "value")),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.addAll("key", exampleListOfValues())),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.addAll(exampleMultiValueMap())),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.set("key", "value")),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.setAll(exampleHashMap())),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.put("key", exampleListOfValues())),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.putIfAbsent("key", exampleListOfValues())),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.putAll(exampleMultiValueMap())),
-				() -> Assertions.assertThrows(UnsupportedOperationException.class,
-						() -> asUnmodifiableMultiValueMap.remove("key1")));
+		assertSoftly(softly -> {
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.add("key", "value"));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.addIfAbsent("key", "value"));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.addAll("key", exampleListOfValues()));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.addAll(exampleMultiValueMap()));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.set("key", "value"));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.setAll(exampleHashMap()));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.put("key", exampleListOfValues()));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.putIfAbsent("key", exampleListOfValues()));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.putAll(exampleMultiValueMap()));
+			softly.assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> asUnmodifiableMultiValueMap.remove("key1"));
+		});
 	}
 
 	private static List<String> exampleListOfValues() {
