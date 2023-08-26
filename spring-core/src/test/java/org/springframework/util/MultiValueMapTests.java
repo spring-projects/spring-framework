@@ -16,8 +16,9 @@
 
 package org.springframework.util;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,9 +27,12 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Tests for {@link MultiValueMap}.
@@ -37,11 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class MultiValueMapTests {
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void add(MultiValueMap<String, String> map) {
 		int initialSize = map.size();
 		map.add("key", "value1");
@@ -50,31 +54,27 @@ class MultiValueMapTests {
 		assertThat(map.get("key")).containsExactly("value1", "value2");
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void addIfAbsentWhenAbsent(MultiValueMap<String, String> map) {
 		map.addIfAbsent("key", "value1");
 		assertThat(map.get("key")).containsExactly("value1");
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void addIfAbsentWhenPresent(MultiValueMap<String, String> map) {
 		map.add("key", "value1");
 		map.addIfAbsent("key", "value2");
 		assertThat(map.get("key")).containsExactly("value1");
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void set(MultiValueMap<String, String> map) {
 		map.set("key", "value1");
 		map.set("key", "value2");
 		assertThat(map.get("key")).containsExactly("value2");
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void addAll(MultiValueMap<String, String> map) {
 		int initialSize = map.size();
 		map.add("key", "value1");
@@ -83,18 +83,16 @@ class MultiValueMapTests {
 		assertThat(map.get("key")).containsExactly("value1", "value2", "value3");
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void addAllWithEmptyList(MultiValueMap<String, String> map) {
 		int initialSize = map.size();
-		map.addAll("key", Collections.emptyList());
+		map.addAll("key", List.of());
 		assertThat(map).hasSize(initialSize + 1);
 		assertThat(map.get("key")).isEmpty();
 		assertThat(map.getFirst("key")).isNull();
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void getFirst(MultiValueMap<String, String> map) {
 		List<String> values = List.of("value1", "value2");
 		map.put("key", values);
@@ -102,8 +100,7 @@ class MultiValueMapTests {
 		assertThat(map.getFirst("other")).isNull();
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void toSingleValueMap(MultiValueMap<String, String> map) {
 		int initialSize = map.size();
 		List<String> values = List.of("value1", "value2");
@@ -113,41 +110,36 @@ class MultiValueMapTests {
 		assertThat(singleValueMap.get("key")).isEqualTo("value1");
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void toSingleValueMapWithEmptyList(MultiValueMap<String, String> map) {
 		int initialSize = map.size();
-		map.put("key", Collections.emptyList());
+		map.put("key", List.of());
 		Map<String, String> singleValueMap = map.toSingleValueMap();
 		assertThat(singleValueMap).hasSize(initialSize);
 		assertThat(singleValueMap.get("key")).isNull();
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void equalsOnExistingValues(MultiValueMap<String, String> map) {
 		map.clear();
 		map.set("key1", "value1");
 		assertThat(map).isEqualTo(map);
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void equalsOnEmpty(MultiValueMap<String, String> map) {
 		map.clear();
 		map.set("key1", "value1");
-		MultiValueMap<String, String> o1 = new LinkedMultiValueMap<>();
-		o1.set("key1", "value1");
-		assertThat(o1).isEqualTo(map);
-		assertThat(map).isEqualTo(o1);
-		Map<String, List<String>> o2 = new HashMap<>();
-		o2.put("key1", Collections.singletonList("value1"));
-		assertThat(o2).isEqualTo(map);
-		assertThat(map).isEqualTo(o2);
+		MultiValueMap<String, String> map1 = new LinkedMultiValueMap<>();
+		map1.set("key1", "value1");
+		assertThat(map1).isEqualTo(map);
+		assertThat(map).isEqualTo(map1);
+		Map<String, List<String>> map2 = Map.of("key1", List.of("value1"));
+		assertThat(map2).isEqualTo(map);
+		assertThat(map).isEqualTo(map2);
 	}
 
-	@ParameterizedTest
-	@MethodSource("objectsUnderTest")
+	@ParameterizedMultiValueMapTest
 	void canNotChangeAnUnmodifiableMultiValueMap(MultiValueMap<String, String> map) {
 		MultiValueMap<String, String> asUnmodifiableMultiValueMap = CollectionUtils.unmodifiableMultiValueMap(map);
 		Assertions.assertAll(
@@ -171,28 +163,37 @@ class MultiValueMapTests {
 						() -> asUnmodifiableMultiValueMap.putAll(exampleMultiValueMap())),
 				() -> Assertions.assertThrows(UnsupportedOperationException.class,
 						() -> asUnmodifiableMultiValueMap.remove("key1")));
-
 	}
 
-	private List<String> exampleListOfValues() {
+	private static List<String> exampleListOfValues() {
 		return List.of("value1", "value2");
 	}
 
-	private Map<String, String> exampleHashMap() {
+	private static Map<String, String> exampleHashMap() {
 		return Map.of("key2", "key2.value1");
 	}
 
-	private MultiValueMap<String, String> exampleMultiValueMap() {
+	private static MultiValueMap<String, String> exampleMultiValueMap() {
 		LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		map.put("key1", Arrays.asList("key1.value1", "key1.value2"));
 		return map;
 	}
 
-	static Stream<MultiValueMap<String, String>> objectsUnderTest() {
-		return Stream.of(new LinkedMultiValueMap<>(), new LinkedMultiValueMap<>(new HashMap<>()),
-				new LinkedMultiValueMap<>(new LinkedHashMap<>()),
-				new LinkedMultiValueMap<>(Map.of("existingkey", Arrays.asList("existingvalue1", "existingvalue2"))),
-				CollectionUtils.toMultiValueMap(new HashMap<>()));
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("mapsUnderTest")
+	@interface ParameterizedMultiValueMapTest {
+	}
+
+	static Stream<Arguments> mapsUnderTest() {
+		return Stream.of(
+				arguments(named("new LinkedMultiValueMap<>()", new LinkedMultiValueMap<>())),
+				arguments(named("new LinkedMultiValueMap<>(new HashMap<>())", new LinkedMultiValueMap<>(new HashMap<>()))),
+				arguments(named("new LinkedMultiValueMap<>(new LinkedHashMap<>())", new LinkedMultiValueMap<>(new LinkedHashMap<>()))),
+				arguments(named("new LinkedMultiValueMap<>(Map.of(...))", new LinkedMultiValueMap<>(Map.of("existingkey", List.of("existingvalue1", "existingvalue2"))))),
+				arguments(named("CollectionUtils.toMultiValueMap", CollectionUtils.toMultiValueMap(new HashMap<>())))
+			);
 	}
 
 }
