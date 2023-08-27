@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ final class AnnotationTypeMapping {
 	/**
 	 * Set used to track which convention-based annotation attribute overrides
 	 * have already been checked. Each key is the combination of the fully
-	 * qualified class names of a composed annotation and a meta-annotation
+	 * qualified class name of a composed annotation and a meta-annotation
 	 * that it is either present or meta-present on the composed annotation,
 	 * separated by a dash.
 	 * @since 6.0
@@ -319,7 +319,7 @@ final class AnnotationTypeMapping {
 				logger.isWarnEnabled()) {
 			logger.warn("""
 					Support for convention-based annotation attribute overrides is deprecated \
-					and will be removed in Spring Framework 6.1. Please annotate the following \
+					and will be removed in Spring Framework 6.2. Please annotate the following \
 					attributes in @%s with appropriate @AliasFor declarations: %s"""
 						.formatted(rootAnnotationTypeName, conventionMappedAttributes));
 		}
