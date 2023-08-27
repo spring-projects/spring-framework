@@ -101,15 +101,13 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata metadata = annotatedDef.getMetadata();
-		Set<String> annotationTypes = metadata.getAnnotationTypes();
 
-		String explicitBeanName = getExplicitBeanName(metadata);
-		if (explicitBeanName != null) {
-			return explicitBeanName;
+		String beanName = getExplicitBeanName(metadata);
+		if (beanName != null) {
+			return beanName;
 		}
 
-		String beanName = null;
-		for (String annotationType : annotationTypes) {
+		for (String annotationType : metadata.getAnnotationTypes()) {
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, annotationType);
 			if (attributes != null) {
 				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType, key -> {
