@@ -17,8 +17,8 @@
 package org.springframework.core.env;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -90,7 +90,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 			total += names.length;
 		}
 		Set<String> allNames = new LinkedHashSet<>(total);
-		namesList.forEach(names -> allNames.addAll(Arrays.asList(names)));
+		namesList.forEach(names -> Collections.addAll(allNames, names));
 		return StringUtils.toStringArray(allNames);
 	}
 
