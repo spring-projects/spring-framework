@@ -35,7 +35,9 @@ import java.lang.annotation.Target;
  * <p>As of Spring Framework 6.1, custom component stereotype annotations should
  * use {@link org.springframework.core.annotation.AliasFor @AliasFor} to declare
  * an explicit alias for this annotation's {@link #value} attribute. See the
- * source code declaration of {@link Repository#value()} for a concrete example.
+ * source code declaration of {@link Repository#value()} and
+ * {@link org.springframework.web.bind.annotation.ControllerAdvice#name()
+ * ControllerAdvice.name()} for concrete examples.
  *
  * @author Mark Fisher
  * @author Sam Brannen

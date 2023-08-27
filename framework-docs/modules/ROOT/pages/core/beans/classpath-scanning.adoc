@@ -675,7 +675,7 @@ As of Spring Framework 6.1, the name of the annotation attribute that is used to
 the bean name is no longer required to be `value`. Custom stereotype annotations can
 declare an attribute with a different name (such as `name`) and annotate that attribute
 with `@AliasFor(annotation = Component.class, attribute = "value")`. See the source code
-declaration of `Repository#value()` for a concrete example.
+declaration of `Repository#value()` and `ControllerAdvice#name()` for concrete examples.
 ====
 
 If such an annotation contains no name `value` or for any other detected component
