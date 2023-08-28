@@ -161,14 +161,11 @@ Java::
 public class MultipartExchangeFilterFunction implements ExchangeFilterFunction {
 
     @Override
-    @Nonnull
-    public Mono<ClientResponse> filter(@Nonnull ClientRequest request, @Nonnull ExchangeFunction next) {
+    public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
         if (MediaType.MULTIPART_FORM_DATA.includes(request.headers().getContentType())
                 && (request.method() == HttpMethod.PUT || request.method() == HttpMethod.POST)) {
-            return next.exchange(
-                    ClientRequest.from(request)
-                            .body((outputMessage, context) -> request.body().insert(new BufferingDecorator(outputMessage), context))
-                            .build()
+            return next.exchange(ClientRequest.from(request).body((outputMessage, context) ->
+                request.body().insert(new BufferingDecorator(outputMessage), context)).build()
             );
         } else {
             return next.exchange(request);
@@ -182,8 +179,7 @@ public class MultipartExchangeFilterFunction implements ExchangeFilterFunction {
         }
 
         @Override
-        @Nonnull
-        public Mono<Void> writeWith(@Nonnull Publisher<? extends DataBuffer> body) {
+        public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
             return DataBufferUtils.join(body).flatMap(buffer -> {
                 getHeaders().setContentLength(buffer.readableByteCount());
                 return super.writeWith(Mono.just(buffer));
@@ -200,19 +196,25 @@ Kotlin::
 class MultipartExchangeFilterFunction : ExchangeFilterFunction {
 
     override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
-        return next.exchange(ClientRequest.from(request)
-                .body { message: ClientHttpRequest?, context: BodyInserter.Context? -> request.body().insert(BufferingDecorator(message), context!!) }
+        return if (MediaType.MULTIPART_FORM_DATA.includes(request.headers().getContentType())
+            && (request.method() == HttpMethod.PUT || request.method() == HttpMethod.POST)) {
+            next.exchange(ClientRequest.from(request)
+                .body { message, context -> request.body().insert(BufferingDecorator(message), context) }
                 .build())
+        }
+        else {
+            next.exchange(request)
+        }
+
     }
 
-    private class BufferingDecorator(delegate: ClientHttpRequest?) : ClientHttpRequestDecorator(delegate!!) {
+    private class BufferingDecorator(delegate: ClientHttpRequest) : ClientHttpRequestDecorator(delegate) {
         override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
             return DataBufferUtils.join(body)
-                    .flatMap { dataBuffer: DataBuffer ->
-                        val length = dataBuffer.readableByteCount()
-                        headers.contentLength = length.toLong()
-                        super.writeWith(Mono.just(dataBuffer))
-                    }
+                .flatMap {
+                    headers.contentLength = it.readableByteCount().toLong()
+                    super.writeWith(Mono.just(it))
+                }
         }
     }
 }
