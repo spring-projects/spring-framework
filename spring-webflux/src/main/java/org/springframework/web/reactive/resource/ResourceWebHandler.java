@@ -437,9 +437,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
 						if (HttpMethod.HEAD == httpMethod) {
-							writer.addHeaders(exchange.getResponse(), resource, mediaType,
-									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
-							return exchange.getResponse().setComplete();
+							return writer.addDefaultHeaders(exchange.getResponse(), resource, mediaType,
+											Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()))
+									.then(exchange.getResponse().setComplete());
 						}
 						else {
 							return writer.write(Mono.just(resource),
