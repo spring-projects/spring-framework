@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.lang.Nullable;
@@ -86,14 +87,15 @@ public abstract class ClassFilters {
 	}
 
 	/**
-	 * reverse the given ClassFilter match.
-	 * @param cf the ClassFilter
-	 * @return a distinct ClassFilter that not matches classes
-	 * of the given ClassFilter match
+	 * Return a class filter that represents the logical negation of the specified
+	 * filter instance.
+	 * @param classFilter the {@link ClassFilter} to negate
+	 * @return a filter that represents the logical negation of the specified filter
+	 * @since 6.1
 	 */
-	public static ClassFilter reversion(ClassFilter cf) {
-		Assert.notNull(cf, "ClassFilter must not be null");
-		return new ReversionClassFilter(cf);
+	public static ClassFilter negate(ClassFilter classFilter) {
+		Assert.notNull(classFilter, "ClassFilter must not be null");
+		return new NegateClassFilter(classFilter);
 	}
 
 
@@ -180,38 +182,38 @@ public abstract class ClassFilters {
 
 
 	/**
-	 * ClassFilter implementation for an reversion of the given ClassFilter.
+	 * ClassFilter implementation for a logical negation of the given ClassFilter.
 	 */
 	@SuppressWarnings("serial")
-	private static class ReversionClassFilter implements ClassFilter, Serializable {
+	private static class NegateClassFilter implements ClassFilter, Serializable {
 
-		private final ClassFilter filter;
+		private final ClassFilter original;
 
-		ReversionClassFilter(ClassFilter filter) {
-			this.filter = filter;
+		NegateClassFilter(ClassFilter original) {
+			this.original = original;
 		}
 
 		@Override
 		public boolean matches(Class<?> clazz) {
-			return !this.filter.matches(clazz);
+			return !this.original.matches(clazz);
 		}
 
 		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof ReversionClassFilter &&
-					this.filter.equals(((ReversionClassFilter)other).filter)));
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof NegateClassFilter that
+					&& this.original.equals(that.original)));
 		}
 
 		@Override
 		public int hashCode() {
-			return 37 * this.filter.hashCode();
+			return Objects.hash(getClass(), this.original);
 		}
 
 		@Override
 		public String toString() {
-			return getClass().getName() + ": " + this.filter;
+			return "Negate " + this.original;
 		}
 
 	}
-	
+
 }

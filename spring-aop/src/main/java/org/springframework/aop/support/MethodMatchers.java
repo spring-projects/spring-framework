@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
@@ -82,13 +83,15 @@ public abstract class MethodMatchers {
 	}
 
 	/**
-	 * reverse the given MethodMatcher match.
-	 * @param mm the MethodMatcher
-	 * @return a distinct MethodMatcher that not matches methods
-	 * of the given MethodMatcher match
+	 * Return a method matcher that represents the logical negation of the specified
+	 * matcher instance.
+	 * @param methodMatcher the {@link MethodMatcher} to negate
+	 * @return a matcher that represents the logical negation of the specified matcher
+	 * @since 6.1
 	 */
-	public static MethodMatcher reversion(MethodMatcher mm) {
-		return  new ReversionMethodMatcher(mm);
+	public static MethodMatcher negate(MethodMatcher methodMatcher) {
+		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
+		return new NegateMethodMatcher(methodMatcher);
 	}
 
 	/**
@@ -349,56 +352,46 @@ public abstract class MethodMatchers {
 	}
 
 
-	/**
-	 * MethodMatcher implementation for an reversion of the given MethodMatcher.
-	 */
 	@SuppressWarnings("serial")
-	private static class ReversionMethodMatcher implements MethodMatcher, Serializable {
+	private static class NegateMethodMatcher implements MethodMatcher, Serializable {
 
-		protected final MethodMatcher mm;
+		private final MethodMatcher original;
 
-		public ReversionMethodMatcher(MethodMatcher mm) {
-			Assert.notNull(mm, "MethodMatcher must not be null");
-			this.mm = mm;
+		NegateMethodMatcher(MethodMatcher original) {
+			this.original = original;
 		}
 
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
-			return !this.mm.matches(method, targetClass);
+			return !this.original.matches(method, targetClass);
 		}
 
 		@Override
 		public boolean isRuntime() {
-			return this.mm.isRuntime();
+			return this.original.isRuntime();
 		}
 
 		@Override
 		public boolean matches(Method method, Class<?> targetClass, Object... args) {
-			return !this.mm.matches(method, targetClass, args);
+			return !this.original.matches(method, targetClass, args);
 		}
 
 		@Override
-		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ReversionMethodMatcher)) {
-				return false;
-			}
-			ReversionMethodMatcher that = (ReversionMethodMatcher) other;
-			return this.mm.equals(that.mm);
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof NegateMethodMatcher that
+					&& this.original.equals(that.original)));
 		}
 
 		@Override
 		public int hashCode() {
-			return 37 * this.mm.hashCode();
+			return Objects.hash(getClass(), this.original);
 		}
 
 		@Override
 		public String toString() {
-			return getClass().getName() + ": " + this.mm;
+			return "Negate " + this.original;
 		}
-		
+
 	}
 
 }
