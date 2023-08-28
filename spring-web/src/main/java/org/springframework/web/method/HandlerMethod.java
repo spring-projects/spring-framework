@@ -215,6 +215,9 @@ public class HandlerMethod extends AnnotatedMethod {
 
 			this.responseStatus = annotation.code();
 			this.responseStatusReason = resolvedReason;
+			if (StringUtils.hasText(this.responseStatusReason) && getMethod().getReturnType() != void.class) {
+				logger.warn("Return value of method [" + getMethod() + "] will be ignored since reason of @ResponseStatus present, please consider changing the return type to void");
+			}
 		}
 	}
 

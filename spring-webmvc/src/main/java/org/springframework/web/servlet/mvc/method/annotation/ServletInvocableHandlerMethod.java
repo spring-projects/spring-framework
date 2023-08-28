@@ -126,6 +126,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			}
 		}
 		else if (StringUtils.hasText(getResponseStatusReason())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Return value [" + returnValue + "] of method [" + getMethod() + "] is ignored since reason of @ResponseStatus will be used for response");
+			}
 			mavContainer.setRequestHandled(true);
 			return;
 		}
