@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -77,6 +80,18 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
 
+	/**
+	 * Set used to track which stereotype annotations have already been checked
+	 * to see if they use a convention-based override for the {@code value}
+	 * attribute in {@code @Component}.
+	 * @since 6.1
+	 * @see #determineBeanNameFromAnnotation(AnnotatedBeanDefinition)
+	 */
+	private static final Set<String> conventionBasedStereotypeCheckCache = ConcurrentHashMap.newKeySet();
+
+
+	private final Log logger = LogFactory.getLog(AnnotationBeanNameGenerator.class);
+
 	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
 
 
@@ -117,6 +132,15 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
 					Object value = attributes.get("value");
 					if (value instanceof String currentName && !currentName.isBlank()) {
+						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
+								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
+							logger.warn("""
+									Support for convention-based stereotype names is deprecated and will \
+									be removed in a future version of the framework. Please annotate the \
+									'value' attribute in @%s with @AliasFor(annotation=Component.class) \
+									to declare an explicit alias for @Component's 'value' attribute."""
+										.formatted(annotationType));
+						}
 						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
 									"component names: '" + beanName + "' versus '" + currentName + "'");

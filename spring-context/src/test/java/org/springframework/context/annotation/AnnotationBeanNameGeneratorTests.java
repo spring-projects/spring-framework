@@ -210,12 +210,16 @@ class AnnotationBeanNameGeneratorTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Component
 	@interface ConventionBasedComponent1 {
+		// This intentionally convention-based. Please do not add @AliasFor.
+		// See gh-31093.
 		String value() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Component
 	@interface ConventionBasedComponent2 {
+		// This intentionally convention-based. Please do not add @AliasFor.
+		// See gh-31093.
 		String value() default "";
 	}
 
@@ -256,7 +260,8 @@ class AnnotationBeanNameGeneratorTests {
 	@Target(ElementType.TYPE)
 	@Controller
 	@interface TestRestController {
-
+		// This intentionally convention-based. Please do not add @AliasFor.
+		// See gh-31093.
 		String value() default "";
 	}
 
