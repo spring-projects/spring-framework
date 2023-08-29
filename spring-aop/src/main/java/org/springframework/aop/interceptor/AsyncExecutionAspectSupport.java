@@ -291,7 +291,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			return executor.submit(task);
 		}
 		else if (void.class == returnType) {
-			executor.submit(task);
+			executor.execute(task);
 			return null;
 		}
 		else {
