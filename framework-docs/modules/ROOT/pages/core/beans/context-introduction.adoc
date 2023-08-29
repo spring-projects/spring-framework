@@ -478,20 +478,21 @@ Kotlin::
 ----
 ======
 
-Notice that `ApplicationListener` is generically parameterized with the type of your
-custom event (`BlockedListEvent` in the preceding example). This means that the
-`onApplicationEvent()` method can remain type-safe, avoiding any need for downcasting.
-You can register as many event listeners as you wish, but note that, by default, event
-listeners receive events synchronously. This means that the `publishEvent()` method
-blocks until all listeners have finished processing the event. One advantage of this
-synchronous and single-threaded approach is that, when a listener receives an event,
-it operates inside the transaction context of the publisher if a transaction context
-is available. If another strategy for event publication becomes necessary, e.g.
-asynchronous event processing by default, see the javadoc for Spring's
-{api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
-and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`]
-implementation for configuration options which can be applied to a custom
-"applicationEventMulticaster" bean definition.
+Notice that `ApplicationListener` is generically parameterized with the type of your custom event (`BlockedListEvent` in the preceding example).
+This means that the `onApplicationEvent()` method can remain type-safe, avoiding any need for downcasting.
+You can register as many event listeners as you wish, but note that, by default, event listeners receive events synchronously.
+This means that the `publishEvent()` method blocks until all listeners have finished processing the event.
+One advantage of this synchronous and single-threaded approach is that, when a listener receives an event,
+it operates inside the transaction context of the publisher if a transaction context is available.
+If another strategy for event publication becomes necessary, e.g. asynchronous event processing by default,
+see the javadoc for Spring's {api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
+and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`] implementation
+for configuration options which can be applied to a custom "applicationEventMulticaster" bean definition.
+In these cases, ThreadLocals and logging context are not propagated for the event processing.
+See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
+for more information on Observability concerns.
+
+
 
 The following example shows the bean definitions used to register and configure each of
 the classes above:
@@ -747,6 +748,9 @@ Be aware of the following limitations when using asynchronous events:
   value. If you need to publish another event as the result of the processing, inject an
   {api-spring-framework}/context/ApplicationEventPublisher.html[`ApplicationEventPublisher`]
   to publish the event manually.
+* ThreadLocals and logging context are not propagated by default for the event processing.
+  See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
+  for more information on Observability concerns.
 
 
 [[context-functionality-events-order]]
