@@ -19,7 +19,7 @@ package org.springframework.messaging.rsocket
 import io.rsocket.transport.ClientTransport
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference

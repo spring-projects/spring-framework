@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.http.codec.multipart.Part
 import org.springframework.util.MultiValueMap

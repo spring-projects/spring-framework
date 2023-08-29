@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function.server
 
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 
 /**
  * Coroutines variant of [RenderingResponse.Builder.build].

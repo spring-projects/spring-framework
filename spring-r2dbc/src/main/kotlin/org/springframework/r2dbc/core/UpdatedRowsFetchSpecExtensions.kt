@@ -16,7 +16,7 @@
 
 package org.springframework.r2dbc.core
 
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 
 /**
  * Coroutines variant of [UpdatedRowsFetchSpec.rowsUpdated].
