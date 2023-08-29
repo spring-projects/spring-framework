@@ -16,6 +16,8 @@
 
 package org.springframework.http;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
 import org.springframework.lang.Nullable;
@@ -36,55 +38,63 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	/**
 	 * The HTTP method {@code GET}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.3">HTTP 1.1, section 9.3</a>
 	 */
 	public static final HttpMethod GET = new HttpMethod("GET");
 
 	/**
 	 * The HTTP method {@code HEAD}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4">HTTP 1.1, section 9.4</a>
 	 */
 	public static final HttpMethod HEAD = new HttpMethod("HEAD");
 
 	/**
 	 * The HTTP method {@code POST}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.5">HTTP 1.1, section 9.5</a>
 	 */
 	public static final HttpMethod POST = new HttpMethod("POST");
 
 	/**
 	 * The HTTP method {@code PUT}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.6">HTTP 1.1, section 9.6</a>
 	 */
 	public static final HttpMethod PUT = new HttpMethod("PUT");
 
 	/**
 	 * The HTTP method {@code PATCH}.
+	 *
 	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc5789#section-2">RFC 5789</a>
 	 */
 	public static final HttpMethod PATCH = new HttpMethod("PATCH");
 
 	/**
 	 * The HTTP method {@code DELETE}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7">HTTP 1.1, section 9.7</a>
 	 */
 	public static final HttpMethod DELETE = new HttpMethod("DELETE");
 
 	/**
 	 * The HTTP method {@code OPTIONS}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.2">HTTP 1.1, section 9.2</a>
 	 */
 	public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS");
 
 	/**
 	 * The HTTP method {@code TRACE}.
+	 *
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.8">HTTP 1.1, section 9.8</a>
 	 */
 	public static final HttpMethod TRACE = new HttpMethod("TRACE");
 
-	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE };
+	private static final HttpMethod[] values = new HttpMethod[]{GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE};
 
-
+	@JsonValue
 	private final String name;
 
 
@@ -109,6 +119,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	/**
 	 * Return an {@code HttpMethod} object for the given value.
+	 *
 	 * @param method the method value as a String
 	 * @return the corresponding {@code HttpMethod}
 	 */
@@ -137,6 +148,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	/**
 	 * Determine whether this {@code HttpMethod} matches the given method value.
+	 *
 	 * @param method the HTTP method as a String
 	 * @return {@code true} if it matches, {@code false} otherwise
 	 * @since 4.2.4
