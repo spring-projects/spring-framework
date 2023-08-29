@@ -399,16 +399,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		}
 
-		// attempt to reset the response, as maybe a partial successful response is being written.
-		if (!response.isCommitted()) {
-			response.reset();
-		}
-
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-
 		ArrayList<Throwable> exceptions = new ArrayList<>();
 		try {
+			response.reset();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
