@@ -21,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.withContext
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatusCode
@@ -71,6 +72,8 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	@PublishedApi
 	internal val builder = RouterFunctions.route()
+
+	private var contextProvider: (suspend (ServerRequest) -> CoroutineContext)? = null
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -510,9 +513,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun resources(lookupFunction: suspend (ServerRequest) -> Resource?) {
 		builder.resources {
-			mono(Dispatchers.Unconfined) {
-				lookupFunction.invoke(it)
-			}
+			asMono(it, handler = lookupFunction)
 		}
 	}
 
@@ -534,7 +535,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun filter(filterFunction: suspend (ServerRequest, suspend (ServerRequest) -> ServerResponse) -> ServerResponse) {
 		builder.filter { serverRequest, handlerFunction ->
-			mono(Dispatchers.Unconfined) {
+			asMono(serverRequest) {
 				filterFunction(serverRequest) { handlerRequest ->
 					if (handlerFunction is CoroutineContextAwareHandlerFunction<*>) {
 						handlerFunction.handle(currentCoroutineContext().minusKey(Job.Key), handlerRequest).awaitSingle()
@@ -578,7 +579,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun onError(predicate: (Throwable) -> Boolean, responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
 		builder.onError(predicate) { throwable, request ->
-			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
+			asMono(request) { responseProvider.invoke(throwable, request) }
 		}
 	}
 
@@ -591,7 +592,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	inline fun <reified E : Throwable> onError(noinline responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
 		builder.onError({it is E}) { throwable, request ->
-			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
+			asMono(request) { responseProvider.invoke(throwable, request) }
 		}
 	}
 
@@ -620,6 +621,19 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	}
 
 	/**
+	 * Allow to provide the default [CoroutineContext], potentially dynamically based on
+	 * the incoming [ServerRequest].
+	 * @param provider the [CoroutineContext] provider
+	 * @since 6.1.0
+	 */
+	fun context(provider: suspend (ServerRequest) -> CoroutineContext) {
+		if (this.contextProvider != null) {
+			throw IllegalStateException("The Coroutine context provider should be defined not more than once")
+		}
+		this.contextProvider = provider
+	}
+
+	/**
 	 * Return a composed routing function created from all the registered routes.
 	 */
 	internal fun build(): RouterFunction<ServerResponse> {
@@ -627,8 +641,22 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 		return builder.build()
 	}
 
-	private fun <T : ServerResponse> asHandlerFunction(handler: suspend (ServerRequest) -> T) =
-		CoroutineContextAwareHandlerFunction(handler)
+	@PublishedApi
+	internal fun <T> asMono(request: ServerRequest, context: CoroutineContext = Dispatchers.Unconfined, handler: suspend (ServerRequest) -> T): Mono<T> {
+		return mono(context) {
+			contextProvider?.let {
+				withContext(it.invoke(request)) {
+					handler.invoke(request)
+				}
+			} ?: run {
+				handler.invoke(request)
+			}
+		}
+	}
+
+	private fun asHandlerFunction(handler: suspend (ServerRequest) -> ServerResponse) = CoroutineContextAwareHandlerFunction { request ->
+		handler.invoke(request)
+	}
 
 	/**
 	 * @see ServerResponse.from
@@ -698,7 +726,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	fun status(status: Int) = ServerResponse.status(status)
 
 
-	private class CoroutineContextAwareHandlerFunction<T : ServerResponse>(
+	private inner class CoroutineContextAwareHandlerFunction<T : ServerResponse>(
 		private val handler: suspend (ServerRequest) -> T
 	) : HandlerFunction<T> {
 
@@ -706,7 +734,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 			return handle(Dispatchers.Unconfined, request)
 		}
 
-		fun handle(context: CoroutineContext, request: ServerRequest) = mono(context) {
+		fun handle(context: CoroutineContext, request: ServerRequest) = asMono(request, context) {
 			handler(request)
 		}
 

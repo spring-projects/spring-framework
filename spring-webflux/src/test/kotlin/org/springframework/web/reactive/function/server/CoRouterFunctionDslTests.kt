@@ -16,11 +16,8 @@
 
 package org.springframework.web.reactive.function.server
 
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.withContext
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import kotlinx.coroutines.*
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.ACCEPT
@@ -180,6 +177,48 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
+	fun contextProvider() {
+		val mockRequest = get("https://example.com/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(routerWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun contextProviderAndFilter() {
+		val mockRequest = get("https://example.com/")
+			.header("Custom-Header", "bar")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(routerWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.let {
+					it.contains("bar") && it.contains("Dispatchers.Default")
+				}
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun multipleContextProviders() {
+		assertThatIllegalStateException().isThrownBy {
+			coRouter {
+				context {
+					CoroutineName("foo")
+				}
+				context {
+					Dispatchers.Default
+				}
+			}
+		}
+	}
+
+	@Test
 	fun attributes() {
 		val visitor = AttributesTestVisitor()
 		attributesRouter.accept(visitor)
@@ -248,6 +287,25 @@ class CoRouterFunctionDslTests {
 		}
 		GET("/") {
 			ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+		}
+	}
+
+	private val routerWithContextProvider = coRouter {
+		context {
+			CoroutineName(it.headers().firstHeader("Custom-Header")!!)
+		}
+		GET("/") {
+			ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+		}
+		filter { request, next ->
+			if (request.headers().firstHeader("Custom-Header") == "bar") {
+				withContext(currentCoroutineContext() + Dispatchers.Default) {
+					next.invoke(request)
+				}
+			}
+			else {
+				next.invoke(request)
+			}
 		}
 	}
 
