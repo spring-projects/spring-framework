@@ -13,18 +13,7 @@ repositories {
 	}
 }
 
-configurations {
-	dependencyManagement {
-		canBeConsumed = false
-		canBeResolved = false
-		visible = false
-	}
-	matching { it.name.endsWith("Classpath") }.all { it.extendsFrom(dependencyManagement) }
-}
-
-
 dependencies {
-	dependencyManagement(enforcedPlatform(dependencies.project(path: ":framework-platform")))
 	rootProject.subprojects.findAll { it.name.startsWith("spring-") }.each { moduleProject ->
 		javadoc moduleProject
 	}
