@@ -337,6 +337,11 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		return Mono.defer(() -> {
 			ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
 
+			if (txObject.hasSavepoint()) {
+				// Just release the savepoint
+				return Mono.defer(txObject::releaseSavepoint);
+			}
+
 			// Remove the connection holder from the context, if exposed.
 			if (txObject.isNewConnectionHolder()) {
 				synchronizationManager.unbindResource(obtainConnectionFactory());
@@ -511,17 +516,25 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			return (this.connectionHolder != null && this.connectionHolder.isTransactionActive());
 		}
 
+		public boolean hasSavepoint() {
+			return this.savepointName != null;
+		}
+
 		public Mono<Void> createSavepoint() {
 			ConnectionHolder holder = getConnectionHolder();
 			this.savepointName = holder.nextSavepoint();
 			return Mono.from(holder.getConnection().createSavepoint(this.savepointName));
 		}
 
+		public Mono<Void> releaseSavepoint() {
+			String currentSavepointName = this.savepointName;
+			this.savepointName = null;
+			return Mono.from(getConnectionHolder().getConnection().releaseSavepoint(currentSavepointName));
+		}
+
 		public Mono<Void> commit() {
 			Connection connection = getConnectionHolder().getConnection();
-			return (this.savepointName != null ?
-					Mono.from(connection.releaseSavepoint(this.savepointName)) :
-					Mono.from(connection.commitTransaction()));
+			return (this.savepointName != null ? Mono.empty() : Mono.from(connection.commitTransaction()));
 		}
 
 		public Mono<Void> rollback() {
