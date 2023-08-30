@@ -163,7 +163,7 @@ public class WebClientAdapterTests {
 	}
 
 	private Service initService(WebClient webClient) {
-		WebClientAdapter adapter = WebClientAdapter.forClient(webClient);
+		WebClientAdapter adapter = WebClientAdapter.create(webClient);
 		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
 	}
 
