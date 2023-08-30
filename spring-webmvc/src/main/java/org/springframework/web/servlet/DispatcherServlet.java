@@ -1338,6 +1338,13 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Success and error responses may use different content types
 		request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		// Reset the response if the response is not committed already
+		try {
+			response.reset();
+		}
+		catch (IllegalStateException illegalStateException) {
+			// the response is already committed, leave it to exception handlers anyway
+		}
 
 		// Check registered HandlerExceptionResolvers...
 		ModelAndView exMv = null;

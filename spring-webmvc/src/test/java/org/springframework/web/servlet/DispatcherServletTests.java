@@ -70,12 +70,15 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link DispatcherServlet}.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -887,6 +890,39 @@ public class DispatcherServletTests {
 		assertThat(response.getContentAsString()).isEqualTo("body");
 	}
 
+	@Test
+	public void shouldResetResponseIfNotCommitted() throws Exception {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.setServletContext(getServletContext());
+		context.registerSingleton("/error", ErrorController.class);
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/error");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertThatThrownBy(() -> servlet.service(request, response)).isInstanceOf(ServletException.class)
+				.hasCauseInstanceOf(IllegalArgumentException.class);
+		assertThat(response.getContentAsByteArray()).isEmpty();
+		assertThat(response.getStatus()).isEqualTo(200);
+	}
+
+	@Test
+	public void shouldAttemptToResetResponseIfCommitted() throws Exception {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.setServletContext(getServletContext());
+		context.registerSingleton("/error", ErrorController.class);
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/error");
+		request.setAttribute("commit", true);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertThatThrownBy(() -> servlet.service(request, response)).isInstanceOf(ServletException.class)
+				.hasCauseInstanceOf(IllegalArgumentException.class);
+		assertThat(response.getContentAsByteArray()).isNotEmpty();
+		assertThat(response.getStatus()).isEqualTo(400);
+	}
+
 
 	public static class ControllerFromParent implements Controller {
 
@@ -931,6 +967,18 @@ public class DispatcherServletTests {
 			mapping.setPatternParser(new PathPatternParser());
 			mapping.setUrlMap(urlMap);
 			return mapping;
+		}
+	}
+
+	private static class ErrorController implements Controller {
+		@Override
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			response.setStatus(400);
+			if (request.getAttribute("commit") != null) {
+				response.flushBuffer();
+			}
+			response.getWriter().write("error");
+			throw new IllegalArgumentException("test error");
 		}
 	}
 

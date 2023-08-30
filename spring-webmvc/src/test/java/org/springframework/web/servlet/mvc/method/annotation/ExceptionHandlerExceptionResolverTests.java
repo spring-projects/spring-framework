@@ -385,38 +385,6 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertExceptionHandledAsBody(mav, "DefaultTestExceptionResolver: IllegalStateException");
 	}
 
-	@Test // gh-30702
-	void attemptToResetResponseBeforeResolveException() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
-		this.resolver.setMappedHandlerClasses(HttpRequestHandler.class);
-		this.resolver.setApplicationContext(ctx);
-		this.resolver.afterPropertiesSet();
-
-		IllegalStateException ex = new IllegalStateException();
-		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		this.response.getWriter().print("test");
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handler, ex);
-
-		assertExceptionHandledAsBody(mav, "DefaultTestExceptionResolver: IllegalStateException");
-	}
-
-	@Test // gh-30702
-	void attemptToResetResponseBeforeResolveExceptionFails() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
-		this.resolver.setMappedHandlerClasses(HttpRequestHandler.class);
-		this.resolver.setApplicationContext(ctx);
-		this.resolver.afterPropertiesSet();
-
-		IllegalStateException ex = new IllegalStateException();
-		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		this.response.getWriter().print("test");
-		this.response.setCommitted(true);
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handler, ex);
-
-		assertThat(mav).as("Exception was handled").isNull();
-		assertThat(this.response.getContentAsString()).isEqualTo("test");
-	}
-
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertThat(this.resolver.getArgumentResolvers().getResolvers()).hasSize(resolverCount);

@@ -401,9 +401,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+
 		ArrayList<Throwable> exceptions = new ArrayList<>();
 		try {
-			response.reset();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
