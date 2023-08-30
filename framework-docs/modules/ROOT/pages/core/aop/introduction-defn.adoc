@@ -31,7 +31,7 @@ However, it would be even more confusing if Spring used its own terminology.
   the "advised object". Since Spring AOP is implemented by using runtime proxies, this
   object is always a proxied object.
 * AOP proxy: An object created by the AOP framework in order to implement the aspect
-  contracts (advise method executions and so on). In the Spring Framework, an AOP proxy
+  contracts (advice method executions and so on). In the Spring Framework, an AOP proxy
   is a JDK dynamic proxy or a CGLIB proxy.
 * Weaving: linking aspects with other application types or objects to create an
   advised object. This can be done at compile time (using the AspectJ compiler, for
