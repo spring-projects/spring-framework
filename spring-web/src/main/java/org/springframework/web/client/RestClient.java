@@ -50,7 +50,7 @@ import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Client to perform HTTP requests, exposing a fluent, synchronous API over
- * underlying HTTP client libraries such the JDK {@code HttpClient}, Apache
+ * underlying HTTP client libraries such as the JDK {@code HttpClient}, Apache
  * HttpComponents, and others.
  *
  * <p>Use static factory methods {@link #create()}, {@link #create(String)},
