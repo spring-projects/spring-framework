@@ -45,7 +45,7 @@ class PreComputeFieldFeature implements Feature {
 			Pattern.compile(Pattern.quote("org.springframework.aot.AotDetector#inNativeImage")),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*Present"),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*PRESENT"),
-			Pattern.compile(Pattern.quote("reactor.") + ".*#.*Available"),
+			Pattern.compile(Pattern.quote("reactor.core.") + ".*#.*Available"),
 			Pattern.compile(Pattern.quote("org.apache.commons.logging.LogAdapter") + "#.*Present")
 	};
 
