@@ -84,6 +84,7 @@
 
 	<!-- spring-orm -->
 	<suppress files="jpa[\\/]vendor[\\/]Database" checks="JavadocVariable|JavadocStyle"/>
+	<suppress files="Target_BytecodeProviderInitiator" checks="HideUtilityClassConstructorCheck"/>
 
 	<!-- spring-tx -->
 	<suppress files="TransactionSystemException" checks="MutableException"/>
