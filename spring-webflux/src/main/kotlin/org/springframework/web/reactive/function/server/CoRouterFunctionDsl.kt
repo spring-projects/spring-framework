@@ -624,7 +624,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 * Allow to provide the default [CoroutineContext], potentially dynamically based on
 	 * the incoming [ServerRequest].
 	 * @param provider the [CoroutineContext] provider
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	fun context(provider: suspend (ServerRequest) -> CoroutineContext) {
 		if (this.contextProvider != null) {

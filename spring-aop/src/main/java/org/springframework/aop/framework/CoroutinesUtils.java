@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
  * Package-visible class designed to avoid a hard dependency on Kotlin and Coroutines dependency at runtime.
  *
  * @author Sebastien Deleuze
- * @since 6.1.0
+ * @since 6.1
  */
 abstract class CoroutinesUtils {
 
