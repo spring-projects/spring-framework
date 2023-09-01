@@ -745,7 +745,7 @@ reliance on it.
 The WebFlux Java config allows you to customize blocking execution in WebFlux.
 
 You can have blocking controller methods called on a separate thread by providing
-an `Executor` such as the
+an `AsyncTaskExecutor` such as the
 {api-spring-framework}/core/task/VirtualThreadTaskExecutor.html[`VirtualThreadTaskExecutor`]
 as follows:
 
@@ -761,7 +761,7 @@ Java::
 
 		@Override
 		public void configureBlockingExecution(BlockingExecutionConfigurer configurer) {
-			Executor executor = ...
+			AsyncTaskExecutor executor = ...
 			configurer.setExecutor(executor);
 		}
 	}
