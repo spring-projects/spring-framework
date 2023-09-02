@@ -344,8 +344,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	@Nullable
 	private Resource resolvePropertySourceLocation(String location) {
 		try {
-			String resolvedLocation = (this.environment != null
-					? this.environment.resolveRequiredPlaceholders(location) : location);
+			String resolvedLocation = (this.environment != null ?
+					this.environment.resolveRequiredPlaceholders(location) : location);
 			return this.resourceLoader.getResource(resolvedLocation);
 		}
 		catch (Exception ex) {
@@ -598,15 +598,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 			Map<String, String> mappings = buildImportAwareMappings();
 			if (!mappings.isEmpty()) {
-				GeneratedMethod generatedMethod = beanFactoryInitializationCode
-						.getMethods()
-						.add("addImportAwareBeanPostProcessors", method ->
-								generateAddPostProcessorMethod(method, mappings));
-				beanFactoryInitializationCode
-						.addInitializer(generatedMethod.toMethodReference());
+				GeneratedMethod generatedMethod = beanFactoryInitializationCode.getMethods().add(
+						"addImportAwareBeanPostProcessors", method -> generateAddPostProcessorMethod(method, mappings));
+				beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
 				ResourceHints hints = generationContext.getRuntimeHints().resources();
-				mappings.forEach(
-						(target, from) -> hints.registerType(TypeReference.of(from)));
+				mappings.forEach((target, from) -> hints.registerType(TypeReference.of(from)));
 			}
 		}
 
@@ -635,8 +631,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		private Map<String, String> buildImportAwareMappings() {
-			ImportRegistry importRegistry = this.beanFactory
-					.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
+			ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
 			Map<String, String> mappings = new LinkedHashMap<>();
 			for (String name : this.beanFactory.getBeanDefinitionNames()) {
 				Class<?> beanType = this.beanFactory.getType(name);
@@ -671,11 +666,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
 			registerRuntimeHints(generationContext.getRuntimeHints());
-			GeneratedMethod generatedMethod = beanFactoryInitializationCode
-					.getMethods()
+			GeneratedMethod generatedMethod = beanFactoryInitializationCode.getMethods()
 					.add("processPropertySources", this::generateAddPropertySourceProcessorMethod);
-			beanFactoryInitializationCode
-					.addInitializer(generatedMethod.toMethodReference());
+			beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
 		}
 
 		private void registerRuntimeHints(RuntimeHints hints) {
@@ -686,8 +679,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				}
 				for (String location : descriptor.locations()) {
 					Resource resource = this.resourceResolver.apply(location);
-					if (resource != null && resource.exists() && resource instanceof ClassPathResource classpathResource) {
-						hints.resources().registerPattern(classpathResource.getPath());
+					if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
+						hints.resources().registerPattern(classPathResource.getPath());
 					}
 				}
 			}
@@ -723,8 +716,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			code.add("new $T(", PropertySourceDescriptor.class);
 			CodeBlock values = descriptor.locations().stream()
 					.map(value -> CodeBlock.of("$S", value)).collect(CodeBlock.joining(", "));
-			if (descriptor.name() == null && descriptor.propertySourceFactory() == null
-					&& descriptor.encoding() == null && !descriptor.ignoreResourceNotFound()) {
+			if (descriptor.name() == null && descriptor.propertySourceFactory() == null &&
+					descriptor.encoding() == null && !descriptor.ignoreResourceNotFound()) {
 				code.add("$L)", values);
 			}
 			else {
