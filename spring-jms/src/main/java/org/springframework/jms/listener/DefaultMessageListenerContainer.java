@@ -98,12 +98,14 @@ import org.springframework.util.backoff.FixedBackOff;
  * number of 1 consumer, otherwise you'd receive the same message multiple times on
  * the same node.
  *
- * <p><b>Note: Don't use Spring's {@link org.springframework.jms.connection.CachingConnectionFactory}
- * in combination with dynamic scaling.</b> Ideally, don't use it with a message
- * listener container at all, since it is generally preferable to let the
- * listener container itself handle appropriate caching within its lifecycle.
- * Also, stopping and restarting a listener container will only work with an
- * independent, locally cached Connection - not with an externally cached one.
+ * <p><b>Note: You may use {@link org.springframework.jms.connection.CachingConnectionFactory}
+ * with a listener container but it comes with limitations.</b> It is generally preferable
+ * to let the listener container itself handle appropriate caching within its lifecycle.
+ * Also, stopping and restarting a listener container will only work with an independent,
+ * locally cached {@code Connection}, not with an externally cached one. Last but not least,
+ * with {@code CachingConnectionFactory}, dynamic scaling with custom provider hints such as
+ * {@link #setMaxMessagesPerTask "maxMessagesPerTask"} can result in JMS messages delivered
+ * to cached consumers even when they are no longer attached to the listener container.
  *
  * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
  * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
