@@ -552,12 +552,11 @@ public abstract class ClassUtils {
 	 * Delegate for {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
 	 * Also used by {@link ObjectUtils#nullSafeConciseToString}.
 	 * <p>Check if the given type represents a common "simple" value type:
-	 * a primitive or primitive wrapper, an {@link Enum}, a {@link String}
-	 * or other {@link CharSequence}, a {@link Number}, a {@link Date},
-	 * a {@link Temporal}, a {@link ZoneId} a {@link TimeZone}, a {@link File},
-	 * a {@link Path}, a {@link URI}, a {@link URL}, an {@link InetAddress},
-	 * a {@link Charset}, a {@link Currency}, a {@link Locale}, a {@link UUID},
-	 * a {@link Pattern}, or a {@link Class}.
+	 * primitive or primitive wrapper, {@link Enum}, {@link String} or other
+	 * {@link CharSequence}, {@link Number}, {@link Date}, {@link Temporal},
+	 * {@link ZoneId}, {@link TimeZone}, {@link File}, {@link Path}, {@link URI},
+	 * {@link URL}, {@link InetAddress}, {@link Charset}, {@link Currency},
+	 * {@link Locale}, {@link UUID}, {@link Pattern}, or {@link Class}.
 	 * <p>{@code Void} and {@code void} are not considered simple value types.
 	 * @param type the type to check
 	 * @return whether the given type represents a "simple" value type,
