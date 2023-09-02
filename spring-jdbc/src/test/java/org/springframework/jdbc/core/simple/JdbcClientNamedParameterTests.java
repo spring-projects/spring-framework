@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,6 +65,11 @@ public class JdbcClientNamedParameterTests {
 	private static final String UPDATE_NAMED_PARAMETERS_PARSED =
 			"update seat_status set booking_id = null where performance_id = ? and price_band_id = ?";
 
+	private static final String INSERT_GENERATE_KEYS =
+			"insert into show (name) values(:name)";
+	private static final String INSERT_GENERATE_KEYS_PARSED =
+			"insert into show (name) values(?)";
+
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 
 
@@ -72,6 +80,8 @@ public class JdbcClientNamedParameterTests {
 	private PreparedStatement preparedStatement = mock();
 
 	private ResultSet resultSet = mock();
+
+	private ResultSetMetaData resultSetMetaData = mock();
 
 	private DatabaseMetaData databaseMetaData = mock();
 
@@ -331,6 +341,30 @@ public class JdbcClientNamedParameterTests {
 		verify(connection).prepareStatement(UPDATE_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setObject(2, 1, Types.INTEGER);
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testUpdateAndGeneratedKeys() throws SQLException {
+		given(resultSetMetaData.getColumnCount()).willReturn(1);
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getObject(1)).willReturn(11);
+		given(preparedStatement.executeUpdate()).willReturn(1);
+		given(preparedStatement.getGeneratedKeys()).willReturn(resultSet);
+		given(connection.prepareStatement(INSERT_GENERATE_KEYS_PARSED, PreparedStatement.RETURN_GENERATED_KEYS))
+				.willReturn(preparedStatement);
+
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int rowsAffected = client.sql(INSERT_GENERATE_KEYS).param("name", "rod").update(generatedKeyHolder);
+
+		assertThat(rowsAffected).isEqualTo(1);
+		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
+		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
+		verify(preparedStatement).setString(1, "rod");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
