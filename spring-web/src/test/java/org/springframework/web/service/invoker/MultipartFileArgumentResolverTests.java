@@ -49,26 +49,23 @@ class MultipartFileArgumentResolverTests {
 
 	@Test
 	void multipartFile() {
-		String fileName = "testFileName";
-		String originalFileName = "originalTestFileName";
-		MultipartFile testFile = new MockMultipartFile(fileName, originalFileName, "text/plain", "test".getBytes());
-
+		MultipartFile testFile = mockMultipartFile();
 		this.multipartService.postMultipartFile(testFile);
-		Object value = this.client.getRequestValues().getBodyValue();
+		testMultipartFile(testFile, "file");
+	}
 
-		assertThat(value).isInstanceOf(MultiValueMap.class);
-		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
-		assertThat(map).hasSize(1);
+	@Test
+	void requestPartMultipartFile() {
+		MultipartFile testFile = mockMultipartFile();
+		this.multipartService.postRequestPartMultipartFile(testFile);
+		testMultipartFile(testFile, "myFile");
+	}
 
-		HttpEntity<?> entity = map.getFirst("file");
-		assertThat(entity).isNotNull();
-		assertThat(entity.getBody()).isEqualTo(testFile.getResource());
-
-		HttpHeaders headers = entity.getHeaders();
-		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
-		assertThat(headers.getContentDisposition().getType()).isEqualTo("form-data");
-		assertThat(headers.getContentDisposition().getName()).isEqualTo("file");
-		assertThat(headers.getContentDisposition().getFilename()).isEqualTo(originalFileName);
+	@Test
+	void requestPartOptionalMultipartFile() {
+		MultipartFile testFile = mockMultipartFile();
+		this.multipartService.postRequestPartOptionalMultipartFile(Optional.of(testFile));
+		testMultipartFile(testFile, "file");
 	}
 
 	@Test
@@ -81,12 +78,42 @@ class MultipartFileArgumentResolverTests {
 		assertThat(map).containsOnlyKeys("anotherPart");
 	}
 
+	private MultipartFile mockMultipartFile() {
+		String fileName = "testFileName";
+		String originalFileName = "originalTestFileName";
+		return new MockMultipartFile(fileName, originalFileName, "text/plain", "test".getBytes());
+	}
+
+	private void testMultipartFile(MultipartFile testFile, String partName) {
+		Object value = this.client.getRequestValues().getBodyValue();
+
+		assertThat(value).isInstanceOf(MultiValueMap.class);
+		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
+		assertThat(map).hasSize(1);
+
+		HttpEntity<?> entity = map.getFirst(partName);
+		assertThat(entity).isNotNull();
+		assertThat(entity.getBody()).isEqualTo(testFile.getResource());
+
+		HttpHeaders headers = entity.getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(headers.getContentDisposition().getType()).isEqualTo("form-data");
+		assertThat(headers.getContentDisposition().getName()).isEqualTo(partName);
+		assertThat(headers.getContentDisposition().getFilename()).isEqualTo(testFile.getOriginalFilename());
+	}
+
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface MultipartService {
 
 		@PostExchange
 		void postMultipartFile(MultipartFile file);
+
+		@PostExchange
+		void postRequestPartMultipartFile(@RequestPart(name = "myFile") MultipartFile file);
+
+		@PostExchange
+		void postRequestPartOptionalMultipartFile(@RequestPart Optional<MultipartFile> file);
 
 		@PostExchange
 		void postOptionalMultipartFile(Optional<MultipartFile> file, @RequestPart String anotherPart);

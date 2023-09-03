@@ -23,11 +23,13 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * {@link HttpServiceArgumentResolver} for {@link RequestPart @RequestPart}
@@ -77,8 +79,18 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
-		return (annot == null ? null :
-				new NamedValueInfo(annot.name(), annot.required(), null, "request part", true));
+		boolean isMultiPartFile = parameter.nestedIfOptional().getNestedParameterType().equals(MultipartFile.class);
+
+		if (annot != null && isMultiPartFile) {
+			return new NamedValueInfo(annot.name(), annot.required(), null, "MultipartFile", true);
+		}
+		else if (annot != null) {
+			return new NamedValueInfo(annot.name(), annot.required(), null, "request part", true);
+		}
+		else if (isMultiPartFile) {
+			return new NamedValueInfo("", true, null, "MultipartFile", true);
+		}
+		return null;
 	}
 
 	@Override
@@ -105,6 +117,18 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 				}
 				return;
 			}
+		}
+		if (value instanceof MultipartFile file) {
+			HttpHeaders headers = new HttpHeaders();
+			if (file.getOriginalFilename() != null) {
+				headers.setContentDispositionFormData(name, file.getOriginalFilename());
+			}
+			if (file.getContentType() != null) {
+				headers.add(HttpHeaders.CONTENT_TYPE, file.getContentType());
+			}
+
+			requestValues.addRequestPart(name, new HttpEntity<>(file.getResource(), headers));
+			return;
 		}
 
 		requestValues.addRequestPart(name, value);
