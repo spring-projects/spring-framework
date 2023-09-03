@@ -29,6 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Uses configuration identical to {@link BasicSpringJupiterTests}.
  *
+ * <p>NOTE: if you modify the configuration for this test class, you must also
+ * modify the configuration for {@link BasicSpringJupiterTests} accordingly.
+ *
  * @author Sam Brannen
  * @since 6.0
  */

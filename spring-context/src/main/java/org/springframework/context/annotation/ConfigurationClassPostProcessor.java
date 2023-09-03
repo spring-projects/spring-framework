@@ -674,9 +674,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private void registerRuntimeHints(RuntimeHints hints) {
 			for (PropertySourceDescriptor descriptor : this.descriptors) {
-				Class<?> factory = descriptor.propertySourceFactory();
-				if (factory != null) {
-					hints.reflection().registerType(factory, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				Class<?> factoryClass = descriptor.propertySourceFactory();
+				if (factoryClass != null) {
+					hints.reflection().registerType(factoryClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 				}
 				for (String location : descriptor.locations()) {
 					Resource resource = this.resourceResolver.apply(location);

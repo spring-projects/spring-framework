@@ -34,6 +34,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 /**
+ * Uses configuration identical to {@link BasicSpringJupiterSharedConfigTests}.
+ *
+ * <p>NOTE: if you modify the configuration for this test class, you must also
+ * modify the configuration for {@link BasicSpringJupiterSharedConfigTests}
+ * accordingly.
+ *
  * @author Sam Brannen
  * @since 6.0
  */
