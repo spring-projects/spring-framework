@@ -16,6 +16,8 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
@@ -54,7 +56,7 @@ class RequestPartArgumentResolverTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		HttpEntity<String> part2 = new HttpEntity<>("part 2", headers);
-		this.service.postMultipart("part 1", part2, Mono.just("part 3"));
+		this.service.postMultipart("part 1", part2, Mono.just("part 3"), Optional.of("part 4"));
 
 		Object body = this.client.getRequestValues().getBodyValue();
 		assertThat(body).isInstanceOf(MultiValueMap.class);
@@ -64,6 +66,7 @@ class RequestPartArgumentResolverTests {
 		assertThat(map.getFirst("part1").getBody()).isEqualTo("part 1");
 		assertThat(map.getFirst("part2")).isEqualTo(part2);
 		assertThat(((Mono<?>) map.getFirst("part3").getBody()).block()).isEqualTo("part 3");
+		assertThat(map.getFirst("optionalPart").getBody()).isEqualTo("part 4");
 	}
 
 
@@ -72,7 +75,8 @@ class RequestPartArgumentResolverTests {
 		@PostExchange
 		void postMultipart(
 				@RequestPart String part1, @RequestPart HttpEntity<String> part2,
-				@RequestPart Mono<String> part3);
+				@RequestPart Mono<String> part3,
+				@RequestPart Optional<String> optionalPart);
 
 	}
 
