@@ -76,6 +76,12 @@ class MergedContextConfigurationRuntimeHints {
 		for (PropertySourceDescriptor descriptor : mergedConfig.getPropertySourceDescriptors()) {
 			// @TestPropertySource(locations = ...)
 			registerClasspathResources(descriptor.locations().stream(), runtimeHints, classLoader);
+
+			// @TestPropertySource(factory = ...)
+			Class<?> factoryClass = descriptor.propertySourceFactory();
+			if (factoryClass != null) {
+				registerDeclaredConstructors(factoryClass, runtimeHints);
+			}
 		}
 
 		// @WebAppConfiguration(value = ...)
