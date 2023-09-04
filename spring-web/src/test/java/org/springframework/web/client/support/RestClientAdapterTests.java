@@ -22,15 +22,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import io.micrometer.observation.tck.TestObservationRegistry;
+import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import org.springframework.cglib.core.internal.Function;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 @SuppressWarnings("JUnitMalformedDeclaration")
 class RestClientAdapterTests {
@@ -75,44 +78,49 @@ class RestClientAdapterTests {
 
 	public static Stream<Object[]> arguments() {
 		return Stream.of(
-				args(url -> {
-					RestClient restClient = RestClient.builder().baseUrl(url).build();
+				args((url, observationRegistry) -> {
+					RestClient restClient = RestClient.builder().baseUrl(url).observationRegistry(observationRegistry).build();
 					return RestClientAdapter.create(restClient);
 				}),
-				args(url -> {
+				args((url, observationRegistry) -> {
 					RestTemplate restTemplate = new RestTemplate();
+					restTemplate.setObservationRegistry(observationRegistry);
 					restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(url));
 					return RestTemplateAdapter.create(restTemplate);
 				}));
 	}
 
 	@SuppressWarnings("resource")
-	private static Object[] args(Function<String, HttpExchangeAdapter> adapterFactory) {
+	private static Object[] args(BiFunction<String, TestObservationRegistry, HttpExchangeAdapter> adapterFactory) {
 		MockWebServer server = new MockWebServer();
 
 		MockResponse response = new MockResponse();
 		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!");
 		server.enqueue(response);
 
-		HttpExchangeAdapter adapter = adapterFactory.apply(server.url("/").toString());
+		TestObservationRegistry observationRegistry = TestObservationRegistry.create();
+
+		HttpExchangeAdapter adapter = adapterFactory.apply(server.url("/").toString(), observationRegistry);
 		Service service = HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
 
-		return new Object[] { server, service };
+		return new Object[] { server, service, observationRegistry };
 	}
 
 
 	@ParameterizedAdapterTest
-	void greeting(MockWebServer server, Service service) throws Exception {
+	void greeting(MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
 		String response = service.getGreeting();
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(response).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getPath()).isEqualTo("/greeting");
+		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests")
+				.that().hasLowCardinalityKeyValue("uri", "/greeting");
 	}
 
 	@ParameterizedAdapterTest
-	void greetingById(MockWebServer server, Service service) throws Exception {
+	void greetingById(MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
 		ResponseEntity<String> response = service.getGreetingById("456");
 
 		RecordedRequest request = server.takeRequest();
@@ -120,10 +128,12 @@ class RestClientAdapterTests {
 		assertThat(response.getBody()).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getPath()).isEqualTo("/greeting/456");
+		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests")
+				.that().hasLowCardinalityKeyValue("uri", "/greeting/{id}");
 	}
 
 	@ParameterizedAdapterTest
-	void greetingWithDynamicUri(MockWebServer server, Service service) throws Exception {
+	void greetingWithDynamicUri(MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
 		URI dynamicUri = server.url("/greeting/123").uri();
 		Optional<String> response = service.getGreetingWithDynamicUri(dynamicUri, "456");
 
@@ -131,6 +141,8 @@ class RestClientAdapterTests {
 		assertThat(response.orElse("empty")).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getRequestUrl().uri()).isEqualTo(dynamicUri);
+		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests")
+				.that().hasLowCardinalityKeyValue("uri", "none");
 	}
 
 	@ParameterizedAdapterTest
