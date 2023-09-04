@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Class to manage context meta-data used for the configuration
@@ -72,15 +73,15 @@ public class TableMetaDataContext {
 	// Should we override default for including synonyms for meta-data lookups
 	private boolean overrideIncludeSynonymsDefault = false;
 
+	// Are we using generated key columns?
+	private boolean generatedKeyColumnsUsed = false;
+
+	// Are we quoting identifiers?
+	private boolean quoteIdentifiers = false;
+
 	// The provider of table meta-data
 	@Nullable
 	private TableMetaDataProvider metaDataProvider;
-
-	// Are we using generated key columns
-	private boolean generatedKeyColumnsUsed = false;
-
-	// Are we using escaping for SQL identifiers
-	private boolean usingEscaping = false;
 
 
 	/**
@@ -142,7 +143,6 @@ public class TableMetaDataContext {
 		return this.accessTableColumnMetaData;
 	}
 
-
 	/**
 	 * Specify whether we should override default for accessing synonyms.
 	 */
@@ -155,6 +155,28 @@ public class TableMetaDataContext {
 	 */
 	public boolean isOverrideIncludeSynonymsDefault() {
 		return this.overrideIncludeSynonymsDefault;
+	}
+
+	/**
+	 * Specify whether we are quoting SQL identifiers.
+	 * <p>Defaults to {@code false}. If set to {@code true}, the identifier
+	 * quote string for the underlying database will be used to quote SQL
+	 * identifiers in generated SQL statements.
+	 * @param quoteIdentifiers whether identifiers should be quoted
+	 * @since 6.1
+	 * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
+	 */
+	public void setQuoteIdentifiers(boolean quoteIdentifiers) {
+		this.quoteIdentifiers = quoteIdentifiers;
+	}
+
+	/**
+	 * Are we quoting identifiers?
+	 * @since 6.1
+	 * @see #setQuoteIdentifiers(boolean)
+	 */
+	public boolean isQuoteIdentifiers() {
+		return this.quoteIdentifiers;
 	}
 
 	/**
@@ -269,7 +291,6 @@ public class TableMetaDataContext {
 		return values;
 	}
 
-
 	/**
 	 * Build the insert string based on configuration and meta-data information.
 	 * @return the insert string to be used
@@ -279,24 +300,37 @@ public class TableMetaDataContext {
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
-		String identifierQuoteString = "";
-		if (this.metaDataProvider != null && this.usingEscaping) {
-			identifierQuoteString = this.metaDataProvider.getIdentifierQuoteString();
-		}
+
+		String identifierQuoteString = (isQuoteIdentifiers() ?
+				obtainMetaDataProvider().getIdentifierQuoteString() : null);
+		boolean quoting = StringUtils.hasText(identifierQuoteString);
+
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
-		if (getSchemaName() != null) {
-			insertStatement.append(identifierQuoteString);
-			insertStatement.append(getSchemaName());
+
+		String schemaName = getSchemaName();
+		if (schemaName != null) {
+			if (quoting) {
+				insertStatement.append(identifierQuoteString);
+				insertStatement.append(this.metaDataProvider.schemaNameToUse(schemaName));
+				insertStatement.append(identifierQuoteString);
+			}
+			else {
+				insertStatement.append(schemaName);
+			}
 			insertStatement.append('.');
-			insertStatement.append(getTableName());
+		}
+
+		String tableName = getTableName();
+		if (quoting) {
+			insertStatement.append(identifierQuoteString);
+			insertStatement.append(this.metaDataProvider.tableNameToUse(tableName));
 			insertStatement.append(identifierQuoteString);
 		}
 		else {
-			insertStatement.append(identifierQuoteString);
-			insertStatement.append(getTableName());
-			insertStatement.append(identifierQuoteString);
+			insertStatement.append(tableName);
 		}
+
 		insertStatement.append(" (");
 		int columnCount = 0;
 		for (String columnName : getTableColumns()) {
@@ -305,9 +339,14 @@ public class TableMetaDataContext {
 				if (columnCount > 1) {
 					insertStatement.append(", ");
 				}
-				insertStatement.append(identifierQuoteString);
-				insertStatement.append(columnName);
-				insertStatement.append(identifierQuoteString);
+				if (quoting) {
+					insertStatement.append(identifierQuoteString);
+					insertStatement.append(this.metaDataProvider.columnNameToUse(columnName));
+					insertStatement.append(identifierQuoteString);
+				}
+				else {
+					insertStatement.append(columnName);
+				}
 			}
 		}
 		insertStatement.append(") VALUES(");
@@ -315,11 +354,11 @@ public class TableMetaDataContext {
 			if (this.generatedKeyColumnsUsed) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Unable to locate non-key columns for table '" +
-							getTableName() + "' so an empty insert statement is generated");
+							tableName + "' so an empty insert statement is generated");
 				}
 			}
 			else {
-				String message = "Unable to locate columns for table '" + getTableName()
+				String message = "Unable to locate columns for table '" + tableName
 						+ "' so an insert statement can't be generated.";
 				if (isAccessTableColumnMetaData()) {
 					message += " Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().";
@@ -397,11 +436,4 @@ public class TableMetaDataContext {
 		return obtainMetaDataProvider().isGeneratedKeysColumnNameArraySupported();
 	}
 
-	public boolean isUsingEscaping() {
-		return this.usingEscaping;
-	}
-
-	public void setUsingEscaping(boolean usingEscaping) {
-		this.usingEscaping = usingEscaping;
-	}
 }

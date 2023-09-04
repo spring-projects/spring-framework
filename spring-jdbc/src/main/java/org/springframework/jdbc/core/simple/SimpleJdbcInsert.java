@@ -103,6 +103,12 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
+	public SimpleJdbcInsert usingQuotedIdentifiers() {
+		setQuoteIdentifiers(true);
+		return this;
+	}
+
+	@Override
 	public SimpleJdbcInsertOperations withoutTableColumnMetaDataAccess() {
 		setAccessTableColumnMetaData(false);
 		return this;
@@ -111,12 +117,6 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	@Override
 	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
-		return this;
-	}
-
-	@Override
-	public SimpleJdbcInsert usingEscaping(boolean usingEscaping) {
-		setUsingEscaping(usingEscaping);
 		return this;
 	}
 

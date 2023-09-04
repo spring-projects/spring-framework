@@ -139,36 +139,41 @@ class SimpleJdbcInsertTests {
 	}
 
 	@Test
-	public void testSimpleJdbcInsert() {
-		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("T").usingColumns("F", "S");
-		jdbcInsert.compile();
-		String expected = "INSERT INTO T (F, S) VALUES(?, ?)";
-		String actual = jdbcInsert.getInsertString();
-		assertThat(actual).isEqualTo(expected);
+	void usingColumns() {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("col1", "col2");
+
+		insert.compile();
+
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_table (col1, col2) VALUES(?, ?)");
 	}
 
-	@Test
-	public void testSimpleJdbcInsertWithEscapingWithSchemaName() throws Exception {
-		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withSchemaName("S").withTableName("T").usingColumns("F", "S").usingEscaping(true);
+	@Test  //  gh-24013
+	void usingColumnsAndQuotedIdentifiers() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingQuotedIdentifiers();
 
 		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
 
-		jdbcInsert.compile();
-		String expected = "INSERT INTO `S.T` (`F`, `S`) VALUES(?, ?)";
-		String actual = jdbcInsert.getInsertString();
-		assertThat(actual).isEqualTo(expected);
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_table` (`col1`, `col2`) VALUES(?, ?)");
 	}
 
-	@Test
-	public void testSimpleJdbcInsertWithEscapingWithoutSchemaName() throws Exception {
-		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("T").usingColumns("F", "S").usingEscaping(true);
+	@Test  //  gh-24013
+	void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withSchemaName("my_schema")
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingQuotedIdentifiers();
 
 		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
 
-		jdbcInsert.compile();
-		String expected = "INSERT INTO `T` (`F`, `S`) VALUES(?, ?)";
-		String actual = jdbcInsert.getInsertString();
-		assertThat(actual).isEqualTo(expected);
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_schema`.`my_table` (`col1`, `col2`) VALUES(?, ?)");
 	}
 
 }

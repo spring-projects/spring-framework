@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,9 +140,12 @@ public interface TableMetaDataProvider {
 	List<TableParameterMetaData> getTableParameterMetaData();
 
 	/**
-	 * Retrieves the string used to quote SQL identifiers. This method returns a space " " if identifier quoting is not supported.
-	 * {@link DatabaseMetaData#getIdentifierQuoteString()}
-	 * @return database identifier quote string.
+	 * Get the string used to quote SQL identifiers.
+	 * <p>This method returns a space ({@code " "}) if identifier quoting is not
+	 * supported.
+	 * @return database identifier quote string
+	 * @since 6.1
+	 * @see DatabaseMetaData#getIdentifierQuoteString()
 	 */
 	String getIdentifierQuoteString();
 

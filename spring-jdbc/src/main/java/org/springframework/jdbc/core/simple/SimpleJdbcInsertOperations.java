@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,17 @@ public interface SimpleJdbcInsertOperations {
 	SimpleJdbcInsertOperations usingGeneratedKeyColumns(String... columnNames);
 
 	/**
+	 * Specify that SQL identifiers should be quoted.
+	 * <p>If this method is invoked, the identifier quote string for the underlying
+	 * database will be used to quote SQL identifiers in generated SQL statements.
+	 * In this context, SQL identifiers refer to schema, table, and column names.
+	 * @return this {@code SimpleJdbcInsert} (for method chaining)
+	 * @since 6.1
+	 * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
+	 */
+	SimpleJdbcInsertOperations usingQuotedIdentifiers();
+
+	/**
 	 * Turn off any processing of column meta-data information obtained via JDBC.
 	 * @return this {@code SimpleJdbcInsert} (for method chaining)
 	 */
@@ -81,14 +92,6 @@ public interface SimpleJdbcInsertOperations {
 	 * @return this {@code SimpleJdbcInsert} (for method chaining)
 	 */
 	SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData();
-
-	/**
-	 * Specify should sql identifiers be quoted.
-	 * @param usingEscaping should sql identifiers be quoted
-	 * @return the instance of this SimpleJdbcInsert
-	 */
-	SimpleJdbcInsertOperations usingEscaping(boolean usingEscaping);
-
 
 	/**
 	 * Execute the insert using the values passed in.

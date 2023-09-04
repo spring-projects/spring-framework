@@ -237,17 +237,25 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Set using using escaping.
+	 * Specify whether SQL identifiers should be quoted.
+	 * <p>Defaults to {@code false}. If set to {@code true}, the identifier
+	 * quote string for the underlying database will be used to quote SQL
+	 * identifiers in generated SQL statements.
+	 * @param quoteIdentifiers whether identifiers should be quoted
+	 * @since 6.1
+	 * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
 	 */
-	public void setUsingEscaping(boolean usingEscaping) {
-		this.tableMetaDataContext.setUsingEscaping(usingEscaping);
+	public void setQuoteIdentifiers(boolean quoteIdentifiers) {
+		this.tableMetaDataContext.setQuoteIdentifiers(quoteIdentifiers);
 	}
 
 	/**
-	 * Get using escaping.
+	 * Get the {@code quoteIdentifiers} flag.
+	 * @since 6.1
+	 * @see #setQuoteIdentifiers(boolean)
 	 */
-	public boolean isUsingEscaping() {
-		return this.tableMetaDataContext.isUsingEscaping();
+	public boolean isQuoteIdentifiers() {
+		return this.tableMetaDataContext.isQuoteIdentifiers();
 	}
 
 

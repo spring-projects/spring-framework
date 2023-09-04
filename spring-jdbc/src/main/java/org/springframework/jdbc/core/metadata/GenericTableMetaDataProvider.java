@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** Collection of TableParameterMetaData objects. */
 	private final List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
-	/** the string used to quote SQL identifiers. */
-	private String identifierQuoteString = "";
+	/** The string used to quote SQL identifiers. */
+	private String identifierQuoteString = " ";
 
 	/**
 	 * Constructor used to initialize with provided database meta-data.
@@ -305,7 +305,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Provide access to identifier quote string.
+	 * Provide access to the identifier quote string.
+	 * @since 6.1
+	 * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
 	 */
 	@Override
 	public String getIdentifierQuoteString() {
