@@ -338,7 +338,7 @@ xref:web/webflux/ann-rest-exceptions.adoc[Error Responses] sections.
 
 
 [[validation-beanvalidation-spring-method-exceptions]]
-==== Method Validation Exceptions
+=== Method Validation Exceptions
 
 By default, `jakarta.validation.ConstraintViolationException` is raised with the set of
 ``ConstraintViolation``s returned by `jakarata.validation.Validator`. As an alternative,
@@ -386,7 +386,7 @@ implements `org.springframework.validation.Errors` and exposes validation errors
 
 
 [[validation-beanvalidation-spring-method-i18n]]
-==== Customizing Validation Errors
+=== Customizing Validation Errors
 
 The adapted `MessageSourceResolvable` errors can be turned into error messages to
 display to users through the configured `MessageSource` with locale and language specific
