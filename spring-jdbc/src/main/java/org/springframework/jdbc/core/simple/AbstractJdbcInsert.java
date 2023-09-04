@@ -57,6 +57,7 @@ import org.springframework.util.Assert;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public abstract class AbstractJdbcInsert {
@@ -91,7 +92,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Constructor to be used when initializing using a {@link DataSource}.
-	 * @param dataSource the DataSource to be used
+	 * @param dataSource the {@code DataSource} to be used
 	 */
 	protected AbstractJdbcInsert(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -99,7 +100,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Constructor to be used when initializing using a {@link JdbcTemplate}.
-	 * @param jdbcTemplate the JdbcTemplate to use
+	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 */
 	protected AbstractJdbcInsert(JdbcTemplate jdbcTemplate) {
 		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
@@ -207,7 +208,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Specify whether the parameter meta-data for the call should be used.
-	 * The default is {@code true}.
+	 * <p>The default is {@code true}.
 	 */
 	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
 		this.tableMetaDataContext.setAccessTableColumnMetaData(accessTableColumnMetaData);
@@ -215,7 +216,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Specify whether the default for including synonyms should be changed.
-	 * The default is {@code false}.
+	 * <p>The default is {@code false}.
 	 */
 	public void setOverrideIncludeSynonymsDefault(boolean override) {
 		this.tableMetaDataContext.setOverrideIncludeSynonymsDefault(override);
