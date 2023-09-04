@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -47,6 +48,7 @@ import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -228,6 +230,43 @@ public class MethodValidationTests {
 				.verify();
 	}
 
+
+	@Test
+	void validateList() {
+		HandlerMethod hm = handlerMethod(new ValidController(), c -> c.handle(List.of(mockPerson, mockPerson)));
+		ServerWebExchange exchange = MockServerWebExchange.from(request()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body("[{\"name\":\"Faustino1234\"},{\"name\":\"Cayetana6789\"}]"));
+
+		StepVerifier.create(this.handlerAdapter.handle(exchange, hm))
+				.consumeErrorWith(throwable -> {
+					HandlerMethodValidationException ex = (HandlerMethodValidationException) throwable;
+
+					assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
+					assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
+
+					assertThat(ex.getAllValidationResults()).hasSize(2);
+
+					assertBeanResult(ex.getBeanResults().get(0), "personList", Collections.singletonList(
+							"""
+							Field error in object 'personList' on field 'name': rejected value [Faustino1234]; \
+							codes [Size.personList.name,Size.name,Size.java.lang.String,Size]; \
+							arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+							codes [personList.name,name]; arguments []; default message [name],10,1]; \
+							default message [size must be between 1 and 10]"""));
+
+					assertBeanResult(ex.getBeanResults().get(1), "personList", Collections.singletonList(
+							"""
+							Field error in object 'personList' on field 'name': rejected value [Cayetana6789]; \
+							codes [Size.personList.name,Size.name,Size.java.lang.String,Size]; \
+							arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+							codes [personList.name,name]; arguments []; default message [name],10,1]; \
+							default message [size must be between 1 and 10]"""
+					));
+				})
+				.verify();
+	}
+
 	@Test
 	void validatedWithMethodValidation() {
 
@@ -328,7 +367,7 @@ public class MethodValidationTests {
 
 
 	@SuppressWarnings("unused")
-	private record Person(@Size(min = 1, max = 10) String name) {
+	private record Person(@Size(min = 1, max = 10) @JsonProperty("name") String name) {
 
 		@Override
 		public String name() {
@@ -356,6 +395,9 @@ public class MethodValidationTests {
 				@RequestHeader @Size(min = 5, max = 10) String myHeader) {
 
 			return errors.toString();
+		}
+
+		void handle(@Valid @RequestBody List<Person> persons) {
 		}
 
 		Mono<String> handleAsync(@Valid @ModelAttribute("student") Mono<Person> person,

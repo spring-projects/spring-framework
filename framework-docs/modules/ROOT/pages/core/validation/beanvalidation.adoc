@@ -282,7 +282,7 @@ As the preceding example shows, a `ConstraintValidator` implementation can have 
 
 
 [[validation-beanvalidation-spring-method]]
-=== Spring-driven Method Validation
+== Spring-driven Method Validation
 
 You can integrate the method validation feature of Bean Validation into a
 Spring context through a `MethodValidationPostProcessor` bean definition:
@@ -329,11 +329,12 @@ xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[Understanding AOP Prox
 to always use methods and accessors on proxied classes; direct field access will not work.
 ====
 
-NOTE: Spring MVC and WebFlux have built-in support for method validation, and therefore
-for web controller methods there is no need for a class level `@Validated` and an AOP proxy.
-See the Spring MVC xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation] section,
-the WebFlux xref:web/webflux/controller/ann-validation.adoc[Validation] section,
-and the xref:web/webmvc/mvc-controller/ann-validation.adoc[Error Responses] section.
+Spring MVC and WebFlux have built-in support for the same underlying method validation but without
+the need for AOP. Therefore, do check the rest of this section, and also see the Spring MVC
+xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation] and
+xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses] sections, and the WebFlux
+xref:web/webflux/controller/ann-validation.adoc[Validation] and
+xref:web/webflux/ann-rest-exceptions.adoc[Error Responses] sections.
 
 
 [[validation-beanvalidation-spring-method-exceptions]]

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -33,6 +34,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -44,6 +47,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -55,6 +59,7 @@ import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.mock;
@@ -95,6 +100,7 @@ public class MethodValidationTests {
 
 		this.request.setMethod("POST");
 		this.request.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+		this.request.addHeader("Accept", "text/plain");
 		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, new HashMap<String, String>(0));
 	}
 
@@ -109,6 +115,8 @@ public class MethodValidationTests {
 		handlerAdapter.setWebBindingInitializer(bindingInitializer);
 		handlerAdapter.setApplicationContext(context);
 		handlerAdapter.setBeanFactory(context.getBeanFactory());
+		handlerAdapter.setMessageConverters(
+				List.of(new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter()));
 		handlerAdapter.afterPropertiesSet();
 		return handlerAdapter;
 	}
@@ -215,6 +223,40 @@ public class MethodValidationTests {
 	}
 
 	@Test
+	void validateList() {
+		HandlerMethod hm = handlerMethod(new ValidController(), c -> c.handle(List.of(mockPerson, mockPerson)));
+		this.request.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		this.request.setContent("[{\"name\":\"Faustino1234\"},{\"name\":\"Cayetana6789\"}]".getBytes(UTF_8));
+
+		HandlerMethodValidationException ex = catchThrowableOfType(
+				() -> this.handlerAdapter.handle(this.request, this.response, hm),
+				HandlerMethodValidationException.class);
+
+		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
+		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
+
+		assertThat(ex.getAllValidationResults()).hasSize(2);
+
+		assertBeanResult(ex.getBeanResults().get(0), "personList", Collections.singletonList(
+				"""
+				Field error in object 'personList' on field 'name': rejected value [Faustino1234]; \
+				codes [Size.personList.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [personList.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
+
+		assertBeanResult(ex.getBeanResults().get(1), "personList", Collections.singletonList(
+				"""
+				Field error in object 'personList' on field 'name': rejected value [Cayetana6789]; \
+				codes [Size.personList.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [personList.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""
+		));
+
+	}
+
+	@Test
 	void jakartaAndSpringValidator() throws Exception {
 		HandlerMethod hm = handlerMethod(new InitBinderController(), ibc -> ibc.handle(mockPerson, mockErrors, ""));
 		this.request.addParameter("name", "name=Faustino1234");
@@ -247,7 +289,7 @@ public class MethodValidationTests {
 		RequestMappingHandlerAdapter springValidatorHandlerAdapter = initHandlerAdapter(new PersonValidator());
 		springValidatorHandlerAdapter.handle(this.request, this.response, hm);
 
-		assertThat(response.getContentAsString()).isEqualTo(
+			assertThat(response.getContentAsString()).isEqualTo(
 				"""
 			org.springframework.validation.BeanPropertyBindingResult: 1 errors
 			Field error in object 'student' on field 'name': rejected value [name=Faustino1234]; \
@@ -283,7 +325,7 @@ public class MethodValidationTests {
 
 
 	@SuppressWarnings("unused")
-	private record Person(@Size(min = 1, max = 10) String name) {
+	private record Person(@Size(min = 1, max = 10) @JsonProperty("name") String name) {
 
 		@Override
 		public String name() {
@@ -311,6 +353,9 @@ public class MethodValidationTests {
 				@RequestHeader @Size(min = 5, max = 10) String myHeader) {
 
 			return errors.toString();
+		}
+
+		void handle(@Valid @RequestBody List<Person> persons) {
 		}
 	}
 
