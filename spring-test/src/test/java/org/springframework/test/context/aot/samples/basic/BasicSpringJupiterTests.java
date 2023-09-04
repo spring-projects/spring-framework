@@ -50,7 +50,7 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
 @TestExecutionListeners(listeners = DummyTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "test.engine = jupiter")
 // We cannot use `classpath*:` in AOT tests until gh-31088 is resolved.
-// @YamlTestProperties("classpath*:org/springframework/test/context/aot/samples/basic/**/test?.yaml")
+// @YamlTestProperties("classpath*:**/aot/samples/basic/test?.yaml")
 @YamlTestProperties({
 	"classpath:org/springframework/test/context/aot/samples/basic/test1.yaml",
 	"classpath:org/springframework/test/context/aot/samples/basic/test2.yaml"

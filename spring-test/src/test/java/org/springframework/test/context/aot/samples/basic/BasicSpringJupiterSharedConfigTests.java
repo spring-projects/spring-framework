@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig({BasicTestConfiguration.class, ManagementConfiguration.class})
 @TestPropertySource(properties = "test.engine = jupiter")
 // We cannot use `classpath*:` in AOT tests until gh-31088 is resolved.
-// @YamlTestProperties("classpath*:org/springframework/test/context/aot/samples/basic/**/test?.yaml")
+// @YamlTestProperties("classpath*:**/aot/samples/basic/test?.yaml")
 @YamlTestProperties({
 	"classpath:org/springframework/test/context/aot/samples/basic/test1.yaml",
 	"classpath:org/springframework/test/context/aot/samples/basic/test2.yaml"
