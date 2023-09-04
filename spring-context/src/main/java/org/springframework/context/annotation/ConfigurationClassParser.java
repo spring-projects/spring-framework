@@ -157,12 +157,17 @@ class ConfigurationClassParser {
 
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
+		//循环遍历configCandidates
 		for (BeanDefinitionHolder holder : configCandidates) {
+			//获取BeanDefintion
 			BeanDefinition bd = holder.getBeanDefinition();
+			//根据BeanDefinition类的不同调用parse不同的重载方法实际上都是调用processConfigurationClass()方法
 			try {
+				//注解类型
 				if (bd instanceof AnnotatedBeanDefinition annotatedBeanDef) {
 					parse(annotatedBeanDef.getMetadata(), holder.getBeanName());
 				}
+				//有class对象的
 				else if (bd instanceof AbstractBeanDefinition abstractBeanDef && abstractBeanDef.hasBeanClass()) {
 					parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
 				}
@@ -188,6 +193,7 @@ class ConfigurationClassParser {
 		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER);
 	}
 
+	//根据注解元数据和beanName解析配置文件、有注解元数据
 	protected final void parse(Class<?> clazz, String beanName) throws IOException {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName), DEFAULT_EXCLUSION_FILTER);
 	}
@@ -215,15 +221,20 @@ class ConfigurationClassParser {
 				Collections.emptyList());
 	}
 
+	//
 	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
+		//判断是否跳过解析
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
 
+		//第一次进入的时候,configuationClass的size为0,existingClass肯定为null,在此处处理configuration重复import
+		//如果同一个类被处理2次,2次都属于被import的则合并导入类,返回.如果配置类不是被导入的,则移除旧的使用新的配置类
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
 			if (configClass.isImported()) {
 				if (existingClass.isImported()) {
+					//如果要处理的配置类configclass在已分析处理的配置类记录中已存在,合并2者的importBy属性
 					existingClass.mergeImportedBy(configClass);
 				}
 				// Otherwise ignore new imported config class; existing non-imported class overrides it.
@@ -238,12 +249,18 @@ class ConfigurationClassParser {
 		}
 
 		// Recursively process the configuration class and its superclass hierarchy.
+		//处理配置类,由于配置类可能存在父类(若父类的全类名是以java开头的,则除外).所有需要将ConfigClass变成sourceclass去解析,
+		//如果此时父类为空,则不会进行while循环去解析,如果父类不为空,则会循环的去解析父类
+		//sourceClass意义:简单的包装类,目的是为了以统一的方式去处理带有注解的类,不管这些类是如果加载的
+		//如果无法理解,可以把它当作一个黑盒,不会影响看spring源码的主流程
 		SourceClass sourceClass = asSourceClass(configClass, filter);
 		do {
+			//解析各种注解
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
 		}
 		while (sourceClass != null);
 
+		//将解析的配置类储存起来,这样回到parse方法时能取道值
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -259,13 +276,15 @@ class ConfigurationClassParser {
 	protected final SourceClass doProcessConfigurationClass(
 			ConfigurationClass configClass, SourceClass sourceClass, Predicate<String> filter)
 			throws IOException {
-
+		//@configuration继承了@Component
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
+			//递归处理内部类,因为内部类也是一个配置类,配置类上有@configuration注解,该注解继承@Component,if判断为true,则调用processMemberClasses方法
 			processMemberClasses(configClass, sourceClass, filter);
 		}
 
 		// Process any @PropertySource annotations
+		//如果配置类上加入了@PropertySource注解,那么就解析加载properties文件,并将属性添加到spring上下文中
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class,
 				PropertySources.class, true)) {
@@ -279,21 +298,30 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
+		//处理@ComponentScan或者@ComponentScans注解,并将扫描包下的所有的bean转换成填充后的ConfigurationClass
+		//此处就是将自定义的bean加载到IOC容器,因为扫描到的类可能也添加了@ComponentScan或者@ComponentScans注解,因此需要递归解析
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScan.class, ComponentScans.class);
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				//解析@ComponentScan或者@ComponentScans配置的扫描的包所包含的类
+				//比如 basePackages = com.jerry,那么这一步会扫描出这个包及子包下的class然后将其解析成beanDefinitionn
+				//(beanDefinitionn可以理解为等价于beanDefinitionHolder)
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
+				//通过上一步扫描包com.jery,有可能扫描出来的bean中也添加了@ComponentScan或者@ComponentScans
+				//所以这里需要循环遍历一次,进行递归(parse),继续解析.直到解析出的类上没有@ComponentScan或者@ComponentScans
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					//判断是否是一个配置类,并设置full或lite属性
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+						//通过递归方法进行解析
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
 				}
@@ -301,9 +329,11 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @Import annotations
+		//处理@Import注解
 		processImports(configClass, sourceClass, getImports(sourceClass), filter, true);
 
 		// Process any @ImportResource annotations
+		//处理@ImportResource,导入spring配置文件
 		AnnotationAttributes importResource =
 				AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
 		if (importResource != null) {
@@ -316,6 +346,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process individual @Bean methods
+		//处理加了@bean注解的方法,将@bean转化为beanMethod对象,保存在集合中
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));

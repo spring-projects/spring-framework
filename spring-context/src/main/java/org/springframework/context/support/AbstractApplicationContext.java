@@ -568,6 +568,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
+		//开始执行刷行操作
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
@@ -575,9 +576,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			//1.通过不同资源类型加载bean定义(xml,properties,grove)并把bean定义交给DefaultListBeanFactory中的BeanDefinitionMap缓存起来
+			//2. 返回defaultListBeanfactory
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
+			//
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -586,6 +590,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 				// Invoke factory processors registered as beans in the context.
+				//调用BeanFactoryPostProcessor链完成beanFactory的后续增强处理.如:
+				//ConfigurationClassPostProcessor – 解析 @Configuration、@Bean、@Import、@PropertySource 等
+				//PropertySourcesPlaceHolderConfigurer – 替换 BeanDefinition 中的 ${ }
+				//MapperScannerConfigurer – 补充 Mapper 接口对应的 BeanDefinition
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -605,6 +613,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				//生成bean实例,并给自定义属性和容器属性赋值
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -926,6 +935,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
 		String[] weaverAwareNames = beanFactory.getBeanNamesForType(LoadTimeWeaverAware.class, false, false);
 		for (String weaverAwareName : weaverAwareNames) {
+			//获取一个bean并赋值
 			getBean(weaverAwareName);
 		}
 
