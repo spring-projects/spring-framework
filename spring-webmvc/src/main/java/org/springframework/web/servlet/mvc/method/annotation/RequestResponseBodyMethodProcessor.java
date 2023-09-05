@@ -134,9 +134,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		parameter = parameter.nestedIfOptional();
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
-		String name = Conventions.getVariableNameForParameter(parameter);
 
 		if (binderFactory != null) {
+			String name = Conventions.getVariableNameForParameter(parameter);
 			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 			if (arg != null) {
 				validateIfApplicable(binder, parameter);
