@@ -8,7 +8,6 @@ description = "Spring Framework Docs"
 
 apply from: "${rootDir}/gradle/publications.gradle"
 
-
 antora {
 	version = '3.2.0-alpha.2'
 	playbook = 'cached-antora-playbook.yml'
@@ -33,7 +32,6 @@ antora {
 			'@springio/asciidoctor-extensions': '1.0.0-alpha.9'
 	]
 }
-
 
 tasks.named("generateAntoraYml") {
 	asciidocAttributes = project.provider( {

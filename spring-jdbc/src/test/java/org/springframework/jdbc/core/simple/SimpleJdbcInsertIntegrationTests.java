@@ -154,34 +154,25 @@ class SimpleJdbcInsertIntegrationTests {
 
 		protected EmbeddedDatabase embeddedDatabase;
 
-
-		protected abstract String getSchemaScript();
-
-		protected abstract String getUsersTableName();
-
-		protected EmbeddedDatabase createEmbeddedDatabase() {
-			return new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(DatabasePopulator.class))
+		@BeforeEach
+		void createDatabase() {
+			this.embeddedDatabase = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(DatabasePopulator.class))
 					.setType(EmbeddedDatabaseType.H2)
 					.addScript(getSchemaScript())
 					.addScript("users-data.sql")
 					.build();
-		}
 
-
-		@BeforeEach
-		void checkDatabaseSetup() {
-			this.embeddedDatabase = createEmbeddedDatabase();
 			assertNumUsers(1);
 		}
 
 		@AfterEach
-		void shutdown() {
+		void shutdownDatabase() {
 			this.embeddedDatabase.shutdown();
 		}
 
 		protected void assertNumUsers(long count) {
 			JdbcClient jdbcClient = JdbcClient.create(this.embeddedDatabase);
-			long numUsers = jdbcClient.sql("select count(*) from " + getUsersTableName()).query().singleValue();
+			long numUsers = jdbcClient.sql("select count(*) from " + getUsersTableName()).query(Long.class).single();
 			assertThat(numUsers).isEqualTo(count);
 		}
 
@@ -189,6 +180,10 @@ class SimpleJdbcInsertIntegrationTests {
 			insert.execute(Map.of("first_name", "Jane", "last_name", "Smith"));
 			assertNumUsers(2);
 		}
+
+		protected abstract String getSchemaScript();
+
+		protected abstract String getUsersTableName();
 
 	}
 
