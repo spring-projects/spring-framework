@@ -176,7 +176,7 @@ but note that `@JmsListener` annotations can refer to specific container factory
 In all cases, Observations are only recorded if the observation registry is configured on the container factory.
 
 Similar observations are recorded with `JmsTemplate` when messages are processed by a `MessageListener`.
-Such listeners are set on a  `MessageConsumer` within a session callback (see `JmsTemplate.execute(SessionCallback<T>)`).
+Such listeners are set on a `MessageConsumer` within a session callback (see `JmsTemplate.execute(SessionCallback<T>)`).
 
 This observation uses the `io.micrometer.core.instrument.binder.jms.DefaultJmsProcessObservationConvention` by default, backed by the `io.micrometer.core.instrument.binder.jms.JmsProcessObservationContext`.
 
