@@ -65,6 +65,7 @@ public class FilePatternResourceHintsRegistrar {
 	 * {@linkplain Builder#withClasspathLocations(String...) classpath locations}.
 	 * @param locations the classpath locations
 	 * @return a {@link Builder} to further configure the registrar
+	 * @since 6.0.12
 	 */
 	public static Builder forClassPathLocations(String... locations) {
 		Assert.notEmpty(locations, "At least one classpath location should be specified");
@@ -91,6 +92,7 @@ public class FilePatternResourceHintsRegistrar {
 
 	/**
 	 * Builder for {@link FilePatternResourceHintsRegistrar}.
+	 * @since 6.0.12
 	 */
 	public static final class Builder {
 
