@@ -55,6 +55,20 @@ class SimpleJdbcInsertIntegrationTests {
 			insertJaneSmith(insert);
 		}
 
+		@Test  //  gh-24013
+		void retrieveColumnNamesFromMetadataAndUsingQuotedIdentifiers() throws Exception {
+			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
+					.withTableName("users")
+					.usingGeneratedKeyColumns("id")
+					.usingQuotedIdentifiers();
+
+			insert.compile();
+			// NOTE: quoted identifiers in H2/HSQL will be UPPERCASE!
+			assertThat(insert.getInsertString()).isEqualTo("INSERT INTO \"USERS\" (\"FIRST_NAME\", \"LAST_NAME\") VALUES(?, ?)");
+
+			insertJaneSmith(insert);
+		}
+
 		@Test
 		void usingColumns() {
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
