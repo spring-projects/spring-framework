@@ -198,6 +198,10 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * Set the {@link ObservationRegistry} to be used for recording
+	 * {@link io.micrometer.core.instrument.binder.jms.JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
+	 * Defaults to no-op observations if the registry is not set.
+	 * @since 6.1
 	 * @see AbstractMessageListenerContainer#setObservationRegistry(ObservationRegistry)
 	 */
 	public void setObservationRegistry(ObservationRegistry observationRegistry) {
