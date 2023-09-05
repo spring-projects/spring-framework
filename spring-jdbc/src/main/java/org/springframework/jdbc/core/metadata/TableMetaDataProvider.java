@@ -61,6 +61,14 @@ public interface TableMetaDataProvider {
 	String tableNameToUse(@Nullable String tableName);
 
 	/**
+	 * Get the column name formatted based on meta-data information.
+	 * <p>This could include altering the case.
+	 * @since 6.1
+	 */
+	@Nullable
+	String columnNameToUse(@Nullable String columnName);
+
+	/**
 	 * Get the catalog name formatted based on meta-data information.
 	 * <p>This could include altering the case.
 	 */

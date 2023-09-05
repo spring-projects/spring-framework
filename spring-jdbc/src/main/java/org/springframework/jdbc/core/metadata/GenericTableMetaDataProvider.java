@@ -231,6 +231,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	@Override
 	@Nullable
+	public String columnNameToUse(@Nullable String columnName) {
+		return identifierNameToUse(columnName);
+	}
+
+	@Override
+	@Nullable
 	public String catalogNameToUse(@Nullable String catalogName) {
 		return identifierNameToUse(catalogName);
 	}
