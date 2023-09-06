@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 /**
  * Unit tests for {@link ReactorResourceFactory}.
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class ReactorResourceFactoryTests {
 
@@ -44,7 +45,7 @@ public class ReactorResourceFactoryTests {
 
 
 	@Test
-	void globalResources() throws Exception {
+	void globalResources() {
 
 		this.resourceFactory.setUseGlobalResources(true);
 		this.resourceFactory.afterPropertiesSet();
@@ -60,7 +61,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void globalResourcesWithConsumer() throws Exception {
+	void globalResourcesWithConsumer() {
 
 		AtomicBoolean invoked = new AtomicBoolean();
 
@@ -72,7 +73,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void localResources() throws Exception {
+	void localResources() {
 
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.afterPropertiesSet();
@@ -94,7 +95,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void localResourcesViaSupplier() throws Exception {
+	void localResourcesViaSupplier() {
 
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.setConnectionProviderSupplier(() -> this.connectionProvider);
@@ -118,7 +119,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void customShutdownDurations() throws Exception {
+	void customShutdownDurations() {
 		Duration quietPeriod = Duration.ofMillis(500);
 		Duration shutdownTimeout = Duration.ofSeconds(1);
 		this.resourceFactory.setUseGlobalResources(false);
@@ -135,7 +136,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void externalResources() throws Exception {
+	void externalResources() {
 
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.setConnectionProvider(this.connectionProvider);
