@@ -109,13 +109,13 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public SimpleJdbcInsertOperations withoutTableColumnMetaDataAccess() {
+	public SimpleJdbcInsert withoutTableColumnMetaDataAccess() {
 		setAccessTableColumnMetaData(false);
 		return this;
 	}
 
 	@Override
-	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
+	public SimpleJdbcInsert includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
 		return this;
 	}
