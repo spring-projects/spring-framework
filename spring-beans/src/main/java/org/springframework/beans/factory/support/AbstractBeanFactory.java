@@ -239,11 +239,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
-
+		//开始获取bean名称
 		String beanName = transformedBeanName(name);
+		System.out.println(beanName);
 		Object beanInstance;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		//添加二级缓存,删除三级缓存,完成对象实例创建
+		//2.把testA从三级缓存挪到二级缓存中,此时一级缓存无值,二级缓存只有testA,三级缓存只有testB
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -287,6 +290,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			if (!typeCheckOnly) {
+				//将bean标记为已创建或者正在创建
 				markBeanAsCreated(beanName);
 			}
 
@@ -319,7 +323,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				// Create bean instance.
+
 				if (mbd.isSingleton()) {
+					//开始创建bean对象
+					//3.把testB对象由三级缓存挪到一级缓存,并添加到bean缓存map(registeredSingletons)中.testA依旧在二级缓存中,三级缓存无值
+					//这个时候testB对象应该已经完成实例创建.
+					//4.把testA对象由二级缓存挪入到一级缓存中,完成testA对象创建
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							return createBean(beanName, mbd, args);
@@ -1627,6 +1636,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Check whether the given bean is defined as a {@link FactoryBean}.
+	 * 检查一个bean是否实现了FactoryBean接口
 	 * @param beanName the name of the bean
 	 * @param mbd the corresponding bean definition
 	 */
@@ -1695,6 +1705,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * 将指定的bean标记为已创建 (或即将创建)。<p> 这允许bean工厂优化其缓存，以重复创建指定的bean
+	 *
 	 * Mark the specified bean as already created (or about to be created).
 	 * <p>This allows the bean factory to optimize its caching for repeated
 	 * creation of the specified bean.

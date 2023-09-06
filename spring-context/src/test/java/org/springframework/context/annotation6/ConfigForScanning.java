@@ -26,4 +26,14 @@ public class ConfigForScanning {
 	public TestBean testBean() {
 		return new TestBean();
 	}
+
+	@Bean
+	public B testA(){
+		return new B();
+	}
+
+	@Bean
+	public A testB(){
+		return new A();
+	}
 }

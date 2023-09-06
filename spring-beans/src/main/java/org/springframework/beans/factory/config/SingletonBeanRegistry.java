@@ -58,6 +58,11 @@ public interface SingletonBeanRegistry {
 	void registerSingleton(String beanName, Object singletonObject);
 
 	/**
+	 * 返回在给定名称下注册的 (原始) 单例对象。
+	 * 仅检查已经实例化的singleton; 不会返回尚未实例化的singleton bean定义的对象。
+	 * 该方法的主要目的是访问手动注册的singleton (参见registerSingleton )。也可以用于以原始方式访问由已经创建的bean定义定义的单例。
+	 * 注意: 此查找方法不知道FactoryBean前缀或别名。在获取单例实例之前，您需要先解析规范bean名称。
+	 *
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Only checks already instantiated singletons; does not return an Object
 	 * for singleton bean definitions which have not been instantiated yet.
