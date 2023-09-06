@@ -158,7 +158,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void stopThenStartWithGlobalResources() {
+	void restartWithGlobalResources() {
 
 		this.resourceFactory.setUseGlobalResources(true);
 		this.resourceFactory.afterPropertiesSet();
@@ -176,7 +176,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void stopThenStartWithLocalResources() {
+	void restartWithLocalResources() {
 
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.afterPropertiesSet();
@@ -200,7 +200,7 @@ public class ReactorResourceFactoryTests {
 	}
 
 	@Test
-	void stopThenStartWithExternalResources() {
+	void restartWithExternalResources() {
 
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.setConnectionProvider(this.connectionProvider);
