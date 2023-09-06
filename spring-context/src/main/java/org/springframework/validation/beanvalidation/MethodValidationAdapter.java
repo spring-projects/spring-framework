@@ -141,6 +141,13 @@ public class MethodValidationAdapter implements MethodValidator {
 
 
 	/**
+	 * Return the {@link SpringValidatorAdapter} configured for use.
+	 */
+	public Supplier<SpringValidatorAdapter> getSpringValidatorAdapter() {
+		return this.validatorAdapter;
+	}
+
+	/**
 	 * Set the strategy to use to determine message codes for violations.
 	 * <p>Default is a DefaultMessageCodesResolver.
 	 */
