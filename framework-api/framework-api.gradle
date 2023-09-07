@@ -108,7 +108,6 @@ tasks.register('schemaZip', Zip) {
 }
 
 publishing {
-	group "distribution"
 	publications {
 		mavenJava(MavenPublication) {
 			artifact docsZip
