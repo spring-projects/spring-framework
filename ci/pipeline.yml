@@ -204,7 +204,7 @@ jobs:
           "zip.displayname": "Spring Framework"
           "zip.deployed": "false"
       - include:
-        - "/**/framework-api-*-api.zip"
+        - "/**/framework-api-*-docs.zip"
         properties:
           "zip.type": "docs"
       - include:
