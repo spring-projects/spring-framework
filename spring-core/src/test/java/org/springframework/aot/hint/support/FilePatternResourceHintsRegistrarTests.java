@@ -40,7 +40,7 @@ class FilePatternResourceHintsRegistrarTests {
 	@Test
 	void configureWithNoClasspathLocation() {
 		assertThatIllegalArgumentException().isThrownBy(FilePatternResourceHintsRegistrar::forClassPathLocations)
-				.withMessageContaining("At least one classpath location should be specified");
+				.withMessageContaining("At least one classpath location must be specified");
 	}
 
 	@Test
@@ -54,7 +54,7 @@ class FilePatternResourceHintsRegistrarTests {
 	void configureWithInvalidFileExtension() {
 		Builder builder = FilePatternResourceHintsRegistrar.forClassPathLocations("");
 		assertThatIllegalArgumentException().isThrownBy(() -> builder.withFileExtensions("txt"))
-				.withMessageContaining("should start with '.'");
+				.withMessageContaining("must start with '.'");
 	}
 
 	@Test
