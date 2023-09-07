@@ -19,6 +19,7 @@ package org.springframework.build.optional;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -40,10 +41,10 @@ public class OptionalDependenciesPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		Configuration optional = project.getConfigurations().create("optional");
+		Configuration optional = project.getConfigurations().create(OPTIONAL_CONFIGURATION_NAME);
 		optional.setCanBeConsumed(false);
 		optional.setCanBeResolved(false);
-		project.getPlugins().withType(JavaPlugin.class, (javaPlugin) -> {
+		project.getPlugins().withType(JavaBasePlugin.class, (javaBasePlugin) -> {
 			SourceSetContainer sourceSets = project.getExtensions().getByType(JavaPluginExtension.class)
 					.getSourceSets();
 			sourceSets.all((sourceSet) -> {

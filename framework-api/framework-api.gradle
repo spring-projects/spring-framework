@@ -1,6 +1,6 @@
 plugins {
 	id 'java-platform'
-	id 'io.freefair.aggregate-javadoc' version '8.2.2'
+	id 'io.freefair.aggregate-javadoc' version '8.3'
 }
 
 description = "Spring Framework API Docs"
@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-	rootProject.subprojects.findAll { it.name.startsWith("spring-") }.each { moduleProject ->
+	moduleProjects.each { moduleProject ->
 		javadoc moduleProject
 	}
 }
@@ -34,12 +34,12 @@ javadoc {
 		addBooleanOption('Werror', true) // fail build on Javadoc warnings
 	}
 	maxMemory = "1024m"
-	destinationDir = file("$buildDir/docs/javadoc")
 	doFirst {
 		classpath += files(
 				// ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 		)
+		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
 	}
 }
 
