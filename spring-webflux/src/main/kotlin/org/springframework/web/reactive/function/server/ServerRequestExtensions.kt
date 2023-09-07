@@ -31,12 +31,14 @@ import reactor.core.publisher.Mono
 import java.net.InetSocketAddress
 import java.security.Principal
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.starProjectedType
 
 /**
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
- * 
+ *
  * @author Sebastien Deleuze
  * @since 5.0
  */
@@ -76,9 +78,25 @@ fun <T : Any> ServerRequest.bodyToFlow(clazz: KClass<T>): Flow<T> =
 /**
  * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
+ * ### Deprecation
+ *
+ * This method is deprecated in favor of [awaitReceive].
+ *
+ * * It is difficult to reason about its exception handling,
+ *   since it forces you to handle both types of errors: serialization and coroutines-related.
+ * * In the case of [IllegalArgumentException] it is indistinguishable if the exception came from coroutines
+ *   or serialization unless checked explicit for `SerializationException` type.
+ * * It is unclear whether [IllegalArgumentException] can be thrown at all from coroutines-perspective
+ *   as the receiver is a [Mono].
+ *
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Deprecated in favor of awaitReceive.",
+	level = DeprecationLevel.WARNING,
+	replaceWith = ReplaceWith("this.awaitReceive")
+)
 suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
 		bodyToMono<T>().awaitSingle()
 
@@ -86,18 +104,47 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
  * `KClass` non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  * Please consider `awaitBody<Foo>` variant if possible.
  *
+ * ### Deprecation
+ *
+ * This method is deprecated in favor of [awaitReceive].
+ *
+ * * It is difficult to reason about its exception handling,
+ *   since it forces you to handle both types of errors: serialization and coroutines-related.
+ * * In the case of [IllegalArgumentException] it is indistinguishable if the exception came from coroutines
+ *   or serialization unless checked explicit for `SerializationException` type.
+ * * It is unclear whether [IllegalArgumentException] can be thrown at all from coroutines-perspective
+ *   as the receiver is a [Mono].
+ *
  * @author Igor Manushin
  * @since 5.3
  */
+@Deprecated(
+	message = "Deprecated in favor of awaitReceive.",
+	level = DeprecationLevel.WARNING,
+	replaceWith = ReplaceWith("this.awaitReceive")
+)
 suspend fun <T : Any> ServerRequest.awaitBody(clazz: KClass<T>): T =
 		bodyToMono(clazz.java).awaitSingle()
 
 /**
  * Nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
+ * ### Deprecation
+ *
+ * This method is deprecated because the conventions established in Kotlin mandate that an operation
+ * with the name `awaitBodyOrNull` returns `null` instead of throwing in case there is an error;
+ * however, this would also mean that this method would return `null` if there is a serialization error.
+ * This can be confusing to those who expect this function to validate if incoming body can be transformed into expected `T`.
+ *
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Deprecated without a replacement due to its name incorrectly conveying the behavior. " +
+			"Please consider replacing it with awaitReceiveOrNull.",
+	level = DeprecationLevel.WARNING,
+	replaceWith = ReplaceWith("this.awaitReceiveOrNull")
+)
 @Suppress("DEPRECATION")
 suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitSingleOrNull()
@@ -106,12 +153,60 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
  * `KClass` nullable Coroutines variant of [ServerRequest.bodyToMono].
  * Please consider `awaitBodyOrNull<Foo>` variant if possible.
  *
+ * ### Deprecation
+ *
+ * This method is deprecated because the conventions established in Kotlin mandate that an operation
+ * with the name `awaitBodyOrNull` returns `null` instead of throwing in case there is an error;
+ * however, this would also mean that this method would return `null` if there is a serialization error.
+ * This can be confusing to those who expect this function to validate if incoming body can be transformed into expected `T`.
+ *
  * @author Igor Manushin
  * @since 5.3
  */
+@Deprecated(
+	message = "Deprecated without a replacement due to its name incorrectly conveying the behavior. " +
+			"Please consider replacing it with awaitReceiveOrNull.",
+	level = DeprecationLevel.WARNING,
+	replaceWith = ReplaceWith("this.awaitReceiveOrNull")
+)
 @Suppress("DEPRECATION")
 suspend fun <T : Any> ServerRequest.awaitBodyOrNull(clazz: KClass<T>): T? =
 		bodyToMono(clazz.java).awaitSingleOrNull()
+
+/**
+ * Receives the incoming body for this [request][ServerRequest] and transforms it to the requested `T` type.
+ *
+ * @author George Papadopoulos
+ * @since 6.0.11
+ * @throws IllegalArgumentException when body cannot be transformed to the requested type.
+ */
+suspend inline fun <reified T : Any> ServerRequest.awaitReceive(): T = awaitReceiveNullable<T>()
+	?: throw ContentTransformationException(starProjectedType<T>())
+
+/**
+ * Receives the incoming body for this [request][ServerRequest] and transforms it to the requested `T` type.
+ *
+ * @author George Papadopoulos
+ * @since 6.0.11
+ * @throws IllegalArgumentException when body cannot be transformed to the requested type.
+ */
+suspend inline fun <reified T : Any> ServerRequest.awaitReceiveNullable(): T? {
+	try {
+		return bodyToMono<T>().awaitSingleOrNull()
+	} catch (e: IllegalArgumentException) {
+		throw ContentTransformationException(starProjectedType<T>())
+	}
+}
+
+@PublishedApi
+internal class ContentTransformationException(
+	type: KType
+) : IllegalArgumentException("Cannot transform this request's body to $type")
+
+@PublishedApi
+internal inline fun <reified T : Any> starProjectedType(): KType {
+	return T::class.starProjectedType
+}
 
 /**
  * Coroutines variant of [ServerRequest.formData].
