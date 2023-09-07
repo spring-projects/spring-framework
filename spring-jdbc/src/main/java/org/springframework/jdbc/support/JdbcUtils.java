@@ -415,14 +415,14 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Return whether the given JDBC driver supports JDBC 2.0 batch updates.
+	 * Return whether the given JDBC driver supports JDBC batch updates.
 	 * <p>Typically invoked right before execution of a given set of statements:
 	 * to decide whether the set of SQL statements should be executed through
-	 * the JDBC 2.0 batch mechanism or simply in a traditional one-by-one fashion.
+	 * the JDBC batch mechanism or simply in a traditional one-by-one fashion.
 	 * <p>Logs a warning if the "supportsBatchUpdates" methods throws an exception
 	 * and simply returns {@code false} in that case.
 	 * @param con the Connection to check
-	 * @return whether JDBC 2.0 batch updates are supported
+	 * @return whether JDBC batch updates are supported
 	 * @see java.sql.DatabaseMetaData#supportsBatchUpdates()
 	 */
 	public static boolean supportsBatchUpdates(Connection con) {
@@ -492,8 +492,8 @@ public abstract class JdbcUtils {
 	/**
 	 * Determine the column name to use. The column name is determined based on a
 	 * lookup using ResultSetMetaData.
-	 * <p>This method implementation takes into account recent clarifications
-	 * expressed in the JDBC 4.0 specification:
+	 * <p>This method's implementation takes into account clarifications expressed
+	 * in the JDBC 4.0 specification:
 	 * <p><i>columnLabel - the label for the column specified with the SQL AS clause.
 	 * If the SQL AS clause was not specified, then the label is the name of the column</i>.
 	 * @param resultSetMetaData the current meta-data to use

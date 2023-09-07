@@ -404,7 +404,7 @@ public class TableMetaDataContext {
 
 
 	/**
-	 * Does this database support the JDBC 3.0 feature of retrieving generated keys?
+	 * Does this database support the JDBC feature for retrieving generated keys?
 	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	public boolean isGetGeneratedKeysSupported() {
@@ -412,16 +412,19 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Does this database support a simple query to retrieve the generated key when
-	 * the JDBC 3.0 feature of retrieving generated keys is not supported?
+	 * Does this database support a simple query to retrieve generated keys when
+	 * the JDBC feature for retrieving generated keys is not supported?
 	 * @see #isGetGeneratedKeysSupported()
+	 * @see #getSimpleQueryForGetGeneratedKey(String, String)
 	 */
 	public boolean isGetGeneratedKeysSimulated() {
 		return obtainMetaDataProvider().isGetGeneratedKeysSimulated();
 	}
 
 	/**
-	 * Get the simple query to retrieve a generated key.
+	 * Get the simple query to retrieve generated keys when the JDBC feature for
+	 * retrieving generated keys is not supported.
+	 * @see #isGetGeneratedKeysSimulated()
 	 */
 	@Nullable
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
@@ -429,7 +432,8 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Is a column name String array for retrieving generated keys supported?
+	 * Does this database support a column name String array for retrieving generated
+	 * keys?
 	 * @see java.sql.Connection#createStruct(String, Object[])
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {

@@ -25,7 +25,7 @@ package org.springframework.transaction;
  * Just use this programmatic savepoint handling for advanced needs;
  * else, a subtransaction with PROPAGATION_NESTED is preferable.
  *
- * <p>This interface is inspired by JDBC 3.0's Savepoint mechanism
+ * <p>This interface is inspired by JDBC's Savepoint mechanism
  * but is independent of any specific persistence technology.
  *
  * @author Juergen Hoeller

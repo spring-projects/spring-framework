@@ -165,7 +165,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 	/**
-	 * Return whether JDBC 3.0 Savepoints are supported.
+	 * Return whether JDBC Savepoints are supported.
 	 * Caches the flag for the lifetime of this ConnectionHolder.
 	 * @throws SQLException if thrown by the JDBC driver
 	 */
@@ -177,7 +177,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 	/**
-	 * Create a new JDBC 3.0 Savepoint for the current Connection,
+	 * Create a new JDBC Savepoint for the current Connection,
 	 * using generated savepoint names that are unique for the Connection.
 	 * @return the new Savepoint
 	 * @throws SQLException if thrown by the JDBC driver

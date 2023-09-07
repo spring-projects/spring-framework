@@ -39,10 +39,10 @@ import javax.sql.DataSource;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>HINT:</b> Since Microsoft SQL Server supports the JDBC 3.0 {@code getGeneratedKeys}
- * method, it is recommended to use IDENTITY columns directly in the tables and then using a
- * {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or utilizing
- * a {@link org.springframework.jdbc.support.KeyHolder} when calling the with the
+ * <b>HINT:</b> Since Microsoft SQL Server supports the JDBC {@code getGeneratedKeys}
+ * method, it is recommended to use IDENTITY columns directly in the tables and then
+ * use a {@link org.springframework.jdbc.core.simple.SimpleJdbcInsert} or a
+ * {@link org.springframework.jdbc.support.KeyHolder} when calling the
  * {@code update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)}
  * method of the {@link org.springframework.jdbc.core.JdbcTemplate}.
  *

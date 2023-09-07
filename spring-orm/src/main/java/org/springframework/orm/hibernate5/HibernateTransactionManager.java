@@ -87,7 +87,7 @@ import org.springframework.util.Assert;
  * transaction. The DataSource that Hibernate uses needs to be JTA-enabled in
  * such a scenario (see container setup).
  *
- * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * <p>This transaction manager supports nested transactions via JDBC Savepoints.
  * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
  * to "false", though, as nested transactions will just apply to the JDBC Connection,
  * not to the Hibernate Session and its cached entity objects and related context.

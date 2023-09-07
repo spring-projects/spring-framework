@@ -33,8 +33,8 @@ import org.springframework.lang.Nullable;
  * <p>The LOB creation part is where {@link LobHandler} implementations usually
  * differ. Possible strategies include usage of
  * {@code PreparedStatement.setBinaryStream/setCharacterStream} but also
- * {@code PreparedStatement.setBlob/setClob} with either a stream argument
- * (requires JDBC 4.0) or {@code java.sql.Blob/Clob} wrapper objects.
+ * {@code PreparedStatement.setBlob/setClob} with either a stream argument or
+ * {@code java.sql.Blob/Clob} wrapper objects.
  *
  * <p>A LobCreator represents a session for creating BLOBs: It is <i>not</i>
  * thread-safe and needs to be instantiated for each statement execution or for
