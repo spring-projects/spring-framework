@@ -43,7 +43,7 @@ public class DefaultUriBuilderFactoryTests {
 	@Test // SPR-17465
 	public void defaultSettingsWithBuilder() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		URI uri = factory.builder().path("/foo/{id}").build("a/b");
+		URI uri = factory.builder().appendPath("/foo/{id}").build("a/b");
 		assertThat(uri.toString()).isEqualTo("/foo/a%2Fb");
 	}
 

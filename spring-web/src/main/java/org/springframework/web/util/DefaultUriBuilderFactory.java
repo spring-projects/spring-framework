@@ -263,7 +263,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 					result.pathSegment(segment);
 				}
 				if (path != null && path.endsWith("/")) {
-					result.path("/");
+					result.appendPath("/");
 				}
 			}
 		}
@@ -300,6 +300,13 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder appendPath(String path) {
+			this.uriComponentsBuilder.appendPath(path);
+			return this;
+		}
+
+		@Override
+		@Deprecated
 		public DefaultUriBuilder path(String path) {
 			this.uriComponentsBuilder.path(path);
 			return this;

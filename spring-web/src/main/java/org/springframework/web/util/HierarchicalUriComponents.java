@@ -919,7 +919,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-			builder.path(getPath());
+			builder.appendPath(getPath());
 		}
 
 		@Override

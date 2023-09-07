@@ -79,6 +79,37 @@ public interface UriBuilder {
 
 	/**
 	 * Append to the path of this builder.
+	 * <p>The given value is appended as-is to previous {@link #appendPath(String) path}
+	 * values without inserting any additional slashes. For example:
+	 * <pre class="code">
+	 *
+	 * builder.appendPath("/first-").appendPath("value/").appendPath("/{id}").build("123")
+	 *
+	 * // Results is "/first-value/123"
+	 * </pre>
+	 * <p>By contrast {@link #pathSegment(String...) pathSegment} does insert
+	 * slashes between individual path segments. For example:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value").path("/")
+	 *
+	 * // Results is "/first-value/second-value/"
+	 * </pre>
+	 * <p>The resulting full path is normalized to eliminate duplicate slashes.
+	 * <p><strong>Note:</strong> When inserting a URI variable value that
+	 * contains slashes in a {@link #appendPath(String) path}, whether those are
+	 * encoded depends on the configured encoding mode. For more details, see
+	 * {@link UriComponentsBuilder#encode()}, or otherwise if building URIs
+	 * indirectly via {@code WebClient} or {@code RestTemplate}, see its
+	 * {@link DefaultUriBuilderFactory#setEncodingMode encodingMode}.
+	 * Also see the <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#web-uri-encoding">
+	 * URI Encoding</a> section of the reference docs.
+	 * @param path the URI path
+	 */
+	UriBuilder appendPath(String path);
+
+	/**
+	 * Append to the path of this builder.
 	 * <p>The given value is appended as-is to previous {@link #path(String) path}
 	 * values without inserting any additional slashes. For example:
 	 * <pre class="code">
@@ -105,7 +136,9 @@ public interface UriBuilder {
 	 * Also see the <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#web-uri-encoding">
 	 * URI Encoding</a> section of the reference docs.
 	 * @param path the URI path
+	 * @deprecated in favor of {@link #appendPath(String)}
 	 */
+	@Deprecated
 	UriBuilder path(String path);
 
 	/**
@@ -129,7 +162,7 @@ public interface UriBuilder {
 	 *
 	 * // Results is "/ba%2Fz/a%2Fb"
 	 * </pre>
-	 * To insert a trailing slash, use the {@link #path} builder method:
+	 * To insert a trailing slash, use the {@link #appendPath} builder method:
 	 * <pre class="code">
 	 *
 	 * builder.pathSegment("first-value", "second-value").path("/")

@@ -103,7 +103,7 @@ class UriComponentsTests {
 
 	@Test
 	void expand() {
-		UriComponents uri = UriComponentsBuilder.fromUriString("https://example.com").path("/{foo} {bar}").build();
+		UriComponents uri = UriComponentsBuilder.fromUriString("https://example.com").appendPath("/{foo} {bar}").build();
 		uri = uri.expand("1 2", "3 4");
 
 		assertThat(uri.getPath()).isEqualTo("/1 2 3 4");
@@ -201,7 +201,7 @@ class UriComponentsTests {
 	@Test
 	void serializable() throws Exception {
 		UriComponents uri = UriComponentsBuilder.fromUriString(
-				"https://example.com").path("/{foo}").query("bar={baz}").build();
+				"https://example.com").appendPath("/{foo}").query("bar={baz}").build();
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -226,9 +226,9 @@ class UriComponentsTests {
 	@Test
 	void equalsHierarchicalUriComponents() {
 		String url = "https://example.com";
-		UriComponents uric1 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bar={baz}").build();
-		UriComponents uric2 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bar={baz}").build();
-		UriComponents uric3 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bin={baz}").build();
+		UriComponents uric1 = UriComponentsBuilder.fromUriString(url).appendPath("/{foo}").query("bar={baz}").build();
+		UriComponents uric2 = UriComponentsBuilder.fromUriString(url).appendPath("/{foo}").query("bar={baz}").build();
+		UriComponents uric3 = UriComponentsBuilder.fromUriString(url).appendPath("/{foo}").query("bin={baz}").build();
 
 		assertThat(uric1).isInstanceOf(HierarchicalUriComponents.class);
 		assertThat(uric1).isEqualTo(uric1);

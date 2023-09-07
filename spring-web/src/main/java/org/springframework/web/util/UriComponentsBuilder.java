@@ -50,7 +50,7 @@ import org.springframework.web.util.UriComponents.UriTemplateVariables;
  * <li>Create a {@code UriComponentsBuilder} with one of the static factory methods
  * (such as {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
  * <li>Set the various URI components through the respective methods ({@link #scheme(String)},
- * {@link #userInfo(String)}, {@link #host(String)}, {@link #port(int)}, {@link #path(String)},
+ * {@link #userInfo(String)}, {@link #host(String)}, {@link #port(int)}, {@link #appendPath(String)},
  * {@link #pathSegment(String...)}, {@link #queryParam(String, Object...)}, and
  * {@link #fragment(String)}.</li>
  * <li>Build the {@link UriComponents} instance with the {@link #build()} method.</li>
@@ -180,7 +180,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 */
 	public static UriComponentsBuilder fromPath(String path) {
 		UriComponentsBuilder builder = new UriComponentsBuilder();
-		builder.path(path);
+		builder.appendPath(path);
 		return builder;
 	}
 
@@ -251,7 +251,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				if (StringUtils.hasLength(port)) {
 					builder.port(port);
 				}
-				builder.path(path);
+				builder.appendPath(path);
 				builder.query(query);
 			}
 			if (StringUtils.hasText(fragment)) {
@@ -295,7 +295,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			if (StringUtils.hasLength(port)) {
 				builder.port(port);
 			}
-			builder.path(matcher.group(8));
+			builder.appendPath(matcher.group(8));
 			builder.query(matcher.group(10));
 			String fragment = matcher.group(12);
 			if (StringUtils.hasText(fragment)) {
@@ -551,7 +551,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * of the given {@link UriComponents} instance.
 	 * <p>For the semantics of each component (i.e. set vs append) check the
 	 * builder methods on this class. For example {@link #host(String)} sets
-	 * while {@link #path(String)} appends.
+	 * while {@link #appendPath(String)} appends.
 	 * @param uriComponents the UriComponents to copy from
 	 * @return this UriComponentsBuilder
 	 */
@@ -570,7 +570,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	/**
 	 * Set the URI scheme-specific-part. When invoked, this method overwrites
 	 * {@linkplain #userInfo(String) user-info}, {@linkplain #host(String) host},
-	 * {@linkplain #port(int) port}, {@linkplain #path(String) path}, and
+	 * {@linkplain #port(int) port}, {@linkplain #appendPath(String) path}, and
 	 * {@link #query(String) query}.
 	 * @param ssp the URI scheme-specific-part, may contain URI template parameters
 	 * @return this UriComponentsBuilder
@@ -617,10 +617,16 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	@Override
-	public UriComponentsBuilder path(String path) {
+	public UriComponentsBuilder appendPath(String path) {
 		this.pathBuilder.addPath(path);
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	@Override
+	@Deprecated
+	public UriComponentsBuilder path(String path) {
+		return appendPath(path);
 	}
 
 	@Override

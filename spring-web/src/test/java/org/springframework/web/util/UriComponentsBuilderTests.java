@@ -73,7 +73,7 @@ class UriComponentsBuilderTests {
 	void plain() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.scheme("https").host("example.com")
-				.path("foo").queryParam("bar").fragment("baz").build();
+				.appendPath("foo").queryParam("bar").fragment("baz").build();
 
 		assertThat(result.getScheme()).isEqualTo("https");
 		assertThat(result.getHost()).isEqualTo("example.com");
@@ -379,7 +379,7 @@ class UriComponentsBuilderTests {
 
 	@Test
 	void pathThenPath() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar").path("ba/z");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar").appendPath("ba/z");
 		UriComponents result = builder.build().encode();
 
 		assertThat(result.getPath()).isEqualTo("/foo/barba/z");
@@ -406,7 +406,7 @@ class UriComponentsBuilderTests {
 
 	@Test
 	void pathSegmentsThenPath() {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().pathSegment("foo").path("/");
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().pathSegment("foo").appendPath("/");
 		UriComponents result = builder.build();
 
 		assertThat(result.getPath()).isEqualTo("/foo/");
@@ -648,24 +648,24 @@ class UriComponentsBuilderTests {
 				.isEqualTo("../../");
 		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath())
 				.isEqualTo("../../");
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toString())
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).appendPath("foo/../bar").build().toString())
 				.isEqualTo(baseUrl + "/foo/../bar");
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUriString())
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).appendPath("foo/../bar").build().toUriString())
 				.isEqualTo(baseUrl + "/foo/../bar");
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUri().getPath())
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).appendPath("foo/../bar").build().toUri().getPath())
 				.isEqualTo("/foo/../bar");
 	}
 
 	@Test
 	void emptySegments() {
 		String baseUrl = "https://example.com/abc/";
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/y/z").build().toString())
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).appendPath("/x/y/z").build().toString())
 				.isEqualTo("https://example.com/abc/x/y/z");
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x", "y", "z").build().toString())
 				.isEqualTo("https://example.com/abc/x/y/z");
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/").path("/y/z").build().toString())
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).appendPath("/x/").appendPath("/y/z").build().toString())
 				.isEqualTo("https://example.com/abc/x/y/z");
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x").path("y").build().toString())
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x").appendPath("y").build().toString())
 				.isEqualTo("https://example.com/abc/x/y");
 	}
 
@@ -685,10 +685,10 @@ class UriComponentsBuilderTests {
 	@Test  // gh-25243
 	void testCloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
-		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1").encode();
+		builder1.scheme("http").host("e1.com").appendPath("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1").encode();
 
 		UriComponentsBuilder builder2 = builder1.cloneBuilder();
-		builder2.scheme("https").host("e2.com").path("p2").pathSegment("{ps2}").queryParam("q2").fragment("f2");
+		builder2.scheme("https").host("e2.com").appendPath("p2").pathSegment("{ps2}").queryParam("q2").fragment("f2");
 
 		builder1.queryParam("q1", "y");  // one more entry for an existing parameter
 
@@ -714,7 +714,7 @@ class UriComponentsBuilderTests {
 		vars.put("ps2", "bar");
 
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
-		builder1.scheme("http").host("e1.com").userInfo("user:pwd").path("/p1").pathSegment("{ps1}")
+		builder1.scheme("http").host("e1.com").userInfo("user:pwd").appendPath("/p1").pathSegment("{ps1}")
 				.pathSegment("{ps2}").queryParam("q1").fragment("f1").uriVariables(vars).encode();
 
 		UriComponentsBuilder builder2 = builder1.cloneBuilder();
@@ -793,7 +793,7 @@ class UriComponentsBuilderTests {
 
 	@Test  // gh-26012
 	void verifyDoubleSlashReplacedWithSingleOne() {
-		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build().getPath();
+		String path = UriComponentsBuilder.fromPath("/home/").appendPath("/path").build().getPath();
 		assertThat(path).isEqualTo("/home/path");
 	}
 
