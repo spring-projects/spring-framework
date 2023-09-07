@@ -30,7 +30,7 @@ import org.springframework.util.ResourceUtils;
  * based on a file name prefix and an extension with convenience to support
  * multiple classpath locations.
  *
- * <p>Only register hints for matching classpath locations, which allows for
+ * <p>Only registers hints for matching classpath locations, which allows for
  * several locations to be provided without contributing unnecessary hints.
  *
  * @author Stephane Nicoll
@@ -49,8 +49,8 @@ public class FilePatternResourceHintsRegistrar {
 	 * extensions.
 	 * @param names the file names
 	 * @param locations the classpath locations
-	 * @param extensions the file extensions (starts with a dot)
-	 * @deprecated as of 6.0.12 in favor of {@link #forClassPathLocations(String...) the builder}
+	 * @param extensions the file extensions (starting with a dot)
+	 * @deprecated as of 6.0.12 in favor of {@linkplain #forClassPathLocations(String...) the builder}
 	 */
 	@Deprecated(since = "6.0.12", forRemoval = true)
 	public FilePatternResourceHintsRegistrar(List<String> names, List<String> locations,
@@ -74,7 +74,7 @@ public class FilePatternResourceHintsRegistrar {
 
 	@Deprecated(since = "6.0.12", forRemoval = true)
 	public void registerHints(ResourceHints hints, @Nullable ClassLoader classLoader) {
-		ClassLoader classLoaderToUse = (classLoader != null) ? classLoader : getClass().getClassLoader();
+		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : getClass().getClassLoader());
 		List<String> includes = new ArrayList<>();
 		for (String location : this.locations) {
 			if (classLoaderToUse.getResource(location) != null) {
@@ -118,7 +118,7 @@ public class FilePatternResourceHintsRegistrar {
 
 		/**
 		 * Consider the specified file prefixes. Any file whose name starts with one
-		 * of the specified prefix is considered. A prefix cannot contain the {@code *}
+		 * of the specified prefixes is considered. A prefix cannot contain the {@code *}
 		 * character.
 		 * @param filePrefixes the file prefixes to consider
 		 * @return this builder
@@ -129,8 +129,8 @@ public class FilePatternResourceHintsRegistrar {
 		}
 
 		/**
-		 * Consider the specified file extensions. A file extension must starts with a
-		 * {@code .} character..
+		 * Consider the specified file extensions. A file extension must start with a
+		 * {@code .} character.
 		 * @param fileExtensions the file extensions to consider
 		 * @return this builder
 		 */
@@ -147,8 +147,8 @@ public class FilePatternResourceHintsRegistrar {
 
 		/**
 		 * Register resource hints for the current state of this builder. For each
-		 * classpath location that resolves against the {@code ClassLoader}, file
-		 * starting with the configured file prefixes and extensions are registered.
+		 * classpath location that resolves against the {@code ClassLoader}, files
+		 * with the configured file prefixes and extensions are registered.
 		 * @param hints the hints contributed so far for the deployment unit
 		 * @param classLoader the classloader, or {@code null} if even the system ClassLoader isn't accessible
 		 */
@@ -173,13 +173,13 @@ public class FilePatternResourceHintsRegistrar {
 			return parsedLocations;
 		}
 
-		private static List<String> validateFilePrefixes(String... fileNames) {
-			for (String name : fileNames) {
-				if (name.contains("*")) {
-					throw new IllegalArgumentException("File prefix '" + name + "' cannot contain '*'");
+		private static List<String> validateFilePrefixes(String... filePrefixes) {
+			for (String filePrefix : filePrefixes) {
+				if (filePrefix.contains("*")) {
+					throw new IllegalArgumentException("File prefix '" + filePrefix + "' cannot contain '*'");
 				}
 			}
-			return Arrays.asList(fileNames);
+			return Arrays.asList(filePrefixes);
 		}
 
 		private static List<String> validateFileExtensions(String... fileExtensions) {
@@ -192,4 +192,5 @@ public class FilePatternResourceHintsRegistrar {
 		}
 
 	}
+
 }
