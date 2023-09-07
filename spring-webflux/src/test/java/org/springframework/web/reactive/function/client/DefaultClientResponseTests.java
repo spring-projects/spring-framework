@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalLong;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -344,6 +346,40 @@ class DefaultClientResponseTests {
 		assertThat(exception.getHeaders()).containsExactly(entry("Content-Type",
 				Collections.singletonList("text/plain")));
 		assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
+	}
+
+	@Test
+	void createExceptionAndDecodeContent() {
+		byte[] bytes = "{\"name\":\"Jason\"}".getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
+
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(mockResponse.getBody()).willReturn(Flux.just(buffer));
+
+		given(mockExchangeStrategies.messageReaders()).willReturn(List.of(
+				new DecoderHttpMessageReader<>(new ByteArrayDecoder()),
+				new DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
+
+		WebClientResponseException ex = defaultClientResponse.createException().block();
+		assertThat(ex.getResponseBodyAs(Map.class)).hasSize(1).containsEntry("name", "Jason");
+	}
+
+	@Test
+	void createExceptionAndDecodeWithoutContent() {
+		byte[] bytes = new byte[0];
+		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
+
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(mockResponse.getBody()).willReturn(Flux.just(buffer));
+
+		given(mockExchangeStrategies.messageReaders()).willReturn(List.of(
+				new DecoderHttpMessageReader<>(new ByteArrayDecoder()),
+				new DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
+
+		WebClientResponseException ex = defaultClientResponse.createException().block();
+		assertThat(ex.getResponseBodyAs(Map.class)).isNull();
 	}
 
 	@Test
