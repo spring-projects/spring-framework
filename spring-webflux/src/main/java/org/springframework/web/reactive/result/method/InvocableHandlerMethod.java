@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import kotlin.coroutines.CoroutineContext;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.KCallablesJvm;
@@ -48,6 +49,7 @@ import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.server.CoWebFilter;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -152,7 +154,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with a {@link HandlerResult}
 	 */
-	@SuppressWarnings({"KotlinInternalInJava", "unchecked"})
+	@SuppressWarnings("unchecked")
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
@@ -167,12 +169,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
 				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-					if (isSuspendingFunction) {
-						value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
-					}
-					else {
-						value = KotlinDelegate.invokeFunction(method, getBean(), args);
-					}
+					value = KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange);
 				}
 				else {
 					value = method.invoke(getBean(), args);
@@ -297,25 +294,38 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		@Nullable
 		@SuppressWarnings("deprecation")
-		public static Object invokeFunction(Method method, Object target, Object[] args) {
-			KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
-			if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
-				KCallablesJvm.setAccessible(function, true);
-			}
-			Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
-			int index = 0;
-			for (KParameter parameter : function.getParameters()) {
-				switch (parameter.getKind()) {
-					case INSTANCE -> argMap.put(parameter, target);
-					case VALUE -> {
-						if (!parameter.isOptional() || args[index] != null) {
-							argMap.put(parameter, args[index]);
-						}
-						index++;
-					}
+		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
+				ServerWebExchange exchange) {
+
+			if (isSuspendingFunction) {
+				Object coroutineContext = exchange.getAttribute(CoWebFilter.COROUTINE_CONTEXT_ATTRIBUTE);
+				if (coroutineContext == null) {
+					return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
+				}
+				else {
+					return CoroutinesUtils.invokeSuspendingFunction((CoroutineContext) coroutineContext, method, target, args);
 				}
 			}
-			return function.callBy(argMap);
+			else {
+				KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+				if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+					KCallablesJvm.setAccessible(function, true);
+				}
+				Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
+				int index = 0;
+				for (KParameter parameter : function.getParameters()) {
+					switch (parameter.getKind()) {
+						case INSTANCE -> argMap.put(parameter, target);
+						case VALUE -> {
+							if (!parameter.isOptional() || args[index] != null) {
+								argMap.put(parameter, args[index]);
+							}
+							index++;
+						}
+					}
+				}
+				return function.callBy(argMap);
+			}
 		}
 	}
 
