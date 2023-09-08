@@ -39,6 +39,10 @@ import org.springframework.util.Assert;
  * and {@link Lifecycle} and is expected typically to be declared as a
  * Spring-managed bean.
  *
+ * <p>Notice that after a {@link Lifecycle} stop/restart, new instances of
+ * the configured {@link LoopResources} and {@link ConnectionProvider} are
+ * created, so any references to those should be updated.
+ *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
