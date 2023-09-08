@@ -258,7 +258,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return identifierNameToUse(schemaName);
 	}
 
-	private String identifierNameToUse(String identifierName) {
+	private String identifierNameToUse(@Nullable String identifierName) {
 		if (identifierName == null) {
 			return null;
 		}
