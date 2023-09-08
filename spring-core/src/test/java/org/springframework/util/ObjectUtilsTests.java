@@ -1052,8 +1052,8 @@ class ObjectUtilsTests {
 		void nullSafeConciseToStringForEmptyCollections() {
 			List<String> list = List.of();
 			Set<Integer> set = Set.of();
-			assertThat(ObjectUtils.nullSafeConciseToString(list)).isEqualTo("[]");
-			assertThat(ObjectUtils.nullSafeConciseToString(set)).isEqualTo("[]");
+			assertThat(ObjectUtils.nullSafeConciseToString(list)).isEqualTo("[...]");
+			assertThat(ObjectUtils.nullSafeConciseToString(set)).isEqualTo("[...]");
 		}
 
 		@Test
@@ -1066,8 +1066,8 @@ class ObjectUtilsTests {
 
 		@Test
 		void nullSafeConciseToStringForEmptyMaps() {
-			Map<String, String> map = new HashMap<String, String>();
-			assertThat(ObjectUtils.nullSafeConciseToString(map)).isEqualTo("{}");
+			Map<String, String> map = Map.of();
+			assertThat(ObjectUtils.nullSafeConciseToString(map)).isEqualTo("{...}");
 		}
 
 		@Test
