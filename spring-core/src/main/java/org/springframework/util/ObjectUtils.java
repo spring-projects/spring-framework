@@ -70,7 +70,8 @@ public abstract class ObjectUtils {
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final String NON_EMPTY_ARRAY = ARRAY_START + "..." + ARRAY_END;
-	private static final String NON_EMPTY_COLLECTION = "[...]";
+	private static final String COLLECTION = "[...]";
+	private static final String MAP = NON_EMPTY_ARRAY;
 
 
 	/**
@@ -952,11 +953,10 @@ public abstract class ObjectUtils {
 			return (Array.getLength(obj) == 0 ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
 		}
 		if (obj instanceof Collection) {
-			return NON_EMPTY_COLLECTION;
+			return COLLECTION;
 		}
 		if (obj instanceof Map) {
-			// NON_EMPTY_ARRAY is also used for maps.
-			return NON_EMPTY_ARRAY;
+			return MAP;
 		}
 		if (obj instanceof Class<?> clazz) {
 			return clazz.getName();
