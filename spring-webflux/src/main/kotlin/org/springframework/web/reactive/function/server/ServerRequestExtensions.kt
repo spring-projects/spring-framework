@@ -76,6 +76,7 @@ fun <T : Any> ServerRequest.bodyToFlow(clazz: KClass<T>): Flow<T> =
 /**
  * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Sebastien Deleuze
  * @since 5.2
  */
@@ -86,6 +87,7 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
  * `KClass` non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  * Please consider `awaitBody<Foo>` variant if possible.
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Igor Manushin
  * @since 5.3
  */

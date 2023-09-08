@@ -102,6 +102,7 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
  * `KClass` non-nullable coroutines variant of [ClientResponse.bodyToMono].
  * Please consider `awaitBody<Foo>` variant if possible.
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Igor Manushin
  * @since 5.3
  */

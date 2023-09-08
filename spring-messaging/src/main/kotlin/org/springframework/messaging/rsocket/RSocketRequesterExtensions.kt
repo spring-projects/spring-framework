@@ -110,6 +110,7 @@ suspend fun RSocketRequester.RetrieveSpec.sendAndAwait() {
 /**
  * Coroutines variant of [RSocketRequester.RetrieveSpec.retrieveMono].
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Sebastien Deleuze
  * @since 5.2
  */
