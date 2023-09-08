@@ -29,7 +29,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * A simple implementation of {@link TypeLocator} that uses the default
- * {@link ClassLoader} or a supplied {@link ClassLoader} to locate types.
+ * {@link #StandardTypeLocator() ClassLoader} or a supplied
+ * {@link #StandardTypeLocator(ClassLoader) ClassLoader} to locate types.
  *
  * <p>Supports <em>well-known</em> packages, registered as
  * {@linkplain #registerImport(String) import prefixes}. If a type cannot be found,
@@ -51,6 +52,9 @@ public class StandardTypeLocator implements TypeLocator {
 	/**
 	 * Create a {@code StandardTypeLocator} for the default {@link ClassLoader}
 	 * (typically, the thread context {@code ClassLoader}).
+	 * <p>Favor {@link #StandardTypeLocator(ClassLoader)} over this constructor
+	 * in order to provide a specific {@link ClassLoader} that is able to reliably
+	 * locate user types.
 	 * @see ClassUtils#getDefaultClassLoader()
 	 */
 	public StandardTypeLocator() {
@@ -59,6 +63,9 @@ public class StandardTypeLocator implements TypeLocator {
 
 	/**
 	 * Create a {@code StandardTypeLocator} for the given {@link ClassLoader}.
+	 * <p>Favor this constructor over {@link #StandardTypeLocator()} in order
+	 * to provide a specific {@link ClassLoader} that is able to reliably locate
+	 * user types.
 	 * @param classLoader the {@code ClassLoader} to delegate to
 	 */
 	public StandardTypeLocator(@Nullable ClassLoader classLoader) {
