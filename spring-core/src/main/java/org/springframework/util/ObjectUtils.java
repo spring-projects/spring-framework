@@ -70,8 +70,8 @@ public abstract class ObjectUtils {
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final String NON_EMPTY_ARRAY = ARRAY_START + "..." + ARRAY_END;
-	private static final String EMPTY_COLLECTION = "[]";
-	private static final String NON_EMPTY_COLLECTION = "[...]";
+	private static final String COLLECTION = "[...]";
+	private static final String MAP = NON_EMPTY_ARRAY;
 
 
 	/**
@@ -938,10 +938,9 @@ public abstract class ObjectUtils {
 	 * <li>{@code"Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
 	 * where {@code <concise-string>} is the result of invoking {@link #nullSafeConciseToString}
 	 * on the object contained in the {@code Optional}</li>
-	 * <li>{@code "{}"} if {@code obj} is an empty array or {@link Map}</li>
-	 * <li>{@code "{...}"} if {@code obj} is a non-empty array or {@link Map}</li>
-	 * <li>{@code "[]"} if {@code obj} is an empty {@link Collection}</li>
-	 * <li>{@code "[...]"} if {@code obj} is a non-empty {@link Collection}</li>
+	 * <li>{@code "{}"} if {@code obj} is an empty array</li>
+	 * <li>{@code "{...}"} if {@code obj} is a {@link Map} or a non-empty array</li>
+	 * <li>{@code "[...]"} if {@code obj} is a {@link Collection}</li>
 	 * <li>{@linkplain Class#getName() Class name} if {@code obj} is a {@link Class}</li>
 	 * <li>{@linkplain Charset#name() Charset name} if {@code obj} is a {@link Charset}</li>
 	 * <li>{@linkplain TimeZone#getID() TimeZone ID} if {@code obj} is a {@link TimeZone}</li>
@@ -977,12 +976,11 @@ public abstract class ObjectUtils {
 		if (obj.getClass().isArray()) {
 			return (Array.getLength(obj) == 0 ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
 		}
-		if (obj instanceof Collection<?>) {
-			return (((Collection<?>) obj).isEmpty() ? EMPTY_COLLECTION : NON_EMPTY_COLLECTION);
+		if (obj instanceof Collection) {
+			return COLLECTION;
 		}
-		if (obj instanceof Map<?, ?>) {
-			// EMPTY_ARRAY and NON_EMPTY_ARRAY are also used for maps.
-			return (((Map<?, ?>) obj).isEmpty() ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
+		if (obj instanceof Map) {
+			return MAP;
 		}
 		if (obj instanceof Class<?>) {
 			return ((Class<?>) obj).getName();
