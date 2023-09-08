@@ -27,6 +27,7 @@ dependencies {
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
+	optional("javax.inject:javax.inject")
 	optional("junit:junit")
 	optional("net.sourceforge.htmlunit:htmlunit") {
 		exclude group: "commons-logging", module: "commons-logging"
@@ -70,7 +71,6 @@ dependencies {
 	testImplementation("jakarta.mail:jakarta.mail-api")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("javax.cache:cache-api")
-	testImplementation("javax.inject:javax.inject:1")
 	testImplementation("org.apache.httpcomponents:httpclient") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}

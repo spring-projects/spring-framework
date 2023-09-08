@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import java.lang.reflect.Executable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -41,7 +44,36 @@ import org.springframework.util.ClassUtils;
  * @since 5.2
  * @see TestConstructor
  */
+@SuppressWarnings("unchecked")
 public abstract class TestConstructorUtils {
+
+	private static final Log logger = LogFactory.getLog(TestConstructorUtils.class);
+
+	private static final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(2);
+
+	static {
+		autowiredAnnotationTypes.add(Autowired.class);
+
+		ClassLoader classLoader = TestConstructorUtils.class.getClassLoader();
+		try {
+			autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("jakarta.inject.Inject", classLoader));
+			logger.trace("'jakarta.inject.Inject' annotation found and supported for autowiring");
+		}
+		catch (ClassNotFoundException ex) {
+			// jakarta.inject API not available - simply skip.
+		}
+
+		try {
+			autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("javax.inject.Inject", classLoader));
+			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
+		}
+		catch (ClassNotFoundException ex) {
+			// javax.inject API not available - simply skip.
+		}
+	}
+
 
 	private TestConstructorUtils() {
 	}
@@ -103,8 +135,9 @@ public abstract class TestConstructorUtils {
 	 * conditions is {@code true}.
 	 *
 	 * <ol>
-	 * <li>The constructor is annotated with {@link Autowired @Autowired}.</li>
-	 * <li>The constructor is annotated with {@link jakarta.inject.Inject} or {@code javax.inject.Inject}.</li>
+	 * <li>The constructor is annotated with {@link Autowired @Autowired},
+	 * {@link jakarta.inject.Inject @jakarta.inject.Inject}, or
+	 * {@link javax.inject.Inject @javax.inject.Inject}.</li>
 	 * <li>{@link TestConstructor @TestConstructor} is <em>present</em> or
 	 * <em>meta-present</em> on the test class with
 	 * {@link TestConstructor#autowireMode() autowireMode} set to
@@ -152,30 +185,9 @@ public abstract class TestConstructorUtils {
 		return (autowireMode == AutowireMode.ALL);
 	}
 
-	@SuppressWarnings("unchecked")
 	private static boolean isAnnotatedWithAutowiredOrInject(Constructor<?> constructor) {
-		Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>();
-
-		autowiredAnnotationTypes.add(Autowired.class);
-
-		try {
-			autowiredAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("jakarta.inject.Inject", TestConstructorUtils.class.getClassLoader()));
-		}
-		catch (ClassNotFoundException ex) {
-			// jakarta.inject API not available - simply skip.
-		}
-
-		try {
-			autowiredAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("javax.inject.Inject", TestConstructorUtils.class.getClassLoader()));
-		}
-		catch (ClassNotFoundException ex) {
-			// javax.inject API not available - simply skip.
-		}
-
 		return autowiredAnnotationTypes.stream()
-				.anyMatch(autowiredAnnotationType -> AnnotatedElementUtils.hasAnnotation(constructor, autowiredAnnotationType));
+				.anyMatch(annotationType -> AnnotatedElementUtils.hasAnnotation(constructor, annotationType));
 	}
 
 }
