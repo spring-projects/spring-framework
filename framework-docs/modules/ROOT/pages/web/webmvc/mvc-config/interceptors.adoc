@@ -65,8 +65,6 @@ NOTE: The XML config declares interceptors as `MappedInterceptor` beans, and tho
 turn detected by any `HandlerMapping` bean, including those from other frameworks.
 By contrast, the Java config passes interceptors only to the  `HandlerMapping` beans it manages.
 To re-use the same interceptors across Spring MVC and other framework `HandlerMapping`
-beans with the MVC Java config, either declare `MappedInterceptor` beans, or conifgure the
-same interceptors in both the Java config and in other `HandlerMapping` beans.
-
-
-
+beans with the MVC Java config, either declare `MappedInterceptor` beans (and don't
+manually add them in the Java config), or configure the same interceptors in both
+the Java config and in other `HandlerMapping` beans.
