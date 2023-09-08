@@ -76,7 +76,7 @@ class SpringJUnitJupiterAutowiredConstructorInjectionTests {
 		final Dog dog;
 		final Integer enigma;
 
-		BaseClass(ApplicationContext context, Person dilbert, Dog dog, @Value("${enigma}") Integer enigma) {
+		BaseClass(ApplicationContext context, Person dilbert, Dog dog, Integer enigma) {
 			this.context = context;
 			this.dilbert = dilbert;
 			this.dog = dog;
