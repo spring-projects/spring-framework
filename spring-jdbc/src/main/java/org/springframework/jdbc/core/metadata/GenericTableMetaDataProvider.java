@@ -326,15 +326,13 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			tables = databaseMetaData.getTables(
 					catalogNameToUse(catalogName), schemaNameToUse(schemaName), tableNameToUse(tableName), null);
 			while (tables != null && tables.next()) {
-				TableMetaData tmd = new TableMetaData();
-				tmd.setCatalogName(tables.getString("TABLE_CAT"));
-				tmd.setSchemaName(tables.getString("TABLE_SCHEM"));
-				tmd.setTableName(tables.getString("TABLE_NAME"));
-				if (tmd.getSchemaName() == null) {
+				TableMetaData tmd = new TableMetaData(tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"),
+						tables.getString("TABLE_NAME"));
+				if (tmd.schemaName() == null) {
 					tableMeta.put(this.userName != null ? this.userName.toUpperCase() : "", tmd);
 				}
 				else {
-					tableMeta.put(tmd.getSchemaName().toUpperCase(), tmd);
+					tableMeta.put(tmd.schemaName().toUpperCase(), tmd);
 				}
 			}
 		}
@@ -395,9 +393,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	 */
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet tableColumns = null;
-		String metaDataCatalogName = metaDataCatalogNameToUse(tmd.getCatalogName());
-		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
-		String metaDataTableName = tableNameToUse(tmd.getTableName());
+		String metaDataCatalogName = metaDataCatalogNameToUse(tmd.catalogName());
+		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.schemaName());
+		String metaDataTableName = tableNameToUse(tmd.tableName());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving meta-data for " + metaDataCatalogName + '/' +
 					metaDataSchemaName + '/' + metaDataTableName);
@@ -446,45 +444,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Class representing table meta-data.
+	 * Record representing table meta-data.
 	 */
-	private static class TableMetaData {
-
-		@Nullable
-		private String catalogName;
-
-		@Nullable
-		private String schemaName;
-
-		@Nullable
-		private String tableName;
-
-		public void setCatalogName(String catalogName) {
-			this.catalogName = catalogName;
-		}
-
-		@Nullable
-		public String getCatalogName() {
-			return this.catalogName;
-		}
-
-		public void setSchemaName(String schemaName) {
-			this.schemaName = schemaName;
-		}
-
-		@Nullable
-		public String getSchemaName() {
-			return this.schemaName;
-		}
-
-		public void setTableName(String tableName) {
-			this.tableName = tableName;
-		}
-
-		@Nullable
-		public String getTableName() {
-			return this.tableName;
-		}
+	private record TableMetaData(@Nullable String catalogName, @Nullable String schemaName,
+			@Nullable String tableName) {
 	}
 
 }
