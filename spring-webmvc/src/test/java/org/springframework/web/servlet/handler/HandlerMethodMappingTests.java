@@ -39,9 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.ComplexWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -133,6 +131,7 @@ public class HandlerMethodMappingTests {
 		assertThat(chain).isNotNull();
 		assertThat(chain.getInterceptorList()).isNotEmpty();
 		assertThat(chain.getHandler()).isInstanceOf(HttpRequestHandler.class);
+
 		chain.getInterceptorList().get(0).preHandle(request, response, chain.getHandler());
 		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
 
@@ -154,6 +153,7 @@ public class HandlerMethodMappingTests {
 		assertThat(chain).isNotNull();
 		assertThat(chain.getInterceptorList()).isNotEmpty();
 		assertThat(chain.getHandler()).isInstanceOf(HttpRequestHandler.class);
+
 		chain.getInterceptorList().get(0).preHandle(request, response, chain.getHandler());
 		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
 
@@ -175,13 +175,10 @@ public class HandlerMethodMappingTests {
 
 		HandlerExecutionChain chain = this.mapping.getHandler(request);
 		assertThat(chain).isNotNull();
-		chain.addInterceptor(new ComplexWebApplicationContext.MyHandlerInterceptor1());
-		chain.addInterceptor(new ComplexWebApplicationContext.MyHandlerInterceptor2());
-		assertThat(chain.getInterceptorList().size()).isEqualTo(3);
 		assertThat(chain.getHandler()).isInstanceOf(HttpRequestHandler.class);
-		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
-			interceptor.preHandle(request, response, chain.getHandler());
-		}
+		assertThat(chain.getInterceptorList()).isNotEmpty();
+
+		chain.getInterceptorList().get(0).preHandle(request, response, chain.getHandler());
 		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
 
 		assertThat(response.getStatus()).isEqualTo(200);

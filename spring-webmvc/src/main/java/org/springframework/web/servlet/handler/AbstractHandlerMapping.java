@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -662,46 +661,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Update the HandlerExecutionChain for CORS-related handling.
-	 * <p>For pre-flight requests, the default implementation inserts a
-	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
-	 * But does not abort the execution chain.
-	 * <p>For actual requests, the default implementation inserts a
-	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
+	 * Update {@link HandlerExecutionChain} for CORS requests, inserting an
+	 * interceptor at the start of the chain to perform CORS checks, and
+	 * also using a no-op handler for preflight requests.
 	 * @param request the current request
-	 * @param chain the handler chain
-	 * @param config the applicable CORS configuration (possibly {@code null})
+	 * @param chain the chain to update
+	 * @param config the CORS configuration applicable to the handler
 	 * @since 4.2
 	 */
-	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
-			HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
-		boolean isPreFlightRequest = CorsUtils.isPreFlightRequest(request);
-		if (isPreFlightRequest) {
-			chain = new HandlerExecutionChain(new PreFlightHandler(config), chain.getInterceptors());
+	protected HandlerExecutionChain getCorsHandlerExecutionChain(
+			HttpServletRequest request, HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
+
+		if (CorsUtils.isPreFlightRequest(request)) {
+			PreFlightHandler preFlightHandler = new PreFlightHandler(config);
+			chain.addInterceptor(0, preFlightHandler);
+			return new HandlerExecutionChain(preFlightHandler, chain.getInterceptors());
 		}
-		chain.addInterceptor(0, new CorsInterceptor(config, isPreFlightRequest));
-		return chain;
-	}
-
-
-	private class PreFlightHandler implements HttpRequestHandler, CorsConfigurationSource {
-
-		@Nullable
-		private final CorsConfiguration config;
-
-		public PreFlightHandler(@Nullable CorsConfiguration config) {
-			this.config = config;
-		}
-
-		@Override
-		public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-			// no-op
-		}
-
-		@Override
-		@Nullable
-		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-			return this.config;
+		else {
+			chain.addInterceptor(0, new CorsInterceptor(config));
+			return chain;
 		}
 	}
 
@@ -710,11 +688,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		@Nullable
 		private final CorsConfiguration config;
-		private final boolean alwaysProceed;
 
-		public CorsInterceptor(@Nullable CorsConfiguration config, boolean alwaysProceed) {
+		public CorsInterceptor(@Nullable CorsConfiguration config) {
 			this.config = config;
-			this.alwaysProceed = alwaysProceed;
 		}
 
 		@Override
@@ -727,14 +703,26 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				return true;
 			}
 
-			boolean proceed = corsProcessor.processRequest(this.config, request, response);
-			return this.alwaysProceed || proceed;
+			return corsProcessor.processRequest(this.config, request, response);
 		}
 
 		@Override
 		@Nullable
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.config;
+		}
+	}
+
+
+	private class PreFlightHandler extends CorsInterceptor implements HttpRequestHandler {
+
+		public PreFlightHandler(@Nullable CorsConfiguration config) {
+			super(config);
+		}
+
+		@Override
+		public void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+			// no-op
 		}
 	}
 
