@@ -309,7 +309,7 @@ how to configure such a bean:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<!-- the factory bean, which contains a method called createInstance() -->
+	<!-- the factory bean, which contains a method called createClientServiceInstance() -->
 	<bean id="serviceLocator" class="examples.DefaultServiceLocator">
 		<!-- inject any dependencies required by this locator bean -->
 	</bean>
