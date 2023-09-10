@@ -27,6 +27,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationRegistry;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,7 +50,7 @@ import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Client to perform HTTP requests, exposing a fluent, synchronous API over
- * underlying HTTP client libraries such the JDK {@code HttpClient}, Apache
+ * underlying HTTP client libraries such as the JDK {@code HttpClient}, Apache
  * HttpComponents, and others.
  *
  * <p>Use static factory methods {@link #create()}, {@link #create(String)},
@@ -363,6 +365,14 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
+
+		/**
+		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use
+		 * for recording HTTP client observations.
+		 * @param observationRegistry the observation registry to use
+		 * @return this builder
+		 */
+		Builder observationRegistry(ObservationRegistry observationRegistry);
 
 		/**
 		 * Apply the given {@code Consumer} to this builder instance.

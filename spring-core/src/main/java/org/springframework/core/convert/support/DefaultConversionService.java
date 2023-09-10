@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.nio.charset.Charset;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.lang.Nullable;
@@ -166,6 +168,14 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new StringToUUIDConverter());
 		converterRegistry.addConverter(UUID.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToPatternConverter());
+		converterRegistry.addConverter(Pattern.class, String.class, new ObjectToStringConverter());
+
+		if (KotlinDetector.isKotlinPresent()) {
+			converterRegistry.addConverter(new StringToRegexConverter());
+			converterRegistry.addConverter(kotlin.text.Regex.class, String.class, new ObjectToStringConverter());
+		}
 	}
 
 }

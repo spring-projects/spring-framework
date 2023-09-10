@@ -17,15 +17,20 @@
 package org.springframework.context.annotation;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -41,8 +46,10 @@ import org.springframework.util.StringUtils;
  * themselves annotated with {@code @Component}.
  *
  * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
- * JSR-330's {@link jakarta.inject.Named} annotations, if available. Note that
- * Spring component annotations always override such standard annotations.
+ * JSR-330's {@link jakarta.inject.Named} annotations (as well as their pre-Jakarta
+ * {@code javax.annotation.ManagedBean} and {@code javax.inject.Named} equivalents),
+ * if available. Note that Spring component annotations always override such
+ * standard annotations.
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
@@ -53,6 +60,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.stereotype.Component#value()
  * @see org.springframework.stereotype.Repository#value()
@@ -71,6 +79,18 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	public static final AnnotationBeanNameGenerator INSTANCE = new AnnotationBeanNameGenerator();
 
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
+
+	/**
+	 * Set used to track which stereotype annotations have already been checked
+	 * to see if they use a convention-based override for the {@code value}
+	 * attribute in {@code @Component}.
+	 * @since 6.1
+	 * @see #determineBeanNameFromAnnotation(AnnotatedBeanDefinition)
+	 */
+	private static final Set<String> conventionBasedStereotypeCheckCache = ConcurrentHashMap.newKeySet();
+
+
+	private final Log logger = LogFactory.getLog(AnnotationBeanNameGenerator.class);
 
 	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
 
@@ -95,24 +115,37 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 */
 	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
-		AnnotationMetadata amd = annotatedDef.getMetadata();
-		Set<String> types = amd.getAnnotationTypes();
-		String beanName = null;
-		for (String type : types) {
-			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
+		AnnotationMetadata metadata = annotatedDef.getMetadata();
+
+		String beanName = getExplicitBeanName(metadata);
+		if (beanName != null) {
+			return beanName;
+		}
+
+		for (String annotationType : metadata.getAnnotationTypes()) {
+			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, annotationType);
 			if (attributes != null) {
-				Set<String> metaTypes = this.metaAnnotationTypesCache.computeIfAbsent(type, key -> {
-					Set<String> result = amd.getMetaAnnotationTypes(key);
+				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType, key -> {
+					Set<String> result = metadata.getMetaAnnotationTypes(key);
 					return (result.isEmpty() ? Collections.emptySet() : result);
 				});
-				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
+				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
 					Object value = attributes.get("value");
-					if (value instanceof String strVal && !strVal.isEmpty()) {
-						if (beanName != null && !strVal.equals(beanName)) {
-							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-									"component names: '" + beanName + "' versus '" + strVal + "'");
+					if (value instanceof String currentName && !currentName.isBlank()) {
+						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
+								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
+							logger.warn("""
+									Support for convention-based stereotype names is deprecated and will \
+									be removed in a future version of the framework. Please annotate the \
+									'value' attribute in @%s with @AliasFor(annotation=Component.class) \
+									to declare an explicit alias for @Component's 'value' attribute."""
+										.formatted(annotationType));
 						}
-						beanName = strVal;
+						if (beanName != null && !currentName.equals(beanName)) {
+							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+									"component names: '" + beanName + "' versus '" + currentName + "'");
+						}
+						beanName = currentName;
 					}
 				}
 			}
@@ -121,8 +154,38 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	}
 
 	/**
+	 * Get the explicit bean name for the underlying class, as configured via
+	 * {@link org.springframework.stereotype.Component @Component} and taking into
+	 * account {@link org.springframework.core.annotation.AliasFor @AliasFor}
+	 * semantics for annotation attribute overrides for {@code @Component}'s
+	 * {@code value} attribute.
+	 * @param metadata the {@link AnnotationMetadata} for the underlying class
+	 * @return the explicit bean name, or {@code null} if not found
+	 * @since 6.1
+	 * @see org.springframework.stereotype.Component#value()
+	 */
+	@Nullable
+	private String getExplicitBeanName(AnnotationMetadata metadata) {
+		List<String> names = metadata.getAnnotations().stream(COMPONENT_ANNOTATION_CLASSNAME)
+				.map(annotation -> annotation.getString(MergedAnnotation.VALUE))
+				.filter(StringUtils::hasText)
+				.map(String::trim)
+				.distinct()
+				.toList();
+
+		if (names.size() == 1) {
+			return names.get(0);
+		}
+		if (names.size() > 1) {
+			throw new IllegalStateException(
+					"Stereotype annotations suggest inconsistent component names: " + names);
+		}
+		return null;
+	}
+
+	/**
 	 * Check whether the given annotation is a stereotype that is allowed
-	 * to suggest a component name through its annotation {@code value()}.
+	 * to suggest a component name through its {@code value()} attribute.
 	 * @param annotationType the name of the annotation class to check
 	 * @param metaAnnotationTypes the names of meta-annotations on the given annotation
 	 * @param attributes the map of attributes for the given annotation
@@ -131,10 +194,11 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	protected boolean isStereotypeWithNameValue(String annotationType,
 			Set<String> metaAnnotationTypes, @Nullable Map<String, Object> attributes) {
 
-		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||
-				metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
+		boolean isStereotype = metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
 				annotationType.equals("jakarta.annotation.ManagedBean") ||
-				annotationType.equals("jakarta.inject.Named");
+				annotationType.equals("javax.annotation.ManagedBean") ||
+				annotationType.equals("jakarta.inject.Named") ||
+				annotationType.equals("javax.inject.Named");
 
 		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}

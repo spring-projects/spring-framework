@@ -73,6 +73,7 @@ dependencies {
 	api(project(":spring-jcl"))
 	compileOnly("io.projectreactor.tools:blockhound")
 	compileOnly("org.graalvm.sdk:graal-sdk")
+	optional("io.micrometer:context-propagation")
 	optional("io.netty:netty-buffer")
 	optional("io.netty:netty5-buffer")
 	optional("io.projectreactor:reactor-core")

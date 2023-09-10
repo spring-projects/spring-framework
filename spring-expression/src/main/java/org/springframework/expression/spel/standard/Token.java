@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ class Token {
 
 	public boolean isNumericRelationalOperator() {
 		return (this.kind == TokenKind.GT || this.kind == TokenKind.GE || this.kind == TokenKind.LT ||
-				this.kind == TokenKind.LE || this.kind==TokenKind.EQ || this.kind==TokenKind.NE);
+				this.kind == TokenKind.LE || this.kind == TokenKind.EQ || this.kind == TokenKind.NE);
 	}
 
 	public String stringValue() {
@@ -87,14 +87,14 @@ class Token {
 
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder();
-		s.append('[').append(this.kind.toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append('[').append(this.kind);
 		if (this.kind.hasPayload()) {
-			s.append(':').append(this.data);
+			sb.append(':').append(this.data);
 		}
-		s.append(']');
-		s.append('(').append(this.startPos).append(',').append(this.endPos).append(')');
-		return s.toString();
+		sb.append(']');
+		sb.append('(').append(this.startPos).append(',').append(this.endPos).append(')');
+		return sb.toString();
 	}
 
 }

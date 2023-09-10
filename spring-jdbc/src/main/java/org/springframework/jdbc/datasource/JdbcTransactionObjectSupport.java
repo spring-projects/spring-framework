@@ -137,7 +137,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementation creates a JDBC 3.0 Savepoint and returns it.
+	 * This implementation creates a JDBC Savepoint and returns it.
 	 * @see java.sql.Connection#setSavepoint
 	 */
 	@Override
@@ -160,7 +160,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	}
 
 	/**
-	 * This implementation rolls back to the given JDBC 3.0 Savepoint.
+	 * This implementation rolls back to the given JDBC Savepoint.
 	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
 	 */
 	@Override
@@ -176,7 +176,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	}
 
 	/**
-	 * This implementation releases the given JDBC 3.0 Savepoint.
+	 * This implementation releases the given JDBC Savepoint.
 	 * @see java.sql.Connection#releaseSavepoint
 	 */
 	@Override

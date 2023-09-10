@@ -80,7 +80,8 @@ public @interface ResponseStatus {
 	/**
 	 * The <em>reason</em> to be used for the response.
 	 * <p>Defaults to an empty string which will be ignored. Set the reason to a
-	 * non-empty value to have it used for the response.
+	 * non-empty value to have it used to send a Servlet container error page.
+	 * In this case, the return value of the handler method will be ignored.
 	 * @see jakarta.servlet.http.HttpServletResponse#sendError(int, String)
 	 */
 	String reason() default "";

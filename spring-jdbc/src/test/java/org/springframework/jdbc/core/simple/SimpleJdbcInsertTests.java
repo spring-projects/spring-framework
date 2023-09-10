@@ -64,6 +64,28 @@ class SimpleJdbcInsertTests {
 	}
 
 
+	/**
+	 * This method does not test any functionality but rather only that
+	 * configuration methods can be chained without compiler errors.
+	 */
+	@Test  // gh-31177
+	void methodChaining() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withCatalogName("my_catalog")
+				.withSchemaName("my_schema")
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingGeneratedKeyColumns("id")
+				.usingQuotedIdentifiers()
+				.withoutTableColumnMetaDataAccess()
+				.includeSynonymsForTableColumnMetaData();
+
+		assertThat(insert).isNotNull();
+
+		// Satisfy the @AfterEach mock verification.
+		connection.close();
+	}
+
 	@Test
 	void noSuchTable() throws Exception {
 		ResultSet resultSet = mock();
@@ -136,6 +158,44 @@ class SimpleJdbcInsertTests {
 
 		verify(columnResultSet).close();
 		verify(tableResultSet).close();
+	}
+
+	@Test
+	void usingColumns() {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("col1", "col2");
+
+		insert.compile();
+
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_table (col1, col2) VALUES(?, ?)");
+	}
+
+	@Test  //  gh-24013
+	void usingColumnsAndQuotedIdentifiers() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingQuotedIdentifiers();
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_table` (`col1`, `col2`) VALUES(?, ?)");
+	}
+
+	@Test  //  gh-24013
+	void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withSchemaName("my_schema")
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingQuotedIdentifiers();
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_schema`.`my_table` (`col1`, `col2`) VALUES(?, ?)");
 	}
 
 }

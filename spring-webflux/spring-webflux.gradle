@@ -24,8 +24,7 @@ dependencies {
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 	}
-	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
-	optional("org.eclipse.jetty.websocket:websocket-jetty-server") {
+	optional("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	optional("org.freemarker:freemarker")
@@ -50,7 +49,6 @@ dependencies {
 	testImplementation("org.apache.tomcat.embed:tomcat-embed-core")
 	testImplementation("org.eclipse.jetty:jetty-reactive-httpclient")
 	testImplementation("org.eclipse.jetty:jetty-server")
-	testImplementation("org.eclipse.jetty:jetty-servlet")
 	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")

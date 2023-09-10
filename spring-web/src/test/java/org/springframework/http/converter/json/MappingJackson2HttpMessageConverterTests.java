@@ -44,7 +44,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
@@ -498,14 +497,15 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result).contains("\"number\":123");
 	}
 
-	@Test
+	@Test // gh-27511
 	public void readWithNoDefaultConstructor() throws Exception {
 		String body = "{\"property1\":\"foo\",\"property2\":\"bar\"}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		assertThatExceptionOfType(HttpMessageConversionException.class).isThrownBy(() ->
-				converter.read(BeanWithNoDefaultConstructor.class, inputMessage))
-			.withMessageStartingWith("Type definition error:");
+		BeanWithNoDefaultConstructor bean =
+				(BeanWithNoDefaultConstructor)converter.read(BeanWithNoDefaultConstructor.class, inputMessage);
+		assertThat(bean.property1).isEqualTo("foo");
+		assertThat(bean.property2).isEqualTo("bar");
 	}
 
 	@Test

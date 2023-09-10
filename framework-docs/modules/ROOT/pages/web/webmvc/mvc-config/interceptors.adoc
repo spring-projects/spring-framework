@@ -52,7 +52,7 @@ The following example shows how to achieve the same configuration in XML:
 	</mvc:interceptors>
 ----
 
-NOTE: Mapped interceptors are not ideally suited as a security layer due to the potential
+NOTE: Interceptors are not ideally suited as a security layer due to the potential
 for a mismatch with annotated controller path matching, which can also match trailing
 slashes and path extensions transparently, along with other path matching options. Many
 of these options have been deprecated but the potential for a mismatch remains.
@@ -61,6 +61,10 @@ https://docs.spring.io/spring-security/reference/servlet/integrations/mvc.html#m
 to align with Spring MVC path matching and also has a security firewall that blocks many
 unwanted characters in URL paths.
 
-
-
-
+NOTE: The XML config declares interceptors as `MappedInterceptor` beans, and those are in
+turn detected by any `HandlerMapping` bean, including those from other frameworks.
+By contrast, the Java config passes interceptors only to the  `HandlerMapping` beans it manages.
+To re-use the same interceptors across Spring MVC and other framework `HandlerMapping`
+beans with the MVC Java config, either declare `MappedInterceptor` beans (and don't
+manually add them in the Java config), or configure the same interceptors in both
+the Java config and in other `HandlerMapping` beans.

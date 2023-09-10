@@ -261,6 +261,17 @@ needs to be capable of `CompletableFuture`-based retrieval. The Spring-provided
 `CaffeineCacheManager` natively supports it when its asynchronous cache mode is
 enabled: set `setAsyncCacheMode(true)` on your `CaffeineCacheManager` instance.
 
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Bean
+	CacheManager cacheManager() {
+		CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+		cacheManager.setCacheSpecification(...);
+		cacheManager.setAsyncCacheMode(true);
+		return cacheManager;
+	}
+----
+
 Last but not least, be aware that annotation-driven caching is not appropriate
 for sophisticated reactive interactions involving composition and back pressure.
 If you choose to declare `@Cacheable` on specific reactive methods, consider the
@@ -489,9 +500,12 @@ Placing this annotation on the class does not turn on any caching operation.
 An operation-level customization always overrides a customization set on `@CacheConfig`.
 Therefore, this gives three levels of customizations for each cache operation:
 
-* Globally configured, available for `CacheManager`, `KeyGenerator`.
+* Globally configured, e.g. through `CachingConfigurer`: see next section.
 * At the class level, using `@CacheConfig`.
 * At the operation level.
+
+NOTE: Provider-specific settings are typically available on the `CacheManager` bean,
+e.g. on `CaffeineCacheManager`. These are effectively also global.
 
 
 [[cache-annotation-enable]]
@@ -511,6 +525,13 @@ To enable caching annotations add the annotation `@EnableCaching` to one of your
 	@Configuration
 	@EnableCaching
 	public class AppConfig {
+
+		@Bean
+		CacheManager cacheManager() {
+			CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+			cacheManager.setCacheSpecification(...);
+			return cacheManager;
+		}
 	}
 ----
 
@@ -525,7 +546,11 @@ Alternatively, for XML configuration you can use the `cache:annotation-driven` e
 			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
-			<cache:annotation-driven/>
+		<cache:annotation-driven/>
+
+		<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
+			<property name="cacheSpecification" value="..."/>
+		</bean>
 	</beans>
 ----
 

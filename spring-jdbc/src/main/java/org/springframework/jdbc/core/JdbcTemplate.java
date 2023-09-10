@@ -1036,10 +1036,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "]");
 		}
+		int batchSize = pss.getBatchSize();
+		if (batchSize == 0) {
+			return new int[0];
+		}
 
 		int[] result = execute(sql, (PreparedStatementCallback<int[]>) ps -> {
 			try {
-				int batchSize = pss.getBatchSize();
 				InterruptibleBatchPreparedStatementSetter ipss =
 						(pss instanceof InterruptibleBatchPreparedStatementSetter ibpss ? ibpss : null);
 				if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {

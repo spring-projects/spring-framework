@@ -28,6 +28,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -41,6 +43,7 @@ import org.springframework.jdbc.core.namedparam.SimplePropertySqlParameterSource
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -102,13 +105,13 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
-		public StatementSpec param(Object value) {
+		public StatementSpec param(@Nullable Object value) {
 			this.indexedParams.add(value);
 			return this;
 		}
 
 		@Override
-		public StatementSpec param(int jdbcIndex, Object value) {
+		public StatementSpec param(int jdbcIndex, @Nullable Object value) {
 			if (jdbcIndex < 1) {
 				throw new IllegalArgumentException("Invalid JDBC index: needs to start at 1");
 			}
@@ -127,18 +130,18 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
-		public StatementSpec param(int jdbcIndex, Object value, int sqlType) {
+		public StatementSpec param(int jdbcIndex, @Nullable Object value, int sqlType) {
 			return param(jdbcIndex, new SqlParameterValue(sqlType, value));
 		}
 
 		@Override
-		public StatementSpec param(String name, Object value) {
+		public StatementSpec param(String name, @Nullable Object value) {
 			this.namedParams.addValue(name, value);
 			return this;
 		}
 
 		@Override
-		public StatementSpec param(String name, Object value, int sqlType) {
+		public StatementSpec param(String name, @Nullable Object value, int sqlType) {
 			this.namedParams.addValue(name, value, sqlType);
 			return this;
 		}
@@ -205,7 +208,7 @@ final class DefaultJdbcClient implements JdbcClient {
 				namedParamOps.query(this.sql, this.namedParamSource, rch);
 			}
 			else {
-				classicOps.query(this.sql, rch, this.indexedParams.toArray());
+				classicOps.query(getPreparedStatementCreatorForIndexedParams(), rch);
 			}
 		}
 
@@ -213,7 +216,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		public <T> T query(ResultSetExtractor<T> rse) {
 			T result = (useNamedParams() ?
 					namedParamOps.query(this.sql, this.namedParamSource, rse) :
-					classicOps.query(this.sql, rse, this.indexedParams.toArray()));
+					classicOps.query(getPreparedStatementCreatorForIndexedParams(), rse));
 			Assert.state(result != null, "No result from ResultSetExtractor");
 			return result;
 		}
@@ -222,14 +225,14 @@ final class DefaultJdbcClient implements JdbcClient {
 		public int update() {
 			return (useNamedParams() ?
 					namedParamOps.update(this.sql, this.namedParamSource) :
-					classicOps.update(this.sql, this.indexedParams.toArray()));
+					classicOps.update(getPreparedStatementCreatorForIndexedParams()));
 		}
 
 		@Override
 		public int update(KeyHolder generatedKeyHolder) {
 			return (useNamedParams() ?
 					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder) :
-					classicOps.update(this.sql, this.indexedParams.toArray(), generatedKeyHolder));
+					classicOps.update(getPreparedStatementCreatorForIndexedParams(), generatedKeyHolder));
 		}
 
 		private boolean useNamedParams() {
@@ -242,6 +245,10 @@ final class DefaultJdbcClient implements JdbcClient {
 						"Configure either individual named parameters or a SqlParameterSource, not both");
 			}
 			return hasNamedParams;
+		}
+
+		private PreparedStatementCreator getPreparedStatementCreatorForIndexedParams() {
+			return new PreparedStatementCreatorFactory(this.sql).newPreparedStatementCreator(this.indexedParams);
 		}
 
 

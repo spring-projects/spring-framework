@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -194,6 +195,20 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	 */
 	public byte[] getContentAsByteArray() {
 		return this.cachedContent.toByteArray();
+	}
+
+	/**
+	 * Return the cached request content as a String, using the configured
+	 * {@link Charset}.
+	 * <p><strong>Note:</strong> The String returned from this method
+	 * reflects the amount of content that has been read at the time when it
+	 * is called. If the application does not read the content, this method
+	 * returns an empty String.
+	 * @since 6.1
+	 * @see #getContentAsByteArray()
+	 */
+	public String getContentAsString() {
+		return this.cachedContent.toString(Charset.forName(getCharacterEncoding()));
 	}
 
 	/**

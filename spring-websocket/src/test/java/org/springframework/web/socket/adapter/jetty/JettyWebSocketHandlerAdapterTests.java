@@ -51,7 +51,7 @@ class JettyWebSocketHandlerAdapterTests {
 
 	@Test
 	void onOpen() throws Exception {
-		this.adapter.onWebSocketConnect(this.session);
+		this.adapter.onWebSocketOpen(this.session);
 		verify(this.webSocketHandler).afterConnectionEstablished(this.webSocketSession);
 	}
 

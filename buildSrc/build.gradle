@@ -38,6 +38,10 @@ gradlePlugin {
 			id = "org.springframework.build.conventions"
 			implementationClass = "org.springframework.build.ConventionsPlugin"
 		}
+		localDevPlugin {
+			id = "org.springframework.build.localdev"
+			implementationClass = "org.springframework.build.dev.LocalDevelopmentPlugin"
+		}
 		optionalDependenciesPlugin {
 			id = "org.springframework.build.optional-dependencies"
 			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"

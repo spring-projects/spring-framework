@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.lang.Nullable;
@@ -83,6 +84,18 @@ public abstract class ClassFilters {
 	public static ClassFilter intersection(ClassFilter[] classFilters) {
 		Assert.notEmpty(classFilters, "ClassFilter array must not be empty");
 		return new IntersectionClassFilter(classFilters);
+	}
+
+	/**
+	 * Return a class filter that represents the logical negation of the specified
+	 * filter instance.
+	 * @param classFilter the {@link ClassFilter} to negate
+	 * @return a filter that represents the logical negation of the specified filter
+	 * @since 6.1
+	 */
+	public static ClassFilter negate(ClassFilter classFilter) {
+		Assert.notNull(classFilter, "ClassFilter must not be null");
+		return new NegateClassFilter(classFilter);
 	}
 
 
@@ -163,6 +176,42 @@ public abstract class ClassFilters {
 		@Override
 		public String toString() {
 			return getClass().getName() + ": " + Arrays.toString(this.filters);
+		}
+
+	}
+
+
+	/**
+	 * ClassFilter implementation for a logical negation of the given ClassFilter.
+	 */
+	@SuppressWarnings("serial")
+	private static class NegateClassFilter implements ClassFilter, Serializable {
+
+		private final ClassFilter original;
+
+		NegateClassFilter(ClassFilter original) {
+			this.original = original;
+		}
+
+		@Override
+		public boolean matches(Class<?> clazz) {
+			return !this.original.matches(clazz);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof NegateClassFilter that
+					&& this.original.equals(that.original)));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(getClass(), this.original);
+		}
+
+		@Override
+		public String toString() {
+			return "Negate " + this.original;
 		}
 
 	}

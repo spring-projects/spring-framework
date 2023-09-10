@@ -434,6 +434,7 @@ public @interface Configuration {
 	 * {@link AnnotationConfigApplicationContext}. If the {@code @Configuration} class
 	 * is registered as a traditional XML bean definition, the name/id of the bean
 	 * element will take precedence.
+	 * <p>Alias for {@link Component#value}.
 	 * @return the explicit component name, if any (or empty String otherwise)
 	 * @see AnnotationBeanNameGenerator
 	 */

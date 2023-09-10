@@ -38,5 +38,15 @@ Kotlin::
 ----
 ======
 
+[NOTE]
+====
+If your application or framework manages its own `EvaluationContext`, you may need to
+manually configure a `StandardTypeLocator` with a specific `ClassLoader` to ensure that
+the SpEL expression parser is able to reliably locate user types.
+
+For example, the `StandardBeanExpressionResolver` in the `spring-context` module
+configures a `StandardTypeLocator` using the bean `ClassLoader` of the corresponding
+`BeanFactory`.
+====
 
 

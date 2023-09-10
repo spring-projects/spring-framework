@@ -25,11 +25,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import kotlin.coroutines.Continuation;
-import kotlinx.coroutines.reactor.MonoKt;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import reactor.core.publisher.Mono;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
@@ -301,10 +298,9 @@ public final class HttpServiceProxyFactory {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
 			if (httpServiceMethod != null) {
-				if (KotlinDetector.isSuspendingFunction(method)) {
-					return KotlinDelegate.invokeSuspendingFunction(invocation, httpServiceMethod);
-				}
-				return httpServiceMethod.invoke(invocation.getArguments());
+				Object[] arguments = KotlinDetector.isSuspendingFunction(method) ?
+						resolveCoroutinesArguments(invocation.getArguments()) : invocation.getArguments();
+				return httpServiceMethod.invoke(arguments);
 			}
 			if (method.isDefault()) {
 				if (invocation instanceof ReflectiveMethodInvocation reflectiveMethodInvocation) {
@@ -314,27 +310,13 @@ public final class HttpServiceProxyFactory {
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
-	}
 
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	@SuppressWarnings("unchecked")
-	private static class KotlinDelegate {
-
-		public static Object invokeSuspendingFunction(MethodInvocation invocation, HttpServiceMethod httpServiceMethod) {
-			Object[] rawArguments = invocation.getArguments();
-			Object[] arguments = resolveArguments(rawArguments);
-			Continuation<Object> continuation = (Continuation<Object>) rawArguments[rawArguments.length - 1];
-			Mono<Object> wrapped = (Mono<Object>) httpServiceMethod.invoke(arguments);
-			return MonoKt.awaitSingleOrNull(wrapped, continuation);
-		}
-
-		private static Object[] resolveArguments(Object[] args) {
+		private static Object[] resolveCoroutinesArguments(Object[] args) {
 			Object[] functionArgs = new Object[args.length - 1];
 			System.arraycopy(args, 0, functionArgs, 0, args.length - 1);
 			return functionArgs;
 		}
+
 	}
 
 }

@@ -20,9 +20,10 @@ xref:data-access/jdbc/connections.adoc[Controlling Database Connections] and xre
 
 * `object`: The `org.springframework.jdbc.object` package contains classes that represent
 RDBMS queries, updates, and stored procedures as thread-safe, reusable objects. See
-xref:data-access/jdbc/object.adoc[Modeling JDBC Operations as Java Objects]. This approach is modeled by JDO, although objects returned by queries
-are naturally disconnected from the database. This higher-level of JDBC abstraction
-depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
+xref:data-access/jdbc/object.adoc[Modeling JDBC Operations as Java Objects]. This style
+results in a more object-oriented approach, although objects returned by queries are
+naturally disconnected from the database. This higher-level of JDBC abstraction depends
+on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
 * `support`: The `org.springframework.jdbc.support` package provides `SQLException`
 translation functionality and some utility classes. Exceptions thrown during JDBC processing

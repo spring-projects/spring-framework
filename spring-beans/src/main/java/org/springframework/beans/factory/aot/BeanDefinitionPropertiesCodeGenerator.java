@@ -316,7 +316,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		private static final ThreadLocal<ArrayDeque<String>> threadLocal = ThreadLocal.withInitial(ArrayDeque::new);
 
 		static void push(@Nullable String name) {
-			String valueToSet = (name != null) ? name : "";
+			String valueToSet = (name != null ? name : "");
 			threadLocal.get().push(valueToSet);
 		}
 

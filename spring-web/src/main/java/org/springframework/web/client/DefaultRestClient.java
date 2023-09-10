@@ -31,6 +31,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,6 +51,10 @@ import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
+import org.springframework.http.client.observation.ClientHttpObservationDocumentation;
+import org.springframework.http.client.observation.ClientRequestObservationContext;
+import org.springframework.http.client.observation.ClientRequestObservationConvention;
+import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -71,6 +77,8 @@ import org.springframework.web.util.UriBuilderFactory;
 final class DefaultRestClient implements RestClient {
 
 	private static final Log logger = LogFactory.getLog(DefaultRestClient.class);
+
+	private static final ClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
 
 	private static final String URI_TEMPLATE_ATTRIBUTE = RestClient.class.getName() + ".uriTemplate";
 
@@ -97,6 +105,8 @@ final class DefaultRestClient implements RestClient {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+	private final ObservationRegistry observationRegistry;
+
 
 	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory,
 			@Nullable List<ClientHttpRequestInterceptor> interceptors,
@@ -105,6 +115,7 @@ final class DefaultRestClient implements RestClient {
 			@Nullable HttpHeaders defaultHeaders,
 			@Nullable List<StatusHandler> statusHandlers,
 			List<HttpMessageConverter<?>> messageConverters,
+			ObservationRegistry observationRegistry,
 			DefaultRestClientBuilder builder) {
 
 		this.clientRequestFactory = clientRequestFactory;
@@ -114,6 +125,7 @@ final class DefaultRestClient implements RestClient {
 		this.defaultHeaders = defaultHeaders;
 		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
+		this.observationRegistry = observationRegistry;
 		this.builder = builder;
 	}
 
@@ -372,12 +384,17 @@ final class DefaultRestClient implements RestClient {
 			Assert.notNull(exchangeFunction, "ExchangeFunction must not be null");
 
 			ClientHttpResponse clientResponse = null;
+			Observation observation = null;
 			URI uri = null;
 			try {
 				uri = initUri();
 				HttpHeaders headers = initHeaders();
 				ClientHttpRequest clientRequest = createRequest(uri);
 				clientRequest.getHeaders().addAll(headers);
+				ClientRequestObservationContext observationContext = new ClientRequestObservationContext(clientRequest);
+				observationContext.setUriTemplate((String) this.attributes.get(URI_TEMPLATE_ATTRIBUTE));
+				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(null,
+						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
 				if (this.body != null) {
 					this.body.writeTo(clientRequest);
 				}
@@ -385,14 +402,28 @@ final class DefaultRestClient implements RestClient {
 					this.httpRequestConsumer.accept(clientRequest);
 				}
 				clientResponse = clientRequest.execute();
+				observationContext.setResponse(clientResponse);
 				return exchangeFunction.exchange(clientRequest, clientResponse);
 			}
 			catch (IOException ex) {
-				throw createResourceAccessException(uri, this.httpMethod, ex);
+				ResourceAccessException resourceAccessException = createResourceAccessException(uri, this.httpMethod, ex);
+				if (observation != null) {
+					observation.error(resourceAccessException);
+				}
+				throw resourceAccessException;
+			}
+			catch (Throwable error) {
+				if (observation != null) {
+					observation.error(error);
+				}
+				throw error;
 			}
 			finally {
 				if (close && clientResponse != null) {
 					clientResponse.close();
+				}
+				if (observation != null) {
+					observation.stop();
 				}
 			}
 		}

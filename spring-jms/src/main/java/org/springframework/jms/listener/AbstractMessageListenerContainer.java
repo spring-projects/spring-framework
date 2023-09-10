@@ -577,8 +577,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Return the {@link ObservationRegistry} used for recording
-	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PUBLISH JMS message processing observations}.
-	 * @since 6.1.0
+	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
+	 * @since 6.1
 	 */
 	@Nullable
 	public ObservationRegistry getObservationRegistry() {
@@ -587,9 +587,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Set the {@link ObservationRegistry} to be used for recording
-	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PUBLISH JMS message processing observations}.
+	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
 	 * Defaults to no-op observations if the registry is not set.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public void setObservationRegistry(@Nullable ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
@@ -716,7 +716,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	private Observation createObservation(Message message) {
-		if (micrometerCorePresent) {
+		if (micrometerCorePresent && this.observationRegistry != null) {
 			return ObservationFactory.create(this.observationRegistry, message);
 		}
 		else {
@@ -995,7 +995,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 		private static final JmsProcessObservationConvention DEFAULT_CONVENTION = new DefaultJmsProcessObservationConvention();
 
-		static Observation create(@Nullable ObservationRegistry registry, Message message) {
+		static Observation create(ObservationRegistry registry, Message message) {
 			return JmsObservationDocumentation.JMS_MESSAGE_PROCESS
 					.observation(null, DEFAULT_CONVENTION, () -> new JmsProcessObservationContext(message), registry);
 		}

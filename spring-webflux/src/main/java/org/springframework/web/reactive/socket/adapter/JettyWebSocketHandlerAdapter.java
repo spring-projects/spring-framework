@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Frame;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.core.OpCode;
 
@@ -71,8 +72,8 @@ public class JettyWebSocketHandlerAdapter {
 	}
 
 
-	@OnWebSocketConnect
-	public void onWebSocketConnect(Session session) {
+	@OnWebSocketOpen
+	public void onWebSocketOpen(Session session) {
 		this.delegateSession = this.sessionFactory.apply(session);
 		this.delegateHandler.handle(this.delegateSession)
 				.checkpoint(session.getUpgradeRequest().getRequestURI() + " [JettyWebSocketHandlerAdapter]")
@@ -88,21 +89,22 @@ public class JettyWebSocketHandlerAdapter {
 	}
 
 	@OnWebSocketMessage
-	public void onWebSocketBinary(byte[] message, int offset, int length) {
+	public void onWebSocketBinary(ByteBuffer buffer, Callback callback) {
 		if (this.delegateSession != null) {
-			ByteBuffer buffer = ByteBuffer.wrap(message, offset, length);
 			WebSocketMessage webSocketMessage = toMessage(Type.BINARY, buffer);
 			this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
+			callback.succeed();
 		}
 	}
 
 	@OnWebSocketFrame
-	public void onWebSocketFrame(Frame frame) {
+	public void onWebSocketFrame(Frame frame, Callback callback) {
 		if (this.delegateSession != null) {
 			if (OpCode.PONG == frame.getOpCode()) {
 				ByteBuffer buffer = (frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD);
 				WebSocketMessage webSocketMessage = toMessage(Type.PONG, buffer);
 				this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
+				callback.succeed();
 			}
 		}
 	}

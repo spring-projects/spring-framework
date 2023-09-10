@@ -31,16 +31,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class NullSafeComparatorTests {
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldCompareWithNullsLow() {
+		@SuppressWarnings("deprecation")
 		Comparator<String> c = NullSafeComparator.NULLS_LOW;
 		assertThat(c.compare(null, "boo")).isLessThan(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldCompareWithNullsHigh() {
+		@SuppressWarnings("deprecation")
 		Comparator<String> c = NullSafeComparator.NULLS_HIGH;
 		assertThat(c.compare(null, "boo")).isGreaterThan(0);
 		assertThat(c.compare(null, null)).isEqualTo(0);

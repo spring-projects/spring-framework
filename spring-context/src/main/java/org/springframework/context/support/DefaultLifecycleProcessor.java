@@ -108,6 +108,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		if (!NativeDetector.inNativeImage() && ClassUtils.isPresent("org.crac.Core", getClass().getClassLoader())) {
 			this.cracResource = new CracDelegate().registerResource();
 		}
+		else if (checkpointOnRefresh) {
+			throw new IllegalStateException(
+					"Checkpoint on refresh requires a CRaC-enabled JVM and 'org.crac:crac' on the classpath");
+		}
 	}
 
 

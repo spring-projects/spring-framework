@@ -469,7 +469,7 @@ public abstract class AbstractPlatformTransactionManager
 			if (useSavepointForNestedTransaction()) {
 				// Create savepoint within existing Spring-managed transaction,
 				// through the SavepointManager API implemented by TransactionStatus.
-				// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.
+				// Usually uses JDBC savepoints. Never activates Spring synchronization.
 				DefaultTransactionStatus status = newTransactionStatus(
 						definition, transaction, false, false, true, debugEnabled, null);
 				this.transactionExecutionListeners.forEach(listener -> listener.beforeBegin(status));

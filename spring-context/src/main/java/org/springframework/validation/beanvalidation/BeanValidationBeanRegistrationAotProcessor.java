@@ -105,8 +105,12 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 					logger.warn("Skipping validation constraint hint inference for bean " + registeredBean.getBeanName() +
 							" due to an ArrayIndexOutOfBoundsException at validator level");
 				}
+				else if (ex instanceof TypeNotPresentException) {
+					logger.debug("Skipping validation constraint hint inference for bean " +
+							registeredBean.getBeanName() + " due to a TypeNotPresentException at validator level: " + ex.getMessage());
+				}
 				else {
-					logger.error("Skipping validation constraint hint inference for bean " +
+					logger.warn("Skipping validation constraint hint inference for bean " +
 							registeredBean.getBeanName(), ex);
 				}
 				return null;

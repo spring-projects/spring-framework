@@ -169,11 +169,28 @@ import org.springframework.core.io.support.PropertySourceFactory;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this property source. If omitted, the {@link #factory}
-	 * will generate a name based on the underlying resource (in the case of
-	 * {@link org.springframework.core.io.support.DefaultPropertySourceFactory}:
-	 * derived from the resource description through a corresponding name-less
-	 * {@link org.springframework.core.io.support.ResourcePropertySource} constructor).
+	 * Indicate the unique name of this property source.
+	 * <p>If omitted, the {@link #factory} will generate a name based on the
+	 * underlying resource (in the case of
+	 * {@link org.springframework.core.io.support.DefaultPropertySourceFactory
+	 * DefaultPropertySourceFactory}: derived from the resource description through
+	 * a corresponding name-less
+	 * {@link org.springframework.core.io.support.ResourcePropertySource
+	 * ResourcePropertySource} constructor).
+	 * <p>The name of a {@code PropertySource} serves two general purposes.
+	 * <ul>
+	 * <li>Diagnostics: to determine the source of the properties in logging and
+	 * debugging &mdash; for example, in a Spring Boot application via Spring
+	 * Boot's {@code PropertySourceOrigin}.</li>
+	 * <li>Programmatic interaction with
+	 * {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}:
+	 * the name can be used to retrieve properties from a particular property
+	 * source (or to determine if a particular named property source already exists).
+	 * The name can also be used to add a new property source relative to an existing
+	 * property source (see
+	 * {@link org.springframework.core.env.MutablePropertySources#addBefore addBefore()} and
+	 * {@link org.springframework.core.env.MutablePropertySources#addAfter addAfter()}).</li>
+	 * </ul>
 	 * @see org.springframework.core.env.PropertySource#getName()
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */

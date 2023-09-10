@@ -251,10 +251,13 @@ https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-featu
 === Constructor injection
 
 As described in the xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[dedicated section],
-JUnit 5 allows constructor injection of beans which is pretty useful with Kotlin
+JUnit Jupiter (JUnit 5) allows constructor injection of beans which is pretty useful with Kotlin
 in order to use `val` instead of `lateinit var`. You can use
 {api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]
 to enable autowiring for all parameters.
+
+NOTE: You can also change the default behavior to `ALL` in a `junit-platform.properties`
+file with a `spring.test.constructor.autowire.mode = all` property.
 
 [source,kotlin,indent=0]
 ----
@@ -272,11 +275,11 @@ class OrderServiceIntegrationTests(val orderService: OrderService,
 === `PER_CLASS` Lifecycle
 
 Kotlin lets you specify meaningful test function names between backticks (```).
-As of JUnit 5, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
+With JUnit Jupiter (JUnit 5), Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
 annotation to enable single instantiation of test classes, which allows the use of `@BeforeAll`
 and `@AfterAll` annotations on non-static methods, which is a good fit for Kotlin.
 
-You can also change the default behavior to `PER_CLASS` thanks to a `junit-platform.properties`
+NOTE: You can also change the default behavior to `PER_CLASS` in a `junit-platform.properties`
 file with a `junit.jupiter.testinstance.lifecycle.default = per_class` property.
 
 The following example demonstrates `@BeforeAll` and `@AfterAll` annotations on non-static methods:

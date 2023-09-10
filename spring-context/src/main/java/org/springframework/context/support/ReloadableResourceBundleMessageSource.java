@@ -120,7 +120,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * Set the list of supported file extensions.
 	 * <p>The default is a list containing {@code .properties} and {@code .xml}.
 	 * @param fileExtensions the file extensions (starts with a dot)
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public void setFileExtensions(List<String> fileExtensions) {
 		Assert.isTrue(!CollectionUtils.isEmpty(fileExtensions), "At least one file extension is required");

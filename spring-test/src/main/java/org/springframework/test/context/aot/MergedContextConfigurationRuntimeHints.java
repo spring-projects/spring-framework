@@ -18,9 +18,14 @@ package org.springframework.test.context.aot;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
+import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ClassUtils;
@@ -68,8 +73,16 @@ class MergedContextConfigurationRuntimeHints {
 		// @ContextConfiguration(locations = ...)
 		registerClasspathResources(mergedConfig.getLocations(), runtimeHints, classLoader);
 
-		// @TestPropertySource(locations = ... )
-		registerClasspathResources(mergedConfig.getPropertySourceLocations(), runtimeHints, classLoader);
+		for (PropertySourceDescriptor descriptor : mergedConfig.getPropertySourceDescriptors()) {
+			// @TestPropertySource(locations = ...)
+			registerClasspathResources(descriptor.locations().stream(), runtimeHints, classLoader);
+
+			// @TestPropertySource(factory = ...)
+			Class<?> factoryClass = descriptor.propertySourceFactory();
+			if (factoryClass != null) {
+				registerDeclaredConstructors(factoryClass, runtimeHints);
+			}
+		}
 
 		// @WebAppConfiguration(value = ...)
 		if (webMergedContextConfigurationClass.isInstance(mergedConfig)) {
@@ -89,12 +102,17 @@ class MergedContextConfigurationRuntimeHints {
 		runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
-	private void registerClasspathResources(String[] paths, RuntimeHints runtimeHints, ClassLoader classLoader) {
+	private void registerClasspathResources(String[] locations, RuntimeHints runtimeHints, ClassLoader classLoader) {
+		registerClasspathResources(Arrays.stream(locations), runtimeHints, classLoader);
+	}
+
+	private void registerClasspathResources(Stream<String> locations, RuntimeHints runtimeHints, ClassLoader classLoader) {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
-		Arrays.stream(paths)
-				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
-				.map(resourceLoader::getResource)
-				.forEach(runtimeHints.resources()::registerResource);
+		ResourceHints resourceHints = runtimeHints.resources();
+		locations.map(resourceLoader::getResource)
+				.filter(ClassPathResource.class::isInstance)
+				.filter(Resource::exists)
+				.forEach(resourceHints::registerResource);
 	}
 
 	private void registerClasspathResourceDirectoryStructure(String directory, RuntimeHints runtimeHints) {

@@ -128,7 +128,7 @@ class KotlinWebClientHttpServiceProxyTests {
 	}
 
 	private fun initHttpService(webClient: WebClient): TestHttpService {
-		val adapter = WebClientAdapter.forClient(webClient)
+		val adapter = WebClientAdapter.create(webClient)
 		return HttpServiceProxyFactory.builderFor(adapter).build().createClient()
 	}
 

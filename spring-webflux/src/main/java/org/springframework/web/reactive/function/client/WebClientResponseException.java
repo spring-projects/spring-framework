@@ -233,22 +233,21 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	@Nullable
 	public <E> E getResponseBodyAs(Class<E> targetType) {
-		return getResponseBodyAs(ResolvableType.forClass(targetType));
+		return decodeBody(ResolvableType.forClass(targetType));
 	}
 
 	/**
-	 * Variant of {@link #getResponseBodyAs(Class)} with
-	 * {@link ParameterizedTypeReference}.
+	 * Variant of {@link #getResponseBodyAs(Class)} with {@link ParameterizedTypeReference}.
 	 * @since 6.0
 	 */
 	@Nullable
 	public <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
-		return getResponseBodyAs(ResolvableType.forType(targetType.getType()));
+		return decodeBody(ResolvableType.forType(targetType.getType()));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private <E> E getResponseBodyAs(ResolvableType targetType) {
+	private <E> E decodeBody(ResolvableType targetType) {
 		Assert.state(this.bodyDecodeFunction != null, "Decoder function not set");
 		return (E) this.bodyDecodeFunction.apply(targetType);
 	}

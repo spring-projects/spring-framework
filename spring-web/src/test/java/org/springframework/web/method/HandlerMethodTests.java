@@ -38,14 +38,14 @@ public class HandlerMethodTests {
 	@Test
 	void shouldValidateArgsWithConstraintsDirectlyOnClass() {
 		Object target = new MyClass();
-		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue"), true);
+		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
 		testShouldValidateArguments(target, List.of("addPerson", "getPerson", "getIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void shouldValidateArgsWithConstraintsOnInterface() {
 		Object target = new MyInterfaceImpl();
-		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue"), true);
+		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
 		testShouldValidateArguments(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
 	}
 
@@ -110,6 +110,9 @@ public class HandlerMethodTests {
 		public void addPersonAndIntValue(@Valid Person person, @Max(10) int value) {
 		}
 
+		public void addPersons(@Valid List<Person> persons) {
+		}
+
 		public void addPersonNotValidated(Person person) {
 		}
 
@@ -134,6 +137,8 @@ public class HandlerMethodTests {
 
 		void addPersonAndIntValue(@Valid Person person, @Max(10) int value);
 
+		void addPersons(@Valid List<Person> persons);
+
 		void addPersonNotValidated(Person person);
 
 		@Valid
@@ -157,6 +162,10 @@ public class HandlerMethodTests {
 
 		@Override
 		public void addPersonAndIntValue(Person person, int value) {
+		}
+
+		@Override
+		public void addPersons(List<Person> persons) {
 		}
 
 		@Override

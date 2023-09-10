@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,28 +115,28 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Specify a limited set of in parameters to be used.
+	 * Specify a limited set of the {@code in} parameters to be used.
 	 */
 	public void setLimitedInParameterNames(Set<String> limitedInParameterNames) {
 		this.limitedInParameterNames = limitedInParameterNames;
 	}
 
 	/**
-	 * Get a limited set of in parameters to be used.
+	 * Get the limited set of the {@code in} parameters to be used.
 	 */
 	public Set<String> getLimitedInParameterNames() {
 		return this.limitedInParameterNames;
 	}
 
 	/**
-	 * Specify the names of the out parameters.
+	 * Specify the names of the {@code out} parameters.
 	 */
 	public void setOutParameterNames(List<String> outParameterNames) {
 		this.outParameterNames = outParameterNames;
 	}
 
 	/**
-	 * Get a list of the out parameter names.
+	 * Get the list of the {@code out} parameter names.
 	 */
 	public List<String> getOutParameterNames() {
 		return this.outParameterNames;

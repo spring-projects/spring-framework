@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,9 +157,9 @@ public class TransactionAspectTests {
 		}
 		finally {
 			assertThat(txManager.begun).isEqualTo(1);
-			long expected1 = rollback ? 0 : 1;
+			long expected1 = (rollback ? 0 : 1);
 			assertThat(txManager.commits).isEqualTo(expected1);
-			long expected = rollback ? 1 : 0;
+			long expected = (rollback ? 1 : 0);
 			assertThat(txManager.rollbacks).isEqualTo(expected);
 		}
 	}

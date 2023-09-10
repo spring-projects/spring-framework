@@ -125,7 +125,7 @@ public interface TransactionDefinition {
 	 * <p><b>NOTE:</b> Actual creation of a nested transaction will only work on
 	 * specific transaction managers. Out of the box, this only applies to the JDBC
 	 * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
-	 * when working on a JDBC 3.0 driver. Some JTA providers might support
+	 * when working on a JDBC 3.0+ driver. Some JTA providers might support
 	 * nested transactions as well.
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
 	 */

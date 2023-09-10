@@ -63,6 +63,7 @@ import org.springframework.lang.Nullable;
  * @author Keith Donald
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -95,6 +96,12 @@ public abstract class ClassUtils {
 
 	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
+
+	/** Precomputed value for the combination of private, static and final modifiers. */
+	private static final int NON_OVERRIDABLE_MODIFIER = Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL;
+
+	/** Precomputed value for the combination of public and protected modifiers. */
+	private static final int OVERRIDABLE_MODIFIER = Modifier.PUBLIC | Modifier.PROTECTED;
 
 
 	/**
@@ -545,12 +552,11 @@ public abstract class ClassUtils {
 	 * Delegate for {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
 	 * Also used by {@link ObjectUtils#nullSafeConciseToString}.
 	 * <p>Check if the given type represents a common "simple" value type:
-	 * a primitive or primitive wrapper, an {@link Enum}, a {@link String}
-	 * or other {@link CharSequence}, a {@link Number}, a {@link Date},
-	 * a {@link Temporal}, a {@link ZoneId} a {@link TimeZone}, a {@link File},
-	 * a {@link Path}, a {@link URI}, a {@link URL}, an {@link InetAddress},
-	 * a {@link Charset}, a {@link Currency}, a {@link Locale}, a {@link UUID},
-	 * a {@link Pattern}, or a {@link Class}.
+	 * primitive or primitive wrapper, {@link Enum}, {@link String} or other
+	 * {@link CharSequence}, {@link Number}, {@link Date}, {@link Temporal},
+	 * {@link ZoneId}, {@link TimeZone}, {@link File}, {@link Path}, {@link URI},
+	 * {@link URL}, {@link InetAddress}, {@link Charset}, {@link Currency},
+	 * {@link Locale}, {@link UUID}, {@link Pattern}, or {@link Class}.
 	 * <p>{@code Void} and {@code void} are not considered simple value types.
 	 * @param type the type to check
 	 * @return whether the given type represents a "simple" value type,
@@ -1448,10 +1454,10 @@ public abstract class ClassUtils {
 	 * @param targetClass the target class to check against
 	 */
 	private static boolean isOverridable(Method method, @Nullable Class<?> targetClass) {
-		if (Modifier.isPrivate(method.getModifiers())) {
+		if ((method.getModifiers() & NON_OVERRIDABLE_MODIFIER) != 0) {
 			return false;
 		}
-		if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
+		if ((method.getModifiers() & OVERRIDABLE_MODIFIER) != 0) {
 			return true;
 		}
 		return (targetClass == null ||
@@ -1472,7 +1478,7 @@ public abstract class ClassUtils {
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
 			Method method = clazz.getMethod(methodName, args);
-			return Modifier.isStatic(method.getModifiers()) ? method : null;
+			return (Modifier.isStatic(method.getModifiers()) ? method : null);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;

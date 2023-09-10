@@ -40,12 +40,17 @@ import org.springframework.util.Assert;
 
 /**
  * A powerful and highly configurable {@link EvaluationContext} implementation.
- * This context uses standard implementations of all applicable strategies,
- * based on reflection to resolve properties, methods and fields.
  *
- * <p>For a simpler builder-style context variant for data-binding purposes,
+ * <p>This context uses standard implementations of all applicable strategies,
+ * based on reflection to resolve properties, methods, and fields. Note, however,
+ * that you may need to manually configure a {@code StandardTypeLocator} with a
+ * specific {@link ClassLoader} to ensure that the SpEL expression parser is able
+ * to reliably locate user types. See {@link #setTypeLocator(TypeLocator)} for
+ * details.
+ *
+ * <p>For a simpler, builder-style context variant for data-binding purposes,
  * consider using {@link SimpleEvaluationContext} instead which allows for
- * opting into several SpEL features as needed by specific evaluation cases.
+ * opting into several SpEL features as needed by specific use cases.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -183,11 +188,29 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return this.beanResolver;
 	}
 
+	/**
+	 * Set the {@link TypeLocator} to use to find types, either by short or
+	 * fully-qualified name.
+	 * <p>By default, a {@link StandardTypeLocator} will be used.
+	 * <p><strong>NOTE</strong>: Even if a {@code StandardTypeLocator} is
+	 * sufficient, you may need to manually configure a {@code StandardTypeLocator}
+	 * with a specific {@link ClassLoader} to ensure that the SpEL expression
+	 * parser is able to reliably locate user types.
+	 * @param typeLocator the {@code TypeLocator} to use
+	 * @see StandardTypeLocator#StandardTypeLocator(ClassLoader)
+	 * @see #getTypeLocator()
+	 */
 	public void setTypeLocator(TypeLocator typeLocator) {
 		Assert.notNull(typeLocator, "TypeLocator must not be null");
 		this.typeLocator = typeLocator;
 	}
 
+	/**
+	 * Get the configured {@link TypeLocator} that will be used to find types,
+	 * either by short or fully-qualified name.
+	 * <p>See {@link #setTypeLocator(TypeLocator)} for further details.
+	 * @see #setTypeLocator(TypeLocator)
+	 */
 	@Override
 	public TypeLocator getTypeLocator() {
 		if (this.typeLocator == null) {

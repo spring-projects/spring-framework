@@ -92,6 +92,8 @@ public abstract class PropertySource<T> {
 
 	/**
 	 * Return the name of this {@code PropertySource}.
+	 * <p>See the {@linkplain PropertySource class-level Javadoc} for details
+	 * on property source identity and names.
 	 */
 	public String getName() {
 		return this.name;
@@ -170,21 +172,22 @@ public abstract class PropertySource<T> {
 
 
 	/**
-	 * Return a {@code PropertySource} implementation intended for collection comparison purposes only.
-	 * <p>Primarily for internal use, but given a collection of {@code PropertySource} objects, may be
-	 * used as follows:
+	 * Return a {@code PropertySource} implementation intended for collection
+	 * comparison purposes only.
+	 * <p>Primarily for internal use, but given a collection of {@code PropertySource}
+	 * objects, may be used as follows:
 	 * <pre class="code">
-	 * {@code List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+	 * List&lt;PropertySource&lt;?&gt;&gt; sources = new ArrayList&lt;&gt;();
 	 * sources.add(new MapPropertySource("sourceA", mapA));
 	 * sources.add(new MapPropertySource("sourceB", mapB));
 	 * assert sources.contains(PropertySource.named("sourceA"));
 	 * assert sources.contains(PropertySource.named("sourceB"));
-	 * assert !sources.contains(PropertySource.named("sourceC"));
-	 * }</pre>
-	 * The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
+	 * assert !sources.contains(PropertySource.named("sourceC"));</pre>
+	 * <p>The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
 	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
 	 * are called.
-	 * @param name the name of the comparison {@code PropertySource} to be created and returned.
+	 * @param name the name of the comparison {@code PropertySource} to be created
+	 * and returned
 	 */
 	public static PropertySource<?> named(String name) {
 		return new ComparisonPropertySource(name);
@@ -206,7 +209,7 @@ public abstract class PropertySource<T> {
 	public static class StubPropertySource extends PropertySource<Object> {
 
 		public StubPropertySource(String name) {
-			super(name, new Object());
+			super(name);
 		}
 
 		/**

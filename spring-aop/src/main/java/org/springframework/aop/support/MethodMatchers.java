@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
@@ -79,6 +80,18 @@ public abstract class MethodMatchers {
 	public static MethodMatcher intersection(MethodMatcher mm1, MethodMatcher mm2) {
 		return (mm1 instanceof IntroductionAwareMethodMatcher || mm2 instanceof IntroductionAwareMethodMatcher ?
 				new IntersectionIntroductionAwareMethodMatcher(mm1, mm2) : new IntersectionMethodMatcher(mm1, mm2));
+	}
+
+	/**
+	 * Return a method matcher that represents the logical negation of the specified
+	 * matcher instance.
+	 * @param methodMatcher the {@link MethodMatcher} to negate
+	 * @return a matcher that represents the logical negation of the specified matcher
+	 * @since 6.1
+	 */
+	public static MethodMatcher negate(MethodMatcher methodMatcher) {
+		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
+		return new NegateMethodMatcher(methodMatcher);
 	}
 
 	/**
@@ -336,6 +349,49 @@ public abstract class MethodMatchers {
 			return (MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
 					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class NegateMethodMatcher implements MethodMatcher, Serializable {
+
+		private final MethodMatcher original;
+
+		NegateMethodMatcher(MethodMatcher original) {
+			this.original = original;
+		}
+
+		@Override
+		public boolean matches(Method method, Class<?> targetClass) {
+			return !this.original.matches(method, targetClass);
+		}
+
+		@Override
+		public boolean isRuntime() {
+			return this.original.isRuntime();
+		}
+
+		@Override
+		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+			return !this.original.matches(method, targetClass, args);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof NegateMethodMatcher that
+					&& this.original.equals(that.original)));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(getClass(), this.original);
+		}
+
+		@Override
+		public String toString() {
+			return "Negate " + this.original;
+		}
+
 	}
 
 }

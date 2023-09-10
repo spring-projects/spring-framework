@@ -35,6 +35,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.Nullable;
 
 /**
  * A fluent {@code JdbcClient} with common JDBC query and update operations,
@@ -124,7 +125,7 @@ public interface JdbcClient {
 		 * @return this statement specification (for chaining)
 		 * @see java.sql.PreparedStatement#setObject(int, Object)
 		 */
-		StatementSpec param(Object value);
+		StatementSpec param(@Nullable Object value);
 
 		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
@@ -134,7 +135,7 @@ public interface JdbcClient {
 		 * @return this statement specification (for chaining)
 		 * @see java.sql.PreparedStatement#setObject(int, Object)
 		 */
-		StatementSpec param(int jdbcIndex, Object value);
+		StatementSpec param(int jdbcIndex, @Nullable Object value);
 
 		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
@@ -145,7 +146,7 @@ public interface JdbcClient {
 		 * @return this statement specification (for chaining)
 		 * @see java.sql.PreparedStatement#setObject(int, Object, int)
 		 */
-		StatementSpec param(int jdbcIndex, Object value, int sqlType);
+		StatementSpec param(int jdbcIndex, @Nullable Object value, int sqlType);
 
 		/**
 		 * Bind a named statement parameter for ":x" placeholder resolution,
@@ -155,7 +156,7 @@ public interface JdbcClient {
 		 * @return this statement specification (for chaining)
 		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource#addValue(String, Object)
 		 */
-		StatementSpec param(String name, Object value);
+		StatementSpec param(String name, @Nullable Object value);
 
 		/**
 		 * Bind a named statement parameter for ":x" placeholder resolution,
@@ -166,7 +167,7 @@ public interface JdbcClient {
 		 * @return this statement specification (for chaining)
 		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource#addValue(String, Object, int)
 		 */
-		StatementSpec param(String name, Object value, int sqlType);
+		StatementSpec param(String name, @Nullable Object value, int sqlType);
 
 		/**
 		 * Bind a var-args list of positional parameters for "?" placeholder resolution.

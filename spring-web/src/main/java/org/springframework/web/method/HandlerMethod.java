@@ -18,6 +18,7 @@ package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -215,6 +216,9 @@ public class HandlerMethod extends AnnotatedMethod {
 
 			this.responseStatus = annotation.code();
 			this.responseStatusReason = resolvedReason;
+			if (StringUtils.hasText(this.responseStatusReason) && getMethod().getReturnType() != void.class) {
+				logger.warn("Return value of [" + getMethod() + "] will be ignored since @ResponseStatus 'reason' attribute is set.");
+			}
 		}
 	}
 
@@ -383,18 +387,24 @@ public class HandlerMethod extends AnnotatedMethod {
 	 */
 	private static class MethodValidationInitializer {
 
-		private static final Predicate<MergedAnnotation<? extends Annotation>> INPUT_PREDICATE =
+		private static final Predicate<MergedAnnotation<? extends Annotation>> CONSTRAINT_PREDICATE =
 				MergedAnnotationPredicates.typeIn("jakarta.validation.Constraint");
 
-		private static final Predicate<MergedAnnotation<? extends Annotation>> OUTPUT_PREDICATE =
-				MergedAnnotationPredicates.typeIn("jakarta.validation.Valid", "jakarta.validation.Constraint");
+		private static final Predicate<MergedAnnotation<? extends Annotation>> VALID_PREDICATE =
+				MergedAnnotationPredicates.typeIn("jakarta.validation.Valid");
 
 		public static boolean checkArguments(Class<?> beanType, MethodParameter[] parameters) {
 			if (AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {
 				for (MethodParameter parameter : parameters) {
 					MergedAnnotations merged = MergedAnnotations.from(parameter.getParameterAnnotations());
-					if (merged.stream().anyMatch(INPUT_PREDICATE)) {
+					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {
 						return true;
+					}
+					else {
+						Class<?> type = parameter.getParameterType();
+						if (merged.stream().anyMatch(VALID_PREDICATE) && List.class.isAssignableFrom(type)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -404,7 +414,7 @@ public class HandlerMethod extends AnnotatedMethod {
 		public static boolean checkReturnValue(Class<?> beanType, Method method) {
 			if (AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {
 				MergedAnnotations merged = MergedAnnotations.from(method, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY);
-				return merged.stream().anyMatch(OUTPUT_PREDICATE);
+				return merged.stream().anyMatch(CONSTRAINT_PREDICATE.or(VALID_PREDICATE));
 			}
 			return false;
 		}

@@ -8,7 +8,6 @@ description = "Spring Framework Docs"
 
 apply from: "${rootDir}/gradle/publications.gradle"
 
-
 antora {
 	version = '3.2.0-alpha.2'
 	playbook = 'cached-antora-playbook.yml'
@@ -34,14 +33,13 @@ antora {
 	]
 }
 
-
 tasks.named("generateAntoraYml") {
 	asciidocAttributes = project.provider( {
 		return  ["spring-version": project.version ]
 	} )
 }
 
-tasks.create("generateAntoraResources") {
+tasks.register("generateAntoraResources") {
 	dependsOn 'generateAntoraYml'
 }
 
@@ -68,161 +66,4 @@ dependencies {
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")
-}
-
-/**
- * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
- */
-task api(type: Javadoc) {
-	group = "Documentation"
-	description = "Generates aggregated Javadoc API documentation."
-	title = "${rootProject.description} ${version} API"
-
-	dependsOn {
-		moduleProjects.collect {
-			it.tasks.getByName("jar")
-		}
-	}
-	doFirst {
-		classpath = files(
-				// ensure the javadoc process can resolve types compiled from .aj sources
-				project(":spring-aspects").sourceSets.main.output
-		)
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-	}
-
-	options {
-		encoding = "UTF-8"
-		memberLevel = JavadocMemberLevel.PROTECTED
-		author = true
-		header = rootProject.description
-		use = true
-		overview = "framework-docs/src/docs/api/overview.html"
-		splitIndex = true
-		links(project.ext.javadocLinks)
-		addBooleanOption('Xdoclint:syntax,reference', true) // only check syntax and reference with doclint
-		addBooleanOption('Werror', true) // fail build on Javadoc warnings
-	}
-	source moduleProjects.collect { project ->
-		project.sourceSets.main.allJava
-	}
-	maxMemory = "1024m"
-	destinationDir = file("$buildDir/docs/javadoc")
-}
-
-/**
- * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
- */
-rootProject.tasks.dokkaHtmlMultiModule.configure {
-	dependsOn {
-		tasks.getByName("api")
-	}
-	moduleName.set("spring-framework")
-	outputDirectory.set(project.file("$buildDir/docs/kdoc"))
-}
-
-/**
- * Zip all Java docs (javadoc & kdoc) into a single archive
- */
-task docsZip(type: Zip, dependsOn: ['api', rootProject.tasks.dokkaHtmlMultiModule]) {
-	group = "Distribution"
-	description = "Builds -${archiveClassifier} archive containing api and reference " +
-			"for deployment at https://docs.spring.io/spring-framework/docs/."
-
-	archiveBaseName.set("spring-framework")
-	archiveClassifier.set("docs")
-	from("src/dist") {
-		include "changelog.txt"
-	}
-	from (api) {
-		into "javadoc-api"
-	}
-	from (rootProject.tasks.dokkaHtmlMultiModule.outputDirectory) {
-		into "kdoc-api"
-	}
-}
-
-/**
- * Zip all Spring Framework schemas into a single archive
- */
-task schemaZip(type: Zip) {
-	group = "Distribution"
-	archiveBaseName.set("spring-framework")
-	archiveClassifier.set("schema")
-	description = "Builds -${archiveClassifier} archive containing all " +
-			"XSDs for deployment at https://springframework.org/schema."
-	duplicatesStrategy DuplicatesStrategy.EXCLUDE
-	moduleProjects.each { module ->
-		def Properties schemas = new Properties();
-
-		module.sourceSets.main.resources.find {
-			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
-		}?.withInputStream { schemas.load(it) }
-
-		for (def key : schemas.keySet()) {
-			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
-			assert shortName != key
-			File xsdFile = module.sourceSets.main.resources.find {
-				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
-			}
-			assert xsdFile != null
-			into (shortName) {
-				from xsdFile.path
-			}
-		}
-	}
-}
-
-/**
- * Create a distribution zip with everything:
- * docs, schemas, jars, source jars, javadoc jars
- */
-task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
-	group = "Distribution"
-	archiveBaseName.set("spring-framework")
-	archiveClassifier.set("dist")
-	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
-			"suitable for community download page."
-
-	ext.baseDir = "spring-framework-${project.version}";
-
-	from("src/docs/dist") {
-		include "readme.txt"
-		include "license.txt"
-		include "notice.txt"
-		into "${baseDir}"
-		expand(copyright: new Date().format("yyyy"), version: project.version)
-	}
-
-	from(zipTree(docsZip.archiveFile)) {
-		into "${baseDir}/docs"
-	}
-
-	from(zipTree(schemaZip.archiveFile)) {
-		into "${baseDir}/schema"
-	}
-
-	moduleProjects.each { module ->
-		into ("${baseDir}/libs") {
-			from module.jar
-			if (module.tasks.findByPath("sourcesJar")) {
-				from module.sourcesJar
-			}
-			if (module.tasks.findByPath("javadocJar")) {
-				from module.javadocJar
-			}
-		}
-	}
-}
-
-distZip.mustRunAfter moduleProjects.check
-
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifact docsZip
-			artifact schemaZip
-			artifact distZip
-		}
-	}
 }

@@ -734,7 +734,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			aliases.add(fullBeanName);
 		}
 		String[] retrievedAliases = super.getAliases(beanName);
-		String prefix = factoryPrefix ? FACTORY_BEAN_PREFIX : "";
+		String prefix = (factoryPrefix ? FACTORY_BEAN_PREFIX : "");
 		for (String retrievedAlias : retrievedAliases) {
 			String alias = prefix + retrievedAlias;
 			if (!alias.equals(name)) {

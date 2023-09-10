@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.Job;
+import org.reactivestreams.Publisher;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.IntroductionAdvisor;
@@ -35,6 +40,8 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.CoroutinesUtils;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -53,6 +60,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sebastien Deleuze
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
@@ -340,7 +348,8 @@ public abstract class AopUtils {
 		// Use reflection to invoke the method.
 		try {
 			ReflectionUtils.makeAccessible(method);
-			return method.invoke(target, args);
+			return KotlinDetector.isSuspendingFunction(method) ?
+					KotlinDelegate.invokeSuspendingFunction(method, target, args) : method.invoke(target, args);
 		}
 		catch (InvocationTargetException ex) {
 			// Invoked method threw a checked exception.
@@ -354,6 +363,20 @@ public abstract class AopUtils {
 		catch (IllegalAccessException ex) {
 			throw new AopInvocationException("Could not access method [" + method + "]", ex);
 		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
+			Continuation<?> continuation = (Continuation<?>) args[args.length -1];
+			Assert.state(continuation != null, "No Continuation available");
+			CoroutineContext context = continuation.getContext().minusKey(Job.Key);
+			return CoroutinesUtils.invokeSuspendingFunction(context, method, target, args);
+		}
+
 	}
 
 }

@@ -19,7 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.Response;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;

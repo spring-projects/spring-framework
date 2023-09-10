@@ -5,6 +5,7 @@ dependencies {
 	api(project(":spring-core"))
 	api(project(":spring-jdbc"))
 	api(project(":spring-tx"))
+	compileOnly("org.graalvm.sdk:graal-sdk")
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-web"))

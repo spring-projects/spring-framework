@@ -709,7 +709,7 @@ As of 6.1, the named parameter statements of `NamedParameterJdbcTemplate` and th
 parameter statements of a regular `JdbcTemplate` are available through a unified client API
 with a fluent interaction model.
 
-E.g. with positional parameters:
+For example, with positional parameters:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -717,12 +717,12 @@ E.g. with positional parameters:
 
 	public int countOfActorsByFirstName(String firstName) {
 		return this.jdbcClient.sql("select count(*) from t_actor where first_name = ?")
-                .param(firstName);
-                .query(Integer.class).single();
+				.param(firstName);
+				.query(Integer.class).single();
 	}
 ----
 
-E.g. with named parameters:
+For example, with named parameters:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -730,8 +730,8 @@ E.g. with named parameters:
 
 	public int countOfActorsByFirstName(String firstName) {
 		return this.jdbcClient.sql("select count(*) from t_actor where first_name = :firstName")
-                .param("firstName", firstName);
-                .query(Integer.class).single();
+				.param("firstName", firstName);
+				.query(Integer.class).single();
 	}
 ----
 
@@ -745,7 +745,7 @@ E.g. with named parameters:
 ----
 
 Instead of a custom `RowMapper`, you may also specify a class to map to.
-E.g. assuming that `Actor` has `firstName` and `lastName` properties
+For example, assuming that `Actor` has `firstName` and `lastName` properties
 as a record class, a custom constructor, bean properties, or plain fields:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -760,7 +760,7 @@ With a required single object result:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Actor actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
-            .param(1212L);
+			.param(1212L);
 			.query(Actor.class)
 			.single();
 ----
@@ -770,7 +770,7 @@ With a `java.util.Optional` result:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Optional<Actor> actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
-            .param(1212L);
+			.param(1212L);
 			.query(Actor.class)
 			.optional();
 ----
@@ -793,8 +793,8 @@ Or an update statement with named parameters:
 			.update();
 ----
 
-Instead of individual named parameters, you may also specify a parameter source object,
-e.g. a record class or a class with bean properties or a plain field holder which
+Instead of individual named parameters, you may also specify a parameter source object –
+for example, a record class, a class with bean properties, or a plain field holder which
 provides `firstName` and `lastName` properties, such as the `Actor` class from above:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -813,7 +813,7 @@ also with `JdbcTemplate` and `NamedParameterJdbcTemplate` themselves.
 NOTE: `JdbcClient` is a flexible but simplified facade for JDBC query/update statements.
 Advanced capabilities such as batch inserts and stored procedure calls typically require
 extra customization: consider Spring's `SimpleJdbcInsert` and `SimpleJdbcCall` classes or
-plain direct `JdbcTemplate` usage for any such capabilities not available on `JdbcClient`.
+plain direct `JdbcTemplate` usage for any such capabilities not available in `JdbcClient`.
 
 
 [[jdbc-SQLExceptionTranslator]]

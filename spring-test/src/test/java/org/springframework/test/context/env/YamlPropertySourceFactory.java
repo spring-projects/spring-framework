@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 6.1
  */
-class YamlPropertySourceFactory implements PropertySourceFactory {
+public class YamlPropertySourceFactory implements PropertySourceFactory {
 
 	@Override
 	public PropertySource<?> createPropertySource(String name, EncodedResource encodedResource) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -32,6 +33,7 @@ public @interface DevComponent {
 
 	String PROFILE_NAME = "dev";
 
+	@AliasFor(annotation = Component.class)
 	String value() default "";
 
 }
