@@ -202,7 +202,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public void query(RowCallbackHandler rch) {
 			if (useNamedParams()) {
-				namedParamOps.query(this.sql, this.namedParams, rch);
+				namedParamOps.query(this.sql, this.namedParamSource, rch);
 			}
 			else {
 				classicOps.query(this.sql, rch, this.indexedParams.toArray());
@@ -212,7 +212,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public <T> T query(ResultSetExtractor<T> rse) {
 			T result = (useNamedParams() ?
-					namedParamOps.query(this.sql, this.namedParams, rse) :
+					namedParamOps.query(this.sql, this.namedParamSource, rse) :
 					classicOps.query(this.sql, rse, this.indexedParams.toArray()));
 			Assert.state(result != null, "No result from ResultSetExtractor");
 			return result;

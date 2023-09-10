@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -79,6 +80,8 @@ public class JdbcClientNamedParameterTests {
 
 	private Map<String, Object> params = new HashMap<>();
 
+	private MapSqlParameterSource paramSource = new MapSqlParameterSource();
+
 
 	@BeforeEach
 	public void setup() throws Exception {
@@ -100,6 +103,33 @@ public class JdbcClientNamedParameterTests {
 		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
 		params.put("country", "UK");
 		Customer cust = client.sql(SELECT_NAMED_PARAMETERS).params(params).query(
+				rs -> {
+					rs.next();
+					Customer cust1 = new Customer();
+					cust1.setId(rs.getInt(COLUMN_NAMES[0]));
+					cust1.setForename(rs.getString(COLUMN_NAMES[1]));
+					return cust1;
+				});
+
+		assertThat(cust.getId()).as("Customer id was assigned correctly").isEqualTo(1);
+		assertThat(cust.getForename()).as("Customer forename was assigned correctly").isEqualTo("rod");
+		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
+		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testQueryWithResultSetExtractorParameterSource() throws SQLException {
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getInt("id")).willReturn(1);
+		given(resultSet.getString("forename")).willReturn("rod");
+
+		paramSource.addValue("id", new SqlParameterValue(Types.DECIMAL, 1));
+		paramSource.addValue("country", "UK");
+		Customer cust = client.sql(SELECT_NAMED_PARAMETERS).paramSource(paramSource).query(
 				rs -> {
 					rs.next();
 					Customer cust1 = new Customer();
@@ -151,6 +181,33 @@ public class JdbcClientNamedParameterTests {
 		params.put("country", "UK");
 		final List<Customer> customers = new ArrayList<>();
 		client.sql(SELECT_NAMED_PARAMETERS).params(params).query(rs -> {
+			Customer cust = new Customer();
+			cust.setId(rs.getInt(COLUMN_NAMES[0]));
+			cust.setForename(rs.getString(COLUMN_NAMES[1]));
+			customers.add(cust);
+		});
+
+		assertThat(customers).hasSize(1);
+		assertThat(customers.get(0).getId()).as("Customer id was assigned correctly").isEqualTo(1);
+		assertThat(customers.get(0).getForename()).as("Customer forename was assigned correctly").isEqualTo("rod");
+		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
+		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testQueryWithRowCallbackHandlerParameterSource() throws SQLException {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt("id")).willReturn(1);
+		given(resultSet.getString("forename")).willReturn("rod");
+
+		paramSource.addValue("id", new SqlParameterValue(Types.DECIMAL, 1));
+		paramSource.addValue("country", "UK");
+		final List<Customer> customers = new ArrayList<>();
+		client.sql(SELECT_NAMED_PARAMETERS).paramSource(paramSource).query(rs -> {
 			Customer cust = new Customer();
 			cust.setId(rs.getInt(COLUMN_NAMES[0]));
 			cust.setForename(rs.getString(COLUMN_NAMES[1]));
