@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.MethodInvoker;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -63,6 +64,8 @@ public class DefaultTestContext implements TestContext {
 
 	@Nullable
 	private volatile Throwable testException;
+
+	private volatile MethodInvoker methodInvoker = MethodInvoker.DEFAULT_INVOKER;
 
 
 	/**
@@ -181,6 +184,17 @@ public class DefaultTestContext implements TestContext {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testException = testException;
+	}
+
+	@Override
+	public final void setMethodInvoker(MethodInvoker methodInvoker) {
+		Assert.notNull(methodInvoker, "MethodInvoker must not be null");
+		this.methodInvoker = methodInvoker;
+	}
+
+	@Override
+	public final MethodInvoker getMethodInvoker() {
+		return this.methodInvoker;
 	}
 
 	@Override
