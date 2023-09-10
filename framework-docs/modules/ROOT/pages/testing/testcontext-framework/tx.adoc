@@ -295,14 +295,18 @@ behavior after your test runs (if the test was configured to commit the transact
 `TransactionalTestExecutionListener` supports the `@BeforeTransaction` and
 `@AfterTransaction` annotations for exactly such scenarios. You can annotate any `void`
 method in a test class or any `void` default method in a test interface with one of these
-annotations, and the `TransactionalTestExecutionListener` ensures that your before
-transaction method or after transaction method runs at the appropriate time.
+annotations, and the `TransactionalTestExecutionListener` ensures that your
+before-transaction method or after-transaction method runs at the appropriate time.
 
-TIP: Any before methods (such as methods annotated with JUnit Jupiter's `@BeforeEach`)
-and any after methods (such as methods annotated with JUnit Jupiter's `@AfterEach`) are
-run within a transaction. In addition, methods annotated with `@BeforeTransaction` or
-`@AfterTransaction` are not run for test methods that are not configured to run within a
-transaction.
+[TIP]
+====
+Any before methods (such as methods annotated with JUnit Jupiter's `@BeforeEach`) and any
+after methods (such as methods annotated with JUnit Jupiter's `@AfterEach`) are run
+within the test-managed transaction for a transactional test method.
+
+Similarly, methods annotated with `@BeforeTransaction` or `@AfterTransaction` are only
+run for transactional test methods.
+====
 
 [[testcontext-tx-mgr-config]]
 == Configuring a Transaction Manager
