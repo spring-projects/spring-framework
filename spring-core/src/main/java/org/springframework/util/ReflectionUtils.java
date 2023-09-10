@@ -463,7 +463,7 @@ public abstract class ReflectionUtils {
 		if (result == null) {
 			try {
 				Method[] declaredMethods = clazz.getDeclaredMethods();
-				List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
+				List<Method> defaultMethods = findDefaultMethodsOnInterfaces(clazz);
 				if (defaultMethods != null) {
 					result = new Method[declaredMethods.length + defaultMethods.size()];
 					System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
@@ -487,15 +487,15 @@ public abstract class ReflectionUtils {
 	}
 
 	@Nullable
-	private static List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
+	private static List<Method> findDefaultMethodsOnInterfaces(Class<?> clazz) {
 		List<Method> result = null;
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			for (Method ifcMethod : ifc.getMethods()) {
-				if (ifcMethod.isDefault()) {
+			for (Method method : ifc.getMethods()) {
+				if (method.isDefault()) {
 					if (result == null) {
 						result = new ArrayList<>();
 					}
-					result.add(ifcMethod);
+					result.add(method);
 				}
 			}
 		}
