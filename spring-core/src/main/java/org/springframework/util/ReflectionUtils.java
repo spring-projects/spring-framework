@@ -491,7 +491,7 @@ public abstract class ReflectionUtils {
 		List<Method> result = null;
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			for (Method ifcMethod : ifc.getMethods()) {
-				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
+				if (ifcMethod.isDefault()) {
 					if (result == null) {
 						result = new ArrayList<>();
 					}
