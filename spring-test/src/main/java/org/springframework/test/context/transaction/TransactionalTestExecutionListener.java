@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,8 +287,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 					logger.debug("Executing @BeforeTransaction method [%s] for test class [%s]"
 							.formatted(method, testClass.getName()));
 				}
-				ReflectionUtils.makeAccessible(method);
-				method.invoke(testContext.getTestInstance());
+				testContext.getMethodInvoker().invoke(method, testContext.getTestInstance());
 			}
 		}
 		catch (InvocationTargetException ex) {
@@ -323,8 +322,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 					logger.debug("Executing @AfterTransaction method [%s] for test class [%s]"
 							.formatted(method, testClass.getName()));
 				}
-				ReflectionUtils.makeAccessible(method);
-				method.invoke(testContext.getTestInstance());
+				testContext.getMethodInvoker().invoke(method, testContext.getTestInstance());
 			}
 			catch (InvocationTargetException ex) {
 				Throwable targetException = ex.getTargetException();
