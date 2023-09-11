@@ -77,7 +77,25 @@ public abstract class LogFactory {
 	 */
 	@Deprecated
 	public static LogFactory getFactory() {
-		return new LogFactory() {};
+		return new LogFactory() {
+			@Override
+			public Object getAttribute(String name) {
+				return null;
+			}
+			@Override
+			public String[] getAttributeNames() {
+				return new String[0];
+			}
+			@Override
+			public void removeAttribute(String name) {
+			}
+			@Override
+			public void setAttribute(String name, Object value) {
+			}
+			@Override
+			public void release() {
+			}
+		};
 	}
 
 	/**
@@ -106,29 +124,19 @@ public abstract class LogFactory {
 	// Just in case some code happens to call uncommon Commons Logging methods...
 
 	@Deprecated
-	public Object getAttribute(String name) {
-		return null;
-	}
+	public abstract Object getAttribute(String name);
 
 	@Deprecated
-	public String[] getAttributeNames() {
-		return new String[0];
-	}
+	public abstract String[] getAttributeNames();
 
 	@Deprecated
-	public void removeAttribute(String name) {
-		// do nothing
-	}
+	public abstract void removeAttribute(String name);
 
 	@Deprecated
-	public void setAttribute(String name, Object value) {
-		// do nothing
-	}
+	public abstract void setAttribute(String name, Object value);
 
 	@Deprecated
-	public void release() {
-		// do nothing
-	}
+	public abstract void release();
 
 	@Deprecated
 	public static void release(ClassLoader classLoader) {

@@ -50,9 +50,9 @@ import static org.mockito.Mockito.verify;
  */
 public class JdbcTemplateQueryTests {
 
-	private Connection connection = mock();
-
 	private DataSource dataSource = mock();
+
+	private Connection connection = mock();
 
 	private Statement statement = mock();
 

@@ -80,4 +80,8 @@ public class LogFactoryService extends LogFactory {
 		return this.attributes.keySet().toArray(new String[0]);
 	}
 
+	@Override
+	public void release() {
+	}
+
 }

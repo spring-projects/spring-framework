@@ -1084,6 +1084,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Let subclasses do some final clean-up if they wish...
 			onClose();
 
+			// Reset common introspection caches to avoid class reference leaks.
+			resetCommonCaches();
+
 			// Reset local application listeners to pre-refresh state.
 			if (this.earlyApplicationListeners != null) {
 				this.applicationListeners.clear();

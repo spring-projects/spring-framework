@@ -39,9 +39,7 @@ final class AttributeMethods {
 
 	static final AttributeMethods NONE = new AttributeMethods(null, new Method[0]);
 
-
-	private static final Map<Class<? extends Annotation>, AttributeMethods> cache =
-			new ConcurrentReferenceHashMap<>();
+	static final Map<Class<? extends Annotation>, AttributeMethods> cache = new ConcurrentReferenceHashMap<>();
 
 	private static final Comparator<Method> methodComparator = (m1, m2) -> {
 		if (m1 != null && m2 != null) {
