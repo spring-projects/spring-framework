@@ -21,6 +21,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.GenerationContext;
@@ -39,12 +40,14 @@ import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * Internal {@link BeanRegistrationCodeFragments} implementation used by
  * default.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragments {
 
@@ -54,6 +57,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	private final BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory;
 
+	private final Supplier<Executable> constructorOrFactoryMethod;
+
 
 	DefaultBeanRegistrationCodeFragments(BeanRegistrationsCode beanRegistrationsCode,
 			RegisteredBean registeredBean,
@@ -62,14 +67,13 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		this.beanRegistrationsCode = beanRegistrationsCode;
 		this.registeredBean = registeredBean;
 		this.beanDefinitionMethodGeneratorFactory = beanDefinitionMethodGeneratorFactory;
+		this.constructorOrFactoryMethod = SingletonSupplier.of(registeredBean::resolveConstructorOrFactoryMethod);
 	}
 
 
 	@Override
-	public ClassName getTarget(RegisteredBean registeredBean,
-			Executable constructorOrFactoryMethod) {
-
-		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), constructorOrFactoryMethod);
+	public ClassName getTarget(RegisteredBean registeredBean) {
+		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), this.constructorOrFactoryMethod.get());
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			RegisteredBean parent = registeredBean.getParent();
 			Assert.state(parent != null, "No parent available for inner bean");
@@ -219,12 +223,11 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	@Override
 	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode,
-			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
+			BeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut) {
 
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
-				.generateCode(this.registeredBean, constructorOrFactoryMethod);
+				.generateCode(this.registeredBean,this.constructorOrFactoryMethod.get());
 	}
 
 	@Override

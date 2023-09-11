@@ -58,6 +58,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationCodeFragments;
 import org.springframework.beans.factory.aot.BeanRegistrationCodeFragmentsDecorator;
+import org.springframework.beans.factory.aot.InstanceSupplierCodeGenerator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -315,9 +316,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Object configClassAttr = registeredBean.getMergedBeanDefinition()
 				.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
 		if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
-			Class<?> proxyClass = registeredBean.getBeanType().toClass();
 			return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
-					new ConfigurationClassProxyBeanRegistrationCodeFragments(codeFragments, proxyClass));
+					new ConfigurationClassProxyBeanRegistrationCodeFragments(codeFragments, registeredBean));
 		}
 		return null;
 	}
@@ -749,12 +749,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private static class ConfigurationClassProxyBeanRegistrationCodeFragments extends BeanRegistrationCodeFragmentsDecorator {
 
+		private final RegisteredBean registeredBean;
+
 		private final Class<?> proxyClass;
 
 		public ConfigurationClassProxyBeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments,
-				Class<?> proxyClass) {
+				RegisteredBean registeredBean) {
 			super(codeFragments);
-			this.proxyClass = proxyClass;
+			this.registeredBean = registeredBean;
+			this.proxyClass = registeredBean.getBeanType().toClass();
 		}
 
 		@Override
@@ -770,11 +773,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		@Override
 		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
+				BeanRegistrationCode beanRegistrationCode,
 				boolean allowDirectSupplierShortcut) {
-			Executable executableToUse = proxyExecutable(generationContext.getRuntimeHints(), constructorOrFactoryMethod);
-			return super.generateInstanceSupplierCode(generationContext, beanRegistrationCode,
-					executableToUse, allowDirectSupplierShortcut);
+
+			Executable executableToUse = proxyExecutable(generationContext.getRuntimeHints(),
+					this.registeredBean.resolveConstructorOrFactoryMethod());
+			return new InstanceSupplierCodeGenerator(generationContext,
+					beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
+					.generateCode(this.registeredBean, executableToUse);
 		}
 
 		private Executable proxyExecutable(RuntimeHints runtimeHints, Executable userExecutable) {

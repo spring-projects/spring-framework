@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Executable;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -97,7 +96,6 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 		@Override
 		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode,
-				Executable constructorOrFactoryMethod,
 				boolean allowDirectSupplierShortcut) {
 			PersistenceManagedTypes persistenceManagedTypes = this.registeredBean.getBeanFactory()
 					.getBean(this.registeredBean.getBeanName(), PersistenceManagedTypes.class);
