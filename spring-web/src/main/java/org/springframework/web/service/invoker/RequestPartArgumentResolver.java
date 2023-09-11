@@ -39,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
  * <ul>
  * <li>String -- form field
  * <li>{@link org.springframework.core.io.Resource Resource} -- file part
+ * <li>{@link MultipartFile} -- uploaded file
  * <li>Object -- content to be encoded (e.g. to JSON)
  * <li>{@link HttpEntity} -- part content and headers although generally it's
  * easier to add headers through the returned builder
@@ -80,16 +81,15 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
 		boolean isMultiPartFile = parameter.nestedIfOptional().getNestedParameterType().equals(MultipartFile.class);
+		String label = (isMultiPartFile ? "MultipartFile" : "request part");
 
-		if (annot != null && isMultiPartFile) {
-			return new NamedValueInfo(annot.name(), annot.required(), null, "MultipartFile", true);
-		}
-		else if (annot != null) {
-			return new NamedValueInfo(annot.name(), annot.required(), null, "request part", true);
+		if (annot != null) {
+			return new NamedValueInfo(annot.name(), annot.required(), null, label, true);
 		}
 		else if (isMultiPartFile) {
-			return new NamedValueInfo("", true, null, "MultipartFile", true);
+			return new NamedValueInfo("", true, null, label, true);
 		}
+
 		return null;
 	}
 
@@ -118,17 +118,9 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 				return;
 			}
 		}
-		if (value instanceof MultipartFile file) {
-			HttpHeaders headers = new HttpHeaders();
-			if (file.getOriginalFilename() != null) {
-				headers.setContentDispositionFormData(name, file.getOriginalFilename());
-			}
-			if (file.getContentType() != null) {
-				headers.add(HttpHeaders.CONTENT_TYPE, file.getContentType());
-			}
 
-			requestValues.addRequestPart(name, new HttpEntity<>(file.getResource(), headers));
-			return;
+		if (value instanceof MultipartFile multipartFile) {
+			value = toHttpEntity(name, multipartFile);
 		}
 
 		requestValues.addRequestPart(name, value);
@@ -136,6 +128,17 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 
 	private static ParameterizedTypeReference<Object> asParameterizedTypeRef(MethodParameter nestedParam) {
 		return ParameterizedTypeReference.forType(nestedParam.getNestedGenericParameterType());
+	}
+
+	private static Object toHttpEntity(String name, MultipartFile multipartFile) {
+		HttpHeaders headers = new HttpHeaders();
+		if (multipartFile.getOriginalFilename() != null) {
+			headers.setContentDispositionFormData(name, multipartFile.getOriginalFilename());
+		}
+		if (multipartFile.getContentType() != null) {
+			headers.add(HttpHeaders.CONTENT_TYPE, multipartFile.getContentType());
+		}
+		return new HttpEntity<>(multipartFile.getResource(), headers);
 	}
 
 }

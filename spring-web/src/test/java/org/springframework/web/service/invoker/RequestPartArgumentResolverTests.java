@@ -45,13 +45,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class RequestPartArgumentResolverTests {
 
+	private static final MockMultipartFile mockMultipartFile =
+			new MockMultipartFile("testFileName", "originalTestFileName", "text/plain", "test".getBytes());
+
+
 	private final TestReactorExchangeAdapter client = new TestReactorExchangeAdapter();
 
-	private final Service service =
-			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
-
-	private static final MockMultipartFile mockMultipartFile = new MockMultipartFile(
-			"testFileName", "originalTestFileName", "text/plain", "test".getBytes());
+	private final Service service = HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
 
 
 	// Base class functionality should be tested in NamedValueArgumentResolverTests.
@@ -88,26 +88,22 @@ class RequestPartArgumentResolverTests {
 	}
 
 	@Test
-	void requestPartOptionalMultipartFile() {
-		this.service.postRequestPartOptionalMultipartFile(Optional.of(mockMultipartFile));
-		testMultipartFile(mockMultipartFile, "file");
-	}
-
-	@Test
 	void optionalMultipartFile() {
 		this.service.postOptionalMultipartFile(Optional.empty(), "anotherPart");
 		Object value = client.getRequestValues().getBodyValue();
 
 		assertThat(value).isInstanceOf(MultiValueMap.class);
+
 		@SuppressWarnings("unchecked")
 		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
-		assertThat(map).containsOnlyKeys("anotherPart");
+		assertThat(map).hasSize(1).containsKey("anotherPart");
 	}
 
 	private void testMultipartFile(MultipartFile testFile, String partName) {
 		Object value = this.client.getRequestValues().getBodyValue();
 
 		assertThat(value).isInstanceOf(MultiValueMap.class);
+
 		@SuppressWarnings("unchecked")
 		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
 		assertThat(map).hasSize(1);
@@ -139,10 +135,7 @@ class RequestPartArgumentResolverTests {
 		void postRequestPartMultipartFile(@RequestPart(name = "myFile") MultipartFile file);
 
 		@PostExchange
-		void postRequestPartOptionalMultipartFile(@RequestPart Optional<MultipartFile> file);
-
-		@PostExchange
-		void postOptionalMultipartFile(Optional<MultipartFile> file, @RequestPart String anotherPart);
+		void postOptionalMultipartFile(@RequestPart Optional<MultipartFile> file, @RequestPart String anotherPart);
 	}
 
 }
