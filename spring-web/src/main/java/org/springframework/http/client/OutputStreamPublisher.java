@@ -32,7 +32,10 @@ import org.springframework.util.Assert;
 /**
  * Bridges between {@link OutputStream} and
  * {@link Flow.Publisher Flow.Publisher&lt;T&gt;}.
-
+ *
+ * <p>Note that this class has a near duplicate in
+ * {@link org.springframework.core.io.buffer.OutputStreamPublisher}.
+ *
  * @author Oleh Dokuka
  * @author Arjen Poutsma
  * @since 6.1

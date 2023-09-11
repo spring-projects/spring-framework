@@ -33,6 +33,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,6 +42,7 @@ import java.util.function.Consumer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
@@ -65,6 +67,9 @@ public abstract class DataBufferUtils {
 	private final static Log logger = LogFactory.getLog(DataBufferUtils.class);
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
+
+	private static final int DEFAULT_CHUNK_SIZE = 1024;
+
 
 
 	//---------------------------------------------------------------------
@@ -402,6 +407,83 @@ public abstract class DataBufferUtils {
 			catch (IOException ignored) {
 			}
 		}
+	}
+
+
+	/**
+	 * Create a new {@code Publisher<DataBuffer>} based on bytes written to a
+	 * {@code OutputStream}.
+	 * <ul>
+	 * <li>The parameter {@code outputStreamConsumer} is invoked once per
+	 * subscription of the returned {@code Publisher}, when the first
+	 * item is
+	 * {@linkplain Subscription#request(long) requested}.</li>
+	 * <li>{@link OutputStream#write(byte[], int, int) OutputStream.write()}
+	 * invocations made by {@code outputStreamConsumer} are buffered until they
+	 * exceed the default chunk size of 1024, or when the stream is
+	 * {@linkplain OutputStream#flush() flushed} and then result in a
+	 * {@linkplain Subscriber#onNext(Object) published} item
+	 * if there is {@linkplain Subscription#request(long) demand}.</li>
+	 * <li>If there is <em>no demand</em>, {@code OutputStream.write()} will block
+	 * until there is.</li>
+	 * <li>If the subscription is {@linkplain Subscription#cancel() cancelled},
+	 * {@code OutputStream.write()} will throw a {@code IOException}.</li>
+	 * <li>The subscription is
+	 * {@linkplain Subscriber#onComplete() completed} when
+	 * {@code outputStreamHandler} completes.</li>
+	 * <li>Any exceptions thrown from {@code outputStreamHandler} will
+	 * be dispatched to the {@linkplain Subscriber#onError(Throwable) Subscriber}.
+	 * </ul>
+	 * @param outputStreamConsumer invoked when the first buffer is requested
+	 * @param executor used to invoke the {@code outputStreamHandler}
+	 * @return a {@code Publisher<DataBuffer>} based on bytes written by
+	 * {@code outputStreamHandler}
+	 */
+	public static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,
+			DataBufferFactory bufferFactory, Executor executor) {
+
+		return outputStreamPublisher(outputStreamConsumer, bufferFactory, executor, DEFAULT_CHUNK_SIZE);
+	}
+
+	/**
+	 * Creates a new {@code Publisher<DataBuffer>} based on bytes written to a
+	 * {@code OutputStream}.
+	 * <ul>
+	 * <li>The parameter {@code outputStreamConsumer} is invoked once per
+	 * subscription of the returned {@code Publisher}, when the first
+	 * item is
+	 * {@linkplain Subscription#request(long) requested}.</li>
+	 * <li>{@link OutputStream#write(byte[], int, int) OutputStream.write()}
+	 * invocations made by {@code outputStreamHandler} are buffered until they
+	 * reach or exceed {@code chunkSize}, or when the stream is
+	 * {@linkplain OutputStream#flush() flushed} and then result in a
+	 * {@linkplain Subscriber#onNext(Object) published} item
+	 * if there is {@linkplain Subscription#request(long) demand}.</li>
+	 * <li>If there is <em>no demand</em>, {@code OutputStream.write()} will block
+	 * until there is.</li>
+	 * <li>If the subscription is {@linkplain Subscription#cancel() cancelled},
+	 * {@code OutputStream.write()} will throw a {@code IOException}.</li>
+	 * <li>The subscription is
+	 * {@linkplain Subscriber#onComplete() completed} when
+	 * {@code outputStreamHandler} completes.</li>
+	 * <li>Any exceptions thrown from {@code outputStreamHandler} will
+	 * be dispatched to the {@linkplain Subscriber#onError(Throwable) Subscriber}.
+	 * </ul>
+	 * @param outputStreamConsumer invoked when the first buffer is requested
+	 * @param executor used to invoke the {@code outputStreamHandler}
+	 * @param chunkSize minimum size of the buffer produced by the publisher
+	 * @return a {@code Publisher<DataBuffer>} based on bytes written by
+	 * {@code outputStreamHandler}
+	 */
+	public static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,
+			DataBufferFactory bufferFactory, Executor executor, int chunkSize) {
+
+		Assert.notNull(outputStreamConsumer, "OutputStreamConsumer must not be null");
+		Assert.notNull(bufferFactory, "BufferFactory must not be null");
+		Assert.notNull(executor, "Executor must not be null");
+		Assert.isTrue(chunkSize > 0, "Chunk size must be > 0");
+
+		return new OutputStreamPublisher(outputStreamConsumer, bufferFactory, executor, chunkSize);
 	}
 
 
