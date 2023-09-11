@@ -53,25 +53,27 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 
 	@ParameterizedWebSocketTest
-	@SuppressWarnings("deprecation")
-	void subProtocolNegotiation(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void subProtocolNegotiation(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
 		URI url = URI.create(getWsBaseUrl() + "/ws");
-		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
+		WebSocketSession session = this.webSocketClient.execute(new TextWebSocketHandler(), headers, url).get();
 		assertThat(session.getAcceptedProtocol()).isEqualTo("foo");
 		session.close();
 	}
 
 	@ParameterizedWebSocketTest  // SPR-12727
-	@SuppressWarnings("deprecation")
-	void unsolicitedPongWithEmptyPayload(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void unsolicitedPongWithEmptyPayload(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		String url = getWsBaseUrl() + "/ws";
-		WebSocketSession session = this.webSocketClient.doHandshake(new AbstractWebSocketHandler() {}, url).get();
+		WebSocketSession session = this.webSocketClient.execute(new AbstractWebSocketHandler() {}, url).get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		serverHandler.setWaitMessageCount(1);
@@ -129,7 +131,7 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		}
 
 		@Override
-		public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+		public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
 			this.receivedMessages.add(message);
 			if (this.receivedMessages.size() >= this.waitMessageCount) {
 				this.latch.countDown();
@@ -137,7 +139,7 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		}
 
 		@Override
-		public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+		public void handleTransportError(WebSocketSession session, Throwable exception) {
 			this.transportError = exception;
 			this.latch.countDown();
 		}

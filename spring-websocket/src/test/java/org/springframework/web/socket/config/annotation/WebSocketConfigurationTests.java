@@ -49,11 +49,12 @@ class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 
 
 	@ParameterizedWebSocketTest
-	@SuppressWarnings("deprecation")
-	void registerWebSocketHandler(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void registerWebSocketHandler(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
-		WebSocketSession session = this.webSocketClient.doHandshake(
+		WebSocketSession session = this.webSocketClient.execute(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
 		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
@@ -63,11 +64,12 @@ class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest
-	@SuppressWarnings("deprecation")
-	void registerWebSocketHandlerWithSockJS(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void registerWebSocketHandlerWithSockJS(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
-		WebSocketSession session = this.webSocketClient.doHandshake(
+		WebSocketSession session = this.webSocketClient.execute(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 
 		TestHandler serverHandler = this.wac.getBean(TestHandler.class);

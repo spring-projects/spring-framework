@@ -74,7 +74,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 
 	@ParameterizedWebSocketTest
-	void sendMessageToController(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void sendMessageToController(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
@@ -87,7 +89,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest
-	void sendMessageToControllerAndReceiveReplyViaTopic(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void sendMessageToControllerAndReceiveReplyViaTopic(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
@@ -105,7 +109,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest  // SPR-10930
-	void sendMessageToBrokerAndReceiveReplyViaTopicWithSelectorHeader(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void sendMessageToBrokerAndReceiveReplyViaTopicWithSelectorHeader(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		String destination = "destination:/topic/foo";
@@ -127,7 +133,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest  // SPR-11648
-	void sendSubscribeToControllerAndReceiveReply(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void sendSubscribeToControllerAndReceiveReply(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
@@ -146,7 +154,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest
-	void handleExceptionAndSendToUser(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void handleExceptionAndSendToUser(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		String destHeader = "destination:/user/queue/error";
@@ -167,7 +177,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest
-	void webSocketScope(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void webSocketScope(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
 		super.setup(server, webSocketClient, testInfo);
 
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
