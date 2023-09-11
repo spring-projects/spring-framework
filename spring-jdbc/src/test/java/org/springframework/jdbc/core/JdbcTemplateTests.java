@@ -75,17 +75,17 @@ import static org.mockito.Mockito.verify;
  */
 public class JdbcTemplateTests {
 
-	private Connection connection = mock();
-
 	private DataSource dataSource = mock();
+
+	private Connection connection = mock();
 
 	private Statement statement = mock();
 
 	private PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet = mock();
-
 	private CallableStatement callableStatement = mock();
+
+	private ResultSet resultSet = mock();
 
 	private JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
@@ -136,9 +136,9 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willThrow(sqlException);
 
 		Dispatcher d = new Dispatcher(idParam, sql);
-		assertThatExceptionOfType(UncategorizedSQLException.class).isThrownBy(() ->
-				this.template.update(d))
-			.withCause(sqlException);
+		assertThatExceptionOfType(UncategorizedSQLException.class)
+				.isThrownBy(() -> this.template.update(d))
+				.withCause(sqlException);
 		verify(this.preparedStatement).setInt(1, idParam);
 		verify(this.preparedStatement).close();
 		verify(this.connection, atLeastOnce()).close();
@@ -371,9 +371,9 @@ public class JdbcTemplateTests {
 		given(this.statement.executeUpdate(sql)).willThrow(sqlException);
 		given(this.connection.createStatement()).willReturn(this.statement);
 
-		assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
-				this.template.update(sql))
-			.withCause(sqlException);
+		assertThatExceptionOfType(DataAccessException.class)
+				.isThrownBy(() -> this.template.update(sql))
+				.withCause(sqlException);
 		verify(this.statement).close();
 		verify(this.connection, atLeastOnce()).close();
 	}
@@ -672,9 +672,9 @@ public class JdbcTemplateTests {
 		};
 
 		try {
-			assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
-					this.template.batchUpdate(sql, setter))
-				.withCause(sqlException);
+			assertThatExceptionOfType(DataAccessException.class)
+					.isThrownBy(() -> this.template.batchUpdate(sql, setter))
+					.withCause(sqlException);
 		}
 		finally {
 			verify(this.preparedStatement, times(2)).addBatch();
@@ -776,9 +776,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 
-		assertThatExceptionOfType(CannotGetJdbcConnectionException.class).isThrownBy(() ->
-				template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
-			.withCause(sqlException);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class)
+				.isThrownBy(() -> template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+				.withCause(sqlException);
 	}
 
 	@Test
@@ -790,9 +790,9 @@ public class JdbcTemplateTests {
 		this.template.afterPropertiesSet();
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 
-		assertThatExceptionOfType(CannotGetJdbcConnectionException.class).isThrownBy(() ->
-				this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
-			.withCause(sqlException);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class)
+				.isThrownBy(() -> this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+				.withCause(sqlException);
 	}
 
 	@Test
@@ -830,9 +830,9 @@ public class JdbcTemplateTests {
 			this.template.afterPropertiesSet();
 		}
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		assertThatExceptionOfType(CannotGetJdbcConnectionException.class).isThrownBy(() ->
-				this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
-			.withCause(sqlException);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class)
+				.isThrownBy(() -> this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+				.withCause(sqlException);
 	}
 
 	@Test
@@ -859,9 +859,9 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willThrow(sqlException);
 
 		PreparedStatementSetter pss = ps -> ps.setString(1, name);
-		assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
-				new JdbcTemplate(this.dataSource).update(sql, pss))
-			.withCause(sqlException);
+		assertThatExceptionOfType(DataAccessException.class)
+				.isThrownBy(() -> new JdbcTemplate(this.dataSource).update(sql, pss))
+				.withCause(sqlException);
 		verify(this.preparedStatement).setString(1, name);
 		verify(this.preparedStatement).close();
 		verify(this.connection, atLeastOnce()).close();
@@ -897,9 +897,9 @@ public class JdbcTemplateTests {
 		t.setIgnoreWarnings(false);
 
 		ResultSetExtractor<Byte> extractor = rs -> rs.getByte(1);
-		assertThatExceptionOfType(SQLWarningException.class).isThrownBy(() ->
-				t.query(sql, extractor))
-			.withCause(warnings);
+		assertThatExceptionOfType(SQLWarningException.class)
+				.isThrownBy(() -> t.query(sql, extractor))
+				.withCause(warnings);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
@@ -940,7 +940,7 @@ public class JdbcTemplateTests {
 				this.template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
 				}))
-			.withCause(sqlException);
+				.withCause(sqlException);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
 		verify(this.connection, atLeastOnce()).close();
@@ -960,7 +960,7 @@ public class JdbcTemplateTests {
 				this.template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
 				}))
-			.withCause(sqlException);
+				.withCause(sqlException);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
@@ -990,7 +990,7 @@ public class JdbcTemplateTests {
 				template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
 				}))
-			.withCause(sqlException);
+				.withCause(sqlException);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
