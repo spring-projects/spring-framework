@@ -188,7 +188,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	/**
 	 * Check the headers and determine the headers for the response of a
 	 * pre-flight request. The default implementation simply delegates to
-	 * {@link CorsConfiguration#checkOrigin(String)}.
+	 * {@link CorsConfiguration#checkHeaders(List)}.
 	 */
 	@Nullable
 	protected List<String> checkHeaders(CorsConfiguration config, List<String> requestHeaders) {
