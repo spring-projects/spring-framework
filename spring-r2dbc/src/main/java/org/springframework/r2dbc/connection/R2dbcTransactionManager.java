@@ -337,36 +337,36 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		return Mono.defer(() -> {
 			ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
 
+			if (txObject.hasSavepoint()) {
+				// Just release the savepoint, keeping the transactional connection.
+				return txObject.releaseSavepoint();
+			}
+
 			// Remove the connection holder from the context, if exposed.
 			if (txObject.isNewConnectionHolder()) {
 				synchronizationManager.unbindResource(obtainConnectionFactory());
 			}
 
 			// Reset connection.
-			Connection con = txObject.getConnectionHolder().getConnection();
-
-			Mono<Void> afterCleanup = Mono.empty();
-
-			Mono<Void> releaseConnectionStep = Mono.defer(() -> {
-				try {
-					if (txObject.isNewConnectionHolder()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
-						}
-						Mono<Void> releaseMono = ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
-						if (logger.isDebugEnabled()) {
-							releaseMono = releaseMono.doOnError(
-									ex -> logger.debug(String.format("Error ignored during cleanup: %s", ex)));
-						}
-						return releaseMono.onErrorComplete();
+			try {
+				if (txObject.isNewConnectionHolder()) {
+					Connection con = txObject.getConnectionHolder().getConnection();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
 					}
+					Mono<Void> releaseMono = ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
+					if (logger.isDebugEnabled()) {
+						releaseMono = releaseMono.doOnError(
+								ex -> logger.debug(String.format("Error ignored during cleanup: %s", ex)));
+					}
+					return releaseMono.onErrorComplete();
 				}
-				finally {
-					txObject.getConnectionHolder().clear();
-				}
-				return Mono.empty();
-			});
-			return afterCleanup.then(releaseConnectionStep);
+			}
+			finally {
+				txObject.getConnectionHolder().clear();
+			}
+
+			return Mono.empty();
 		});
 	}
 
@@ -511,23 +511,36 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			return (this.connectionHolder != null && this.connectionHolder.isTransactionActive());
 		}
 
+		public boolean hasSavepoint() {
+			return (this.savepointName != null);
+		}
+
 		public Mono<Void> createSavepoint() {
 			ConnectionHolder holder = getConnectionHolder();
-			this.savepointName = holder.nextSavepoint();
-			return Mono.from(holder.getConnection().createSavepoint(this.savepointName));
+			String currentSavepoint = holder.nextSavepoint();
+			this.savepointName = currentSavepoint;
+			return Mono.from(holder.getConnection().createSavepoint(currentSavepoint));
+		}
+
+		public Mono<Void> releaseSavepoint() {
+			String currentSavepoint = this.savepointName;
+			if (currentSavepoint == null) {
+				return Mono.empty();
+			}
+			this.savepointName = null;
+			return Mono.from(getConnectionHolder().getConnection().releaseSavepoint(currentSavepoint));
 		}
 
 		public Mono<Void> commit() {
-			Connection connection = getConnectionHolder().getConnection();
-			return (this.savepointName != null ?
-					Mono.from(connection.releaseSavepoint(this.savepointName)) :
-					Mono.from(connection.commitTransaction()));
+			return (hasSavepoint() ? Mono.empty() :
+					Mono.from(getConnectionHolder().getConnection().commitTransaction()));
 		}
 
 		public Mono<Void> rollback() {
 			Connection connection = getConnectionHolder().getConnection();
-			return (this.savepointName != null ?
-					Mono.from(connection.rollbackTransactionToSavepoint(this.savepointName)) :
+			String currentSavepoint = this.savepointName;
+			return (currentSavepoint != null ?
+					Mono.from(connection.rollbackTransactionToSavepoint(currentSavepoint)) :
 					Mono.from(connection.rollbackTransaction()));
 		}
 
