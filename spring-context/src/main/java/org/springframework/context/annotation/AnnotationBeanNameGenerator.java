@@ -16,11 +16,15 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +35,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -89,10 +95,13 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 */
 	private static final Set<String> conventionBasedStereotypeCheckCache = ConcurrentHashMap.newKeySet();
 
+	private static final Adapt[] ADAPTATIONS = Adapt.values(false, true);
+
 
 	private final Log logger = LogFactory.getLog(AnnotationBeanNameGenerator.class);
 
 	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
+
 
 
 	@Override
@@ -122,24 +131,32 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 			return beanName;
 		}
 
-		for (String annotationType : metadata.getAnnotationTypes()) {
-			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, annotationType);
-			if (attributes != null) {
-				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType, key -> {
-					Set<String> result = metadata.getMetaAnnotationTypes(key);
-					return (result.isEmpty() ? Collections.emptySet() : result);
-				});
+		// List of annotations directly present on the class we're searching on.
+		// MergedAnnotation implementations do not implement equals()/hashCode(),
+		// so we use a List and a 'visited' Set below.
+		List<MergedAnnotation<Annotation>> mergedAnnotations = metadata.getAnnotations().stream()
+				.filter(MergedAnnotation::isDirectlyPresent)
+				.toList();
+
+		Set<AnnotationAttributes> visited = new HashSet<>();
+
+		for (MergedAnnotation<Annotation> mergedAnnotation : mergedAnnotations) {
+			AnnotationAttributes attributes = mergedAnnotation.asAnnotationAttributes(ADAPTATIONS);
+			if (visited.add(attributes)) {
+				String annotationType = mergedAnnotation.getType().getName();
+				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType,
+						key -> getMetaAnnotationTypes(mergedAnnotation));
 				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
 					Object value = attributes.get("value");
 					if (value instanceof String currentName && !currentName.isBlank()) {
 						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
 								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
 							logger.warn("""
-									Support for convention-based stereotype names is deprecated and will \
-									be removed in a future version of the framework. Please annotate the \
-									'value' attribute in @%s with @AliasFor(annotation=Component.class) \
-									to declare an explicit alias for @Component's 'value' attribute."""
-										.formatted(annotationType));
+								Support for convention-based stereotype names is deprecated and will \
+								be removed in a future version of the framework. Please annotate the \
+								'value' attribute in @%s with @AliasFor(annotation=Component.class) \
+								to declare an explicit alias for @Component's 'value' attribute."""
+									.formatted(annotationType));
 						}
 						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
@@ -151,6 +168,13 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 			}
 		}
 		return beanName;
+	}
+
+	private Set<String> getMetaAnnotationTypes(MergedAnnotation<Annotation> mergedAnnotation) {
+		Set<String> result = MergedAnnotations.from(mergedAnnotation.getType()).stream()
+				.map(metaAnnotation -> metaAnnotation.getType().getName())
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+		return (result.isEmpty() ? Collections.emptySet() : result);
 	}
 
 	/**
