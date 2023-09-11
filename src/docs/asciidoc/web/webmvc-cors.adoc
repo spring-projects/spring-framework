@@ -76,6 +76,35 @@ To learn more from the source or make advanced customizations, check the code be
 
 
 
+[[mvc-cors-credentialed-requests]]
+== Credentialed Requests
+[.small]#<<web-reactive.adoc#webflux-cors-credentialed-requests, WebFlux>>#
+
+Using CORS with credentialed requests requires enabling `allowedCredentials`. Be aware that
+this option establishes a high level of trust with the configured domains and also increases
+the surface of attack of the web application by exposing sensitive user-specific information
+such as cookies and CSRF tokens.
+
+Enabling credentials also impacts how the configured `"*"` CORS wildcards are processed:
+
+* Wildcards are not authorized in `allowOrigins`, but alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
+* When set on `allowedHeaders` or `allowedMethods`, the `Access-Control-Allow-Headers`
+and `Access-Control-Allow-Methods` response headers are handled by copying the related
+headers and method specified in the CORS preflight request.
+* When set on `exposedHeaders`, `Access-Control-Expose-Headers` response header is set
+either to the configured list of headers or to the wildcard character. While the CORS spec
+does not allow the wildcard character when `Access-Control-Allow-Credentials` is set to
+`true`, most browsers support it and the response headers are not all available during the
+CORS processing, so as a consequence the wildcard character is the header value used when
+specified regardless of the value of the `allowCredentials` property.
+
+WARNING: While such wildcard configuration can be handy, it is recommended when possible to configure
+a finite set of values instead to provide a higher level of security.
+
+
+
+
 [[mvc-cors-controller]]
 == `@CrossOrigin`
 [.small]#<<web-reactive.adoc#webflux-cors-controller, WebFlux>>#
