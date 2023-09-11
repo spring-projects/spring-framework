@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,7 @@ final class AttributeMethods {
 
 	static final AttributeMethods NONE = new AttributeMethods(null, new Method[0]);
 
-
-	private static final Map<Class<? extends Annotation>, AttributeMethods> cache =
-			new ConcurrentReferenceHashMap<>();
+	static final Map<Class<? extends Annotation>, AttributeMethods> cache = new ConcurrentReferenceHashMap<>();
 
 	private static final Comparator<Method> methodComparator = (m1, m2) -> {
 		if (m1 != null && m2 != null) {
