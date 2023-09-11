@@ -27,7 +27,6 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.ClassName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -66,10 +65,6 @@ class BeanDefinitionMethodGenerator {
 			RegisteredBean registeredBean, @Nullable String currentPropertyName,
 			List<BeanRegistrationAotContribution> aotContributions) {
 
-		RootBeanDefinition mbd = registeredBean.getMergedBeanDefinition();
-		if (mbd.getInstanceSupplier() != null && aotContributions.isEmpty()) {
-			throw new IllegalArgumentException("Code generation is not supported for bean definitions declaring an instance supplier callback : " + mbd);
-		}
 		this.methodGeneratorFactory = methodGeneratorFactory;
 		this.registeredBean = registeredBean;
 		this.currentPropertyName = currentPropertyName;

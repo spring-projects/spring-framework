@@ -73,6 +73,10 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	@Override
 	public ClassName getTarget(RegisteredBean registeredBean) {
+		if (hasInstanceSupplier()) {
+			throw new IllegalStateException("Default code generation is not supported for bean definitions "
+					+ "declaring an instance supplier callback: " + registeredBean.getMergedBeanDefinition());
+		}
 		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), this.constructorOrFactoryMethod.get());
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			RegisteredBean parent = registeredBean.getParent();
@@ -224,7 +228,10 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	@Override
 	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut) {
-
+		if (hasInstanceSupplier()) {
+			throw new IllegalStateException("Default code generation is not supported for bean definitions declaring "
+					+ "an instance supplier callback: " + this.registeredBean.getMergedBeanDefinition());
+		}
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
 				.generateCode(this.registeredBean,this.constructorOrFactoryMethod.get());
@@ -237,6 +244,10 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		CodeBlock.Builder code = CodeBlock.builder();
 		code.addStatement("return $L", BEAN_DEFINITION_VARIABLE);
 		return code.build();
+	}
+
+	private boolean hasInstanceSupplier() {
+		return this.registeredBean.getMergedBeanDefinition().getInstanceSupplier() != null;
 	}
 
 }
