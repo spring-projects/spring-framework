@@ -192,7 +192,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @return whether the annotation qualifies as a stereotype with component name
 	 */
 	protected boolean isStereotypeWithNameValue(String annotationType,
-			Set<String> metaAnnotationTypes, @Nullable Map<String, Object> attributes) {
+			Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
 
 		boolean isStereotype = metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
 				annotationType.equals("jakarta.annotation.ManagedBean") ||
@@ -200,7 +200,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				annotationType.equals("jakarta.inject.Named") ||
 				annotationType.equals("javax.inject.Named");
 
-		return (isStereotype && attributes != null && attributes.containsKey("value"));
+		return (isStereotype && attributes.containsKey("value"));
 	}
 
 	/**
