@@ -5,16 +5,11 @@ The Spring Framework provides abstractions for the asynchronous execution and sc
 tasks with the `TaskExecutor` and `TaskScheduler` interfaces, respectively. Spring also
 features implementations of those interfaces that support thread pools or delegation to
 CommonJ within an application server environment. Ultimately, the use of these
-implementations behind the common interfaces abstracts away the differences between Java
-SE 5, Java SE 6, and Jakarta EE environments.
+implementations behind the common interfaces abstracts away the differences between
+Java SE and Jakarta EE environments.
 
-Spring also features integration classes to support scheduling with the `Timer`
-(part of the JDK since 1.3) and the https://www.quartz-scheduler.org/[Quartz Scheduler].
-You can set up both of those schedulers by using a `FactoryBean` with optional references to
-`Timer` or `Trigger` instances, respectively. Furthermore, a convenience class for both
-the Quartz Scheduler and the `Timer` is available that lets you invoke a method of
-an existing target object (analogous to the normal `MethodInvokingFactoryBean`
-operation).
+Spring also features integration classes to support scheduling with the
+https://www.quartz-scheduler.org/[Quartz Scheduler].
 
 
 
@@ -261,8 +256,8 @@ execution.
 [[scheduling-enable-annotation-support]]
 === Enable Scheduling Annotations
 
-To enable support for `@Scheduled` and `@Async` annotations, you can add `@EnableScheduling` and
-`@EnableAsync` to one of your `@Configuration` classes, as the following example shows:
+To enable support for `@Scheduled` and `@Async` annotations, you can add `@EnableScheduling`
+and `@EnableAsync` to one of your `@Configuration` classes, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -336,7 +331,7 @@ For example, the previous example can also be written as follows.
 
 If you need a fixed-rate execution, you can use the `fixedRate` attribute within the
 annotation. The following method is invoked every five seconds (measured between the
-successive start times of each invocation).
+successive start times of each invocation):
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -346,9 +341,9 @@ successive start times of each invocation).
 	}
 ----
 
-For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating the
-amount of time to wait before the first execution of the method, as the following
-`fixedRate` example shows.
+For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating
+the amount of time to wait before the first execution of the method, as the following
+`fixedRate` example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -417,8 +412,8 @@ to a method that returns `void`, as the following example shows:
 
 Unlike the methods annotated with the `@Scheduled` annotation, these methods can expect
 arguments, because they are invoked in the "`normal`" way by callers at runtime rather
-than from a scheduled task being managed by the container. For example, the following code is
-a legitimate application of the `@Async` annotation:
+than from a scheduled task being managed by the container. For example, the following
+code is a legitimate application of the `@Async` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -442,15 +437,15 @@ that returns a value:
 	}
 ----
 
-TIP: `@Async` methods may not only declare a regular `java.util.concurrent.Future` return type
-but also Spring's `org.springframework.util.concurrent.ListenableFuture` or, as of Spring
-4.2, JDK 8's `java.util.concurrent.CompletableFuture`, for richer interaction with the
-asynchronous task and for immediate composition with further processing steps.
+TIP: `@Async` methods may not only declare a regular `java.util.concurrent.Future` return
+type but also Spring's `org.springframework.util.concurrent.ListenableFuture` or, as of
+Spring 4.2, JDK 8's `java.util.concurrent.CompletableFuture`, for richer interaction with
+the asynchronous task and for immediate composition with further processing steps.
 
-You can not use `@Async` in conjunction with lifecycle callbacks such as
-`@PostConstruct`. To asynchronously initialize Spring beans, you currently have to use
-a separate initializing Spring bean that then invokes the `@Async` annotated method on the
-target, as the following example shows:
+You can not use `@Async` in conjunction with lifecycle callbacks such as `@PostConstruct`.
+To asynchronously initialize Spring beans, you currently have to use a separate
+initializing Spring bean that then invokes the `@Async` annotated method on the target,
+as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -504,8 +499,8 @@ used when executing a given method. The following example shows how to do so:
 ----
 
 In this case, `"otherExecutor"` can be the name of any `Executor` bean in the Spring
-container, or it may be the name of a qualifier associated with any `Executor` (for example, as
-specified with the `<qualifier>` element or Spring's `@Qualifier` annotation).
+container, or it may be the name of a qualifier associated with any `Executor` (for example,
+as specified with the `<qualifier>` element or Spring's `@Qualifier` annotation).
 
 
 [[scheduling-annotation-support-exception]]
@@ -673,14 +668,15 @@ invoked on that object. The following listing shows a simple example:
 ----
 
 The scheduler is referenced by the outer element, and each individual
-task includes the configuration of its trigger metadata. In the preceding example, that
-metadata defines a periodic trigger with a fixed delay indicating the number of
+task includes the configuration of its trigger metadata. In the preceding example,
+that metadata defines a periodic trigger with a fixed delay indicating the number of
 milliseconds to wait after each task execution has completed. Another option is
 `fixed-rate`, indicating how often the method should be run regardless of how long
-any previous execution takes. Additionally, for both `fixed-delay` and `fixed-rate` tasks, you can specify an
-'initial-delay' parameter, indicating the number of milliseconds to wait
-before the first execution of the method. For more control, you can instead provide a `cron` attribute
-to provide a xref:integration/scheduling.adoc#scheduling-cron-expression[cron expression].
+any previous execution takes. Additionally, for both `fixed-delay` and `fixed-rate`
+tasks, you can specify an 'initial-delay' parameter, indicating the number of
+milliseconds to wait before the first execution of the method. For more control,
+you can instead provide a `cron` attribute to provide a
+xref:integration/scheduling.adoc#scheduling-cron-expression[cron expression].
 The following example shows these other options:
 
 [source,xml,indent=0]
@@ -703,9 +699,8 @@ The following example shows these other options:
 All Spring cron expressions have to conform to the same format, whether you are using them in
 xref:integration/scheduling.adoc#scheduling-annotation-support-scheduled[`@Scheduled` annotations],
 xref:integration/scheduling.adoc#scheduling-task-namespace-scheduled-tasks[`task:scheduled-tasks` elements],
-or someplace else.
-A well-formed cron expression, such as `* * * * * *`, consists of six space-separated time and date
-fields, each with its own range of valid values:
+or someplace else. A well-formed cron expression, such as `* * * * * *`, consists of six
+space-separated time and date fields, each with its own range of valid values:
 
 
 ....
@@ -770,9 +765,10 @@ Here are some examples:
 [[macros]]
 === Macros
 
-Expressions such as `0 0 * * * *` are hard for humans to parse and are, therefore, hard to fix in case of bugs.
-To improve readability, Spring supports the following macros, which represent commonly used sequences.
-You can use these macros instead of the six-digit value, thus: `@Scheduled(cron = "@hourly")`.
+Expressions such as `0 0 * * * *` are hard for humans to parse and are, therefore,
+hard to fix in case of bugs. To improve readability, Spring supports the following
+macros, which represent commonly used sequences. You can use these macros instead
+of the six-digit value, thus: `@Scheduled(cron = "@hourly")`.
 
 |===
 |Macro                          | Meaning
@@ -789,8 +785,8 @@ You can use these macros instead of the six-digit value, thus: `@Scheduled(cron 
 [[scheduling-quartz]]
 == Using the Quartz Scheduler
 
-Quartz uses `Trigger`, `Job`, and `JobDetail` objects to realize scheduling of all kinds
-of jobs. For the basic concepts behind Quartz, see the
+Quartz uses `Trigger`, `Job`, and `JobDetail` objects to realize scheduling of all
+kinds of jobs. For the basic concepts behind Quartz, see the
 https://www.quartz-scheduler.org/[Quartz Web site]. For convenience purposes, Spring
 offers a couple of classes that simplify using Quartz within Spring-based applications.
 
@@ -798,9 +794,9 @@ offers a couple of classes that simplify using Quartz within Spring-based applic
 [[scheduling-quartz-jobdetail]]
 === Using the `JobDetailFactoryBean`
 
-Quartz `JobDetail` objects contain all the information needed to run a job. Spring provides a
-`JobDetailFactoryBean`, which provides bean-style properties for XML configuration purposes.
-Consider the following example:
+Quartz `JobDetail` objects contain all the information needed to run a job. Spring
+provides a `JobDetailFactoryBean`, which provides bean-style properties for XML
+configuration purposes. Consider the following example:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -817,9 +813,9 @@ Consider the following example:
 The job detail configuration has all the information it needs to run the job (`ExampleJob`).
 The timeout is specified in the job data map. The job data map is available through the
 `JobExecutionContext` (passed to you at execution time), but the `JobDetail` also gets
-its properties from the job data mapped to properties of the job instance. So, in the following example,
-the `ExampleJob` contains a bean property named `timeout`, and the `JobDetail`
-has it applied automatically:
+its properties from the job data mapped to properties of the job instance. So, in the
+following example, the `ExampleJob` contains a bean property named `timeout`, and the
+`JobDetail` has it applied automatically:
 
 [source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
@@ -912,8 +908,8 @@ NOTE: By default, jobs will run in a concurrent fashion.
 [[scheduling-quartz-cron]]
 === Wiring up Jobs by Using Triggers and `SchedulerFactoryBean`
 
-We have created job details and jobs. We have also reviewed the convenience bean that lets
-you invoke a method on a specific object. Of course, we still need to schedule the
+We have created job details and jobs. We have also reviewed the convenience bean that
+lets you invoke a method on a specific object. Of course, we still need to schedule the
 jobs themselves. This is done by using triggers and a `SchedulerFactoryBean`. Several
 triggers are available within Quartz, and Spring offers two Quartz `FactoryBean`
 implementations with convenient defaults: `CronTriggerFactoryBean` and
@@ -944,9 +940,9 @@ The following listing uses both a `SimpleTriggerFactoryBean` and a `CronTriggerF
 	</bean>
 ----
 
-The preceding example sets up two triggers, one running every 50 seconds with a starting delay of 10
-seconds and one running every morning at 6 AM. To finalize everything, we need to set up the
-`SchedulerFactoryBean`, as the following example shows:
+The preceding example sets up two triggers, one running every 50 seconds with a starting
+delay of 10 seconds and one running every morning at 6 AM. To finalize everything,
+we need to set up the `SchedulerFactoryBean`, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----

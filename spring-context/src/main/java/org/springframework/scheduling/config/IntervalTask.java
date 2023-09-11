@@ -99,8 +99,6 @@ public class IntervalTask extends Task {
 	}
 
 
-
-
 	/**
 	 * Return how often in milliseconds the task should be executed.
 	 * @deprecated as of 6.0, in favor of {@link #getIntervalDuration()}
