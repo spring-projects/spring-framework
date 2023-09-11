@@ -280,8 +280,12 @@ public class CorsConfiguration {
 
 	/**
 	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
-	 * {@code "PUT"}, etc.
-	 * <p>The special value {@code "*"} allows all methods.
+	 * {@code "PUT"}, etc. The special value {@code "*"} allows all methods.
+	 * <p>{@code Access-Control-Allow-Methods} response header is set either
+	 * to the configured method or to {@code "*"}. Keep in mind however that the
+	 * CORS spec does not allow {@code "*"} when {@link #setAllowCredentials
+	 * allowCredentials} is set to {@code true}, that combination is handled
+	 * by copying the method specified in the CORS preflight request.
 	 * <p>If not set, only {@code "GET"} and {@code "HEAD"} are allowed.
 	 * <p>By default this is not set.
 	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
@@ -312,9 +316,9 @@ public class CorsConfiguration {
 	/**
 	 * Return the allowed HTTP methods, or {@code null} in which case
 	 * only {@code "GET"} and {@code "HEAD"} allowed.
+	 * @see #setAllowedMethods(List)
 	 * @see #addAllowedMethod(HttpMethod)
 	 * @see #addAllowedMethod(String)
-	 * @see #setAllowedMethods(List)
 	 */
 	@Nullable
 	public List<String> getAllowedMethods() {
@@ -322,14 +326,14 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Add an HTTP method to allow.
+	 * Variant of {@link #setAllowedMethods} for adding one allowed method at a time.
 	 */
 	public void addAllowedMethod(HttpMethod method) {
 		addAllowedMethod(method.name());
 	}
 
 	/**
-	 * Add an HTTP method to allow.
+	 * Variant of {@link #setAllowedMethods} for adding one allowed method at a time.
 	 */
 	public void addAllowedMethod(String method) {
 		if (StringUtils.hasText(method)) {
@@ -352,9 +356,13 @@ public class CorsConfiguration {
 
 	/**
 	 * Set the list of headers that a pre-flight request can list as allowed
-	 * for use during an actual request.
-	 * <p>The special value {@code "*"} allows actual requests to send any
-	 * header.
+	 * for use during an actual request. The special value {@code "*"} allows
+	 * actual requests to send any header.
+	 * <p>{@code Access-Control-Allow-Headers} response header is set either
+	 * to the configured list of headers or to {@code "*"}. Keep in mind however
+	 * that the CORS spec does not allow {@code "*"} when {@link #setAllowCredentials
+	 * allowCredentials} is set to {@code true}, that combination is handled by
+	 * copying the headers specified in the CORS preflight request.
 	 * <p>A header name is not required to be listed if it is one of:
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
 	 * {@code Last-Modified}, or {@code Pragma}.
@@ -375,7 +383,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Add an actual request header to allow.
+	 * Variant of {@link #setAllowedHeaders(List)} for adding one allowed header at a time.
 	 */
 	public void addAllowedHeader(String allowedHeader) {
 		if (this.allowedHeaders == null) {
@@ -388,12 +396,19 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Set the list of response headers other than simple headers (i.e.
-	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
-	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
-	 * actual response might have and can be exposed.
-	 * <p>The special value {@code "*"} allows all headers to be exposed for
-	 * non-credentialed requests.
+	 * Set the list of response headers that an actual response might have
+	 * and can be exposed to the client. The special value {@code "*"}
+	 * allows all headers to be exposed.
+	 * <p>{@code Access-Control-Expose-Headers} response header is set either
+	 * to the configured list of headers or to {@code "*"}. While the CORS
+	 * spec does not allow {@code "*"} when {@code Access-Control-Allow-Credentials}
+	 * is set to {@code true}, most browsers support it and
+	 * the response headers are not all available during the CORS processing,
+	 * so as a consequence {@code "*"} is the header value used when specified
+	 * regardless of the value of the `allowCredentials` property.
+	 * <p>A header name is not required to be listed if it is one of:
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
+	 * {@code Last-Modified}, or {@code Pragma}.
 	 * <p>By default this is not set.
 	 */
 	public void setExposedHeaders(@Nullable List<String> exposedHeaders) {
@@ -411,9 +426,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Add a response header to expose.
-	 * <p>The special value {@code "*"} allows all headers to be exposed for
-	 * non-credentialed requests.
+	 * Variant of {@link #setExposedHeaders} for adding one exposed header at a time.
 	 */
 	public void addExposedHeader(String exposedHeader) {
 		if (this.exposedHeaders == null) {
@@ -424,6 +437,15 @@ public class CorsConfiguration {
 
 	/**
 	 * Whether user credentials are supported.
+	 * <p>Setting this property has an impact on how {@link #setAllowedOrigins(List)
+	 * origins}, {@link #setAllowedOriginPatterns(List) originPatterns},
+	 * {@link #setAllowedMethods(List)  allowedMethods} and
+	 * {@link #setAllowedHeaders(List) allowedHeaders} are processed, see related
+	 * API documentation for more details.
+	 * <p><strong>NOTE:</strong> Be aware that this option establishes a high
+	 * level of trust with the configured domains and also increases the surface
+	 * attack of the web application by exposing sensitive user-specific
+	 * information such as cookies and CSRF tokens.
 	 * <p>By default this is not set (i.e. user credentials are not supported).
 	 */
 	public void setAllowCredentials(@Nullable Boolean allowCredentials) {
