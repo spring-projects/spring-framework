@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.util.ReflectionUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -32,21 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.5
  */
-class TestContextManagerTests {
+class TestContextManagerListenerExecutionOrderTests {
 
 	private static final List<String> executionOrder = new ArrayList<>();
 
-	private final TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
+	private final TestContextManager testContextManager = new TestContextManager(TestCase.class);
 
-	private final Method testMethod;
-	{
-		try {
-			this.testMethod = ExampleTestCase.class.getDeclaredMethod("exampleTestMethod");
-		}
-		catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+	private final Method testMethod = ReflectionUtils.findMethod(TestCase.class, "testMethod");
 
 
 	@Test
@@ -108,14 +102,14 @@ class TestContextManagerTests {
 
 
 	@TestExecutionListeners({ FirstTel.class, SecondTel.class, ThirdTel.class })
-	private static class ExampleTestCase {
+	private static class TestCase {
 
 		@SuppressWarnings("unused")
-		public void exampleTestMethod() {
+		void testMethod() {
 		}
 	}
 
-	private static class NamedTestExecutionListener implements TestExecutionListener {
+	private abstract static class NamedTestExecutionListener implements TestExecutionListener {
 
 		private final String name;
 
