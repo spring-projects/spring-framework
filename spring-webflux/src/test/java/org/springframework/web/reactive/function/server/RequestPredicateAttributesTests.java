@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.web.reactive.function.server.RequestPredicates.Evaluation;
-import org.springframework.web.reactive.function.server.RequestPredicates.EvaluatorRequestPredicate;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
@@ -184,28 +182,25 @@ public class RequestPredicateAttributesTests {
 	}
 
 
-	private static class AddAttributePredicate extends EvaluatorRequestPredicate {
+	private static class AddAttributePredicate extends RequestPredicates.RequestModifyingPredicate {
 
-		private boolean result;
+		private final boolean result;
 
 		private final String key;
 
 		private final String value;
 
-		private AddAttributePredicate(boolean result, String key, String value) {
+
+		public AddAttributePredicate(boolean result, String key, String value) {
 			this.result = result;
 			this.key = key;
 			this.value = value;
 		}
 
+
 		@Override
-		public Evaluation apply(ServerRequest request) {
-			return new Evaluation(result) {
-				@Override
-				void doCommit() {
-					request.attributes().put(key, value);
-				}
-			};
+		protected Result testInternal(ServerRequest request) {
+			return Result.of(this.result, serverRequest -> serverRequest.attributes().put(this.key, this.value));
 		}
 	}
 
