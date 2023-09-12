@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -311,8 +312,9 @@ final class PostProcessorRegistrationDelegate {
 
 	/**
 	 * Selectively invoke {@link MergedBeanDefinitionPostProcessor} instances
-	 * registered in the specified bean factory, resolving bean definitions as
-	 * well as any inner bean definitions that they may contain.
+	 * registered in the specified bean factory, resolving bean definitions and
+	 * any attributes if necessary as well as any inner bean definitions that
+	 * they may contain.
 	 * @param beanFactory the bean factory to use
 	 */
 	static void invokeMergedBeanDefinitionPostProcessors(DefaultListableBeanFactory beanFactory) {
@@ -483,6 +485,9 @@ final class PostProcessorRegistrationDelegate {
 					resolveInnerBeanDefinition(valueResolver, innerBd, (innerBeanName, innerBeanDefinition)
 							-> postProcessRootBeanDefinition(postProcessors, innerBeanName, innerBeanType, innerBeanDefinition));
 				}
+				if (value instanceof TypedStringValue typedStringValue) {
+					resolveTypeStringValue(typedStringValue);
+				}
 			}
 			for (ValueHolder valueHolder : bd.getConstructorArgumentValues().getIndexedArgumentValues().values()) {
 				Object value = valueHolder.getValue();
@@ -490,6 +495,9 @@ final class PostProcessorRegistrationDelegate {
 					Class<?> innerBeanType = resolveBeanType(innerBd);
 					resolveInnerBeanDefinition(valueResolver, innerBd, (innerBeanName, innerBeanDefinition)
 							-> postProcessRootBeanDefinition(postProcessors, innerBeanName, innerBeanType, innerBeanDefinition));
+				}
+				if (value instanceof TypedStringValue typedStringValue) {
+					resolveTypeStringValue(typedStringValue);
 				}
 			}
 		}
@@ -501,6 +509,15 @@ final class PostProcessorRegistrationDelegate {
 				resolver.accept(name, rbd);
 				return Void.class;
 			});
+		}
+
+		private void resolveTypeStringValue(TypedStringValue typedStringValue) {
+			try {
+				typedStringValue.resolveTargetType(this.beanFactory.getBeanClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				// ignore
+			}
 		}
 
 		private Class<?> resolveBeanType(AbstractBeanDefinition bd) {

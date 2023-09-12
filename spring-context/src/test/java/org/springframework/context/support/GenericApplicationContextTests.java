@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -359,6 +360,34 @@ class GenericApplicationContextTests {
 		GenericBeanDefinition value = (GenericBeanDefinition) bd.getPropertyValues().get("inner");
 		assertThat(value.hasBeanClass()).isTrue();
 		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
+		context.close();
+	}
+
+	@Test
+	void refreshForAotLoadsTypedStringValueClassNameInProperty() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition("java.lang.Integer");
+		beanDefinition.getPropertyValues().add("value", new TypedStringValue("42", "java.lang.Integer"));
+		context.registerBeanDefinition("number", beanDefinition);
+		context.refreshForAotProcessing(new RuntimeHints());
+		assertThat(getBeanDefinition(context, "number").getPropertyValues().get("value"))
+				.isInstanceOfSatisfying(TypedStringValue.class, typeStringValue ->
+						assertThat(typeStringValue.getTargetType()).isEqualTo(Integer.class));
+		context.close();
+	}
+
+	@Test
+	void refreshForAotLoadsTypedStringValueClassNameInConstructorArgument() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition("java.lang.Integer");
+		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0,
+				new TypedStringValue("42", "java.lang.Integer"));
+		context.registerBeanDefinition("number", beanDefinition);
+		context.refreshForAotProcessing(new RuntimeHints());
+		assertThat(getBeanDefinition(context, "number").getConstructorArgumentValues()
+				.getIndexedArgumentValue(0, TypedStringValue.class).getValue())
+				.isInstanceOfSatisfying(TypedStringValue.class, typeStringValue ->
+						assertThat(typeStringValue.getTargetType()).isEqualTo(Integer.class));
 		context.close();
 	}
 

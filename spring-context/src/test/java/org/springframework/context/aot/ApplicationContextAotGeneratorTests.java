@@ -52,6 +52,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Implementation;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.One;
@@ -62,6 +64,7 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.testfixture.context.annotation.AutowiredComponent;
 import org.springframework.context.testfixture.context.annotation.AutowiredGenericTemplate;
 import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
@@ -79,6 +82,7 @@ import org.springframework.context.testfixture.context.generator.SimpleComponent
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
@@ -437,6 +441,59 @@ class ApplicationContextAotGeneratorTests {
 					Arguments.of(new String[] { "aot" }, new String[] { "prod" }, new String[] { "prod", "aot" }),
 					Arguments.of(new String[] { "aot", "prod" }, new String[] { "aot", "prod" }, new String[] { "aot", "prod" }),
 					Arguments.of(new String[] { "default" }, new String[] {}, new String[] {}));
+		}
+
+	}
+
+	@Nested
+	class XmlSupport {
+
+		@Test
+		void processAheadOfTimeWhenHasTypedStringValue() {
+			GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
+			applicationContext
+					.load(new ClassPathResource("applicationContextAotGeneratorTests-values.xml", getClass()));
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				Employee employee = freshApplicationContext.getBean(Employee.class);
+				assertThat(employee.getName()).isEqualTo("John Smith");
+				assertThat(employee.getAge()).isEqualTo(42);
+				assertThat(employee.getCompany()).isEqualTo("Acme Widgets, Inc.");
+				assertThat(freshApplicationContext.getBean("pet", Pet.class)
+						.getName()).isEqualTo("Fido");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasTypedStringValueWithType() {
+			GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
+			applicationContext
+					.load(new ClassPathResource("applicationContextAotGeneratorTests-values-types.xml", getClass()));
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				Employee employee = freshApplicationContext.getBean(Employee.class);
+				assertThat(employee.getName()).isEqualTo("John Smith");
+				assertThat(employee.getAge()).isEqualTo(42);
+				assertThat(employee.getCompany()).isEqualTo("Acme Widgets, Inc.");
+				assertThat(compiled.getSourceFile(".*Employee__BeanDefinitions"))
+						.contains("new TypedStringValue(\"42\", Integer.class");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasTypedStringValueWithExpression() {
+			GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
+			applicationContext
+					.load(new ClassPathResource("applicationContextAotGeneratorTests-values-expressions.xml", getClass()));
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				Employee employee = freshApplicationContext.getBean(Employee.class);
+				assertThat(employee.getName()).isEqualTo("John Smith");
+				assertThat(employee.getAge()).isEqualTo(42);
+				assertThat(employee.getCompany()).isEqualTo("Acme Widgets, Inc.");
+				assertThat(freshApplicationContext.getBean("pet", Pet.class)
+						.getName()).isEqualTo("Fido");
+			});
 		}
 
 	}
