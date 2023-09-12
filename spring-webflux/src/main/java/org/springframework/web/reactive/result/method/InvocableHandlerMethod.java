@@ -49,7 +49,6 @@ import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.server.CoWebFilter;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -292,13 +291,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	private static class KotlinDelegate {
 
+		// Copy of CoWebFilter.COROUTINE_CONTEXT_ATTRIBUTE value to avoid compilation errors in Eclipse
+		private static final String COROUTINE_CONTEXT_ATTRIBUTE = "org.springframework.web.server.CoWebFilter.context";
+
 		@Nullable
 		@SuppressWarnings("deprecation")
 		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
 				ServerWebExchange exchange) {
 
 			if (isSuspendingFunction) {
-				Object coroutineContext = exchange.getAttribute(CoWebFilter.COROUTINE_CONTEXT_ATTRIBUTE);
+				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
 				if (coroutineContext == null) {
 					return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 				}
