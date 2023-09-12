@@ -182,24 +182,25 @@ public class RequestPredicateAttributesTests {
 	}
 
 
-	private static class AddAttributePredicate implements RequestPredicate {
+	private static class AddAttributePredicate extends RequestPredicates.RequestModifyingPredicate {
 
-		private boolean result;
+		private final boolean result;
 
 		private final String key;
 
 		private final String value;
 
-		private AddAttributePredicate(boolean result, String key, String value) {
+
+		public AddAttributePredicate(boolean result, String key, String value) {
 			this.result = result;
 			this.key = key;
 			this.value = value;
 		}
 
+
 		@Override
-		public boolean test(ServerRequest request) {
-			request.attributes().put(key, value);
-			return this.result;
+		protected Result testInternal(ServerRequest request) {
+			return Result.of(this.result, serverRequest -> serverRequest.attributes().put(this.key, this.value));
 		}
 	}
 
