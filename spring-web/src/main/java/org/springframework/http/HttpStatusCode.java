@@ -89,12 +89,11 @@ public sealed interface HttpStatusCode extends Serializable permits DefaultHttpS
 	}
 
 	/**
-	 * Checks whether the given status code is a well-known HTTP status code or not
-	 * @param statusCode the HTTP status code (potentially non-standard)
-	 * @return {@code true} if the status code corresponds to a standard HTTP status code
+	 * Checks whether this status code is a well-known HTTP status code or not
+	 * @return {@code true} if the status code corresponds to a standard HTTP status code, {@code false} otherwise
 	 */
-	static boolean isWellKnownStatusCode(HttpStatusCode statusCode) {
-		return HttpStatus.resolve(statusCode.value()) != null;
+	default boolean isWellKnown() {
+		return HttpStatus.resolve(this.value()) != null;
 	}
 
 	/**

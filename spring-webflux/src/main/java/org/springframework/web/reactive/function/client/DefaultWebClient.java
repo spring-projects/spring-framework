@@ -516,7 +516,7 @@ final class DefaultWebClient implements WebClient {
 	private static class DefaultResponseSpec implements ResponseSpec {
 
 		private static final Predicate<HttpStatusCode> STATUS_CODE_ERROR = HttpStatusCode::isError;
-		private static final Predicate<HttpStatusCode> STATUS_CODE_UNKNOWN = status -> !HttpStatusCode.isWellKnownStatusCode(status);
+		private static final Predicate<HttpStatusCode> STATUS_CODE_UNKNOWN = status -> !status.isWellKnown();
 		private static final StatusHandler DEFAULT_ERROR_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
 		private static final StatusHandler DEFAULT_UNKNOWN_STATUS_HANDLER =
