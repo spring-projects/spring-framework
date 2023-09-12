@@ -9,7 +9,7 @@ input:
 - xref:beans-constructor-binding[Constructor binding] - bind user input to a public data
 constructor, looking up constructor argument values in the user input.
 - xref:beans-beans[Property binding] - bind user input to setters, matching keys from the
-the user input to properties of the target object structure.
+user input to properties of the target object structure.
 
 You can apply both constructor and property binding or only one.
 

@@ -824,7 +824,7 @@ between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessEx
 which is agnostic in regard to data access strategy. Implementations can be generic (for
 example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
 codes) for greater precision. This exception translation mechanism is used behind the
-the common `JdbcTemplate` and `JdbcTransactionManager` entry points which do not
+common `JdbcTemplate` and `JdbcTransactionManager` entry points which do not
 propagate `SQLException` but rather `DataAccessException`.
 
 NOTE: As of 6.0, the default exception translator is `SQLExceptionSubclassTranslator`,
