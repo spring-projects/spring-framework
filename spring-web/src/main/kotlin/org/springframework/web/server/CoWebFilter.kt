@@ -53,6 +53,11 @@ abstract class CoWebFilter : WebFilter {
 
 	companion object {
 
+		/**
+		 * Name of the [ServerWebExchange] attribute that contains the
+		 * [kotlin.coroutines.CoroutineContext] to be passed to the
+		 * [org.springframework.web.reactive.result.method.InvocableHandlerMethod].
+		 */
 		@JvmField
 		val COROUTINE_CONTEXT_ATTRIBUTE = CoWebFilter::class.java.getName() + ".context"
 	}
