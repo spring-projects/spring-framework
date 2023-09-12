@@ -152,11 +152,11 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
 								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
 							logger.warn("""
-								Support for convention-based stereotype names is deprecated and will \
-								be removed in a future version of the framework. Please annotate the \
-								'value' attribute in @%s with @AliasFor(annotation=Component.class) \
-								to declare an explicit alias for @Component's 'value' attribute."""
-									.formatted(annotationType));
+									Support for convention-based stereotype names is deprecated and will \
+									be removed in a future version of the framework. Please annotate the \
+									'value' attribute in @%s with @AliasFor(annotation=Component.class) \
+									to declare an explicit alias for @Component's 'value' attribute."""
+										.formatted(annotationType));
 						}
 						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +

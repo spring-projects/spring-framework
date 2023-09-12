@@ -318,7 +318,7 @@ extension API from JUnit Jupiter, which lets Spring provide dependency injection
 constructors, test methods, and test lifecycle callback methods.
 
 Specifically, the `SpringExtension` can inject dependencies from the test's
-`ApplicationContext` into into test constructors and methods that are annotated with
+`ApplicationContext` into test constructors and methods that are annotated with
 Spring's `@BeforeTransaction` and `@AfterTransaction` or JUnit's `@BeforeAll`,
 `@AfterAll`, `@BeforeEach`, `@AfterEach`, `@Test`, `@RepeatedTest`, `@ParameterizedTest`,
 and others.
