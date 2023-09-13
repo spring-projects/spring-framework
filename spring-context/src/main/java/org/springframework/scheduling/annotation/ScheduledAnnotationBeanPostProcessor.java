@@ -65,6 +65,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
+import org.springframework.scheduling.config.OneTimeTask;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -393,8 +394,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	private void processScheduledTask(Scheduled scheduled, Runnable runnable, Method method, Object bean) {
 		try {
 			boolean processedSchedule = false;
-			String errorMessage =
-					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
+			String errorMessage = "Exactly one of the 'cron', 'fixedDelay' or 'fixedRate' attributes is required";
 
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
@@ -442,18 +442,15 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
-			if (initialDelay.isNegative()) {
-				initialDelay = Duration.ZERO;
-			}
+			Duration delayToUse = (initialDelay.isNegative() ? Duration.ZERO : initialDelay);
 
 			// Check fixed delay
 			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
 			if (!fixedDelay.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
+				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse)));
 			}
-
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
 				if (this.embeddedValueResolver != null) {
@@ -469,7 +466,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
 					}
-					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
+					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse)));
 				}
 			}
 
@@ -478,7 +475,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
+				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse)));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -495,12 +492,16 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
 					}
-					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
+					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse)));
 				}
 			}
 
-			// Check whether we had any attribute set
-			Assert.isTrue(processedSchedule, errorMessage);
+			if (!processedSchedule) {
+				if (initialDelay.isNegative()) {
+					throw new IllegalArgumentException("One-time task only supported with specified initial delay");
+				}
+				tasks.add(this.registrar.scheduleOneTimeTask(new OneTimeTask(runnable, delayToUse)));
+			}
 
 			// Finally register the scheduled tasks
 			synchronized (this.scheduledTasks) {
@@ -548,7 +549,13 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	private static Duration toDuration(long value, TimeUnit timeUnit) {
-		return Duration.of(value, timeUnit.toChronoUnit());
+		try {
+			return Duration.of(value, timeUnit.toChronoUnit());
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(
+					"Unsupported unit " + timeUnit + " for value \"" + value + "\": " + ex.getMessage(), ex);
+		}
 	}
 
 	private static Duration toDuration(String value, TimeUnit timeUnit) {

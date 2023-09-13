@@ -346,7 +346,7 @@ For example, the previous example can also be written as follows.
 
 If you need a fixed-rate execution, you can use the `fixedRate` attribute within the
 annotation. The following method is invoked every five seconds (measured between the
-successive start times of each invocation).
+successive start times of each invocation):
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -356,15 +356,26 @@ successive start times of each invocation).
 	}
 ----
 
-For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating the
-amount of time to wait before the first execution of the method, as the following
-`fixedRate` example shows.
+For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating
+the amount of time to wait before the first execution of the method, as the following
+`fixedRate` example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(initialDelay = 1000, fixedRate = 5000)
 	public void doSomething() {
 		// something that should run periodically
+	}
+----
+
+For one-time tasks, you can just specify an initial delay by indicating the amount
+of time to wait before the intended execution of the method:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(initialDelay = 1000)
+	public void doSomething() {
+		// something that should run only once
 	}
 ----
 

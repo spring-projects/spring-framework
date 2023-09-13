@@ -28,9 +28,10 @@ import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
- * Annotation that marks a method to be scheduled. Exactly one of the
- * {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes
- * must be specified.
+ * Annotation that marks a method to be scheduled. For periodic tasks, exactly one
+ * of the {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes
+ * must be specified, and additionally an optional {@link #initialDelay}.
+ * For a one-time task, it is sufficient to just specify an {@link #initialDelay}.
  *
  * <p>The annotated method must not accept arguments. It will typically have
  * a {@code void} return type; if not, the returned value will be ignored

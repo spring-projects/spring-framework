@@ -57,6 +57,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
+import org.springframework.scheduling.config.OneTimeTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
@@ -264,6 +265,33 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertThat(task2.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(2_000L));
 		assertThat(task2.getIntervalDuration()).isEqualTo(Duration.ofMillis(4_000L));
+	}
+
+	@Test
+	void oneTimeTask() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(OneTimeTaskBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks()).hasSize(1);
+
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<OneTimeTask> oneTimeTasks = (List<OneTimeTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("oneTimeTasks");
+		assertThat(oneTimeTasks).hasSize(1);
+		OneTimeTask task = oneTimeTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertThat(targetObject).isEqualTo(target);
+		assertThat(targetMethod.getName()).isEqualTo("oneTimeTask");
+		assertThat(task.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(2_000L));
 	}
 
 	@Test
@@ -845,6 +873,14 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 
 	static class FixedRatesDefaultBean implements FixedRatesDefaultMethod {
+	}
+
+
+	static class OneTimeTaskBean {
+
+		@Scheduled(initialDelay = 2_000)
+		private void oneTimeTask() {
+		}
 	}
 
 

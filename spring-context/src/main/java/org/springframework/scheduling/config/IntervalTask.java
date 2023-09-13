@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,9 @@ import org.springframework.util.Assert;
  * @see ScheduledTaskRegistrar#addFixedRateTask(IntervalTask)
  * @see ScheduledTaskRegistrar#addFixedDelayTask(IntervalTask)
  */
-public class IntervalTask extends Task {
+public class IntervalTask extends DelayedTask {
 
 	private final Duration interval;
-
-	private final Duration initialDelay;
 
 
 	/**
@@ -79,26 +77,18 @@ public class IntervalTask extends Task {
 	 * @since 6.0
 	 */
 	public IntervalTask(Runnable runnable, Duration interval, Duration initialDelay) {
-		super(runnable);
+		super(runnable, initialDelay);
 		Assert.notNull(interval, "Interval must not be null");
-		Assert.notNull(initialDelay, "InitialDelay must not be null");
-
 		this.interval = interval;
-		this.initialDelay = initialDelay;
 	}
 
 	/**
 	 * Copy constructor.
 	 */
 	IntervalTask(IntervalTask task) {
-		super(task.getRunnable());
-		Assert.notNull(task, "IntervalTask must not be null");
-
+		super(task);
 		this.interval = task.getIntervalDuration();
-		this.initialDelay = task.getInitialDelayDuration();
 	}
-
-
 
 
 	/**
@@ -124,15 +114,16 @@ public class IntervalTask extends Task {
 	 */
 	@Deprecated(since = "6.0")
 	public long getInitialDelay() {
-		return this.initialDelay.toMillis();
+		return getInitialDelayDuration().toMillis();
 	}
 
 	/**
 	 * Return the initial delay before first execution of the task.
 	 * @since 6.0
 	 */
+	@Override
 	public Duration getInitialDelayDuration() {
-		return this.initialDelay;
+		return super.getInitialDelayDuration();
 	}
 
 }

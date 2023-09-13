@@ -220,24 +220,36 @@ public class EnableSchedulingTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void withTriggerTask() throws InterruptedException {
-		ctx = new AnnotationConfigApplicationContext(TriggerTaskConfig.class);
-
-		Thread.sleep(110);
-		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThan(1);
-	}
-
-	@Test
-	@EnabledForTestGroups(LONG_RUNNING)
 	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig_withInitialDelay.class);
 
 		Thread.sleep(1950);
 		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
 
-		// The @Scheduled method should have been called at least once but
-		// not more times than the delay allows.
-		assertThat(counter.get()).isBetween(1, 10);
+		// The @Scheduled method should have been called several times
+		// but not more times than the delay allows.
+		assertThat(counter.get()).isBetween(2, 10);
+	}
+
+	@Test
+	@EnabledForTestGroups(LONG_RUNNING)
+	public void withOneTimeTask() throws InterruptedException {
+		ctx = new AnnotationConfigApplicationContext(OneTimeTaskConfig.class);
+
+		Thread.sleep(110);
+		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
+
+		// The @Scheduled method should have been called exactly once.
+		assertThat(counter.get()).isEqualTo(1);
+	}
+
+	@Test
+	@EnabledForTestGroups(LONG_RUNNING)
+	public void withTriggerTask() throws InterruptedException {
+		ctx = new AnnotationConfigApplicationContext(TriggerTaskConfig.class);
+
+		Thread.sleep(110);
+		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThan(1);
 	}
 
 
@@ -599,6 +611,38 @@ public class EnableSchedulingTests {
 
 
 	@Configuration
+	@EnableScheduling
+	static class FixedRateTaskConfig_withInitialDelay {
+
+		@Bean
+		public AtomicInteger counter() {
+			return new AtomicInteger();
+		}
+
+		@Scheduled(initialDelay = 1000, fixedRate = 100)
+		public void task() {
+			counter().incrementAndGet();
+		}
+	}
+
+
+	@Configuration
+	@EnableScheduling
+	static class OneTimeTaskConfig {
+
+		@Bean
+		public AtomicInteger counter() {
+			return new AtomicInteger();
+		}
+
+		@Scheduled(initialDelay = 10)
+		public void task() {
+			counter().incrementAndGet();
+		}
+	}
+
+
+	@Configuration
 	static class TriggerTaskConfig {
 
 		@Bean
@@ -613,22 +657,6 @@ public class EnableSchedulingTests {
 			scheduler.schedule(() -> counter().incrementAndGet(),
 					triggerContext -> Instant.now().plus(10, ChronoUnit.MILLIS));
 			return scheduler;
-		}
-	}
-
-
-	@Configuration
-	@EnableScheduling
-	static class FixedRateTaskConfig_withInitialDelay {
-
-		@Bean
-		public AtomicInteger counter() {
-			return new AtomicInteger();
-		}
-
-		@Scheduled(initialDelay = 1000, fixedRate = 100)
-		public void task() {
-			counter().incrementAndGet();
 		}
 	}
 
