@@ -76,7 +76,6 @@ class BeanDefinitionDslTests {
 	}
 
 	@Test
-	@Suppress("DEPRECATION")
 	fun `Declare beans using environment condition with the functional Kotlin DSL`() {
 		val beans = beans {
 			bean<Foo>()

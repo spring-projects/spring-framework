@@ -83,9 +83,7 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see CommandLinePropertySource
  * @see JOptCommandLinePropertySource
- * @deprecated since 6.1 with no plans for a replacement
  */
-@Deprecated(since = "6.1")
 public class SimpleCommandLinePropertySource extends CommandLinePropertySource<CommandLineArgs> {
 
 	/**
