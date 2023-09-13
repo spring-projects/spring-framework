@@ -94,7 +94,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
 		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
+				"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 		glassfishWsPresent = ClassUtils.isPresent(

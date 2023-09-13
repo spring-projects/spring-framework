@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class HandshakeHandlerRuntimeHints implements RuntimeHintsRegistrar {
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
 		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
+				"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 		glassfishWsPresent = ClassUtils.isPresent(
