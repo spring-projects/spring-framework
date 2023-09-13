@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.module.ModuleFinder;
@@ -786,10 +787,26 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// Fallback via Resource.getFile() below
 			}
 		}
+
 		if (rootPath == null) {
 			// Resource.getFile() resolution as a fallback -
 			// for custom URI formats and custom Resource implementations
-			rootPath = Path.of(rootDirResource.getFile().getAbsolutePath());
+			try {
+				rootPath = Path.of(rootDirResource.getFile().getAbsolutePath());
+			}
+			catch (FileNotFoundException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cannot search for matching files underneath " + rootDirResource +
+							" in the file system: " + ex.getMessage());
+				}
+				return result;
+			}
+			catch (Exception ex) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Failed to resolve " + rootDirResource + " in the file system: " + ex);
+				}
+				return result;
+			}
 		}
 
 		if (!Files.exists(rootPath)) {
