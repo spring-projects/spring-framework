@@ -71,7 +71,7 @@ public class InlineMap extends SpelNodeImpl {
 					}
 				}
 				else if (!(c % 2 == 0 && child instanceof PropertyOrFieldReference)) {
-					if (!(child instanceof OpMinus) || !((OpMinus) child).isNegativeNumber()) {
+					if (!(child instanceof OpMinus opMinus) || !opMinus.isNegativeNumberLiteral()) {
 						return null;
 					}
 				}

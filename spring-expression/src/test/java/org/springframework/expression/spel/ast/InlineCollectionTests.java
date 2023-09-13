@@ -16,10 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.ExpressionParser;
@@ -32,144 +32,188 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link InlineList} and {@link InlineMap}.
+ *
  * @author Semyon Danilov
+ * @author Sam Brannen
+ * @since 6.1
  */
-public class InlineCollectionTests {
+class InlineCollectionTests {
 
-	@Test
-	void testListCached() {
-		InlineList list = parseList("{1, -2, 3, 4}");
-		assertThat(list.isConstant()).isTrue();
-		assertThat(list.getConstantValue()).isEqualTo(Arrays.asList(1, -2, 3, 4));
+	private final ExpressionParser parser = new SpelExpressionParser();
+
+
+	@Nested
+	class InlineListTests {
+
+		@Test
+		void listIsCached() {
+			InlineList list = parseList("{1, -2, 3, 4}");
+			assertThat(list.isConstant()).isTrue();
+			assertThat(list.getConstantValue()).isEqualTo(List.of(1, -2, 3, 4));
+		}
+
+		@Test
+		void dynamicListIsNotCached() {
+			InlineList list = parseList("{1, (5 - 3), 3, 4}");
+			assertThat(list.isConstant()).isFalse();
+			assertThat(list.getValue(null)).isEqualTo(List.of(1, 2, 3, 4));
+		}
+
+		@Test
+		void listWithVariableIsNotCached() {
+			StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+			ExpressionState expressionState = new ExpressionState(evaluationContext);
+
+			InlineList list = parseList("{1, -#num, 3, 4}");
+			assertThat(list.isConstant()).isFalse();
+
+			evaluationContext.setVariable("num", 2);
+			assertThat(list.getValue(expressionState)).isEqualTo(List.of(1, -2, 3, 4));
+		}
+
+		@Test
+		void listWithPropertyAccessIsNotCached() {
+			StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new NumberHolder());
+			ExpressionState expressionState = new ExpressionState(evaluationContext);
+
+			InlineList list = parseList("{1, -num, 3, 4}");
+			assertThat(list.isConstant()).isFalse();
+			assertThat(list.getValue(expressionState)).isEqualTo(List.of(1, -99, 3, 4));
+
+			parser.parseExpression("num = 2").getValue(evaluationContext);
+			assertThat(list.getValue(expressionState)).isEqualTo(List.of(1, -2, 3, 4));
+		}
+
+		@Test
+		void listCanBeCompiled() {
+			SpelExpression listExpression = parseExpression("{1, -2, 3, 4}");
+			assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isTrue();
+			assertThat(SpelCompiler.compile(listExpression)).isTrue();
+		}
+
+		@Test
+		void dynamicListCannotBeCompiled() {
+			SpelExpression listExpression = parseExpression("{1, (5 - 3), 3, 4}");
+			assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isFalse();
+			assertThat(SpelCompiler.compile(listExpression)).isFalse();
+		}
+
+		private InlineList parseList(String s) {
+			SpelExpression expression = parseExpression(s);
+			return (InlineList) expression.getAST();
+		}
+
 	}
 
-	@Test
-	void testDynamicListNotCached() {
-		InlineList list = parseList("{1, 5-2, 3, 4}");
-		assertThat(list.isConstant()).isFalse();
-		assertThat(list.getValue(null)).isEqualTo(Arrays.asList(1, 3, 3, 4));
+	@Nested
+	class InlineMapTests {
+
+		@Test
+		void mapIsCached() {
+			InlineMap map = parseMap("{1 : 2, 3 : 4}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Integer, Integer> expected = Map.of(1, 2, 3, 4);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void dynamicMapIsNotCached() {
+			InlineMap map = parseMap("{-1 : 2, (-2 - 1) : -4}");
+			assertThat(map.isConstant()).isFalse();
+			Map<Integer, Integer> expected = Map.of(-1, 2, -3, -4);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void mapWithVariableIsNotCached() {
+			StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+			ExpressionState expressionState = new ExpressionState(evaluationContext);
+
+			InlineMap map = parseMap("{-1 : 2, -3 : -#num}");
+			assertThat(map.isConstant()).isFalse();
+
+			evaluationContext.setVariable("num", 4);
+			assertThat(map.getValue(expressionState)).isEqualTo(Map.of(-1, 2, -3, -4));
+		}
+
+		@Test
+		void mapWithPropertyAccessIsNotCached() {
+			StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new NumberHolder());
+			ExpressionState expressionState = new ExpressionState(evaluationContext);
+
+			InlineMap map = parseMap("{-1 : 2, -3 : -num}");
+			assertThat(map.isConstant()).isFalse();
+			assertThat(map.getValue(expressionState)).isEqualTo(Map.of(-1, 2, -3, -99));
+
+			parser.parseExpression("num = 4").getValue(evaluationContext);
+			assertThat(map.getValue(expressionState)).isEqualTo(Map.of(-1, 2, -3, -4));
+		}
+
+		@Test
+		void mapWithNegativeKeysIsCached() {
+			InlineMap map = parseMap("{-1 : 2, -3 : 4}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Integer, Integer> expected = Map.of(-1, 2, -3, 4);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void mapWithNegativeValuesIsCached() {
+			InlineMap map = parseMap("{1 : -2, 3 : -4}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Integer, Integer> expected = Map.of(1, -2, 3, -4);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void mapWithNegativeLongValuesIsCached() {
+			InlineMap map = parseMap("{1L : -2L, 3L : -4L}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Long, Long> expected = Map.of(1L, -2L, 3L, -4L);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void mapWithNegativeFloatValuesIsCached() {
+			InlineMap map = parseMap("{-1.0f : -2.0f, -3.0f : -4.0f}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Float, Float> expected = Map.of(-1.0f, -2.0f, -3.0f, -4.0f);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void mapWithNegativeRealValuesIsCached() {
+			InlineMap map = parseMap("{-1.0 : -2.0, -3.0 : -4.0}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Double, Double> expected = Map.of(-1.0, -2.0, -3.0, -4.0);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		@Test
+		void mapWithNegativeKeysAndNegativeValuesIsCached() {
+			InlineMap map = parseMap("{-1 : -2, -3 : -4}");
+			assertThat(map.isConstant()).isTrue();
+			Map<Integer, Integer> expected = Map.of(-1, -2, -3, -4);
+			assertThat(map.getValue(null)).isEqualTo(expected);
+		}
+
+		private InlineMap parseMap(String s) {
+			SpelExpression expression = parseExpression(s);
+			return (InlineMap) expression.getAST();
+		}
+
 	}
 
-	@Test
-	void testListWithVariableNotCached() {
-		InlineList list = parseList("{1, -a, 3, 4}");
-		assertThat(list.isConstant()).isFalse();
-		final StandardEvaluationContext standardEvaluationContext = new StandardEvaluationContext(new AHolder());
-		standardEvaluationContext.setVariable("a", 2);
-		assertThat(list.getValue(new ExpressionState(standardEvaluationContext))).isEqualTo(Arrays.asList(1, -2, 3, 4));
-	}
 
-	@Test
-	void testListCanBeCompiled() {
-		SpelExpression listExpression = parseExpression("{1, -2, 3, 4}");
-		assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isTrue();
-		assertThat(SpelCompiler.compile(listExpression)).isTrue();
-	}
-
-	@Test
-	void testDynamicListCantBeCompiled() {
-		SpelExpression listExpression = parseExpression("{1, 5-2, 3, 4}");
-		assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isFalse();
-		assertThat(SpelCompiler.compile(listExpression)).isFalse();
-	}
-
-	@Test
-	void testMapCached() {
-		InlineMap map = parseMap("{1 : 2, 3 : 4}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Integer, Integer> expected = new HashMap<>();
-		expected.put(1, 2);
-		expected.put(3, 4);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithNegativeKeyCached() {
-		InlineMap map = parseMap("{-1 : 2, -3 : 4}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Integer, Integer> expected = new HashMap<>();
-		expected.put(-1, 2);
-		expected.put(-3, 4);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithNegativeValueCached() {
-		InlineMap map = parseMap("{1 : -2, 3 : -4}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Integer, Integer> expected = new HashMap<>();
-		expected.put(1, -2);
-		expected.put(3, -4);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithNegativeLongTypesCached() {
-		InlineMap map = parseMap("{1L : -2L, 3L : -4L}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Long, Long> expected = new HashMap<>();
-		expected.put(1L, -2L);
-		expected.put(3L, -4L);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithNegativeFloatTypesCached() {
-		InlineMap map = parseMap("{-1.0f : -2.0f, -3.0f : -4.0f}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Float, Float> expected = new HashMap<>();
-		expected.put(-1.0f, -2.0f);
-		expected.put(-3.0f, -4.0f);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithNegativeRealTypesCached() {
-		InlineMap map = parseMap("{-1.0 : -2.0, -3.0 : -4.0}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Double, Double> expected = new HashMap<>();
-		expected.put(-1.0, -2.0);
-		expected.put(-3.0, -4.0);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithNegativeKeyAndValueCached() {
-		InlineMap map = parseMap("{-1 : -2, -3 : -4}");
-		assertThat(map.isConstant()).isTrue();
-		final Map<Integer, Integer> expected = new HashMap<>();
-		expected.put(-1, -2);
-		expected.put(-3, -4);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	@Test
-	void testMapWithDynamicNotCached() {
-		InlineMap map = parseMap("{-1 : 2, -3+1 : -4}");
-		assertThat(map.isConstant()).isFalse();
-		final Map<Integer, Integer> expected = new HashMap<>();
-		expected.put(-1, 2);
-		expected.put(-2, -4);
-		assertThat(map.getValue(null)).isEqualTo(expected);
-	}
-
-	private InlineMap parseMap(String s) {
-		SpelExpression expression = parseExpression(s);
-		return (InlineMap) expression.getAST();
-	}
-
-	private InlineList parseList(String s) {
-		SpelExpression expression = parseExpression(s);
-		return (InlineList) expression.getAST();
-	}
-
-	private SpelExpression parseExpression(final String s) {
-		ExpressionParser parser = new SpelExpressionParser();
+	private SpelExpression parseExpression(String s) {
 		return (SpelExpression) parser.parseExpression(s);
 	}
 
-	private static class AHolder {
-		public int a = 2;
+
+	private static class NumberHolder {
+		@SuppressWarnings("unused")
+		public int num = 99;
 	}
 
 }

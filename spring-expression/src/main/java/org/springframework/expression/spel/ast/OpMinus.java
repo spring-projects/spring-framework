@@ -54,6 +54,17 @@ public class OpMinus extends Operator {
 	}
 
 
+	/**
+	 * Determine if this operator is a unary minus and its child is a
+	 * {@linkplain Literal#isNumberLiteral() number literal}.
+	 * @return {@code true} if it is a negative number literal
+	 * @since 6.1
+	 */
+	public boolean isNegativeNumberLiteral() {
+		return (this.children.length == 1 && this.children[0] instanceof Literal literal &&
+				literal.isNumberLiteral());
+	}
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
@@ -204,17 +215,6 @@ public class OpMinus extends Operator {
 			}
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
-	}
-
-	/**
-	 * Check whether this operator is an unary minus and it's child is a number.
-	 * @return true if it is a negative number
-	 */
-	public boolean isNegativeNumber() {
-		if (children.length == 1 && children[0] instanceof Literal) {
-			return ((Literal) children[0]).isNumberLiteral();
-		}
-		return false;
 	}
 
 }

@@ -53,6 +53,18 @@ public abstract class Literal extends SpelNodeImpl {
 		return getLiteralValue();
 	}
 
+	/**
+	 * Determine if this literal represents a number.
+	 * @return {@code true} if this literal represents a number
+	 * @since 6.1
+	 */
+	public boolean isNumberLiteral() {
+		return (this instanceof IntLiteral ||
+				this instanceof LongLiteral ||
+				this instanceof FloatLiteral ||
+				this instanceof RealLiteral);
+	}
+
 	@Override
 	public String toString() {
 		return String.valueOf(getLiteralValue().getValue());
@@ -109,17 +121,6 @@ public abstract class Literal extends SpelNodeImpl {
 		catch (NumberFormatException ex) {
 			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_REAL, numberToken));
 		}
-	}
-
-	/**
-	 * Check whether this literal is a number.
-	 * @return true if this is a number
-	 */
-	public boolean isNumberLiteral() {
-		return this instanceof IntLiteral ||
-				this instanceof LongLiteral ||
-				this instanceof FloatLiteral ||
-				this instanceof RealLiteral;
 	}
 
 }
