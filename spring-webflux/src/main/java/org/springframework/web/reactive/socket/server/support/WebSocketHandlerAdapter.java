@@ -16,13 +16,11 @@
 
 package org.springframework.web.reactive.socket.server.support;
 
-import jakarta.servlet.ServletContext;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
-import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -49,7 +47,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 @ImportRuntimeHints(HandshakeWebSocketServiceRuntimeHints.class)
-public class WebSocketHandlerAdapter implements HandlerAdapter, ServletContextAware, Ordered {
+public class WebSocketHandlerAdapter implements HandlerAdapter, Ordered {
 
 	private final WebSocketService webSocketService;
 
@@ -97,13 +95,6 @@ public class WebSocketHandlerAdapter implements HandlerAdapter, ServletContextAw
 	 */
 	public WebSocketService getWebSocketService() {
 		return this.webSocketService;
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		if (this.webSocketService instanceof ServletContextAware servletContextAware) {
-			servletContextAware.setServletContext(servletContext);
-		}
 	}
 
 

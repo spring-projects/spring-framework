@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import jakarta.servlet.ServletContext;
@@ -24,7 +23,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
-import org.eclipse.jetty.websocket.api.Configurable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -33,7 +31,6 @@ import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.Nullable;
-import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
@@ -48,30 +45,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.3.4
  */
-public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, ServletContextAware {
-
-	@Nullable
-	private Consumer<Configurable> webSocketConfigurer;
-
-
-	/**
-	 * Add a callback to configure WebSocket server parameters on
-	 * {@link JettyWebSocketServerContainer}.
-	 * @since 6.1.0
-	 */
-	public void addWebSocketConfigurer(Consumer<Configurable> webSocketConfigurer) {
-		this.webSocketConfigurer = (this.webSocketConfigurer != null ?
-				this.webSocketConfigurer.andThen(webSocketConfigurer) : webSocketConfigurer);
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		JettyWebSocketServerContainer container = JettyWebSocketServerContainer.getContainer(servletContext);
-		if (container != null && this.webSocketConfigurer != null) {
-			this.webSocketConfigurer.accept(container);
-		}
-	}
-
+public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public Mono<Void> upgrade(
