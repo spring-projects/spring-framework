@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -136,42 +135,9 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		for (int i = 0; i < this.attributes.size(); i++) {
 			Method attribute = this.attributes.get(i);
 			Object value = getAttributeValue(attribute);
-			hashCode += (127 * attribute.getName().hashCode()) ^ getValueHashCode(value);
+			hashCode += (127 * attribute.getName().hashCode()) ^ ObjectUtils.nullSafeHashCode(value);
 		}
 		return hashCode;
-	}
-
-	private int getValueHashCode(Object value) {
-		// Use Arrays.hashCode(...) since Spring's ObjectUtils doesn't comply
-		// with the requirements specified in Annotation#hashCode().
-		if (value instanceof boolean[] booleans) {
-			return Arrays.hashCode(booleans);
-		}
-		if (value instanceof byte[] bytes) {
-			return Arrays.hashCode(bytes);
-		}
-		if (value instanceof char[] chars) {
-			return Arrays.hashCode(chars);
-		}
-		if (value instanceof double[] doubles) {
-			return Arrays.hashCode(doubles);
-		}
-		if (value instanceof float[] floats) {
-			return Arrays.hashCode(floats);
-		}
-		if (value instanceof int[] ints) {
-			return Arrays.hashCode(ints);
-		}
-		if (value instanceof long[] longs) {
-			return Arrays.hashCode(longs);
-		}
-		if (value instanceof short[] shorts) {
-			return Arrays.hashCode(shorts);
-		}
-		if (value instanceof Object[] objects) {
-			return Arrays.hashCode(objects);
-		}
-		return value.hashCode();
 	}
 
 	private String annotationToString() {
