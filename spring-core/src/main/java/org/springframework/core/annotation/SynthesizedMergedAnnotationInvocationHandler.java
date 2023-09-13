@@ -73,27 +73,21 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
-		if (ReflectionUtils.isEqualsMethod(method)) {
-			return annotationEquals(args[0]);
-		}
-		if (ReflectionUtils.isHashCodeMethod(method)) {
-			return annotationHashCode();
-		}
-		if (ReflectionUtils.isToStringMethod(method)) {
-			return annotationToString();
-		}
-		if (isAnnotationTypeMethod(method)) {
-			return this.type;
-		}
 		if (this.attributes.indexOf(method.getName()) != -1) {
 			return getAttributeValue(method);
 		}
+		if (method.getParameterCount() == 0) {
+			switch (method.getName()) {
+				case "annotationType": return this.type;
+				case "hashCode": return annotationHashCode();
+				case "toString": return annotationToString();
+			}
+		}
+		if (ReflectionUtils.isEqualsMethod(method)) {
+			return annotationEquals(args[0]);
+		}
 		throw new AnnotationConfigurationException(String.format(
 				"Method [%s] is unsupported for synthesized annotation type [%s]", method, this.type));
-	}
-
-	private boolean isAnnotationTypeMethod(Method method) {
-		return (method.getName().equals("annotationType") && method.getParameterCount() == 0);
 	}
 
 	/**
