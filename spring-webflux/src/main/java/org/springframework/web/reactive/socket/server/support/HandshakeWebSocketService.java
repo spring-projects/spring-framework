@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
@@ -39,6 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -63,7 +65,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @author Juergen Hoeller
  * @since 5.0
  */
-public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
+public class HandshakeWebSocketService implements WebSocketService, ServletContextAware, Lifecycle {
 
 	private static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
 
@@ -98,6 +100,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 
 	private static final Log logger = LogFactory.getLog(HandshakeWebSocketService.class);
+
 
 	private final RequestUpgradeStrategy upgradeStrategy;
 
@@ -152,6 +155,13 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	@Nullable
 	public Predicate<String> getSessionAttributePredicate() {
 		return this.sessionAttributePredicate;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (getUpgradeStrategy() instanceof ServletContextAware servletContextAware) {
+			servletContextAware.setServletContext(servletContext);
+		}
 	}
 
 

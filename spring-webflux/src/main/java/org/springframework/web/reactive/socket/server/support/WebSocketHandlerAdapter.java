@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.web.reactive.socket.server.support;
 
+import jakarta.servlet.ServletContext;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -47,7 +49,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 @ImportRuntimeHints(HandshakeWebSocketServiceRuntimeHints.class)
-public class WebSocketHandlerAdapter implements HandlerAdapter, Ordered {
+public class WebSocketHandlerAdapter implements HandlerAdapter, ServletContextAware, Ordered {
 
 	private final WebSocketService webSocketService;
 
@@ -95,6 +97,13 @@ public class WebSocketHandlerAdapter implements HandlerAdapter, Ordered {
 	 */
 	public WebSocketService getWebSocketService() {
 		return this.webSocketService;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (this.webSocketService instanceof ServletContextAware servletContextAware) {
+			servletContextAware.setServletContext(servletContext);
+		}
 	}
 
 
