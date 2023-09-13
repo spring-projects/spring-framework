@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import jakarta.servlet.ServletContext;
@@ -23,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.websocket.api.Configurable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -46,6 +48,24 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.3.4
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
+
+	@Nullable
+	private Consumer<Configurable> webSocketConfigurer;
+
+	@Nullable
+	private JettyWebSocketServerContainer serverContainer;
+
+
+	/**
+	 * Add a callback to configure WebSocket server parameters on
+	 * {@link JettyWebSocketServerContainer}.
+	 * @since 6.1.0
+	 */
+	public void addWebSocketConfigurer(Consumer<Configurable> webSocketConfigurer) {
+		this.webSocketConfigurer = (this.webSocketConfigurer != null ?
+				this.webSocketConfigurer.andThen(webSocketConfigurer) : webSocketConfigurer);
+	}
+
 
 	@Override
 	public Mono<Void> upgrade(
@@ -76,8 +96,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 						return adapter;
 					};
 
-					JettyWebSocketServerContainer container = JettyWebSocketServerContainer.getContainer(servletContext);
-
+					JettyWebSocketServerContainer container = getWebSocketServerContainer(servletContext);
 					try {
 						container.upgrade(webSocketCreator, servletRequest, servletResponse);
 					}
@@ -87,6 +106,17 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 					return Mono.empty();
 				}));
+	}
+
+	private JettyWebSocketServerContainer getWebSocketServerContainer(ServletContext servletContext) {
+		if (this.serverContainer == null) {
+			JettyWebSocketServerContainer container = JettyWebSocketServerContainer.getContainer(servletContext);
+			if (this.webSocketConfigurer != null) {
+				this.webSocketConfigurer.accept(container);
+			}
+			this.serverContainer = container;
+		}
+		return this.serverContainer;
 	}
 
 }
