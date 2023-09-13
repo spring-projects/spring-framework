@@ -61,7 +61,9 @@ import org.springframework.util.StringUtils;
  * @see CommandLinePropertySource
  * @see joptsimple.OptionParser
  * @see joptsimple.OptionSet
+ * @deprecated since 6.1 with no plans for a replacement
  */
+@Deprecated(since = "6.1")
 public class JOptCommandLinePropertySource extends CommandLinePropertySource<OptionSet> {
 
 	/**

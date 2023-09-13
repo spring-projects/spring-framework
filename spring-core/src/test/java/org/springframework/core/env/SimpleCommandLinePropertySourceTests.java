@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.1
  */
+@SuppressWarnings("deprecation")
 class SimpleCommandLinePropertySourceTests {
 
 	@Test

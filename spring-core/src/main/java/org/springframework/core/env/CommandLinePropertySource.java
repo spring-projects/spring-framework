@@ -204,7 +204,9 @@ import org.springframework.util.StringUtils;
  * @see PropertySource
  * @see SimpleCommandLinePropertySource
  * @see JOptCommandLinePropertySource
+ * @deprecated since 6.1 with no plans for a replacement
  */
+@Deprecated(since = "6.1")
 public abstract class CommandLinePropertySource<T> extends EnumerablePropertySource<T> {
 
 	/** The default name given to {@link CommandLinePropertySource} instances: {@value}. */
