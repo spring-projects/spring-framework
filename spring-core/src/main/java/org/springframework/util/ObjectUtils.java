@@ -390,7 +390,7 @@ public abstract class ObjectUtils {
 	/**
 	 * Return a hash code for the given elements, delegating to
 	 * {@link #nullSafeHashCode(Object)} for each element. Contrary
-	 * to {@link Objects#hash(Object...)}, this method handle an
+	 * to {@link Objects#hash(Object...)}, this method can handle an
 	 * element that is an array.
 	 * @param elements the elements to be hashed
 	 * @return a hash value of the elements
@@ -410,7 +410,7 @@ public abstract class ObjectUtils {
 	/**
 	 * Return a hash code for the given object; typically the value of
 	 * {@code Object#hashCode()}}. If the object is an array,
-	 * this method will delegate to any of the {@code Arrays#hasCode}
+	 * this method will delegate to any of the {@code Arrays.hashCode}
 	 * methods. If the object is {@code null}, this method returns 0.
 	 * @see Object#hashCode()
 	 * @see Arrays
