@@ -191,7 +191,13 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		this.extensions = getExtensions(session);
 
 		if (this.user == null) {
-			this.user = session.getUpgradeRequest().getUserPrincipal();
+			try {
+				this.user = session.getUpgradeRequest().getUserPrincipal();
+			}
+			catch (NullPointerException ex) {
+				// Necessary until https://github.com/eclipse/jetty.project/issues/10498 is resolved
+				logger.error("Failure from UpgradeRequest while getting Principal", ex);
+			}
 		}
 	}
 
