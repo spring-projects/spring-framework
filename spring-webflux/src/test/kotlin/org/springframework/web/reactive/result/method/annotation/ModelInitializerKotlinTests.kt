@@ -53,7 +53,7 @@ class ModelInitializerKotlinTests {
 		val resolverConfigurer = ArgumentResolverConfigurer()
 		resolverConfigurer.addCustomResolver(ModelMethodArgumentResolver(adapterRegistry))
 		val methodResolver = ControllerMethodResolver(resolverConfigurer, adapterRegistry, StaticApplicationContext(),
-			emptyList())
+			emptyList(), null)
 		modelInitializer = ModelInitializer(methodResolver, adapterRegistry)
 	}
 
@@ -64,7 +64,8 @@ class ModelInitializerKotlinTests {
 		val method = ResolvableMethod.on(TestController::class.java).annotPresent(GetMapping::class.java)
 			.resolveMethod()
 		val handlerMethod = HandlerMethod(controller, method)
-		val context  = InitBinderBindingContext(ConfigurableWebBindingInitializer(), emptyList())
+		val context  = InitBinderBindingContext(ConfigurableWebBindingInitializer(), emptyList(),
+			false, ReactiveAdapterRegistry.getSharedInstance())
 		this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(timeout)
 		val model = context.model.asMap()
 		Assertions.assertThat(model).hasSize(2)
