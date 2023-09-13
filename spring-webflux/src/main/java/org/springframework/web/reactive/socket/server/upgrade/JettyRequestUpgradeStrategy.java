@@ -59,7 +59,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	/**
 	 * Add a callback to configure WebSocket server parameters on
 	 * {@link JettyWebSocketServerContainer}.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public void addWebSocketConfigurer(Consumer<Configurable> webSocketConfigurer) {
 		this.webSocketConfigurer = (this.webSocketConfigurer != null ?
