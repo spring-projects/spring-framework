@@ -83,7 +83,7 @@ import org.springframework.util.StringValueResolver;
  * "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the
+ * {@code <task:annotation-driven>} XML element and also by the
  * {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
@@ -395,8 +395,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		try {
 			Runnable runnable = createRunnable(bean, method);
 			boolean processedSchedule = false;
-			String errorMessage =
-					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
+			String errorMessage = "Exactly one of the 'cron', 'fixedDelay' or 'fixedRate' attributes is required";
 
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
@@ -455,7 +454,6 @@ public class ScheduledAnnotationBeanPostProcessor
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
 			}
-
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
 				if (this.embeddedValueResolver != null) {
@@ -532,7 +530,13 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	private static Duration toDuration(long value, TimeUnit timeUnit) {
-		return Duration.of(value, timeUnit.toChronoUnit());
+		try {
+			return Duration.of(value, timeUnit.toChronoUnit());
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(
+					"Unsupported unit " + timeUnit + " for value \"" + value + "\": " + ex.getMessage());
+		}
 	}
 
 	private static Duration toDuration(String value, TimeUnit timeUnit) {
