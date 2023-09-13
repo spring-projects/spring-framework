@@ -536,7 +536,7 @@ The _Spring TestContext Framework_ has supported the use of test-related annotat
 Framework 5.3 class-level test configuration annotations were not _inherited_ from
 enclosing classes like they are from superclasses.
 
-Spring Framework 5.3 introduces first-class support for inheriting test class
+Spring Framework 5.3 introduced first-class support for inheriting test class
 configuration from enclosing classes, and such configuration will be inherited by
 default. To change from the default `INHERIT` mode to `OVERRIDE` mode, you may annotate
 an individual `@Nested` test class with
