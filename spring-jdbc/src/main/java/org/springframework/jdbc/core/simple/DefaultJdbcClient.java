@@ -106,6 +106,7 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		@Override
 		public StatementSpec param(@Nullable Object value) {
+			validateIndexedParamValue(value);
 			this.indexedParams.add(value);
 			return this;
 		}
@@ -115,6 +116,7 @@ final class DefaultJdbcClient implements JdbcClient {
 			if (jdbcIndex < 1) {
 				throw new IllegalArgumentException("Invalid JDBC index: needs to start at 1");
 			}
+			validateIndexedParamValue(value);
 			int index = jdbcIndex - 1;
 			int size = this.indexedParams.size();
 			if (index < size) {
@@ -127,6 +129,14 @@ final class DefaultJdbcClient implements JdbcClient {
 				this.indexedParams.add(value);
 			}
 			return this;
+		}
+
+		private void validateIndexedParamValue(@Nullable Object value) {
+			if (value instanceof Iterable) {
+				throw new IllegalArgumentException("Invalid positional parameter value of type Iterable (" +
+						value.getClass().getSimpleName() +
+						"): Parameter expansion is only supported with named parameters.");
+			}
 		}
 
 		@Override
