@@ -554,7 +554,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 		catch (Exception ex) {
 			throw new IllegalArgumentException(
-					"Unsupported unit " + timeUnit + " for value \"" + value + "\": " + ex.getMessage(), ex);
+					"Unsupported unit " + timeUnit + " for value \"" + value + "\": " + ex.getMessage());
 		}
 	}
 
