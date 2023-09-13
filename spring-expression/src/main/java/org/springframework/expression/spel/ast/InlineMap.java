@@ -51,7 +51,7 @@ public class InlineMap extends SpelNodeImpl {
 
 	/**
 	 * If all the components of the map are constants, or lists/maps that themselves
-	 * contain constants, then a constant list can be built to represent this node.
+	 * contain constants, then a constant map can be built to represent this node.
 	 * <p>This will speed up later getValue calls and reduce the amount of garbage
 	 * created.
 	 */

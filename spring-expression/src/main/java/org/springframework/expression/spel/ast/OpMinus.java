@@ -33,7 +33,7 @@ import org.springframework.util.NumberUtils;
  * <ul>
  * <li>subtraction of numbers
  * <li>subtraction of an int from a string of one character
- * (effectively decreasing that character), so 'd'-3='a'
+ * (effectively decreasing that character), so {@code 'd' - 3 = 'a'}
  * </ul>
  *
  * <p>It can be used as a unary operator for numbers.
