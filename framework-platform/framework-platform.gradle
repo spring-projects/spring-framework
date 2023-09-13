@@ -45,7 +45,7 @@ dependencies {
 		api("com.thoughtworks.xstream:xstream:1.4.20")
 		api("commons-io:commons-io:2.11.0")
 		api("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.2")
-		api("io.micrometer:context-propagation:1.0.4")
+		api("io.micrometer:context-propagation:1.0.5")
 		api("io.mockk:mockk:1.13.4")
 		api("io.projectreactor.netty:reactor-netty5-http:2.0.0-M3")
 		api("io.projectreactor.tools:blockhound:1.0.8.RELEASE")
