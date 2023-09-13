@@ -911,10 +911,10 @@ public abstract class ObjectUtils {
 	 * <p>Returns:
 	 * <ul>
 	 * <li>{@code "null"} if {@code obj} is {@code null}</li>
-	 * <li>{@code"Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
-	 * <li>{@code"Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
-	 * where {@code <concise-string>} is the result of invoking {@link #nullSafeConciseToString}
-	 * on the object contained in the {@code Optional}</li>
+	 * <li>{@code "Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
+	 * <li>{@code "Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
+	 * where {@code <concise-string>} is the result of invoking this method on the object
+	 * contained in the {@code Optional}</li>
 	 * <li>{@code "{}"} if {@code obj} is an empty array</li>
 	 * <li>{@code "{...}"} if {@code obj} is a {@link Map} or a non-empty array</li>
 	 * <li>{@code "[...]"} if {@code obj} is a {@link Collection}</li>
