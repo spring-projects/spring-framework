@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,21 +37,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class InlineCollectionTests {
 
 	@Test
-	public void testListCached() {
+	void testListCached() {
 		InlineList list = parseList("{1, -2, 3, 4}");
 		assertThat(list.isConstant()).isTrue();
 		assertThat(list.getConstantValue()).isEqualTo(Arrays.asList(1, -2, 3, 4));
 	}
 
 	@Test
-	public void testDynamicListNotCached() {
+	void testDynamicListNotCached() {
 		InlineList list = parseList("{1, 5-2, 3, 4}");
 		assertThat(list.isConstant()).isFalse();
 		assertThat(list.getValue(null)).isEqualTo(Arrays.asList(1, 3, 3, 4));
 	}
 
 	@Test
-	public void testListWithVariableNotCached() {
+	void testListWithVariableNotCached() {
 		InlineList list = parseList("{1, -a, 3, 4}");
 		assertThat(list.isConstant()).isFalse();
 		final StandardEvaluationContext standardEvaluationContext = new StandardEvaluationContext(new AHolder());
@@ -60,21 +60,21 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testListCanBeCompiled() {
+	void testListCanBeCompiled() {
 		SpelExpression listExpression = parseExpression("{1, -2, 3, 4}");
 		assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isTrue();
 		assertThat(SpelCompiler.compile(listExpression)).isTrue();
 	}
 
 	@Test
-	public void testDynamicListCantBeCompiled() {
+	void testDynamicListCantBeCompiled() {
 		SpelExpression listExpression = parseExpression("{1, 5-2, 3, 4}");
 		assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isFalse();
 		assertThat(SpelCompiler.compile(listExpression)).isFalse();
 	}
 
 	@Test
-	public void testMapCached() {
+	void testMapCached() {
 		InlineMap map = parseMap("{1 : 2, 3 : 4}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Integer, Integer> expected = new HashMap<>();
@@ -84,7 +84,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithNegativeKeyCached() {
+	void testMapWithNegativeKeyCached() {
 		InlineMap map = parseMap("{-1 : 2, -3 : 4}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Integer, Integer> expected = new HashMap<>();
@@ -94,7 +94,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithNegativeValueCached() {
+	void testMapWithNegativeValueCached() {
 		InlineMap map = parseMap("{1 : -2, 3 : -4}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Integer, Integer> expected = new HashMap<>();
@@ -104,7 +104,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithNegativeLongTypesCached() {
+	void testMapWithNegativeLongTypesCached() {
 		InlineMap map = parseMap("{1L : -2L, 3L : -4L}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Long, Long> expected = new HashMap<>();
@@ -114,7 +114,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithNegativeFloatTypesCached() {
+	void testMapWithNegativeFloatTypesCached() {
 		InlineMap map = parseMap("{-1.0f : -2.0f, -3.0f : -4.0f}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Float, Float> expected = new HashMap<>();
@@ -124,7 +124,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithNegativeRealTypesCached() {
+	void testMapWithNegativeRealTypesCached() {
 		InlineMap map = parseMap("{-1.0 : -2.0, -3.0 : -4.0}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Double, Double> expected = new HashMap<>();
@@ -134,7 +134,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithNegativeKeyAndValueCached() {
+	void testMapWithNegativeKeyAndValueCached() {
 		InlineMap map = parseMap("{-1 : -2, -3 : -4}");
 		assertThat(map.isConstant()).isTrue();
 		final Map<Integer, Integer> expected = new HashMap<>();
@@ -144,7 +144,7 @@ public class InlineCollectionTests {
 	}
 
 	@Test
-	public void testMapWithDynamicNotCached() {
+	void testMapWithDynamicNotCached() {
 		InlineMap map = parseMap("{-1 : 2, -3+1 : -4}");
 		assertThat(map.isConstant()).isFalse();
 		final Map<Integer, Integer> expected = new HashMap<>();
