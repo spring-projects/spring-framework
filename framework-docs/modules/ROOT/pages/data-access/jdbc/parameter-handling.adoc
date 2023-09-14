@@ -121,18 +121,17 @@ Kotlin::
 <3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
 ======
 
-
 [NOTE]
 ====
 If you invoke the `setBlobAsBinaryStream`, `setClobAsAsciiStream`, or
 `setClobAsCharacterStream` method on the `LobCreator` returned from
-`DefaultLobHandler.getLobCreator()`, you can optionally specify a negative value for the
-`contentLength` argument. If the specified content length is negative, the
+`DefaultLobHandler.getLobCreator()`, you can optionally specify a negative value
+for the `contentLength` argument. If the specified content length is negative, the
 `DefaultLobHandler` uses the JDBC 4.0 variants of the set-stream methods without a
 length parameter. Otherwise, it passes the specified length on to the driver.
 
-See the documentation for the JDBC driver you use to verify that it supports streaming a
-LOB without providing the content length.
+See the documentation for the JDBC driver you use to verify that it supports streaming
+a LOB without providing the content length.
 ====
 
 Now it is time to read the LOB data from the database. Again, you use a `JdbcTemplate`
@@ -184,15 +183,15 @@ variable list of values. A typical example would be `select * from T_ACTOR where
 JDBC standard. You cannot declare a variable number of placeholders. You need a number
 of variations with the desired number of placeholders prepared, or you need to generate
 the SQL string dynamically once you know how many placeholders are required. The named
-parameter support provided in the `NamedParameterJdbcTemplate` and `JdbcTemplate` takes
-the latter approach. You can pass in the values as a `java.util.List` of primitive objects. This
-list is used to insert the required placeholders and pass in the values during
-statement execution.
+parameter support provided in the `NamedParameterJdbcTemplate` takes the latter approach.
+You can pass in the values as a `java.util.List` (or any `Iterable`) of simple values.
+This list is used to insert the required placeholders into the actual SQL statement
+and pass in the values during statement execution.
 
-NOTE: Be careful when passing in many values. The JDBC standard does not guarantee that you
-can use more than 100 values for an `in` expression list. Various databases exceed this
-number, but they usually have a hard limit for how many values are allowed. For example, Oracle's
-limit is 1000.
+NOTE: Be careful when passing in many values. The JDBC standard does not guarantee that
+you can use more than 100 values for an `IN` expression list. Various databases exceed
+this number, but they usually have a hard limit for how many values are allowed.
+For example, Oracle's limit is 1000.
 
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list can support multiple expressions being defined for the `in`
