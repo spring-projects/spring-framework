@@ -185,6 +185,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return listeners;
 	}
 
+	@SuppressWarnings("unchecked")
+	private List<TestExecutionListener> instantiateListeners(Class<? extends TestExecutionListener>... classes) {
+		return instantiateComponents(TestExecutionListener.class, classes);
+	}
+
 	/**
 	 * Get the default {@link TestExecutionListener TestExecutionListeners} for
 	 * this bootstrapper.
@@ -197,33 +202,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected List<TestExecutionListener> getDefaultTestExecutionListeners() {
 		return TestContextSpringFactoriesUtils.loadFactoryImplementations(TestExecutionListener.class);
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<TestExecutionListener> instantiateListeners(Class<? extends TestExecutionListener>... classes) {
-		List<TestExecutionListener> listeners = new ArrayList<>(classes.length);
-		for (Class<? extends TestExecutionListener> listenerClass : classes) {
-			try {
-				listeners.add(BeanUtils.instantiateClass(listenerClass));
-			}
-			catch (BeanInstantiationException ex) {
-				Throwable cause = ex.getCause();
-				if (cause instanceof ClassNotFoundException || cause instanceof NoClassDefFoundError) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("""
-								Skipping candidate %1$s [%2$s] due to a missing dependency. \
-								Specify custom %1$s classes or make the default %1$s classes \
-								and their required dependencies available. Offending class: [%3$s]"""
-									.formatted(TestExecutionListener.class.getSimpleName(), listenerClass.getName(),
-										cause.getMessage()));
-					}
-				}
-				else {
-					throw ex;
-				}
-			}
-		}
-		return listeners;
 	}
 
 	/**
@@ -473,10 +451,15 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 	@SuppressWarnings("unchecked")
 	private List<ContextCustomizerFactory> instantiateCustomizerFactories(Class<? extends ContextCustomizerFactory>... classes) {
-		List<ContextCustomizerFactory> factories = new ArrayList<>(classes.length);
-		for (Class<? extends ContextCustomizerFactory> factoryClass : classes) {
+		return instantiateComponents(ContextCustomizerFactory.class, classes);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> List<T> instantiateComponents(Class<T> componentType, Class<? extends T>... classes) {
+		List<T> components = new ArrayList<>(classes.length);
+		for (Class<? extends T> clazz : classes) {
 			try {
-				factories.add(BeanUtils.instantiateClass(factoryClass));
+				components.add(BeanUtils.instantiateClass(clazz));
 			}
 			catch (BeanInstantiationException ex) {
 				Throwable cause = ex.getCause();
@@ -486,8 +469,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 								Skipping candidate %1$s [%2$s] due to a missing dependency. \
 								Specify custom %1$s classes or make the default %1$s classes \
 								and their required dependencies available. Offending class: [%3$s]"""
-									.formatted(ContextCustomizerFactory.class.getSimpleName(), factoryClass.getName(),
-										cause.getMessage()));
+									.formatted(componentType.getSimpleName(), clazz.getName(), cause.getMessage()));
 					}
 				}
 				else {
@@ -495,7 +477,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				}
 			}
 		}
-		return factories;
+		return components;
 	}
 
 	/**
