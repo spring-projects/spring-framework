@@ -96,6 +96,11 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
+	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
+		this.objectMapper = objectMapper;
+	}
+
 	/**
 	 * Specify the {@link ObjectMapper} to use instead of using the default.
 	 */

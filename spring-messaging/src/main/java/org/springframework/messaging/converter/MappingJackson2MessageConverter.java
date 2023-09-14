@@ -85,6 +85,13 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		this.objectMapper = initObjectMapper();
 	}
 
+	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
+		super(new MimeType("application", "json"), new MimeType("application", "*+json"));
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
+		this.objectMapper = objectMapper;
+	}
+
+
 
 	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	private ObjectMapper initObjectMapper() {
