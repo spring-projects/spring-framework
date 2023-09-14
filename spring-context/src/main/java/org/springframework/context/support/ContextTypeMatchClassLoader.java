@@ -55,7 +55,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 		// override classes that have not been loaded yet. If not accessible, we will
 		// always override requested classes, even when the classes have been loaded
 		// by the parent ClassLoader already and cannot be transformed anymore anyway.
-		Method method = null;
+		Method method;
 		try {
 			method = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
 			ReflectionUtils.makeAccessible(method);
@@ -63,6 +63,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 		catch (Throwable ex) {
 			// Typically a JDK 9+ InaccessibleObjectException...
 			// Avoid through JVM startup with --add-opens=java.base/java.lang=ALL-UNNAMED
+			method = null;
 			LogFactory.getLog(ContextTypeMatchClassLoader.class).debug(
 					"ClassLoader.findLoadedClass not accessible -> will always override requested class", ex);
 		}
