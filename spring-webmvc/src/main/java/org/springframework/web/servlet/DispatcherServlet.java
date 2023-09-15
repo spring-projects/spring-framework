@@ -1518,7 +1518,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 	}
 
-	private static String getRequestUri(HttpServletRequest request) {
+	private String getRequestUri(HttpServletRequest request) {
 		String uri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 		if (uri == null) {
 			uri = request.getRequestURI();
