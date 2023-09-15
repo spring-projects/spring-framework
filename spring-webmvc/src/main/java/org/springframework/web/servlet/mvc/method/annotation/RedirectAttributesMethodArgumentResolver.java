@@ -63,7 +63,7 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 			redirectAttributes = new RedirectAttributesModelMap(dataBinder);
 		}
 		else {
-			redirectAttributes  = new RedirectAttributesModelMap();
+			redirectAttributes = new RedirectAttributesModelMap();
 		}
 		mavContainer.setRedirectModel(redirectAttributes);
 		return redirectAttributes;

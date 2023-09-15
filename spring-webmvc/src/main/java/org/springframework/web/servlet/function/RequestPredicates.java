@@ -1189,7 +1189,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String toString() {
-			return method() + " " +  path();
+			return method() + " " + path();
 		}
 	}
 
