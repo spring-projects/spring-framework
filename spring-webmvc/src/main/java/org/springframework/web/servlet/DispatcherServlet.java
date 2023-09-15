@@ -1018,7 +1018,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			if (traceOn) {
 				List<String> values = Collections.list(request.getHeaderNames());
-				String headers = values.size() > 0 ? "masked" : "";
+				String headers = values.isEmpty() ? "" : "masked";
 				if (isEnableLoggingRequestDetails()) {
 					headers = values.stream().map(name -> name + ":" + Collections.list(request.getHeaders(name)))
 							.collect(Collectors.joining(", "));
