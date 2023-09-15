@@ -523,7 +523,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Boundary found @" + endIdx + " in " + buffer);
 				}
-				int len = endIdx - this.boundaryLength + 1;
+				int len = endIdx - this.boundaryLength + 1 - boundaryBuffer.readPosition();
 				if (len > 0) {
 					// whole boundary in buffer.
 					// slice off the body part, and flush
@@ -538,10 +538,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 					DataBufferUtils.release(boundaryBuffer);
 					DataBuffer prev;
 					while ((prev = this.queue.pollLast()) != null) {
-						int prevLen = prev.readableByteCount() + len;
+						int prevByteCount = prev.readableByteCount();
+						int prevLen = prevByteCount + len;
 						if (prevLen > 0) {
 							// slice body part of previous buffer, and flush it
-							DataBuffer body = prev.split(prevLen);
+							DataBuffer body = prev.split(prevLen + prev.readPosition());
 							DataBufferUtils.release(prev);
 							enqueue(body);
 							flush();
@@ -550,7 +551,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 						else {
 							// previous buffer only contains boundary bytes
 							DataBufferUtils.release(prev);
-							len += prev.readableByteCount();
+							len += prevByteCount;
 						}
 					}
 				}
