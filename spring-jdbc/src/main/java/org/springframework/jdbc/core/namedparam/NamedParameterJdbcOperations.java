@@ -555,4 +555,37 @@ public interface NamedParameterJdbcOperations {
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
 
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied
+	 * arguments, returning generated keys.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
+	 * arguments for the query
+	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder);
+
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments,
+	 * returning generated keys.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
+	 * arguments for the query
+	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+	 * @param keyColumnNames names of the columns that will have keys generated for them
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
+			String[] keyColumnNames);
 }
