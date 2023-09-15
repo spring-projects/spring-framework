@@ -1021,7 +1021,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(final PreparedStatementCreator psc, final BatchPreparedStatementSetter pss, final KeyHolder generatedKeyHolder) throws DataAccessException {
+	public int[] batchUpdate(final PreparedStatementCreator psc, final BatchPreparedStatementSetter pss,
+			final KeyHolder generatedKeyHolder) throws DataAccessException {
+
 		int[] result = execute(psc, getPreparedStatementCallback(pss, generatedKeyHolder));
 
 		Assert.state(result != null, "No result array");

@@ -1014,9 +1014,11 @@ public interface JdbcOperations {
 	 * (may also contain special JDBC-defined negative values for affected rows such as
 	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
-	int[] batchUpdate(PreparedStatementCreator psc, BatchPreparedStatementSetter pss, KeyHolder generatedKeyHolder) throws DataAccessException;
+	int[] batchUpdate(PreparedStatementCreator psc, BatchPreparedStatementSetter pss,
+			KeyHolder generatedKeyHolder) throws DataAccessException;
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.

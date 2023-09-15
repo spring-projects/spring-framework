@@ -556,8 +556,8 @@ public interface NamedParameterJdbcOperations {
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
 
 	/**
-	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments,
-	 * returning generated keys.
+	 * Execute a batch using the supplied SQL statement with the batch of supplied
+	 * arguments, returning generated keys.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
 	 * arguments for the query
@@ -566,6 +566,7 @@ public interface NamedParameterJdbcOperations {
 	 * (may also contain special JDBC-defined negative values for affected rows such as
 	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder);
@@ -582,7 +583,9 @@ public interface NamedParameterJdbcOperations {
 	 * (may also contain special JDBC-defined negative values for affected rows such as
 	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
-	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder, String[] keyColumnNames);
+	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
+			String[] keyColumnNames);
 }
