@@ -45,7 +45,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.socket.client.ReactorNetty2WebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
@@ -64,7 +63,6 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorNetty2HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
@@ -94,7 +92,6 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
 				new ReactorNettyWebSocketClient(),
-				new ReactorNetty2WebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
 		};
 
@@ -102,7 +99,6 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		servers.put(new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class), TomcatConfig.class);
 		servers.put(new JettyHttpServer(), JettyConfig.class);
 		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
-		servers.put(new ReactorNetty2HttpServer(), ReactorNetty2Config.class);
 		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
 		// Try each client once against each server..
