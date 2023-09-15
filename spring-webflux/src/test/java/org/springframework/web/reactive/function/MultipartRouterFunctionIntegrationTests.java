@@ -49,7 +49,6 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorNetty2HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,9 +68,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void multipartData(HttpServer httpServer) throws Exception {
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -90,9 +86,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void parts(HttpServer httpServer) throws Exception {
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -113,9 +106,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 	void transferTo(HttpServer httpServer) throws Exception {
 		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		verifyTransferTo(httpServer);
 	}
 
@@ -154,9 +144,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void partData(HttpServer httpServer) throws Exception {
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -176,9 +163,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 	@ParameterizedHttpServerTest
 	void proxy(HttpServer httpServer) throws Exception {
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails proxying requests");
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient

@@ -60,7 +60,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorNetty2HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,9 +87,6 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 	@ParameterizedHttpServerTest
 	void requestPart(HttpServer httpServer) throws Exception {
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -174,9 +170,6 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 	void transferTo(HttpServer httpServer) throws Exception {
 		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Flux<String> result = webClient
@@ -195,9 +188,6 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 	@ParameterizedHttpServerTest
 	void modelAttribute(HttpServer httpServer) throws Exception {
-		// TODO Determine why Reactor Netty 2 fails:  https://github.com/spring-projects/spring-framework/issues/31110
-		assumeFalse(httpServer instanceof ReactorNetty2HttpServer, "Potential bug in Netty 5 multipart support");
-
 		startServer(httpServer);
 
 		Mono<String> result = webClient
