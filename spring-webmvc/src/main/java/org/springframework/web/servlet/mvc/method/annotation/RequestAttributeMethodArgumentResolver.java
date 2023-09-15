@@ -57,7 +57,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMe
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
 		throw new ServletRequestBindingException("Missing request attribute '" + name +
-				"' of type " +  parameter.getNestedParameterType().getSimpleName());
+				"' of type " + parameter.getNestedParameterType().getSimpleName());
 	}
 
 }

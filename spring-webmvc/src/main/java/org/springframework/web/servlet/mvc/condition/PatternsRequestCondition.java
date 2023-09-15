@@ -80,7 +80,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * {@link PathMatcher} and flag for matching trailing slashes.
 	 * @since 5.3
 	 */
-	public PatternsRequestCondition(String[] patterns,  boolean useTrailingSlashMatch,
+	public PatternsRequestCondition(String[] patterns, boolean useTrailingSlashMatch,
 			@Nullable PathMatcher pathMatcher) {
 
 		this(patterns, null, pathMatcher, useTrailingSlashMatch);
