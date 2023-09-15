@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,19 +274,6 @@ public class ReflectionHintsPredicates {
 			return this;
 		}
 
-		@Override
-		public boolean test(RuntimeHints runtimeHints) {
-			return (new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
-					.withAnyMemberCategory(getPublicMemberCategories())
-					.and(hints -> Modifier.isPublic(this.executable.getModifiers())))
-					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass())).withAnyMemberCategory(getDeclaredMemberCategories()))
-					.or(exactMatch()).test(runtimeHints);
-		}
-
-		abstract MemberCategory[] getPublicMemberCategories();
-
-		abstract MemberCategory[] getDeclaredMemberCategories();
-
 		abstract Predicate<RuntimeHints> exactMatch();
 
 		/**
@@ -309,6 +296,14 @@ public class ReflectionHintsPredicates {
 		}
 
 		@Override
+		public boolean test(RuntimeHints runtimeHints) {
+			return (new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+					.withAnyMemberCategory(getPublicMemberCategories())
+					.and(hints -> Modifier.isPublic(this.executable.getModifiers())))
+					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass())).withAnyMemberCategory(getDeclaredMemberCategories()))
+					.or(exactMatch()).test(runtimeHints);
+		}
+
 		MemberCategory[] getPublicMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
 				return new MemberCategory[] { MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
@@ -317,7 +312,6 @@ public class ReflectionHintsPredicates {
 			return new MemberCategory[] { MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS };
 		}
 
-		@Override
 		MemberCategory[] getDeclaredMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
 				return new MemberCategory[] { MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
@@ -344,6 +338,16 @@ public class ReflectionHintsPredicates {
 		}
 
 		@Override
+		public boolean test(RuntimeHints runtimeHints) {
+			return (new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+					.withAnyMemberCategory(getPublicMemberCategories())
+					.and(hints -> Modifier.isPublic(this.executable.getModifiers())))
+					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+							.withAnyMemberCategory(getDeclaredMemberCategories())
+							.and(hints -> !Modifier.isPublic(this.executable.getModifiers())))
+					.or(exactMatch()).test(runtimeHints);
+		}
+
 		MemberCategory[] getPublicMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
 				return new MemberCategory[] { MemberCategory.INTROSPECT_PUBLIC_METHODS,
@@ -352,7 +356,6 @@ public class ReflectionHintsPredicates {
 			return new MemberCategory[] { MemberCategory.INVOKE_PUBLIC_METHODS };
 		}
 
-		@Override
 		MemberCategory[] getDeclaredMemberCategories() {
 
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
@@ -392,8 +395,7 @@ public class ReflectionHintsPredicates {
 
 		private boolean memberCategoryMatch(TypeHint typeHint) {
 			if (Modifier.isPublic(this.field.getModifiers())) {
-				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS) ||
-						typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS);
 			}
 			else {
 				return typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);

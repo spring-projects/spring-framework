@@ -408,15 +408,15 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodShouldMatchIntrospectDeclaredMethodsHint() {
+		void classGetMethodShouldNotMatchIntrospectDeclaredMethodsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
 
 		@Test
-		void classGetMethodShouldMatchInvokeDeclaredMethodsHint() {
+		void classGetMethodShouldNotMatchInvokeDeclaredMethodsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INVOKE_DECLARED_METHODS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
 
 		@Test
@@ -544,9 +544,9 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetFieldShouldMatchDeclaredFieldsHint() {
+		void classGetFieldShouldNotMatchDeclaredFieldsHint() {
 			hints.reflection().registerType(PublicField.class, MemberCategory.DECLARED_FIELDS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETFIELD, this.getPublicField);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETFIELD, this.getPublicField);
 		}
 
 		@Test
