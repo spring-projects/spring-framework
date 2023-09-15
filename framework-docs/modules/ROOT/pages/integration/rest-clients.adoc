@@ -68,7 +68,7 @@ This can be done with `method(HttpMethod)`, or with the convenience methods `get
 
 ==== Request URL
 
-Next, the request URI can be specified with the `uri` methods
+Next, the request URI can be specified with the `uri` methods.
 This step is optional, and can be skipped if the `RestClient` is configured with a default URI.
 The URL is typically specified as `String`, with optional URI template variables.
 String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
