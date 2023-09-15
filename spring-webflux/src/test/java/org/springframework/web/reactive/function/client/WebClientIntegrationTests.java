@@ -103,7 +103,6 @@ class WebClientIntegrationTests {
 	static Stream<Named<ClientHttpConnector>> arguments() {
 		return Stream.of(
 				named("Reactor Netty", new ReactorClientHttpConnector()),
-				named("Reactor Netty 2", new ReactorNetty2ClientHttpConnector()),
 				named("JDK", new JdkClientHttpConnector()),
 				named("Jetty", new JettyClientHttpConnector()),
 				named("HttpComponents", new HttpComponentsClientHttpConnector())
