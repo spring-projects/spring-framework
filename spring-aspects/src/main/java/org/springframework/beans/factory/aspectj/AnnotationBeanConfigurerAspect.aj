@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,11 +84,5 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDepe
 
 
 	declare parents: @Configurable * implements ConfigurableObject;
-
-	/*
-	 * This declaration shouldn't be needed,
-	 * except for an AspectJ bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=214559)
-	 */
-	declare parents: @Configurable Serializable+ implements ConfigurableDeserializationSupport;
 
 }
