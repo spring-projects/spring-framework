@@ -89,6 +89,9 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	private ClassLoader beanClassLoader;
 
 
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} with a default {@link ObjectMapper}.
+	 */
 	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	public MappingJackson2MessageConverter() {
 		this.objectMapper = new ObjectMapper();
@@ -96,13 +99,20 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} with a custom  {@link ObjectMapper}.
+	 * @param objectMapper the ObjectMapper to use
+	 * @since 6.1
+	 */
 	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
 
+
 	/**
-	 * Specify the {@link ObjectMapper} to use instead of using the default.
+	 * Set the {@code ObjectMapper} for this converter.
+	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");

@@ -59,6 +59,9 @@ import org.springframework.util.MimeType;
  */
 public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
+	private static final MimeType[] DEFAULT_MIME_TYPES = new MimeType[] {
+			new MimeType("application", "json"), new MimeType("application", "*+json")};
+
 	private ObjectMapper objectMapper;
 
 	@Nullable
@@ -66,40 +69,50 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 
 	/**
-	 * Construct a {@code MappingJackson2MessageConverter} supporting
-	 * the {@code application/json} MIME type with {@code UTF-8} character set.
+	 * Construct a {@code MappingJackson2MessageConverter} with a default {@link ObjectMapper},
+	 * supporting the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json"), new MimeType("application", "*+json"));
-		this.objectMapper = initObjectMapper();
+		this(DEFAULT_MIME_TYPES);
 	}
 
 	/**
-	 * Construct a {@code MappingJackson2MessageConverter} supporting
-	 * one or more custom MIME types.
+	 * Construct a {@code MappingJackson2MessageConverter} with a default {@link ObjectMapper},
+	 * supporting one or more custom MIME types.
 	 * @param supportedMimeTypes the supported MIME types
 	 * @since 4.1.5
 	 */
+	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	public MappingJackson2MessageConverter(MimeType... supportedMimeTypes) {
 		super(supportedMimeTypes);
-		this.objectMapper = initObjectMapper();
+		this.objectMapper = new ObjectMapper();
+		this.objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper},
+	 * supporting the {@code application/json} MIME type with {@code UTF-8} character set.
+	 * @param objectMapper the ObjectMapper to use
+	 * @since 6.1
+	 */
 	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
-		super(new MimeType("application", "json"), new MimeType("application", "*+json"));
+		this(objectMapper, DEFAULT_MIME_TYPES);
+	}
+
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper},
+	 * supporting one or more custom MIME types.
+	 * @param objectMapper the ObjectMapper to use
+	 * @param supportedMimeTypes the supported MIME types
+	 * @since 6.1
+	 */
+	public MappingJackson2MessageConverter(ObjectMapper objectMapper, MimeType... supportedMimeTypes) {
+		super(supportedMimeTypes);
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
 
-
-
-	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
-	private ObjectMapper initObjectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		return objectMapper;
-	}
 
 	/**
 	 * Set the {@code ObjectMapper} for this converter.
