@@ -35,7 +35,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>This handler is intended to be used with a "/*" mapping when the
  * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
- * is mapped to "/", thus  overriding the Servlet container's default handling of static resources.
+ * is mapped to "/", thus overriding the Servlet container's default handling of static resources.
  * The mapping to this handler should generally be ordered as the last in the chain so that it will
  * only execute when no other more specific mappings (i.e., to controllers) can be matched.
  *
@@ -45,7 +45,7 @@ import org.springframework.web.context.ServletContextAware;
  * handler checks at initialization time for the presence of the default Servlet of well-known
  * containers such as Tomcat, Jetty, Resin, WebLogic and WebSphere. However, when running in a
  * container where the default Servlet's name is not known, or where it has been customized
- * via server configuration, the  {@code defaultServletName} will need to be set explicitly.
+ * via server configuration, the {@code defaultServletName} will need to be set explicitly.
  *
  * @author Jeremy Grelle
  * @author Juergen Hoeller

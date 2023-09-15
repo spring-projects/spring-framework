@@ -635,7 +635,7 @@ public interface ServerResponse {
 		/**
 		 * Register a callback to be invoked when an error occurs during SSE
 		 * processing.
-		 * @param onError  the callback to invoke on error
+		 * @param onError the callback to invoke on error
 		 * @return this builder
 		 */
 		SseBuilder onError(Consumer<Throwable> onError);

@@ -20,7 +20,7 @@ import jakarta.servlet.jsp.JspException;
 
 /**
  * The {@code <htmlEscape>} tag sets default HTML escape value for the current
- * page. The actual value  can be overridden by escaping-aware tags.
+ * page. The actual value can be overridden by escaping-aware tags.
  * The default is "false".
  *
  * <p>Note: You can also set a "defaultHtmlEscape" web.xml context-param.

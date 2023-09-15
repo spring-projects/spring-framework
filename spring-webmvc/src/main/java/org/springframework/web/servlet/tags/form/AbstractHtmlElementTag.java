@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * across elements.
  *
  * <p>Additionally, this base class allows for rendering non-standard attributes
- * as part of the tag's output.  These attributes are accessible to subclasses if
+ * as part of the tag's output. These attributes are accessible to subclasses if
  * needed via the {@link AbstractHtmlElementTag#getDynamicAttributes() dynamicAttributes}
  * map.
  *

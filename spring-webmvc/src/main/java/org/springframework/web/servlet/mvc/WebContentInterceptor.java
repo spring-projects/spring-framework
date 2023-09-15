@@ -155,7 +155,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	}
 
 	/**
-	 * Map settings for  cache seconds to specific URL paths via patterns.
+	 * Map settings for cache seconds to specific URL paths via patterns.
 	 * <p>Overrides the default cache seconds setting of this interceptor.
 	 * Can specify "-1" to exclude a URL path from default caching.
 	 * <p>For pattern syntax see {@link AntPathMatcher} and {@link PathPattern}
