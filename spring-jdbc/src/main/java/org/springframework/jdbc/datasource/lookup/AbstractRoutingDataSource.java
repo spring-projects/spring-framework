@@ -116,6 +116,15 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 
 	@Override
 	public void afterPropertiesSet() {
+		initialize();
+	}
+
+	/**
+	 * Synchronizes targetDataSources to resolvedDataSources
+	 * and defaultTargetDataSource to resolvedDefaultDataSource.
+	 * @throws IllegalArgumentException in case of targetDataSources is null
+	 */
+	public void initialize() {
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}

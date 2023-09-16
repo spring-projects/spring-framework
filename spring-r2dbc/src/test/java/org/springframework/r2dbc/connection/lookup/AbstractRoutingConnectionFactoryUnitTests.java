@@ -182,6 +182,19 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 				.verifyComplete();
 	}
 
+	@Test
+	void testInitialize_shouldDetermineRoutedFactory() {
+		connectionFactory.setTargetConnectionFactories(
+				singletonMap("key", routedConnectionFactory));
+		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
+		connectionFactory.initialize();
+
+		connectionFactory.determineTargetConnectionFactory()
+				.contextWrite(Context.of(ROUTING_KEY, "key"))
+				.as(StepVerifier::create)
+				.expectNext(routedConnectionFactory)
+				.verifyComplete();
+	}
 
 	static class DummyRoutingConnectionFactory extends AbstractRoutingConnectionFactory {
 
