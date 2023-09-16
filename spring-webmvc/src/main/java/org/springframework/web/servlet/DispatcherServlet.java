@@ -1244,7 +1244,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Check "jakarta.servlet.error.exception" attribute for a multipart exception.
 	 */
-	private boolean hasMultipartException(HttpServletRequest request) {
+	private static boolean hasMultipartException(HttpServletRequest request) {
 		Throwable error = (Throwable) request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
 		while (error != null) {
 			if (error instanceof MultipartException) {
@@ -1478,7 +1478,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		return null;
 	}
 
-	private void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
+	private static void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
 			@Nullable HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
 
 		if (mappedHandler != null) {
