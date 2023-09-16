@@ -93,7 +93,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	/**
 	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper},
 	 * supporting the {@code application/json} MIME type with {@code UTF-8} character set.
-	 * @param objectMapper the ObjectMapper to use
+	 * @param objectMapper the {@code ObjectMapper} to use
 	 * @since 6.1
 	 */
 	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
@@ -103,7 +103,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	/**
 	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper},
 	 * supporting one or more custom MIME types.
-	 * @param objectMapper the ObjectMapper to use
+	 * @param objectMapper the {@code ObjectMapper} to use
 	 * @param supportedMimeTypes the supported MIME types
 	 * @since 6.1
 	 */
@@ -116,14 +116,14 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	/**
 	 * Set the {@code ObjectMapper} for this converter.
-	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * <p>If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further
 	 * control of the JSON serialization process. For example, an extended
 	 * {@link com.fasterxml.jackson.databind.ser.SerializerFactory} can be
 	 * configured that provides custom serializers for specific types. The other
 	 * option for refining the serialization process is to use Jackson's provided
 	 * annotations on the types to be serialized, in which case a custom-configured
-	 * ObjectMapper is unnecessary.
+	 * {@code ObjectMapper} is unnecessary.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
@@ -140,7 +140,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	/**
 	 * Whether to use the {@link DefaultPrettyPrinter} when writing JSON.
-	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
+	 * <p>This is a shortcut for setting up an {@code ObjectMapper} as follows:
 	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);

@@ -44,7 +44,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Message converter that uses Jackson 2.x to convert messages to and from JSON.
- * Maps an object to a {@link BytesMessage}, or to a {@link TextMessage} if the
+ *
+ * <p>Maps an object to a {@link BytesMessage}, or to a {@link TextMessage} if the
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
@@ -100,8 +101,8 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	}
 
 	/**
-	 * Construct a {@code MappingJackson2MessageConverter} with a custom  {@link ObjectMapper}.
-	 * @param objectMapper the ObjectMapper to use
+	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper}.
+	 * @param objectMapper the {@code ObjectMapper} to use
 	 * @since 6.1
 	 */
 	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
@@ -112,7 +113,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	/**
 	 * Set the {@code ObjectMapper} for this converter.
-	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * <p>If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
