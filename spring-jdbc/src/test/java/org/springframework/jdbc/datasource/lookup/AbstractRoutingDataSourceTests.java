@@ -147,6 +147,31 @@ class AbstractRoutingDataSourceTests {
 	}
 
 	@Test
+	void testRefresh_SynchronizeTargetDataSourcesToResolvedDataSources() {
+		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
+			@Override
+			protected Object determineCurrentLookupKey() {
+				return null;
+			}
+		};
+
+		DataSource ds1 = new StubDataSource();
+		DataSource ds2 = new StubDataSource();
+
+		Map<Object, Object> targetDataSources = new HashMap<>();
+		targetDataSources.put("ds1", ds1);
+		targetDataSources.put("ds2", ds2);
+		routingDataSource.setTargetDataSources(targetDataSources);
+
+		routingDataSource.refresh();
+
+		Map<Object, DataSource> resolvedDataSources = routingDataSource.getResolvedDataSources();
+		assertThat(resolvedDataSources).hasSize(2);
+		assertThat(resolvedDataSources.get("ds1")).isSameAs(ds1);
+		assertThat(resolvedDataSources.get("ds2")).isSameAs(ds2);
+	}
+
+	@Test
 	public void notInitialized() {
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
