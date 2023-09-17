@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,13 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.OVERRIDE;
 
+/**
+ * Verifies that {@link Sql @Sql} with {@link Sql.ExecutionPhase#BEFORE_TEST_CLASS} is run before all tests in the class
+ * have been run.
+ *
+ * @author Andreas Ahlenstorf
+ * @since 6.1
+ */
 @SpringJUnitConfig(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
 @Sql(value = {"schema.sql", "data-add-catbert.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
@@ -51,9 +58,8 @@ class BeforeTestClassSqlScriptsTests extends AbstractTransactionalTests {
 	@Test
 	@Sql(scripts = {"data-add-catbert.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 	void classLevelPhaseIsIgnoredOnMethod() {
-		// There's a unique constraint on the name. If the script succeeded, there would be a
+		// There is a unique constraint on the name. If the script had been run, there would have been a
 		// constraint violation.
 		assertUsers("Catbert");
 	}
 }
-

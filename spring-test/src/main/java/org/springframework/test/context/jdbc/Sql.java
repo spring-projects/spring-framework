@@ -66,6 +66,7 @@ import org.springframework.core.annotation.AliasFor;
  * modules as well as their transitive dependencies to be present on the classpath.
  *
  * @author Sam Brannen
+ * @author Andreas Ahlenstorf
  * @since 4.1
  * @see SqlConfig
  * @see SqlMergeMode

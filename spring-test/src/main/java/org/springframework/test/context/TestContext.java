@@ -42,6 +42,7 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  * override {@link #setMethodInvoker(MethodInvoker)} and {@link #getMethodInvoker()}.
  *
  * @author Sam Brannen
+ * @author Andreas Ahlenstorf
  * @since 2.5
  * @see TestContextManager
  * @see TestExecutionListener

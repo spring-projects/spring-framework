@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.test.context.jdbc;
 
 import javax.sql.DataSource;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
@@ -30,8 +32,15 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
 
+/**
+ * Verifies that {@link Sql @Sql} with {@link Sql.ExecutionPhase#AFTER_TEST_CLASS} is run after all tests in the class
+ * have been run.
+ *
+ * @author Andreas Ahlenstorf
+ * @since 6.1
+ */
 @SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
-@DirtiesContext
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Sql(value = {"drop-schema.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 @TestExecutionListeners(
 		value = AfterTestClassSqlScriptsTests.VerifyTestExecutionListener.class,
@@ -40,10 +49,19 @@ import org.springframework.test.context.transaction.TestContextTransactionUtils;
 class AfterTestClassSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
+	@Order(1)
 	@Sql(scripts = "data-add-catbert.sql")
+	@Commit
 	void databaseHasBeenInitialized() {
-		// Ensure that the database has been initialized and can be accessed.
 		assertUsers("Catbert");
+	}
+
+	@Test
+	@Order(2)
+	@Sql(scripts = "data-add-dogbert.sql")
+	@Commit
+	void databaseIsNotWipedBetweenTests() {
+		assertUsers("Catbert", "Dogbert");
 	}
 
 	static class VerifyTestExecutionListener implements TestExecutionListener, Ordered {

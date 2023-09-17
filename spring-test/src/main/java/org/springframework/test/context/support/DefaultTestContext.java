@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Andreas Ahlenstorf
  * @since 4.0
  */
 @SuppressWarnings("serial")

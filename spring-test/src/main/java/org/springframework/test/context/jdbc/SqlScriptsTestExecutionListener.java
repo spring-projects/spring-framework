@@ -105,6 +105,7 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  *
  * @author Sam Brannen
  * @author Dmitry Semukhin
+ * @author Andreas Ahlenstorf
  * @since 4.1
  * @see Sql
  * @see SqlConfig
