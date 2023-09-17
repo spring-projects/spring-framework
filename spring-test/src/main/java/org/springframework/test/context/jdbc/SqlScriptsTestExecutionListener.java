@@ -285,6 +285,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(
 			Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel) {
 
+		Assert.isTrue(classLevel || isValidMethodLevelPhase(sql.executionPhase()),
+				() -> "%s cannot be used on methods".formatted(sql.executionPhase()));
+
 		if (executionPhase != sql.executionPhase()) {
 			return;
 		}
@@ -455,4 +458,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				.forEach(runtimeHints.resources()::registerResource);
 	}
 
+	private static boolean isValidMethodLevelPhase(ExecutionPhase executionPhase) {
+		// Class-level phases cannot be used on methods.
+		return executionPhase != ExecutionPhase.BEFORE_TEST_CLASS &&
+				executionPhase != ExecutionPhase.AFTER_TEST_CLASS;
+	}
 }

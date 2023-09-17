@@ -55,11 +55,4 @@ class BeforeTestClassSqlScriptsTests extends AbstractTransactionalTests {
 		assertUsers("Dogbert", "Catbert");
 	}
 
-	@Test
-	@Sql(scripts = {"data-add-catbert.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-	void classLevelPhaseIsIgnoredOnMethod() {
-		// There is a unique constraint on the name. If the script had been run, there would have been a
-		// constraint violation.
-		assertUsers("Catbert");
-	}
 }
