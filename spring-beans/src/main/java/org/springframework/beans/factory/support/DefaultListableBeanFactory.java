@@ -1322,7 +1322,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (bean instanceof NullBean) {
 			return null;
 		}
-		return new NamedBeanHolder<>(beanName, adaptBeanInstance(beanName, bean, requiredType.toClass()));
+		NamedBeanHolder<T> holder = new NamedBeanHolder<>(beanName, adaptBeanInstance(beanName, bean, requiredType.toClass()));
+		if (isSingletonCurrentlyInCreation(beanName)) {
+			synchronized (getSingletonMutex()) {
+				return holder;
+			}
+		}
+		return holder;
 	}
 
 	@Override
