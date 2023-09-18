@@ -6,7 +6,7 @@ The Spring Framework integrates with checkpoint/restore as implemented by https:
 Using this feature requires:
 
 * A checkpoint/restore enabled JVM (Linux only for now).
-* The presence in the classpath of the https://github.com/CRaC/org.crac[`org.crac:crac`] library.
+* The presence in the classpath of the https://github.com/CRaC/org.crac[`org.crac:crac`] library (version `1.4.0` and above are supported).
 * Specifying the required `java` command line parameters like `-XX:CRaCCheckpointTo=PATH` or `-XX:CRaCRestoreFrom=PATH`.
 
 WARNING: The files generated in the path specified by `-XX:CRaCCheckpointTo=PATH` when a checkpoint is requested contain a representation of the memory of the running JVM, which may contain secrets and other sensitive data. Using this feature should be done with the assumption that any value "seen" by the JVM, such as configuration properties coming from the environment, will be stored in those CRaC files. As a consequence, the security implications of where and how those files are generated, stored and accessed should be carefully assessed.

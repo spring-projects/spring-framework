@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.crac.CheckpointException;
 import org.crac.Core;
 import org.crac.RestoreException;
+import org.crac.management.CRaCMXBean;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -59,10 +60,13 @@ import org.springframework.util.ClassUtils;
  * <p>Provides interaction with {@link Lifecycle} and {@link SmartLifecycle} beans in
  * groups for specific phases, on startup/shutdown as well as for explicit start/stop
  * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
- * As of 6.1, this also includes support for JVM checkpoint/restore (Project CRaC).
+ *
+ * <p>As of 6.1, this also includes support for JVM checkpoint/restore (Project CRaC)
+ * when the {@code org.crac:crac} dependency on the classpath.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.0
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
@@ -554,8 +558,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			// Barrier for prevent-shutdown thread not needed anymore
 			this.barrier = null;
 
-			Duration timeTakenToRestart = Duration.ofNanos(System.nanoTime() - restartTime);
-			logger.info("Spring-managed lifecycle restart completed in " + timeTakenToRestart.toMillis() + " ms");
+			long timeTakenToRestart = Duration.ofNanos(System.nanoTime() - restartTime).toMillis();
+			long timeTakenToRestoreJvm = CRaCMXBean.getCRaCMXBean().getUptimeSinceRestore();
+			logger.info("Spring-managed lifecycle restart completed in " + timeTakenToRestart
+					+ " ms (restored JVM running for " + timeTakenToRestoreJvm + " ms)");
 		}
 
 		private void awaitPreventShutdownBarrier() {
