@@ -106,6 +106,11 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 	@Override
+	public boolean canDecodeEmptyMessage() {
+		return true;
+	}
+
+	@Override
 	public Flux<String> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

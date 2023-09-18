@@ -229,7 +229,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			if (decoder.canDecode(elementType, mimeType)) {
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = content
-							.filter(this::nonEmptyDataBuffer)
+							.filter(dataBuffer -> nonEmptyDataBuffer(dataBuffer, decoder))
 							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
 							.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
@@ -243,7 +243,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				else {
 					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = content.next()
-							.filter(this::nonEmptyDataBuffer)
+							.filter(dataBuffer -> nonEmptyDataBuffer(dataBuffer, decoder))
 							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
 							.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
@@ -261,7 +261,10 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				message, parameter, "Cannot decode to [" + targetType + "]" + message));
 	}
 
-	private boolean nonEmptyDataBuffer(DataBuffer buffer) {
+	private boolean nonEmptyDataBuffer(DataBuffer buffer, Decoder<?> decoder) {
+		if (decoder.canDecodeEmptyMessage()) {
+			return true;
+		}
 		if (buffer.readableByteCount() > 0) {
 			return true;
 		}

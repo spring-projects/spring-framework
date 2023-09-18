@@ -49,6 +49,11 @@ public class Netty5BufferDecoder extends AbstractDataBufferDecoder<Buffer> {
 	}
 
 	@Override
+	public boolean canDecodeEmptyMessage() {
+		return true;
+	}
+
+	@Override
 	public Buffer decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
  * Abstract base class for {@link Decoder} unit tests. Subclasses need to implement
@@ -114,6 +115,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 *     <li>{@link #testDecodeError(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeCancel(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeEmpty(ResolvableType, MimeType, Map)}</li>
+	 *     <li>{@link #testDecodeEmptyMessage(ResolvableType, MimeType, Map)}</li>
 	 * </ul>
 	 *
 	 * @param input the input to be provided to the decoder
@@ -131,6 +133,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 		testDecodeError(input, outputType, mimeType, hints);
 		testDecodeCancel(input, outputType, mimeType, hints);
 		testDecodeEmpty(outputType, mimeType, hints);
+		testDecodeEmptyMessage(outputType, mimeType, hints);
 	}
 
 	/**
@@ -258,6 +261,25 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 		StepVerifier.create(result).verifyComplete();
 	}
 
+	/**
+	 * Test a {@link Decoder#decode decode} scenario where the input stream is an empty buffer.
+	 * The output is expected to be filled when the decoder supports it.
+	 *
+	 * @param outputType the desired output type
+	 * @param mimeType the mime type to use for decoding. May be {@code null}.
+	 * @param hints the hints used for decoding. May be {@code null}.
+	 */
+	protected void testDecodeEmptyMessage(ResolvableType outputType, MimeType mimeType, Map<String, Object> hints) {
+		if (!this.decoder.canDecodeEmptyMessage()) {
+			return;
+		}
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(0);
+		Object result = this.decoder.decode(buffer, outputType, mimeType, hints);
+		releaseDataBufferIfIdentical(buffer, result);
+		Assert.notNull(result, "result expected to be non null");
+		Assert.isAssignable(outputType.toClass(), result.getClass(), "result not of specified type");
+	}
+
 	// Mono
 
 	/**
@@ -289,6 +311,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 *     <li>{@link #testDecodeToMonoError(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeToMonoCancel(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeToMonoEmpty(ResolvableType, MimeType, Map)}</li>
+	 *     <li>{@link #testDecodeToMonoEmptyMessage(ResolvableType, MimeType, Map)}</li>
 	 * </ul>
 	 *
 	 * @param input the input to be provided to the decoder
@@ -306,6 +329,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 		testDecodeToMonoError(input, outputType, mimeType, hints);
 		testDecodeToMonoCancel(input, outputType, mimeType, hints);
 		testDecodeToMonoEmpty(outputType, mimeType, hints);
+		testDecodeToMonoEmptyMessage(outputType, mimeType, hints);
 	}
 
 	/**
@@ -420,6 +444,32 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	}
 
 	/**
+	 * Test a {@link Decoder#decodeToMono decode} scenario where the input stream is an empty buffer.
+	 * The output is expected to be filled when the decoder supports it.
+	 *
+	 * @param outputType the desired output type
+	 * @param mimeType the mime type to use for decoding. May be {@code null}.
+	 * @param hints the hints used for decoding. May be {@code null}.
+	 */
+	protected void testDecodeToMonoEmptyMessage(ResolvableType outputType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
+
+		if (!this.decoder.canDecodeEmptyMessage()) {
+			return;
+		}
+
+		Flux<DataBuffer> source = Flux.range(0, 2)
+				.map(i -> this.bufferFactory.allocateBuffer(0));
+
+		Mono<?> result = this.decoder.decodeToMono(source, outputType, mimeType, hints)
+						.doOnNext(this::releaseIfDataBuffer);
+
+		StepVerifier.create(result)
+				.expectNextMatches(next -> outputType.toClass().isInstance(next))
+				.verifyComplete();
+	}
+
+	/**
 	 * Creates a deferred {@link DataBuffer} containing the given bytes.
 	 * @param bytes the bytes that are to be stored in the buffer
 	 * @return the deferred buffer
@@ -430,6 +480,27 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 			dataBuffer.write(bytes);
 			return dataBuffer;
 		});
+	}
+
+	/**
+	 * If {@code value} is referentially identical to {@code buffer}, release it.
+	 * @param buffer the {@link DataBuffer} that is compared
+	 * @param value  the {@link Object} that is compared
+	 */
+	private void releaseDataBufferIfIdentical(DataBuffer buffer, Object value) {
+		if (buffer == value) {
+			release(buffer);
+		}
+	}
+
+	/**
+	 * If {@code value} is a {@link DataBuffer}, release it.
+	 * @param value the {@link Object} that is checked
+	 */
+	private void releaseIfDataBuffer(Object value) {
+		if (value instanceof DataBuffer) {
+			release((DataBuffer) value);
+		}
 	}
 
 	/**

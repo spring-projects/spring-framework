@@ -126,6 +126,11 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	}
 
 	@Override
+	public boolean canDecodeEmptyMessage() {
+		return true;
+	}
+
+	@Override
 	public Flux<Message> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

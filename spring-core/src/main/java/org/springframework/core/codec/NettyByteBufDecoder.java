@@ -49,6 +49,11 @@ public class NettyByteBufDecoder extends AbstractDataBufferDecoder<ByteBuf> {
 	}
 
 	@Override
+	public boolean canDecodeEmptyMessage() {
+		return true;
+	}
+
+	@Override
 	public ByteBuf decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

@@ -45,6 +45,11 @@ public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
 	}
 
 	@Override
+	public boolean canDecodeEmptyMessage() {
+		return true;
+	}
+
+	@Override
 	public byte[] decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

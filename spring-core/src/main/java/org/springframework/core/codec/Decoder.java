@@ -54,6 +54,17 @@ public interface Decoder<T> {
 	boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType);
 
 	/**
+	 * Whether the decoder supports decoding an Object of its target type from an
+	 * empty message. When it is true, the decoder will always return a non-null
+	 * value from its {@code decode} method when an empty message is decoded.
+	 * @return {@code true} if supported, {@code false} otherwise
+	 * @since 6.0.5
+	 */
+	default boolean canDecodeEmptyMessage()  {
+		return false;
+	}
+
+	/**
 	 * Decode a {@link DataBuffer} input stream into a Flux of {@code T}.
 	 * @param inputStream the {@code DataBuffer} input stream to decode
 	 * @param elementType the expected type of elements in the output stream;

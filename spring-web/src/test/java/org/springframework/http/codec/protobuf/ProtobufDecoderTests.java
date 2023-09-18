@@ -221,6 +221,11 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 		testDecode(input, Msg.class, step -> step.verifyError(DecodingException.class));
 	}
 
+	@Test
+	public void decodeEmpty() {
+		testDecodeEmptyMessage(ResolvableType.forClass(Msg.class), null, null);
+	}
+
 	private Mono<DataBuffer> dataBuffer(Msg msg) {
 		return Mono.fromCallable(() -> {
 			byte[] bytes = msg.toByteArray();

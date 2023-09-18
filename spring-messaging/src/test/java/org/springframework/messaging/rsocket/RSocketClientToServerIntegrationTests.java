@@ -169,7 +169,7 @@ public class RSocketClientToServerIntegrationTests {
 	@Test // gh-26344
 	public void echoChannelWithEmptyInput() {
 		Flux<String> result = requester.route("echo-channel-empty").data(Flux.empty()).retrieveFlux(String.class);
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result).expectNext(" echoed").verifyComplete();
 	}
 
 	@Test
