@@ -173,7 +173,7 @@ fun ServerRequest.attributeOrNull(name: String): Any? = attributes()[name]
  */
 fun ServerRequest.queryParamOrNull(name: String): String? {
 	val queryParamValues = queryParams()[name]
-	return queryParamValues?.getOrNull(0) ?: ""
+	return queryParamValues!!.getOrNull(0) ?: ""
 }
 
 /**
