@@ -527,72 +527,66 @@ public final class MockServerRequest implements ServerRequest {
 	}
 
 
-	private static class MockHeaders implements Headers {
-
-		private final HttpHeaders headers;
-
-		public MockHeaders(HttpHeaders headers) {
-			this.headers = headers;
-		}
+	private record MockHeaders(HttpHeaders headers) implements Headers {
 
 		private HttpHeaders delegate() {
-			return this.headers;
-		}
+				return this.headers;
+			}
 
-		public void header(String key, String value) {
-			this.headers.add(key, value);
-		}
+			public void header(String key, String value) {
+				this.headers.add(key, value);
+			}
 
-		@Override
-		public List<MediaType> accept() {
-			return delegate().getAccept();
-		}
+			@Override
+			public List<MediaType> accept() {
+				return delegate().getAccept();
+			}
 
-		@Override
-		public List<Charset> acceptCharset() {
-			return delegate().getAcceptCharset();
-		}
+			@Override
+			public List<Charset> acceptCharset() {
+				return delegate().getAcceptCharset();
+			}
 
-		@Override
-		public List<Locale.LanguageRange> acceptLanguage() {
-			return delegate().getAcceptLanguage();
-		}
+			@Override
+			public List<Locale.LanguageRange> acceptLanguage() {
+				return delegate().getAcceptLanguage();
+			}
 
-		@Override
-		public OptionalLong contentLength() {
-			return toOptionalLong(delegate().getContentLength());
-		}
+			@Override
+			public OptionalLong contentLength() {
+				return toOptionalLong(delegate().getContentLength());
+			}
 
-		@Override
-		public Optional<MediaType> contentType() {
-			return Optional.ofNullable(delegate().getContentType());
-		}
+			@Override
+			public Optional<MediaType> contentType() {
+				return Optional.ofNullable(delegate().getContentType());
+			}
 
-		@Override
-		public InetSocketAddress host() {
-			return delegate().getHost();
-		}
+			@Override
+			public InetSocketAddress host() {
+				return delegate().getHost();
+			}
 
-		@Override
-		public List<HttpRange> range() {
-			return delegate().getRange();
-		}
+			@Override
+			public List<HttpRange> range() {
+				return delegate().getRange();
+			}
 
-		@Override
-		public List<String> header(String headerName) {
-			List<String> headerValues = delegate().get(headerName);
-			return headerValues != null ? headerValues : Collections.emptyList();
-		}
+			@Override
+			public List<String> header(String headerName) {
+				List<String> headerValues = delegate().get(headerName);
+				return headerValues != null ? headerValues : Collections.emptyList();
+			}
 
-		@Override
-		public HttpHeaders asHttpHeaders() {
-			return HttpHeaders.readOnlyHttpHeaders(delegate());
-		}
+			@Override
+			public HttpHeaders asHttpHeaders() {
+				return HttpHeaders.readOnlyHttpHeaders(delegate());
+			}
 
-		private OptionalLong toOptionalLong(long value) {
-			return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
-		}
+			private OptionalLong toOptionalLong(long value) {
+				return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
+			}
 
-	}
+		}
 
 }
