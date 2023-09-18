@@ -62,6 +62,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -653,8 +654,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			this.adviceType = advisor.getAdvice().getClass();
 			if (advisor instanceof PointcutAdvisor pointcutAdvisor) {
 				Pointcut pointcut = pointcutAdvisor.getPointcut();
-				this.classFilterKey = ObjectUtils.identityToString(pointcut.getClassFilter());
-				this.methodMatcherKey = ObjectUtils.identityToString(pointcut.getMethodMatcher());
+				this.classFilterKey = pointcut.getClassFilter().toString();
+				this.methodMatcherKey = pointcut.getMethodMatcher().toString();
 			}
 			else {
 				this.classFilterKey = null;

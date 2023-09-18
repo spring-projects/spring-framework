@@ -53,12 +53,14 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.cglib.proxy.Factory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.DecoratingProxy;
@@ -206,6 +208,31 @@ class AspectJAutoProxyCreatorTests {
 		assertThat(adrian2.getAge()).isEqualTo(1);
 		assertThat(adrian2.getAge()).isEqualTo(2);
 		assertThat(adrian1.getAge()).isEqualTo(3);
+	}
+
+	@Test  // gh-31238
+	void cglibProxyClassIsCachedAcrossApplicationContextsForPerTargetAspect() {
+		Class<?> configClass = PerTargetProxyTargetClassTrueConfig.class;
+		TestBean testBean1;
+		TestBean testBean2;
+
+		// Round #1
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			testBean1 = context.getBean(TestBean.class);
+			assertThat(AopUtils.isCglibProxy(testBean1)).as("CGLIB proxy").isTrue();
+			assertThat(testBean1.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(Factory.class, SpringProxy.class, Advised.class);
+		}
+
+		// Round #2
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			testBean2 = context.getBean(TestBean.class);
+			assertThat(AopUtils.isCglibProxy(testBean2)).as("CGLIB proxy").isTrue();
+			assertThat(testBean2.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(Factory.class, SpringProxy.class, Advised.class);
+		}
+
+		assertThat(testBean1.getClass()).isSameAs(testBean2.getClass());
 	}
 
 	@Test
@@ -613,6 +640,23 @@ class ProxyTargetClassFalseConfig extends AbstractProxyTargetClassConfig {
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 class ProxyTargetClassTrueConfig extends AbstractProxyTargetClassConfig {
+}
+
+@Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class PerTargetProxyTargetClassTrueConfig {
+
+	@Bean
+	@Scope("prototype")
+	TestBean testBean() {
+		return new TestBean("Jane", 34);
+	}
+
+	@Bean
+	@Scope("prototype")
+	PerTargetAspect perTargetAspect() {
+		return new PerTargetAspect();
+	}
 }
 
 @FunctionalInterface
