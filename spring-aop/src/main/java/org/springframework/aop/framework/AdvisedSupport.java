@@ -48,7 +48,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Base class for AOP proxy configuration managers.
- * These are not themselves AOP proxies, but subclasses of this class are
+ *
+ * <p>These are not themselves AOP proxies, but subclasses of this class are
  * normally factories from which AOP proxy instances are obtained directly.
  *
  * <p>This class frees subclasses of the housekeeping of Advices
@@ -56,7 +57,8 @@ import org.springframework.util.ObjectUtils;
  * methods, which are provided by subclasses.
  *
  * <p>This class is serializable; subclasses need not be.
- * This class is used to hold snapshots of proxies.
+ *
+ * <p>This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -111,7 +113,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Create a AdvisedSupport instance with the given parameters.
+	 * Create an {@code AdvisedSupport} instance with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
 	public AdvisedSupport(Class<?>... interfaces) {
@@ -131,7 +133,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Set the given object as target.
-	 * Will create a SingletonTargetSource for the object.
+	 * <p>Will create a SingletonTargetSource for the object.
 	 * @see #setTargetSource
 	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
@@ -506,9 +508,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Copy the AOP configuration from the given AdvisedSupport object,
-	 * but allow substitution of a fresh TargetSource and a given interceptor chain.
-	 * @param other the AdvisedSupport object to take proxy configuration from
+	 * Copy the AOP configuration from the given {@link AdvisedSupport} object,
+	 * but allow substitution of a fresh {@link TargetSource} and a given interceptor chain.
+	 * @param other the {@code AdvisedSupport} object to take proxy configuration from
 	 * @param targetSource the new TargetSource
 	 * @param advisors the Advisors for the chain
 	 */
@@ -528,8 +530,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Build a configuration-only copy of this AdvisedSupport,
-	 * replacing the TargetSource.
+	 * Build a configuration-only copy of this {@link AdvisedSupport},
+	 * replacing the {@link TargetSource}.
 	 */
 	AdvisedSupport getConfigurationOnlyCopy() {
 		AdvisedSupport copy = new AdvisedSupport(this.advisorChainFactory, this.methodCache);
@@ -604,8 +606,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof MethodCacheKey methodCacheKey &&
-					this.method == methodCacheKey.method));
+			return (this == other || (other instanceof MethodCacheKey that && this.method == that.method));
 		}
 
 		@Override
@@ -630,7 +631,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 
 	/**
-	 * Stub for an Advisor instance that is just needed for key purposes,
+	 * Stub for an {@link Advisor} instance that is just needed for key purposes,
 	 * allowing for efficient equals and hashCode comparisons against the
 	 * advice class and the pointcut.
 	 * @since 6.0.10
@@ -642,10 +643,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		private final Class<?> adviceType;
 
 		@Nullable
-		private String classFilterKey;
+		private final String classFilterKey;
 
 		@Nullable
-		private String methodMatcherKey;
+		private final String methodMatcherKey;
+
 
 		public AdvisorKeyEntry(Advisor advisor) {
 			this.adviceType = advisor.getAdvice().getClass();
@@ -653,6 +655,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 				Pointcut pointcut = pointcutAdvisor.getPointcut();
 				this.classFilterKey = ObjectUtils.identityToString(pointcut.getClassFilter());
 				this.methodMatcherKey = ObjectUtils.identityToString(pointcut.getMethodMatcher());
+			}
+			else {
+				this.classFilterKey = null;
+				this.methodMatcherKey = null;
 			}
 		}
 
@@ -663,10 +669,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Override
 		public boolean equals(Object other) {
-			return (this == other || (other instanceof AdvisorKeyEntry otherEntry &&
-					this.adviceType == otherEntry.adviceType &&
-					ObjectUtils.nullSafeEquals(this.classFilterKey, otherEntry.classFilterKey) &&
-					ObjectUtils.nullSafeEquals(this.methodMatcherKey, otherEntry.methodMatcherKey)));
+			return (this == other || (other instanceof AdvisorKeyEntry that &&
+					this.adviceType == that.adviceType &&
+					ObjectUtils.nullSafeEquals(this.classFilterKey, that.classFilterKey) &&
+					ObjectUtils.nullSafeEquals(this.methodMatcherKey, that.methodMatcherKey)));
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package org.springframework.aop;
 
 /**
- * Filter that restricts matching of a pointcut or introduction to
- * a given set of target classes.
+ * Filter that restricts matching of a pointcut or introduction to a given set
+ * of target classes.
  *
- * <p>Can be used as part of a {@link Pointcut} or for the entire
- * targeting of an {@link IntroductionAdvisor}.
+ * <p>Can be used as part of a {@link Pointcut} or for the entire targeting of
+ * an {@link IntroductionAdvisor}.
  *
  * <p>Concrete implementations of this interface typically should provide proper
  * implementations of {@link Object#equals(Object)} and {@link Object#hashCode()}
@@ -44,7 +44,7 @@ public interface ClassFilter {
 
 
 	/**
-	 * Canonical instance of a ClassFilter that matches all classes.
+	 * Canonical instance of a {@code ClassFilter} that matches all classes.
 	 */
 	ClassFilter TRUE = TrueClassFilter.INSTANCE;
 

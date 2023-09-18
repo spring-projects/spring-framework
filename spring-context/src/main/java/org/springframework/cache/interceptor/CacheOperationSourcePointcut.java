@@ -27,7 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A Pointcut that matches if the underlying {@link CacheOperationSource}
+ * A {@code Pointcut} that matches if the underlying {@link CacheOperationSource}
  * has an attribute for a given method.
  *
  * @author Costin Leau

@@ -27,7 +27,7 @@ import org.springframework.transaction.TransactionManager;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract class that implements a Pointcut that matches if the underlying
+ * Abstract class that implements a {@code Pointcut} that matches if the underlying
  * {@link TransactionAttributeSource} has an attribute for a given method.
  *
  * @author Juergen Hoeller
