@@ -125,7 +125,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		Class<?> beanClass = (mergedBeanDefinition.hasBeanClass()
 				? ClassUtils.getUserClass(mergedBeanDefinition.getBeanClass()) : null);
 		CodeBlock beanClassCode = generateBeanClassCode(
-				beanRegistrationCode.getClassName().packageName(), beanClass);
+				beanRegistrationCode.getClassName().packageName(),
+				(beanClass != null ? beanClass : beanType.toClass()));
 		code.addStatement("$T $L = new $T($L)", RootBeanDefinition.class,
 				BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, beanClassCode);
 		if (targetTypeNecessary(beanType, beanClass)) {
@@ -135,16 +136,13 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		return code.build();
 	}
 
-	private CodeBlock generateBeanClassCode(String targetPackage, @Nullable Class<?> beanClass) {
-		if (beanClass != null) {
-			if (Modifier.isPublic(beanClass.getModifiers()) || targetPackage.equals(beanClass.getPackageName())) {
-				return CodeBlock.of("$T.class", beanClass);
-			}
-			else {
-				return CodeBlock.of("$S", beanClass.getName());
-			}
+	private CodeBlock generateBeanClassCode(String targetPackage, Class<?> beanClass) {
+		if (Modifier.isPublic(beanClass.getModifiers()) || targetPackage.equals(beanClass.getPackageName())) {
+			return CodeBlock.of("$T.class", beanClass);
 		}
-		return CodeBlock.of("");
+		else {
+			return CodeBlock.of("$S", beanClass.getName());
+		}
 	}
 
 	private CodeBlock generateBeanTypeCode(ResolvableType beanType) {
@@ -155,11 +153,14 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	}
 
 	private boolean targetTypeNecessary(ResolvableType beanType, @Nullable Class<?> beanClass) {
-		if (beanType.hasGenerics() || beanClass == null) {
+		if (beanType.hasGenerics()) {
 			return true;
 		}
-		return (!beanType.toClass().equals(beanClass)
-				|| this.registeredBean.getMergedBeanDefinition().getFactoryMethodName() != null);
+		if (beanClass != null
+				&& this.registeredBean.getMergedBeanDefinition().getFactoryMethodName() != null) {
+			return true;
+		}
+		return (beanClass != null && !beanType.toClass().equals(beanClass));
 	}
 
 	@Override
