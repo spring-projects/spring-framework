@@ -47,6 +47,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.aot.InnerBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
+import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Implementation;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.One;
@@ -92,29 +93,8 @@ class BeanDefinitionMethodGeneratorTests {
 		this.beanRegistrationsCode = new MockBeanRegistrationsCode(this.generationContext);
 	}
 
-
 	@Test
-	void generateBeanDefinitionMethodWithOnlyTargetTypeDoesNotSetBeanClass() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setTargetType(TestBean.class);
-		RegisteredBean registeredBean = registerBean(beanDefinition);
-		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
-				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList());
-		MethodReference method = generator.generateBeanDefinitionMethod(
-				this.generationContext, this.beanRegistrationsCode);
-		compile(method, (actual, compiled) -> {
-			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
-			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
-			assertThat(sourceFile).contains("new RootBeanDefinition()");
-			assertThat(sourceFile).contains("setTargetType(TestBean.class)");
-			assertThat(sourceFile).contains("setInstanceSupplier(TestBean::new)");
-			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
-		});
-	}
-
-	@Test
-	void generateBeanDefinitionMethodSpecifiesBeanClassIfSet() {
+	void generateWithBeanClassSetsOnlyBeanClass() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(TestBean.class);
 		RegisteredBean registeredBean = registerBean(beanDefinition);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
@@ -133,7 +113,91 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	@Test
-	void generateBeanDefinitionMethodSpecifiesBeanClassAndTargetTypIfDifferent() {
+	void generateWithTargetTypeWithNoGenericSetsOnlyBeanClass() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setTargetType(TestBean.class);
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
+			assertThat(sourceFile).contains("new RootBeanDefinition(TestBean.class)");
+			assertThat(sourceFile).contains("setInstanceSupplier(TestBean::new)");
+			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
+	@Test
+	void generateWithTargetTypeUsingGenericsSetsBothBeanClassAndTargetType() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class));
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			assertThat(actual.getResolvableType().resolve()).isEqualTo(GenericBean.class);
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
+			assertThat(sourceFile).contains("new RootBeanDefinition(GenericBean.class)");
+			assertThat(sourceFile).contains(
+					"setTargetType(ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class))");
+			assertThat(sourceFile).contains("setInstanceSupplier(GenericBean::new)");
+			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
+	@Test
+	void generateWithBeanClassAndFactoryMethodNameSetsTargetTypeAndBeanClass() {
+		this.beanFactory.registerSingleton("factory", new SimpleBeanConfiguration());
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
+		beanDefinition.setFactoryBeanName("factory");
+		beanDefinition.setFactoryMethodName("simpleBean");
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
+			assertThat(sourceFile).contains("new RootBeanDefinition(SimpleBean.class)");
+			assertThat(sourceFile).contains("setTargetType(SimpleBean.class)");
+			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
+	@Test
+	void generateWithTargetTypeAndFactoryMethodNameSetsOnlyBeanClass() {
+		this.beanFactory.registerSingleton("factory", new SimpleBeanConfiguration());
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setTargetType(SimpleBean.class);
+		beanDefinition.setFactoryBeanName("factory");
+		beanDefinition.setFactoryMethodName("simpleBean");
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
+			assertThat(sourceFile).contains("new RootBeanDefinition(SimpleBean.class)");
+			assertThat(sourceFile).doesNotContain("setTargetType(");
+			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
+	@Test
+	void generateWithBeanClassAndTargetTypeDifferentSetsBoth() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(One.class);
 		beanDefinition.setTargetType(Implementation.class);
 		beanDefinition.setResolvedFactoryMethod(ReflectionUtils.findMethod(TestHierarchy.class, "oneBean"));
@@ -148,6 +212,28 @@ class BeanDefinitionMethodGeneratorTests {
 			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
 			assertThat(sourceFile).contains("new RootBeanDefinition(TestHierarchy.One.class)");
 			assertThat(sourceFile).contains("setTargetType(TestHierarchy.Implementation.class)");
+			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
+	@Test
+	void generateWithBeanClassAndTargetTypWithGenericSetsBoth() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(Integer.class);
+		beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class));
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			assertThat(actual.getResolvableType().resolve()).isEqualTo(GenericBean.class);
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
+			assertThat(sourceFile).contains("new RootBeanDefinition(Integer.class)");
+			assertThat(sourceFile).contains(
+					"setTargetType(ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class))");
+			assertThat(sourceFile).contains("setInstanceSupplier(GenericBean::new)");
 			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
 		});
 	}
