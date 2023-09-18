@@ -39,6 +39,7 @@ import org.springframework.util.StringValueResolver;
  *
  * @author Juergen Hoeller
  * @author Qimiao Chen
+ * @author Hailin Kang
  * @since 2.5.2
  */
 public class SimpleAliasRegistry implements AliasRegistry {
@@ -211,13 +212,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		String canonicalName = name;
 		// Handle aliasing...
 		String resolvedName;
-		do {
-			resolvedName = this.aliasMap.get(canonicalName);
-			if (resolvedName != null) {
-				canonicalName = resolvedName;
-			}
+		while ((resolvedName = this.aliasMap.get(canonicalName)) != null) {
+			canonicalName = resolvedName;
 		}
-		while (resolvedName != null);
 		return canonicalName;
 	}
 
