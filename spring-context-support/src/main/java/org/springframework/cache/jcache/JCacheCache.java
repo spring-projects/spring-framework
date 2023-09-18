@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,8 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	@Override
 	@Nullable
 	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
-		boolean set = this.cache.putIfAbsent(key, toStoreValue(value));
-		return (set ? null : get(key));
+		Object previous = this.cache.invoke(key, PutIfAbsentEntryProcessor.INSTANCE, toStoreValue(value));
+		return (previous != null ? toValueWrapper(previous) : null);
 	}
 
 	@Override
@@ -122,6 +122,22 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 		boolean notEmpty = this.cache.iterator().hasNext();
 		this.cache.removeAll();
 		return notEmpty;
+	}
+
+
+	private static class PutIfAbsentEntryProcessor implements EntryProcessor<Object, Object, Object> {
+
+		private static final PutIfAbsentEntryProcessor INSTANCE = new PutIfAbsentEntryProcessor();
+
+		@Override
+		@Nullable
+		public Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
+			Object existingValue = entry.getValue();
+			if (existingValue == null) {
+				entry.setValue(arguments[0]);
+			}
+			return existingValue;
+		}
 	}
 
 
