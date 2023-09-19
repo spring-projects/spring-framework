@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,9 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Unit tests for {@link CharBufferDecoder}.
  *
- * @author Sebastien Deleuze
- * @author Brian Clozel
- * @author Mark Paluch
+ * @author Markus Heiden
+ * @author Arjen Poutsma
  */
 class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 
@@ -71,14 +71,7 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 		CharBuffer e = charBuffer("é");
 		CharBuffer o = charBuffer("ø");
 		String s = String.format("%s\n%s\n%s", u, e, o);
-		Flux<DataBuffer> input = buffers(s, 1, UTF_8);
-
-		// TODO: temporarily replace testDecodeAll with explicit decode/cancel/empty
-		// see https://github.com/reactor/reactor-core/issues/2041
-
-//		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
-//		testDecodeCancel(input, TYPE, null, null);
-//		testDecodeEmpty(TYPE, null, null);
+		Flux<DataBuffer> input = toDataBuffers(s, 1, UTF_8);
 
 		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
 	}
@@ -89,33 +82,38 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 		CharBuffer e = charBuffer("é");
 		CharBuffer o = charBuffer("ø");
 		String s = String.format("%s\n%s\n%s", u, e, o);
-		Flux<DataBuffer> source = buffers(s, 2, UTF_16BE);
+		Flux<DataBuffer> source = toDataBuffers(s, 2, UTF_16BE);
 		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain;charset=utf-16be");
 
 		testDecode(source, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), mimeType, null);
 	}
 
-	private Flux<DataBuffer> buffers(String s, int length, Charset charset) {
+	private Flux<DataBuffer> toDataBuffers(String s, int length, Charset charset) {
 		byte[] bytes = s.getBytes(charset);
 		List<byte[]> chunks = new ArrayList<>();
 		for (int i = 0; i < bytes.length; i += length) {
 			chunks.add(Arrays.copyOfRange(bytes, i, i + length));
 		}
 		return Flux.fromIterable(chunks)
-				.map(this::buffer);
+				.map(chunk -> {
+					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(length);
+					dataBuffer.write(chunk, 0, chunk.length);
+					return dataBuffer;
+				});
 	}
 
 	@Test
 	void decodeNewLine() {
-		Flux<DataBuffer> input = buffers(
-				"\r\nabc\n",
-				"def",
-				"ghi\r\n\n",
-				"jkl",
-				"mno\npqr\n",
-				"stu",
-				"vw",
-				"xyz");
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("\r\nabc\n"),
+				stringBuffer("def"),
+				stringBuffer("ghi\r\n\n"),
+				stringBuffer("jkl"),
+				stringBuffer("mno\npqr\n"),
+				stringBuffer("stu"),
+				stringBuffer("vw"),
+				stringBuffer("xyz")
+		);
 
 		testDecode(input, CharBuffer.class, step -> step
 				.expectNext(charBuffer("")).as("1st")
@@ -130,11 +128,12 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 	}
 
 	@Test
-	void decodeNewlinesAcrossBuffers() {
-		Flux<DataBuffer> input = buffers(
-				"\r",
-				"\n",
-				"xyz");
+	void decodeNewlinesAcrossBuffers()  {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("\r"),
+				stringBuffer("\n"),
+				stringBuffer("xyz")
+		);
 
 		testDecode(input, CharBuffer.class, step -> step
 				.expectNext(charBuffer(""))
@@ -145,9 +144,9 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 
 	@Test
 	void maxInMemoryLimit() {
-		Flux<DataBuffer> input = buffers(
-				"abc\n", "defg\n",
-				"hi", "jkl", "mnop");
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("abc\n"), stringBuffer("defg\n"),
+				stringBuffer("hi"), stringBuffer("jkl"), stringBuffer("mnop"));
 
 		this.decoder.setMaxInMemorySize(5);
 
@@ -159,8 +158,8 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 
 	@Test
 	void maxInMemoryLimitDoesNotApplyToParsedItemsThatDontRequireBuffering() {
-		Flux<DataBuffer> input = buffers(
-				"TOO MUCH DATA\nanother line\n\nand another\n");
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("TOO MUCH DATA\nanother line\n\nand another\n"));
 
 		this.decoder.setMaxInMemorySize(5);
 
@@ -176,10 +175,9 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 	@Test
 		// gh-24339
 	void maxInMemoryLimitReleaseUnprocessedLinesWhenUnlimited() {
-		Flux<DataBuffer> input = buffers("Line 1\nLine 2\nLine 3\n");
+		Flux<DataBuffer> input = Flux.just(stringBuffer("Line 1\nLine 2\nLine 3\n"));
 
 		this.decoder.setMaxInMemorySize(-1);
-
 		testDecodeCancel(input, ResolvableType.forClass(String.class), null, Collections.emptyMap());
 	}
 
@@ -187,15 +185,16 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 	void decodeNewLineIncludeDelimiters() {
 		this.decoder = CharBufferDecoder.allMimeTypes(CharBufferDecoder.DEFAULT_DELIMITERS, false);
 
-		Flux<DataBuffer> input = buffers(
-				"\r\nabc\n",
-				"def",
-				"ghi\r\n\n",
-				"jkl",
-				"mno\npqr\n",
-				"stu",
-				"vw",
-				"xyz");
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("\r\nabc\n"),
+				stringBuffer("def"),
+				stringBuffer("ghi\r\n\n"),
+				stringBuffer("jkl"),
+				stringBuffer("mno\npqr\n"),
+				stringBuffer("stu"),
+				stringBuffer("vw"),
+				stringBuffer("xyz")
+		);
 
 		testDecode(input, CharBuffer.class, step -> step
 				.expectNext(charBuffer("\r\n"))
@@ -220,9 +219,9 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 
 	@Test
 	void decodeEmptyDataBuffer() {
-		Flux<DataBuffer> input = buffers("");
-
-		Flux<CharBuffer> output = this.decoder.decode(input, TYPE, null, Collections.emptyMap());
+		Flux<DataBuffer> input = Flux.just(stringBuffer(""));
+		Flux<CharBuffer> output = this.decoder.decode(input,
+				TYPE, null, Collections.emptyMap());
 
 		StepVerifier.create(output)
 				.expectNext(charBuffer(""))
@@ -232,10 +231,10 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 	@Override
 	@Test
 	public void decodeToMono() {
-		Flux<DataBuffer> input = buffers(
-				"foo",
-				"bar",
-				"baz");
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("foo"),
+				stringBuffer("bar"),
+				stringBuffer("baz"));
 
 		testDecodeToMonoAll(input, CharBuffer.class, step -> step
 				.expectNext(charBuffer("foobarbaz"))
@@ -245,24 +244,17 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 
 	@Test
 	void decodeToMonoWithEmptyFlux() {
-		Flux<DataBuffer> input = buffers();
+		Flux<DataBuffer> input = Flux.empty();
 
 		testDecodeToMono(input, String.class, step -> step
 				.expectComplete()
 				.verify());
 	}
 
-	private Flux<DataBuffer> buffers(String... value) {
-		return Flux.just(value).map(this::buffer);
-	}
-
-	private DataBuffer buffer(String value) {
-		return buffer(value.getBytes(UTF_8));
-	}
-
-	private DataBuffer buffer(byte[] value) {
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(value.length);
-		buffer.write(value);
+	private DataBuffer stringBuffer(String value) {
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+		buffer.write(bytes);
 		return buffer;
 	}
 
