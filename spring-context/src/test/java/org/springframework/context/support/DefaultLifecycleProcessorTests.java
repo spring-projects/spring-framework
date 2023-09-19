@@ -24,12 +24,14 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
@@ -105,6 +107,21 @@ class DefaultLifecycleProcessorTests {
 		context.stop();
 		assertThat(bean.isRunning()).isFalse();
 		context.close();
+	}
+
+	@Test
+	void singleSmartLifecycleAutoStartupWithFailingLifecycleBean() {
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<>();
+		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
+		bean.setAutoStartup(true);
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.getBeanFactory().registerSingleton("bean", bean);
+		context.registerSingleton("failingBean", FailingLifecycleBean.class);
+		assertThat(bean.isRunning()).isFalse();
+		assertThatExceptionOfType(ApplicationContextException.class)
+				.isThrownBy(context::refresh).withCauseInstanceOf(IllegalStateException.class);
+		assertThat(bean.isRunning()).isFalse();
+		assertThat(startedBeans).hasSize(1);
 	}
 
 	@Test
@@ -829,6 +846,25 @@ class DefaultLifecycleProcessorTests {
 		@Override
 		public int getPhase() {
 			return 0;
+		}
+	}
+
+
+	public static class FailingLifecycleBean implements SmartLifecycle {
+
+		@Override
+		public void start() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public void stop() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public boolean isRunning() {
+			return false;
 		}
 	}
 

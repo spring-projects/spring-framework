@@ -159,6 +159,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	public void start() {
 		this.stoppedBeans = null;
 		startBeans(false);
+		// If any bean failed to explicitly start, the exception propagates here.
+		// The caller may choose to subsequently call stop() if appropriate.
 		this.running = true;
 	}
 
@@ -183,7 +185,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 
 		this.stoppedBeans = null;
-		startBeans(true);
+		try {
+			startBeans(true);
+		}
+		catch (ApplicationContextException ex) {
+			// Some bean failed to auto-start within context refresh:
+			// stop already started beans on context refresh failure.
+			stopBeans();
+			throw ex;
+		}
 		this.running = true;
 	}
 
