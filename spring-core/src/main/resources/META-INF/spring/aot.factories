@@ -1,4 +1,5 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar=\
 org.springframework.aot.hint.support.KotlinDetectorRuntimeHints,\
 org.springframework.aot.hint.support.ObjectToObjectConverterRuntimeHints,\
-org.springframework.aot.hint.support.SpringFactoriesLoaderRuntimeHints
+org.springframework.aot.hint.support.SpringFactoriesLoaderRuntimeHints,\
+org.springframework.aot.hint.support.SpringPropertiesRuntimeHints
