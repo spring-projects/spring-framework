@@ -18,6 +18,7 @@ package org.springframework.beans.factory.annotation;
 
 
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.inject.Qualifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,11 @@ class JakartaAnnotationsRuntimeHintsTests {
 	@Test
 	void jakartaInjectAnnotationHasHints() {
 		assertThat(RuntimeHintsPredicates.reflection().onType(Inject.class)).accepts(this.hints);
+	}
+
+	@Test
+	void jakartaProviderAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(Provider.class)).accepts(this.hints);
 	}
 
 	@Test
