@@ -1,3 +1,6 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar= \
+org.springframework.format.support.FormattingConversionServiceRuntimeHints
+
 org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor= \
 org.springframework.context.aot.ReflectiveProcessorBeanFactoryInitializationAotProcessor
 
