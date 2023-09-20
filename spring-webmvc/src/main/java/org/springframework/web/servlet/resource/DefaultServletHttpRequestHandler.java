@@ -126,11 +126,11 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +
 					this.defaultServletName + "'");
 		}
-		if (request.getDispatcherType() == DispatcherType.INCLUDE) {
-			rd.include(request, response);
+		if (request.getDispatcherType() != DispatcherType.INCLUDE) {
+			rd.forward(request, response);
 		}
 		else {
-			rd.forward(request, response);
+			rd.include(request, response);
 		}
 	}
 
