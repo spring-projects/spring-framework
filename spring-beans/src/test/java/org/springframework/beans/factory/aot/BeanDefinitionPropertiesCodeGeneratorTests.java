@@ -31,6 +31,7 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -413,6 +414,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		@Test
 		void noDestroyMethod() {
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).isNull());
+			assertReflectionOnPublisher();
 		}
 
 		@Test
@@ -420,6 +422,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			beanDefinition.setDestroyMethodName("destroy");
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy"));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy");
+			assertReflectionOnPublisher();
 		}
 
 		@Test
@@ -427,6 +430,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			beanDefinition.setDestroyMethodName(privateDestroyMethod);
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly(privateDestroyMethod));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "privateDestroy");
+			assertReflectionOnPublisher();
 		}
 
 		@Test
@@ -434,6 +438,11 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			beanDefinition.setDestroyMethodNames("destroy", privateDestroyMethod);
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy", privateDestroyMethod));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy", "privateDestroy");
+			assertReflectionOnPublisher();
+		}
+
+		private void assertReflectionOnPublisher() {
+			assertThat(RuntimeHintsPredicates.reflection().onType(Publisher.class)).accepts(generationContext.getRuntimeHints());
 		}
 
 	}
