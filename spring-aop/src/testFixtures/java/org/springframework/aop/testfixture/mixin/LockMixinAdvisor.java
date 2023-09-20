@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-package test.aop;
+package org.springframework.aop.testfixture.mixin;
+
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 
 /**
- * Simple implementation of Lockable interface for use in mixins.
+ * Advisor for use with a LockMixin. Applies to all classes.
  *
  * @author Rod Johnson
  */
-public class DefaultLockable implements Lockable {
+@SuppressWarnings("serial")
+public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
-	private boolean locked;
-
-	@Override
-	public void lock() {
-		this.locked = true;
-	}
-
-	@Override
-	public void unlock() {
-		this.locked = false;
-	}
-
-	@Override
-	public boolean locked() {
-		return this.locked;
+	public LockMixinAdvisor() {
+		super(new LockMixin(), Lockable.class);
 	}
 
 }

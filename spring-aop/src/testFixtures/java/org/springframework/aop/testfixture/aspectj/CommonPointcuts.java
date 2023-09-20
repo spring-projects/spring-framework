@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package test.mixin;
+package org.springframework.aop.testfixture.aspectj;
 
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.aspectj.lang.annotation.Pointcut;
 
 /**
- * Advisor for use with a LockMixin. Applies to all classes.
- *
- * @author Rod Johnson
+ * @author Sam Brannen
+ * @since 6.0.6
  */
-@SuppressWarnings("serial")
-public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
+public class CommonPointcuts {
 
-	public LockMixinAdvisor() {
-		super(new LockMixin(), Lockable.class);
-	}
+	@Pointcut("execution(* getAge())")
+	public void getAgeExecution() {}
 
 }

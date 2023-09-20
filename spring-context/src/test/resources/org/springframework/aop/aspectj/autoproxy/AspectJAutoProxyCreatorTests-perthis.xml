@@ -5,7 +5,7 @@
 
 	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
 
-	<bean class="test.aspect.PerThisAspect" scope="prototype"/>
+	<bean class="org.springframework.aop.testfixture.aspectj.PerThisAspect" scope="prototype"/>
 
 	<bean id="adrian" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="name" value="adrian"/>

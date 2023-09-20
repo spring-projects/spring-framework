@@ -32,6 +32,7 @@ import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory.
 import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.aop.support.Pointcuts;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Internal implementation of AspectJPointcutAdvisor.
@@ -40,6 +41,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  */
 @SuppressWarnings("serial")
@@ -297,6 +299,23 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		private boolean isAspectMaterialized() {
 			return (this.aspectInstanceFactory == null || this.aspectInstanceFactory.isMaterialized());
 		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof PerTargetInstantiationModelPointcut that &&
+					ObjectUtils.nullSafeEquals(this.declaredPointcut.getExpression(), that.declaredPointcut.getExpression())));
+		}
+
+		@Override
+		public int hashCode() {
+			return ObjectUtils.nullSafeHashCode(this.declaredPointcut.getExpression());
+		}
+
+		@Override
+		public String toString() {
+			return PerTargetInstantiationModelPointcut.class.getName() + ": " + this.declaredPointcut.getExpression();
+		}
+
 	}
 
 }

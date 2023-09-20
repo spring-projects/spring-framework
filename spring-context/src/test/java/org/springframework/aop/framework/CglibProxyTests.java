@@ -21,7 +21,6 @@ import java.io.Serializable;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
-import test.mixin.LockMixinAdvisor;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
@@ -31,6 +30,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.mixin.LockMixinAdvisor;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
