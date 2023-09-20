@@ -35,6 +35,7 @@ import java.util.function.Predicate;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -128,6 +129,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private void addInitDestroyMethods(Builder code, AbstractBeanDefinition beanDefinition,
 			@Nullable String[] methodNames, String format) {
+		// For Publisher-based destroy methods
+		this.hints.reflection().registerType(TypeReference.of("org.reactivestreams.Publisher"));
 		if (!ObjectUtils.isEmpty(methodNames)) {
 			Class<?> beanType = ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
 			Arrays.stream(methodNames).forEach(methodName -> addInitDestroyHint(beanType, methodName));
