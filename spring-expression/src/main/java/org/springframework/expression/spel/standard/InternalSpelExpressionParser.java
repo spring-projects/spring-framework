@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
+import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -848,6 +849,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//  | REAL_LITERAL
 	//	| DQ_STRING_LITERAL
 	//	| NULL_LITERAL
+	@BigNumberConcern
 	private boolean maybeEatLiteral() {
 		Token t = peekToken();
 		if (t == null) {
@@ -858,29 +860,27 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		else if (t.kind == TokenKind.LITERAL_LONG) {
 			push(Literal.getLongLiteral(t.stringValue(), t.startPos, t.endPos, 10));
-		}
-		else if (t.kind == TokenKind.LITERAL_HEXINT) {
+		} else if (t.kind == TokenKind.LITERAL_BIG_INTEGER) {
+			push(Literal.getBigIntegerLiteral(t.stringValue(), t.startPos, t.endPos, 10));
+		} else if (t.kind == TokenKind.LITERAL_HEXINT) {
 			push(Literal.getIntLiteral(t.stringValue(), t.startPos, t.endPos, 16));
-		}
-		else if (t.kind == TokenKind.LITERAL_HEXLONG) {
+		} else if (t.kind == TokenKind.LITERAL_HEXLONG) {
 			push(Literal.getLongLiteral(t.stringValue(), t.startPos, t.endPos, 16));
-		}
-		else if (t.kind == TokenKind.LITERAL_REAL) {
+		} else if (t.kind == TokenKind.LITERAL_HEX_BIG_INTEGER) {
+			push(Literal.getBigIntegerLiteral(t.stringValue(), t.startPos, t.endPos, 16));
+		} else if (t.kind == TokenKind.LITERAL_REAL) {
 			push(Literal.getRealLiteral(t.stringValue(), t.startPos, t.endPos, false));
-		}
-		else if (t.kind == TokenKind.LITERAL_REAL_FLOAT) {
+		} else if (t.kind == TokenKind.LITERAL_REAL_FLOAT) {
 			push(Literal.getRealLiteral(t.stringValue(), t.startPos, t.endPos, true));
-		}
-		else if (peekIdentifierToken("true")) {
+		} else if (t.kind == TokenKind.LITERAL_BIG_DECIMAL) {
+			push(Literal.getBigDecimalLiteral(t.stringValue(), t.startPos, t.endPos));
+		} else if (peekIdentifierToken("true")) {
 			push(new BooleanLiteral(t.stringValue(), t.startPos, t.endPos, true));
-		}
-		else if (peekIdentifierToken("false")) {
+		} else if (peekIdentifierToken("false")) {
 			push(new BooleanLiteral(t.stringValue(), t.startPos, t.endPos, false));
-		}
-		else if (t.kind == TokenKind.LITERAL_STRING) {
+		} else if (t.kind == TokenKind.LITERAL_STRING) {
 			push(new StringLiteral(t.stringValue(), t.startPos, t.endPos, t.stringValue()));
-		}
-		else {
+		} else {
 			return false;
 		}
 		nextToken();

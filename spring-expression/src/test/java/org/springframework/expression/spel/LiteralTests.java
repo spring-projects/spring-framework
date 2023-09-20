@@ -16,12 +16,16 @@
 
 package org.springframework.expression.spel;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date
@@ -109,6 +113,21 @@ public class LiteralTests extends AbstractExpressionTests {
 		evaluate("-0xa", -10, Integer.class);
 		evaluate("-1L", -1L, Long.class);
 		evaluate("-0x20l", -32L, Long.class);
+	}
+
+	@BigNumberConcern
+	@ParameterizedTest
+	@ValueSource(strings = {"Bi", "BI", "bI", "bi"})
+	public void testBigIntegerLiterals(final String suffixVariant) {
+		evaluateComparable("-1" + suffixVariant, new BigInteger("-1"), BigInteger.class);
+		evaluateComparable("-0x20" + suffixVariant, new BigInteger("-32"), BigInteger.class);
+	}
+
+	@BigNumberConcern
+	@ParameterizedTest
+	@ValueSource(strings = {"Bd", "BD", "bD", "bd"})
+	public void testBigDecimalLiterals(final String suffixVariant) {
+		evaluateComparable("-1.7" + suffixVariant, new BigDecimal("-1.7"), BigDecimal.class);
 	}
 
 	@Test

@@ -18,15 +18,16 @@ package org.springframework.expression.spel;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
+import org.assertj.core.api.Condition;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ObjectUtils;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Common superclass for expression tests.
@@ -50,36 +51,59 @@ public abstract class AbstractExpressionTests {
 	/**
 	 * Evaluate an expression and check that the actual result matches the
 	 * expectedValue and the class of the result matches the expectedResultType.
-	 * @param expression the expression to evaluate
-	 * @param expectedValue the expected result for evaluating the expression
+	 *
+	 * @param expression         the expression to evaluate
+	 * @param expectedValue      the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
+		doEvaluate(expression, expectedValue, expectedResultType,
+				new Condition<>((actualValue) -> Objects.deepEquals(actualValue, expectedValue),
+						"equal to '" + expectedValue + "'"));
+	}
+
+	/**
+	 * Same as {@link #evaluate(String, Object, Class)} but only uses {@link Comparable#compareTo(Object)}.
+	 *
+	 * @param expression         the expression to evaluate
+	 * @param expectedValue      the expected result for evaluating the expression
+	 * @param expectedResultType the expected class of the evaluation result
+	 */
+	@BigNumberConcern
+	public void evaluateComparable(final String expression, final Comparable<?> expectedValue, final Class<? extends Comparable<?>> expectedResultType) {
+		doEvaluate(expression, expectedValue, expectedResultType,
+				new Condition<>((actualValue) -> actualValue instanceof Comparable && ((Comparable) actualValue).compareTo(expectedValue) == 0,
+						"equal to '" + expectedValue + "'"));
+	}
+
+	public void doEvaluate(String expression, Object expectedValue, Class<?> expectedResultType, final Condition<Object> matchCondition) {
 		Expression expr = parser.parseExpression(expression);
 		assertThat(expr).as("expression").isNotNull();
 		if (DEBUG) {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
 
-		Object value = expr.getValue(context);
+		final Object actualValue = expr.getValue(context);
 
 		// Check the return value
-		if (value == null) {
+		if (actualValue == null) {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
 			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 
-		Class<?> resultType = value.getClass();
+		Class<?> resultType = actualValue.getClass();
 		assertThat(resultType).as("Type of the actual result was not as expected.  Expected '" + expectedResultType +
 				"' but result was of type '" + resultType + "'").isEqualTo(expectedResultType);
 
 		if (expectedValue instanceof String) {
-			assertThat(AbstractExpressionTests.stringValueOf(value)).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
-		}
-		else {
-			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
+			assertThat(AbstractExpressionTests.stringValueOf(actualValue))
+					.as("Did not get expected value for expression '" + expression + "'.")
+					.isEqualTo(expectedValue);
+		} else {
+			assertThat(actualValue).as("Did not get expected value for expression '" + expression + "'.")
+					.is(matchCondition);
 		}
 	}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.MessageFormat;
 
 /**
@@ -274,18 +276,46 @@ public enum SpelMessage {
 	MAX_REGEX_LENGTH_EXCEEDED(Kind.ERROR, 1077,
 			"Regular expression is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/** @since 5.2.24 */
+	/**
+	 * @since 5.2.24
+	 */
 	MAX_CONCATENATED_STRING_LENGTH_EXCEEDED(Kind.ERROR, 1078,
 			"Concatenated string is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/** @since 5.2.24 */
+	/**
+	 * @since 5.2.24
+	 */
 	MAX_EXPRESSION_LENGTH_EXCEEDED(Kind.ERROR, 1079,
 			"SpEL expression is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/** @since 5.2.24 */
+	/**
+	 * @since 5.2.24
+	 */
 	VARIABLE_ASSIGNMENT_NOT_SUPPORTED(Kind.ERROR, 1080,
-			"Assignment to variable ''{0}'' is not supported");
+			"Assignment to variable ''{0}'' is not supported"),
 
+	@BigNumberConcern
+	NOT_A_BIG_INTEGER(Kind.ERROR, 1081,
+			"The value ''{0}'' cannot be parsed as a " + BigInteger.class.getName()),
+
+	@BigNumberConcern
+	REAL_CANNOT_BE_BIG_INTEGER(Kind.ERROR, 1082,
+			"Real number cannot be suffixed with a " + BigInteger.class.getName() + " (BI or bi or Bi or bI) suffix"),
+
+	@BigNumberConcern
+	NOT_A_BIG_DECIMAL(Kind.ERROR, 1083,
+			"The value ''{0}'' cannot be parsed as a " + BigDecimal.class.getName()),
+
+	@BigNumberConcern
+	UNEXPECTED_BIG_INTEGER_OR_DECIMAL_SUFFIX_ERROR(Kind.ERROR, 1084,
+			"Found mark of Big Number (BigInteger/BigDecimal) but second char is incorrect. It should be one of BI, bi, Bi, bI or BD, bd, Bd, bD"),
+
+	@BigNumberConcern
+	UNEXPECTED_BIG_INTEGER_SUFFIX_ERROR(Kind.ERROR, 1085,
+			"Found mark of hex literal of BigInteger but second char is incorrect. It should be one of BI, bi, Bi, bI"),
+
+	IMPROPER_HEX_NON_HEX_TOKEN_USAGE_DEVELOPER_ERROR(Kind.ERROR, 1086,
+			"HEX token is being added as non-HEX or vice versa during Big NUmber parsin. Likely developer's mistake");
 
 	private final Kind kind;
 

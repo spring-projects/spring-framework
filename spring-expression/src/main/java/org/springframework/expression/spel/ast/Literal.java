@@ -16,7 +16,11 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -101,9 +105,17 @@ public abstract class Literal extends SpelNodeImpl {
 		try {
 			long value = Long.parseLong(numberToken, radix);
 			return new LongLiteral(numberToken, startPos, endPos, value);
-		}
-		catch (NumberFormatException ex) {
+		} catch (NumberFormatException ex) {
 			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_LONG, numberToken));
+		}
+	}
+
+	@BigNumberConcern
+	public static Literal getBigIntegerLiteral(final String numberToken, final int startPos, final int endPos, final int radix) {
+		try {
+			return new BigIntegerLiteral(numberToken, startPos, endPos, new BigInteger(numberToken, radix));
+		} catch (NumberFormatException ex) {
+			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_BIG_INTEGER, numberToken));
 		}
 	}
 
@@ -112,15 +124,22 @@ public abstract class Literal extends SpelNodeImpl {
 			if (isFloat) {
 				float value = Float.parseFloat(numberToken);
 				return new FloatLiteral(numberToken, startPos, endPos, value);
-			}
-			else {
+			} else {
 				double value = Double.parseDouble(numberToken);
 				return new RealLiteral(numberToken, startPos, endPos, value);
 			}
-		}
-		catch (NumberFormatException ex) {
+		} catch (NumberFormatException ex) {
 			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_REAL, numberToken));
 		}
 	}
 
+	@BigNumberConcern
+	public static Literal getBigDecimalLiteral(final String numberToken, final int startPos, final int endPos) {
+		try {
+			return new BigDecimalLiteral(numberToken, startPos, endPos, new BigDecimal(numberToken));
+		} catch (final NumberFormatException |
+					   ArithmeticException ex) {
+			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_BIG_DECIMAL, numberToken));
+		}
+	}
 }
