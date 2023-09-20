@@ -224,22 +224,20 @@ class DefaultDatabaseClientUnitTests {
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
 		databaseClient.sql("INSERT INTO table VALUES ($1)")
-				.bind(0, Parameter.from("foo"))
-				.add()
-				.bind(0, Parameter.from("bar"))
+				.bind(params -> params.bind(0, Parameters.in("foo")))
+				.bind(params -> params.bind(0, Parameters.in("bar")))
 				.then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind(0, "foo");
-		verify(statement).bind(0, "bar");
+		verify(statement).bind(0, Parameters.in("foo"));
+		verify(statement).bind(0, Parameters.in("bar"));
 
 		databaseClient.sql("INSERT INTO table VALUES ($1)")
-				.bind("$1", "foo")
-				.add()
-				.bind("$1", "bar")
+				.bind(params -> params.bind("$1", "foo"))
+				.bind(params -> params.bind("$1", "bar"))
 				.then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind("$1", "foo");
-		verify(statement).bind("$1", "bar");
+		verify(statement).bind("$1", Parameters.in("foo"));
+		verify(statement).bind("$1", Parameters.in("bar"));
 	}
 
 	@Test

@@ -143,16 +143,14 @@ abstract class AbstractDatabaseClientIntegrationTests {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
-				.bind("id", 42055)
-				.bind("name", "SCHAUFELRADBAGGER")
-				.bindNull("manual", Integer.class)
-				.add()
-				.bind("id", 2021)
-				.bind("name", "TOM")
-				.bindNull("manual", Integer.class)
+				.bind(params -> params
+						.bind("id", 42055)
+						.bind("name", "SCHAUFELRADBAGGER")
+						.bindNull("manual", Integer.class))
+				.bind(params -> params.bind("id", 2021).bind("name", "TOM").bindNull("manual", Integer.class))
 				.fetch().rowsUpdated()
 				.as(StepVerifier::create)
-				.expectNextMatches(updatedRows -> updatedRows.equals(2))
+				.expectNextMatches(updatedRows -> updatedRows.equals(2L))
 				.verifyComplete();
 
 		databaseClient.sql("SELECT id FROM legoset")
@@ -172,8 +170,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:my_list)")
-				.bind("my_list", Arrays.asList(1, "Bob", 1))
-				.add()
+				.bind(params -> params.bind("my_list", Arrays.asList(1, "Bob", 1)))
 				.bind("my_list", Arrays.asList(2, "Alice", 1, "next"))
 				.fetch().rowsUpdated()
 				.as(StepVerifier::create)

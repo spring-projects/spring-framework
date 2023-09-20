@@ -16,25 +16,24 @@
 
 package org.springframework.r2dbc.core;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Parameter;
-import io.r2dbc.spi.Parameters;
 import io.r2dbc.spi.R2dbcException;
 import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.Result;
@@ -48,7 +47,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
@@ -56,7 +54,6 @@ import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -224,124 +221,99 @@ final class DefaultDatabaseClient implements DatabaseClient {
 	 */
 	class DefaultGenericExecuteSpec implements GenericExecuteSpec {
 
-		final Map<Integer, Parameter> byIndex;
+		final Params params;
 
-		final Map<String, Parameter> byName;
+		final List<Params> batchParams;
 
 		final Supplier<String> sqlSupplier;
 
 		final StatementFilterFunction filterFunction;
 
 		DefaultGenericExecuteSpec(Supplier<String> sqlSupplier) {
-			this.byIndex = Collections.emptyMap();
-			this.byName = Collections.emptyMap();
+			this.params = DefaultParamsImpl.EMPTY_PARAMS;
+			this.batchParams = Collections.emptyList();
 			this.sqlSupplier = sqlSupplier;
 			this.filterFunction = StatementFilterFunction.EMPTY_FILTER;
 		}
 
-		DefaultGenericExecuteSpec(Map<Integer, Parameter> byIndex, Map<String, Parameter> byName,
-				Supplier<String> sqlSupplier, StatementFilterFunction filterFunction) {
-
-			this.byIndex = byIndex;
-			this.byName = byName;
+		DefaultGenericExecuteSpec(Params params, List<Params> batchParams, Supplier<String> sqlSupplier,
+								  StatementFilterFunction filterFunction) {
+			this.params = params;
+			this.batchParams = batchParams;
 			this.sqlSupplier = sqlSupplier;
 			this.filterFunction = filterFunction;
-		}
-
-		@SuppressWarnings("deprecation")
-		private Parameter resolveParameter(Object value) {
-			if (value instanceof Parameter param) {
-				return param;
-			}
-			else if (value instanceof org.springframework.r2dbc.core.Parameter param) {
-				Object paramValue = param.getValue();
-				return (paramValue != null ? Parameters.in(paramValue) : Parameters.in(param.getType()));
-			}
-			else {
-				return Parameters.in(value);
-			}
 		}
 
 		@Override
 		public DefaultGenericExecuteSpec bind(int index, Object value) {
 			assertNotPreparedOperation();
-			Assert.notNull(value, () -> String.format(
-					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
-			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-			byIndex.put(index, resolveParameter(value));
+			Params newParams = this.params.bind(index, value);
 
-			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
+			return new DefaultGenericExecuteSpec(newParams, this.batchParams, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
 		public DefaultGenericExecuteSpec bindNull(int index, Class<?> type) {
 			assertNotPreparedOperation();
 
-			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-			byIndex.put(index, Parameters.in(type));
+			Params newParams = this.params.bindNull(index, type);
 
-			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
+			return new DefaultGenericExecuteSpec(newParams, this.batchParams, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
 
-			Assert.hasText(name, "Parameter name must not be null or empty");
-			Assert.notNull(value, () -> String.format(
-					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
+			Params newParams = this.params.bind(name, value);
 
-			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-			byName.put(name, resolveParameter(value));
-
-			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
+			return new DefaultGenericExecuteSpec(newParams, this.batchParams, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
 		public DefaultGenericExecuteSpec bindNull(String name, Class<?> type) {
 			assertNotPreparedOperation();
-			Assert.hasText(name, "Parameter name must not be null or empty");
 
-			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-			byName.put(name, Parameters.in(type));
+			Params newParams = this.params.bindNull(name, type);
 
-			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
+			return new DefaultGenericExecuteSpec(newParams, this.batchParams, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
 		public GenericExecuteSpec bindValues(Map<String, ?> source) {
 			assertNotPreparedOperation();
-			Assert.notNull(source, "Parameter source must not be null");
 
-			Map<String, Parameter> target = new LinkedHashMap<>(this.byName);
-			source.forEach((name, value) -> target.put(name, resolveParameter(value)));
+			Params newParams = this.params.bindValues(source);
 
-			return new DefaultGenericExecuteSpec(this.byIndex, target, this.sqlSupplier, this.filterFunction);
+			return new DefaultGenericExecuteSpec(newParams, this.batchParams, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
 		public DefaultGenericExecuteSpec bindProperties(Object source) {
 			assertNotPreparedOperation();
-			Assert.notNull(source, "Parameter source must not be null");
 
-			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-			for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(source.getClass())) {
-				if (pd.getReadMethod() != null && pd.getReadMethod().getDeclaringClass() != Object.class) {
-					ReflectionUtils.makeAccessible(pd.getReadMethod());
-					Object value = ReflectionUtils.invokeMethod(pd.getReadMethod(), source);
-					byName.put(pd.getName(), (value != null ? Parameters.in(value) : Parameters.in(pd.getPropertyType())));
-				}
-			}
+			Params newParams = this.params.bindProperties(source);
 
-			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
+			return new DefaultGenericExecuteSpec(newParams, this.batchParams, this.sqlSupplier, this.filterFunction);
+		}
+
+		@Override
+		public GenericExecuteSpec bind(UnaryOperator<Params> paramsFunction) {
+			assertNotPreparedOperation();
+
+			Assert.notNull(paramsFunction, "Params function must not be null");
+			List<Params> newBatchParams = new ArrayList<>(this.batchParams);
+			newBatchParams.add(paramsFunction.apply(DefaultParamsImpl.EMPTY_PARAMS));
+
+			return new DefaultGenericExecuteSpec(this.params, newBatchParams, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
 			Assert.notNull(filter, "StatementFilterFunction must not be null");
-			return new DefaultGenericExecuteSpec(
-					this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
+			return new DefaultGenericExecuteSpec(this.params, this.batchParams, this.sqlSupplier,
+					this.filterFunction.andThen(filter));
 		}
 
 		@Override
@@ -396,18 +368,26 @@ final class DefaultDatabaseClient implements DatabaseClient {
 					return statement;
 				}
 
-				if (DefaultDatabaseClient.this.namedParameterExpander != null) {
-					Map<String, Parameter> remainderByName = new LinkedHashMap<>(this.byName);
-					Map<Integer, Parameter> remainderByIndex = new LinkedHashMap<>(this.byIndex);
+				List<Params> allParams = new ArrayList<>(this.batchParams);
 
+				if (!this.params.byIndex().isEmpty() || !this.params.byName().isEmpty()) {
+					allParams.add(this.params);
+				}
+
+				if (!allParams.isEmpty() && DefaultDatabaseClient.this.namedParameterExpander != null) {
 					List<String> parameterNames = DefaultDatabaseClient.this.namedParameterExpander.getParameterNames(sql);
-					MapBindParameterSource namedBindings = retrieveParameters(
-							sql, parameterNames, remainderByName, remainderByIndex);
+					List<PreparedOperation<String>> operations = new ArrayList<>(allParams.size());
+
+					for (Params params : allParams) {
+						MapBindParameterSource namedBindings = retrieveParameters(sql, parameterNames, params);
 
 					PreparedOperation<String> operation = DefaultDatabaseClient.this.namedParameterExpander.expand(
 							sql, DefaultDatabaseClient.this.bindMarkersFactory, namedBindings);
 
-					String expanded = getRequiredSql(operation);
+						operations.add(operation);
+					}
+
+					String expanded = getRequiredSql(operations);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Expanded SQL [" + expanded + "]");
 					}
@@ -415,24 +395,41 @@ final class DefaultDatabaseClient implements DatabaseClient {
 					Statement statement = connection.createStatement(expanded);
 					BindTarget bindTarget = new StatementWrapper(statement);
 
-					operation.bindTo(bindTarget);
+					for (int i = 0; i < operations.size(); i++) {
+						PreparedOperation<String> operation = operations.get(i);
+						operation.bindTo(bindTarget);
+						if (operations.size() > 1 && i != operations.size() - 1) {
+							statement.add();
+						}
+					}
 
-					bindByName(statement, remainderByName);
-					bindByIndex(statement, remainderByIndex);
+					applyBindings(statement, allParams);
 
 					return statement;
 				}
 
 				Statement statement = connection.createStatement(sql);
 
-				bindByIndex(statement, this.byIndex);
-				bindByName(statement, this.byName);
+				applyBindings(statement, allParams);
 
 				return statement;
 			};
 
 			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction,
 					DefaultDatabaseClient.this.executeFunction);
+		}
+
+		private void applyBindings(Statement statement, List<Params> params) {
+			for (int i = 0; i < params.size(); i++) {
+				Params parameter = params.get(i);
+				if (!parameter.byIndex().isEmpty() || !parameter.byName().isEmpty()) {
+					bindByIndex(statement, parameter.byIndex());
+					bindByName(statement, parameter.byName());
+					if (params.size() > 1 && i != params.size() - 1) {
+						statement.add();
+					}
+				}
+			}
 		}
 
 		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> resultAdapter) {
@@ -448,12 +445,11 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			return inConnectionMany(connectionFunction);
 		}
 
-		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames,
-				Map<String, Parameter> remainderByName, Map<Integer, Parameter> remainderByIndex) {
+		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames, Params params) {
 
 			Map<String, Parameter> namedBindings = CollectionUtils.newLinkedHashMap(parameterNames.size());
 			for (String parameterName : parameterNames) {
-				Parameter parameter = getParameter(remainderByName, remainderByIndex, parameterNames, parameterName);
+				Parameter parameter = getParameter(params.byName(), params.byIndex(), parameterNames, parameterName);
 				if (parameter == null) {
 					throw new InvalidDataAccessApiUsageException(
 							String.format("No parameter specified for [%s] in query [%s]", parameterName, sql));
@@ -464,18 +460,15 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@Nullable
-		private Parameter getParameter(Map<String, Parameter> remainderByName,
-				Map<Integer, Parameter> remainderByIndex, List<String> parameterNames, String parameterName) {
-
-			if (this.byName.containsKey(parameterName)) {
-				remainderByName.remove(parameterName);
-				return this.byName.get(parameterName);
+		private Parameter getParameter(Map<String, Parameter> byName, Map<Integer, Parameter> byIndex,
+									   List<String> parameterNames, String parameterName) {
+			if (byName.containsKey(parameterName)) {
+				return byName.remove(parameterName);
 			}
 
 			int index = parameterNames.indexOf(parameterName);
-			if (this.byIndex.containsKey(index)) {
-				remainderByIndex.remove(index);
-				return this.byIndex.get(index);
+			if (byIndex.containsKey(index)) {
+				return byIndex.remove(index);
 			}
 
 			return null;
@@ -493,6 +486,19 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 		private void bindByIndex(Statement statement, Map<Integer, Parameter> byIndex) {
 			byIndex.forEach(statement::bind);
+		}
+
+		private String getRequiredSql(List<PreparedOperation<String>> operations) throws IllegalArgumentException {
+			return operations
+					.stream()
+					.map(this::getRequiredSql)
+					.reduce((prevSql, nextSql) -> {
+						if (prevSql.equals(nextSql)) {
+							return nextSql;
+						} else {
+							throw new IllegalArgumentException("Resulting SQL is not the same!");
+						}
+					}).orElseThrow(() -> new IllegalArgumentException("Operations must not be empty!"));
 		}
 
 		private String getRequiredSql(Supplier<String> sqlSupplier) {

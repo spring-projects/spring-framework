@@ -22,8 +22,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.Parameter;
 import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Row;
@@ -211,6 +213,13 @@ public interface DatabaseClient extends ConnectionAccessor {
 		GenericExecuteSpec bindProperties(Object source);
 
 		/**
+		 * Bind values from the given mapping function.
+		 * @param paramsFunction a function that maps from {@link Params} to {@link Params} with new bindings
+		 * @since 6.1
+		 */
+		GenericExecuteSpec bind(UnaryOperator<Params> paramsFunction);
+
+		/**
 		 * Add the given filter to the end of the filter chain.
 		 * <p>Filter functions are typically used to invoke methods on the Statement
 		 * before it is executed. For example:
@@ -298,6 +307,53 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @return a {@link Mono} ignoring its payload (actively dropping)
 		 */
 		Mono<Void> then();
+	}
+
+	/**
+	 * Interface that defines common functionality for parameter binding.
+	 */
+	interface Params {
+		/**
+		 * See {@link GenericExecuteSpec#bind(String, Object)}.
+		 */
+		Params bind(String name, Object value);
+
+		/**
+		 * See {@link GenericExecuteSpec#bind(int, Object)}.
+		 */
+		Params bind(int index, Object value);
+
+		/**
+		 * See {@link GenericExecuteSpec#bindNull(String, Class)}.
+		 */
+		Params bindNull(String name, Class<?> type);
+
+		/**
+		 * See {@link GenericExecuteSpec#bind(int, Object)}.
+		 */
+		Params bindNull(int index, Class<?> type);
+
+		/**
+		 * See {@link GenericExecuteSpec#bindValues(Map)}.
+		 */
+		Params bindValues(Map<String, ?> source);
+
+		/**
+		 * See {@link GenericExecuteSpec#bindProperties(Object)}.
+		 */
+		Params bindProperties(Object source);
+
+		/**
+		 * Get bindings by index.
+		 * @return index based params
+		 */
+		Map<Integer, Parameter> byIndex();
+
+		/**
+		 * Get bindings by name.
+		 * @return name based params
+		 */
+		Map<String, Parameter> byName();
 	}
 
 }
