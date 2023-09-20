@@ -135,7 +135,7 @@
 	-->
 	<bean id="global_aspectInterface" class="org.springframework.aop.framework.ProxyFactoryBeanTests$GlobalIntroductionAdvice"/>
 
-	<bean id="prototypeLockMixinAdvisor" class="test.mixin.LockMixinAdvisor" scope="prototype"/>
+	<bean id="prototypeLockMixinAdvisor" class="org.springframework.aop.testfixture.mixin.LockMixinAdvisor" scope="prototype"/>
 
 	<bean id="prototypeTestBean" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype"/>
 
@@ -150,13 +150,13 @@
 		</property>
 	</bean>
 
-	<bean id="prototypeLockMixinInterceptor" class="test.mixin.LockMixin" scope="prototype"/>
+	<bean id="prototypeLockMixinInterceptor" class="org.springframework.aop.testfixture.mixin.LockMixin" scope="prototype"/>
 
 	<bean id="prototypeTestBeanProxySingletonTarget" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interfaces">
 			<list>
 				<value>org.springframework.beans.testfixture.beans.ITestBean</value>
-				<value>test.mixin.Lockable</value>
+				<value>org.springframework.aop.testfixture.mixin.Lockable</value>
 			</list>
 		</property>
 		<property name="singleton"><value>false</value></property>

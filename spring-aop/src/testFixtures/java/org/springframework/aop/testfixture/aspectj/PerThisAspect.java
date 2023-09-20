@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package test.aspect;
+package org.springframework.aop.testfixture.aspectj;
 
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 
-/**
- * @author Sam Brannen
- * @since 6.0.6
- */
-public class CommonPointcuts {
+@Aspect("perthis(org.springframework.aop.testfixture.aspectj.CommonPointcuts.getAgeExecution())")
+public class PerThisAspect {
 
-	@Pointcut("execution(* getAge())")
-	public void getAgeExecution() {}
+	private int invocations = 0;
+
+	public int getInvocations() {
+		return this.invocations;
+	}
+
+	@Around("org.springframework.aop.testfixture.aspectj.CommonPointcuts.getAgeExecution()")
+	public int changeAge(ProceedingJoinPoint pjp) {
+		return this.invocations++;
+	}
 
 }
