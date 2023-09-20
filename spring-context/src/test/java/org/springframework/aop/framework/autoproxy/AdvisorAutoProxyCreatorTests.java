@@ -19,7 +19,6 @@ package org.springframework.aop.framework.autoproxy;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
-import test.mixin.Lockable;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
@@ -32,6 +31,7 @@ import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
+import org.springframework.aop.testfixture.mixin.Lockable;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.testfixture.beans.CountingTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;

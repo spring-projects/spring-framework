@@ -46,6 +46,7 @@ import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.aop.testfixture.aspectj.PerTargetAspect;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
@@ -62,7 +63,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
 
@@ -352,33 +352,6 @@ class AspectJAutoProxyCreatorTests {
 		return String.format("%s-%s", getClass().getSimpleName(), fileSuffix);
 	}
 
-}
-
-@Aspect("pertarget(execution(* *.getSpouse()))")
-class PerTargetAspect implements Ordered {
-
-	public int count;
-
-	private int order = Ordered.LOWEST_PRECEDENCE;
-
-	@Around("execution(int *.getAge())")
-	public int returnCountAsAge() {
-		return count++;
-	}
-
-	@Before("execution(void *.set*(int))")
-	public void countSetter() {
-		++count;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
 }
 
 @Aspect

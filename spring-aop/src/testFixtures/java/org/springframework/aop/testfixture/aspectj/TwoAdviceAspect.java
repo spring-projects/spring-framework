@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,26 @@
  * limitations under the License.
  */
 
-package test.aop;
+package org.springframework.aop.testfixture.aspectj;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
-import org.springframework.core.Ordered;
+@Aspect
+public class TwoAdviceAspect {
 
-@Aspect("pertarget(execution(* *.getSpouse()))")
-public class PerTargetAspect implements Ordered {
+	private int totalCalls;
 
-	public int count;
-
-	private int order = Ordered.LOWEST_PRECEDENCE;
-
-	@Around("execution(int *.getAge())")
-	public int returnCountAsAge() {
-		return count++;
+	@Around("execution(* org.springframework.beans.testfixture.beans.ITestBean.age())")
+	public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
+		return totalCalls;
 	}
 
-	@Before("execution(void *.set*(int))")
-	public void countSetter() {
-		++count;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
+	@Before("execution(* org.springframework.beans.testfixture.beans.ITestBean.setAge(int)) && args(newAge)")
+	public void countSet(int newAge) throws Exception {
+		++totalCalls;
 	}
 
 }
