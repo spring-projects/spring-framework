@@ -18,6 +18,7 @@ package org.springframework.web.server.adapter;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ForwardedHeaderUtils;
+import org.springframework.web.util.UriComponents;
 
 /**
  * Extract values from "Forwarded" and "X-Forwarded-*" headers to override
@@ -102,7 +104,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 			if (!this.removeOnly) {
 				URI originalUri = request.getURI();
 				HttpHeaders headers = request.getHeaders();
-				URI uri = ForwardedHeaderUtils.adaptFromForwardedHeaders(originalUri, headers).build(true).toUri();
+				URI uri = adaptFromForwardedHeaders(originalUri, headers);
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
@@ -119,6 +121,17 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 			request = builder.build();
 		}
 		return request;
+	}
+
+	private static URI adaptFromForwardedHeaders(URI uri, HttpHeaders headers) {
+		// GH-30137: assume URI is encoded, but avoid build(true) for more lenient handling
+		UriComponents components = ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers).build();
+		try {
+			return new URI(components.toUriString());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
+		}
 	}
 
 	/**
