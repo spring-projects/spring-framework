@@ -180,24 +180,31 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock
 		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+		if (singletonObject != null || !isSingletonCurrentlyInCreation(beanName)) {
+			return singletonObject;
+		}
+
+		singletonObject = this.earlySingletonObjects.get(beanName);
+		if (singletonObject != null || !allowEarlyReference) {
+			return singletonObject;
+		}
+
+		synchronized (this.singletonObjects) {
+			// Consistent creation of early reference within full singleton lock
+			singletonObject = this.singletonObjects.get(beanName);
+			if (singletonObject != null) {
+				return singletonObject;
+			}
+
 			singletonObject = this.earlySingletonObjects.get(beanName);
-			if (singletonObject == null && allowEarlyReference) {
-				synchronized (this.singletonObjects) {
-					// Consistent creation of early reference within full singleton lock
-					singletonObject = this.singletonObjects.get(beanName);
-					if (singletonObject == null) {
-						singletonObject = this.earlySingletonObjects.get(beanName);
-						if (singletonObject == null) {
-							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-							if (singletonFactory != null) {
-								singletonObject = singletonFactory.getObject();
-								this.earlySingletonObjects.put(beanName, singletonObject);
-								this.singletonFactories.remove(beanName);
-							}
-						}
-					}
-				}
+			if (singletonObject != null) {
+				return singletonObject;
+			}
+			ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+			if (singletonFactory != null) {
+				singletonObject = singletonFactory.getObject();
+				this.earlySingletonObjects.put(beanName, singletonObject);
+				this.singletonFactories.remove(beanName);
 			}
 		}
 		return singletonObject;
