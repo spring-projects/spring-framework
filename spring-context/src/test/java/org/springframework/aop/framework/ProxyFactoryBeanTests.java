@@ -27,8 +27,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
@@ -42,6 +40,8 @@ import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
 import org.springframework.aop.testfixture.advice.MyThrowsHandler;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
+import org.springframework.aop.testfixture.mixin.Lockable;
+import org.springframework.aop.testfixture.mixin.LockedException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;

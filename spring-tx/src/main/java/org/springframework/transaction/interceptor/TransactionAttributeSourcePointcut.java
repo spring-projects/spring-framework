@@ -27,14 +27,15 @@ import org.springframework.transaction.TransactionManager;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract class that implements a Pointcut that matches if the underlying
+ * Internal class that implements a {@code Pointcut} that matches if the underlying
  * {@link TransactionAttributeSource} has an attribute for a given method.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5.5
  */
 @SuppressWarnings("serial")
-class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
+final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 	@Nullable
 	private TransactionAttributeSource transactionAttributeSource;
@@ -87,6 +88,27 @@ class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut imp
 			}
 			return (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
 		}
+
+		private TransactionAttributeSource getTransactionAttributeSource() {
+			return transactionAttributeSource;
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof TransactionAttributeSourceClassFilter that &&
+					ObjectUtils.nullSafeEquals(transactionAttributeSource, that.getTransactionAttributeSource())));
+		}
+
+		@Override
+		public int hashCode() {
+			return TransactionAttributeSourceClassFilter.class.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return TransactionAttributeSourceClassFilter.class.getName() + ": " + transactionAttributeSource;
+		}
+
 	}
 
 }

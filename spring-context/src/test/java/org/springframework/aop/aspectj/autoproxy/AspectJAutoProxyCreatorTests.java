@@ -46,23 +46,25 @@ import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.aop.testfixture.aspectj.PerTargetAspect;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.cglib.proxy.Factory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
 
@@ -206,6 +208,31 @@ class AspectJAutoProxyCreatorTests {
 		assertThat(adrian2.getAge()).isEqualTo(1);
 		assertThat(adrian2.getAge()).isEqualTo(2);
 		assertThat(adrian1.getAge()).isEqualTo(3);
+	}
+
+	@Test  // gh-31238
+	void cglibProxyClassIsCachedAcrossApplicationContextsForPerTargetAspect() {
+		Class<?> configClass = PerTargetProxyTargetClassTrueConfig.class;
+		TestBean testBean1;
+		TestBean testBean2;
+
+		// Round #1
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			testBean1 = context.getBean(TestBean.class);
+			assertThat(AopUtils.isCglibProxy(testBean1)).as("CGLIB proxy").isTrue();
+			assertThat(testBean1.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(Factory.class, SpringProxy.class, Advised.class);
+		}
+
+		// Round #2
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
+			testBean2 = context.getBean(TestBean.class);
+			assertThat(AopUtils.isCglibProxy(testBean2)).as("CGLIB proxy").isTrue();
+			assertThat(testBean2.getClass().getInterfaces())
+				.containsExactlyInAnyOrder(Factory.class, SpringProxy.class, Advised.class);
+		}
+
+		assertThat(testBean1.getClass()).isSameAs(testBean2.getClass());
 	}
 
 	@Test
@@ -352,33 +379,6 @@ class AspectJAutoProxyCreatorTests {
 		return String.format("%s-%s", getClass().getSimpleName(), fileSuffix);
 	}
 
-}
-
-@Aspect("pertarget(execution(* *.getSpouse()))")
-class PerTargetAspect implements Ordered {
-
-	public int count;
-
-	private int order = Ordered.LOWEST_PRECEDENCE;
-
-	@Around("execution(int *.getAge())")
-	public int returnCountAsAge() {
-		return count++;
-	}
-
-	@Before("execution(void *.set*(int))")
-	public void countSetter() {
-		++count;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
 }
 
 @Aspect
@@ -640,6 +640,23 @@ class ProxyTargetClassFalseConfig extends AbstractProxyTargetClassConfig {
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 class ProxyTargetClassTrueConfig extends AbstractProxyTargetClassConfig {
+}
+
+@Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class PerTargetProxyTargetClassTrueConfig {
+
+	@Bean
+	@Scope("prototype")
+	TestBean testBean() {
+		return new TestBean("Jane", 34);
+	}
+
+	@Bean
+	@Scope("prototype")
+	PerTargetAspect perTargetAspect() {
+		return new PerTargetAspect();
+	}
 }
 
 @FunctionalInterface

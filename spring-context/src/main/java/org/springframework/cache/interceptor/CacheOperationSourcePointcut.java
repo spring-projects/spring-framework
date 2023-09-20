@@ -27,11 +27,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A Pointcut that matches if the underlying {@link CacheOperationSource}
+ * A {@code Pointcut} that matches if the underlying {@link CacheOperationSource}
  * has an attribute for a given method.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -86,6 +87,27 @@ class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut implement
 			}
 			return (cacheOperationSource == null || cacheOperationSource.isCandidateClass(clazz));
 		}
+
+		private CacheOperationSource getCacheOperationSource() {
+			return cacheOperationSource;
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof CacheOperationSourceClassFilter that &&
+					ObjectUtils.nullSafeEquals(cacheOperationSource, that.getCacheOperationSource())));
+		}
+
+		@Override
+		public int hashCode() {
+			return CacheOperationSourceClassFilter.class.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return CacheOperationSourceClassFilter.class.getName() + ": " + cacheOperationSource;
+		}
+
 	}
 
 }

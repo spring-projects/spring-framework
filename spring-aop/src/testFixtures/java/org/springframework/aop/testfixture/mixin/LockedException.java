@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,12 @@
  * limitations under the License.
  */
 
-package test.mixin;
+package org.springframework.aop.testfixture.mixin;
 
+@SuppressWarnings("serial")
+public class LockedException extends RuntimeException {
 
-/**
- * Simple implementation of Lockable interface for use in mixins.
- *
- * @author Rod Johnson
- */
-public class DefaultLockable implements Lockable {
-
-	private boolean locked;
-
-	@Override
-	public void lock() {
-		this.locked = true;
-	}
-
-	@Override
-	public void unlock() {
-		this.locked = false;
-	}
-
-	@Override
-	public boolean locked() {
-		return this.locked;
+	public LockedException() {
 	}
 
 }
