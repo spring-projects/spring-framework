@@ -78,6 +78,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
+	final static String SUPPRESS_LOGGING_ATTRIBUTE = AbstractHandlerMapping.class.getName() + ".SUPPRESS_LOGGING";
+
+
 	/** Dedicated "hidden" logger for request mappings. */
 	protected final Log mappingsLogger =
 			LogDelegateFactory.getHiddenLog(HandlerMapping.class.getName() + ".Mappings");
@@ -520,11 +523,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Mapped to " + handler);
-		}
-		else if (logger.isDebugEnabled() && !DispatcherType.ASYNC.equals(request.getDispatcherType())) {
-			logger.debug("Mapped to " + executionChain.getHandler());
+		if (request.getAttribute(SUPPRESS_LOGGING_ATTRIBUTE) == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Mapped to " + handler);
+			}
+			else if (logger.isDebugEnabled() && !DispatcherType.ASYNC.equals(request.getDispatcherType())) {
+				logger.debug("Mapped to " + executionChain.getHandler());
+			}
 		}
 
 		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
