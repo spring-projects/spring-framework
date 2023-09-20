@@ -72,7 +72,6 @@ class Tokenizer {
 	private final BigNonHexNumberConcernExtension bigNonHexNumberConcernExt = new BigNonHexNumberConcernExtension();
 	private final BigHexNumberConcernExtension bigHexNumberConcernExt = new BigHexNumberConcernExtension();
 
-
 	public Tokenizer(String inputData) {
 		this.expressionString = inputData;
 		this.charsToProcess = (inputData + "\0").toCharArray();
@@ -352,9 +351,11 @@ class Tokenizer {
 			if (isLongSuffix()) {
 				pushHexIntToken(subarray(start + 2, this.pos), true, start, this.pos);
 				this.pos++;
-			} else if (bigHexNumberConcernExt.isSuffixDetected()) {
+			}
+			else if (bigHexNumberConcernExt.isSuffixDetected()) {
 				bigHexNumberConcernExt.addBigIntegerToken(start);
-			} else {
+			}
+			else {
 				pushHexIntToken(subarray(start + 2, this.pos), false, start, this.pos);
 			}
 			return;
@@ -399,9 +400,11 @@ class Tokenizer {
 			}
 			pushIntToken(subarray(start, endOfNumber), true, start, endOfNumber);
 			this.pos++;
-		} else if (bigNonHexNumberConcernExt.isSuffixDetected()) {
+		}
+		else if (bigNonHexNumberConcernExt.isSuffixDetected()) {
 			bigNonHexNumberConcernExt.addToken(isReal, start, endOfNumber);
-		} else if (isExponentChar(this.charsToProcess[this.pos])) {
+		}
+		else if (isExponentChar(this.charsToProcess[this.pos])) {
 			isReal = true;  // if it wasn't before, it is now
 			this.pos++;
 			char possibleSign = this.charsToProcess[this.pos];
@@ -418,24 +421,28 @@ class Tokenizer {
 			if (isFloatSuffix(this.charsToProcess[this.pos])) {
 				isFloat = true;
 				endOfNumber = ++this.pos;
-			} else if (isDoubleSuffix(this.charsToProcess[this.pos])) {
+			}
+			else if (isDoubleSuffix(this.charsToProcess[this.pos])) {
 				endOfNumber = ++this.pos;
 			}
 			pushRealToken(subarray(start, this.pos), isFloat, start, this.pos);
-		} else {
+		}
+		else {
 			ch = this.charsToProcess[this.pos];
 			boolean isFloat = false;
 			if (isFloatSuffix(ch)) {
 				isReal = true;
 				isFloat = true;
 				endOfNumber = ++this.pos;
-			} else if (isDoubleSuffix(ch)) {
+			}
+			else if (isDoubleSuffix(ch)) {
 				isReal = true;
 				endOfNumber = ++this.pos;
 			}
 			if (isReal) {
 				pushRealToken(subarray(start, endOfNumber), isFloat, start, endOfNumber);
-			} else {
+			}
+			else {
 				pushIntToken(subarray(start, endOfNumber), false, start, endOfNumber);
 			}
 		}
@@ -616,10 +623,12 @@ class Tokenizer {
 					}
 					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_INTEGER, subarray(start, endOfNumber), start, endOfNumber));
 					shiftParsingPosition();
-				} else if (isBigDecimalSecondChar(secondChar)) {
+				}
+				else if (isBigDecimalSecondChar(secondChar)) {
 					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_DECIMAL, subarray(start, endOfNumber), start, endOfNumber));
 					shiftParsingPosition();
-				} else {
+				}
+				else {
 					raiseParseException(start, SpelMessage.UNEXPECTED_BIG_INTEGER_OR_DECIMAL_SUFFIX_ERROR);
 				}
 			}

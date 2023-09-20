@@ -276,21 +276,15 @@ public enum SpelMessage {
 	MAX_REGEX_LENGTH_EXCEEDED(Kind.ERROR, 1077,
 			"Regular expression is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/**
-	 * @since 5.2.24
-	 */
+	/** @since 5.2.24 */
 	MAX_CONCATENATED_STRING_LENGTH_EXCEEDED(Kind.ERROR, 1078,
 			"Concatenated string is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/**
-	 * @since 5.2.24
-	 */
+	/** @since 5.2.24 */
 	MAX_EXPRESSION_LENGTH_EXCEEDED(Kind.ERROR, 1079,
 			"SpEL expression is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/**
-	 * @since 5.2.24
-	 */
+	/** @since 5.2.24 */
 	VARIABLE_ASSIGNMENT_NOT_SUPPORTED(Kind.ERROR, 1080,
 			"Assignment to variable ''{0}'' is not supported"),
 
