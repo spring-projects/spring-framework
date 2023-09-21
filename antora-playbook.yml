@@ -8,6 +8,7 @@ antora:
   - '@opendevise/antora-release-line-extension'
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: 'framework'
+  - '@springio/antora-extensions/static-page-extension'
 site:
   title: Spring Framework
   url: https://docs.spring.io/spring-framework/reference
@@ -42,5 +43,5 @@ runtime:
     failure_level: warn
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.6/ui-bundle.zip
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.2/ui-bundle.zip
     snapshot: true
