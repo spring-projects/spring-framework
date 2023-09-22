@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date

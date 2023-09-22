@@ -298,11 +298,7 @@ public enum SpelMessage {
 
 	@BigNumberConcern
 	NOT_A_BIG_DECIMAL(Kind.ERROR, 1083,
-			"The value ''{0}'' cannot be parsed as a " + BigDecimal.class.getName()),
-
-	@BigNumberConcern
-	NOT_A_BIG_INTEGER_NOR_BIG_DECIMAL(Kind.ERROR, 1084,
-			"The value ''{0}'' cannot be parsed neither as a " + BigInteger.class.getName() + " nor as a " + BigDecimal.class.getName() + "");
+			"The value ''{0}'' cannot be parsed as a " + BigDecimal.class.getName());
 
 	private final Kind kind;
 

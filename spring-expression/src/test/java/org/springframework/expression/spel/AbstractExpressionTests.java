@@ -53,8 +53,8 @@ public abstract class AbstractExpressionTests {
 	/**
 	 * Evaluate an expression and check that the actual result matches the
 	 * expectedValue and the class of the result matches the expectedResultType.
-	 * @param expression         the expression to evaluate
-	 * @param expectedValue      the expected result for evaluating the expression
+	 * @param expression the expression to evaluate
+	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
@@ -66,8 +66,8 @@ public abstract class AbstractExpressionTests {
 	/**
 	 * Same as {@link #evaluate(String, Object, Class)} but only uses {@link Comparable#compareTo(Object)}.
 	 *
-	 * @param expression         the expression to evaluate
-	 * @param expectedValue      the expected result for evaluating the expression
+	 * @param expression the expression to evaluate
+	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
 	 */
 	@BigNumberConcern
