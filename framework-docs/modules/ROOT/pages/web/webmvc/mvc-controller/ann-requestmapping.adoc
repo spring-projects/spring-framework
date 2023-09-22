@@ -229,7 +229,7 @@ one of the following depending on whether use of parsed `PathPattern` is enabled
 * {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
 * {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
 
-Both help to sort patterns with more specific ones on top. A pattern is less specific if
+Both help to sort patterns with more specific ones on top. A pattern is more specific if
 it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),
 and double wildcards (counted as 2). Given an equal score, the longer pattern is chosen.
 Given the same score and length, the pattern with more URI variables than wildcards is
