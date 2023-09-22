@@ -1,13 +1,5 @@
-pluginManagement {
-	repositories {
-		mavenCentral()
-		gradlePluginPortal()
-		maven { url "https://repo.spring.io/release" }
-	}
-}
-
 plugins {
-	id "com.gradle.enterprise" version "3.12.6"
+	id "com.gradle.enterprise" version "3.14"
 	id "io.spring.ge.conventions" version "0.0.13"
 }
 
