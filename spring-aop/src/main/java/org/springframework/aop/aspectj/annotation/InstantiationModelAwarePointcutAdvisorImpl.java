@@ -303,7 +303,9 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		@Override
 		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof PerTargetInstantiationModelPointcut that &&
-					ObjectUtils.nullSafeEquals(this.declaredPointcut.getExpression(), that.declaredPointcut.getExpression())));
+					ObjectUtils.nullSafeEquals(this.declaredPointcut, that.declaredPointcut) &&
+					ObjectUtils.nullSafeEquals(this.preInstantiationPointcut, that.preInstantiationPointcut) &&
+					ObjectUtils.nullSafeEquals(this.aspectInstanceFactory, that.aspectInstanceFactory)));
 		}
 
 		@Override
