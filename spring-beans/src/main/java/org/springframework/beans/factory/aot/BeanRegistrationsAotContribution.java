@@ -117,10 +117,10 @@ class BeanRegistrationsAotContribution
 		registrations.keySet().forEach(beanRegistrationKey -> {
 			ReflectionHints hints = runtimeHints.reflection();
 			Class<?> beanClass = beanRegistrationKey.beanClass();
-			hints.registerType(beanClass, MemberCategory.INTROSPECT_DECLARED_METHODS);
+			hints.registerType(beanClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS);
 			// Workaround for https://github.com/oracle/graal/issues/6510
 			if (beanClass.isRecord()) {
-				hints.registerType(beanClass, MemberCategory.INVOKE_DECLARED_METHODS);
+				hints.registerType(beanClass, MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS);
 			}
 			// Workaround for https://github.com/oracle/graal/issues/6529
 			ReflectionUtils.doWithMethods(beanClass, method -> {
