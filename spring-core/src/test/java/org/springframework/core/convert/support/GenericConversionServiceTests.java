@@ -504,6 +504,12 @@ class GenericConversionServiceTests {
 	}
 
 	@Test
+	void stringToEnumWithOrdinalAsString() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		assertThat(conversionService.convert("0", MyEnum.class)).isEqualTo(MyEnum.A);
+	}
+
+	@Test
 	void convertNullAnnotatedStringToString() throws Exception {
 		String source = null;
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("annotatedString"));

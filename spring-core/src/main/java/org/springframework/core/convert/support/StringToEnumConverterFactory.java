@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Keith Donald
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  * @since 3.0
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -50,6 +51,10 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 			if (source.isEmpty()) {
 				// It's an empty enum identifier: reset the enum value to null.
 				return null;
+			}
+			if (source.chars().allMatch(Character::isDigit)) {
+				// It's safe to use source as ordinal since name cannot be numeric.
+				return this.enumType.getEnumConstants()[Integer.parseInt(source)];
 			}
 			return (T) Enum.valueOf(this.enumType, source.trim());
 		}
