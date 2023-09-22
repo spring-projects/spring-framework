@@ -70,7 +70,7 @@ class Tokenizer {
 	private final List<Token> tokens = new ArrayList<>();
 
 	private final BigNonHexNumberConcernExtension bigNonHexNumberConcernExt = new BigNonHexNumberConcernExtension();
-	private final BigHexNumberConcernExtension bigHexNumberConcernExt = new BigHexNumberConcernExtension();
+	private final BigHexIntegerConcernExtension bigHexIntegerConcernExt = new BigHexIntegerConcernExtension();
 
 	public Tokenizer(String inputData) {
 		this.expressionString = inputData;
@@ -352,8 +352,8 @@ class Tokenizer {
 				pushHexIntToken(subarray(start + 2, this.pos), true, start, this.pos);
 				this.pos++;
 			}
-			else if (bigHexNumberConcernExt.isSuffixDetected()) {
-				bigHexNumberConcernExt.addBigIntegerToken(start);
+			else if (this.bigHexIntegerConcernExt.isSuffixDetected()) {
+				this.bigHexIntegerConcernExt.addToken(start);
 			}
 			else {
 				pushHexIntToken(subarray(start + 2, this.pos), false, start, this.pos);
@@ -401,8 +401,8 @@ class Tokenizer {
 			pushIntToken(subarray(start, endOfNumber), true, start, endOfNumber);
 			this.pos++;
 		}
-		else if (bigNonHexNumberConcernExt.isSuffixDetected()) {
-			bigNonHexNumberConcernExt.addToken(isReal, start, endOfNumber);
+		else if (this.bigNonHexNumberConcernExt.isSuffixDetected()) {
+			this.bigNonHexNumberConcernExt.addToken(isReal, start, endOfNumber);
 		}
 		else if (isExponentChar(this.charsToProcess[this.pos])) {
 			isReal = true;  // if it wasn't before, it is now
@@ -417,15 +417,20 @@ class Tokenizer {
 				this.pos++;
 			}
 			while (isDigit(this.charsToProcess[this.pos]));
-			boolean isFloat = false;
-			if (isFloatSuffix(this.charsToProcess[this.pos])) {
-				isFloat = true;
-				endOfNumber = ++this.pos;
+			if(this.bigNonHexNumberConcernExt.isSuffixDetected()) {
+				this.bigNonHexNumberConcernExt.addToken(isReal, start, this.pos);
 			}
-			else if (isDoubleSuffix(this.charsToProcess[this.pos])) {
-				endOfNumber = ++this.pos;
+			else {
+				boolean isFloat = false;
+				if (isFloatSuffix(this.charsToProcess[this.pos])) {
+					isFloat = true;
+					endOfNumber = ++this.pos;
+				}
+				else if (isDoubleSuffix(this.charsToProcess[this.pos])) {
+					endOfNumber = ++this.pos;
+				}
+				pushRealToken(subarray(start, this.pos), isFloat, start, this.pos);
 			}
-			pushRealToken(subarray(start, this.pos), isFloat, start, this.pos);
 		}
 		else {
 			ch = this.charsToProcess[this.pos];
@@ -595,24 +600,15 @@ class Tokenizer {
 
 	private class BigNonHexNumberConcernExtension extends BigNumberConcernExtension {
 		public BigNonHexNumberConcernExtension() {
-			super(IS_NOT_HEX);
-		}
-
-		protected boolean isSuffixSecondCharDetected() {
-			final char suffixSecondChar = getSecondChar();
-
-			return isBigIntegerSecondChar(suffixSecondChar) || isBigDecimalSecondChar(suffixSecondChar);
+			super(0, 1, 0);
 		}
 
 		/**
-		 * @throws InternalParseException with {@link SpelMessage#REAL_CANNOT_BE_BIG_INTEGER},
-		 *                                {@link SpelMessage#UNEXPECTED_BIG_INTEGER_OR_DECIMAL_SUFFIX_ERROR}{@link SpelMessage#IMPROPER_HEX_NON_HEX_TOKEN_USAGE_DEVELOPER_ERROR}
+		 * Adds token.
+		 *
+		 * @throws InternalParseException with {@link SpelMessage#REAL_CANNOT_BE_BIG_INTEGER}
 		 */
 		private void addToken(final boolean isReal, final int start, final int endOfNumber) {
-			if (isHex) {
-				raiseParseException(start, SpelMessage.IMPROPER_HEX_NON_HEX_TOKEN_USAGE_DEVELOPER_ERROR);
-			}
-
 			final Tokenizer tokenizer = Tokenizer.this;
 
 			final char secondChar = getSecondChar();
@@ -628,34 +624,30 @@ class Tokenizer {
 					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_DECIMAL, subarray(start, endOfNumber), start, endOfNumber));
 					shiftParsingPosition();
 				}
-				else {
-					raiseParseException(start, SpelMessage.UNEXPECTED_BIG_INTEGER_OR_DECIMAL_SUFFIX_ERROR);
-				}
 			}
 		}
 	}
 
-	private class BigHexNumberConcernExtension extends BigNumberConcernExtension {
-		public BigHexNumberConcernExtension() {
-			super(IS_HEX);
+	private class BigHexIntegerConcernExtension extends BigNumberConcernExtension {
+		public BigHexIntegerConcernExtension() {
+			// First char 'B'/'b' is already consumed (as the char may be part of HEX)
+			super(-1, 0, -1);
 		}
 
+		@Override
 		protected boolean isSuffixSecondCharDetected() {
 			return isBigIntegerSecondChar(getSecondChar());
 		}
 
 		/**
-		 * @throws InternalParseException with {@link SpelMessage#NOT_A_BIG_INTEGER},
-		 *                                {@link SpelMessage#UNEXPECTED_BIG_INTEGER_SUFFIX_ERROR}, {@link SpelMessage#IMPROPER_HEX_NON_HEX_TOKEN_USAGE_DEVELOPER_ERROR}
+		 * Adds token.
+		 *
+		 * @throws InternalParseException with {@link SpelMessage#NOT_A_BIG_INTEGER}
 		 */
-		private void addBigIntegerToken(final int start) {
-			if (!isHex) {
-				raiseParseException(start, SpelMessage.IMPROPER_HEX_NON_HEX_TOKEN_USAGE_DEVELOPER_ERROR);
-			}
-
+		private void addToken(final int start) {
 			final Tokenizer tokenizer = Tokenizer.this;
 
-			final int end = tokenizer.pos + getFirstCharParsingPositionShift();
+			final int end = tokenizer.pos + firstCharParsingPositionShift;
 			final char[] numberBody = subarray(start + 2, end);
 
 			if (numberBody.length == 0) {
@@ -664,10 +656,6 @@ class Tokenizer {
 
 			final char secondChar = getSecondChar();
 			if (secondChar != 0) {
-				if (!isBigIntegerSecondChar(secondChar)) {
-					raiseParseException(start, SpelMessage.UNEXPECTED_BIG_INTEGER_SUFFIX_ERROR, tokenizer.expressionString.substring(start, end + SUFFIX_LENGTH));
-				}
-
 				tokenizer.tokens.add(new Token(TokenKind.LITERAL_HEX_BIG_INTEGER, numberBody, start, end));
 				shiftParsingPosition();
 			}
@@ -675,46 +663,38 @@ class Tokenizer {
 	}
 
 	/**
-	 * Abstraction of an extension of the tokenizer which handles big number ({@link java.math.BigInteger} and {@link java.math.BigDecimal}) concern
+	 * Abstraction of an extension of the tokenizer which handles big number ({@link java.math.BigInteger} and {@link java.math.BigDecimal}) concern.
 	 */
 	@BigNumberConcern
 	private abstract class BigNumberConcernExtension {
 		protected static final int SUFFIX_LENGTH = 2;
-		protected static final boolean IS_HEX = true;
-		protected static final boolean IS_NOT_HEX = false;
 
-		protected final boolean isHex;
+		protected final int firstCharParsingPositionShift;
+		protected final int secondCharParsingPositionShift;
+		private final int parsingPositionShiftStep;
 
-		public BigNumberConcernExtension(final boolean isHex) {
-			this.isHex = isHex;
+		public BigNumberConcernExtension(final int firstCharParsingPositionShift, final int secondCharParsingPositionShift, final int parsingPositionShiftStep) {
+			this.firstCharParsingPositionShift = firstCharParsingPositionShift;
+			this.secondCharParsingPositionShift = secondCharParsingPositionShift;
+			this.parsingPositionShiftStep = parsingPositionShiftStep;
 		}
 
 		protected boolean isSuffixDetected() {
 			return isSuffixFirstCharDetected() && isSuffixSecondCharDetected();
 		}
 
-		/**
-		 * In case of HEX uses '{@link #SUFFIX_LENGTH} - 1' because first char 'B'/'b' is already consumed (as the char may be part of HEX)
-		 *
-		 * @see #isHexadecimalDigit(char)
-		 */
-		protected void shiftParsingPosition() {
-			Tokenizer.this.pos += isHex ? SUFFIX_LENGTH - 1 : SUFFIX_LENGTH;
+		protected boolean isSuffixFirstCharDetected() {
+			return isSuffixFirstChar(getCharOrZero(Tokenizer.this.pos + this.firstCharParsingPositionShift));
 		}
 
-		/**
-		 * In case of HEX uses 'pos - 1' because first char 'B'/'b' is already consumed (as the char may be part of HEX)
-		 *
-		 * @see #isHexadecimalDigit(char)
-		 */
-		protected int getFirstCharParsingPositionShift() {
-			return isHex ? -1 : 0;
+		protected boolean isSuffixSecondCharDetected() {
+			final char suffixSecondChar = getSecondChar();
+
+			return isBigIntegerSecondChar(suffixSecondChar) || isBigDecimalSecondChar(suffixSecondChar);
 		}
 
-		protected abstract boolean isSuffixSecondCharDetected();
-
-		protected char getSecondChar() {
-			return getCharOrZero(Tokenizer.this.pos + getSecondCharParsingPositionShift());
+		protected boolean isSuffixFirstChar(final char firstChar) {
+			return firstChar == 'B' || firstChar == 'b';
 		}
 
 		protected boolean isBigIntegerSecondChar(char suffixNextChar) {
@@ -725,25 +705,18 @@ class Tokenizer {
 			return suffixNextChar == 'D' || suffixNextChar == 'd';
 		}
 
-		private boolean isSuffixFirstCharDetected() {
-			final char firstChar = getCharOrZero(Tokenizer.this.pos + getFirstCharParsingPositionShift());
-
-			return firstChar == 'B' || firstChar == 'b';
+		protected char getSecondChar() {
+			return getCharOrZero(Tokenizer.this.pos + this.secondCharParsingPositionShift);
 		}
 
-		/**
-		 * In case of HEX uses current 'pos'(0 shift) because first char 'B'/'b' is already consumed (as the char may be part of HEX)
-		 *
-		 * @see #isHexadecimalDigit(char)
-		 */
-		private int getSecondCharParsingPositionShift() {
-			return isHex ? 0 : 1;
-		}
-
-		private char getCharOrZero(final int index) {
+		protected char getCharOrZero(final int index) {
 			final Tokenizer tokenizer = Tokenizer.this;
 
 			return index < tokenizer.charsToProcess.length ? tokenizer.charsToProcess[index] : 0;
+		}
+
+		protected void shiftParsingPosition() {
+			Tokenizer.this.pos += SUFFIX_LENGTH + this.parsingPositionShiftStep;
 		}
 	}
 }

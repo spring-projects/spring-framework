@@ -116,7 +116,7 @@ public abstract class Literal extends SpelNodeImpl {
 		try {
 			return new BigIntegerLiteral(numberToken, startPos, endPos, new BigInteger(numberToken, radix));
 		}
-		catch (NumberFormatException ex) {
+		catch (final NumberFormatException ex) {
 			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_BIG_INTEGER, numberToken));
 		}
 	}

@@ -27,7 +27,9 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ObjectUtils;
-import static org.assertj.core.api.Assertions.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Common superclass for expression tests.
@@ -51,7 +53,6 @@ public abstract class AbstractExpressionTests {
 	/**
 	 * Evaluate an expression and check that the actual result matches the
 	 * expectedValue and the class of the result matches the expectedResultType.
-	 *
 	 * @param expression         the expression to evaluate
 	 * @param expectedValue      the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result

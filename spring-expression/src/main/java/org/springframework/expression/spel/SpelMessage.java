@@ -301,15 +301,8 @@ public enum SpelMessage {
 			"The value ''{0}'' cannot be parsed as a " + BigDecimal.class.getName()),
 
 	@BigNumberConcern
-	UNEXPECTED_BIG_INTEGER_OR_DECIMAL_SUFFIX_ERROR(Kind.ERROR, 1084,
-			"Found mark of Big Number (BigInteger/BigDecimal) but second char is incorrect. It should be one of BI, bi, Bi, bI or BD, bd, Bd, bD"),
-
-	@BigNumberConcern
-	UNEXPECTED_BIG_INTEGER_SUFFIX_ERROR(Kind.ERROR, 1085,
-			"Found mark of hex literal of BigInteger but second char is incorrect. It should be one of BI, bi, Bi, bI"),
-
-	IMPROPER_HEX_NON_HEX_TOKEN_USAGE_DEVELOPER_ERROR(Kind.ERROR, 1086,
-			"HEX token is being added as non-HEX or vice versa during Big NUmber parsin. Likely developer's mistake");
+	NOT_A_BIG_INTEGER_NOR_BIG_DECIMAL(Kind.ERROR, 1084,
+			"The value ''{0}'' cannot be parsed neither as a " + BigInteger.class.getName() + " nor as a " + BigDecimal.class.getName() + "");
 
 	private final Kind kind;
 

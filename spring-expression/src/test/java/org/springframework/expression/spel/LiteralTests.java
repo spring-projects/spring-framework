@@ -115,19 +115,31 @@ public class LiteralTests extends AbstractExpressionTests {
 		evaluate("-0x20l", -32L, Long.class);
 	}
 
-	@BigNumberConcern
 	@ParameterizedTest
 	@ValueSource(strings = {"Bi", "BI", "bI", "bi"})
+	@BigNumberConcern
 	public void testBigIntegerLiterals(final String suffixVariant) {
 		evaluateComparable("-1" + suffixVariant, new BigInteger("-1"), BigInteger.class);
-		evaluateComparable("-0x20" + suffixVariant, new BigInteger("-32"), BigInteger.class);
+		evaluateComparable("1" + suffixVariant, new BigInteger("1"), BigInteger.class);
 	}
 
+	@Test
 	@BigNumberConcern
+	public void testBigIntegerLiterals_BadExpressions() {
+		parseAndCheckError("-3.4bI", SpelMessage.REAL_CANNOT_BE_BIG_INTEGER);
+	}
+
 	@ParameterizedTest
-	@ValueSource(strings = {"Bd", "BD", "bD", "bd"})
-	public void testBigDecimalLiterals(final String suffixVariant) {
-		evaluateComparable("-1.7" + suffixVariant, new BigDecimal("-1.7"), BigDecimal.class);
+	@ValueSource(strings = {"Bi", "BI", "bI", "bi"})
+	@BigNumberConcern
+	public void testBigIntegerLiterals_Hex(final String suffixVariant) {
+		evaluateComparable("-0x20" + suffixVariant, new BigInteger("-32"), BigInteger.class);
+		evaluateComparable("0x20" + suffixVariant, new BigInteger("32"), BigInteger.class);
+		evaluateComparable("0x7FFFF" + suffixVariant, new BigInteger("524287"), BigInteger.class);
+		evaluateComparable("0x3B2A6" + suffixVariant, new BigInteger("242342"), BigInteger.class);
+		evaluateComparable("0x5B7D" + suffixVariant, new BigInteger("23421"), BigInteger.class);
+		evaluateComparable("0x5BD7" + suffixVariant, new BigInteger("23511"), BigInteger.class);
+		evaluateComparable("0x57BD" + suffixVariant, new BigInteger("22461"), BigInteger.class);
 	}
 
 	@Test
@@ -167,6 +179,30 @@ public class LiteralTests extends AbstractExpressionTests {
 	public void testLiteralReal04_BadExpressions() {
 		parseAndCheckError("6.1e23e22", SpelMessage.MORE_INPUT, 6, "e22");
 		parseAndCheckError("6.1f23e22", SpelMessage.MORE_INPUT, 4, "23e22");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"Bd", "BD", "bD", "bd"})
+	@BigNumberConcern
+	public void testBigDecimalLiterals(final String suffixVariant) {
+		evaluateComparable("0.1" + suffixVariant, new BigDecimal("0.1"), BigDecimal.class);
+		evaluateComparable("0.0" + suffixVariant, new BigDecimal("0.0"), BigDecimal.class);
+		evaluateComparable("-0.1" + suffixVariant, new BigDecimal("-0.1"), BigDecimal.class);
+		evaluateComparable("1.7" + suffixVariant, new BigDecimal("1.7"), BigDecimal.class);
+		evaluateComparable("-1.7" + suffixVariant, new BigDecimal("-1.7"), BigDecimal.class);
+		evaluateComparable("0.0000100" + suffixVariant, new BigDecimal("0.00001"), BigDecimal.class);
+		evaluateComparable("1.25" + suffixVariant, new BigDecimal("1.25"), BigDecimal.class);
+		evaluateComparable("2.99" + suffixVariant, new BigDecimal("2.99"), BigDecimal.class);
+		evaluateComparable("-3.141" + suffixVariant, new BigDecimal("-3.141"), BigDecimal.class);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"Bd", "BD", "bD", "bd"})
+	@BigNumberConcern
+	public void testBigDecimalLiterals_UsingExponents(final String suffixVariant) {
+		evaluateComparable("6.0221415E+23" + suffixVariant, new BigDecimal("6.0221415E23"), BigDecimal.class);
+		evaluateComparable("6.0221415e+23" + suffixVariant, new BigDecimal("6.0221415E23"), BigDecimal.class);
+		evaluateComparable("6E2" + suffixVariant, new BigDecimal("6E2"), BigDecimal.class);
 	}
 
 	@Test
