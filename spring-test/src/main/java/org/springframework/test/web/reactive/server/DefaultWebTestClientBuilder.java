@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	private final WebHttpHandlerBuilder httpHandlerBuilder;
 
 	@Nullable
-	private final ClientHttpConnector connector;
+	private ClientHttpConnector connector;
 
 	@Nullable
 	private String baseUrl;
@@ -274,6 +274,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	@Override
 	public WebTestClient.Builder responseTimeout(Duration timeout) {
 		this.responseTimeout = timeout;
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder clientConnector(ClientHttpConnector connector) {
+		this.connector = connector;
 		return this;
 	}
 

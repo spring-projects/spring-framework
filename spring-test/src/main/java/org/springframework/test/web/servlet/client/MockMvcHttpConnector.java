@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.client;
 import java.io.StringWriter;
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,6 +57,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -82,9 +84,16 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 
 	private final MockMvc mockMvc;
 
+	private final List<RequestPostProcessor> requestPostProcessors;
+
 
 	public MockMvcHttpConnector(MockMvc mockMvc) {
+		this(mockMvc, Collections.emptyList());
+	}
+
+	private MockMvcHttpConnector(MockMvc mockMvc, List<RequestPostProcessor> requestPostProcessors) {
 		this.mockMvc = mockMvc;
+		this.requestPostProcessors = new ArrayList<>(requestPostProcessors);
 	}
 
 
@@ -134,6 +143,8 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 				requestBuilder.cookie(new Cookie(cookie.getName(), cookie.getValue()));
 			}
 		}
+
+		this.requestPostProcessors.forEach(requestBuilder::with);
 
 		return requestBuilder;
 	}
@@ -205,6 +216,15 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 		clientResponse.setBody(Mono.just(dataBuffer));
 		return clientResponse;
+	}
+
+	/**
+	 * Create a new instance that applies the given {@link RequestPostProcessor}s
+	 * to performed requests.
+	 * @since 6.1
+	 */
+	public MockMvcHttpConnector with(List<RequestPostProcessor> postProcessors) {
+		return new MockMvcHttpConnector(this.mockMvc, postProcessors);
 	}
 
 
