@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
@@ -61,11 +62,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Phillip Webb
  * @author David Haraburda
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 class GenericConversionServiceTests {
 
-	private final GenericConversionService conversionService = new GenericConversionService();
+	private GenericConversionService conversionService;
 
+	@BeforeEach
+	void init() {
+		conversionService = new GenericConversionService();
+	}
 
 	@Test
 	void canConvert() {
