@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
@@ -68,6 +69,8 @@ class Tokenizer {
 
 	private final List<Token> tokens = new ArrayList<>();
 
+	private final BigNonHexNumberConcernExtension bigNonHexNumberConcernExt = new BigNonHexNumberConcernExtension();
+	private final BigHexIntegerConcernExtension bigHexIntegerConcernExt = new BigHexIntegerConcernExtension();
 
 	public Tokenizer(String inputData) {
 		this.expressionString = inputData;
@@ -345,9 +348,12 @@ class Tokenizer {
 				this.pos++;
 			}
 			while (isHexadecimalDigit(this.charsToProcess[this.pos]));
-			if (isChar('L', 'l')) {
+			if (isLongSuffix()) {
 				pushHexIntToken(subarray(start + 2, this.pos), true, start, this.pos);
 				this.pos++;
+			}
+			else if (this.bigHexIntegerConcernExt.isSuffixDetected()) {
+				this.bigHexIntegerConcernExt.addToken(start);
 			}
 			else {
 				pushHexIntToken(subarray(start + 2, this.pos), false, start, this.pos);
@@ -388,12 +394,15 @@ class Tokenizer {
 		// Now there may or may not be an exponent
 
 		// Is it a long ?
-		if (isChar('L', 'l')) {
+		if (isLongSuffix()) {
 			if (isReal) {  // 3.4L - not allowed
 				raiseParseException(start, SpelMessage.REAL_CANNOT_BE_LONG);
 			}
 			pushIntToken(subarray(start, endOfNumber), true, start, endOfNumber);
 			this.pos++;
+		}
+		else if (this.bigNonHexNumberConcernExt.isSuffixDetected()) {
+			this.bigNonHexNumberConcernExt.addToken(isReal, start, endOfNumber);
 		}
 		else if (isExponentChar(this.charsToProcess[this.pos])) {
 			isReal = true;  // if it wasn't before, it is now
@@ -408,15 +417,20 @@ class Tokenizer {
 				this.pos++;
 			}
 			while (isDigit(this.charsToProcess[this.pos]));
-			boolean isFloat = false;
-			if (isFloatSuffix(this.charsToProcess[this.pos])) {
-				isFloat = true;
-				endOfNumber = ++this.pos;
+			if(this.bigNonHexNumberConcernExt.isSuffixDetected()) {
+				this.bigNonHexNumberConcernExt.addToken(isReal, start, this.pos);
 			}
-			else if (isDoubleSuffix(this.charsToProcess[this.pos])) {
-				endOfNumber = ++this.pos;
+			else {
+				boolean isFloat = false;
+				if (isFloatSuffix(this.charsToProcess[this.pos])) {
+					isFloat = true;
+					endOfNumber = ++this.pos;
+				}
+				else if (isDoubleSuffix(this.charsToProcess[this.pos])) {
+					endOfNumber = ++this.pos;
+				}
+				pushRealToken(subarray(start, this.pos), isFloat, start, this.pos);
 			}
-			pushRealToken(subarray(start, this.pos), isFloat, start, this.pos);
 		}
 		else {
 			ch = this.charsToProcess[this.pos];
@@ -538,6 +552,10 @@ class Tokenizer {
 		return ch == a || ch == b;
 	}
 
+	private boolean isLongSuffix() {
+		return isChar('L', 'l');
+	}
+
 	private boolean isExponentChar(char ch) {
 		return ch == 'e' || ch == 'E';
 	}
@@ -580,4 +598,123 @@ class Tokenizer {
 		throw new InternalParseException(new SpelParseException(this.expressionString, start, msg, inserts));
 	}
 
+	private class BigNonHexNumberConcernExtension extends BigNumberConcernExtension {
+		public BigNonHexNumberConcernExtension() {
+			super(0, 1, 0);
+		}
+
+		/**
+		 * Adds token.
+		 * @throws InternalParseException with {@link SpelMessage#REAL_CANNOT_BE_BIG_INTEGER}
+		 */
+		private void addToken(final boolean isReal, final int start, final int endOfNumber) {
+			final Tokenizer tokenizer = Tokenizer.this;
+
+			final char secondChar = getSecondChar();
+			if (secondChar != 0) {
+				if (isBigIntegerSecondChar(secondChar)) {
+					if (isReal) {  // 3.4BI - not allowed
+						raiseParseException(start, SpelMessage.REAL_CANNOT_BE_BIG_INTEGER);
+					}
+					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_INTEGER, subarray(start, endOfNumber), start, endOfNumber));
+					shiftParsingPos();
+				}
+				else if (isBigDecimalSecondChar(secondChar)) {
+					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_DECIMAL, subarray(start, endOfNumber), start, endOfNumber));
+					shiftParsingPos();
+				}
+			}
+		}
+	}
+
+	private class BigHexIntegerConcernExtension extends BigNumberConcernExtension {
+		public BigHexIntegerConcernExtension() {
+			// First char 'B'/'b' is already consumed (as the char may be part of HEX)
+			super(-1, 0, -1);
+		}
+
+		@Override
+		protected boolean isSuffixSecondCharDetected() {
+			return isBigIntegerSecondChar(getSecondChar());
+		}
+
+		/**
+		 * Adds token.
+		 * @throws InternalParseException with {@link SpelMessage#NOT_A_BIG_INTEGER}
+		 */
+		private void addToken(final int start) {
+			final Tokenizer tokenizer = Tokenizer.this;
+
+			final int end = tokenizer.pos + firstCharParsingPosShift;
+			final char[] numberBody = subarray(start + 2, end);
+
+			if (numberBody.length == 0) {
+				raiseParseException(start, SpelMessage.NOT_A_BIG_INTEGER, tokenizer.expressionString.substring(start, end + SUFFIX_LENGTH));
+			}
+
+			final char secondChar = getSecondChar();
+			if (secondChar != 0) {
+				tokenizer.tokens.add(new Token(TokenKind.LITERAL_HEX_BIG_INTEGER, numberBody, start, end));
+				shiftParsingPos();
+			}
+		}
+	}
+
+	/**
+	 * Abstraction of an extension of the tokenizer which handles big number ({@link java.math.BigInteger} and {@link java.math.BigDecimal}) concern.
+	 */
+	@BigNumberConcern
+	private abstract class BigNumberConcernExtension {
+		protected static final int SUFFIX_LENGTH = 2;
+
+		protected final int firstCharParsingPosShift;
+		private final int secondCharParsingPosShift;
+		private final int parsingPosShiftStep;
+
+		public BigNumberConcernExtension(final int firstCharParsingPosShift, final int secondCharParsingPosShift, final int parsingPosShiftStep) {
+			this.firstCharParsingPosShift = firstCharParsingPosShift;
+			this.secondCharParsingPosShift = secondCharParsingPosShift;
+			this.parsingPosShiftStep = parsingPosShiftStep;
+		}
+
+		protected boolean isSuffixDetected() {
+			return isSuffixFirstCharDetected() && isSuffixSecondCharDetected();
+		}
+
+		protected boolean isSuffixFirstCharDetected() {
+			return isSuffixFirstChar(getCharOrZero(Tokenizer.this.pos + this.firstCharParsingPosShift));
+		}
+
+		protected boolean isSuffixSecondCharDetected() {
+			final char suffixSecondChar = getSecondChar();
+
+			return isBigIntegerSecondChar(suffixSecondChar) || isBigDecimalSecondChar(suffixSecondChar);
+		}
+
+		protected boolean isSuffixFirstChar(final char firstChar) {
+			return firstChar == 'B' || firstChar == 'b';
+		}
+
+		protected boolean isBigIntegerSecondChar(char suffixNextChar) {
+			return suffixNextChar == 'I' || suffixNextChar == 'i';
+		}
+
+		protected boolean isBigDecimalSecondChar(char suffixNextChar) {
+			return suffixNextChar == 'D' || suffixNextChar == 'd';
+		}
+
+		protected char getSecondChar() {
+			return getCharOrZero(Tokenizer.this.pos + this.secondCharParsingPosShift);
+		}
+
+		protected char getCharOrZero(final int index) {
+			final Tokenizer tokenizer = Tokenizer.this;
+
+			return index < tokenizer.charsToProcess.length ? tokenizer.charsToProcess[index] : 0;
+		}
+
+		protected void shiftParsingPos() {
+			Tokenizer.this.pos += SUFFIX_LENGTH + this.parsingPosShiftStep;
+		}
+	}
 }

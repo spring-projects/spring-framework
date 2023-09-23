@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.MessageFormat;
 
 /**
@@ -284,8 +286,19 @@ public enum SpelMessage {
 
 	/** @since 5.2.24 */
 	VARIABLE_ASSIGNMENT_NOT_SUPPORTED(Kind.ERROR, 1080,
-			"Assignment to variable ''{0}'' is not supported");
+			"Assignment to variable ''{0}'' is not supported"),
 
+	@BigNumberConcern
+	NOT_A_BIG_INTEGER(Kind.ERROR, 1081,
+			"The value ''{0}'' cannot be parsed as a " + BigInteger.class.getName()),
+
+	@BigNumberConcern
+	REAL_CANNOT_BE_BIG_INTEGER(Kind.ERROR, 1082,
+			"Real number cannot be suffixed with a " + BigInteger.class.getName() + " (BI or bi or Bi or bI) suffix"),
+
+	@BigNumberConcern
+	NOT_A_BIG_DECIMAL(Kind.ERROR, 1083,
+			"The value ''{0}'' cannot be parsed as a " + BigDecimal.class.getName());
 
 	private final Kind kind;
 

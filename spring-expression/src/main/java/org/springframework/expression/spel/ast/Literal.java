@@ -16,7 +16,11 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -107,6 +111,16 @@ public abstract class Literal extends SpelNodeImpl {
 		}
 	}
 
+	@BigNumberConcern
+	public static Literal getBigIntegerLiteral(final String numberToken, final int startPos, final int endPos, final int radix) {
+		try {
+			return new BigIntegerLiteral(numberToken, startPos, endPos, new BigInteger(numberToken, radix));
+		}
+		catch (final NumberFormatException ex) {
+			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_BIG_INTEGER, numberToken));
+		}
+	}
+
 	public static Literal getRealLiteral(String numberToken, int startPos, int endPos, boolean isFloat) {
 		try {
 			if (isFloat) {
@@ -123,4 +137,13 @@ public abstract class Literal extends SpelNodeImpl {
 		}
 	}
 
+	@BigNumberConcern
+	public static Literal getBigDecimalLiteral(final String numberToken, final int startPos, final int endPos) {
+		try {
+			return new BigDecimalLiteral(numberToken, startPos, endPos, new BigDecimal(numberToken));
+		}
+		catch (final NumberFormatException | ArithmeticException ex) {
+			throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_BIG_DECIMAL, numberToken));
+		}
+	}
 }
