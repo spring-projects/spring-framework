@@ -122,6 +122,8 @@ public class LiteralTests extends AbstractExpressionTests {
 	public void testBigIntegerLiterals(final String suffixVariant) {
 		evaluateComparable("-1" + suffixVariant, new BigInteger("-1"), BigInteger.class);
 		evaluateComparable("1" + suffixVariant, new BigInteger("1"), BigInteger.class);
+		evaluateComparable("1342356" + suffixVariant, new BigInteger("1342356"), BigInteger.class);
+		evaluateComparable("-999999" + suffixVariant, new BigInteger("-999999"), BigInteger.class);
 	}
 
 	@Test
