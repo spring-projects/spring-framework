@@ -668,7 +668,7 @@ class Tokenizer {
 		protected static final int SUFFIX_LENGTH = 2;
 
 		protected final int firstCharParsingPosShift;
-		protected final int secondCharParsingPosShift;
+		private final int secondCharParsingPosShift;
 		private final int parsingPosShiftStep;
 
 		public BigNumberConcernExtension(final int firstCharParsingPosShift, final int secondCharParsingPosShift, final int parsingPosShiftStep) {
