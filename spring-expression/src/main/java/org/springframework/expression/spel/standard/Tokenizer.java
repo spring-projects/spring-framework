@@ -605,7 +605,6 @@ class Tokenizer {
 
 		/**
 		 * Adds token.
-		 *
 		 * @throws InternalParseException with {@link SpelMessage#REAL_CANNOT_BE_BIG_INTEGER}
 		 */
 		private void addToken(final boolean isReal, final int start, final int endOfNumber) {
@@ -618,11 +617,11 @@ class Tokenizer {
 						raiseParseException(start, SpelMessage.REAL_CANNOT_BE_BIG_INTEGER);
 					}
 					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_INTEGER, subarray(start, endOfNumber), start, endOfNumber));
-					shiftParsingPosition();
+					shiftParsingPos();
 				}
 				else if (isBigDecimalSecondChar(secondChar)) {
 					tokenizer.tokens.add(new Token(TokenKind.LITERAL_BIG_DECIMAL, subarray(start, endOfNumber), start, endOfNumber));
-					shiftParsingPosition();
+					shiftParsingPos();
 				}
 			}
 		}
@@ -641,13 +640,12 @@ class Tokenizer {
 
 		/**
 		 * Adds token.
-		 *
 		 * @throws InternalParseException with {@link SpelMessage#NOT_A_BIG_INTEGER}
 		 */
 		private void addToken(final int start) {
 			final Tokenizer tokenizer = Tokenizer.this;
 
-			final int end = tokenizer.pos + firstCharParsingPositionShift;
+			final int end = tokenizer.pos + firstCharParsingPosShift;
 			final char[] numberBody = subarray(start + 2, end);
 
 			if (numberBody.length == 0) {
@@ -657,7 +655,7 @@ class Tokenizer {
 			final char secondChar = getSecondChar();
 			if (secondChar != 0) {
 				tokenizer.tokens.add(new Token(TokenKind.LITERAL_HEX_BIG_INTEGER, numberBody, start, end));
-				shiftParsingPosition();
+				shiftParsingPos();
 			}
 		}
 	}
@@ -669,14 +667,14 @@ class Tokenizer {
 	private abstract class BigNumberConcernExtension {
 		protected static final int SUFFIX_LENGTH = 2;
 
-		protected final int firstCharParsingPositionShift;
-		protected final int secondCharParsingPositionShift;
-		private final int parsingPositionShiftStep;
+		protected final int firstCharParsingPosShift;
+		protected final int secondCharParsingPosShift;
+		private final int parsingPosShiftStep;
 
-		public BigNumberConcernExtension(final int firstCharParsingPositionShift, final int secondCharParsingPositionShift, final int parsingPositionShiftStep) {
-			this.firstCharParsingPositionShift = firstCharParsingPositionShift;
-			this.secondCharParsingPositionShift = secondCharParsingPositionShift;
-			this.parsingPositionShiftStep = parsingPositionShiftStep;
+		public BigNumberConcernExtension(final int firstCharParsingPosShift, final int secondCharParsingPosShift, final int parsingPosShiftStep) {
+			this.firstCharParsingPosShift = firstCharParsingPosShift;
+			this.secondCharParsingPosShift = secondCharParsingPosShift;
+			this.parsingPosShiftStep = parsingPosShiftStep;
 		}
 
 		protected boolean isSuffixDetected() {
@@ -684,7 +682,7 @@ class Tokenizer {
 		}
 
 		protected boolean isSuffixFirstCharDetected() {
-			return isSuffixFirstChar(getCharOrZero(Tokenizer.this.pos + this.firstCharParsingPositionShift));
+			return isSuffixFirstChar(getCharOrZero(Tokenizer.this.pos + this.firstCharParsingPosShift));
 		}
 
 		protected boolean isSuffixSecondCharDetected() {
@@ -706,7 +704,7 @@ class Tokenizer {
 		}
 
 		protected char getSecondChar() {
-			return getCharOrZero(Tokenizer.this.pos + this.secondCharParsingPositionShift);
+			return getCharOrZero(Tokenizer.this.pos + this.secondCharParsingPosShift);
 		}
 
 		protected char getCharOrZero(final int index) {
@@ -715,8 +713,8 @@ class Tokenizer {
 			return index < tokenizer.charsToProcess.length ? tokenizer.charsToProcess[index] : 0;
 		}
 
-		protected void shiftParsingPosition() {
-			Tokenizer.this.pos += SUFFIX_LENGTH + this.parsingPositionShiftStep;
+		protected void shiftParsingPos() {
+			Tokenizer.this.pos += SUFFIX_LENGTH + this.parsingPosShiftStep;
 		}
 	}
 }

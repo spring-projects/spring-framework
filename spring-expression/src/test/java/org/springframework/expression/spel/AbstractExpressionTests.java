@@ -59,7 +59,7 @@ public abstract class AbstractExpressionTests {
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
 		doEvaluate(expression, expectedValue, expectedResultType,
-				new Condition<>((actualValue) -> Objects.deepEquals(actualValue, expectedValue),
+				new Condition<>(actualValue -> Objects.deepEquals(actualValue, expectedValue),
 						"equal to '" + expectedValue + "'"));
 	}
 
@@ -73,7 +73,7 @@ public abstract class AbstractExpressionTests {
 	@BigNumberConcern
 	public void evaluateComparable(final String expression, final Comparable<?> expectedValue, final Class<? extends Comparable<?>> expectedResultType) {
 		doEvaluate(expression, expectedValue, expectedResultType,
-				new Condition<>((actualValue) -> actualValue instanceof Comparable && ((Comparable) actualValue).compareTo(expectedValue) == 0,
+				new Condition<>(actualValue -> actualValue instanceof Comparable && ((Comparable) actualValue).compareTo(expectedValue) == 0,
 						"equal to '" + expectedValue + "'"));
 	}
 
@@ -102,7 +102,8 @@ public abstract class AbstractExpressionTests {
 			assertThat(AbstractExpressionTests.stringValueOf(actualValue))
 					.as("Did not get expected value for expression '" + expression + "'.")
 					.isEqualTo(expectedValue);
-		} else {
+		}
+		else {
 			assertThat(actualValue).as("Did not get expected value for expression '" + expression + "'.")
 					.is(matchCondition);
 		}

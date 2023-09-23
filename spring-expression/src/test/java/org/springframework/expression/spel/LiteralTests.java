@@ -30,11 +30,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date
+ * and complex ones like BigInteger and BigDecimal
  *
  * @author Andy Clement
  */
 public class LiteralTests extends AbstractExpressionTests {
-
 	@Test
 	public void testLiteralBoolean01() {
 		evaluate("false", "false", Boolean.class);
