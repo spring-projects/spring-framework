@@ -15,56 +15,54 @@
 	</bean>
 
 	<bean id="list" class="org.springframework.beans.factory.config.ListFactoryBean">
-		<property name="sourceList" value="http://localhost:8080"/>
-		<property name="targetListClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlList"/>
+		<property name="sourceList" value="http://localhost:8080" />
+		<property name="targetListClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlList" />
 	</bean>
 
 	<bean id="set" class="org.springframework.beans.factory.config.SetFactoryBean">
-		<property name="sourceSet" value="http://localhost:8080"/>
-		<property name="targetSetClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlSet"/>
+		<property name="sourceSet" value="http://localhost:8080" />
+		<property name="targetSetClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlSet" />
 	</bean>
 
 	<bean id="map" class="org.springframework.beans.factory.config.MapFactoryBean">
 		<property name="sourceMap">
 			<map>
-				<entry key="10" value="http://localhost:8080"/>
+				<entry key="10" value="http://localhost:8080" />
 			</map>
 		</property>
-		<property name="targetMapClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlMap"/>
+		<property name="targetMapClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlMap" />
 	</bean>
 
 	<bean class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$CollectionDependentBean">
-		<constructor-arg ref="list"/>
-		<constructor-arg ref="set"/>
-		<constructor-arg ref="map"/>
+		<constructor-arg ref="list" />
+		<constructor-arg ref="set" />
+		<constructor-arg ref="map" />
 	</bean>
 
-	<bean class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$CollectionDependentBean"
-			autowire="constructor">
+	<bean class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$CollectionDependentBean" autowire="constructor" />
+
+	<bean id="integerBean" class="org.springframework.beans.testfixture.beans.GenericIntegerBean">
+		<property name="genericProperty" value="10" />
+		<property name="genericListProperty">
+			<list>
+				<value>20</value>
+				<value>30</value>
+			</list>
+		</property>
 	</bean>
 
-  <bean id="integerBean" class="org.springframework.beans.testfixture.beans.GenericIntegerBean">
-    <property name="genericProperty" value="10"/>
-    <property name="genericListProperty">
-      <list>
-        <value>20</value>
-        <value>30</value>
-      </list>
-    </property>
-  </bean>
+	<bean id="setOfIntegerBean" class="org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean">
+		<property name="genericProperty" value="10" />
+		<property name="genericListProperty">
+			<list>
+				<value>20</value>
+				<value>30</value>
+			</list>
+		</property>
+	</bean>
 
-  <bean id="setOfIntegerBean" class="org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean">
-    <property name="genericProperty" value="10"/>
-    <property name="genericListProperty">
-      <list>
-        <value>20</value>
-        <value>30</value>
-      </list>
-    </property>
-  </bean>
-
-  <bean id="setBean" class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$UrlSet">
-    <property name="urlNames" value="https://www.springframework.org"/>
-  </bean>
+	<bean id="setBean" class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$UrlSet">
+		<property name="urlNames" value="https://www.springframework.org" />
+	</bean>
 
 </beans>

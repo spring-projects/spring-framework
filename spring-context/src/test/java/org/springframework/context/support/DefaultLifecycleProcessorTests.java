@@ -48,6 +48,7 @@ class DefaultLifecycleProcessorTests {
 		Object lifecycleProcessor = new DirectFieldAccessor(context).getPropertyValue("lifecycleProcessor");
 		assertThat(lifecycleProcessor).isNotNull();
 		assertThat(lifecycleProcessor.getClass()).isEqualTo(DefaultLifecycleProcessor.class);
+		context.close();
 	}
 
 	@Test
@@ -63,6 +64,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(contextLifecycleProcessor).isSameAs(bean);
 		assertThat(new DirectFieldAccessor(contextLifecycleProcessor).getPropertyValue("timeoutPerShutdownPhase"))
 				.isEqualTo(1000L);
+		context.close();
 	}
 
 	@Test
@@ -122,6 +124,7 @@ class DefaultLifecycleProcessorTests {
 				.isThrownBy(context::refresh).withCauseInstanceOf(IllegalStateException.class);
 		assertThat(bean.isRunning()).isFalse();
 		assertThat(startedBeans).hasSize(1);
+		context.close();
 	}
 
 	@Test
@@ -654,7 +657,7 @@ class DefaultLifecycleProcessorTests {
 
 
 	private static int getPhase(Lifecycle lifecycle) {
-		return (lifecycle instanceof SmartLifecycle ? ((SmartLifecycle) lifecycle).getPhase() : 0);
+		return (lifecycle instanceof SmartLifecycle smartLifecycle ? smartLifecycle.getPhase() : 0);
 	}
 
 
@@ -718,7 +721,8 @@ class DefaultLifecycleProcessorTests {
 			return new TestSmartLifecycleBean(phase, shutdownDelay, null, stoppedBeans);
 		}
 
-		private TestSmartLifecycleBean(int phase, int shutdownDelay, CopyOnWriteArrayList<Lifecycle> startedBeans, CopyOnWriteArrayList<Lifecycle> stoppedBeans) {
+		private TestSmartLifecycleBean(int phase, int shutdownDelay, CopyOnWriteArrayList<Lifecycle> startedBeans,
+				CopyOnWriteArrayList<Lifecycle> stoppedBeans) {
 			super(startedBeans, stoppedBeans);
 			this.phase = phase;
 			this.shutdownDelay = shutdownDelay;
