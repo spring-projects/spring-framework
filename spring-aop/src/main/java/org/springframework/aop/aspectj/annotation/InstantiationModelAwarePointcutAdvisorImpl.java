@@ -302,8 +302,12 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 		@Override
 		public boolean equals(@Nullable Object other) {
+			// For equivalence, we only need to compare the preInstantiationPointcut fields since
+			// they include the declaredPointcut fields. In addition, we should not compare the
+			// aspectInstanceFactory fields since LazySingletonAspectInstanceFactoryDecorator does
+			// not implement equals().
 			return (this == other || (other instanceof PerTargetInstantiationModelPointcut that &&
-					ObjectUtils.nullSafeEquals(this.declaredPointcut.getExpression(), that.declaredPointcut.getExpression())));
+					ObjectUtils.nullSafeEquals(this.preInstantiationPointcut, that.preInstantiationPointcut)));
 		}
 
 		@Override

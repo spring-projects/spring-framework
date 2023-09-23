@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -59,33 +61,57 @@ public class DefaultServletHandlerConfigurerTests {
 	@Test
 	public void enable() throws Exception {
 		configurer.enable();
-		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
-		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
+		SimpleUrlHandlerMapping mapping = configurer.buildHandlerMapping();
+		HttpRequestHandler handler = (DefaultServletHttpRequestHandler) mapping.getUrlMap().get("/**");
 
 		assertThat(handler).isNotNull();
-		assertThat(handlerMapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(mapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
 
 		handler.handleRequest(new MockHttpServletRequest(), response);
 
-		String expected = "default";
-		assertThat(servletContext.url).as("The ServletContext was not called with the default servlet name").isEqualTo(expected);
-		assertThat(response.getForwardedUrl()).as("The request was not forwarded").isEqualTo(expected);
+		assertThat(servletContext.url)
+				.as("The ServletContext was not called with the default servlet name").isEqualTo("default");
+
+		assertThat(response.getForwardedUrl())
+				.as("The request was not forwarded").isEqualTo("default");
 	}
 
 	@Test
 	public void enableWithServletName() throws Exception {
 		configurer.enable("defaultServlet");
-		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
-		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
+		SimpleUrlHandlerMapping mapping = configurer.buildHandlerMapping();
+		HttpRequestHandler handler = (DefaultServletHttpRequestHandler) mapping.getUrlMap().get("/**");
 
 		assertThat(handler).isNotNull();
-		assertThat(handlerMapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(mapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
 
 		handler.handleRequest(new MockHttpServletRequest(), response);
 
-		String expected = "defaultServlet";
-		assertThat(servletContext.url).as("The ServletContext was not called with the default servlet name").isEqualTo(expected);
-		assertThat(response.getForwardedUrl()).as("The request was not forwarded").isEqualTo(expected);
+		assertThat(servletContext.url)
+				.as("The ServletContext was not called with the default servlet name").isEqualTo("defaultServlet");
+
+		assertThat(response.getForwardedUrl())
+				.as("The request was not forwarded").isEqualTo("defaultServlet");
+	}
+
+	@Test // gh-30113
+	public void handleIncludeRequest() throws Exception {
+		configurer.enable();
+		SimpleUrlHandlerMapping mapping = configurer.buildHandlerMapping();
+		HttpRequestHandler handler = (DefaultServletHttpRequestHandler) mapping.getUrlMap().get("/**");
+
+		assertThat(handler).isNotNull();
+		assertThat(mapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setDispatcherType(DispatcherType.INCLUDE);
+		handler.handleRequest(request, response);
+
+		assertThat(servletContext.url)
+				.as("The ServletContext was not called with the default servlet name").isEqualTo("default");
+
+		assertThat(response.getIncludedUrl())
+				.as("The request was not included").isEqualTo("default");
 	}
 
 

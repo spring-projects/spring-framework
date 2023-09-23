@@ -18,6 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -125,7 +126,12 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +
 					this.defaultServletName + "'");
 		}
-		rd.forward(request, response);
+		if (request.getDispatcherType() != DispatcherType.INCLUDE) {
+			rd.forward(request, response);
+		}
+		else {
+			rd.include(request, response);
+		}
 	}
 
 }

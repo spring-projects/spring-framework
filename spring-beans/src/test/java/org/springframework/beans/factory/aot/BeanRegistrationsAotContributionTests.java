@@ -147,7 +147,7 @@ class BeanRegistrationsAotContributionTests {
 		BeanRegistrationsAotContribution contribution = createContribution(TestBean.class, generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		assertThat(reflection().onType(TestBean.class)
-				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS))
+				.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 
@@ -159,7 +159,8 @@ class BeanRegistrationsAotContributionTests {
 		BeanRegistrationsAotContribution contribution = createContribution(RecordBean.class, generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		assertThat(reflection().onType(RecordBean.class)
-				.withMemberCategories(MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
+				.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
+						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 
