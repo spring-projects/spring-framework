@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
@@ -663,7 +662,6 @@ class Tokenizer {
 	/**
 	 * Abstraction of an extension of the tokenizer which handles big number ({@link java.math.BigInteger} and {@link java.math.BigDecimal}) concern.
 	 */
-	@BigNumberConcern
 	private abstract class BigNumberConcernExtension {
 		protected static final int SUFFIX_LENGTH = 2;
 

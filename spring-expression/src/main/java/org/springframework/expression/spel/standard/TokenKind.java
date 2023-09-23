@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.standard;
 
-import org.springframework.expression.spel.BigNumberConcern;
-
 /**
  * Token Kinds.
  *
@@ -32,14 +30,12 @@ enum TokenKind {
 
 	LITERAL_LONG,
 
-	@BigNumberConcern
 	LITERAL_BIG_INTEGER,
 
 	LITERAL_HEXINT,
 
 	LITERAL_HEXLONG,
 
-	@BigNumberConcern
 	LITERAL_HEX_BIG_INTEGER,
 
 	LITERAL_STRING,
@@ -48,7 +44,6 @@ enum TokenKind {
 
 	LITERAL_REAL_FLOAT,
 
-	@BigNumberConcern
 	LITERAL_BIG_DECIMAL,
 
 	LPAREN("("),

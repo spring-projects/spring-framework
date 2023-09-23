@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
-import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -849,7 +848,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//  | REAL_LITERAL
 	//	| DQ_STRING_LITERAL
 	//	| NULL_LITERAL
-	@BigNumberConcern
 	private boolean maybeEatLiteral() {
 		Token t = peekToken();
 		if (t == null) {
