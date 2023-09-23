@@ -19,9 +19,7 @@ package org.springframework.expression.spel.ast;
 import java.math.BigInteger;
 
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.BigNumberConcern;
 
-@BigNumberConcern
 public class BigIntegerLiteral extends Literal {
 	private final TypedValue typedValue;
 

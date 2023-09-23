@@ -70,7 +70,6 @@ public abstract class AbstractExpressionTests {
 	 * @param expectedValue the expected result for evaluating the expression
 	 * @param expectedResultType the expected class of the evaluation result
 	 */
-	@BigNumberConcern
 	public void evaluateComparable(final String expression, final Comparable<?> expectedValue, final Class<? extends Comparable<?>> expectedResultType) {
 		doEvaluate(expression, expectedValue, expectedResultType,
 				new Condition<>(actualValue -> actualValue instanceof Comparable && ((Comparable) actualValue).compareTo(expectedValue) == 0,

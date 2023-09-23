@@ -118,7 +118,6 @@ public class LiteralTests extends AbstractExpressionTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"Bi", "BI", "bI", "bi"})
-	@BigNumberConcern
 	public void testBigIntegerLiterals(final String suffixVariant) {
 		evaluateComparable("-1" + suffixVariant, new BigInteger("-1"), BigInteger.class);
 		evaluateComparable("1" + suffixVariant, new BigInteger("1"), BigInteger.class);
@@ -127,14 +126,12 @@ public class LiteralTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	@BigNumberConcern
 	public void testBigIntegerLiterals_BadExpressions() {
 		parseAndCheckError("-3.4bI", SpelMessage.REAL_CANNOT_BE_BIG_INTEGER);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {"Bi", "BI", "bI", "bi"})
-	@BigNumberConcern
 	public void testBigIntegerLiterals_Hex(final String suffixVariant) {
 		evaluateComparable("-0x20" + suffixVariant, new BigInteger("-32"), BigInteger.class);
 		evaluateComparable("0x20" + suffixVariant, new BigInteger("32"), BigInteger.class);
@@ -186,7 +183,6 @@ public class LiteralTests extends AbstractExpressionTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"Bd", "BD", "bD", "bd"})
-	@BigNumberConcern
 	public void testBigDecimalLiterals(final String suffixVariant) {
 		evaluateComparable("0.1" + suffixVariant, new BigDecimal("0.1"), BigDecimal.class);
 		evaluateComparable("0.0" + suffixVariant, new BigDecimal("0.0"), BigDecimal.class);
@@ -201,7 +197,6 @@ public class LiteralTests extends AbstractExpressionTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"Bd", "BD", "bD", "bd"})
-	@BigNumberConcern
 	public void testBigDecimalLiterals_UsingExponents(final String suffixVariant) {
 		evaluateComparable("6.0221415E+23" + suffixVariant, new BigDecimal("6.0221415E23"), BigDecimal.class);
 		evaluateComparable("6.0221415e+23" + suffixVariant, new BigDecimal("6.0221415E23"), BigDecimal.class);

@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.BigNumberConcern;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -111,7 +110,6 @@ public abstract class Literal extends SpelNodeImpl {
 		}
 	}
 
-	@BigNumberConcern
 	public static Literal getBigIntegerLiteral(final String numberToken, final int startPos, final int endPos, final int radix) {
 		try {
 			return new BigIntegerLiteral(numberToken, startPos, endPos, new BigInteger(numberToken, radix));
@@ -137,7 +135,6 @@ public abstract class Literal extends SpelNodeImpl {
 		}
 	}
 
-	@BigNumberConcern
 	public static Literal getBigDecimalLiteral(final String numberToken, final int startPos, final int endPos) {
 		try {
 			return new BigDecimalLiteral(numberToken, startPos, endPos, new BigDecimal(numberToken));
