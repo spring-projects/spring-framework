@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ public final class SpringNamingPolicy implements NamingPolicy {
 
 	public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
 
-	private static final String LABEL = "$$SpringCGLIB$$";
+	private static final String SPRING_LABEL = "$$SpringCGLIB$$";
+
 
 	private SpringNamingPolicy() {
 	}
@@ -46,12 +47,12 @@ public final class SpringNamingPolicy implements NamingPolicy {
 		}
 
 		String base;
-		int existingLabel = prefix.indexOf(LABEL);
+		int existingLabel = prefix.indexOf(SPRING_LABEL);
 		if (existingLabel >= 0) {
-			base = prefix.substring(0, existingLabel + LABEL.length());
+			base = prefix.substring(0, existingLabel + SPRING_LABEL.length());
 		}
 		else {
-			base = prefix + LABEL;
+			base = prefix + SPRING_LABEL;
 		}
 
 		int index = 0;
