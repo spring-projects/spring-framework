@@ -8,6 +8,7 @@ dependencies {
 	api(project(":spring-core"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
+	optional("com.alibaba.fastjson2:fastjson2")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.google.code.gson:gson")
 	optional("com.google.protobuf:protobuf-java-util")

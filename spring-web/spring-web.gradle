@@ -11,6 +11,7 @@ dependencies {
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
+	optional("com.alibaba.fastjson2:fastjson2")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")

@@ -23,6 +23,7 @@ dependencies {
 	api(platform("org.mockito:mockito-bom:5.5.0"))
 
 	constraints {
+		api("com.alibaba.fastjson2:fastjson2:2.0.40")
 		api("com.fasterxml:aalto-xml:1.3.2")
 		api("com.fasterxml.woodstox:woodstox-core:6.5.1")
 		api("com.github.ben-manes.caffeine:caffeine:3.1.8")

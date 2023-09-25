@@ -48,6 +48,7 @@ import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessag
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.FastjsonHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
@@ -210,6 +211,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private static final boolean kotlinSerializationProtobufPresent;
 
+	private static final boolean fastjsonPresent;
+
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
@@ -224,6 +227,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+		fastjsonPresent = ClassUtils.isPresent("com.alibaba.fastjson2", classLoader);
 	}
 
 
@@ -454,7 +458,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (jaxb2Present || jackson2XmlPresent) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jackson2Present || gsonPresent || jsonbPresent || kotlinSerializationJsonPresent) {
+		if (jackson2Present || gsonPresent || jsonbPresent || kotlinSerializationJsonPresent || fastjsonPresent) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		if (jackson2SmilePresent) {
@@ -935,6 +939,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 			messageConverters.add(new MappingJackson2CborHttpMessageConverter(builder.build()));
 		}
+
+		if (fastjsonPresent) {
+			messageConverters.add(new FastjsonHttpMessageConverter());
+		}
 	}
 
 	/**
@@ -1046,7 +1054,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers,
-			ContentNegotiationManager mvcContentNegotiationManager) {
+															 ContentNegotiationManager mvcContentNegotiationManager) {
 
 		ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
 		exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager);

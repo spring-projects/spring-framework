@@ -18,6 +18,7 @@ package org.springframework.http.converter.support;
 
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
+import org.springframework.http.converter.json.FastjsonHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
@@ -57,11 +58,13 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 	private static final boolean kotlinSerializationProtobufPresent;
 
+	private static final boolean fastjsonPresent;
+
 	static {
 		ClassLoader classLoader = AllEncompassingFormHttpMessageConverter.class.getClassLoader();
 		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
-						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
@@ -69,6 +72,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+		fastjsonPresent = ClassUtils.isPresent("com.alibaba.fastjson2", classLoader);
 	}
 
 
@@ -105,6 +109,10 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 		if (kotlinSerializationProtobufPresent) {
 			addPartConverter(new KotlinSerializationProtobufHttpMessageConverter());
+		}
+
+		if (fastjsonPresent) {
+			addPartConverter(new FastjsonHttpMessageConverter());
 		}
 	}
 

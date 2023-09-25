@@ -45,6 +45,7 @@ import org.springframework.lang.Nullable;
  * @since 5.0
  * @see GsonHttpMessageConverter
  * @see JsonbHttpMessageConverter
+ * @see FastjsonHttpMessageConverter
  * @see #readInternal(Type, Reader)
  * @see #writeInternal(Object, Type, Writer)
  */

@@ -48,6 +48,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.FastjsonHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -175,17 +176,20 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean gsonPresent;
 
+	private static final boolean fastjsonPresent;
+
 	static {
 		ClassLoader classLoader = AnnotationDrivenBeanDefinitionParser.class.getClassLoader();
 		javaxValidationPresent = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
-						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		fastjsonPresent = ClassUtils.isPresent("com.alibaba.fastjson2", classLoader);
 	}
 
 
@@ -613,6 +617,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonFactoryDef.getPropertyValues().add("factory", new CBORFactory());
 				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
 				messageConverters.add(jacksonConverterDef);
+			}
+			if (fastjsonPresent) {
+				messageConverters.add(createConverterDefinition(FastjsonHttpMessageConverter.class, source));
 			}
 		}
 		return messageConverters;

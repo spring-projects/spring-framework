@@ -40,6 +40,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
+import org.springframework.http.converter.json.FastjsonHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
@@ -83,6 +84,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private static final boolean jackson2CborPresent;
 
+	private static final boolean fastjsonPresent;
+
 
 	static {
 		ClassLoader loader = DefaultRestClientBuilder.class.getClassLoader();
@@ -98,6 +101,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", loader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", loader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", loader);
+		fastjsonPresent = ClassUtils.isPresent("com.alibaba.fastjson2", loader);
 	}
 
 	@Nullable
@@ -339,6 +343,9 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			if (jackson2CborPresent) {
 				this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
 			}
+			if (fastjsonPresent) {
+				this.messageConverters.add(new FastjsonHttpMessageConverter());
+			}
 		}
 		return this.messageConverters;
 	}
@@ -363,7 +370,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				messageConverters,
 				this.observationRegistry,
 				new DefaultRestClientBuilder(this)
-				);
+		);
 	}
 
 	private ClientHttpRequestFactory initRequestFactory() {
