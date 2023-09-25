@@ -24,7 +24,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -99,7 +98,12 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	private static final Namespace AUTOWIRED_VALIDATION_NAMESPACE =
 			Namespace.create(SpringExtension.class.getName() + "#autowired.validation");
 
-	private static final String NO_VIOLATIONS_DETECTED = "NO VIOLATIONS DETECTED";
+	/**
+	 * <em>Marker</em> string constant to represent that no violations were detected.
+	 * <p>The value is an empty string which allows this class to perform quick
+	 * {@code isEmpty()} checks instead of performing unnecessary string comparisons.
+	 */
+	private static final String NO_VIOLATIONS_DETECTED = "";
 
 	/**
 	 * {@link Namespace} in which {@code @RecordApplicationEvents} validation error messages
@@ -180,7 +184,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 								testClass.getName(), Arrays.toString(methodsWithErrors)));
 			}, String.class);
 
-		if (!Objects.equals(errorMessage, NO_VIOLATIONS_DETECTED)) {
+		if (!errorMessage.isEmpty()) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
@@ -219,7 +223,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 					published by other tests since the application context may be shared.""";
 		}, String.class);
 
-		if (!Objects.equals(errorMessage, NO_VIOLATIONS_DETECTED)) {
+		if (!errorMessage.isEmpty()) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
