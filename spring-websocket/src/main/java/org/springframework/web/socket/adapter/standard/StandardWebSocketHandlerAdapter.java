@@ -64,40 +64,15 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		// declared generic types (which need to be seen by the underlying WebSocket engine)
 
 		if (this.handler.supportsPartialMessages()) {
-			session.addMessageHandler(new MessageHandler.Partial<String>() {
-				@Override
-				public void onMessage(String message, boolean isLast) {
-					handleTextMessage(session, message, isLast);
-				}
-			});
-			session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>() {
-				@Override
-				public void onMessage(ByteBuffer message, boolean isLast) {
-					handleBinaryMessage(session, message, isLast);
-				}
-			});
+			session.addMessageHandler((MessageHandler.Partial<String>) (message, isLast) -> handleTextMessage(session, message, isLast));
+			session.addMessageHandler((MessageHandler.Partial<ByteBuffer>) (message, isLast) -> handleBinaryMessage(session, message, isLast));
 		}
 		else {
-			session.addMessageHandler(new MessageHandler.Whole<String>() {
-				@Override
-				public void onMessage(String message) {
-					handleTextMessage(session, message, true);
-				}
-			});
-			session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
-				@Override
-				public void onMessage(ByteBuffer message) {
-					handleBinaryMessage(session, message, true);
-				}
-			});
+			session.addMessageHandler((MessageHandler.Whole<String>) message -> handleTextMessage(session, message, true));
+			session.addMessageHandler((MessageHandler.Whole<ByteBuffer>) message -> handleBinaryMessage(session, message, true));
 		}
 
-		session.addMessageHandler(new MessageHandler.Whole<jakarta.websocket.PongMessage>() {
-			@Override
-			public void onMessage(jakarta.websocket.PongMessage message) {
-				handlePongMessage(session, message.getApplicationData());
-			}
-		});
+		session.addMessageHandler((MessageHandler.Whole<jakarta.websocket.PongMessage>) message -> handlePongMessage(session, message.getApplicationData()));
 
 		try {
 			this.handler.afterConnectionEstablished(this.wsSession);
