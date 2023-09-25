@@ -63,6 +63,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Hailin Kang
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -88,7 +89,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private AdvisorChainFactory advisorChainFactory;
 
 	/** Cache with Method as key and advisor chain List as value. */
-	private transient Map<MethodCacheKey, List<Object>> methodCache;
+	private transient Map<Method, List<Object>> methodCache;
 
 	/**
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
@@ -126,7 +127,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Internal constructor for {@link #getConfigurationOnlyCopy()}.
 	 * @since 6.0.10
 	 */
-	private AdvisedSupport(AdvisorChainFactory advisorChainFactory, Map<MethodCacheKey, List<Object>> methodCache) {
+	private AdvisedSupport(AdvisorChainFactory advisorChainFactory, Map<Method, List<Object>> methodCache) {
 		this.advisorChainFactory = advisorChainFactory;
 		this.methodCache = methodCache;
 	}
@@ -482,7 +483,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return a List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
-		return this.methodCache.computeIfAbsent(new MethodCacheKey(method), k ->
+		return this.methodCache.computeIfAbsent(method, k ->
 				this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this, method, targetClass));
 	}
 
@@ -582,48 +583,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append(super.toString());
 		return sb.toString();
 	}
-
-
-	/**
-	 * Simple wrapper class around a Method. Used as the key when
-	 * caching methods, for efficient equals and hashCode comparisons.
-	 */
-	private static final class MethodCacheKey implements Comparable<MethodCacheKey> {
-
-		private final Method method;
-
-		private final int hashCode;
-
-		public MethodCacheKey(Method method) {
-			this.method = method;
-			this.hashCode = method.hashCode();
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof MethodCacheKey that && this.method == that.method));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.hashCode;
-		}
-
-		@Override
-		public String toString() {
-			return this.method.toString();
-		}
-
-		@Override
-		public int compareTo(MethodCacheKey other) {
-			int result = this.method.getName().compareTo(other.method.getName());
-			if (result == 0) {
-				result = this.method.toString().compareTo(other.method.toString());
-			}
-			return result;
-		}
-	}
-
 
 	/**
 	 * Stub for an {@link Advisor} instance that is just needed for key purposes,
