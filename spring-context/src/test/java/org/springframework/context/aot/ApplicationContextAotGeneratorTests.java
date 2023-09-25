@@ -363,8 +363,8 @@ class ApplicationContextAotGeneratorTests {
 			applicationContext.registerBean(CglibConfiguration.class);
 			TestGenerationContext context = processAheadOfTime(applicationContext);
 			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$0");
-			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$1");
-			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$2");
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$FastClass$$0");
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$FastClass$$1");
 		}
 
 		private void isRegisteredCglibClass(TestGenerationContext context, String cglibClassName) throws IOException {
