@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -179,7 +180,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 								testClass.getName(), Arrays.toString(methodsWithErrors)));
 			}, String.class);
 
-		if (errorMessage != NO_VIOLATIONS_DETECTED) {
+		if (!Objects.equals(errorMessage, NO_VIOLATIONS_DETECTED)) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
@@ -218,7 +219,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 					published by other tests since the application context may be shared.""";
 		}, String.class);
 
-		if (errorMessage != NO_VIOLATIONS_DETECTED) {
+		if (!Objects.equals(errorMessage, NO_VIOLATIONS_DETECTED)) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
