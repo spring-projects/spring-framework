@@ -514,8 +514,8 @@ the `<aop:scoped-proxy/>` element, a CGLIB-based class proxy is created.
 
 [NOTE]
 ====
-CGLIB proxies intercept only public method calls! Do not call non-public methods
-on such a proxy. They are not delegated to the actual scoped target object.
+CGLIB proxies do not intercept private methods. Attempting to call a private method
+on such a proxy will not delegate to the actual scoped target object.
 ====
 
 Alternatively, you can configure the Spring container to create standard JDK
