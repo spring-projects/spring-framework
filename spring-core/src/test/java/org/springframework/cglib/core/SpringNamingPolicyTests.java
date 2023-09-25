@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.cglib.reflect.FastClass;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -65,6 +67,15 @@ class SpringNamingPolicyTests {
 
 		assertThat(getClassName(generated1)).isEqualTo(generated1);
 		assertThat(getClassName(generated1)).isEqualTo(generated2);
+	}
+
+	@Test
+	void fastClass() {
+		String prefix = "example.MyComponent";
+		String source = FastClass.class.getName();
+		assertThat(getClassName(prefix, "a.b.c", null)).isEqualTo("example.MyComponent$$SpringCGLIB$$0");
+		assertThat(getClassName(prefix, source, null)).isEqualTo("example.MyComponent$$SpringCGLIB$$FastClass$$0");
+		assertThat(getClassName(prefix, source, null)).isEqualTo("example.MyComponent$$SpringCGLIB$$FastClass$$1");
 	}
 
 	private String getClassName(String prefix) {

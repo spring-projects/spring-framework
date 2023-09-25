@@ -25,6 +25,7 @@ package org.springframework.cglib.core;
  * in the classpath.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2.8 / 6.0
  */
 public final class SpringNamingPolicy implements NamingPolicy {
@@ -32,6 +33,8 @@ public final class SpringNamingPolicy implements NamingPolicy {
 	public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
 
 	private static final String SPRING_LABEL = "$$SpringCGLIB$$";
+
+	private static final String FAST_CLASS_SUFFIX = "FastClass$$";
 
 
 	private SpringNamingPolicy() {
@@ -53,6 +56,13 @@ public final class SpringNamingPolicy implements NamingPolicy {
 		}
 		else {
 			base = prefix + SPRING_LABEL;
+		}
+
+		// When the generated class name is for a FastClass, the source is
+		// "org.springframework.cglib.reflect.FastClass".
+		boolean isFastClass = (source != null && source.endsWith(".FastClass"));
+		if (isFastClass && !prefix.contains(FAST_CLASS_SUFFIX)) {
+			base += FAST_CLASS_SUFFIX;
 		}
 
 		int index = 0;
