@@ -147,7 +147,7 @@ class AbstractRoutingDataSourceTests {
 	}
 
 	@Test
-	void testRefresh_SynchronizeTargetDataSourcesToResolvedDataSources() {
+	void testInitialize_synchronizeTargetDataSourcesToResolvedDataSources() {
 		AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 			@Override
 			protected Object determineCurrentLookupKey() {
@@ -163,7 +163,7 @@ class AbstractRoutingDataSourceTests {
 		targetDataSources.put("ds2", ds2);
 		routingDataSource.setTargetDataSources(targetDataSources);
 
-		routingDataSource.refresh();
+		routingDataSource.initialize();
 
 		Map<Object, DataSource> resolvedDataSources = routingDataSource.getResolvedDataSources();
 		assertThat(resolvedDataSources).hasSize(2);

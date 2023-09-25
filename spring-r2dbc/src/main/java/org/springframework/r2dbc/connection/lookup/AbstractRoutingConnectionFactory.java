@@ -127,14 +127,14 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 
 	@Override
 	public void afterPropertiesSet() {
-		refresh();
+		initialize();
 	}
 
 	/**
 	 * Synchronizes targetConnectionFactories to resolvedConnectionFactories
 	 * and defaultTargetConnectionFactory to resolvedDefaultConnectionFactory.
 	 */
-	public void refresh() {
+	public void initialize() {
 		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
 
 		this.resolvedConnectionFactories = CollectionUtils.newHashMap(this.targetConnectionFactories.size());

@@ -183,11 +183,11 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	void testRefresh_shouldDetermineRoutedFactory() {
+	void testInitialize_shouldDetermineRoutedFactory() {
 		connectionFactory.setTargetConnectionFactories(
 				singletonMap("key", routedConnectionFactory));
 		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
-		connectionFactory.refresh();
+		connectionFactory.initialize();
 
 		connectionFactory.determineTargetConnectionFactory()
 				.contextWrite(Context.of(ROUTING_KEY, "key"))
