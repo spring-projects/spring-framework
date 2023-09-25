@@ -63,6 +63,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Hailin Kang
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -482,8 +483,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return a List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
-		return this.methodCache.computeIfAbsent(new MethodCacheKey(method), k ->
-				this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this, method, targetClass));
+		MethodCacheKey methodCacheKey = new MethodCacheKey(method);
+		List<Object> objects = this.methodCache.get(methodCacheKey);
+		if (objects == null) {
+			objects = this.methodCache.computeIfAbsent(methodCacheKey, k ->
+					this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this, method, targetClass));
+		}
+		return objects;
 	}
 
 	/**
