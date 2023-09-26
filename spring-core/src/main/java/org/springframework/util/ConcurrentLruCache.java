@@ -81,7 +81,7 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	private ConcurrentLruCache(int capacity, Function<K, V> generator, int concurrencyLevel) {
-		Assert.isTrue(capacity > 0, "Capacity must be > 0");
+		Assert.isTrue(capacity >= 0, "Capacity must be >= 0");
 		this.capacity = capacity;
 		this.cache = new ConcurrentHashMap<>(16, 0.75f, concurrencyLevel);
 		this.generator = generator;
