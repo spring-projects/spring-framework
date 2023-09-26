@@ -39,6 +39,7 @@ import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
+import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
@@ -337,6 +338,45 @@ public class MessagingMessageListenerAdapterTests {
 		verify(messageProducer).send(responseMessage);
 		verify(messageProducer).close();
 		return responseMessage;
+	}
+
+	@Test
+	void lazyResolutionMessageToStringProvidesBestEffortWithUnresolvedPayload() throws JMSException {
+		MessagingMessageListenerAdapter adapter = getSimpleInstance("echo", Message.class);
+		MessagingMessageConverter messagingMessageConverter = adapter.getMessagingMessageConverter();
+		assertThat(messagingMessageConverter).isNotNull();
+		TextMessage message = new StubTextMessage();
+		assertThat(messagingMessageConverter.fromMessage(message)).isInstanceOfSatisfying(Message.class, msg ->
+				assertThat(msg.toString()).contains("rawMessage=").contains(message.toString())
+						.doesNotContain("payload=").doesNotContain("headers="));
+	}
+
+	@Test
+	void lazyResolutionMessageToStringWithResolvedPayload() throws JMSException {
+		MessagingMessageListenerAdapter adapter = getSimpleInstance("echo", Message.class);
+		MessagingMessageConverter messagingMessageConverter = adapter.getMessagingMessageConverter();
+		assertThat(messagingMessageConverter).isNotNull();
+		TextMessage message = new StubTextMessage("Hello");
+		assertThat(messagingMessageConverter.fromMessage(message)).isInstanceOfSatisfying(Message.class, msg -> {
+			msg.getPayload(); // force resolution
+			assertThat(msg.toString()).contains("payload=Hello")
+					.doesNotContain("rawMessage=").doesNotContain("headers=");
+		});
+	}
+
+	@Test
+	void lazyResolutionMessageToStringWithResolvedPayloadAndHeaders() throws JMSException {
+		MessagingMessageListenerAdapter adapter = getSimpleInstance("echo", Message.class);
+		MessagingMessageConverter messagingMessageConverter = adapter.getMessagingMessageConverter();
+		assertThat(messagingMessageConverter).isNotNull();
+		TextMessage message = new StubTextMessage("Hello");
+		message.setJMSPriority(7);
+		assertThat(messagingMessageConverter.fromMessage(message)).isInstanceOfSatisfying(Message.class, msg -> {
+			msg.getPayload();
+			msg.getHeaders();  // force resolution
+			assertThat(msg.toString()).contains("payload=Hello").contains("headers=").contains("jms_priority=7")
+					.doesNotContain("rawMessage=");
+		});
 	}
 
 
