@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.context.support;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +53,7 @@ public abstract class MessageSourceSupport {
 	 * Used for passed-in default messages. MessageFormats for resolved
 	 * codes are cached on a specific basis in subclasses.
 	 */
-	private final Map<String, Map<Locale, MessageFormat>> messageFormatsPerMessage = new HashMap<>();
+	private final Map<String, Map<Locale, MessageFormat>> messageFormatsPerMessage = new ConcurrentHashMap<>();
 
 
 	/**
@@ -116,32 +116,22 @@ public abstract class MessageSourceSupport {
 		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			return msg;
 		}
-		MessageFormat messageFormat = null;
-		synchronized (this.messageFormatsPerMessage) {
-			Map<Locale, MessageFormat> messageFormatsPerLocale = this.messageFormatsPerMessage.get(msg);
-			if (messageFormatsPerLocale != null) {
-				messageFormat = messageFormatsPerLocale.get(locale);
+		Map<Locale, MessageFormat> messageFormatsPerLocale = this.messageFormatsPerMessage
+				.computeIfAbsent(msg, key -> new ConcurrentHashMap<>());
+		MessageFormat messageFormat = messageFormatsPerLocale.computeIfAbsent(locale, key -> {
+			try {
+				return createMessageFormat(msg, locale);
 			}
-			else {
-				messageFormatsPerLocale = new HashMap<>();
-				this.messageFormatsPerMessage.put(msg, messageFormatsPerLocale);
-			}
-			if (messageFormat == null) {
-				try {
-					messageFormat = createMessageFormat(msg, locale);
+			catch (IllegalArgumentException ex) {
+				// Invalid message format - probably not intended for formatting,
+				// rather using a message structure with no arguments involved...
+				if (isAlwaysUseMessageFormat()) {
+					throw ex;
 				}
-				catch (IllegalArgumentException ex) {
-					// Invalid message format - probably not intended for formatting,
-					// rather using a message structure with no arguments involved...
-					if (isAlwaysUseMessageFormat()) {
-						throw ex;
-					}
-					// Silently proceed with raw message if format not enforced...
-					messageFormat = INVALID_MESSAGE_FORMAT;
-				}
-				messageFormatsPerLocale.put(locale, messageFormat);
+				// Silently proceed with raw message if format not enforced...
+				return INVALID_MESSAGE_FORMAT;
 			}
-		}
+		});
 		if (messageFormat == INVALID_MESSAGE_FORMAT) {
 			return msg;
 		}
