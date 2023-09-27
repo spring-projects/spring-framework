@@ -31,19 +31,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Stephane Nicoll
  */
-public class ParamsRequestConditionTests {
+class ParamsRequestConditionTests {
 
 	@Test
-	public void paramEquals() {
+	void paramEquals() {
 		assertThat(new ParamsRequestCondition("foo")).isEqualTo(new ParamsRequestCondition("foo"));
-		assertThat(new ParamsRequestCondition("foo").equals(new ParamsRequestCondition("bar"))).isFalse();
-		assertThat(new ParamsRequestCondition("foo").equals(new ParamsRequestCondition("FOO"))).isFalse();
+		assertThat(new ParamsRequestCondition("foo")).isNotEqualTo(new ParamsRequestCondition("bar"));
+		assertThat(new ParamsRequestCondition("foo")).isNotEqualTo(new ParamsRequestCondition("FOO"));
 		assertThat(new ParamsRequestCondition("foo=bar")).isEqualTo(new ParamsRequestCondition("foo=bar"));
-		assertThat(new ParamsRequestCondition("foo=bar").equals(new ParamsRequestCondition("FOO=bar"))).isFalse();
+		assertThat(new ParamsRequestCondition("foo=bar")).isNotEqualTo(new ParamsRequestCondition("FOO=bar"));
 	}
 
 	@Test
-	public void paramPresent() {
+	void paramPresent() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("foo", "");
 
@@ -51,7 +51,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test // SPR-15831
-	public void paramPresentNullValue() {
+	void paramPresentNullValue() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("foo", (String) null);
 
@@ -59,7 +59,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void paramPresentNoMatch() {
+	void paramPresentNoMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("bar", "");
 
@@ -67,7 +67,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void paramNotPresent() {
+	void paramNotPresent() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("!foo");
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -75,7 +75,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void paramValueMatch() {
+	void paramValueMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("foo", "bar");
 
@@ -83,7 +83,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void paramValueNoMatch() {
+	void paramValueNoMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("foo", "bazz");
 
@@ -91,7 +91,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
@@ -105,7 +105,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test // SPR-16674
-	public void compareToWithMoreSpecificMatchByValue() {
+	void compareToWithMoreSpecificMatchByValue() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type=code");
@@ -116,7 +116,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void compareToWithNegatedMatch() {
+	void compareToWithNegatedMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type!=code");
@@ -126,7 +126,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void combineWithOtherEmpty() {
+	void combineWithOtherEmpty() {
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo=bar");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition();
 
@@ -135,7 +135,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void combineWithThisEmpty() {
+	void combineWithThisEmpty() {
 		ParamsRequestCondition condition1 = new ParamsRequestCondition();
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=bar");
 
@@ -144,7 +144,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void combine() {
+	void combine() {
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo=bar");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=baz");
 

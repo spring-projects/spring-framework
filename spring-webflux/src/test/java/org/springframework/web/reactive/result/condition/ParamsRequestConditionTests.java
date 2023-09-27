@@ -32,55 +32,55 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  */
-public class ParamsRequestConditionTests {
+class ParamsRequestConditionTests {
 
 	@Test
-	public void paramEquals() {
+	void paramEquals() {
 		assertThat(new ParamsRequestCondition("foo")).isEqualTo(new ParamsRequestCondition("foo"));
-		assertThat(new ParamsRequestCondition("foo").equals(new ParamsRequestCondition("bar"))).isFalse();
-		assertThat(new ParamsRequestCondition("foo").equals(new ParamsRequestCondition("FOO"))).isFalse();
+		assertThat(new ParamsRequestCondition("foo")).isNotEqualTo(new ParamsRequestCondition("bar"));
+		assertThat(new ParamsRequestCondition("foo")).isNotEqualTo(new ParamsRequestCondition("FOO"));
 		assertThat(new ParamsRequestCondition("foo=bar")).isEqualTo(new ParamsRequestCondition("foo=bar"));
-		assertThat(new ParamsRequestCondition("foo=bar").equals(new ParamsRequestCondition("FOO=bar"))).isFalse();
+		assertThat(new ParamsRequestCondition("foo=bar")).isNotEqualTo(new ParamsRequestCondition("FOO=bar"));
 	}
 
 	@Test
-	public void paramPresent() {
+	void paramPresent() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=")))).isNotNull();
 	}
 
 	@Test // SPR-15831
-	public void paramPresentNullValue() {
+	void paramPresentNullValue() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo")))).isNotNull();
 	}
 
 	@Test
-	public void paramPresentNoMatch() {
+	void paramPresentNoMatch() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?bar=")))).isNull();
 	}
 
 	@Test
-	public void paramNotPresent() {
+	void paramNotPresent() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 		assertThat(new ParamsRequestCondition("!foo").getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
-	public void paramValueMatch() {
+	void paramValueMatch() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bar")))).isNotNull();
 	}
 
 	@Test
-	public void paramValueNoMatch() {
+	void paramValueNoMatch() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bazz")))).isNull();
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
@@ -94,7 +94,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test // SPR-16674
-	public void compareToWithMoreSpecificMatchByValue() {
+	void compareToWithMoreSpecificMatchByValue() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type=code");
@@ -105,7 +105,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void compareToWithNegatedMatch() {
+	void compareToWithNegatedMatch() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("response_type!=code");
@@ -115,7 +115,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void combineWitOtherEmpty() {
+	void combineWithOtherEmpty() {
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo=bar");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition();
 
@@ -124,7 +124,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void combineWitThisEmpty() {
+	void combineWithThisEmpty() {
 		ParamsRequestCondition condition1 = new ParamsRequestCondition();
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=bar");
 
@@ -133,7 +133,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void combine() {
+	void combine() {
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo=bar");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=baz");
 
