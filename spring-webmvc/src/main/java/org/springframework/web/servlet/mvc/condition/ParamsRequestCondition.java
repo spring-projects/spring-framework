@@ -90,13 +90,10 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
-		if (isEmpty() && other.isEmpty()) {
+		if (other.isEmpty()) {
 			return this;
 		}
-		else if (other.isEmpty()) {
-			return this;
-		}
-		else if (isEmpty()) {
+		if (isEmpty()) {
 			return other;
 		}
 		Set<ParamExpression> set = new LinkedHashSet<>(this.expressions);
