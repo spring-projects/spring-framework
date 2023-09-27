@@ -37,6 +37,8 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationContext;
+import org.springframework.http.client.observation.ClientRequestObservationConvention;
+import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -157,6 +159,20 @@ class RestClientObservationTests {
 		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
 						client.get().uri(url).retrieve().body(String.class));
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN");
+	}
+
+	@Test
+	void executeWithCustomConventionUsesCustomObservationName() throws Exception {
+		ClientRequestObservationConvention observationConvention =
+				new DefaultClientRequestObservationConvention("custom.requests");
+		RestClient restClient = this.client.mutate().observationConvention(observationConvention).build();
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+
+		restClient.get().uri("https://example.org").retrieve().toBodilessEntity();
+
+		TestObservationRegistryAssert.assertThat(this.observationRegistry)
+				.hasObservationWithNameEqualTo("custom.requests");
 	}
 
 

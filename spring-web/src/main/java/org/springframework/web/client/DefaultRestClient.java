@@ -107,6 +107,9 @@ final class DefaultRestClient implements RestClient {
 
 	private final ObservationRegistry observationRegistry;
 
+	@Nullable
+	private final ClientRequestObservationConvention observationConvention;
+
 
 	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory,
 			@Nullable List<ClientHttpRequestInterceptor> interceptors,
@@ -116,6 +119,7 @@ final class DefaultRestClient implements RestClient {
 			@Nullable List<StatusHandler> statusHandlers,
 			List<HttpMessageConverter<?>> messageConverters,
 			ObservationRegistry observationRegistry,
+			@Nullable ClientRequestObservationConvention observationConvention,
 			DefaultRestClientBuilder builder) {
 
 		this.clientRequestFactory = clientRequestFactory;
@@ -126,6 +130,7 @@ final class DefaultRestClient implements RestClient {
 		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
 		this.observationRegistry = observationRegistry;
+		this.observationConvention = observationConvention;
 		this.builder = builder;
 	}
 
@@ -393,7 +398,7 @@ final class DefaultRestClient implements RestClient {
 				clientRequest.getHeaders().addAll(headers);
 				ClientRequestObservationContext observationContext = new ClientRequestObservationContext(clientRequest);
 				observationContext.setUriTemplate((String) this.attributes.get(URI_TEMPLATE_ATTRIBUTE));
-				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(null,
+				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
 				if (this.body != null) {
 					this.body.writeTo(clientRequest);

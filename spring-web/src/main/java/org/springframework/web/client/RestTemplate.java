@@ -375,6 +375,15 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.observationConvention = observationConvention;
 	}
 
+	/**
+	 * Return the configured {@link ClientRequestObservationConvention}, or {@code null} if not set.
+	 * @since 6.1
+	 */
+	@Nullable
+	public ClientRequestObservationConvention getObservationConvention() {
+		return this.observationConvention;
+	}
+
 	// GET
 
 	@Override
