@@ -167,8 +167,6 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see jakarta.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionAcknowledgeMode(int sessionAcknowledgeMode) {
-		Assert.isTrue(sessionConstants.containsValue(sessionAcknowledgeMode),
-				"Only values of acknowledge mode constants allowed");
 		this.sessionAcknowledgeMode = sessionAcknowledgeMode;
 	}
 
