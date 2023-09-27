@@ -27,7 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ParamsRequestCondition}.
+ *
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  */
 public class ParamsRequestConditionTests {
 
@@ -121,6 +123,24 @@ public class ParamsRequestConditionTests {
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
 
 		assertThat(condition1.compareTo(condition2, request)).as("Negated match should not count as more specific").isEqualTo(0);
+	}
+
+	@Test
+	public void combineWithOtherEmpty() {
+		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo=bar");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition();
+
+		ParamsRequestCondition result = condition1.combine(condition2);
+		assertThat(result).isEqualTo(condition1);
+	}
+
+	@Test
+	public void combineWithThisEmpty() {
+		ParamsRequestCondition condition1 = new ParamsRequestCondition();
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=bar");
+
+		ParamsRequestCondition result = condition1.combine(condition2);
+		assertThat(result).isEqualTo(condition2);
 	}
 
 	@Test

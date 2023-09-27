@@ -28,7 +28,9 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
 
 /**
  * Unit tests for {@link ParamsRequestCondition}.
+ *
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  */
 public class ParamsRequestConditionTests {
 
@@ -42,43 +44,43 @@ public class ParamsRequestConditionTests {
 	}
 
 	@Test
-	public void paramPresent() throws Exception {
+	public void paramPresent() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=")))).isNotNull();
 	}
 
 	@Test // SPR-15831
-	public void paramPresentNullValue() throws Exception {
+	public void paramPresentNullValue() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo")))).isNotNull();
 	}
 
 	@Test
-	public void paramPresentNoMatch() throws Exception {
+	public void paramPresentNoMatch() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?bar=")))).isNull();
 	}
 
 	@Test
-	public void paramNotPresent() throws Exception {
+	public void paramNotPresent() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 		assertThat(new ParamsRequestCondition("!foo").getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
-	public void paramValueMatch() throws Exception {
+	public void paramValueMatch() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bar")))).isNotNull();
 	}
 
 	@Test
-	public void paramValueNoMatch() throws Exception {
+	public void paramValueNoMatch() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/path?foo=bazz")))).isNull();
 	}
 
 	@Test
-	public void compareTo() throws Exception {
+	public void compareTo() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
@@ -110,6 +112,24 @@ public class ParamsRequestConditionTests {
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
 
 		assertThat(condition1.compareTo(condition2, exchange)).as("Negated match should not count as more specific").isEqualTo(0);
+	}
+
+	@Test
+	public void combineWitOtherEmpty() {
+		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo=bar");
+		ParamsRequestCondition condition2 = new ParamsRequestCondition();
+
+		ParamsRequestCondition result = condition1.combine(condition2);
+		assertThat(result).isEqualTo(condition1);
+	}
+
+	@Test
+	public void combineWitThisEmpty() {
+		ParamsRequestCondition condition1 = new ParamsRequestCondition();
+		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=bar");
+
+		ParamsRequestCondition result = condition1.combine(condition2);
+		assertThat(result).isEqualTo(condition2);
 	}
 
 	@Test
