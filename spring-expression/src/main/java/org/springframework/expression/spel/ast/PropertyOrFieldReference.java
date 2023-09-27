@@ -73,10 +73,16 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 
+	/**
+	 * Does this node represent a null-safe property or field reference?
+	 */
 	public boolean isNullSafe() {
 		return this.nullSafe;
 	}
 
+	/**
+	 * Get the name of the referenced property or field.
+	 */
 	public String getName() {
 		return this.name;
 	}

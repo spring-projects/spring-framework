@@ -47,6 +47,7 @@ class ParsingTests {
 		void compoundExpressions() {
 			parseCheck("property1.property2.methodOne()");
 			parseCheck("property1[0].property2['key'].methodOne()");
+			parseCheck("property1?.methodOne()?.property2?.methodTwo()");
 		}
 
 		@Test
