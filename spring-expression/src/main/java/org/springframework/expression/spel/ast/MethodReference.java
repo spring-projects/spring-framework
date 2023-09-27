@@ -54,9 +54,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class MethodReference extends SpelNodeImpl {
 
-	private final String name;
-
 	private final boolean nullSafe;
+
+	private final String name;
 
 	@Nullable
 	private String originalPrimitiveExitTypeDescriptor;
@@ -72,6 +72,9 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 
+	/**
+	 * Get the name of the referenced method.
+	 */
 	public final String getName() {
 		return this.name;
 	}
