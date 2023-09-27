@@ -86,10 +86,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
-		if (isEmpty() && other.isEmpty()) {
-			return this;
-		}
-		else if (other.isEmpty()) {
+		if (other.isEmpty()) {
 			return this;
 		}
 		else if (isEmpty()) {
