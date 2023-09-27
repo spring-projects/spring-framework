@@ -28,7 +28,9 @@ import org.springframework.expression.spel.SpelNode;
 
 /**
  * Represents a DOT separated expression sequence, such as
- * {@code property1.property2.methodOne()}.
+ * {@code property1.property2.methodOne()} or
+ * {@code property1?.property2?.methodOne()} when the null-safe navigation
+ * operator is used.
  *
  * <p>May also contain array/collection/map indexers, such as
  * {@code property1[0].property2['key']}.
@@ -122,6 +124,10 @@ public class CompoundExpression extends SpelNodeImpl {
 				// Don't append a '.' if the next child is an Indexer.
 				// For example, we want 'myVar[0]' instead of 'myVar.[0]'.
 				if (!(nextChild instanceof Indexer)) {
+					if ((nextChild instanceof MethodReference methodRef && methodRef.isNullSafe()) ||
+						(nextChild instanceof PropertyOrFieldReference pofRef && pofRef.isNullSafe())) {
+						sb.append('?');
+					}
 					sb.append('.');
 				}
 			}

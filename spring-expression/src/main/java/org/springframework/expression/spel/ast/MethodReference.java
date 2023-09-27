@@ -50,6 +50,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class MethodReference extends SpelNodeImpl {
@@ -71,6 +72,14 @@ public class MethodReference extends SpelNodeImpl {
 		this.nullSafe = nullSafe;
 	}
 
+
+	/**
+	 * Does this node represent a null-safe method reference?
+	 * @since 6.0.13
+	 */
+	public final boolean isNullSafe() {
+		return this.nullSafe;
+	}
 
 	/**
 	 * Get the name of the referenced method.
