@@ -42,6 +42,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -373,6 +374,16 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		Builder observationRegistry(ObservationRegistry observationRegistry);
+
+		/**
+		 * Configure the {@link io.micrometer.observation.ObservationConvention} to use
+		 * for collecting metadata for the request observation. Will use
+		 * {@link org.springframework.http.client.observation.DefaultClientRequestObservationConvention}
+		 * if none provided.
+		 * @param observationConvention the observation convention to use
+		 * @return this builder
+		 */
+		Builder observationConvention(ClientRequestObservationConvention observationConvention);
 
 		/**
 		 * Apply the given {@code Consumer} to this builder instance.

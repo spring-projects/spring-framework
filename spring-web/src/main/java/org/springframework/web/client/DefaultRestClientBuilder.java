@@ -35,6 +35,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -132,6 +133,9 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
+	@Nullable
+	private ClientRequestObservationConvention observationConvention;
+
 
 	public DefaultRestClientBuilder() {
 	}
@@ -161,6 +165,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
 		this.observationRegistry = other.observationRegistry;
+		this.observationConvention = other.observationConvention;
 	}
 
 	public DefaultRestClientBuilder(RestTemplate restTemplate) {
@@ -182,6 +187,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.initializers = new ArrayList<>(restTemplate.getClientHttpRequestInitializers());
 		}
 		this.observationRegistry = restTemplate.getObservationRegistry();
+		this.observationConvention = restTemplate.getObservationConvention();
 	}
 
 
@@ -308,6 +314,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
+	public RestClient.Builder observationConvention(ClientRequestObservationConvention observationConvention) {
+		this.observationConvention = observationConvention;
+		return this;
+	}
+
+	@Override
 	public RestClient.Builder apply(Consumer<RestClient.Builder> builderConsumer) {
 		builderConsumer.accept(this);
 		return this;
@@ -362,6 +374,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				this.statusHandlers,
 				messageConverters,
 				this.observationRegistry,
+				this.observationConvention,
 				new DefaultRestClientBuilder(this)
 				);
 	}
