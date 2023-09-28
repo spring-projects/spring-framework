@@ -771,6 +771,34 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(context)).isNull();
 	}
 
+	@Test  // gh-27421
+	public void nullSafeMethodChainingWithNonStaticVoidMethod() throws Exception {
+		FooObjectHolder foh = new FooObjectHolder();
+		StandardEvaluationContext context = new StandardEvaluationContext(foh);
+		SpelExpression expression = (SpelExpression) parser.parseExpression("getFoo()?.doFoo()");
+
+		FooObject.doFooInvoked = false;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isTrue();
+
+		FooObject.doFooInvoked = false;
+		foh.foo = null;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isFalse();
+
+		assertCanCompile(expression);
+
+		FooObject.doFooInvoked = false;
+		foh.foo = new FooObject();
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isTrue();
+
+		FooObject.doFooInvoked = false;
+		foh.foo = null;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isFalse();
+	}
+
 	@Test
 	public void nullsafeMethodChaining_SPR16489() throws Exception {
 		FooObjectHolder foh = new FooObjectHolder();
@@ -3898,37 +3926,71 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 	}
 
-	@Test
-	void nullSafeInvocationOfNonStaticVoidWrapperMethod() {
+	@Test  // gh-27421
+	public void nullSafeInvocationOfNonStaticVoidMethod() {
+		// non-static method, no args, void return
+		expression = parser.parseExpression("new %s()?.one()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfStaticVoidMethod() {
+		// static method, no args, void return
+		expression = parser.parseExpression("T(%s)?.two()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfNonStaticVoidWrapperMethod() {
 		// non-static method, no args, Void return
 		expression = parser.parseExpression("new %s()?.oneVoidWrapper()".formatted(TestClass5.class.getName()));
 
 		assertCantCompile(expression);
 
 		TestClass5._i = 0;
-		expression.getValue();
+		assertThat(expression.getValue()).isNull();
 		assertThat(TestClass5._i).isEqualTo(1);
 
 		TestClass5._i = 0;
 		assertCanCompile(expression);
-		expression.getValue();
+		assertThat(expression.getValue()).isNull();
 		assertThat(TestClass5._i).isEqualTo(1);
 	}
 
-	@Test
-	void nullSafeInvocationOfStaticVoidWrapperMethod() {
+	@Test  // gh-27421
+	public void nullSafeInvocationOfStaticVoidWrapperMethod() {
 		// static method, no args, Void return
 		expression = parser.parseExpression("T(%s)?.twoVoidWrapper()".formatted(TestClass5.class.getName()));
 
 		assertCantCompile(expression);
 
 		TestClass5._i = 0;
-		expression.getValue();
+		assertThat(expression.getValue()).isNull();
 		assertThat(TestClass5._i).isEqualTo(1);
 
 		TestClass5._i = 0;
 		assertCanCompile(expression);
-		expression.getValue();
+		assertThat(expression.getValue()).isNull();
 		assertThat(TestClass5._i).isEqualTo(1);
 	}
 
@@ -5496,7 +5558,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	public static class FooObject {
 
+		static boolean doFooInvoked = false;
+
 		public Object getObject() { return "hello"; }
+		public void doFoo() { doFooInvoked = true; }
 	}
 
 
@@ -5744,7 +5809,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			field = null;
 		}
 
-		public void one() { i = 1; }
+		public void one() {
+			_i = 1;
+			this.i = 1;
+		}
 
 		public Void oneVoidWrapper() {
 			_i = 1;
