@@ -219,13 +219,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		for (Class<?> paramType : method.getParameterTypes()) {
 			sj.add(paramType.getName());
 		}
-		return ClassUtils.getQualifiedMethodName(method) + sj.toString();
+		return ClassUtils.getQualifiedMethodName(method) + sj;
 	}
 
 
 	/**
 	 * Process the specified {@link ApplicationEvent}, checking if the condition
 	 * matches and handling a non-null result, if any.
+	 * @param event the event to process through the listener method
 	 */
 	public void processEvent(ApplicationEvent event) {
 		Object[] args = resolveArguments(event);
@@ -238,6 +239,29 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				logger.trace("No result object given - no result to handle");
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the listener method would actually handle the given
+	 * event, checking if the condition matches.
+	 * @param event the event to process through the listener method
+	 * @since 6.1
+	 */
+	public boolean shouldHandle(ApplicationEvent event) {
+		return shouldHandle(event, resolveArguments(event));
+	}
+
+	private boolean shouldHandle(ApplicationEvent event, @Nullable Object[] args) {
+		if (args == null) {
+			return false;
+		}
+		String condition = getCondition();
+		if (StringUtils.hasText(condition)) {
+			Assert.notNull(this.evaluator, "EventExpressionEvaluator must not be null");
+			return this.evaluator.condition(
+					condition, event, this.targetMethod, this.methodKey, args, this.applicationContext);
+		}
+		return true;
 	}
 
 	/**
@@ -317,19 +341,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	protected void handleAsyncError(Throwable t) {
 		logger.error("Unexpected error occurred in asynchronous listener", t);
-	}
-
-	private boolean shouldHandle(ApplicationEvent event, @Nullable Object[] args) {
-		if (args == null) {
-			return false;
-		}
-		String condition = getCondition();
-		if (StringUtils.hasText(condition)) {
-			Assert.notNull(this.evaluator, "EventExpressionEvaluator must not be null");
-			return this.evaluator.condition(
-					condition, event, this.targetMethod, this.methodKey, args, this.applicationContext);
-		}
-		return true;
 	}
 
 	/**
