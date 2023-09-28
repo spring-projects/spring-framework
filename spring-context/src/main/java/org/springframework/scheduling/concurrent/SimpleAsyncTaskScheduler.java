@@ -46,6 +46,11 @@ import org.springframework.util.ErrorHandler;
  * separate thread. This is an attractive choice with virtual threads on JDK 21,
  * expecting common usage with {@link #setVirtualThreads setVirtualThreads(true)}.
  *
+ * <p><b>NOTE: Scheduling with a fixed delay enforces execution on the single
+ * scheduler thread, in order to provide traditional fixed-delay semantics!</b>
+ * Prefer the use of fixed rates or cron triggers instead which are a better fit
+ * with this thread-per-task scheduler variant.
+ *
  * <p>Supports a graceful shutdown through {@link #setTaskTerminationTimeout},
  * at the expense of task tracking overhead per execution thread at runtime.
  * Supports limiting concurrent threads through {@link #setConcurrencyLimit}.
@@ -234,7 +239,8 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
 		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return this.scheduledExecutor.scheduleWithFixedDelay(scheduledTask(task),
+			// Blocking task on scheduler thread for fixed delay semantics
+			return this.scheduledExecutor.scheduleWithFixedDelay(task,
 					NANO.convert(initialDelay), NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
@@ -245,7 +251,8 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
 		try {
-			return this.scheduledExecutor.scheduleWithFixedDelay(scheduledTask(task),
+			// Blocking task on scheduler thread for fixed delay semantics
+			return this.scheduledExecutor.scheduleWithFixedDelay(task,
 					0, NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
