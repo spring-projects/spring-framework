@@ -46,7 +46,7 @@ import org.springframework.lang.Nullable;
  * <pre class="code">
  * Optional&lt;Integer&gt; value = client.sql("SELECT AGE FROM CUSTOMER WHERE ID = :id")
  *     .param("id", 3)
- *     .query((rs, rowNum) -> rs.getInt(1))
+ *     .query(Integer.class)
  *     .optional();
  * </pre>
  *
