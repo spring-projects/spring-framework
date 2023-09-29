@@ -28,6 +28,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.expression.spel.SpelMessage.MAX_CONCATENATED_STRING_LENGTH_EXCEEDED;
 import static org.springframework.expression.spel.SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED;
+import static org.springframework.expression.spel.SpelMessage.NEGATIVE_REPEATED_TEXT_COUNT;
 
 /**
  * Tests the evaluation of expressions using various operators.
@@ -585,6 +586,13 @@ class OperatorTests extends AbstractExpressionTests {
 		assertThat(2 * repeatCount).isNegative();
 		// 5 is the position of the '*' (repeat operator)
 		evaluateAndCheckError("'ab' * " + repeatCount, String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 5);
+	}
+
+	@Test
+	void stringRepeatWithNegativeRepeatCount() {
+		// 4 is the position of the '*' (repeat operator)
+		// -1 is the negative repeat count
+		evaluateAndCheckError("'a' * -1", String.class, NEGATIVE_REPEATED_TEXT_COUNT, 4, -1);
 	}
 
 	@Test
