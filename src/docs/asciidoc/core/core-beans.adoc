@@ -8883,7 +8883,6 @@ classes, each depending on beans declared in the others:
 	}
 ----
 
-
 There is another way to achieve the same result. Remember that `@Configuration` classes are
 ultimately only another bean in the container: This means that they can take advantage of
 `@Autowired` and `@Value` injection and other features the same as any other bean.
@@ -8894,6 +8893,11 @@ Make sure that the dependencies you inject that way are of the simplest kind onl
 classes are processed quite early during the initialization of the context, and forcing a dependency
 to be injected this way may lead to unexpected early initialization. Whenever possible, resort to
 parameter-based injection, as in the preceding example.
+
+Avoid access to locally defined beans within a `@PostConstruct` method on the same configuration
+class. This effectively leads to a circular reference since non-static `@Bean` methods semantically
+require a fully initialized configuration class instance to be called on. With circular references
+disallowed (e.g. in Spring Boot 2.6+), this may trigger a `BeanCurrentlyInCreationException`.
 
 Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
 through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
