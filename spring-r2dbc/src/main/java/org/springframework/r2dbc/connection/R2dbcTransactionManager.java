@@ -209,7 +209,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				connectionMono = Mono.just(txObject.getConnectionHolder().getConnection());
 			}
 
-			return connectionMono.flatMap(con -> doBegin(definition, con)
+			return connectionMono.flatMap(con -> doBegin(con, txObject, definition)
 					.then(prepareTransactionalConnection(con, definition))
 					.doOnSuccess(v -> {
 						txObject.getConnectionHolder().setTransactionActive(true);
@@ -233,7 +233,10 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		}).then();
 	}
 
-	private Mono<Void> doBegin(TransactionDefinition definition, Connection con) {
+	private Mono<Void> doBegin(
+			Connection con, ConnectionFactoryTransactionObject transaction, TransactionDefinition definition) {
+
+		transaction.setMustRestoreAutoCommit(con.isAutoCommit());
 		io.r2dbc.spi.TransactionDefinition transactionDefinition = createTransactionDefinition(definition);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting R2DBC transaction on Connection [" + con + "] using [" + transactionDefinition + "]");
@@ -354,12 +357,22 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 					if (logger.isDebugEnabled()) {
 						logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
 					}
+					Mono<Void> restoreMono = Mono.empty();
+					if (txObject.isMustRestoreAutoCommit() && !con.isAutoCommit()) {
+						restoreMono = Mono.from(con.setAutoCommit(true));
+						if (logger.isDebugEnabled()) {
+							restoreMono = restoreMono.doOnError(ex ->
+									logger.debug(String.format("Error ignored during auto-commit restore: %s", ex)));
+						}
+						restoreMono = restoreMono.onErrorComplete();
+					}
 					Mono<Void> releaseMono = ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
 					if (logger.isDebugEnabled()) {
-						releaseMono = releaseMono.doOnError(
-								ex -> logger.debug(String.format("Error ignored during cleanup: %s", ex)));
+						releaseMono = releaseMono.doOnError(ex ->
+								logger.debug(String.format("Error ignored during connection release: %s", ex)));
 					}
-					return releaseMono.onErrorComplete();
+					releaseMono = releaseMono.onErrorComplete();
+					return restoreMono.then(releaseMono);
 				}
 			}
 			finally {
@@ -482,6 +495,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		private boolean newConnectionHolder;
 
+		private boolean mustRestoreAutoCommit;
+
 		@Nullable
 		private String savepointName;
 
@@ -505,6 +520,14 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		public boolean hasConnectionHolder() {
 			return (this.connectionHolder != null);
+		}
+
+		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
+			this.mustRestoreAutoCommit = mustRestoreAutoCommit;
+		}
+
+		public boolean isMustRestoreAutoCommit() {
+			return this.mustRestoreAutoCommit;
 		}
 
 		public boolean isTransactionActive() {
