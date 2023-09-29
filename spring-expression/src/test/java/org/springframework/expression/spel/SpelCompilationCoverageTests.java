@@ -579,8 +579,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parse("#root or #root");
 		Object resultI2 = expression.getValue(b);
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) resultI2).isFalse();
-		assertThat((boolean) (Boolean) expression.getValue(b)).isFalse();
+		assertThat((Boolean) resultI2).isFalse();
+		assertThat((Boolean) expression.getValue(b)).isFalse();
 	}
 
 	@Test
@@ -639,8 +639,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parse("#root and #root");
 		Object resultI2 = expression.getValue(b);
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) resultI2).isTrue();
-		assertThat((boolean) (Boolean) expression.getValue(b)).isTrue();
+		assertThat((Boolean) resultI2).isTrue();
+		assertThat((Boolean) expression.getValue(b)).isTrue();
 	}
 
 	@Test
@@ -749,12 +749,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		// Single size primitive (boolean)
 		expression = (SpelExpression) parser.parseExpression("#var?.a");
 		context.setVariable("var", new TestClass4());
-		assertThat((boolean) (Boolean) expression.getValue(context)).isFalse();
+		assertThat((Boolean) expression.getValue(context)).isFalse();
 		context.setVariable("var", null);
 		assertThat(expression.getValue(context)).isNull();
 		assertCanCompile(expression);
 		context.setVariable("var", new TestClass4());
-		assertThat((boolean) (Boolean) expression.getValue(context)).isFalse();
+		assertThat((Boolean) expression.getValue(context)).isFalse();
 		context.setVariable("var", null);
 		assertThat(expression.getValue(context)).isNull();
 
@@ -1359,282 +1359,282 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	public void opLt() throws Exception {
 		expression = parse("3.0d < 4.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("3446.0d < 1123.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("3 < 1");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("2 < 4");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3.0f < 1.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("1.0f < 5.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("30L < 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("15L < 20L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		// Differing types of number, not yet supported
 		expression = parse("1 < 3.0d");
 		assertCantCompile(expression);
 
 		expression = parse("T(Integer).valueOf(3) < 4");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Integer).valueOf(3) < T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("5 < T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 	}
 
 	@Test
 	public void opLe() throws Exception {
 		expression = parse("3.0d <= 4.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("3446.0d <= 1123.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3446.0d <= 3446.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3 <= 1");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("2 <= 4");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("3 <= 3");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3.0f <= 1.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("1.0f <= 5.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("2.0f <= 2.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("30L <= 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("15L <= 20L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		// Differing types of number, not yet supported
 		expression = parse("1 <= 3.0d");
 		assertCantCompile(expression);
 
 		expression = parse("T(Integer).valueOf(3) <= 4");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Integer).valueOf(3) <= T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5 <= T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 	}
 
 	@Test
 	public void opGt() throws Exception {
 		expression = parse("3.0d > 4.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3446.0d > 1123.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3 > 1");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("2 > 4");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("3.0f > 1.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("1.0f > 5.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("30L > 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("15L > 20L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		// Differing types of number, not yet supported
 		expression = parse("1 > 3.0d");
 		assertCantCompile(expression);
 
 		expression = parse("T(Integer).valueOf(3) > 4");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Integer).valueOf(3) > T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("5 > T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 	}
 
 	@Test
 	public void opGe() throws Exception {
 		expression = parse("3.0d >= 4.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3446.0d >= 1123.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("3446.0d >= 3446.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3 >= 1");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("2 >= 4");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3 >= 3");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3.0f >= 1.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("1.0f >= 5.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3.0f >= 3.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("40L >= 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("15L >= 20L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("30L >= 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		// Differing types of number, not yet supported
 		expression = parse("1 >= 3.0d");
 		assertCantCompile(expression);
 
 		expression = parse("T(Integer).valueOf(3) >= 4");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Integer).valueOf(3) >= T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5 >= T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 	}
 
 	@Test
 	public void opEq() throws Exception {
 		String tvar = "35";
 		expression = parse("#root == 35");
-		assertThat((boolean) (Boolean) expression.getValue(tvar)).isFalse();
+		assertThat((Boolean) expression.getValue(tvar)).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(tvar)).isFalse();
+		assertThat((Boolean) expression.getValue(tvar)).isFalse();
 
 		expression = parse("35 == #root");
 		expression.getValue(tvar);
-		assertThat((boolean) (Boolean) expression.getValue(tvar)).isFalse();
+		assertThat((Boolean) expression.getValue(tvar)).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(tvar)).isFalse();
+		assertThat((Boolean) expression.getValue(tvar)).isFalse();
 
 		TestClass7 tc7 = new TestClass7();
 		expression = parse("property == 'UK'");
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isTrue();
+		assertThat((Boolean) expression.getValue(tc7)).isTrue();
 		TestClass7.property = null;
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isFalse();
+		assertThat((Boolean) expression.getValue(tc7)).isFalse();
 		assertCanCompile(expression);
 		TestClass7.reset();
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isTrue();
+		assertThat((Boolean) expression.getValue(tc7)).isTrue();
 		TestClass7.property = "UK";
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isTrue();
+		assertThat((Boolean) expression.getValue(tc7)).isTrue();
 		TestClass7.reset();
 		TestClass7.property = null;
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isFalse();
+		assertThat((Boolean) expression.getValue(tc7)).isFalse();
 		expression = parse("property == null");
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isTrue();
+		assertThat((Boolean) expression.getValue(tc7)).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(tc7)).isTrue();
+		assertThat((Boolean) expression.getValue(tc7)).isTrue();
 
 		expression = parse("3.0d == 4.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3446.0d == 3446.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3 == 1");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("3 == 3");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("3.0f == 1.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("2.0f == 2.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("30L == 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("15L == 20L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		// number types are not the same
 		expression = parse("1 == 3.0d");
@@ -1642,228 +1642,228 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		Double d = 3.0d;
 		expression = parse("#root==3.0d");
-		assertThat((boolean) (Boolean) expression.getValue(d)).isTrue();
+		assertThat((Boolean) expression.getValue(d)).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(d)).isTrue();
+		assertThat((Boolean) expression.getValue(d)).isTrue();
 
 		Integer i = 3;
 		expression = parse("#root==3");
-		assertThat((boolean) (Boolean) expression.getValue(i)).isTrue();
+		assertThat((Boolean) expression.getValue(i)).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(i)).isTrue();
+		assertThat((Boolean) expression.getValue(i)).isTrue();
 
 		Float f = 3.0f;
 		expression = parse("#root==3.0f");
-		assertThat((boolean) (Boolean) expression.getValue(f)).isTrue();
+		assertThat((Boolean) expression.getValue(f)).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(f)).isTrue();
+		assertThat((Boolean) expression.getValue(f)).isTrue();
 
 		long l = 300L;
 		expression = parse("#root==300l");
-		assertThat((boolean) (Boolean) expression.getValue(l)).isTrue();
+		assertThat((Boolean) expression.getValue(l)).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(l)).isTrue();
+		assertThat((Boolean) expression.getValue(l)).isTrue();
 
 		boolean b = true;
 		expression = parse("#root==true");
-		assertThat((boolean) (Boolean) expression.getValue(b)).isTrue();
+		assertThat((Boolean) expression.getValue(b)).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue(b)).isTrue();
+		assertThat((Boolean) expression.getValue(b)).isTrue();
 
 		expression = parse("T(Integer).valueOf(3) == 4");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Integer).valueOf(3) == T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5 == T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Float).valueOf(3.0f) == 4.0f");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Float).valueOf(3.0f) == T(Float).valueOf(3.0f)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5.0f == T(Float).valueOf(3.0f)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Long).valueOf(3L) == 4L");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Long).valueOf(3L) == T(Long).valueOf(3L)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5L == T(Long).valueOf(3L)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Double).valueOf(3.0d) == 4.0d");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Double).valueOf(3.0d) == T(Double).valueOf(3.0d)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5.0d == T(Double).valueOf(3.0d)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("false == true");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Boolean).valueOf('true') == T(Boolean).valueOf('true')");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Boolean).valueOf('true') == true");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("false == T(Boolean).valueOf('false')");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 	}
 
 	@Test
 	public void opNe() throws Exception {
 		expression = parse("3.0d != 4.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("3446.0d != 3446.0d");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("3 != 1");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("3 != 3");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("3.0f != 1.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		expression = parse("2.0f != 2.0f");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("30L != 30L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		expression = parse("15L != 20L");
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		// not compatible number types
 		expression = parse("1 != 3.0d");
 		assertCantCompile(expression);
 
 		expression = parse("T(Integer).valueOf(3) != 4");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Integer).valueOf(3) != T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("5 != T(Integer).valueOf(3)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Float).valueOf(3.0f) != 4.0f");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Float).valueOf(3.0f) != T(Float).valueOf(3.0f)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("5.0f != T(Float).valueOf(3.0f)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Long).valueOf(3L) != 4L");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Long).valueOf(3L) != T(Long).valueOf(3L)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("5L != T(Long).valueOf(3L)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Double).valueOf(3.0d) == 4.0d");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Double).valueOf(3.0d) == T(Double).valueOf(3.0d)");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("5.0d == T(Double).valueOf(3.0d)");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("false == true");
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isFalse();
+		assertThat((Boolean) expression.getValue()).isFalse();
 
 		expression = parse("T(Boolean).valueOf('true') == T(Boolean).valueOf('true')");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("T(Boolean).valueOf('true') == true");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 
 		expression = parse("false == T(Boolean).valueOf('false')");
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 		assertCanCompile(expression);
-		assertThat((boolean) (Boolean) expression.getValue()).isTrue();
+		assertThat((Boolean) expression.getValue()).isTrue();
 	}
 
 	@Test
@@ -3544,8 +3544,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		ex = parser.parseRaw("#it?.age.equals([0])");
 		context = new StandardEvaluationContext(new Object[] {person2.getAge()});
 		context.setVariable("it", person2);
-		assertThat((boolean) (Boolean) ex.getValue(context)).isTrue();
-		assertThat((boolean) (Boolean) ex.getValue(context)).isTrue();
+		assertThat((Boolean) ex.getValue(context)).isTrue();
+		assertThat((Boolean) ex.getValue(context)).isTrue();
 	}
 
 	@Test
