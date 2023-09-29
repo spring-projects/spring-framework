@@ -109,7 +109,10 @@ class JmsAccessorTests {
 
 		accessor.setSessionAcknowledgeMode(Session.SESSION_TRANSACTED);
 		assertThat(accessor.getSessionAcknowledgeMode()).isEqualTo(Session.SESSION_TRANSACTED);
+	}
 
+	@Test
+	void setCustomSessionAcknowledgeMode() {
 		accessor.setSessionAcknowledgeMode(999);
 		assertThat(accessor.getSessionAcknowledgeMode()).isEqualTo(999);
 	}
