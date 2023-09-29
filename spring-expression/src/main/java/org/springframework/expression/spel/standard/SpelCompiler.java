@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,8 +184,9 @@ public final class SpelCompiler implements Opcodes {
 		cf.finish();
 
 		byte[] data = cw.toByteArray();
-		// TODO need to make this conditionally occur based on a debug flag
-		// dump(expressionToCompile.toStringAST(), clazzName, data);
+		// TODO Save generated class files conditionally based on a debug flag.
+		// Source code for the following method resides in SpelCompilationCoverageTests.
+		// saveGeneratedClassFile(expressionToCompile.toStringAST(), className, data);
 		return loadClass(StringUtils.replace(className, "/", "."), data);
 	}
 
