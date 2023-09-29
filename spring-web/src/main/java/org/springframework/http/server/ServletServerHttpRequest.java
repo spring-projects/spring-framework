@@ -209,7 +209,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public InputStream getBody() throws IOException {
-		if (isFormPost(this.servletRequest)) {
+		if (isFormPost(this.servletRequest) && this.servletRequest.getQueryString() == null) {
 			return getBodyFromServletRequestParameters(this.servletRequest);
 		}
 		else {

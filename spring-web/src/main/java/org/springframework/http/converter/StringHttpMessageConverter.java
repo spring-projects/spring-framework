@@ -93,7 +93,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
-		return StreamUtils.copyToString(inputMessage.getBody(), charset);
+		long length = inputMessage.getHeaders().getContentLength();
+		byte[] bytes = (length >= 0 && length <= Integer.MAX_VALUE ?
+				inputMessage.getBody().readNBytes((int) length) :
+				inputMessage.getBody().readAllBytes());
+		return new String(bytes, charset);
 	}
 
 	@Override
