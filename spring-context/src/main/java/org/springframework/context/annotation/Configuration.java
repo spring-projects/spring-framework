@@ -105,8 +105,8 @@ import org.springframework.stereotype.Component;
  *
  * }</pre>
  *
- * <p>{@code @Configuration} classes may not only be bootstrapped using
- * component scanning, but may also themselves <em>configure</em> component scanning using
+ * <p>{@code @Configuration} classes may not only be bootstrapped using component
+ * scanning, but may also themselves <em>configure</em> component scanning using
  * the {@link ComponentScan @ComponentScan} annotation:
  *
  * <pre class="code">
