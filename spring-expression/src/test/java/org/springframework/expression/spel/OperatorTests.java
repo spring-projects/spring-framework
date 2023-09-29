@@ -579,6 +579,12 @@ class OperatorTests extends AbstractExpressionTests {
 
 		// 4 is the position of the '*' (repeat operator)
 		evaluateAndCheckError("'a' * 257", String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 4);
+
+		// Integer overflow: 2 * ((Integer.MAX_VALUE / 2) + 1) --> integer overflow
+		int repeatCount = (Integer.MAX_VALUE / 2) + 1;
+		assertThat(2 * repeatCount).isNegative();
+		// 5 is the position of the '*' (repeat operator)
+		evaluateAndCheckError("'ab' * " + repeatCount, String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 5);
 	}
 
 	@Test
