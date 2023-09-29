@@ -22,6 +22,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.test.AddPropertyBeanPropertyRowMapper;
+import org.springframework.jdbc.core.test.AddPropertyPerson;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.DatePerson;
 import org.springframework.jdbc.core.test.EmailPerson;
@@ -177,6 +179,16 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 	void underscoreName(String input, String expected) {
 		BeanPropertyRowMapper<?> mapper = new BeanPropertyRowMapper<>(Object.class);
 		assertThat(mapper.underscoreName(input)).isEqualTo(expected);
+	}
+
+	@Test
+	void staticQueryWithRowMapperAddProperty() throws Exception {
+		Mock mock = new Mock();
+		AddPropertyPerson person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birth_date, balance from people",
+				new AddPropertyBeanPropertyRowMapper<>(AddPropertyPerson.class));
+		verifyPerson(person);
+		mock.verifyClosed();
 	}
 
 }

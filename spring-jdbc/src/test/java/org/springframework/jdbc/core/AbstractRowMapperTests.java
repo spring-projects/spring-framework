@@ -28,6 +28,7 @@ import java.util.Date;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.jdbc.core.test.AddPropertyPerson;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.DatePerson;
@@ -89,6 +90,13 @@ public abstract class AbstractRowMapperTests {
 		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
 		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
 		verifyPersonViaBeanWrapper(person);
+	}
+
+	protected void verifyPerson(AddPropertyPerson person) {
+		assertThat(person.getNickname()).isEqualTo("Bubba");
+		assertThat(person.getYear()).isEqualTo(22L);
+		assertThat(person.getDateOfBirth()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.getBalance()).isEqualTo(new BigDecimal("1234.56"));
 	}
 
 	protected void verifyPersonViaBeanWrapper(Object person) {
