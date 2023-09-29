@@ -195,7 +195,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @see #hasAlias
 	 */
 	protected void checkForAliasCircle(String name, String alias) {
-		if (hasAlias(alias, name)) {
+		if (hasAlias(name, alias)) {
 			throw new IllegalStateException("Cannot register alias '" + alias +
 					"' for name '" + name + "': Circular reference - '" +
 					name + "' is a direct or indirect alias for '" + alias + "' already");

@@ -17,8 +17,12 @@
 package org.springframework.core;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.util.StringValueResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link SimpleAliasRegistry}.
@@ -43,6 +47,7 @@ class SimpleAliasRegistryTests {
 		assertThat(registry.canonicalName("testAlias")).isEqualTo("test");
 		assertThat(registry.canonicalName("testAlias2")).isEqualTo("test");
 		assertThat(registry.canonicalName("testAlias3")).isEqualTo("test");
+
 	}
 
 	@Test  // SPR-17191
@@ -93,6 +98,54 @@ class SimpleAliasRegistryTests {
 		assertThat(registry.getAliases("testAlias2")).containsExactly("testAlias3");
 
 		assertThat(registry.getAliases("testAlias3")).isEmpty();
+	}
+
+	@Test
+	void testCheckForAliasCircle() {
+		String name = "testName";
+		String alias = "testAlias";
+		registry.checkForAliasCircle(name, alias);
+		registry.registerAlias(name, alias);
+		assertThatExceptionOfType(IllegalStateException.class)
+				.isThrownBy(() -> registry.checkForAliasCircle(name, alias));
+	}
+
+	@Test
+	void testResolveAliases() {
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> registry.resolveAliases(null));
+
+		StringValueResolver mock = mock();
+
+		registry.registerAlias("testName1", "testAlias1");
+		registry.registerAlias("testName2", "testAlias2");
+		when(mock.resolveStringValue("testAlias2")).thenReturn("anotherAlias2");
+		when(mock.resolveStringValue("testName2")).thenReturn("anotherName2");
+		registry.resolveAliases(mock);
+		assertThat(registry.getAliases("anotherName2")).containsExactly("anotherAlias2");
+
+		registry.registerAlias("testName3", "testAlias3");
+		registry.registerAlias("testName4", "testAlias4");
+		registry.registerAlias("testName5", "testAlias5");
+		when(mock.resolveStringValue("testName5")).thenReturn("testName5");
+		when(mock.resolveStringValue("testAlias5")).thenReturn("testAlias5");
+		when(mock.resolveStringValue("testName3")).thenReturn("testName4");
+		when(mock.resolveStringValue("testAlias3")).thenReturn("testAlias4");
+		when(mock.resolveStringValue("testName4")).thenReturn("testName4");
+		when(mock.resolveStringValue("testAlias4")).thenReturn("testAlias5");
+		assertThatExceptionOfType(IllegalStateException.class)
+				.isThrownBy(() -> registry.resolveAliases(mock));
+
+		when(mock.resolveStringValue("testName4")).thenReturn("testName5");
+		when(mock.resolveStringValue("testAlias4")).thenReturn("testAlias4");
+		assertThatExceptionOfType(IllegalStateException.class)
+				.isThrownBy(() -> registry.resolveAliases(mock));
+
+		when(mock.resolveStringValue("testName4")).thenReturn("testName4");
+		when(mock.resolveStringValue("testAlias4")).thenReturn("testAlias5");
+		registry.resolveAliases(mock);
+		assertThat(registry.getAliases("testName4")).containsExactly("testAlias4");
+		assertThat(registry.getAliases("testName5")).containsExactly("testAlias5");
 	}
 
 }
