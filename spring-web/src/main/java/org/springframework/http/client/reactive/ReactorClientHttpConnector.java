@@ -139,7 +139,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		HttpClient.RequestSender requestSender = this.httpClient
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()));
 
-		requestSender = (uri.isAbsolute() ? requestSender.uri(uri) : requestSender.uri(uri.toString()));
+		requestSender = setUri(requestSender, uri);
 
 		return requestSender
 				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
@@ -154,6 +154,18 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 						response.releaseAfterCancel(method);
 					}
 				});
+	}
+
+	private static HttpClient.RequestSender setUri(HttpClient.RequestSender requestSender, URI uri) {
+		if (uri.isAbsolute()) {
+			try {
+				return requestSender.uri(uri);
+			}
+			catch (Exception ex) {
+				// Fall back on passing it in as a String
+			}
+		}
+		return requestSender.uri(uri.toString());
 	}
 
 	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request,
