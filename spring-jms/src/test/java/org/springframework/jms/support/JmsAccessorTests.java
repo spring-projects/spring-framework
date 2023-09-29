@@ -98,8 +98,6 @@ class JmsAccessorTests {
 
 	@Test
 	void setSessionAcknowledgeMode() {
-		assertThatIllegalArgumentException().isThrownBy(() -> accessor.setSessionAcknowledgeMode(999));
-
 		accessor.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
 		assertThat(accessor.getSessionAcknowledgeMode()).isEqualTo(Session.AUTO_ACKNOWLEDGE);
 
@@ -111,6 +109,12 @@ class JmsAccessorTests {
 
 		accessor.setSessionAcknowledgeMode(Session.SESSION_TRANSACTED);
 		assertThat(accessor.getSessionAcknowledgeMode()).isEqualTo(Session.SESSION_TRANSACTED);
+	}
+
+	@Test
+	void setCustomSessionAcknowledgeMode() {
+		accessor.setSessionAcknowledgeMode(999);
+		assertThat(accessor.getSessionAcknowledgeMode()).isEqualTo(999);
 	}
 
 	@Test
