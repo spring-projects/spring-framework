@@ -515,9 +515,9 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Determine whether the descriptor is for a primitive type.
+	 * Determine whether the descriptor is for a primitive type or {@code void}.
 	 * @param descriptor type descriptor
-	 * @return {@code true} if a primitive type
+	 * @return {@code true} if a primitive type or {@code void}
 	 */
 	public static boolean isPrimitive(@Nullable String descriptor) {
 		return (descriptor != null && descriptor.length() == 1);

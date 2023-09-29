@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
@@ -55,6 +57,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 4.1
  */
 public class SpelCompilationCoverageTests extends AbstractExpressionTests {
@@ -768,6 +771,34 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(context)).isNull();
 	}
 
+	@Test  // gh-27421
+	public void nullSafeMethodChainingWithNonStaticVoidMethod() throws Exception {
+		FooObjectHolder foh = new FooObjectHolder();
+		StandardEvaluationContext context = new StandardEvaluationContext(foh);
+		SpelExpression expression = (SpelExpression) parser.parseExpression("getFoo()?.doFoo()");
+
+		FooObject.doFooInvoked = false;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isTrue();
+
+		FooObject.doFooInvoked = false;
+		foh.foo = null;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isFalse();
+
+		assertCanCompile(expression);
+
+		FooObject.doFooInvoked = false;
+		foh.foo = new FooObject();
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isTrue();
+
+		FooObject.doFooInvoked = false;
+		foh.foo = null;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isFalse();
+	}
+
 	@Test
 	public void nullsafeMethodChaining_SPR16489() throws Exception {
 		FooObjectHolder foh = new FooObjectHolder();
@@ -995,6 +1026,60 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(ctx).toString()).isEqualTo("4.0");
 		assertCanCompile(expression);
 		assertThat(expression.getValue(ctx).toString()).isEqualTo("4.0");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"voidMethod", "voidWrapperMethod"})
+	public void voidFunctionReference(String method) throws Exception {
+		assertVoidFunctionReferenceBehavior(method);
+	}
+
+	private void assertVoidFunctionReferenceBehavior(String methodName) throws Exception {
+		Method method = getClass().getDeclaredMethod(methodName, String.class);
+
+		EvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("voidMethod", method);
+
+		expression = parser.parseExpression("#voidMethod('a')");
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("a");
+		assertCanCompile(expression);
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("a");
+		assertCanCompile(expression);
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("a");
+		assertCanCompile(expression);
+
+		expression = parser.parseExpression("#voidMethod(#a)");
+		ctx.setVariable("a", "foo");
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("foo");
+		assertCanCompile(expression);
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("foo");
+		assertCanCompile(expression);
+	}
+
+	private static String voidMethodInvokedWith;
+
+	public static Void voidWrapperMethod(String str) {
+		voidMethodInvokedWith = str;
+		return null;
+	}
+
+	public static void voidMethod(String str) {
+		voidMethodInvokedWith = str;
 	}
 
 	@Test
@@ -3841,6 +3926,74 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 	}
 
+	@Test  // gh-27421
+	public void nullSafeInvocationOfNonStaticVoidMethod() {
+		// non-static method, no args, void return
+		expression = parser.parseExpression("new %s()?.one()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfStaticVoidMethod() {
+		// static method, no args, void return
+		expression = parser.parseExpression("T(%s)?.two()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfNonStaticVoidWrapperMethod() {
+		// non-static method, no args, Void return
+		expression = parser.parseExpression("new %s()?.oneVoidWrapper()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfStaticVoidWrapperMethod() {
+		// static method, no args, Void return
+		expression = parser.parseExpression("T(%s)?.twoVoidWrapper()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
 	@Test
 	void methodReference() {
 		TestClass5 tc = new TestClass5();
@@ -5405,7 +5558,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	public static class FooObject {
 
+		static boolean doFooInvoked = false;
+
 		public Object getObject() { return "hello"; }
+		public void doFoo() { doFooInvoked = true; }
 	}
 
 
@@ -5653,9 +5809,23 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			field = null;
 		}
 
-		public void one() { i = 1; }
+		public void one() {
+			_i = 1;
+			this.i = 1;
+		}
+
+		public Void oneVoidWrapper() {
+			_i = 1;
+			this.i = 1;
+			return null;
+		}
 
 		public static void two() { _i = 1; }
+
+		public static Void twoVoidWrapper() {
+			_i = 1;
+			return null;
+		}
 
 		public String three() { return "hello"; }
 		public long four() { return 3277700L; }
@@ -6254,5 +6424,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			_valueF2 = value==null?null:Float.valueOf(value);
 		}
 	}
+
+	// NOTE: saveGeneratedClassFile() can be copied to SpelCompiler and uncommented
+	// at the end of createExpressionClass(SpelNodeImpl) in order to review generated
+	// byte code for debugging purposes.
+	//
+	// private static void saveGeneratedClassFile(String stringAST, String className, byte[] data) {
+	//		Path path = Path.of("build", StringUtils.replace(className, "/", ".") + ".class");
+	//		System.out.println("Writing compiled SpEL expression [%s] to [%s]".formatted(stringAST, path.toAbsolutePath()));
+	//		try {
+	//			Files.copy(new ByteArrayInputStream(data), path);
+	//		}
+	//		catch (IOException ex) {
+	//			throw new UncheckedIOException(ex);
+	//		}
+	//	}
 
 }
