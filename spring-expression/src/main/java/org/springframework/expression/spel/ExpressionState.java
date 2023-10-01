@@ -93,7 +93,7 @@ public class ExpressionState {
 
 	public ExpressionState(EvaluationContext context, TypedValue rootObject, SpelParserConfiguration configuration) {
 		Assert.notNull(context, "EvaluationContext must not be null");
-		Assert.notNull(context, "'rootObject' must not be null");
+		Assert.notNull(rootObject, "'rootObject' must not be null");
 		Assert.notNull(configuration, "SpelParserConfiguration must not be null");
 		this.relatedContext = context;
 		this.rootObject = rootObject;
