@@ -314,20 +314,22 @@ public class MethodReference extends SpelNodeImpl {
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
 
-		Label skipIfNull = null;
 		if (descriptor == null && !isStaticMethod) {
 			// Nothing on the stack but something is needed
 			cf.loadTarget(mv);
 		}
-		if ((descriptor != null || !isStaticMethod) && this.nullSafe) {
-			mv.visitInsn(DUP);
+
+		Label skipIfNull = null;
+		if (this.nullSafe && (descriptor != null || !isStaticMethod)) {
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
+			mv.visitInsn(DUP);
 			mv.visitJumpInsn(IFNONNULL, continueLabel);
 			CodeFlow.insertCheckCast(mv, this.exitTypeDescriptor);
 			mv.visitJumpInsn(GOTO, skipIfNull);
 			mv.visitLabel(continueLabel);
 		}
+
 		if (descriptor != null && isStaticMethod) {
 			// Something on the stack when nothing is needed
 			mv.visitInsn(POP);
