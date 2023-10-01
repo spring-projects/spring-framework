@@ -414,9 +414,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * {@link Sql#scripts}.
 	 */
 	private String detectDefaultScript(Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
-		if (!classLevel && testMethod == null) {
-			throw new AssertionError("Method-level @Sql requires a testMethod");
-		}
+		Assert.state(classLevel || testMethod != null, "Method-level @Sql requires a testMethod");
 
 		String elementType = (classLevel ? "class" : "method");
 		String elementName = (classLevel ? testClass.getName() : testMethod.toString());
@@ -460,7 +458,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	private static boolean isValidMethodLevelPhase(ExecutionPhase executionPhase) {
 		// Class-level phases cannot be used on methods.
-		return executionPhase != ExecutionPhase.BEFORE_TEST_CLASS &&
-				executionPhase != ExecutionPhase.AFTER_TEST_CLASS;
+		return executionPhase == ExecutionPhase.BEFORE_TEST_METHOD ||
+				executionPhase == ExecutionPhase.AFTER_TEST_METHOD;
 	}
 }

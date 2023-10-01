@@ -32,6 +32,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 /**
  * Verifies that {@link Sql @Sql} with {@link Sql.ExecutionPhase#AFTER_TEST_CLASS} is run after all tests in the class
  * have been run.
@@ -69,12 +71,10 @@ class AfterTestClassSqlScriptsTests extends AbstractTransactionalTests {
 		@Override
 		public void afterTestClass(TestContext testContext) throws Exception {
 			DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext, null);
-			try {
-				new JdbcTemplate(dataSource).queryForList("SELECT name FROM user", String.class);
-				throw new AssertionError("BadSqlGrammarException should have been thrown.");
-			}
-			catch (BadSqlGrammarException expected) {
-			}
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
+			assertThatExceptionOfType(BadSqlGrammarException.class)
+					.isThrownBy(() -> jdbcTemplate.queryForList("SELECT name FROM user", String.class));
 		}
 
 		@Override
