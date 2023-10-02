@@ -408,9 +408,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * Retrieve a JDBC object value for the specified column.
 	 * <p>The default implementation calls
 	 * {@link JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)}
-	 * using the type of the specified {@link PropertyDescriptor}
-	 * Subclasses may override this to check specific value types upfront,
-	 * or to post-process values return from {@code getResultSetValue}.
+	 * using the type of the specified {@link PropertyDescriptor}.
+	 * <p>Subclasses may override this to check specific value types upfront,
+	 * or to post-process values returned from {@code getResultSetValue}.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param pd the bean property that each result object is expected to match
@@ -427,8 +427,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * Retrieve a JDBC object value for the specified column.
 	 * <p>The default implementation calls
 	 * {@link JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)}.
-	 * Subclasses may override this to check specific value types upfront,
-	 * or to post-process values return from {@code getResultSetValue}.
+	 * <p>Subclasses may override this to check specific value types upfront,
+	 * or to post-process values returned from {@code getResultSetValue}.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param paramType the target parameter type
