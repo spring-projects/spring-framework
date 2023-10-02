@@ -725,7 +725,7 @@ public class CorsConfiguration {
 	 * Contains both the user-declared pattern (e.g. "https://*.domain.com") and
 	 * the regex {@link Pattern} derived from it.
 	 */
-	private static class OriginPattern {
+	public static class OriginPattern {
 
 		private static final Pattern PORTS_PATTERN = Pattern.compile("(.*):\\[(\\*|\\d+(,\\d+)*)]");
 
