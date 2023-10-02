@@ -149,6 +149,11 @@ class BeanRegistrationsAotContributionTests {
 		assertThat(reflection().onType(TestBean.class)
 				.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
+		for (Class<?> interfaceType : TestBean.class.getInterfaces()) {
+			assertThat(reflection().onType(interfaceType)
+					.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+					.accepts(this.generationContext.getRuntimeHints());
+		}
 	}
 
 	@Test
