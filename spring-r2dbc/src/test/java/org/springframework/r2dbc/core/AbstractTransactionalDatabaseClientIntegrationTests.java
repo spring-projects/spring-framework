@@ -69,7 +69,7 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 		Mono.from(connectionFactory.create())
 				.flatMapMany(connection -> Flux.from(connection.createStatement("DROP TABLE legoset").execute())
 						.flatMap(Result::getRowsUpdated)
-						.onErrorResume(e -> Mono.empty())
+						.onErrorComplete()
 						.thenMany(connection.createStatement(getCreateTableStatement()).execute())
 						.flatMap(Result::getRowsUpdated).thenMany(connection.close())).as(StepVerifier::create).verifyComplete();
 

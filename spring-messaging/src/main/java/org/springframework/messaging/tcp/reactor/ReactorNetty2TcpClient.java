@@ -256,12 +256,12 @@ public class ReactorNetty2TcpClient<P> implements TcpOperations<P> {
 			this.channelGroup.close().addListener(future -> channnelGroupCloseSink.tryEmitEmpty());
 			result = channnelGroupCloseSink.asMono();
 			if (this.loopResources != null) {
-				result = result.onErrorResume(ex -> Mono.empty()).then(this.loopResources.disposeLater());
+				result = result.onErrorComplete().then(this.loopResources.disposeLater());
 			}
 			if (this.poolResources != null) {
-				result = result.onErrorResume(ex -> Mono.empty()).then(this.poolResources.disposeLater());
+				result = result.onErrorComplete().then(this.poolResources.disposeLater());
 			}
-			result = result.onErrorResume(ex -> Mono.empty()).then(stopScheduler());
+			result = result.onErrorComplete().then(stopScheduler());
 		}
 		else {
 			result = stopScheduler();

@@ -223,7 +223,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		return lookupTemplate(locale)
 				.map(template -> Boolean.TRUE)
 				.switchIfEmpty(Mono.just(Boolean.FALSE))
-				.onErrorResume(FileNotFoundException.class, t -> Mono.just(Boolean.FALSE))
+				.onErrorReturn(FileNotFoundException.class, Boolean.FALSE)
 				.onErrorMap(ParseException.class, ex -> new ApplicationContextException(
 						"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex))
 				.onErrorMap(IOException.class, ex -> new ApplicationContextException(

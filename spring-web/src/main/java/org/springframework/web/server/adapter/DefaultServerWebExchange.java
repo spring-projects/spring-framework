@@ -249,11 +249,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	public Mono<Void> cleanupMultipart() {
 		if (this.multipartRead) {
 			return getMultipartData()
-					.onErrorResume(t -> Mono.empty()) // ignore errors reading multipart data
+					.onErrorComplete() // ignore errors reading multipart data
 					.flatMapIterable(Map::values)
 					.flatMapIterable(Function.identity())
 					.flatMap(part -> part.delete()
-									.onErrorResume(ex -> Mono.empty()))
+									.onErrorComplete())
 					.then();
 		}
 		else {
