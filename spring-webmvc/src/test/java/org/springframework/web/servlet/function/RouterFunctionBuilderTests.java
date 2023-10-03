@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -116,6 +118,23 @@ class RouterFunctionBuilderTests {
 				.map(handlerFunction -> handle(handlerFunction, invalidRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).isEmpty();
+	}
+
+	@Test
+	public void resourcesCaching() {
+		Resource resource = new ClassPathResource("/org/springframework/web/servlet/function/");
+		assertThat(resource.exists()).isTrue();
+
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.resources("/resources/**", resource, (r, headers) -> headers.setCacheControl(CacheControl.maxAge(Duration.ofSeconds(60))))
+						.build();
+
+		ServerRequest resourceRequest = initRequest("GET", "/resources/response.txt");
+
+		Optional<String> responseCacheControl = route.route(resourceRequest)
+				.map(handlerFunction -> handle(handlerFunction, resourceRequest))
+				.map(response -> response.headers().getCacheControl());
+		assertThat(responseCacheControl).contains("max-age=60");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
-import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -46,18 +47,13 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 
 	private final Resource resource;
-	private final CacheControl cacheControl;
+
+	private final BiConsumer<Resource, HttpHeaders> headersConsumer;
 
 
-	public ResourceHandlerFunction(Resource resource) {
+	public ResourceHandlerFunction(Resource resource, BiConsumer<Resource, HttpHeaders> headersConsumer) {
 		this.resource = resource;
-		this.cacheControl = CacheControl.empty();
-	}
-
-
-	public ResourceHandlerFunction(Resource resource, ResourceCacheLookupStrategy strategy) {
-		this.resource = resource;
-		this.cacheControl = strategy.lookupCacheControl(resource);
+		this.headersConsumer = headersConsumer;
 	}
 
 
@@ -66,14 +62,14 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 		HttpMethod method = request.method();
 		if (HttpMethod.GET.equals(method)) {
 			return EntityResponse.fromObject(this.resource)
-					.cacheControl(this.cacheControl)
+					.headers(headers -> this.headersConsumer.accept(this.resource, headers))
 					.build()
 					.map(response -> response);
 		}
 		else if (HttpMethod.HEAD.equals(method)) {
 			Resource headResource = new HeadMethodResource(this.resource);
 			return EntityResponse.fromObject(headResource)
-					.cacheControl(this.cacheControl)
+					.headers(headers -> this.headersConsumer.accept(this.resource, headers))
 					.build()
 					.map(response -> response);
 		}
