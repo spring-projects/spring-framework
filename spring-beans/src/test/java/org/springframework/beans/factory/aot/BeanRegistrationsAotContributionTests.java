@@ -36,7 +36,9 @@ import org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Re
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.beans.testfixture.beans.GenericBeanWithBounds;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.Person;
 import org.springframework.beans.testfixture.beans.RecordBean;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -141,19 +143,17 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToRegisterReflectionHints() {
-		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(TestBean.class));
+		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(Employee.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(this.methodGeneratorFactory,
 				registeredBean, null, List.of());
-		BeanRegistrationsAotContribution contribution = createContribution(TestBean.class, generator);
+		BeanRegistrationsAotContribution contribution = createContribution(Employee.class, generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
-		assertThat(reflection().onType(TestBean.class)
+		assertThat(reflection().onType(Employee.class)
 				.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
-		for (Class<?> interfaceType : TestBean.class.getInterfaces()) {
-			assertThat(reflection().onType(interfaceType)
-					.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
-					.accepts(this.generationContext.getRuntimeHints());
-		}
+		assertThat(reflection().onType(ITestBean.class)
+				.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+				.accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test

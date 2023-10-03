@@ -36,6 +36,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -118,8 +119,14 @@ class BeanRegistrationsAotContribution
 			ReflectionHints hints = runtimeHints.reflection();
 			Class<?> beanClass = beanRegistrationKey.beanClass();
 			hints.registerType(beanClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			for (Class<?> interfaceType : beanClass.getInterfaces()) {
-				hints.registerType(interfaceType, MemberCategory.INTROSPECT_PUBLIC_METHODS);
+			Class<?> currentClass = beanClass;
+			while (currentClass != null && currentClass != Object.class) {
+				for (Class<?> interfaceType : currentClass.getInterfaces()) {
+					if (!ClassUtils.isJavaLanguageInterface(interfaceType)) {
+						hints.registerType(interfaceType, MemberCategory.INTROSPECT_PUBLIC_METHODS);
+					}
+				}
+				currentClass = currentClass.getSuperclass();
 			}
 			// Workaround for https://github.com/oracle/graal/issues/6510
 			if (beanClass.isRecord()) {
