@@ -17,6 +17,7 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,18 +47,18 @@ import static org.mockito.Mockito.verify;
  */
 class WebAsyncManagerTests {
 
-	private AsyncWebRequest asyncWebRequest = mock();
+	private final AsyncWebRequest asyncWebRequest = mock();
 
-	private MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+	private final MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 
-	private WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
+	private final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 
 
 	@BeforeEach
 	void setup() {
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		this.asyncManager.setAsyncWebRequest(this.asyncWebRequest);
-		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
+		verify(this.asyncWebRequest).addCompletionHandler(notNull());
 		reset(this.asyncWebRequest);
 	}
 
@@ -133,6 +134,26 @@ class WebAsyncManagerTests {
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, task);
 		verify(interceptor).preProcess(this.asyncWebRequest, task);
 		verify(interceptor).postProcess(this.asyncWebRequest, task, concurrentResult);
+	}
+
+	@Test // gh-30232
+	void startCallableProcessingSubmitException() throws Exception {
+		RuntimeException ex = new RuntimeException();
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.setTaskExecutor(new SimpleAsyncTaskExecutor() {
+			@Override
+			public Future<?> submit(Runnable task) {
+				throw ex;
+			}
+		});
+		this.asyncManager.startCallableProcessing(() -> "not used");
+
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(ex);
+
+		verifyDefaultAsyncScenario();
 	}
 
 	@Test
