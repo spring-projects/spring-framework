@@ -231,7 +231,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 					Flux<?> flux = content
 							.filter(this::nonEmptyDataBuffer)
 							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
-							.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
+							.onErrorMap(ex -> handleReadError(parameter, message, ex));
 					if (isContentRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(parameter, message)));
 					}
@@ -245,7 +245,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 					Mono<?> mono = content.next()
 							.filter(this::nonEmptyDataBuffer)
 							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
-							.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
+							.onErrorMap(ex -> handleReadError(parameter, message, ex));
 					if (isContentRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(parameter, message)));
 					}

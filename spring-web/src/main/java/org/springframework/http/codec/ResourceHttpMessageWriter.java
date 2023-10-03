@@ -191,7 +191,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		if (InputStreamResource.class != resource.getClass()) {
 			return Mono.fromCallable(resource::contentLength)
 					.filter(length -> length != -1)
-					.onErrorResume(IOException.class, t -> Mono.empty())
+					.onErrorComplete(IOException.class)
 					.subscribeOn(Schedulers.boundedElastic());
 		}
 		else {

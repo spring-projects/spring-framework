@@ -228,8 +228,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 									.then(Mono.error(ex));
 						}
 						return Mono.error(ex);
-					})).onErrorResume(ex -> Mono.error(new CannotCreateTransactionException(
-							"Could not open R2DBC Connection for transaction", ex)));
+					})).onErrorMap(ex -> new CannotCreateTransactionException(
+							"Could not open R2DBC Connection for transaction", ex));
 		}).then();
 	}
 

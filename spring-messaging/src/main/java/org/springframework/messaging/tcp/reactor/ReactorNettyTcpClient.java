@@ -254,12 +254,12 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		if (this.channelGroup != null) {
 			result = FutureMono.from(this.channelGroup.close());
 			if (this.loopResources != null) {
-				result = result.onErrorResume(ex -> Mono.empty()).then(this.loopResources.disposeLater());
+				result = result.onErrorComplete().then(this.loopResources.disposeLater());
 			}
 			if (this.poolResources != null) {
-				result = result.onErrorResume(ex -> Mono.empty()).then(this.poolResources.disposeLater());
+				result = result.onErrorComplete().then(this.poolResources.disposeLater());
 			}
-			result = result.onErrorResume(ex -> Mono.empty()).then(stopScheduler());
+			result = result.onErrorComplete().then(stopScheduler());
 		}
 		else {
 			result = stopScheduler();

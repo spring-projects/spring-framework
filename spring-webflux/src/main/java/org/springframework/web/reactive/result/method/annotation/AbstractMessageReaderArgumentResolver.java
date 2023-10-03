@@ -183,7 +183,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 						logger.debug(exchange.getLogPrefix() + "0..N [" + elementType + "]");
 					}
 					Flux<?> flux = reader.read(actualType, elementType, request, response, readHints);
-					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParam, ex)));
+					flux = flux.onErrorMap(ex -> handleReadError(bodyParam, ex));
 					if (isBodyRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(bodyParam)));
 					}
@@ -199,7 +199,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 						logger.debug(exchange.getLogPrefix() + "0..1 [" + elementType + "]");
 					}
 					Mono<?> mono = reader.readMono(actualType, elementType, request, response, readHints);
-					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParam, ex)));
+					mono = mono.onErrorMap(ex -> handleReadError(bodyParam, ex));
 					if (isBodyRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
 					}

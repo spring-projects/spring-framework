@@ -105,7 +105,7 @@ class ServerHttpResponseTests {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set(HttpHeaders.CONTENT_ENCODING, "gzip");
 		headers.setContentLength(12);
-		response.writeWith(body).onErrorResume(ex -> Mono.empty()).block();
+		response.writeWith(body).onErrorComplete().block();
 
 		assertThat(response.statusCodeWritten).isFalse();
 		assertThat(response.headersWritten).isFalse();
