@@ -36,6 +36,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Re
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.AgeHolder;
 import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -149,6 +150,9 @@ class BeanRegistrationsAotContributionTests {
 				.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
 		assertThat(reflection().onType(ITestBean.class)
+				.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+				.accepts(this.generationContext.getRuntimeHints());
+		assertThat(reflection().onType(AgeHolder.class)
 				.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}

@@ -115,16 +115,21 @@ class BeanRegistrationsAotContribution
 			ReflectionHints hints = runtimeHints.reflection();
 			Class<?> beanClass = beanRegistrationKey.beanClass();
 			hints.registerType(beanClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			Class<?> currentClass = beanClass;
-			while (currentClass != null && currentClass != Object.class) {
-				for (Class<?> interfaceType : currentClass.getInterfaces()) {
-					if (!ClassUtils.isJavaLanguageInterface(interfaceType)) {
-						hints.registerType(interfaceType, MemberCategory.INTROSPECT_PUBLIC_METHODS);
-					}
-				}
-				currentClass = currentClass.getSuperclass();
-			}
+			introspectPublicMethodsOnAllInterfaces(hints, beanClass);
 		});
+	}
+
+	private void introspectPublicMethodsOnAllInterfaces(ReflectionHints hints, Class<?> type) {
+		Class<?> currentClass = type;
+		while (currentClass != null && currentClass != Object.class) {
+			for (Class<?> interfaceType : currentClass.getInterfaces()) {
+				if (!ClassUtils.isJavaLanguageInterface(interfaceType)) {
+					hints.registerType(interfaceType, MemberCategory.INTROSPECT_PUBLIC_METHODS);
+					introspectPublicMethodsOnAllInterfaces(hints, interfaceType);
+				}
+			}
+			currentClass = currentClass.getSuperclass();
+		}
 	}
 
 	/**
