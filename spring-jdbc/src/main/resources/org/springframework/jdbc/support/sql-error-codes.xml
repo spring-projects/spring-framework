@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 	- Default SQL error codes for well-known databases.
 	- Can be overridden by definitions in a "sql-error-codes.xml" file
@@ -13,7 +12,8 @@
 	-->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="DB2" name="Db2" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductName">
