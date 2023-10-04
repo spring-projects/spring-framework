@@ -6,6 +6,7 @@ They are declared in the `build.gradle` file in this folder.
 ## Build Conventions
 
 The `org.springframework.build.conventions` plugin applies all conventions to the Framework build:
+MY SECOND COMMIT
 
 * Configuring the Java compiler, see `JavaConventions`
 * Configuring the Kotlin compiler, see `KotlinConventions`
