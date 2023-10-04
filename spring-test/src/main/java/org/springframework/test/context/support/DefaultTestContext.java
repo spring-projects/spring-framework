@@ -41,7 +41,6 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @author Andreas Ahlenstorf
  * @since 4.0
  */
 @SuppressWarnings("serial")
@@ -165,11 +164,6 @@ public class DefaultTestContext implements TestContext {
 		Object testInstance = this.testInstance;
 		Assert.state(testInstance != null, "No test instance");
 		return testInstance;
-	}
-
-	@Override
-	public boolean hasTestMethod() {
-		return this.testMethod != null;
 	}
 
 	@Override

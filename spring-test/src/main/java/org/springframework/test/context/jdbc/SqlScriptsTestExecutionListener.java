@@ -68,8 +68,8 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  * configured via the {@link Sql @Sql} annotation.
  *
  * <p>Class-level annotations that are constrained to a class-level execution
- * phase ({@link ExecutionPhase#BEFORE_TEST_CLASS} or
- * {@link ExecutionPhase#AFTER_TEST_CLASS}) will be run
+ * phase ({@link ExecutionPhase#BEFORE_TEST_CLASS BEFORE_TEST_CLASS} or
+ * {@link ExecutionPhase#AFTER_TEST_CLASS AFTER_TEST_CLASS}) will be run
  * {@linkplain #beforeTestClass(TestContext) once before all test methods} or
  * {@linkplain #afterTestMethod(TestContext) once after all test methods},
  * respectively. All other scripts and inlined statements will be executed
@@ -138,20 +138,22 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
 	 * {@link TestContext} once per test class <em>before</em> any test method
 	 * is run.
+	 * @since 6.1
 	 */
 	@Override
 	public void beforeTestClass(TestContext testContext) throws Exception {
-		executeBeforeOrAfterClassSqlScripts(testContext, ExecutionPhase.BEFORE_TEST_CLASS);
+		executeClassLevelSqlScripts(testContext, ExecutionPhase.BEFORE_TEST_CLASS);
 	}
 
 	/**
 	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
 	 * {@link TestContext} once per test class <em>after</em> all test methods
 	 * have been run.
+	 * @since 6.1
 	 */
 	@Override
 	public void afterTestClass(TestContext testContext) throws Exception {
-		executeBeforeOrAfterClassSqlScripts(testContext, ExecutionPhase.AFTER_TEST_CLASS);
+		executeClassLevelSqlScripts(testContext, ExecutionPhase.AFTER_TEST_CLASS);
 	}
 
 	/**
@@ -189,11 +191,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	/**
 	 * Execute class-level SQL scripts configured via {@link Sql @Sql} for the
-	 * supplied {@link TestContext} and the execution phases
-	 * {@link ExecutionPhase#BEFORE_TEST_CLASS} and
-	 * {@link ExecutionPhase#AFTER_TEST_CLASS}.
+	 * supplied {@link TestContext} and the supplied
+	 * {@link ExecutionPhase#BEFORE_TEST_CLASS BEFORE_TEST_CLASS} or
+	 * {@link ExecutionPhase#AFTER_TEST_CLASS AFTER_TEST_CLASS} execution phase.
+	 * @since 6.1
 	 */
-	private void executeBeforeOrAfterClassSqlScripts(TestContext testContext, ExecutionPhase executionPhase) {
+	private void executeClassLevelSqlScripts(TestContext testContext, ExecutionPhase executionPhase) {
 		Class<?> testClass = testContext.getTestClass();
 		executeSqlScripts(getSqlAnnotationsFor(testClass), testContext, executionPhase, true);
 	}
@@ -286,7 +289,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel) {
 
 		Assert.isTrue(classLevel || isValidMethodLevelPhase(sql.executionPhase()),
-				() -> "%s cannot be used on methods".formatted(sql.executionPhase()));
+				() -> "@SQL execution phase %s cannot be used on methods".formatted(sql.executionPhase()));
 
 		if (executionPhase != sql.executionPhase()) {
 			return;
@@ -302,10 +305,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					.formatted(executionPhase, testContext.getTestClass().getName()));
 		}
 
-		Method testMethod = null;
-		if (testContext.hasTestMethod()) {
-			testMethod = testContext.getTestMethod();
-		}
+		boolean methodLevel = !classLevel;
+		Method testMethod = (methodLevel ? testContext.getTestMethod() : null);
 
 		String[] scripts = getScripts(sql, testContext.getTestClass(), testMethod, classLevel);
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
@@ -357,7 +358,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			int propagation = (newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW :
 					TransactionDefinition.PROPAGATION_REQUIRED);
 			TransactionAttribute txAttr = TestContextTransactionUtils.createDelegatingTransactionAttribute(
-					testContext, new DefaultTransactionAttribute(propagation));
+					testContext, new DefaultTransactionAttribute(propagation), methodLevel);
 			new TransactionTemplate(txMgr, txAttr).executeWithoutResult(s -> populator.execute(finalDataSource));
 		}
 	}
@@ -458,7 +459,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	private static boolean isValidMethodLevelPhase(ExecutionPhase executionPhase) {
 		// Class-level phases cannot be used on methods.
-		return executionPhase == ExecutionPhase.BEFORE_TEST_METHOD ||
-				executionPhase == ExecutionPhase.AFTER_TEST_METHOD;
+		return (executionPhase == ExecutionPhase.BEFORE_TEST_METHOD ||
+				executionPhase == ExecutionPhase.AFTER_TEST_METHOD);
 	}
+
 }

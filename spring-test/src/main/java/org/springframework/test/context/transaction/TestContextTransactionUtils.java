@@ -228,8 +228,7 @@ public abstract class TestContextTransactionUtils {
 	/**
 	 * Create a delegating {@link TransactionAttribute} for the supplied target
 	 * {@link TransactionAttribute} and {@link TestContext}, using the names of
-	 * the test class and test method (if available) to build the name of the
-	 * transaction.
+	 * the test class and test method to build the name of the transaction.
 	 * @param testContext the {@code TestContext} upon which to base the name
 	 * @param targetAttribute the {@code TransactionAttribute} to delegate to
 	 * @return the delegating {@code TransactionAttribute}
@@ -237,9 +236,27 @@ public abstract class TestContextTransactionUtils {
 	public static TransactionAttribute createDelegatingTransactionAttribute(
 			TestContext testContext, TransactionAttribute targetAttribute) {
 
+		return createDelegatingTransactionAttribute(testContext, targetAttribute, true);
+	}
+
+	/**
+	 * Create a delegating {@link TransactionAttribute} for the supplied target
+	 * {@link TransactionAttribute} and {@link TestContext}, using the names of
+	 * the test class and test method (if requested) to build the name of the
+	 * transaction.
+	 * @param testContext the {@code TestContext} upon which to base the name
+	 * @param targetAttribute the {@code TransactionAttribute} to delegate to
+	 * @param includeMethodName {@code true} if the test method's name should be
+	 * included in the name of the transaction
+	 * @return the delegating {@code TransactionAttribute}
+	 * @since 6.1
+	 */
+	public static TransactionAttribute createDelegatingTransactionAttribute(
+			TestContext testContext, TransactionAttribute targetAttribute, boolean includeMethodName) {
+
 		Assert.notNull(testContext, "TestContext must not be null");
 		Assert.notNull(targetAttribute, "Target TransactionAttribute must not be null");
-		return new TestContextTransactionAttribute(targetAttribute, testContext);
+		return new TestContextTransactionAttribute(targetAttribute, testContext, includeMethodName);
 	}
 
 
@@ -248,10 +265,12 @@ public abstract class TestContextTransactionUtils {
 
 		private final String name;
 
-		public TestContextTransactionAttribute(TransactionAttribute targetAttribute, TestContext testContext) {
+		public TestContextTransactionAttribute(
+				TransactionAttribute targetAttribute, TestContext testContext, boolean includeMethodName) {
+
 			super(targetAttribute);
 
-			if (testContext.hasTestMethod()) {
+			if (includeMethodName) {
 				this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
 			}
 			else {
