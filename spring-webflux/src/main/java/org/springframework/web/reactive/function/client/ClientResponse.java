@@ -73,6 +73,12 @@ public interface ClientResponse {
 	ExchangeStrategies strategies();
 
 	/**
+	 * Return the request associated with the response.
+	 * @since 6.1
+	 */
+	HttpRequest request();
+
+	/**
 	 * Extract the body with the given {@code BodyExtractor}.
 	 * @param extractor the {@code BodyExtractor} that reads from the response
 	 * @param <T> the type of the body returned

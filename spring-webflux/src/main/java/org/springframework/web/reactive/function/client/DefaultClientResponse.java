@@ -262,8 +262,8 @@ class DefaultClientResponse implements ClientResponse {
 		return this.logPrefix;
 	}
 
-	// Used by DefaultClientResponseBuilder
-	HttpRequest request() {
+	@Override
+	public HttpRequest request() {
 		return this.requestSupplier.get();
 	}
 
