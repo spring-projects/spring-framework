@@ -558,6 +558,314 @@ See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplat
 
 Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
 
+=== Migrating from `RestTemplate` to `RestClient`
+
+The following table shows `RestClient` equivalents for `RestTemplate` methods.
+It can be used to migrate from the latter to the former.
+
+.RestClient equivalents for RestTemplate methods
+[cols="1,1"]
+|===
+| `RestTemplate` method | `RestClient` equivalent
+
+| `getForObject(String, Class, Object...)`
+| `get()
+.uri(String, Object...)
+.retrieve()
+.body(Class)`
+
+| `getForObject(String, Class, Map)`
+| `get()
+.uri(String, Map)
+.retrieve()
+.body(Class)`
+
+| `getForObject(URI, Class)`
+| `get()
+.uri(URI)
+.retrieve()
+.body(Class)`
+
+
+| `getForEntity(String, Class, Object...)`
+| `get()
+.uri(String, Object...)
+.retrieve()
+.toEntity(Class)`
+
+| `getForEntity(String, Class, Map)`
+| `get()
+.uri(String, Map)
+.retrieve()
+.toEntity(Class)`
+
+| `getForEntity(URI, Class)`
+| `get()
+.uri(URI)
+.retrieve()
+.toEntity(Class)`
+
+
+| `headForHeaders(String, Object...)`
+| `head()
+.uri(String, Object...)
+.retrieve()
+.toBodilessEntity()
+.getHeaders()`
+
+| `headForHeaders(String, Map)`
+| `head()
+.uri(String, Map)
+.retrieve()
+.toBodilessEntity()
+.getHeaders()`
+
+| `headForHeaders(URI)`
+| `head()
+.uri(URI)
+.retrieve()
+.toBodilessEntity()
+.getHeaders()`
+
+
+| `postForLocation(String, Object, Object...)`
+| `post()
+.uri(String, Object...)
+.body(Object).retrieve()
+.toBodilessEntity()
+.getLocation()`
+
+| `postForLocation(String, Object, Map)`
+| `post()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.toBodilessEntity()
+.getLocation()`
+
+| `postForLocation(URI, Object)`
+| `post()
+.uri(URI)
+.body(Object)
+.retrieve()
+.toBodilessEntity()
+.getLocation()`
+
+
+| `postForObject(String, Object, Class, Object...)`
+| `post()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `postForObject(String, Object, Class, Map)`
+| `post()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `postForObject(URI, Object, Class)`
+| `post()
+.uri(URI)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+
+| `postForEntity(String, Object, Class, Object...)`
+| `post()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.toEntity(Class)`
+
+| `postForEntity(String, Object, Class, Map)`
+| `post()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.toEntity(Class)`
+
+| `postForEntity(URI, Object, Class)`
+| `post()
+.uri(URI)
+.body(Object)
+.retrieve()
+.toEntity(Class)`
+
+
+| `put(String, Object, Object...)`
+| `put()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.toBodilessEntity()`
+
+| `put(String, Object, Map)`
+| `put()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.toBodilessEntity()`
+
+| `put(URI, Object)`
+| `put()
+.uri(URI)
+.body(Object)
+.retrieve()
+.toBodilessEntity()`
+
+
+| `patchForObject(String, Object, Class, Object...)`
+| `patch()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `patchForObject(String, Object, Class, Map)`
+| `patch()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `patchForObject(URI, Object, Class)`
+| `patch()
+.uri(URI)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+
+| `delete(String, Object...)`
+| `delete()
+.uri(String, Object...)
+.retrieve()
+.toBodilessEntity()`
+
+| `delete(String, Map)`
+| `delete()
+.uri(String, Map)
+.retrieve()
+.toBodilessEntity()`
+
+| `delete(URI)`
+| `delete()
+.uri(URI)
+.retrieve()
+.toBodilessEntity()`
+
+
+| `optionsForAllow(String, Object...)`
+| `options()
+.uri(String, Object...)
+.retrieve()
+.toBodilessEntity()
+.getAllow()`
+
+| `optionsForAllow(String, Map)`
+| `options()
+.uri(String, Map)
+.retrieve()
+.toBodilessEntity()
+.getAllow()`
+
+| `optionsForAllow(URI)`
+| `options()
+.uri(URI)
+.retrieve()
+.toBodilessEntity()
+.getAllow()`
+
+
+| `exchange(String, HttpMethod, HttpEntity, Class, Object...)`
+| `method(HttpMethod)
+.uri(String, Object...)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:http-entity[`HttpEntity` headers and body have to be supplied to the `RestClient` via `headers(Consumer<HttpHeaders>)` and `body(Object)`.]
+
+| `exchange(String, HttpMethod, HttpEntity, Class, Map)`
+| `method(HttpMethod)
+.uri(String, Map)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:http-entity[]
+
+| `exchange(URI, HttpMethod, HttpEntity, Class)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:http-entity[]
+
+
+| `exchange(String, HttpMethod, HttpEntity, ParameterizedTypeReference, Object...)`
+| `method(HttpMethod)
+.uri(String, Object...)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:http-entity[]
+
+| `exchange(String, HttpMethod, HttpEntity, ParameterizedTypeReference, Map)`
+| `method(HttpMethod)
+.uri(String, Map)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:http-entity[]
+
+| `exchange(URI, HttpMethod, HttpEntity, ParameterizedTypeReference)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:http-entity[]
+
+
+| `exchange(RequestEntity, Class)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:request-entity[`RequestEntity` method, URI, headers and body have to be supplied to the `RestClient` via `method(HttpMethod)`, `uri(URI)`, headers(Consumer<HttpHeaders>)` and `body(Object)`.]
+
+| `exchange(RequestEntity, ParameterizedTypeReference)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:request-entity[]
+
+
+| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Object...)`
+| `method(HttpMethod)
+.uri(String, Object...)
+.exchange(ExchangeFunction)`
+
+| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Map)`
+| `method(HttpMethod)
+.uri(String, Map)
+.exchange(ExchangeFunction)`
+
+| `execute(URI, HttpMethod method, RequestCallback, ResponseExtractor)`
+| `method(HttpMethod)
+.uri(URI)
+.exchange(ExchangeFunction)`
+
+|===
+
+
 [[rest-http-interface]]
 == HTTP Interface
 
