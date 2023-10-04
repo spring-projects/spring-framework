@@ -22,7 +22,6 @@ import org.mockito.BDDMockito;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -32,6 +31,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_CLASS;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
+import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
 /**
  * Unit tests for {@link SqlScriptsTestExecutionListener}.
@@ -71,11 +71,12 @@ class SqlScriptsTestExecutionListenerTests {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				listener.beforeTestMethod(testContext))
-			.withMessageContaining("Different @AliasFor mirror values")
-			.withMessageContaining("attribute 'scripts' and its alias 'value'")
-			.withMessageContaining("values of [{bar}] and [{foo}]");
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+				.isThrownBy(() -> listener.beforeTestMethod(testContext))
+				.withMessageContainingAll(
+						"Different @AliasFor mirror values",
+						"attribute 'scripts' and its alias 'value'",
+						"values of [{bar}] and [{foo}]");
 	}
 
 	@Test
@@ -129,9 +130,9 @@ class SqlScriptsTestExecutionListenerTests {
 	}
 
 	private void assertExceptionContains(String msg) throws Exception {
-		assertThatIllegalStateException().isThrownBy(() ->
-				listener.beforeTestMethod(testContext))
-			.withMessageContaining(msg);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> listener.beforeTestMethod(testContext))
+				.withMessageContaining(msg);
 	}
 
 
@@ -160,7 +161,7 @@ class SqlScriptsTestExecutionListenerTests {
 
 	static class IsolatedWithoutTxMgr {
 
-		@Sql(scripts = "foo.sql", config = @SqlConfig(transactionMode = TransactionMode.ISOLATED))
+		@Sql(scripts = "foo.sql", config = @SqlConfig(transactionMode = ISOLATED))
 		public void foo() {
 		}
 	}
