@@ -93,9 +93,9 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-core/2.14.1/",
-			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.14.1/",
-			"https://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.14.1/",
+			"https://fasterxml.github.io/jackson-core/javadoc/2.14/",
+			"https://fasterxml.github.io/jackson-databind/javadoc/2.14/",
+			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.14/",
 			"https://hc.apache.org/httpcomponents-client-5.2.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
@@ -104,12 +104,12 @@ configure([rootProject] + javaProjects) { project ->
 			//
 			// "https://junit.org/junit5/docs/5.10.0/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
-			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
+			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
 			// Previously there could be a split-package issue between JSR250 and JSR305 javax.annotation packages,
 			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
 			// JakartaEE equivalents in the jakarta.annotation package.
-			"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
+			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
 	] as String[]
 }
 
