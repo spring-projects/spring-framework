@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.broker;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 
@@ -48,6 +49,8 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 
 	private final MessageChannel channel;
 
+	private final int subscriberCount;
+
 	private final Log logger;
 
 	private final Queue<Message<?>> messages = new ConcurrentLinkedQueue<>();
@@ -57,6 +60,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 
 	public OrderedMessageChannelDecorator(MessageChannel channel, Log logger) {
 		this.channel = channel;
+		this.subscriberCount = (channel instanceof ExecutorSubscribableChannel ch ? ch.getSubscribers().size() : 0);
 		this.logger = logger;
 	}
 
@@ -162,24 +166,30 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 	/**
 	 * Remove handled message from queue, and send next message.
 	 */
-	private class PostHandleTask implements Runnable {
+	private final class PostHandleTask implements Runnable {
 
 		private final Message<?> message;
 
+		@Nullable
+		private final AtomicInteger handledCount;
+
 		private PostHandleTask(Message<?> message) {
 			this.message = message;
+			this.handledCount = (subscriberCount > 1 ? new AtomicInteger(0) : null);
 		}
 
 		@Override
 		public void run() {
-			if (OrderedMessageChannelDecorator.this.removeMessage(message)) {
-				sendNextMessage();
+			if (this.handledCount == null || this.handledCount.addAndGet(1) == subscriberCount) {
+				if (OrderedMessageChannelDecorator.this.removeMessage(message)) {
+					sendNextMessage();
+				}
 			}
 		}
 	}
 
 
-	private static class CallbackTaskInterceptor implements ExecutorChannelInterceptor {
+	private final static class CallbackTaskInterceptor implements ExecutorChannelInterceptor {
 
 		@Override
 		public void afterMessageHandled(
