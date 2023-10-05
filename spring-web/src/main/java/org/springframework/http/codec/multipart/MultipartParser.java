@@ -212,7 +212,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	/**
 	 * Represents a token that contains {@link HttpHeaders}.
 	 */
-	public final static class HeadersToken extends Token {
+	public static final class HeadersToken extends Token {
 
 		private final HttpHeaders headers;
 
@@ -240,7 +240,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	/**
 	 * Represents a token that contains {@link DataBuffer}.
 	 */
-	public final static class BodyToken extends Token {
+	public static final class BodyToken extends Token {
 
 		private final DataBuffer buffer;
 

@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
  */
 public class MethodMatchersTests {
 
-	private final static Method TEST_METHOD = mock(Method.class);
+	private static final Method TEST_METHOD = mock(Method.class);
 
 	private final Method EXCEPTION_GETMESSAGE;
 

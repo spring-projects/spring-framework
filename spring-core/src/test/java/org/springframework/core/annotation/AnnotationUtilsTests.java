@@ -1133,7 +1133,7 @@ class AnnotationUtilsTests {
 		boolean readOnly() default false;
 	}
 
-	public static abstract class Foo<T> {
+	public abstract static class Foo<T> {
 
 		@Order(1)
 		public abstract void something(T arg);
@@ -1243,7 +1243,7 @@ class AnnotationUtilsTests {
 		}
 	}
 
-	public static abstract class BaseClassWithGenericAnnotatedMethod<T> {
+	public abstract static class BaseClassWithGenericAnnotatedMethod<T> {
 
 		@Order
 		abstract void foo(T t);

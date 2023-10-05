@@ -306,7 +306,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
-	static abstract class ScopedTestBean implements IScopedTestBean {
+	abstract static class ScopedTestBean implements IScopedTestBean {
 
 		private String name = DEFAULT_NAME;
 

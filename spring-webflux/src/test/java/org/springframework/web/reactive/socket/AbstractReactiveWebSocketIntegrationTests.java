@@ -179,7 +179,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 	}
 
 
-	static abstract class AbstractHandlerAdapterConfig {
+	abstract static class AbstractHandlerAdapterConfig {
 
 		@Bean
 		public WebSocketHandlerAdapter handlerAdapter() {

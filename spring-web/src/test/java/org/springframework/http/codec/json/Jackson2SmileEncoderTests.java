@@ -48,8 +48,8 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  */
 public class Jackson2SmileEncoderTests extends AbstractEncoderTests<Jackson2SmileEncoder> {
 
-	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
-	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
+	private static final MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
+	private static final MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
 
 	private final Jackson2SmileEncoder encoder = new Jackson2SmileEncoder();
 

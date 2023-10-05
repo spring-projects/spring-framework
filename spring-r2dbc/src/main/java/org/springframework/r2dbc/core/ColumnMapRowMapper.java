@@ -49,7 +49,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<String, Object>> {
 
 	/** A default {@code ColumnMapRowMapper} instance. */
-	public final static ColumnMapRowMapper INSTANCE = new ColumnMapRowMapper();
+	public static final ColumnMapRowMapper INSTANCE = new ColumnMapRowMapper();
 
 
 	@SuppressWarnings("deprecation")  // getColumnNames() is deprecated as of R2DBC 0.9

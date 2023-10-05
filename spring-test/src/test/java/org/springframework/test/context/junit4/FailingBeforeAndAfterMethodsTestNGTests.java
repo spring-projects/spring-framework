@@ -167,7 +167,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 
 	@TestExecutionListeners(inheritListeners = false)
-	public static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
+	public abstract static class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
 		public void testNothing() {

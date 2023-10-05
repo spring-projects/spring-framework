@@ -88,7 +88,7 @@ class ControllerMethodResolver {
 			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
 					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
 
-	private final static boolean BEAN_VALIDATION_PRESENT =
+	private static final boolean BEAN_VALIDATION_PRESENT =
 			ClassUtils.isPresent("jakarta.validation.Validator", HandlerMethod.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ControllerMethodResolver.class);

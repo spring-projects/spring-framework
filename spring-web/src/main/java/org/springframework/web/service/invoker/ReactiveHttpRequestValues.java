@@ -109,7 +109,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	/**
 	 * Builder for {@link ReactiveHttpRequestValues}.
 	 */
-	public final static class Builder extends HttpRequestValues.Builder {
+	public static final class Builder extends HttpRequestValues.Builder {
 
 		@Nullable
 		private MultipartBodyBuilder multipartBuilder;

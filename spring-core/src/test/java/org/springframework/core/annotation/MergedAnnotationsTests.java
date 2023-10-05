@@ -2695,7 +2695,7 @@ class MergedAnnotationsTests {
 		void handleFromInterface();
 	}
 
-	static abstract class AbstractClassWithInheritedAnnotation<T>
+	abstract static class AbstractClassWithInheritedAnnotation<T>
 			implements InterfaceWithInheritedAnnotation {
 
 		@Transactional
@@ -2999,7 +2999,7 @@ class MergedAnnotationsTests {
 		}
 	}
 
-	public static abstract class SimpleGeneric<T> {
+	public abstract static class SimpleGeneric<T> {
 
 		@Order(1)
 		public abstract void something(T arg);
@@ -3089,7 +3089,7 @@ class MergedAnnotationsTests {
 		}
 	}
 
-	public static abstract class BaseClassWithGenericAnnotatedMethod<T> {
+	public abstract static class BaseClassWithGenericAnnotatedMethod<T> {
 
 		@Order
 		abstract void foo(T t);

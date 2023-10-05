@@ -37,7 +37,7 @@ import org.springframework.validation.FieldError;
  */
 public abstract class BindErrorUtils {
 
-	private final static MessageSource defaultMessageSource = new MethodArgumentErrorMessageSource();
+	private static final MessageSource defaultMessageSource = new MethodArgumentErrorMessageSource();
 
 
 	/**

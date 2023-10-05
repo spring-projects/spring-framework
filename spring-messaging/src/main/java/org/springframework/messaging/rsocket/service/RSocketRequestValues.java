@@ -134,7 +134,7 @@ public final class RSocketRequestValues {
 	/**
 	 * Builder for {@link RSocketRequestValues}.
 	 */
-	public final static class Builder {
+	public static final class Builder {
 
 		@Nullable
 		private String route;

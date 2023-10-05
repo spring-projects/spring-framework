@@ -78,7 +78,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
-	final static String SUPPRESS_LOGGING_ATTRIBUTE = AbstractHandlerMapping.class.getName() + ".SUPPRESS_LOGGING";
+	static final String SUPPRESS_LOGGING_ATTRIBUTE = AbstractHandlerMapping.class.getName() + ".SUPPRESS_LOGGING";
 
 
 	/** Dedicated "hidden" logger for request mappings. */

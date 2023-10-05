@@ -102,7 +102,7 @@ abstract class DefaultParts {
 	/**
 	 * Abstract base class for {@link Part} implementations.
 	 */
-	private static abstract class AbstractPart implements Part {
+	private abstract static class AbstractPart implements Part {
 
 		private final HttpHeaders headers;
 

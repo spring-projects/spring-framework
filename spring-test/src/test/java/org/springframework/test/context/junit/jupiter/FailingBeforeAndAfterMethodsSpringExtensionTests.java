@@ -174,7 +174,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 
 	@FailingTestCase
 	@ExtendWith(SpringExtension.class)
-	private static abstract class BaseTestCase {
+	private abstract static class BaseTestCase {
 
 		@Test
 		void testNothing() {

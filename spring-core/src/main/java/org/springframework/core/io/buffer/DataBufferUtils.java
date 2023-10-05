@@ -64,7 +64,7 @@ import org.springframework.util.Assert;
  */
 public abstract class DataBufferUtils {
 
-	private final static Log logger = LogFactory.getLog(DataBufferUtils.class);
+	private static final Log logger = LogFactory.getLog(DataBufferUtils.class);
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
 
@@ -868,7 +868,7 @@ public abstract class DataBufferUtils {
 	/**
 	 * Base class for a {@link NestedMatcher}.
 	 */
-	private static abstract class AbstractNestedMatcher implements NestedMatcher {
+	private abstract static class AbstractNestedMatcher implements NestedMatcher {
 
 		private final byte[] delimiter;
 

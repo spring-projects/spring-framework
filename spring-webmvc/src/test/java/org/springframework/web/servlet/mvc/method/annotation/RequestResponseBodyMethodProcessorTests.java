@@ -830,7 +830,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 
-	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+	private abstract static class MyParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(@RequestBody DTO dto) {}
@@ -850,7 +850,7 @@ class RequestResponseBodyMethodProcessorTests {
 
 
 	@SuppressWarnings("unused")
-	private static abstract class MyParameterizedControllerWithList<DTO extends Identifiable> {
+	private abstract static class MyParameterizedControllerWithList<DTO extends Identifiable> {
 
 		public void handleDto(@RequestBody List<DTO> dto) {
 		}

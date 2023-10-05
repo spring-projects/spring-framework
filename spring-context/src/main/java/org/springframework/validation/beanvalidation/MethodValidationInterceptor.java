@@ -234,7 +234,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	/**
 	 * Helper class to decorate reactive arguments with async validation.
 	 */
-	private final static class ReactorValidationHelper {
+	private static final class ReactorValidationHelper {
 
 		private static final ReactiveAdapterRegistry reactiveAdapterRegistry =
 				ReactiveAdapterRegistry.getSharedInstance();

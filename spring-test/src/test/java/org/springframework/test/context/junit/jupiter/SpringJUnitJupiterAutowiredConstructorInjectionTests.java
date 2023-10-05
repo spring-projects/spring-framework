@@ -69,7 +69,7 @@ class SpringJUnitJupiterAutowiredConstructorInjectionTests {
 
 	@SpringJUnitConfig(TestConfig.class)
 	@TestPropertySource(properties = "enigma = 42")
-	private static abstract class BaseClass {
+	private abstract static class BaseClass {
 
 		final ApplicationContext context;
 		final Person dilbert;

@@ -429,7 +429,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Extension of {@code RequestPredicate} that can modify the {@code ServerRequest}.
 	 */
-	static abstract class RequestModifyingPredicate implements RequestPredicate {
+	abstract static class RequestModifyingPredicate implements RequestPredicate {
 
 
 		public static RequestModifyingPredicate of(RequestPredicate requestPredicate) {

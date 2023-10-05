@@ -519,7 +519,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * also falling back on container indexes if necessary for cascaded
 	 * constraints on a List container.
 	 */
-	private final static class ResultComparator implements Comparator<ParameterValidationResult> {
+	private static final class ResultComparator implements Comparator<ParameterValidationResult> {
 
 		@Override
 		public int compare(ParameterValidationResult result1, ParameterValidationResult result2) {

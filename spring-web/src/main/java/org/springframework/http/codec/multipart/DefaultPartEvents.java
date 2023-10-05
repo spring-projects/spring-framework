@@ -74,7 +74,7 @@ abstract class DefaultPartEvents {
 
 
 
-	private static abstract class AbstractPartEvent implements PartEvent {
+	private abstract static class AbstractPartEvent implements PartEvent {
 
 		private final HttpHeaders headers;
 

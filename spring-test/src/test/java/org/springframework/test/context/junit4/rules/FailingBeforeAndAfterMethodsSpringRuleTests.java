@@ -69,7 +69,7 @@ public class FailingBeforeAndAfterMethodsSpringRuleTests extends FailingBeforeAn
 	// All tests are in superclass.
 
 	@RunWith(JUnit4.class)
-	public static abstract class BaseSpringRuleTestCase {
+	public abstract static class BaseSpringRuleTestCase {
 
 		@ClassRule
 		public static final SpringClassRule springClassRule = new SpringClassRule();
