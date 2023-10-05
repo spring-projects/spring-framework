@@ -120,7 +120,7 @@ public class ImportResourceTests {
 	static class ImportXmlConfig {
 		@Value("${name}")
 		private String name;
-		public @Bean TestBean javaDeclaredBean() {
+		@Bean public TestBean javaDeclaredBean() {
 			return new TestBean(this.name);
 		}
 	}
@@ -160,7 +160,7 @@ public class ImportResourceTests {
 	static class ImportXmlAutowiredConfig {
 		@Autowired TestBean xmlDeclaredBean;
 
-		public @Bean String xmlBeanName() {
+		@Bean public String xmlBeanName() {
 			return xmlDeclaredBean.getName();
 		}
 	}

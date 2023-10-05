@@ -165,7 +165,7 @@ class ClassLevelDirtiesContextTestNGTests {
 	@TestExecutionListeners(listeners = { DependencyInjectionTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class }, inheritListeners = false)
 	@ContextConfiguration
-	static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
+	abstract static class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@Configuration
 		static class Config {

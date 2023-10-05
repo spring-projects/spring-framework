@@ -3620,7 +3620,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		List<E> find(boolean sort, P predicate) throws IOException;
 	}
 
-	static abstract class Entity {
+	abstract static class Entity {
 
 		public UUID id;
 
@@ -3638,7 +3638,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		public String content;
 	}
 
-	static abstract class EntityPredicate<E extends Entity> {
+	abstract static class EntityPredicate<E extends Entity> {
 
 		public String createdBy;
 
@@ -3756,7 +3756,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		}
 	}
 
-	static abstract class MyAbstractController {
+	abstract static class MyAbstractController {
 
 		@RequestMapping("/handle")
 		public abstract void handle(Writer writer) throws IOException;

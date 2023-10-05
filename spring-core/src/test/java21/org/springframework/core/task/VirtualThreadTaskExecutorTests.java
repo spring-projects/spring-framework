@@ -95,7 +95,7 @@ class VirtualThreadTaskExecutorTests {
 	}
 
 
-	private static abstract class AbstractNotifyingRunnable implements Runnable {
+	private abstract static class AbstractNotifyingRunnable implements Runnable {
 
 		private final Object monitor;
 

@@ -42,7 +42,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  */
 public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborDecoder> {
 
-	private final static MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");
+	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");
 
 	private Pojo pojo1 = new Pojo("f1", "b1");
 

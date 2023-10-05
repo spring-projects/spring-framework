@@ -35,7 +35,7 @@ class BridgeMethodAutowiringTests {
 	}
 
 
-	static abstract class GenericServiceImpl<D> {
+	abstract static class GenericServiceImpl<D> {
 
 		public abstract void setObject(D object);
 	}

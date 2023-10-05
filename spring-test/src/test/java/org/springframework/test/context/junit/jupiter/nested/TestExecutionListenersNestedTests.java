@@ -144,7 +144,7 @@ class TestExecutionListenersNestedTests {
 		/* no user beans required for these tests */
 	}
 
-	private static abstract class BaseTestExecutionListener extends AbstractTestExecutionListener {
+	private abstract static class BaseTestExecutionListener extends AbstractTestExecutionListener {
 
 		protected abstract String name();
 

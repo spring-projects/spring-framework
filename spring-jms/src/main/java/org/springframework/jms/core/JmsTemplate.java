@@ -1217,7 +1217,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	private static abstract class MicrometerInstrumentation {
+	private abstract static class MicrometerInstrumentation {
 
 		static Session instrumentSession(Session session, ObservationRegistry registry) {
 			return JmsInstrumentation.instrumentSession(session, registry);

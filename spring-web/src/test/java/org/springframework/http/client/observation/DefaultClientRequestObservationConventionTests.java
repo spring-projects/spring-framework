@@ -44,7 +44,7 @@ class DefaultClientRequestObservationConventionTests {
 
 	private final MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");
 
-	private final static MockClientHttpResponse response = new MockClientHttpResponse();
+	private static final MockClientHttpResponse response = new MockClientHttpResponse();
 
 	private final DefaultClientRequestObservationConvention observationConvention = new DefaultClientRequestObservationConvention();
 

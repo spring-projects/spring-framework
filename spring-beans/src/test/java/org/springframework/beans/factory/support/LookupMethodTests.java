@@ -113,7 +113,7 @@ public class LookupMethodTests {
 	}
 
 
-	public static abstract class AbstractBean {
+	public abstract static class AbstractBean {
 
 		public abstract TestBean get();
 
@@ -139,7 +139,7 @@ public class LookupMethodTests {
 	}
 
 
-	public static abstract class NumberBean {
+	public abstract static class NumberBean {
 
 		public abstract NumberStore<Double> getDoubleStore();
 

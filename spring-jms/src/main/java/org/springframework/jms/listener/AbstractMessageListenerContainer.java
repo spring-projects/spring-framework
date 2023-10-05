@@ -991,7 +991,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
 	}
 
-	private static abstract class ObservationFactory {
+	private abstract static class ObservationFactory {
 
 		private static final JmsProcessObservationConvention DEFAULT_CONVENTION = new DefaultJmsProcessObservationConvention();
 

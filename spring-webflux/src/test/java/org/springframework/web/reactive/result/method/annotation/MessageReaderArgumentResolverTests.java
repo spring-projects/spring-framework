@@ -388,7 +388,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 
-	private static abstract class AbstractParameterizedController<DTO extends Identifiable> {
+	private abstract static class AbstractParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(DTO dto) {}

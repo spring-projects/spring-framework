@@ -346,7 +346,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public static abstract class Bar<T> {
+	public abstract static class Bar<T> {
 
 		void someMethod(Map<?, ?> m, Object otherArg) {
 		}
@@ -358,7 +358,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public static abstract class InterBar<T> extends Bar<T> {
+	public abstract static class InterBar<T> extends Bar<T> {
 
 	}
 
@@ -380,7 +380,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public static abstract class AbstractDateAdder implements Adder<Date> {
+	public abstract static class AbstractDateAdder implements Adder<Date> {
 
 		@Override
 		public abstract void add(Date date);
@@ -475,7 +475,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	static abstract class AbstractDaoImpl<T, S> implements Dao<T, S> {
+	abstract static class AbstractDaoImpl<T, S> implements Dao<T, S> {
 
 		protected T object;
 
@@ -706,7 +706,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public static abstract class BaseUserInitiatedEvent extends GenericEvent implements UserInitiatedEvent {
+	public abstract static class BaseUserInitiatedEvent extends GenericEvent implements UserInitiatedEvent {
 	}
 
 
@@ -743,7 +743,7 @@ class BridgeMethodResolverTests {
 
 
 	@SuppressWarnings({"unused", "unchecked"})
-	public static abstract class GenericEventBroadcasterImpl<T extends Event>
+	public abstract static class GenericEventBroadcasterImpl<T extends Event>
 			extends GenericBroadcasterImpl implements EventBroadcaster {
 
 		private Class<T>[] subscribingEvents;
@@ -1053,7 +1053,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public static abstract class AbstractDao<T> {
+	public abstract static class AbstractDao<T> {
 
 		public void save(T t) {
 		}
@@ -1081,7 +1081,7 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public static abstract class BusinessGenericDao<T, PK extends Serializable>
+	public abstract static class BusinessGenericDao<T, PK extends Serializable>
 			implements DaoInterface<T, PK> {
 
 		public void save(T object) {
@@ -1181,7 +1181,7 @@ class BridgeMethodResolverTests {
 
 
 	@SuppressWarnings("unused")
-	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
+	private abstract static class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
 
 		@Override
 		public <T> void doSomething(D domainObject, T value) {
@@ -1297,7 +1297,7 @@ class BridgeMethodResolverTests {
 	// SPR-16103 classes
 	//-------------------
 
-	public static abstract class BaseEntity {
+	public abstract static class BaseEntity {
 	}
 
 	public static class FooEntity extends BaseEntity {

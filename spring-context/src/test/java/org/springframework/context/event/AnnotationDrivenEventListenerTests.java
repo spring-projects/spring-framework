@@ -713,7 +713,7 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 
-	static abstract class AbstractTestEventListener extends AbstractIdentifiable {
+	abstract static class AbstractTestEventListener extends AbstractIdentifiable {
 
 		@Autowired
 		private EventCollector eventCollector;

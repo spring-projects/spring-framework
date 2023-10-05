@@ -158,7 +158,7 @@ class ClassLevelDirtiesContextTests {
 		DependencyInjectionTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class
 	})
-	static abstract class BaseTestCase {
+	abstract static class BaseTestCase {
 
 		@Configuration
 		static class Config {

@@ -37,7 +37,7 @@ public class UnknownContentTypeException extends RestClientException {
 	private static final long serialVersionUID = 2759516676367274084L;
 
 
-	private transient final Type targetType;
+	private final transient Type targetType;
 
 	private final MediaType contentType;
 
