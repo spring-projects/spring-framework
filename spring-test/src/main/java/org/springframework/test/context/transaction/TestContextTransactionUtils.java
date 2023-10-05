@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -270,12 +269,11 @@ public abstract class TestContextTransactionUtils {
 
 			super(targetAttribute);
 
+			String name = testContext.getTestClass().getName();
 			if (includeMethodName) {
-				this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
+				name += "." + testContext.getTestMethod().getName();
 			}
-			else {
-				this.name = testContext.getTestClass().getName();
-			}
+			this.name = name;
 		}
 
 		@Override

@@ -116,6 +116,9 @@ class SqlScriptsTestExecutionListenerTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> listener.beforeTestMethod(testContext))
 				.withMessage("@SQL execution phase BEFORE_TEST_CLASS cannot be used on methods");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> listener.afterTestMethod(testContext))
+				.withMessage("@SQL execution phase BEFORE_TEST_CLASS cannot be used on methods");
 	}
 
 	@Test
@@ -126,6 +129,9 @@ class SqlScriptsTestExecutionListenerTests {
 
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> listener.beforeTestMethod(testContext))
+				.withMessage("@SQL execution phase AFTER_TEST_CLASS cannot be used on methods");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> listener.afterTestMethod(testContext))
 				.withMessage("@SQL execution phase AFTER_TEST_CLASS cannot be used on methods");
 	}
 
