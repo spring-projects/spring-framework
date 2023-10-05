@@ -564,7 +564,7 @@ The following table shows `RestClient` equivalents for `RestTemplate` methods.
 It can be used to migrate from the latter to the former.
 
 .RestClient equivalents for RestTemplate methods
-[cols="1,1"]
+[cols="1,1", options="header"]
 |===
 | `RestTemplate` method | `RestClient` equivalent
 
@@ -837,7 +837,7 @@ It can be used to migrate from the latter to the former.
 .headers(Consumer<HttpHeaders>)
 .body(Object)
 .retrieve()
-.toEntity(Class)` footnote:request-entity[`RequestEntity` method, URI, headers and body have to be supplied to the `RestClient` via `method(HttpMethod)`, `uri(URI)`, headers(Consumer<HttpHeaders>)` and `body(Object)`.]
+.toEntity(Class)` footnote:request-entity[`RequestEntity` method, URI, headers and body have to be supplied to the `RestClient` via `method(HttpMethod)`, `uri(URI)`, `headers(Consumer<HttpHeaders>)` and `body(Object)`.]
 
 | `exchange(RequestEntity, ParameterizedTypeReference)`
 | `method(HttpMethod)
