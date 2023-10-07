@@ -581,7 +581,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			boolean needsResize;
 			lock();
 			try {
-				int countAfterRestructure = this.count.get();
 				Set<Reference<K, V>> toPurge = Collections.emptySet();
 				if (ref != null) {
 					toPurge = new HashSet<>();
@@ -590,7 +589,20 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 						ref = this.referenceManager.pollForPurge();
 					}
 				}
-				countAfterRestructure -= toPurge.size();
+				//Count the number of references containing entry to countAfterRestructure
+				int countAfterRestructure = 0;
+				for (int i = 0; i < this.references.length; i++) {
+					ref = this.references[i];
+					while (ref != null) {
+						if (!toPurge.contains(ref)) {
+							Entry<K, V> entry = ref.get();
+							if (entry != null) {
+								countAfterRestructure++;
+							}
+						}
+						ref = ref.getNext();
+					}
+				}
 
 				// Recalculate taking into account count inside lock and items that
 				// will be purged
