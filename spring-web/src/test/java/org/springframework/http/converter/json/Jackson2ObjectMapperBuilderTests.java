@@ -57,6 +57,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
+import com.fasterxml.jackson.databind.cfg.EnumFeature;
+import com.fasterxml.jackson.databind.cfg.JsonNodeFeature;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
 import com.fasterxml.jackson.databind.deser.Deserializers;
@@ -455,10 +457,12 @@ class Jackson2ObjectMapperBuilderTests {
 				.annotationIntrospector(current -> AnnotationIntrospector.pair(current, introspector))
 				.featuresToEnable(SerializationFeature.FAIL_ON_EMPTY_BEANS,
 						DeserializationFeature.UNWRAP_ROOT_VALUE,
+						EnumFeature.BOGUS_FEATURE,
 						JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER,
 						JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS)
 				.featuresToDisable(MapperFeature.AUTO_DETECT_GETTERS,
 						MapperFeature.AUTO_DETECT_FIELDS,
+						JsonNodeFeature.READ_NULL_PROPERTIES,
 						JsonParser.Feature.AUTO_CLOSE_SOURCE,
 						JsonGenerator.Feature.QUOTE_FIELD_NAMES)
 						.serializationInclusion(JsonInclude.Include.NON_NULL);
@@ -487,6 +491,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 		assertThat(mapper.getSerializationConfig().isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS)).isTrue();
 		assertThat(mapper.getDeserializationConfig().isEnabled(DeserializationFeature.UNWRAP_ROOT_VALUE)).isTrue();
+		assertThat(mapper.getSerializationConfig().isEnabled(EnumFeature.BOGUS_FEATURE)).isTrue();
 		assertThat(mapper.getFactory().isEnabled(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)).isTrue();
 		assertThat(mapper.getFactory().isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS)).isTrue();
 
@@ -494,6 +499,7 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(mapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 		assertThat(mapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 		assertThat(mapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS)).isFalse();
+		assertThat(mapper.getDeserializationConfig().isEnabled(JsonNodeFeature.READ_NULL_PROPERTIES)).isFalse();
 		assertThat(mapper.getFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)).isFalse();
 		assertThat(mapper.getFactory().isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES)).isFalse();
 		assertThat(mapper.getSerializationConfig().getSerializationInclusion()).isSameAs(JsonInclude.Include.NON_NULL);
