@@ -19,6 +19,7 @@ package org.springframework.test.context.jdbc;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -38,6 +39,7 @@ import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_CLASS;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
 
 /**
  * Verifies that {@link Sql @Sql} with {@link ExecutionPhase#AFTER_TEST_CLASS}
@@ -69,6 +71,26 @@ class AfterTestClassSqlScriptsTests extends AbstractTransactionalTests {
 		assertUsers("Catbert", "Dogbert");
 	}
 
+	@Nested
+	@Sql(scripts = "recreate-schema.sql", executionPhase = BEFORE_TEST_CLASS)
+	@Sql(scripts = "drop-schema.sql", executionPhase = AFTER_TEST_CLASS)
+	class NestedAfterTestClassSqlScriptsTests {
+
+		@Test
+		@Order(1)
+		@Sql("data-add-catbert.sql")
+		void databaseHasBeenInitialized() {
+			assertUsers("Catbert");
+		}
+
+		@Test
+		@Order(2)
+		@Sql("data-add-dogbert.sql")
+		void databaseIsNotWipedBetweenTests() {
+			assertUsers("Catbert", "Dogbert");
+		}
+
+	}
 
 	static class VerifySchemaDroppedListener extends AbstractTestExecutionListener {
 

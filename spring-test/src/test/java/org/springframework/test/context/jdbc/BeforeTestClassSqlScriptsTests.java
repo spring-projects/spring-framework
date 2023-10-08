@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.jdbc;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.annotation.DirtiesContext;
@@ -36,7 +37,7 @@ import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.OVERR
  */
 @SpringJUnitConfig(EmptyDatabaseConfig.class)
 @DirtiesContext
-@Sql(scripts = {"schema.sql", "data-add-catbert.sql"}, executionPhase = BEFORE_TEST_CLASS)
+@Sql(scripts = {"recreate-schema.sql", "data-add-catbert.sql"}, executionPhase = BEFORE_TEST_CLASS)
 class BeforeTestClassSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
@@ -56,6 +57,30 @@ class BeforeTestClassSqlScriptsTests extends AbstractTransactionalTests {
 	@SqlMergeMode(OVERRIDE)
 	void overrideDoesNotAffectClassLevelPhase() {
 		assertUsers("Catbert", "Dogbert");
+	}
+
+	@Nested
+	class NestedBeforeTestClassSqlScriptsTests  {
+
+		@Test
+		void classLevelScriptsHaveBeenRun() {
+			assertUsers("Catbert");
+		}
+
+		@Test
+		@Sql("data-add-dogbert.sql")
+		@SqlMergeMode(MERGE)
+		void mergeDoesNotAffectClassLevelPhase() {
+			assertUsers("Catbert", "Dogbert");
+		}
+
+		@Test
+		@Sql({"data-add-dogbert.sql"})
+		@SqlMergeMode(OVERRIDE)
+		void overrideDoesNotAffectClassLevelPhase() {
+			assertUsers("Catbert", "Dogbert");
+		}
+
 	}
 
 }
