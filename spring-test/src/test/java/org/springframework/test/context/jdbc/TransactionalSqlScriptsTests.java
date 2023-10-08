@@ -17,6 +17,7 @@
 package org.springframework.test.context.jdbc;
 
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -31,7 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
  */
 @SpringJUnitConfig(EmptyDatabaseConfig.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-@Sql({ "schema.sql", "data.sql" })
+@Sql({ "recreate-schema.sql", "data.sql" })
 @DirtiesContext
 class TransactionalSqlScriptsTests extends AbstractTransactionalTests {
 
@@ -44,6 +45,22 @@ class TransactionalSqlScriptsTests extends AbstractTransactionalTests {
 	@Sql({ "recreate-schema.sql", "data.sql", "data-add-dogbert.sql" })
 	void methodLevelScripts() {
 		assertNumUsers(2);
+	}
+
+	@Nested
+	class NestedTransactionalSqlScriptsTests {
+
+		@Test
+		void classLevelScripts() {
+			assertNumUsers(1);
+		}
+
+		@Test
+		@Sql({ "recreate-schema.sql", "data.sql", "data-add-dogbert.sql" })
+		void methodLevelScripts() {
+			assertNumUsers(2);
+		}
+
 	}
 
 }
