@@ -507,7 +507,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 *
 	 * @since 6.0
 	 */
-	static final class Search {
+	class Search {
 
 		static final Predicate<Class<?>> always = clazz -> true;
 
