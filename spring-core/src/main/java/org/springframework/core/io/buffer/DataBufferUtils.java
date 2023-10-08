@@ -438,6 +438,7 @@ public abstract class DataBufferUtils {
 	 * @param executor used to invoke the {@code outputStreamHandler}
 	 * @return a {@code Publisher<DataBuffer>} based on bytes written by
 	 * {@code outputStreamHandler}
+	 * @since 6.1
 	 */
 	public static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,
 			DataBufferFactory bufferFactory, Executor executor) {
@@ -474,6 +475,7 @@ public abstract class DataBufferUtils {
 	 * @param chunkSize minimum size of the buffer produced by the publisher
 	 * @return a {@code Publisher<DataBuffer>} based on bytes written by
 	 * {@code outputStreamHandler}
+	 * @since 6.1
 	 */
 	public static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,
 			DataBufferFactory bufferFactory, Executor executor, int chunkSize) {
