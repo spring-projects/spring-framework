@@ -377,8 +377,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	// Methods dealing with static SQL (java.sql.Statement)
 	//-------------------------------------------------------------------------
 
+	@Override
 	@Nullable
-	private <T> T execute(StatementCallback<T> action, boolean closeResources) throws DataAccessException {
+	public  <T> T execute(StatementCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
@@ -404,17 +405,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throw translateException("StatementCallback", sql, ex);
 		}
 		finally {
-			if (closeResources) {
-				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.releaseConnection(con, getDataSource());
-			}
+			JdbcUtils.closeStatement(stmt);
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
-	}
-
-	@Override
-	@Nullable
-	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
-		return execute(action, true);
 	}
 
 	@Override
@@ -437,7 +430,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
-		execute(new ExecuteStatementCallback(), true);
+		execute(new ExecuteStatementCallback());
 	}
 
 	@Override
@@ -469,7 +462,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
-		return execute(new QueryStatementCallback(), true);
+		return execute(new QueryStatementCallback());
 	}
 
 	@Override
@@ -491,8 +484,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				Connection con = stmt.getConnection();
 				return new ResultSetSpliterator<>(rs, rowMapper).stream().onClose(() -> {
 					JdbcUtils.closeResultSet(rs);
-					JdbcUtils.closeStatement(stmt);
-					DataSourceUtils.releaseConnection(con, getDataSource());
 				});
 			}
 			@Override
@@ -501,7 +492,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
-		return result(execute(new StreamStatementCallback(), false));
+		return result(execute(new StreamStatementCallback()));
 	}
 
 	@Override
@@ -560,7 +551,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
-		return updateCount(execute(new UpdateStatementCallback(), true));
+		return updateCount(execute(new UpdateStatementCallback()));
 	}
 
 	@Override
@@ -625,7 +616,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
-		int[] result = execute(new BatchUpdateStatementCallback(), true);
+		int[] result = execute(new BatchUpdateStatementCallback());
 		Assert.state(result != null, "No update counts");
 		return result;
 	}
