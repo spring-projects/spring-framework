@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
 import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.FactoryBean;
@@ -240,6 +241,21 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("spring")).isEqualTo("framework");
 		});
 		assertHasMethodInvokeHints(PropertyValuesBean.class, "setTest", "setSpring");
+		assertHasDecalredFieldsHint(PropertyValuesBean.class);
+	}
+
+	@Test
+	void propertyValuesWhenValuesOnParentClass() {
+		this.beanDefinition.setTargetType(ExtendedPropertyValuesBean.class);
+		this.beanDefinition.getPropertyValues().add("test", String.class);
+		this.beanDefinition.getPropertyValues().add("spring", "framework");
+		compile((actual, compiled) -> {
+			assertThat(actual.getPropertyValues().get("test")).isEqualTo(String.class);
+			assertThat(actual.getPropertyValues().get("spring")).isEqualTo("framework");
+		});
+		assertHasMethodInvokeHints(PropertyValuesBean.class, "setTest", "setSpring");
+		assertHasDecalredFieldsHint(ExtendedPropertyValuesBean.class);
+		assertHasDecalredFieldsHint(PropertyValuesBean.class);
 	}
 
 	@Test
@@ -300,6 +316,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("name")).isEqualTo("World");
 		});
 		assertHasMethodInvokeHints(PropertyValuesFactoryBean.class, "setPrefix", "setName" );
+		assertHasDecalredFieldsHint(PropertyValuesFactoryBean.class);
 	}
 
 	@Test
@@ -453,6 +470,12 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			.test(this.generationContext.getRuntimeHints()));
 	}
 
+	private void assertHasDecalredFieldsHint(Class<?> beanType) {
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onType(beanType).withMemberCategory(MemberCategory.DECLARED_FIELDS))
+				.accepts(this.generationContext.getRuntimeHints());
+	}
+
 	private void compile(BiConsumer<RootBeanDefinition, Compiled> result) {
 		compile(attribute -> true, result);
 	}
@@ -521,6 +544,10 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		public void setSpring(String spring) {
 			this.spring = spring;
 		}
+
+	}
+
+	static class ExtendedPropertyValuesBean extends PropertyValuesBean {
 
 	}
 
