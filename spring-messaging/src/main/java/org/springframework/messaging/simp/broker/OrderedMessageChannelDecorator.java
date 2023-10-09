@@ -89,11 +89,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 			Message<?> message = this.messages.peek();
 			if (message != null) {
 				try {
-					addNextMessageTaskHeader(message, () -> {
-						if (removeMessage(message)) {
-							sendNextMessage();
-						}
-					});
+					setTaskHeader(message, new PostHandleTask(message));
 					if (this.channel.send(message)) {
 						return;
 					}
@@ -124,19 +120,12 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 		}
 	}
 
-	private static void addNextMessageTaskHeader(Message<?> message, Runnable task) {
+	private static void setTaskHeader(Message<?> message, Runnable task) {
 		SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
 		Assert.isTrue(accessor != null && accessor.isMutable(), "Expected mutable SimpMessageHeaderAccessor");
 		accessor.setHeader(NEXT_MESSAGE_TASK_HEADER, task);
 	}
 
-	/**
-	 * Obtain the task to release the next message, if found.
-	 */
-	@Nullable
-	public static Runnable getNextMessageTask(Message<?> message) {
-		return (Runnable) message.getHeaders().get(OrderedMessageChannelDecorator.NEXT_MESSAGE_TASK_HEADER);
-	}
 
 	/**
 	 * Install or remove an {@link ExecutorChannelInterceptor} that invokes a
@@ -150,19 +139,47 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 			Assert.isInstanceOf(ExecutorSubscribableChannel.class, channel,
 					"An ExecutorSubscribableChannel is required for 'preservePublishOrder'");
 			ExecutorSubscribableChannel execChannel = (ExecutorSubscribableChannel) channel;
-			if (execChannel.getInterceptors().stream().noneMatch(CallbackInterceptor.class::isInstance)) {
-				execChannel.addInterceptor(0, new CallbackInterceptor());
+			if (execChannel.getInterceptors().stream().noneMatch(CallbackTaskInterceptor.class::isInstance)) {
+				execChannel.addInterceptor(0, new CallbackTaskInterceptor());
 			}
 		}
 		else if (channel instanceof ExecutorSubscribableChannel execChannel) {
-			execChannel.getInterceptors().stream().filter(CallbackInterceptor.class::isInstance)
+			execChannel.getInterceptors().stream().filter(CallbackTaskInterceptor.class::isInstance)
 					.findFirst().map(execChannel::removeInterceptor);
 
 		}
 	}
 
+	/**
+	 * Obtain the task to release the next message, if found.
+	 */
+	@Nullable
+	public static Runnable getNextMessageTask(Message<?> message) {
+		return (Runnable) message.getHeaders().get(OrderedMessageChannelDecorator.NEXT_MESSAGE_TASK_HEADER);
+	}
 
-	private static class CallbackInterceptor implements ExecutorChannelInterceptor {
+
+	/**
+	 * Remove handled message from queue, and send next message.
+	 */
+	private class PostHandleTask implements Runnable {
+
+		private final Message<?> message;
+
+		private PostHandleTask(Message<?> message) {
+			this.message = message;
+		}
+
+		@Override
+		public void run() {
+			if (OrderedMessageChannelDecorator.this.removeMessage(message)) {
+				sendNextMessage();
+			}
+		}
+	}
+
+
+	private static class CallbackTaskInterceptor implements ExecutorChannelInterceptor {
 
 		@Override
 		public void afterMessageHandled(
