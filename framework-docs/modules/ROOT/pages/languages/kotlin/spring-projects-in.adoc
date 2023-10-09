@@ -236,6 +236,42 @@ be matched, not only the `GET` method.
 
 
 
+[[declaration-site-variance]]
+== Declaration-site variance
+
+Dealing with generic types in Spring applications written in Kotlin may require, for some use cases, to understand
+Kotlin https://kotlinlang.org/docs/generics.html#declaration-site-variance[declaration-site variance]
+which allows to define the variance when declaring a type, which is not possible in Java which supports only use-site
+variance.
+
+For example, declaring `List<Foo>` in Kotlin is conceptually equivalent to `java.util.List<? extends Foo>` because
+`kotlin.collections.List` is declared as
+https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/[`interface List<out E> : kotlin.collections.Collection<E>`].
+
+This needs to be taken in account by using the `out` Kotlin keyword on generic types when using Java classes,
+for example when writing a `org.springframework.core.convert.converter.Converter` from a Kotlin type to a Java type.
+
+[source,kotlin,indent=0]
+----
+class ListOfFooConverter : Converter<List<Foo>, CustomJavaList<out Foo>> {
+    // ...
+}
+----
+
+When converting any kind of objects, star projection with `*` can be used instead of `out Any`.
+[source,kotlin,indent=0]
+----
+class ListOfAnyConverter : Converter<List<*>, CustomJavaList<*>> {
+    // ...
+}
+----
+
+NOTE: Spring Framework does not leverage yet declaration-site variance type information for injecting beans,
+subscribe to https://github.com/spring-projects/spring-framework/issues/22313[spring-framework#22313] to track related
+progresses.
+
+
+
 [[testing]]
 == Testing
 
