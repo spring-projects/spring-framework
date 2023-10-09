@@ -113,7 +113,12 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 		}
 	}
 
+	/**
+	 * Remove the message from the top of the queue, but only if it matches,
+	 * i.e. hasn't been removed already.
+	 */
 	private boolean removeMessage(Message<?> message) {
+		// Remove only if not removed already
 		Message<?> next = this.messages.peek();
 		if (next == message) {
 			this.messages.remove();
@@ -181,7 +186,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 		@Override
 		public void run() {
 			if (this.handledCount == null || this.handledCount.addAndGet(1) == subscriberCount) {
-				if (OrderedMessageChannelDecorator.this.removeMessage(message)) {
+				if (OrderedMessageChannelDecorator.this.removeMessage(this.message)) {
 					sendNextMessage();
 				}
 			}

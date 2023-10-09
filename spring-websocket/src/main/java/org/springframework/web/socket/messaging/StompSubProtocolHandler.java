@@ -108,6 +108,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
+	private boolean preserveReceiveOrder;
+
+	private final Map<String, MessageChannel> messageChannels = new ConcurrentHashMap<>();
+
 	private final Map<String, Principal> stompAuthentications = new ConcurrentHashMap<>();
 
 	@Nullable
@@ -193,6 +197,30 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return this.headerInitializer;
 	}
 
+	/**
+	 * Whether client messages must be handled in the order received.
+	 * <p>By default messages sent to the {@code "clientInboundChannel"} may
+	 * not be handled in the same order because the channel is backed by a
+	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
+	 * <p>When this flag is set to {@code true} messages within the same session
+	 * will be sent to the {@code "clientInboundChannel"} one at a time to
+	 * preserve the order in which they were received.
+	 * @param preserveReceiveOrder whether to publish in order
+	 * @since 6.1
+	 */
+	public void setPreserveReceiveOrder(boolean preserveReceiveOrder) {
+		this.preserveReceiveOrder = preserveReceiveOrder;
+	}
+
+	/**
+	 * Whether the handler is configured to handle inbound messages in the
+	 * order in which they were received.
+	 * @since 6.1
+	 */
+	public boolean isPreserveReceiveOrder() {
+		return this.preserveReceiveOrder;
+	}
+
 	@Override
 	public List<String> getSupportedProtocols() {
 		return Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp");
@@ -268,6 +296,12 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			return;
 		}
 
+		MessageChannel channelToUse =
+				(this.messageChannels.computeIfAbsent(session.getId(),
+						id -> this.preserveReceiveOrder ?
+								new OrderedMessageChannelDecorator(outputChannel, logger) :
+								outputChannel));
+
 		for (Message<byte[]> message : messages) {
 			StompHeaderAccessor headerAccessor =
 					MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -307,7 +341,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				try {
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
-					sent = outputChannel.send(message);
+					sent = channelToUse.send(message);
 
 					if (sent) {
 						if (this.eventPublisher != null) {
@@ -652,6 +686,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			outputChannel.send(message);
 		}
 		finally {
+			this.messageChannels.remove(session.getId());
 			this.stompAuthentications.remove(session.getId());
 			SimpAttributesContextHolder.resetAttributes();
 			simpAttributes.sessionCompleted();
