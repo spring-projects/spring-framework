@@ -41,7 +41,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.event.test.self_inject.MyApplication;
+import org.springframework.context.event.test.self_inject.MyAspect;
 import org.springframework.context.event.test.self_inject.MyEventListener;
 import org.springframework.context.event.test.self_inject.MyEventPublisher;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -280,17 +280,17 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	 * Regression test for <a href="https://github.com/spring-projects/spring-framework/issues/28283">issue 28283</a>,
 	 * where event listeners proxied due to e.g.
 	 * <ul>
-	 *   <li>{@code @Transactional} annotations in their methods or</li>
-	 *   <li>being targeted by aspects</li>
+	 * <li>{@code @Transactional} annotations in their methods or</li>
+	 * <li>being targeted by aspects</li>
 	 * </ul>
 	 * were added to the list of application listener beans twice (both proxy and unwrapped target).
 	 */
 	@Test
 	public void eventForSelfInjectedProxiedListenerFiredOnlyOnce() {
-		String basePackage = MyApplication.class.getPackageName();
-		AbstractApplicationContext context = new AnnotationConfigApplicationContext(basePackage);
+		AbstractApplicationContext context = new AnnotationConfigApplicationContext(
+				MyAspect.class, MyEventListener.class, MyEventPublisher.class);
 		context.getBean(MyEventPublisher.class).publishMyEvent("hello");
-		assertThat(MyEventListener.eventCount).isEqualTo(1);
+		assertThat(context.getBean(MyEventListener.class).eventCount).isEqualTo(1);
 		context.close();
 	}
 
