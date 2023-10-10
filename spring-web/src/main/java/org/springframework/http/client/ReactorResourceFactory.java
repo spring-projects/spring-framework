@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.reactive;
+package org.springframework.http.client;
 
 import java.time.Duration;
 import java.util.function.Consumer;
@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
- * @since 5.1
+ * @since 6.1
  */
 public class ReactorResourceFactory implements InitializingBean, DisposableBean, Lifecycle {
 
@@ -179,7 +179,6 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean,
 	 * can also be overridden with the system property
 	 * {@link reactor.netty.ReactorNetty#SHUTDOWN_QUIET_PERIOD
 	 * ReactorNetty.SHUTDOWN_QUIET_PERIOD}.
-	 * @since 5.2.4
 	 * @see #setShutdownTimeout(Duration)
 	 */
 	public void setShutdownQuietPeriod(Duration shutdownQuietPeriod) {
@@ -196,7 +195,6 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean,
 	 * can also be overridden with the system property
 	 * {@link reactor.netty.ReactorNetty#SHUTDOWN_TIMEOUT
 	 * ReactorNetty.SHUTDOWN_TIMEOUT}.
-	 * @since 5.2.4
 	 * @see #setShutdownQuietPeriod(Duration)
 	 */
 	public void setShutdownTimeout(Duration shutdownTimeout) {

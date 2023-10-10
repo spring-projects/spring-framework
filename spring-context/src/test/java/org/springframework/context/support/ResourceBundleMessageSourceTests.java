@@ -32,6 +32,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -210,6 +211,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -222,6 +225,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -234,6 +239,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -246,6 +253,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test

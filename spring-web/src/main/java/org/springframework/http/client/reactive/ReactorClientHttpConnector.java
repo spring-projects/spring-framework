@@ -31,6 +31,7 @@ import reactor.netty.resources.LoopResources;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ReactorResourceFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
