@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.springframework.http.codec.multipart;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.AbstractMap;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -91,6 +93,46 @@ public class PartEventHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(part.name()).isEqualTo("file part");
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
 		assertThat(decodeToString(part)).isEqualTo("AaBbCc");
+	}
+
+	@Test
+	void writeFormEventStream() {
+		Flux<Map.Entry<String, String>> body = Flux.just(
+				new AbstractMap.SimpleEntry<>("name 1", "value 1"),
+				new AbstractMap.SimpleEntry<>("name 2", "value 2+1"),
+				new AbstractMap.SimpleEntry<>("name 2", "value 2+2")
+		);
+
+		Flux<PartEvent> partEvents = body
+				.concatMap(entry -> FormPartEvent.create(entry.getKey(), entry.getValue()));
+
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(partEvents, null, MediaType.MULTIPART_FORM_DATA, this.response, hints)
+				.block(Duration.ofSeconds(5));
+
+		MultiValueMap<String, Part> requestParts = parse(this.response, hints);
+		assertThat(requestParts).hasSize(2);
+
+		Part part = requestParts.getFirst("name 1");
+		assertThat(part.name()).isEqualTo("name 1");
+		assertThat(part.headers().getContentType().isCompatibleWith(MediaType.TEXT_PLAIN)).isTrue();
+		String value = decodeToString(part);
+		assertThat(value).isEqualTo("value 1");
+
+		List<Part> parts = requestParts.get("name 2");
+		assertThat(parts).hasSize(2);
+
+		part = parts.get(0);
+		assertThat(part.name()).isEqualTo("name 2");
+		assertThat(part.headers().getContentType().isCompatibleWith(MediaType.TEXT_PLAIN)).isTrue();
+		value = decodeToString(part);
+		assertThat(value).isEqualTo("value 2+1");
+
+		part = parts.get(1);
+		assertThat(part.name()).isEqualTo("name 2");
+		assertThat(part.headers().getContentType().isCompatibleWith(MediaType.TEXT_PLAIN)).isTrue();
+		value = decodeToString(part);
+		assertThat(value).isEqualTo("value 2+2");
 	}
 
 	@SuppressWarnings("ConstantConditions")
