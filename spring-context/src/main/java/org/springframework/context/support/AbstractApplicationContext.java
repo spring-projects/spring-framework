@@ -137,31 +137,39 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext {
 
 	/**
-	 * Name of the MessageSource bean in the factory.
-	 * If none is supplied, message resolution is delegated to the parent.
-	 * @see MessageSource
-	 */
-	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
-
-	/**
-	 * Name of the LifecycleProcessor bean in the factory.
-	 * If none is supplied, a DefaultLifecycleProcessor is used.
+	 * The name of the {@link LifecycleProcessor} bean in the context.
+	 * If none is supplied, a {@link DefaultLifecycleProcessor} is used.
+	 * @since 3.0
 	 * @see org.springframework.context.LifecycleProcessor
 	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 * @see #start()
+	 * @see #stop()
 	 */
 	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
 
 	/**
-	 * Name of the ApplicationEventMulticaster bean in the factory.
-	 * If none is supplied, a default SimpleApplicationEventMulticaster is used.
+	 * The name of the {@link MessageSource} bean in the context.
+	 * If none is supplied, message resolution is delegated to the parent.
+	 * @see org.springframework.context.MessageSource
+	 * @see org.springframework.context.support.ResourceBundleMessageSource
+	 * @see org.springframework.context.support.ReloadableResourceBundleMessageSource
+	 * @see #getMessage(MessageSourceResolvable, Locale)
+	 */
+	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
+
+	/**
+	 * The name of the {@link ApplicationEventMulticaster} bean in the context.
+	 * If none is supplied, a {@link SimpleApplicationEventMulticaster} is used.
 	 * @see org.springframework.context.event.ApplicationEventMulticaster
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+	 * @see #publishEvent(ApplicationEvent)
+	 * @see #addApplicationListener(ApplicationListener)
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
 	/**
-	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
-	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
+	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that
+	 * instructs Spring to ignore SpEL, i.e. to not initialize the SpEL infrastructure.
 	 * <p>The default is "false".
 	 */
 	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
@@ -211,7 +219,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private Thread shutdownHook;
 
 	/** ResourcePatternResolver used by this context. */
-	private ResourcePatternResolver resourcePatternResolver;
+	private final ResourcePatternResolver resourcePatternResolver;
 
 	/** LifecycleProcessor for managing the lifecycle of beans within this context. */
 	@Nullable
