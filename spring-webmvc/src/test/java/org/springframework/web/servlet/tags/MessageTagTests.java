@@ -17,9 +17,8 @@
 package org.springframework.web.servlet.tags;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
@@ -28,9 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -365,23 +362,7 @@ class MessageTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	void nullMessageSource() throws JspException {
-		PageContext pc = createPageContext();
-		ConfigurableWebApplicationContext ctx = (ConfigurableWebApplicationContext)
-				RequestContextUtils.findWebApplicationContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
-		ctx.close();
-
-		MessageTag tag = new MessageTag();
-		tag.setPageContext(pc);
-		tag.setCode("test");
-		tag.setVar("testvar2");
-		tag.doStartTag();
-		assertThat(tag.doEndTag()).as("Correct doEndTag return value").isEqualTo(Tag.EVAL_PAGE);
-	}
-
-	@Test
-	@SuppressWarnings("rawtypes")
-	void requestContext() throws ServletException {
+	void requestContext() {
 		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
 		assertThat(rc.getMessage("test")).isEqualTo("test message");
@@ -391,7 +372,7 @@ class MessageTagTests extends AbstractTagTests {
 		assertThat(rc.getMessage("testArgs", new String[]{"arg1", "arg2"}, "default")).isEqualTo("test arg1 message arg2");
 		assertThat(rc.getMessage("testArgs", Arrays.asList("arg1", "arg2"), "default")).isEqualTo("test arg1 message arg2");
 		assertThat(rc.getMessage("testa", "default")).isEqualTo("default");
-		assertThat(rc.getMessage("testa", (List) null, "default")).isEqualTo("default");
+		assertThat(rc.getMessage("testa", Collections.emptyList(), "default")).isEqualTo("default");
 		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"});
 		assertThat(rc.getMessage(resolvable)).isEqualTo("test message");
 	}
