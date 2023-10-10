@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.reactive.ReactorResourceFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.reactive;
+package org.springframework.http.client;
 
 import java.time.Duration;
 import java.util.function.Consumer;
