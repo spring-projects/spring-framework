@@ -16,6 +16,7 @@
 
 package org.springframework.web.client.support;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,9 +92,19 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 		if (values.getUri() != null) {
 			builder = RequestEntity.method(httpMethod, values.getUri());
 		}
+
 		else if (values.getUriTemplate() != null) {
-			builder = RequestEntity.method(httpMethod, values.getUriTemplate(), values.getUriVariables());
+			if (values.getUriBuilderFactory() != null) {
+				URI expanded = values.getUriBuilderFactory()
+						.expand(values.getUriTemplate(), values.getUriVariables());
+				builder = RequestEntity.method(httpMethod, expanded);
+			}
+
+			else {
+				builder = RequestEntity.method(httpMethod, values.getUriTemplate(), values.getUriVariables());
+			}
 		}
+
 		else {
 			throw new IllegalStateException("Neither full URL nor URI template");
 		}
