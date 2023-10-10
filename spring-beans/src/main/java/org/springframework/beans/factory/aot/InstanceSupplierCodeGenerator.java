@@ -21,6 +21,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -189,11 +190,15 @@ public class InstanceSupplierCodeGenerator {
 	private CodeBlock generateCodeForInaccessibleConstructor(String beanName, Class<?> beanClass,
 			Constructor<?> constructor, boolean dependsOnBean, Consumer<ReflectionHints> hints) {
 
+		CodeWarnings codeWarnings = new CodeWarnings();
+		codeWarnings.detectDeprecation(beanClass, constructor)
+				.detectDeprecation(Arrays.stream(constructor.getParameters()).map(Parameter::getType));
 		hints.accept(this.generationContext.getRuntimeHints().reflection());
 
 		GeneratedMethod generatedMethod = generateGetInstanceSupplierMethod(method -> {
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);
+			codeWarnings.suppress(method);
 			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, beanClass));
 			int parameterOffset = (!dependsOnBean) ? 0 : 1;
 			method.addStatement(generateResolverForConstructor(beanClass, constructor, parameterOffset));
@@ -206,8 +211,12 @@ public class InstanceSupplierCodeGenerator {
 			String beanName, Class<?> beanClass, Constructor<?> constructor, Class<?> declaringClass,
 			boolean dependsOnBean, javax.lang.model.element.Modifier... modifiers) {
 
+		CodeWarnings codeWarnings = new CodeWarnings();
+		codeWarnings.detectDeprecation(beanClass, constructor, declaringClass)
+				.detectDeprecation(Arrays.stream(constructor.getParameters()).map(Parameter::getType));
 		method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 		method.addModifiers(modifiers);
+		codeWarnings.suppress(method);
 		method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, beanClass));
 
 		int parameterOffset = (!dependsOnBean) ? 0 : 1;
@@ -300,9 +309,13 @@ public class InstanceSupplierCodeGenerator {
 
 		String factoryMethodName = factoryMethod.getName();
 		Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
+		CodeWarnings codeWarnings = new CodeWarnings();
+		codeWarnings.detectDeprecation(declaringClass, factoryMethod, suppliedType)
+				.detectDeprecation(Arrays.stream(factoryMethod.getParameters()).map(Parameter::getType));
 
 		method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 		method.addModifiers(modifiers);
+		codeWarnings.suppress(method);
 		method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, suppliedType));
 
 		CodeBlock.Builder code = CodeBlock.builder();
