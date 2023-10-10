@@ -474,7 +474,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Configure the {@link ObservationRegistry} to use for recording JMS observations.
 	 * @param observationRegistry the observation registry to use.
 	 * @since 6.1
-	 * @see io.micrometer.jakarta10.instrument.jms.JmsInstrumentation
+	 * @see io.micrometer.jakarta9.instrument.jms.JmsInstrumentation
 	 */
 	public void setObservationRegistry(ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
