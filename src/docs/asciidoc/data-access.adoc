@@ -1562,30 +1562,27 @@ chapter for examples.
 ====
 
 You can apply the `@Transactional` annotation to an interface definition, a method
-on an interface, a class definition, or a method on a class. However, the
-mere presence of the `@Transactional` annotation is not enough to activate the
-transactional behavior. The `@Transactional` annotation is merely metadata that can
-be consumed by some runtime infrastructure that is `@Transactional`-aware and that
-can use the metadata to configure the appropriate beans with transactional behavior.
-In the preceding example, the `<tx:annotation-driven/>` element switches on the
-transactional behavior.
+on an interface, a class definition, or a method on a class. However, the mere presence
+of the `@Transactional` annotation is not enough to activate the transactional behavior.
+The `@Transactional` annotation is merely metadata that can be consumed by corresponding
+runtime infrastructure which uses that metadata to configure the appropriate beans with
+transactional behavior. In the preceding example, the `<tx:annotation-driven/>` element
+switches on actual transaction management at runtime.
 
-TIP: The Spring team recommends that you annotate only concrete classes (and methods of
-concrete classes) with the `@Transactional` annotation, as opposed to annotating interfaces.
-You certainly can place the `@Transactional` annotation on an interface (or an interface
-method), but this works only as you would expect it to if you use interface-based
-proxies. The fact that Java annotations are not inherited from interfaces means that,
-if you use class-based proxies (`proxy-target-class="true"`) or the weaving-based
-aspect (`mode="aspectj"`), the transaction settings are not recognized by the proxying
-and weaving infrastructure, and the object is not wrapped in a transactional proxy.
+TIP: The Spring team recommends that you annotate methods of concrete classes with the
+`@Transactional` annotation, rather than relying on annotated methods in interfaces,
+even if the latter does work for interface-based and target-class proxies as of 5.0.
+Since Java annotations are not inherited from interfaces, interface-declared annotations
+are still not recognized by the weaving infrastructure when using AspectJ mode, so the
+aspect does not get applied. As a consequence, your transaction annotations may be
+silently ignored: Your code might appear to "work" until you test a rollback scenario.
 
 NOTE: In proxy mode (which is the default), only external method calls coming in through
 the proxy are intercepted. This means that self-invocation (in effect, a method within
 the target object calling another method of the target object) does not lead to an actual
 transaction at runtime even if the invoked method is marked with `@Transactional`. Also,
 the proxy must be fully initialized to provide the expected behavior, so you should not
-rely on this feature in your initialization code -- for example, in a `@PostConstruct`
-method.
+rely on this feature in your initialization code -- e.g. in a `@PostConstruct` method.
 
 Consider using AspectJ mode (see the `mode` attribute in the following table) if you
 expect self-invocations to be wrapped with transactions as well. In this case, there is
@@ -1610,20 +1607,20 @@ is modified) to support `@Transactional` runtime behavior on any kind of method.
   framework (following proxy semantics, as discussed earlier, applying to method calls
   coming in through the proxy only). The alternative mode (`aspectj`) instead weaves the
   affected classes with Spring's AspectJ transaction aspect, modifying the target class
-  byte code to apply to any kind of method call. AspectJ weaving requires
-  `spring-aspects.jar` in the classpath as well as having load-time weaving (or compile-time
-  weaving) enabled. (See <<core.adoc#aop-aj-ltw-spring, Spring configuration>>
-  for details on how to set up load-time weaving.)
+  byte code to apply to any kind of method call. AspectJ weaving requires `spring-aspects.jar`
+  in the classpath as well as having load-time weaving (or compile-time weaving) enabled.
+  (See <<core.adoc#aop-aj-ltw-spring, Spring configuration>> for details on how to set up
+  load-time weaving.)
 
 | `proxy-target-class`
 | `proxyTargetClass`
 | `false`
 | Applies to `proxy` mode only. Controls what type of transactional proxies are created
-  for classes annotated with the `@Transactional` annotation. If the
-  `proxy-target-class` attribute is set to `true`, class-based proxies are created.
-  If `proxy-target-class` is `false` or if the attribute is omitted, then standard JDK
-  interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
-  for a detailed examination of the different proxy types.)
+  for classes annotated with the `@Transactional` annotation. If the `proxy-target-class`
+  attribute is set to `true`, class-based proxies are created. If `proxy-target-class` is
+  `false` or if the attribute is omitted, then standard JDK interface-based proxies are
+  created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>> for a detailed examination
+  of the different proxy types.)
 
 | `order`
 | `order`
