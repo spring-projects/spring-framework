@@ -108,9 +108,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
-	private boolean preserveReceiveOrder;
-
-	private final Map<String, MessageChannel> messageChannels = new ConcurrentHashMap<>();
+	@Nullable
+	private Map<String, MessageChannel> orderedHandlingMessageChannels;
 
 	private final Map<String, Principal> stompAuthentications = new ConcurrentHashMap<>();
 
@@ -209,7 +208,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * @since 6.1
 	 */
 	public void setPreserveReceiveOrder(boolean preserveReceiveOrder) {
-		this.preserveReceiveOrder = preserveReceiveOrder;
+		this.orderedHandlingMessageChannels = (preserveReceiveOrder ? new ConcurrentHashMap<>() : null);
 	}
 
 	/**
@@ -218,7 +217,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 * @since 6.1
 	 */
 	public boolean isPreserveReceiveOrder() {
-		return this.preserveReceiveOrder;
+		return (this.orderedHandlingMessageChannels != null);
 	}
 
 	@Override
@@ -253,7 +252,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	@Override
 	public void handleMessageFromClient(WebSocketSession session,
-			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
+			WebSocketMessage<?> webSocketMessage, MessageChannel targetChannel) {
 
 		List<Message<byte[]>> messages;
 		try {
@@ -296,11 +295,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			return;
 		}
 
-		MessageChannel channelToUse =
-				(this.messageChannels.computeIfAbsent(session.getId(),
-						id -> this.preserveReceiveOrder ?
-								new OrderedMessageChannelDecorator(outputChannel, logger) :
-								outputChannel));
+		MessageChannel channelToUse = targetChannel;
+		if (this.orderedHandlingMessageChannels != null) {
+			channelToUse = this.orderedHandlingMessageChannels.computeIfAbsent(
+					session.getId(), id -> new OrderedMessageChannelDecorator(targetChannel, logger));
+		}
 
 		for (Message<byte[]> message : messages) {
 			StompHeaderAccessor headerAccessor =
@@ -324,7 +323,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					});
 				}
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
-				if (!detectImmutableMessageInterceptor(outputChannel)) {
+				if (!detectImmutableMessageInterceptor(targetChannel)) {
 					headerAccessor.setImmutable();
 				}
 
@@ -686,7 +685,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			outputChannel.send(message);
 		}
 		finally {
-			this.messageChannels.remove(session.getId());
+			if (this.orderedHandlingMessageChannels != null) {
+				this.orderedHandlingMessageChannels.remove(session.getId());
+			}
 			this.stompAuthentications.remove(session.getId());
 			SimpAttributesContextHolder.resetAttributes();
 			simpAttributes.sessionCompleted();

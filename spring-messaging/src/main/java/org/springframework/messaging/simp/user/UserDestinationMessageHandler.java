@@ -43,9 +43,9 @@ import org.springframework.util.StringUtils;
 /**
  * {@code MessageHandler} with support for "user" destinations.
  *
- * <p>Listens for messages with "user" destinations, translates their destination
- * to actual target destinations unique to the active session(s) of a user, and
- * then sends the resolved messages to the broker channel to be delivered.
+ * <p>Listen for messages with "user" destinations, translate the destination to
+ * a target destination that's unique to the active user session(s), and send
+ * to the broker channel for delivery.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -75,24 +75,24 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 
 	/**
-	 * Create an instance with the given client and broker channels subscribing
-	 * to handle messages from each and then sending any resolved messages to the
-	 * broker channel.
+	 * Create an instance with the given client and broker channels to subscribe to,
+	 * and then send resolved messages to the broker channel.
 	 * @param clientInboundChannel messages received from clients.
 	 * @param brokerChannel messages sent to the broker.
-	 * @param resolver the resolver for "user" destinations.
+	 * @param destinationResolver the resolver for "user" destinations.
 	 */
-	public UserDestinationMessageHandler(SubscribableChannel clientInboundChannel,
-			SubscribableChannel brokerChannel, UserDestinationResolver resolver) {
+	public UserDestinationMessageHandler(
+			SubscribableChannel clientInboundChannel, SubscribableChannel brokerChannel,
+			UserDestinationResolver destinationResolver) {
 
 		Assert.notNull(clientInboundChannel, "'clientInChannel' must not be null");
 		Assert.notNull(brokerChannel, "'brokerChannel' must not be null");
-		Assert.notNull(resolver, "resolver must not be null");
+		Assert.notNull(destinationResolver, "resolver must not be null");
 
 		this.clientInboundChannel = clientInboundChannel;
 		this.brokerChannel = brokerChannel;
 		this.messagingTemplate = new SimpMessagingTemplate(brokerChannel);
-		this.destinationResolver = resolver;
+		this.destinationResolver = destinationResolver;
 	}
 
 
@@ -182,16 +182,16 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 
 	@Override
-	public void handleMessage(Message<?> message) throws MessagingException {
-		Message<?> messageToUse = message;
+	public void handleMessage(Message<?> sourceMessage) throws MessagingException {
+		Message<?> message = sourceMessage;
 		if (this.broadcastHandler != null) {
-			messageToUse = this.broadcastHandler.preHandle(message);
-			if (messageToUse == null) {
+			message = this.broadcastHandler.preHandle(sourceMessage);
+			if (message == null) {
 				return;
 			}
 		}
 
-		UserDestinationResult result = this.destinationResolver.resolveDestination(messageToUse);
+		UserDestinationResult result = this.destinationResolver.resolveDestination(message);
 		if (result == null) {
 			return;
 		}
@@ -201,22 +201,22 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 				logger.trace("No active sessions for user destination: " + result.getSourceDestination());
 			}
 			if (this.broadcastHandler != null) {
-				this.broadcastHandler.handleUnresolved(messageToUse);
+				this.broadcastHandler.handleUnresolved(message);
 			}
 			return;
 		}
 
-		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(messageToUse);
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(message);
 		initHeaders(accessor);
 		accessor.setNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION, result.getSubscribeDestination());
 		accessor.setLeaveMutable(true);
 
-		messageToUse = MessageBuilder.createMessage(messageToUse.getPayload(), accessor.getMessageHeaders());
+		message = MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
 		if (logger.isTraceEnabled()) {
 			logger.trace("Translated " + result.getSourceDestination() + " -> " + result.getTargetDestinations());
 		}
 		for (String target : result.getTargetDestinations()) {
-			this.messagingTemplate.send(target, messageToUse);
+			this.messagingTemplate.send(target, message);
 		}
 	}
 

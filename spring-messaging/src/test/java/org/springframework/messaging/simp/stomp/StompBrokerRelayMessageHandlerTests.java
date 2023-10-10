@@ -54,11 +54,11 @@ class StompBrokerRelayMessageHandlerTests {
 
 	private StompBrokerRelayMessageHandler brokerRelay;
 
-	private StubMessageChannel outboundChannel = new StubMessageChannel();
+	private final StubMessageChannel outboundChannel = new StubMessageChannel();
 
-	private StubTcpOperations tcpClient = new StubTcpOperations();
+	private final StubTcpOperations tcpClient = new StubTcpOperations();
 
-	private ArgumentCaptor<Runnable> messageCountTaskCaptor = ArgumentCaptor.forClass(Runnable.class);
+	private final ArgumentCaptor<Runnable> messageCountTaskCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 
 	@BeforeEach
