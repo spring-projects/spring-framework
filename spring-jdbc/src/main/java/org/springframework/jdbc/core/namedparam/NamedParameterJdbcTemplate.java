@@ -436,6 +436,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * @return a representation of the parsed SQL statement
 	 */
 	protected ParsedSql getParsedSql(String sql) {
+		Assert.notNull(sql, "SQL must not be null");
 		return this.parsedSqlCache.get(sql);
 	}
 
