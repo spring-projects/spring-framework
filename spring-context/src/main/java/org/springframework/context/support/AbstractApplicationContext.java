@@ -136,19 +136,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext {
 
 	/**
+	 * Name of the LifecycleProcessor bean in the factory.
+	 * If none is supplied, a DefaultLifecycleProcessor is used.
+	 * @since 3.0
+	 * @see org.springframework.context.LifecycleProcessor
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 */
+	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
+
+	/**
 	 * Name of the MessageSource bean in the factory.
 	 * If none is supplied, message resolution is delegated to the parent.
 	 * @see MessageSource
 	 */
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
-
-	/**
-	 * Name of the LifecycleProcessor bean in the factory.
-	 * If none is supplied, a DefaultLifecycleProcessor is used.
-	 * @see org.springframework.context.LifecycleProcessor
-	 * @see org.springframework.context.support.DefaultLifecycleProcessor
-	 */
-	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
 
 	/**
 	 * Name of the ApplicationEventMulticaster bean in the factory.
@@ -433,8 +434,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (this.earlyApplicationEvents != null) {
 			this.earlyApplicationEvents.add(applicationEvent);
 		}
-		else {
-			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
+		else if (this.applicationEventMulticaster != null) {
+			this.applicationEventMulticaster.multicastEvent(applicationEvent, eventType);
 		}
 
 		// Publish event via parent context as well...
@@ -1092,6 +1093,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				this.applicationListeners.clear();
 				this.applicationListeners.addAll(this.earlyApplicationListeners);
 			}
+
+			// Reset internal delegates.
+			this.applicationEventMulticaster = null;
+			this.messageSource = null;
+			this.lifecycleProcessor = null;
 
 			// Switch to inactive.
 			this.active.set(false);
