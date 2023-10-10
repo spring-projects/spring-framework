@@ -16,6 +16,7 @@
 
 package org.springframework.web.client.support;
 
+import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +31,7 @@ import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -55,6 +57,7 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.testfixture.servlet.MockMultipartFile;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,6 +71,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings("JUnitMalformedDeclaration")
 class RestClientAdapterTests {
+
+	private final MockWebServer anotherServer = anotherServer();
+
+	@SuppressWarnings("ConstantValue")
+	@AfterEach
+	void shutdown() throws IOException {
+		if (this.anotherServer != null) {
+			this.anotherServer.shutdown();
+		}
+	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -203,6 +216,62 @@ class RestClientAdapterTests {
 		assertThat(request.getHeader("Cookie")).isEqualTo("testCookie=test1; testCookie=test2");
 	}
 
+	@ParameterizedAdapterTest
+	void getWithUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
+				.toString());
+
+		ResponseEntity<String> actualResponse = service.getWithUriBuilderFactory(factory);
+
+		RecordedRequest request = this.anotherServer.takeRequest();
+		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(actualResponse.getBody()).isEqualTo("Hello Spring 2!");
+		assertThat(request.getMethod()).isEqualTo("GET");
+		assertThat(request.getPath()).isEqualTo("/greeting");
+		assertThat(server.getRequestCount()).isEqualTo(0);
+	}
+
+	@ParameterizedAdapterTest
+	void getWithFactoryPathVariableAndRequestParam(MockWebServer server, Service service) throws InterruptedException {
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
+				.toString());
+
+		ResponseEntity<String> actualResponse = service.getWithUriBuilderFactory(factory, "123",
+				"test");
+
+		RecordedRequest request = this.anotherServer.takeRequest();
+		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(actualResponse.getBody()).isEqualTo("Hello Spring 2!");
+		assertThat(request.getMethod()).isEqualTo("GET");
+		assertThat(request.getPath()).isEqualTo("/greeting/123?param=test");
+		assertThat(server.getRequestCount()).isEqualTo(0);
+	}
+
+	@ParameterizedAdapterTest
+	void getWithIgnoredUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
+		URI dynamicUri = server.url("/greeting/123").uri();
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
+				.toString());
+
+		ResponseEntity<String> actualResponse = service.getWithIgnoredUriBuilderFactory(dynamicUri, factory);
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(actualResponse.getBody()).isEqualTo("Hello Spring!");
+		assertThat(request.getMethod()).isEqualTo("GET");
+		assertThat(request.getPath()).isEqualTo("/greeting/123");
+		assertThat(this.anotherServer.getRequestCount()).isEqualTo(0);
+	}
+
+
+	private static MockWebServer anotherServer() {
+		MockWebServer anotherServer = new MockWebServer();
+		MockResponse response = new MockResponse();
+		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!");
+		anotherServer.enqueue(response);
+		return anotherServer;
+	}
+
 
 	private interface Service {
 
@@ -231,6 +300,15 @@ class RestClientAdapterTests {
 		void putWithSameNameCookies(
 				@CookieValue("testCookie") String firstCookie, @CookieValue("testCookie") String secondCookie);
 
+		@GetExchange("/greeting")
+		ResponseEntity<String> getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+
+		@GetExchange("/greeting/{id}")
+		ResponseEntity<String> getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory,
+				@PathVariable String id, @RequestParam String param);
+
+		@GetExchange("/greeting")
+		ResponseEntity<String> getWithIgnoredUriBuilderFactory(URI uri, UriBuilderFactory uriBuilderFactory);
 	}
 
 }

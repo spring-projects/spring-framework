@@ -956,6 +956,11 @@ method parameters:
 | `URI`
 | Dynamically set the URL for the request, overriding the annotation's `url` attribute.
 
+| `UriBuilderFactory`
+| Provide a `UriBuilderFactory` to use to expand the `UriTemplate`.
+  Allows dynamically setting the base URI for the request,
+  while maintaining the `path` specified through annotations.
+
 | `HttpMethod`
 | Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
 

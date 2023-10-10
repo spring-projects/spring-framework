@@ -31,11 +31,13 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * {@link HttpRequestValues} extension for use with {@link ReactorHttpExchangeAdapter}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 6.1
  */
 public final class ReactiveHttpRequestValues extends HttpRequestValues {
@@ -49,11 +51,13 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 
 	private ReactiveHttpRequestValues(
 			@Nullable HttpMethod httpMethod,
-			@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVariables,
+			@Nullable URI uri, @Nullable String uriTemplate,
+			@Nullable UriBuilderFactory uriBuilderFactory, Map<String, String> uriVariables,
 			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue, @Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> elementType) {
 
-		super(httpMethod, uri, uriTemplate, uriVariables, headers, cookies, attributes, bodyValue);
+		super(httpMethod, uri, uriTemplate, uriBuilderFactory,
+				uriVariables, headers, cookies, attributes, bodyValue);
 
 		this.body = body;
 		this.bodyElementType = elementType;
@@ -133,6 +137,12 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		@Override
 		public Builder setUriTemplate(String uriTemplate) {
 			super.setUriTemplate(uriTemplate);
+			return this;
+		}
+
+		@Override
+		public Builder setUriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
+			super.setUriBuilderFactory(uriBuilderFactory);
 			return this;
 		}
 
@@ -261,12 +271,14 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		@Override
 		protected ReactiveHttpRequestValues createRequestValues(
 				@Nullable HttpMethod httpMethod,
-				@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVars,
+				@Nullable URI uri, @Nullable String uriTemplate,
+				@Nullable UriBuilderFactory uriBuilderFactory, Map<String, String> uriVars,
 				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 				@Nullable Object bodyValue) {
 
 			return new ReactiveHttpRequestValues(
-					httpMethod, uri, uriTemplate, uriVars, headers, cookies, attributes,
+					httpMethod, uri, uriTemplate, uriBuilderFactory,
+					uriVars, headers, cookies, attributes,
 					bodyValue, this.body, this.bodyElementType);
 		}
 
