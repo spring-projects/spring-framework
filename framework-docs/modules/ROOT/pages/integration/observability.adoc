@@ -117,8 +117,8 @@ By default, the following `KeyValues` are created:
 [[observability.jms]]
 == JMS messaging instrumentation
 
-Spring Framework uses the Jakarta JMS instrumentation provided by Micrometer if the `io.micrometer:micrometer-core` dependency is on the classpath.
-The `io.micrometer.core.instrument.binder.jms.JmsInstrumentation` instruments `jakarta.jms.Session` and records the relevant observations.
+Spring Framework uses the Jakarta JMS instrumentation provided by Micrometer if the `io.micrometer:micrometer-jakarta9` dependency is on the classpath.
+The `io.micrometer.jakarta9.instrument.jms.JmsInstrumentation` instruments `jakarta.jms.Session` and records the relevant observations.
 
 This instrumentation will create 2 types of observations:
 
@@ -158,7 +158,7 @@ You will need to configure the `ObservationRegistry` on the `JmsTemplate` to ena
 
 include-code::./JmsTemplatePublish[]
 
-It uses the `io.micrometer.core.instrument.binder.jms.DefaultJmsPublishObservationConvention` by default, backed by the `io.micrometer.core.instrument.binder.jms.JmsPublishObservationContext`.
+It uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsPublishObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsPublishObservationContext`.
 
 [[observability.jms.process]]
 === JMS message Processing instrumentation
@@ -178,7 +178,7 @@ In all cases, Observations are only recorded if the observation registry is conf
 Similar observations are recorded with `JmsTemplate` when messages are processed by a `MessageListener`.
 Such listeners are set on a `MessageConsumer` within a session callback (see `JmsTemplate.execute(SessionCallback<T>)`).
 
-This observation uses the `io.micrometer.core.instrument.binder.jms.DefaultJmsProcessObservationConvention` by default, backed by the `io.micrometer.core.instrument.binder.jms.JmsProcessObservationContext`.
+This observation uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsProcessObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext`.
 
 [[observability.http-server]]
 == HTTP Server instrumentation

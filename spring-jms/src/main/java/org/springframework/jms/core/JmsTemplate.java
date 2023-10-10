@@ -16,7 +16,7 @@
 
 package org.springframework.jms.core;
 
-import io.micrometer.core.instrument.binder.jms.JmsInstrumentation;
+import io.micrometer.jakarta9.instrument.jms.JmsInstrumentation;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -92,8 +92,8 @@ import org.springframework.util.ClassUtils;
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
 
-	private static final boolean micrometerCorePresent = ClassUtils.isPresent(
-			"io.micrometer.core.instrument.binder.jms.JmsInstrumentation", JmsTemplate.class.getClassLoader());
+	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
+			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", JmsTemplate.class.getClassLoader());
 
 	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils. */
 	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
@@ -474,7 +474,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Configure the {@link ObservationRegistry} to use for recording JMS observations.
 	 * @param observationRegistry the observation registry to use.
 	 * @since 6.1
-	 * @see io.micrometer.core.instrument.binder.jms.JmsObservationDocumentation
+	 * @see io.micrometer.jakarta10.instrument.jms.JmsInstrumentation
 	 */
 	public void setObservationRegistry(ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
@@ -524,7 +524,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing callback on JMS Session: " + sessionToUse);
 			}
-			if (micrometerCorePresent && this.observationRegistry != null) {
+			if (micrometerJakartaPresent && this.observationRegistry != null) {
 				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
 			}
 			return action.doInJms(sessionToUse);

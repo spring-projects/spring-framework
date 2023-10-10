@@ -16,10 +16,10 @@
 
 package org.springframework.jms.listener;
 
-import io.micrometer.core.instrument.binder.jms.DefaultJmsProcessObservationConvention;
-import io.micrometer.core.instrument.binder.jms.JmsObservationDocumentation;
-import io.micrometer.core.instrument.binder.jms.JmsProcessObservationContext;
-import io.micrometer.core.instrument.binder.jms.JmsProcessObservationConvention;
+import io.micrometer.jakarta9.instrument.jms.DefaultJmsProcessObservationConvention;
+import io.micrometer.jakarta9.instrument.jms.JmsObservationDocumentation;
+import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext;
+import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationConvention;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.jms.Connection;
@@ -150,8 +150,8 @@ import org.springframework.util.ErrorHandler;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
-	private static final boolean micrometerCorePresent = ClassUtils.isPresent(
-			"io.micrometer.core.instrument.binder.jms.JmsInstrumentation", AbstractMessageListenerContainer.class.getClassLoader());
+	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
+			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", AbstractMessageListenerContainer.class.getClassLoader());
 
 	@Nullable
 	private volatile Object destination;
@@ -716,7 +716,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	private Observation createObservation(Message message) {
-		if (micrometerCorePresent && this.observationRegistry != null) {
+		if (micrometerJakartaPresent && this.observationRegistry != null) {
 			return ObservationFactory.create(this.observationRegistry, message);
 		}
 		else {
