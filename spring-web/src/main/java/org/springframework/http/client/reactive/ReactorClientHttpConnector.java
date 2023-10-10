@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
 /**
  * Reactor-Netty implementation of {@link ClientHttpConnector}.
  *
- * <p>This class implements {@link Lifecycle} and can be optionally declared
+ * <p>This class implements {@link SmartLifecycle} and can be optionally declared
  * as a Spring-managed bean.
  *
  * @author Brian Clozel
@@ -90,7 +90,9 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	 * fixed, shared resources are favored for event loop concurrency. However,
 	 * consider declaring a {@link ReactorResourceFactory} bean with
 	 * {@code globalResources=true} in order to ensure the Reactor Netty global
-	 * resources are shut down when the Spring ApplicationContext is closed.
+	 * resources are shut down when the Spring ApplicationContext is stopped or closed
+	 * and restarted properly when the Spring ApplicationContext is
+	 * (with JVM Checkpoint Restore for example).
 	 * @param resourceFactory the resource factory to obtain the resources from
 	 * @param mapper a mapper for further initialization of the created client
 	 * @since 5.1
