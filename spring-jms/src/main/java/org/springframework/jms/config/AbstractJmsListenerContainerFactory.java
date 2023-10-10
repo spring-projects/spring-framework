@@ -199,7 +199,7 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	/**
 	 * Set the {@link ObservationRegistry} to be used for recording
-	 * {@linkplain io.micrometer.core.instrument.binder.jms.JmsObservationDocumentation#JMS_MESSAGE_PROCESS
+	 * {@linkplain io.micrometer.jakarta9.instrument.jms.JmsObservationDocumentation#JMS_MESSAGE_PROCESS
 	 * JMS message processing observations}.
 	 * <p>Defaults to no-op observations if the registry is not set.
 	 * @since 6.1
