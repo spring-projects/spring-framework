@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import javax.lang.model.element.Modifier;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedMethod;
@@ -52,6 +53,7 @@ import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Implementation;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.One;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Two;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
@@ -66,6 +68,7 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link BeanDefinitionMethodGenerator} and
@@ -740,6 +743,32 @@ class BeanDefinitionMethodGeneratorTests {
 		});
 	}
 
+	@Nested
+	@SuppressWarnings("deprecation")
+	class DeprecationTests {
+
+		private static final TestCompiler TEST_COMPILER = TestCompiler.forSystem()
+				.withCompilerOptions("-Xlint:all", "-Xlint:-rawtypes", "-Werror");
+
+		@Test
+		void generateBeanDefinitionMethodWithDeprecatedTargetClass() {
+			RootBeanDefinition beanDefinition = new RootBeanDefinition(DeprecatedBean.class);
+			RegisteredBean registeredBean = registerBean(beanDefinition);
+			BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+					methodGeneratorFactory, registeredBean, null,
+					Collections.emptyList());
+			MethodReference method = generator.generateBeanDefinitionMethod(
+					generationContext, beanRegistrationsCode);
+			compileAndCheckWarnings(method);
+		}
+
+		private void compileAndCheckWarnings(MethodReference methodReference) {
+			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, methodReference,
+					((instanceSupplier, compiled) -> {})));
+		}
+
+	}
+
 	private void testBeanDefinitionMethodInCurrentFile(Class<?> targetType, RootBeanDefinition beanDefinition) {
 		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(beanDefinition));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
@@ -764,6 +793,10 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	private void compile(MethodReference method, BiConsumer<RootBeanDefinition, Compiled> result) {
+		compile(TestCompiler.forSystem(), method, result);
+	}
+
+	private void compile(TestCompiler testCompiler, MethodReference method, BiConsumer<RootBeanDefinition, Compiled> result) {
 		this.beanRegistrationsCode.getTypeBuilder().set(type -> {
 			CodeBlock methodInvocation = method.toInvokeCodeBlock(ArgumentCodeGenerator.none(),
 					this.beanRegistrationsCode.getClassName());
@@ -775,7 +808,7 @@ class BeanDefinitionMethodGeneratorTests {
 					.addCode("return $L;", methodInvocation).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
+		testCompiler.with(this.generationContext).compile(compiled ->
 				result.accept((RootBeanDefinition) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 

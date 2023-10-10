@@ -164,11 +164,14 @@ class BeanDefinitionMethodGenerator {
 
 		this.aotContributions.forEach(aotContribution -> aotContribution.applyTo(generationContext, codeGenerator));
 
+		CodeWarnings codeWarnings = new CodeWarnings();
+		codeWarnings.detectDeprecation(this.registeredBean.getBeanClass());
 		return generatedMethods.add("getBeanDefinition", method -> {
 			method.addJavadoc("Get the $L definition for '$L'.",
 					(this.registeredBean.isInnerBean() ? "inner-bean" : "bean"),
 					getName());
 			method.addModifiers(modifier, Modifier.STATIC);
+			codeWarnings.suppress(method);
 			method.returns(BeanDefinition.class);
 			method.addCode(codeGenerator.generateCode(generationContext));
 		});

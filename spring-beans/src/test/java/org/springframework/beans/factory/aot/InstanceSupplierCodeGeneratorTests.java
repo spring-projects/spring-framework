@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import javax.lang.model.element.Modifier;
 
 import org.assertj.core.api.ThrowingConsumer;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedClass;
@@ -44,6 +46,12 @@ import org.springframework.beans.testfixture.beans.factory.generator.InnerCompon
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.EnvironmentAwareComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.NoDependencyComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedConstructor;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalConstructor;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalMemberConfiguration;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedMemberConfiguration;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolder;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolderFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
@@ -57,6 +65,7 @@ import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link InstanceSupplierCodeGenerator}.
@@ -261,6 +270,108 @@ class InstanceSupplierCodeGeneratorTests {
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
 	}
 
+	@Nested
+	@SuppressWarnings("deprecation")
+	class DeprecationTests {
+
+		private static final TestCompiler TEST_COMPILER = TestCompiler.forSystem()
+				.withCompilerOptions("-Xlint:all", "-Xlint:-rawtypes", "-Werror");
+
+		@Test
+		@Disabled("Need to move to a separate method so that the warning can be suppressed")
+		void generateWhenTargetClassIsDeprecated() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedBean.class));
+		}
+
+		@Test
+		void generateWhenTargetConstructorIsDeprecated() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedConstructor.class));
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedString", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodParameterIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedParameter", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedBean.class));
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodReturnTypeIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(DeprecatedBean.class)
+					.setFactoryMethodOnBean("deprecatedReturnType", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		private void compileAndCheckWarnings(BeanDefinition beanDefinition) {
+			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
+					((instanceSupplier, compiled) -> {})));
+		}
+
+	}
+
+	@Nested
+	@SuppressWarnings("removal")
+	class DeprecationForRemovalTests {
+
+		private static final TestCompiler TEST_COMPILER = TestCompiler.forSystem()
+				.withCompilerOptions("-Xlint:all", "-Xlint:-rawtypes", "-Werror");
+
+		@Test
+		@Disabled("Need to move to a separate method so that the warning can be suppressed")
+		void generateWhenTargetClassIsDeprecatedForRemoval() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedForRemovalBean.class));
+		}
+
+		@Test
+		void generateWhenTargetConstructorIsDeprecatedForRemoval() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedForRemovalConstructor.class));
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodIsDeprecatedForRemoval() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedString", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodParameterIsDeprecatedForRemoval() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedParameter", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
+			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedForRemovalBean.class));
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		private void compileAndCheckWarnings(BeanDefinition beanDefinition) {
+			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
+					((instanceSupplier, compiled) -> {})));
+		}
+
+	}
+
 	private ReflectionHints getReflectionHints() {
 		return this.generationContext.getRuntimeHints().reflection();
 	}
@@ -285,6 +396,11 @@ class InstanceSupplierCodeGeneratorTests {
 	}
 
 	private void compile(BeanDefinition beanDefinition, BiConsumer<InstanceSupplier<?>, Compiled> result) {
+		compile(TestCompiler.forSystem(), beanDefinition, result);
+	}
+
+	private void compile(TestCompiler testCompiler, BeanDefinition beanDefinition,
+			BiConsumer<InstanceSupplier<?>, Compiled> result) {
 
 		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(this.beanFactory);
 		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition);
@@ -306,8 +422,8 @@ class InstanceSupplierCodeGeneratorTests {
 					.addStatement("return $L", generatedCode).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
-				result.accept((InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
+		testCompiler.with(this.generationContext).compile(compiled -> result.accept(
+				(InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
 }
