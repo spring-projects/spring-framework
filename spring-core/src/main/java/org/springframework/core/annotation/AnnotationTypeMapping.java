@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 5.2
  * @see AnnotationTypeMappings
  */
@@ -402,9 +403,11 @@ final class AnnotationTypeMapping {
 				if (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation())) {
 					Class<? extends Annotation> annotationType =
 							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.componentType());
-					AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
-					if (mapping.isSynthesizable()) {
-						return true;
+					if (annotationType != this.annotationType) {
+						AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
+						if (mapping.isSynthesizable()) {
+							return true;
+						}
 					}
 				}
 			}
