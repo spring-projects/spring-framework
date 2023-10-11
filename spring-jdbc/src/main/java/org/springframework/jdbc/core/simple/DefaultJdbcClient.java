@@ -285,10 +285,9 @@ final class DefaultJdbcClient implements JdbcClient {
 				return classicOps.queryForMap(sql, indexedParams.toArray());
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override
-			public <T> List<T> singleColumn() {
-				return (List<T>) classicOps.queryForList(sql, Object.class, indexedParams.toArray());
+			public List<Object> singleColumn() {
+				return classicOps.queryForList(sql, Object.class, indexedParams.toArray());
 			}
 		}
 
@@ -310,10 +309,9 @@ final class DefaultJdbcClient implements JdbcClient {
 				return namedParamOps.queryForMap(sql, namedParamSource);
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override
-			public <T> List<T> singleColumn() {
-				return (List<T>) namedParamOps.queryForList(sql, namedParamSource, Object.class);
+			public List<Object> singleColumn() {
+				return namedParamOps.queryForList(sql, namedParamSource, Object.class);
 			}
 		}
 
