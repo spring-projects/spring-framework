@@ -19,6 +19,7 @@ package org.springframework.core.test.tools;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -29,6 +30,8 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.TypeElement;
 
 import com.example.PublicInterface;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -44,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Andy Wilkinson
  * @author Scott Frederick
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 class TestCompilerTests {
 
@@ -102,6 +106,18 @@ class TestCompilerTests {
 
 			}
 			""";
+
+	private static final Locale defaultLocale = Locale.getDefault();
+
+	@BeforeAll
+	static void setLocale() {
+		Locale.setDefault(Locale.ENGLISH);
+	}
+
+	@AfterAll
+	static void resetLocale() {
+		Locale.setDefault(defaultLocale);
+	}
 
 	@Test
 	@SuppressWarnings("unchecked")
