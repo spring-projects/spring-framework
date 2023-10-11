@@ -131,7 +131,8 @@ public class ApiDiffPlugin implements Plugin<Project> {
 	}
 
 	private File getOutputFile(String baseLineVersion, Project project) {
-		Path outDir = Paths.get(project.getRootProject().getBuildDir().getAbsolutePath(),
+		Path outDir = Paths.get(project.getRootProject()
+						.getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath(),
 				"reports", "api-diff",
 				baseLineVersion + "_to_" + project.getRootProject().getVersion());
 		return project.file(outDir.resolve(project.getName() + ".html").toString());
