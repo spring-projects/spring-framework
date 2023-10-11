@@ -158,7 +158,6 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> message = messages.get(0);
 
 		assertThat(message.getHeaders()).isSameAs(headers);
-		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test
@@ -190,7 +189,6 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> sentMessage = messages.get(0);
 
 		assertThat(sentMessage).isSameAs(message);
-		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test

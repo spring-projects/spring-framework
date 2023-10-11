@@ -16,10 +16,12 @@
 
 package org.springframework.web.socket.messaging;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +29,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +174,38 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		}
 	}
 
+	@ParameterizedWebSocketTest // gh-21798
+	void sendMessageToUserAndReceiveInOrder(
+			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+
+		UserFilter userFilter = new UserFilter(() -> "joe");
+		super.setup(server, userFilter, webSocketClient, testInfo);
+
+		List<TextMessage> messages = new ArrayList<>();
+		messages.add(create(StompCommand.CONNECT).headers("accept-version:1.1").build());
+		messages.add(create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/user/queue/foo").build());
+
+		int count = 1000;
+		for (int i = 0; i < count; i++) {
+			String dest = "destination:/user/joe/queue/foo";
+			messages.add(create(StompCommand.SEND).headers(dest).body(String.valueOf(i)).build());
+		}
+
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(count, messages);
+
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
+			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
+
+			for (int i = 0; i < count; i++) {
+				TextMessage message = clientHandler.actual.get(i);
+				ByteBuffer buffer = ByteBuffer.wrap(message.asBytes());
+				byte[] bytes = new StompDecoder().decode(buffer).get(0).getPayload();
+				assertThat(new String(bytes, StandardCharsets.UTF_8)).isEqualTo(String.valueOf(i));
+			}
+		}
+	}
+
 	@ParameterizedWebSocketTest  // SPR-11648
 	void sendSubscribeToControllerAndReceiveReply(
 			WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
@@ -278,6 +319,30 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 
+	private static class UserFilter implements Filter {
+
+		private final Principal user;
+
+		private UserFilter(Principal user) {
+			this.user = user;
+		}
+
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+
+			request = new HttpServletRequestWrapper((HttpServletRequest) request) {
+				@Override
+				public Principal getUserPrincipal() {
+					return user;
+				}
+			};
+
+			chain.doFilter(request, response);
+		}
+	}
+
+
 	@IntegrationTestController
 	static class ScopedBeanController {
 
@@ -335,14 +400,17 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-			for (TextMessage message : this.messagesToSend) {
-				session.sendMessage(message);
-			}
+			session.sendMessage(this.messagesToSend.get(0));
 		}
 
 		@Override
-		protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-			if (!message.getPayload().startsWith("CONNECTED")) {
+		protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+			if (message.getPayload().startsWith("CONNECTED")) {
+				for (int i = 1; i < this.messagesToSend.size(); i++) {
+					session.sendMessage(this.messagesToSend.get(i));
+				}
+			}
+			else {
 				this.actual.add(message);
 				this.latch.countDown();
 			}
@@ -371,6 +439,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			configurer.setApplicationDestinationPrefixes("/app");
 			configurer.setPreservePublishOrder(true);
 			configurer.enableSimpleBroker("/topic", "/queue").setSelectorHeaderName("selector");
+			configurer.configureBrokerChannel().taskExecutor();
 		}
 
 		@Bean

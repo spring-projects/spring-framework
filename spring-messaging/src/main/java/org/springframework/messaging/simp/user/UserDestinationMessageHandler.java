@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
 package org.springframework.messaging.simp.user;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
@@ -33,6 +38,7 @@ import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.broker.OrderedMessageChannelDecorator;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -61,7 +67,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 	private final UserDestinationResolver destinationResolver;
 
-	private final MessageSendingOperations<String> messagingTemplate;
+	private final SendHelper sendHelper;
 
 	@Nullable
 	private BroadcastHandler broadcastHandler;
@@ -91,7 +97,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 		this.clientInboundChannel = clientInboundChannel;
 		this.brokerChannel = brokerChannel;
-		this.messagingTemplate = new SimpMessagingTemplate(brokerChannel);
+		this.sendHelper = new SendHelper(clientInboundChannel, brokerChannel);
 		this.destinationResolver = destinationResolver;
 	}
 
@@ -112,7 +118,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 */
 	public void setBroadcastDestination(@Nullable String destination) {
 		this.broadcastHandler = (StringUtils.hasText(destination) ?
-				new BroadcastHandler(this.messagingTemplate, destination) : null);
+				new BroadcastHandler(this.sendHelper.getMessagingTemplate(), destination) : null);
 	}
 
 	/**
@@ -128,7 +134,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 * broker channel.
 	 */
 	public MessageSendingOperations<String> getBrokerMessagingTemplate() {
-		return this.messagingTemplate;
+		return this.sendHelper.getMessagingTemplate();
 	}
 
 	/**
@@ -193,6 +199,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 		UserDestinationResult result = this.destinationResolver.resolveDestination(message);
 		if (result == null) {
+			this.sendHelper.checkDisconnect(message);
 			return;
 		}
 
@@ -215,9 +222,8 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		if (logger.isTraceEnabled()) {
 			logger.trace("Translated " + result.getSourceDestination() + " -> " + result.getTargetDestinations());
 		}
-		for (String target : result.getTargetDestinations()) {
-			this.messagingTemplate.send(target, message);
-		}
+
+		this.sendHelper.send(result, message);
 	}
 
 	private void initHeaders(SimpMessageHeaderAccessor headerAccessor) {
@@ -229,6 +235,63 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	@Override
 	public String toString() {
 		return "UserDestinationMessageHandler[" + this.destinationResolver + "]";
+	}
+
+
+	private static class SendHelper {
+
+		private final MessageChannel brokerChannel;
+
+		private final MessageSendingOperations<String> messagingTemplate;
+
+		@Nullable
+		private final Map<String, MessageSendingOperations<String>> orderedMessagingTemplates;
+
+		SendHelper(MessageChannel clientInboundChannel, MessageChannel brokerChannel) {
+			this.brokerChannel = brokerChannel;
+			this.messagingTemplate = new SimpMessagingTemplate(brokerChannel);
+			if (OrderedMessageChannelDecorator.supportsOrderedMessages(clientInboundChannel)) {
+				this.orderedMessagingTemplates = new ConcurrentHashMap<>();
+				OrderedMessageChannelDecorator.configureInterceptor(brokerChannel, true);
+			}
+			else {
+				this.orderedMessagingTemplates = null;
+			}
+		}
+
+		public MessageSendingOperations<String> getMessagingTemplate() {
+			return this.messagingTemplate;
+		}
+
+		public void send(UserDestinationResult destinationResult, Message<?> message) throws MessagingException {
+			Set<String> sessionIds = destinationResult.getSessionIds();
+			Iterator<String> itr = (sessionIds != null ? sessionIds.iterator() : null);
+
+			for (String target : destinationResult.getTargetDestinations()) {
+				String sessionId = (itr != null ? itr.next() : null);
+				getTemplateToUse(sessionId).send(target, message);
+			}
+		}
+
+		private MessageSendingOperations<String> getTemplateToUse(@Nullable String sessionId) {
+			if (this.orderedMessagingTemplates != null && sessionId != null) {
+				return this.orderedMessagingTemplates.computeIfAbsent(sessionId, id ->
+						new SimpMessagingTemplate(new OrderedMessageChannelDecorator(this.brokerChannel, logger)));
+			}
+			return this.messagingTemplate;
+		}
+
+		public void checkDisconnect(Message<?> message) {
+			if (this.orderedMessagingTemplates != null) {
+				MessageHeaders headers = message.getHeaders();
+				if (SimpMessageHeaderAccessor.getMessageType(headers) == SimpMessageType.DISCONNECT) {
+					String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+					if (sessionId != null) {
+						this.orderedMessagingTemplates.remove(sessionId);
+					}
+				}
+			}
+		}
 	}
 
 

@@ -160,6 +160,16 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 	}
 
 	/**
+	 * Whether the channel has been {@link #configureInterceptor configured}
+	 * with an interceptor for sequential handling.
+	 * @since 6.1
+	 */
+	public static boolean supportsOrderedMessages(MessageChannel channel) {
+		return (channel instanceof ExecutorSubscribableChannel ch &&
+				ch.getInterceptors().stream().anyMatch(CallbackTaskInterceptor.class::isInstance));
+	}
+
+	/**
 	 * Obtain the task to release the next message, if found.
 	 */
 	@Nullable
