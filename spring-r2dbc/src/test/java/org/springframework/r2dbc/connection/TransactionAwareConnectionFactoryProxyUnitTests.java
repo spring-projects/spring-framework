@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,13 +54,15 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 
 	R2dbcTransactionManager tm;
 
+
 	@BeforeEach
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock1),
 				(Mono) Mono.just(connectionMock2), (Mono) Mono.just(connectionMock3));
 		tm = new R2dbcTransactionManager(connectionFactoryMock);
 	}
+
 
 	@Test
 	void createShouldWrapConnection() {
@@ -143,14 +145,15 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 		ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 				.doOnNext(transactionalConnection::set).flatMap(connection -> proxyCf.create()
 				.doOnNext(wrappedConnection -> assertThat(((Wrapped<?>) wrappedConnection).unwrap()).isSameAs(connection)))
-				.as(rxtx::transactional)
 				.flatMapMany(Connection::close)
+				.as(rxtx::transactional)
 				.as(StepVerifier::create)
 				.verifyComplete();
 
+		verify(connectionFactoryMock, times(1)).create();
+		verify(connectionMock1, times(1)).close();
 		verifyNoInteractions(connectionMock2);
 		verifyNoInteractions(connectionMock3);
-		verify(connectionFactoryMock, times(1)).create();
 	}
 
 }

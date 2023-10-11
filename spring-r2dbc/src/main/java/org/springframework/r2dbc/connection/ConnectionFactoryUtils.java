@@ -176,6 +176,7 @@ public abstract class ConnectionFactoryUtils {
 			if (conHolder != null && connectionEquals(conHolder, connection)) {
 				// It's the transactional Connection: Don't close it.
 				conHolder.released();
+				return Mono.empty();
 			}
 			return Mono.from(connection.close());
 		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connection.close()));
