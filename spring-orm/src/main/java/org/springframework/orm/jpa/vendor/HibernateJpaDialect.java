@@ -124,8 +124,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * @since 5.1
 	 * @see java.sql.SQLException
 	 * @see org.hibernate.JDBCException
+	 * @see org.springframework.jdbc.support.SQLExceptionSubclassTranslator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
@@ -245,7 +245,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			DataAccessException dae = this.jdbcExceptionTranslator.translate(
 					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
 			if (dae != null) {
-				throw dae;
+				return dae;
 			}
 		}
 
