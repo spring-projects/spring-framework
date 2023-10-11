@@ -178,6 +178,7 @@ public abstract class ConnectionFactoryUtils {
 			if (conHolder != null && connectionEquals(conHolder, connection)) {
 				// It's the transactional Connection: Don't close it.
 				conHolder.released();
+				return Mono.empty();
 			}
 			return Mono.from(connection.close());
 		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connection.close()));
@@ -301,13 +302,13 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the innermost target Connection, or the passed-in one if not wrapped
 	 * @see Wrapped#unwrap()
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings("unchecked")
 	public static Connection getTargetConnection(Connection con) {
-		Object conToUse = con;
-		while (conToUse instanceof Wrapped wrapped) {
-			conToUse = wrapped.unwrap();
+		Connection conToUse = con;
+		while (conToUse instanceof Wrapped<?>) {
+			conToUse = ((Wrapped<Connection>) conToUse).unwrap();
 		}
-		return (Connection) conToUse;
+		return conToUse;
 	}
 
 	/**

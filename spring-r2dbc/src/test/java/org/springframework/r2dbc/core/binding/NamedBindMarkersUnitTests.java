@@ -43,7 +43,7 @@ class NamedBindMarkersUnitTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "$", "?" })
+	@ValueSource(strings = {"$", "?"})
 	void nextShouldIncrementBindMarker(String prefix) {
 		BindMarkers bindMarkers = BindMarkersFactory.named(prefix, "p", 32).create();
 

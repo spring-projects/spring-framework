@@ -84,8 +84,9 @@ public class NamedParameterUtilsUnitTests {
 	@Test
 	public void substituteObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
-		namedParams.addValue("a", Arrays.asList(new Object[] { "Walter", "Heisenberg" },
-				new Object[] { "Walt Jr.", "Flynn" }));
+		namedParams.addValue("a",
+				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
+				new Object[] {"Walt Jr.", "Flynn"}));
 
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
 				"xxx :a", BIND_MARKERS, namedParams);
@@ -96,8 +97,9 @@ public class NamedParameterUtilsUnitTests {
 	@Test
 	public void shouldBindObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
-		namedParams.addValue("a", Arrays.asList(new Object[] { "Walter", "Heisenberg" },
-				new Object[] { "Walt Jr.", "Flynn" }));
+		namedParams.addValue("a",
+				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
+				new Object[] {"Walt Jr.", "Flynn"}));
 
 		BindTarget bindTarget = mock();
 
