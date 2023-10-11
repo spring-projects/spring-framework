@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,30 +34,27 @@ public class MapConnectionFactoryLookupUnitTests {
 
 	private static final String CONNECTION_FACTORY_NAME = "connectionFactory";
 
+
 	@Test
 	public void getConnectionFactoriesReturnsUnmodifiableMap() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 		Map<String, ConnectionFactory> connectionFactories = lookup.getConnectionFactories();
 
-		assertThatThrownBy(() -> connectionFactories.put("",
-				new DummyConnectionFactory())).isInstanceOf(
-						UnsupportedOperationException.class);
+		assertThatThrownBy(() -> connectionFactories.put("", new DummyConnectionFactory()))
+				.isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
 	public void shouldLookupConnectionFactory() {
 		Map<String, ConnectionFactory> connectionFactories = new HashMap<>();
 		DummyConnectionFactory expectedConnectionFactory = new DummyConnectionFactory();
-
 		connectionFactories.put(CONNECTION_FACTORY_NAME, expectedConnectionFactory);
-		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 
+		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 		lookup.setConnectionFactories(connectionFactories);
 
-		ConnectionFactory connectionFactory = lookup.getConnectionFactory(
-				CONNECTION_FACTORY_NAME);
-
-		assertThat(connectionFactory).isNotNull().isSameAs(expectedConnectionFactory);
+		assertThat(lookup.getConnectionFactory(CONNECTION_FACTORY_NAME))
+				.isNotNull().isSameAs(expectedConnectionFactory);
 	}
 
 	@Test
@@ -68,27 +65,22 @@ public class MapConnectionFactoryLookupUnitTests {
 		connectionFactories.put(CONNECTION_FACTORY_NAME, overriddenConnectionFactory);
 
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
-
 		lookup.setConnectionFactories(connectionFactories);
 		lookup.addConnectionFactory(CONNECTION_FACTORY_NAME, expectedConnectionFactory);
 
-		ConnectionFactory connectionFactory = lookup.getConnectionFactory(
-				CONNECTION_FACTORY_NAME);
-
-		assertThat(connectionFactory).isNotNull().isSameAs(expectedConnectionFactory);
+		assertThat(lookup.getConnectionFactory(CONNECTION_FACTORY_NAME))
+				.isNotNull().isSameAs(expectedConnectionFactory);
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void getConnectionFactoryWhereSuppliedMapHasNonConnectionFactoryTypeUnderSpecifiedKey() {
 		Map connectionFactories = new HashMap<>();
 		connectionFactories.put(CONNECTION_FACTORY_NAME, new Object());
-		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup(
-				connectionFactories);
+		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup(connectionFactories);
 
-		assertThatThrownBy(
-				() -> lookup.getConnectionFactory(CONNECTION_FACTORY_NAME)).isInstanceOf(
-						ClassCastException.class);
+		assertThatThrownBy(() -> lookup.getConnectionFactory(CONNECTION_FACTORY_NAME))
+				.isInstanceOf(ClassCastException.class);
 	}
 
 	@Test
@@ -99,4 +91,5 @@ public class MapConnectionFactoryLookupUnitTests {
 				() -> lookup.getConnectionFactory(CONNECTION_FACTORY_NAME)).isInstanceOf(
 						ConnectionFactoryLookupFailureException.class);
 	}
+
 }

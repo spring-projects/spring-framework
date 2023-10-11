@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,9 @@ public class NamedParameterUtilsUnitTests {
 	@Test
 	public void substituteObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
-		namedParams.addValue("a", Arrays.asList(new Object[] { "Walter", "Heisenberg" },
-				new Object[] { "Walt Jr.", "Flynn" }));
+		namedParams.addValue("a",
+				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
+				new Object[] {"Walt Jr.", "Flynn"}));
 
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
 				"xxx :a", BIND_MARKERS, namedParams);
@@ -94,8 +95,9 @@ public class NamedParameterUtilsUnitTests {
 	@Test
 	public void shouldBindObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
-		namedParams.addValue("a", Arrays.asList(new Object[] { "Walter", "Heisenberg" },
-				new Object[] { "Walt Jr.", "Flynn" }));
+		namedParams.addValue("a",
+				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
+				new Object[] {"Walt Jr.", "Flynn"}));
 
 		BindTarget bindTarget = mock(BindTarget.class);
 

@@ -77,8 +77,9 @@ class DefaultDatabaseClientUnitTests {
 
 	private DatabaseClient.Builder databaseClientBuilder;
 
+
 	@BeforeEach
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void before() {
 		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 
@@ -88,6 +89,7 @@ class DefaultDatabaseClientUnitTests {
 		databaseClientBuilder = DatabaseClient.builder().connectionFactory(
 				connectionFactory).bindMarkers(BindMarkersFactory.indexed("$", 1));
 	}
+
 
 	@Test
 	void connectionFactoryIsExposed() {

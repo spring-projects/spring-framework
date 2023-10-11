@@ -64,14 +64,16 @@ class R2dbcTransactionManagerUnitTests {
 
 	private R2dbcTransactionManager tm;
 
+
 	@BeforeEach
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock));
 		when(connectionMock.beginTransaction()).thenReturn(Mono.empty());
 		when(connectionMock.close()).thenReturn(Mono.empty());
 		tm = new R2dbcTransactionManager(connectionFactoryMock);
 	}
+
 
 	@Test
 	void testSimpleTransaction() {
