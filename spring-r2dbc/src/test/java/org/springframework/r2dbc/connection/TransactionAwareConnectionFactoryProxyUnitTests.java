@@ -57,7 +57,7 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 
 
 	@BeforeEach
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock1),
 				(Mono) Mono.just(connectionMock2), (Mono) Mono.just(connectionMock3));

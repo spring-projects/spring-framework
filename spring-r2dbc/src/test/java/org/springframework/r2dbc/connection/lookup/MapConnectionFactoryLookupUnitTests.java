@@ -34,13 +34,14 @@ public class MapConnectionFactoryLookupUnitTests {
 
 	private static final String CONNECTION_FACTORY_NAME = "connectionFactory";
 
+
 	@Test
 	public void getConnectionFactoriesReturnsUnmodifiableMap() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 		Map<String, ConnectionFactory> connectionFactories = lookup.getConnectionFactories();
 
-		assertThatThrownBy(() -> connectionFactories.put("",
-				new DummyConnectionFactory())).isInstanceOf(UnsupportedOperationException.class);
+		assertThatThrownBy(() -> connectionFactories.put("", new DummyConnectionFactory()))
+				.isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
@@ -52,8 +53,8 @@ public class MapConnectionFactoryLookupUnitTests {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 		lookup.setConnectionFactories(connectionFactories);
 
-		ConnectionFactory connectionFactory = lookup.getConnectionFactory(CONNECTION_FACTORY_NAME);
-		assertThat(connectionFactory).isNotNull().isSameAs(expectedConnectionFactory);
+		assertThat(lookup.getConnectionFactory(CONNECTION_FACTORY_NAME))
+				.isNotNull().isSameAs(expectedConnectionFactory);
 	}
 
 	@Test
@@ -67,12 +68,12 @@ public class MapConnectionFactoryLookupUnitTests {
 		lookup.setConnectionFactories(connectionFactories);
 		lookup.addConnectionFactory(CONNECTION_FACTORY_NAME, expectedConnectionFactory);
 
-		ConnectionFactory connectionFactory = lookup.getConnectionFactory(CONNECTION_FACTORY_NAME);
-		assertThat(connectionFactory).isNotNull().isSameAs(expectedConnectionFactory);
+		assertThat(lookup.getConnectionFactory(CONNECTION_FACTORY_NAME))
+				.isNotNull().isSameAs(expectedConnectionFactory);
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void getConnectionFactoryWhereSuppliedMapHasNonConnectionFactoryTypeUnderSpecifiedKey() {
 		Map connectionFactories = new HashMap<>();
 		connectionFactories.put(CONNECTION_FACTORY_NAME, new Object());
@@ -86,8 +87,9 @@ public class MapConnectionFactoryLookupUnitTests {
 	public void getConnectionFactoryWhereSuppliedMapHasNoEntryForSpecifiedKey() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 
-		assertThatThrownBy(() -> lookup.getConnectionFactory(CONNECTION_FACTORY_NAME))
-				.isInstanceOf(ConnectionFactoryLookupFailureException.class);
+		assertThatThrownBy(
+				() -> lookup.getConnectionFactory(CONNECTION_FACTORY_NAME)).isInstanceOf(
+						ConnectionFactoryLookupFailureException.class);
 	}
 
 }

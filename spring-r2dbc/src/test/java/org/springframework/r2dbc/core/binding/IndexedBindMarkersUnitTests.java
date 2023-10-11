@@ -32,7 +32,6 @@ class IndexedBindMarkersUnitTests {
 	@Test
 	void shouldCreateNewBindMarkers() {
 		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);
-
 		BindMarkers bindMarkers1 = factory.create();
 		BindMarkers bindMarkers2 = factory.create();
 
@@ -43,7 +42,6 @@ class IndexedBindMarkersUnitTests {
 	@Test
 	void shouldCreateNewBindMarkersWithOffset() {
 		BindTarget bindTarget = mock();
-
 		BindMarkers bindMarkers = BindMarkersFactory.indexed("$", 1).create();
 
 		BindMarker first = bindMarkers.next();
@@ -60,10 +58,9 @@ class IndexedBindMarkersUnitTests {
 
 	@Test
 	void nextShouldIncrementBindMarker() {
-		String[] prefixes = { "$", "?" };
+		String[] prefixes = {"$", "?"};
 
 		for (String prefix : prefixes) {
-
 			BindMarkers bindMarkers = BindMarkersFactory.indexed(prefix, 0).create();
 
 			BindMarker marker1 = bindMarkers.next();
@@ -76,9 +73,7 @@ class IndexedBindMarkersUnitTests {
 
 	@Test
 	void bindValueShouldBindByIndex() {
-
 		BindTarget bindTarget = mock();
-
 		BindMarkers bindMarkers = BindMarkersFactory.indexed("$", 0).create();
 
 		bindMarkers.next().bind(bindTarget, "foo");
@@ -91,7 +86,6 @@ class IndexedBindMarkersUnitTests {
 	@Test
 	void bindNullShouldBindByIndex() {
 		BindTarget bindTarget = mock();
-
 		BindMarkers bindMarkers = BindMarkersFactory.indexed("$", 0).create();
 
 		bindMarkers.next(); // ignore
