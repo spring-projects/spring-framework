@@ -33,11 +33,13 @@ import org.springframework.lang.Nullable;
  * generated code.
  *
  * @author Stephane Nicoll
+ * @since 6.1
  * @see SuppressWarnings
  */
 class CodeWarnings {
 
 	private final Set<String> warnings = new LinkedHashSet<>();
+
 
 	/**
 	 * Register a warning to be included for this block. Does nothing if
@@ -71,7 +73,7 @@ class CodeWarnings {
 	}
 
 	/**
-	 * Include a {@link SuppressWarnings} on the specified method if necessary.
+	 * Include {@link SuppressWarnings} on the specified method if necessary.
 	 * @param method the method to update
 	 */
 	public void suppress(MethodSpec.Builder method) {
@@ -122,4 +124,3 @@ class CodeWarnings {
 	}
 
 }
-

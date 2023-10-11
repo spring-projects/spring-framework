@@ -19,7 +19,7 @@ package org.springframework.beans.testfixture.beans.factory.generator.deprecatio
 import org.springframework.core.env.Environment;
 
 /**
- * A sample whose factory method (constructor) is deprecated for removal
+ * A sample bean whose factory method (constructor) is deprecated for removal.
  *
  * @author Stephane Nicoll
  */
@@ -27,8 +27,6 @@ public class DeprecatedForRemovalConstructor {
 
 	@Deprecated(forRemoval = true)
 	public DeprecatedForRemovalConstructor(Environment environment) {
-
 	}
 
 }
-
