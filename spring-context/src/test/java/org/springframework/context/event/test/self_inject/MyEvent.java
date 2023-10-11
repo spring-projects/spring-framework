@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationEvent;
 @SuppressWarnings("serial")
 public class MyEvent extends ApplicationEvent {
 
+	@SuppressWarnings("unused")
 	private String message;
 
 	public MyEvent(Object source, String message) {

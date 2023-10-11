@@ -46,9 +46,7 @@ import org.springframework.beans.testfixture.beans.factory.generator.InnerCompon
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.EnvironmentAwareComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.NoDependencyComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
-import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
 import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedConstructor;
-import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean;
 import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalConstructor;
 import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalMemberConfiguration;
 import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedMemberConfiguration;
@@ -280,7 +278,9 @@ class InstanceSupplierCodeGeneratorTests {
 		@Test
 		@Disabled("Need to move to a separate method so that the warning can be suppressed")
 		void generateWhenTargetClassIsDeprecated() {
-			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedBean.class));
+			Class<?> deprecatedBeanClass =
+					org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
+			compileAndCheckWarnings(new RootBeanDefinition(deprecatedBeanClass));
 		}
 
 		@Test
@@ -305,14 +305,18 @@ class InstanceSupplierCodeGeneratorTests {
 					.setFactoryMethodOnBean("deprecatedParameter", "config").getBeanDefinition();
 			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
-			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedBean.class));
+			Class<?> deprecatedBeanClass =
+					org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
+			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(deprecatedBeanClass));
 			compileAndCheckWarnings(beanDefinition);
 		}
 
 		@Test
 		void generateWhenTargetFactoryMethodReturnTypeIsDeprecated() {
+			Class<?> deprecatedBeanClass =
+					org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
 			BeanDefinition beanDefinition = BeanDefinitionBuilder
-					.rootBeanDefinition(DeprecatedBean.class)
+					.rootBeanDefinition(deprecatedBeanClass)
 					.setFactoryMethodOnBean("deprecatedReturnType", "config").getBeanDefinition();
 			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
@@ -336,7 +340,9 @@ class InstanceSupplierCodeGeneratorTests {
 		@Test
 		@Disabled("Need to move to a separate method so that the warning can be suppressed")
 		void generateWhenTargetClassIsDeprecatedForRemoval() {
-			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedForRemovalBean.class));
+			Class<?> deprecatedForRemovalBeanClass =
+					org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean.class;
+			compileAndCheckWarnings(new RootBeanDefinition(deprecatedForRemovalBeanClass));
 		}
 
 		@Test
@@ -361,7 +367,9 @@ class InstanceSupplierCodeGeneratorTests {
 					.setFactoryMethodOnBean("deprecatedParameter", "config").getBeanDefinition();
 			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
-			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedForRemovalBean.class));
+			Class<?> deprecatedForRemovalBeanClass =
+					org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean.class;
+			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(deprecatedForRemovalBeanClass));
 			compileAndCheckWarnings(beanDefinition);
 		}
 
