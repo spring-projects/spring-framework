@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.test.web.servlet.setup;
 
+import java.util.EnumSet;
+
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -32,13 +35,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
-
 /**
+ * Unit tests for {@link MockMvcFilterDecorator}.
  * @author Rob Winch
+ * @author Rossen Stoyanchev
  */
-public class ConditionalDelegatingFilterProxyTests {
+public class MockMvcFilterDecoratorTests {
 
 	private MockHttpServletRequest request;
 
@@ -48,7 +50,7 @@ public class ConditionalDelegatingFilterProxyTests {
 
 	private MockFilter delegate;
 
-	private PatternMappingFilterProxy filter;
+	private MockMvcFilterDecorator filter;
 
 
 	@BeforeEach
@@ -64,14 +66,14 @@ public class ConditionalDelegatingFilterProxyTests {
 	@Test
 	public void init() throws Exception {
 		FilterConfig config = new MockFilterConfig();
-		filter = new PatternMappingFilterProxy(delegate, "/");
+		filter = new MockMvcFilterDecorator(delegate, null, null, "/");
 		filter.init(config);
 		assertThat(delegate.filterConfig).isEqualTo(config);
 	}
 
 	@Test
-	public void destroy() throws Exception {
-		filter = new PatternMappingFilterProxy(delegate, "/");
+	public void destroy() {
+		filter = new MockMvcFilterDecorator(delegate, null, null, "/");
 		filter.destroy();
 		assertThat(delegate.destroy).isTrue();
 	}
@@ -144,6 +146,11 @@ public class ConditionalDelegatingFilterProxyTests {
 	@Test
 	public void noMatchPathMappingMissingSlash() throws Exception {
 		assertFilterNotInvoked("/test2", "/test/*");
+	}
+
+	@Test
+	public void noMatchDispatcherType() throws Exception {
+		assertFilterNotInvoked(DispatcherType.FORWARD, DispatcherType.REQUEST, "/test", "/test");
 	}
 
 	@Test
@@ -231,8 +238,16 @@ public class ConditionalDelegatingFilterProxyTests {
 	}
 
 	private void assertFilterNotInvoked(String requestUri, String pattern) throws Exception {
+		assertFilterNotInvoked(DispatcherType.REQUEST, DispatcherType.REQUEST, requestUri, pattern);
+	}
+
+	private void assertFilterNotInvoked(
+			DispatcherType requestDispatcherType, DispatcherType filterDispatcherType,
+			String requestUri, String pattern) throws Exception {
+
+		request.setDispatcherType(requestDispatcherType);
 		request.setRequestURI(request.getContextPath() + requestUri);
-		filter = new PatternMappingFilterProxy(delegate, pattern);
+		filter = new MockMvcFilterDecorator(delegate, null, EnumSet.of(filterDispatcherType), pattern);
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(delegate.request).isNull();
@@ -246,7 +261,7 @@ public class ConditionalDelegatingFilterProxyTests {
 
 	private void assertFilterInvoked(String requestUri, String pattern) throws Exception {
 		request.setRequestURI(request.getContextPath() + requestUri);
-		filter = new PatternMappingFilterProxy(delegate, pattern);
+		filter = new MockMvcFilterDecorator(delegate, null, null, pattern);
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(delegate.request).isEqualTo(request);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,22 @@ package org.springframework.test.web.servlet.setup;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -39,13 +45,21 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rob Winch
  * @since 3.2
  */
-final class PatternMappingFilterProxy implements Filter {
+final class MockMvcFilterDecorator implements Filter {
 
 	private static final String EXTENSION_MAPPING_PATTERN = "*.";
 
 	private static final String PATH_MAPPING_PATTERN = "/*";
 
 	private final Filter delegate;
+
+	@Nullable
+	private final Map<String, String> initParams;
+
+	@Nullable
+	private final EnumSet<DispatcherType> dispatcherTypes;
+
+	private final boolean hasPatterns;
 
 	/** Patterns that require an exact match, e.g. "/test" */
 	private final List<String> exactMatches = new ArrayList<>();
@@ -58,11 +72,27 @@ final class PatternMappingFilterProxy implements Filter {
 
 
 	/**
-	 * Creates a new instance.
+	 * Create instance with URL patterns only.
+	 * <p>Note: when this constructor is used, the Filter is not initialized.
 	 */
-	public PatternMappingFilterProxy(Filter delegate, String... urlPatterns) {
-		Assert.notNull(delegate, "A delegate Filter is required");
+	public MockMvcFilterDecorator(Filter delegate, String[] urlPatterns) {
+		this(delegate, null, null, urlPatterns);
+	}
+
+	/**
+	 * Create instance with init parameters to initialize the filter with,
+	 * as well as dispatcher types and URL patterns to match.
+	 */
+	public MockMvcFilterDecorator(
+			Filter delegate, @Nullable Map<String, String> initParams,
+			@Nullable EnumSet<DispatcherType> dispatcherTypes, String... urlPatterns) {
+
+		Assert.notNull(delegate, "filter cannot be null");
+		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
 		this.delegate = delegate;
+		this.initParams = initParams;
+		this.dispatcherTypes = dispatcherTypes;
+		this.hasPatterns = (urlPatterns.length != 0);
 		for (String urlPattern : urlPatterns) {
 			addUrlPattern(urlPattern);
 		}
@@ -96,7 +126,7 @@ final class PatternMappingFilterProxy implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		String requestPath = UrlPathHelper.defaultInstance.getPathWithinApplication(httpRequest);
 
-		if (matches(requestPath)) {
+		if (matchDispatcherType(httpRequest.getDispatcherType()) && matchRequestPath(requestPath)) {
 			this.delegate.doFilter(request, response, filterChain);
 		}
 		else {
@@ -104,7 +134,15 @@ final class PatternMappingFilterProxy implements Filter {
 		}
 	}
 
-	private boolean matches(String requestPath) {
+	private boolean matchDispatcherType(DispatcherType dispatcherType) {
+		return (this.dispatcherTypes == null ||
+				this.dispatcherTypes.stream().anyMatch(type -> type == dispatcherType));
+	}
+
+	private boolean matchRequestPath(String requestPath) {
+		if (!this.hasPatterns) {
+			return true;
+		}
 		for (String pattern : this.exactMatches) {
 			if (pattern.equals(requestPath)) {
 				return true;
@@ -134,6 +172,14 @@ final class PatternMappingFilterProxy implements Filter {
 	@Override
 	public void destroy() {
 		this.delegate.destroy();
+	}
+
+	public void initIfRequired(@Nullable ServletContext servletContext) throws ServletException {
+		if (this.initParams != null) {
+			MockFilterConfig filterConfig = new MockFilterConfig(servletContext);
+			this.initParams.forEach(filterConfig::addInitParameter);
+			this.delegate.init(filterConfig);
+		}
 	}
 
 }
