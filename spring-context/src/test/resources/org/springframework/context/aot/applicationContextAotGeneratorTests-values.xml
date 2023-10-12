@@ -8,8 +8,12 @@
 		<property name="company" value="Acme Widgets, Inc." />
 	</bean>
 
-	<bean id="pet" class="org.springframework.beans.testfixture.beans.Pet">
+	<bean id="petIndexed" class="org.springframework.beans.testfixture.beans.Pet">
 		<constructor-arg index="0" value="Fido" />
+	</bean>
+
+	<bean id="petGeneric" class="org.springframework.beans.testfixture.beans.Pet">
+		<constructor-arg value="Dofi" />
 	</bean>
 
 </beans>

@@ -331,7 +331,7 @@ class GenericApplicationContextTests {
 	}
 
 	@Test
-	void refreshForAotLoadsBeanClassNameOfConstructorArgumentInnerBeanDefinition() {
+	void refreshForAotLoadsBeanClassNameOfIndexedConstructorArgumentInnerBeanDefinition() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
 		GenericBeanDefinition innerBeanDefinition = new GenericBeanDefinition();
@@ -342,6 +342,23 @@ class GenericApplicationContextTests {
 		RootBeanDefinition bd = getBeanDefinition(context, "test");
 		GenericBeanDefinition value = (GenericBeanDefinition) bd.getConstructorArgumentValues()
 				.getIndexedArgumentValue(0, GenericBeanDefinition.class).getValue();
+		assertThat(value.hasBeanClass()).isTrue();
+		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
+		context.close();
+	}
+
+	@Test
+	void refreshForAotLoadsBeanClassNameOfGenericConstructorArgumentInnerBeanDefinition() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
+		GenericBeanDefinition innerBeanDefinition = new GenericBeanDefinition();
+		innerBeanDefinition.setBeanClassName("java.lang.Integer");
+		beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(innerBeanDefinition);
+		context.registerBeanDefinition("test",beanDefinition);
+		context.refreshForAotProcessing(new RuntimeHints());
+		RootBeanDefinition bd = getBeanDefinition(context, "test");
+		GenericBeanDefinition value = (GenericBeanDefinition) bd.getConstructorArgumentValues()
+				.getGenericArgumentValues().get(0).getValue();
 		assertThat(value.hasBeanClass()).isTrue();
 		assertThat(value.getBeanClass()).isEqualTo(Integer.class);
 		context.close();
@@ -377,7 +394,7 @@ class GenericApplicationContextTests {
 	}
 
 	@Test
-	void refreshForAotLoadsTypedStringValueClassNameInConstructorArgument() {
+	void refreshForAotLoadsTypedStringValueClassNameInIndexedConstructorArgument() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition("java.lang.Integer");
 		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0,
@@ -386,6 +403,21 @@ class GenericApplicationContextTests {
 		context.refreshForAotProcessing(new RuntimeHints());
 		assertThat(getBeanDefinition(context, "number").getConstructorArgumentValues()
 				.getIndexedArgumentValue(0, TypedStringValue.class).getValue())
+				.isInstanceOfSatisfying(TypedStringValue.class, typeStringValue ->
+						assertThat(typeStringValue.getTargetType()).isEqualTo(Integer.class));
+		context.close();
+	}
+
+	@Test
+	void refreshForAotLoadsTypedStringValueClassNameInGenericConstructorArgument() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition("java.lang.Integer");
+		beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(
+				new TypedStringValue("42", "java.lang.Integer"));
+		context.registerBeanDefinition("number", beanDefinition);
+		context.refreshForAotProcessing(new RuntimeHints());
+		assertThat(getBeanDefinition(context, "number").getConstructorArgumentValues()
+				.getGenericArgumentValue(TypedStringValue.class).getValue())
 				.isInstanceOfSatisfying(TypedStringValue.class, typeStringValue ->
 						assertThat(typeStringValue.getTargetType()).isEqualTo(Integer.class));
 		context.close();
@@ -414,12 +446,29 @@ class GenericApplicationContextTests {
 	}
 
 	@Test
-	void refreshForAotInvokesMergedBeanDefinitionPostProcessorsOnConstructorArgument() {
+	void refreshForAotInvokesMergedBeanDefinitionPostProcessorsOnIndexedConstructorArgument() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(BeanD.class);
 		GenericBeanDefinition innerBeanDefinition = new GenericBeanDefinition();
 		innerBeanDefinition.setBeanClassName("java.lang.Integer");
 		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, innerBeanDefinition);
+		context.registerBeanDefinition("test", beanDefinition);
+		MergedBeanDefinitionPostProcessor bpp = registerMockMergedBeanDefinitionPostProcessor(context);
+		context.refreshForAotProcessing(new RuntimeHints());
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), BeanD.class, "test");
+		verify(bpp).postProcessMergedBeanDefinition(any(RootBeanDefinition.class), eq(Integer.class), captor.capture());
+		assertThat(captor.getValue()).startsWith("(inner bean)");
+		context.close();
+	}
+
+	@Test
+	void refreshForAotInvokesMergedBeanDefinitionPostProcessorsOnGenericConstructorArgument() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(BeanD.class);
+		GenericBeanDefinition innerBeanDefinition = new GenericBeanDefinition();
+		innerBeanDefinition.setBeanClassName("java.lang.Integer");
+		beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(innerBeanDefinition);
 		context.registerBeanDefinition("test", beanDefinition);
 		MergedBeanDefinitionPostProcessor bpp = registerMockMergedBeanDefinitionPostProcessor(context);
 		context.refreshForAotProcessing(new RuntimeHints());
