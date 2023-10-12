@@ -35,8 +35,8 @@ class UriBuilderFactoryArgumentResolverTests {
 	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
 	private final Service service =
-			HttpServiceProxyFactory.builderFor(this.client).build()
-					.createClient(Service.class);
+			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
+
 
 	@Test
 	void uriBuilderFactory(){

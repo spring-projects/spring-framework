@@ -63,10 +63,10 @@ public class HttpRequestValues {
 	private final URI uri;
 
 	@Nullable
-	private final String uriTemplate;
+	private final UriBuilderFactory uriBuilderFactory;
 
 	@Nullable
-	private final UriBuilderFactory uriBuilderFactory;
+	private final String uriTemplate;
 
 	private final Map<String, String> uriVariables;
 
@@ -81,11 +81,10 @@ public class HttpRequestValues {
 
 
 	/**
-	 * Construct {@link HttpRequestValues}.
-	 *
-	 * @deprecated in favour of {@link HttpRequestValues#HttpRequestValues(
-	 * HttpMethod, URI, String, UriBuilderFactory, Map, HttpHeaders,
-	 * MultiValueMap, Map, Object)} to be removed in 6.2.
+	 * Constructor without UriBuilderFactory.
+	 * @deprecated in favour of
+	 * {@link HttpRequestValues#HttpRequestValues(HttpMethod, URI, UriBuilderFactory, String, Map, HttpHeaders, MultiValueMap, Map, Object)}
+	 * to be removed in 6.2.
 	 */
 	@Deprecated(since = "6.1", forRemoval = true)
 	protected HttpRequestValues(@Nullable HttpMethod httpMethod,
@@ -94,13 +93,16 @@ public class HttpRequestValues {
 			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue) {
 
-		this(httpMethod, uri, uriTemplate, null, uriVariables,
-				headers, cookies, attributes, bodyValue);
+		this(httpMethod, uri, null, uriTemplate, uriVariables, headers, cookies, attributes, bodyValue);
 	}
 
+	/**
+	 * Construct {@link HttpRequestValues}.
+	 * @since 6.1
+	 */
 	protected HttpRequestValues(@Nullable HttpMethod httpMethod,
-			@Nullable URI uri, @Nullable String uriTemplate,
-			@Nullable UriBuilderFactory uriBuilderFactory, Map<String, String> uriVariables,
+			@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
+			@Nullable String uriTemplate, Map<String, String> uriVariables,
 			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue) {
 
@@ -108,8 +110,8 @@ public class HttpRequestValues {
 
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.uriTemplate = uriTemplate;
 		this.uriBuilderFactory = uriBuilderFactory;
+		this.uriTemplate = uriTemplate;
 		this.uriVariables = uriVariables;
 		this.headers = headers;
 		this.cookies = cookies;
@@ -138,25 +140,25 @@ public class HttpRequestValues {
 	}
 
 	/**
+	 * Return the {@link UriBuilderFactory} to expand
+	 * the {@link HttpRequestValues#uriTemplate} and {@link #getUriVariables()} with.
+	 * <p>The {@link UriBuilderFactory} is passed into the HTTP interface method
+	 * in order to override the UriBuilderFactory (and its baseUrl) used by the
+	 * underlying client.
+	 * @since 6.1
+	 */
+	@Nullable
+	public UriBuilderFactory getUriBuilderFactory() {
+		return this.uriBuilderFactory;
+	}
+
+	/**
 	 * Return the URL template for the request. This comes from the values in
 	 * class and method {@code HttpExchange} annotations.
 	 */
 	@Nullable
 	public String getUriTemplate() {
 		return this.uriTemplate;
-	}
-
-	/**
-	 * Return the {@link UriBuilderFactory} to expand
-	 * the {@link HttpRequestValues#uriTemplate} with.
-	 * <p>This comes from a {@link UriBuilderFactory} method argument.
-	 * It allows you to override the {@code baseUri}, while keeping the
-	 * path as defined in class and method
-	 * {@code HttpExchange} annotations.
-	 */
-	@Nullable
-	public UriBuilderFactory getUriBuilderFactory() {
-		return this.uriBuilderFactory;
 	}
 
 	/**
@@ -237,10 +239,10 @@ public class HttpRequestValues {
 		private URI uri;
 
 		@Nullable
-		private String uriTemplate;
+		private UriBuilderFactory uriBuilderFactory;
 
 		@Nullable
-		private UriBuilderFactory uriBuilderFactory;
+		private String uriTemplate;
 
 		@Nullable
 		private Map<String, String> uriVars;
@@ -282,19 +284,20 @@ public class HttpRequestValues {
 		}
 
 		/**
-		 * Set the request URL as a String template.
+		 * Set the {@link UriBuilderFactory} that will be used to expand the
+		 * {@link #getUriTemplate()}.
+		 * @since 6.1
 		 */
-		public Builder setUriTemplate(String uriTemplate) {
-			this.uriTemplate = uriTemplate;
+		public Builder setUriBuilderFactory(@Nullable UriBuilderFactory uriBuilderFactory) {
+			this.uriBuilderFactory = uriBuilderFactory;
 			return this;
 		}
 
 		/**
-		 * Set the {@link UriBuilderFactory} that
-		 * will be used to expand the URI.
+		 * Set the request URL as a String template.
 		 */
-		public Builder setUriBuilderFactory(@Nullable UriBuilderFactory uriBuilderFactory) {
-			this.uriBuilderFactory = uriBuilderFactory;
+		public Builder setUriTemplate(String uriTemplate) {
+			this.uriTemplate = uriTemplate;
 			return this;
 		}
 
@@ -427,8 +430,8 @@ public class HttpRequestValues {
 		public HttpRequestValues build() {
 
 			URI uri = this.uri;
-			String uriTemplate = (this.uriTemplate != null ? this.uriTemplate : "");
 			UriBuilderFactory uriBuilderFactory = this.uriBuilderFactory;
+			String uriTemplate = (this.uriTemplate != null ? this.uriTemplate : "");
 			Map<String, String> uriVars = (this.uriVars != null ? new HashMap<>(this.uriVars) : Collections.emptyMap());
 
 			Object bodyValue = this.bodyValue;
@@ -470,8 +473,8 @@ public class HttpRequestValues {
 					new HashMap<>(this.attributes) : Collections.emptyMap());
 
 			return createRequestValues(
-					this.httpMethod, uri, uriTemplate, uriBuilderFactory,
-					uriVars, headers, cookies, attributes, bodyValue);
+					this.httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
+					headers, cookies, attributes, bodyValue);
 		}
 
 		protected boolean hasParts() {
@@ -512,9 +515,9 @@ public class HttpRequestValues {
 
 		/**
 		 * Create {@link HttpRequestValues} from values passed to the {@link Builder}.
-		 * @deprecated in favour of {@link Builder#createRequestValues(
-		 * HttpMethod, URI, String, UriBuilderFactory, Map, HttpHeaders,
-		 * MultiValueMap, Map, Object)} to be removed in 6.2.
+		 * @deprecated in favour of
+		 * {@link Builder#createRequestValues(HttpMethod, URI, UriBuilderFactory, String, Map, HttpHeaders, MultiValueMap, Map, Object)}
+		 * to be removed in 6.2.
 		 */
 		@Deprecated(since = "6.1", forRemoval = true)
 		protected HttpRequestValues createRequestValues(
@@ -524,22 +527,23 @@ public class HttpRequestValues {
 				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 				@Nullable Object bodyValue) {
 
-			return createRequestValues(httpMethod, uri, uriTemplate, null,
+			return createRequestValues(httpMethod, uri, null, uriTemplate,
 					uriVars, headers, cookies, attributes, bodyValue);
 		}
 
 		/**
 		 * Create {@link HttpRequestValues} from values passed to the {@link Builder}.
+		 * @since 6.1
 		 */
 		protected HttpRequestValues createRequestValues(
 				@Nullable HttpMethod httpMethod,
-				@Nullable URI uri, @Nullable String uriTemplate,
-				@Nullable UriBuilderFactory uriBuilderFactory, Map<String, String> uriVars,
+				@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory, @Nullable String uriTemplate,
+				Map<String, String> uriVars,
 				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 				@Nullable Object bodyValue) {
 
 			return new HttpRequestValues(
-					this.httpMethod, uri, uriTemplate, uriBuilderFactory,
+					this.httpMethod, uri, uriBuilderFactory, uriTemplate,
 					uriVars, headers, cookies, attributes, bodyValue);
 		}
 	}

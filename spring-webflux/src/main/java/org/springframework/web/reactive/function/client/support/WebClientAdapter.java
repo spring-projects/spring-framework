@@ -33,6 +33,7 @@ import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.invoker.ReactiveHttpRequestValues;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * {@link ReactorHttpExchangeAdapter} that enables an {@link HttpServiceProxyFactory}
@@ -111,12 +112,11 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		}
 
 		else if (values.getUriTemplate() != null) {
-			if(values.getUriBuilderFactory() != null){
-				URI expanded = values.getUriBuilderFactory()
-						.expand(values.getUriTemplate(), values.getUriVariables());
-				bodySpec = uriSpec.uri(expanded);
+			UriBuilderFactory uriBuilderFactory = values.getUriBuilderFactory();
+			if(uriBuilderFactory != null){
+				URI uri = uriBuilderFactory.expand(values.getUriTemplate(), values.getUriVariables());
+				bodySpec = uriSpec.uri(uri);
 			}
-
 			else {
 				bodySpec = uriSpec.uri(values.getUriTemplate(), values.getUriVariables());
 			}

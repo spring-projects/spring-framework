@@ -135,17 +135,12 @@ class KotlinWebClientHttpServiceProxyTests {
 	@Throws(InterruptedException::class)
 	fun getWithFactoryPathVariableAndRequestParam() {
 		prepareResponse { response: MockResponse ->
-			response.setHeader(
-					"Content-Type",
-					"text/plain"
-			).setBody("Hello Spring!")
+			response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
 		}
-		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/")
-				.toString())
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/").toString())
 
-		val actualResponse: ResponseEntity<String> = initHttpService()
-				.getWithUriBuilderFactory(factory, "123",
-						"test")
+		val actualResponse: ResponseEntity<String> =
+			initHttpService().getWithUriBuilderFactory(factory, "123", "test")
 
 		val request = anotherServer.takeRequest()
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
@@ -159,17 +154,13 @@ class KotlinWebClientHttpServiceProxyTests {
 	@Throws(InterruptedException::class)
 	fun getWithIgnoredUriBuilderFactory() {
 		prepareResponse { response: MockResponse ->
-			response.setHeader(
-					"Content-Type",
-					"text/plain"
-			).setBody("Hello Spring!")
+			response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
 		}
 		val dynamicUri = server.url("/greeting/123").uri()
-		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/")
-				.toString())
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/").toString())
 
-		val actualResponse: ResponseEntity<String> = initHttpService()
-				.getWithIgnoredUriBuilderFactory(dynamicUri, factory)
+		val actualResponse: ResponseEntity<String> =
+			initHttpService().getWithIgnoredUriBuilderFactory(dynamicUri, factory)
 
 		val request = server.takeRequest()
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
@@ -181,9 +172,7 @@ class KotlinWebClientHttpServiceProxyTests {
 
 
 	private fun initHttpService(): TestHttpService {
-		val webClient = WebClient.builder().baseUrl(
-			server.url("/").toString()
-		).build()
+		val webClient = WebClient.builder().baseUrl(server.url("/").toString()).build()
 		return initHttpService(webClient)
 	}
 
@@ -220,8 +209,8 @@ class KotlinWebClientHttpServiceProxyTests {
 		suspend fun getGreetingSuspendingWithAttribute(@RequestAttribute myAttribute: String): String
 
 		@GetExchange("/greeting/{id}")
-		fun getWithUriBuilderFactory(uriBuilderFactory: UriBuilderFactory?,
-									 @PathVariable id: String?, @RequestParam param: String?): ResponseEntity<String>
+		fun getWithUriBuilderFactory(
+			uriBuilderFactory: UriBuilderFactory?, @PathVariable id: String?, @RequestParam param: String?): ResponseEntity<String>
 
 		@GetExchange("/greeting")
 		fun getWithIgnoredUriBuilderFactory(uri: URI?, uriBuilderFactory: UriBuilderFactory?): ResponseEntity<String>

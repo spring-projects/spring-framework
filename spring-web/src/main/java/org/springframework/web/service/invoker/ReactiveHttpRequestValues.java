@@ -51,14 +51,12 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 
 	private ReactiveHttpRequestValues(
 			@Nullable HttpMethod httpMethod,
-			@Nullable URI uri, @Nullable String uriTemplate,
-			@Nullable UriBuilderFactory uriBuilderFactory, Map<String, String> uriVariables,
+			@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
+			@Nullable String uriTemplate, Map<String, String> uriVars,
 			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue, @Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> elementType) {
 
-		super(httpMethod, uri, uriTemplate, uriBuilderFactory,
-				uriVariables, headers, cookies, attributes, bodyValue);
-
+		super(httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars, headers, cookies, attributes, bodyValue);
 		this.body = body;
 		this.bodyElementType = elementType;
 	}
@@ -135,14 +133,14 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		}
 
 		@Override
-		public Builder setUriTemplate(String uriTemplate) {
-			super.setUriTemplate(uriTemplate);
+		public Builder setUriBuilderFactory(@Nullable UriBuilderFactory uriBuilderFactory) {
+			super.setUriBuilderFactory(uriBuilderFactory);
 			return this;
 		}
 
 		@Override
-		public Builder setUriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
-			super.setUriBuilderFactory(uriBuilderFactory);
+		public Builder setUriTemplate(String uriTemplate) {
+			super.setUriTemplate(uriTemplate);
 			return this;
 		}
 
@@ -271,17 +269,15 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		@Override
 		protected ReactiveHttpRequestValues createRequestValues(
 				@Nullable HttpMethod httpMethod,
-				@Nullable URI uri, @Nullable String uriTemplate,
-				@Nullable UriBuilderFactory uriBuilderFactory, Map<String, String> uriVars,
+				@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
+				@Nullable String uriTemplate, Map<String, String> uriVars,
 				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 				@Nullable Object bodyValue) {
 
 			return new ReactiveHttpRequestValues(
-					httpMethod, uri, uriTemplate, uriBuilderFactory,
-					uriVars, headers, cookies, attributes,
-					bodyValue, this.body, this.bodyElementType);
+					httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
+					headers, cookies, attributes, bodyValue, this.body, this.bodyElementType);
 		}
-
 	}
 
 }

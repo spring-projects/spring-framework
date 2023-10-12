@@ -172,8 +172,7 @@ public class WebClientAdapterTests {
 	void uriBuilderFactory() throws Exception {
 		String ignoredResponseBody = "hello";
 		prepareResponse(response -> response.setResponseCode(200).setBody(ignoredResponseBody));
-		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
-				.toString());
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
 		String actualBody = initService().getWithUriBuilderFactory(factory);
 
@@ -186,14 +185,12 @@ public class WebClientAdapterTests {
 	void uriBuilderFactoryWithPathVariableAndRequestParam() throws Exception {
 		String ignoredResponseBody = "hello";
 		prepareResponse(response -> response.setResponseCode(200).setBody(ignoredResponseBody));
-		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
-				.toString());
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
 		String actualBody = initService().getWithUriBuilderFactory(factory, "123", "test");
 
 		assertThat(actualBody).isEqualTo(ANOTHER_SERVER_RESPONSE_BODY);
-		assertThat(this.anotherServer.takeRequest().getPath())
-				.isEqualTo("/greeting/123?param=test");
+		assertThat(this.anotherServer.takeRequest().getPath()).isEqualTo("/greeting/123?param=test");
 		assertThat(this.server.getRequestCount()).isEqualTo(0);
 	}
 
@@ -202,8 +199,7 @@ public class WebClientAdapterTests {
 		String expectedResponseBody = "hello";
 		prepareResponse(response -> response.setResponseCode(200).setBody(expectedResponseBody));
 		URI dynamicUri = this.server.url("/greeting/123").uri();
-		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
-				.toString());
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
 		String actualBody = initService().getWithIgnoredUriBuilderFactory(dynamicUri, factory);
 
@@ -216,8 +212,7 @@ public class WebClientAdapterTests {
 	private static MockWebServer anotherServer() {
 		MockWebServer anotherServer = new MockWebServer();
 		MockResponse response = new MockResponse();
-		response.setHeader("Content-Type", "text/plain")
-				.setBody(ANOTHER_SERVER_RESPONSE_BODY);
+		response.setHeader("Content-Type", "text/plain").setBody(ANOTHER_SERVER_RESPONSE_BODY);
 		anotherServer.enqueue(response);
 		return anotherServer;
 	}

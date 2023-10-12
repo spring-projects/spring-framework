@@ -74,6 +74,7 @@ class RestClientAdapterTests {
 
 	private final MockWebServer anotherServer = anotherServer();
 
+
 	@SuppressWarnings("ConstantValue")
 	@AfterEach
 	void shutdown() throws IOException {
@@ -121,19 +122,24 @@ class RestClientAdapterTests {
 
 
 	@ParameterizedAdapterTest
-	void greeting(MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
+	void greeting(
+			MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
+
 		String response = service.getGreeting();
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(response).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getPath()).isEqualTo("/greeting");
-		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests")
+		TestObservationRegistryAssert.assertThat(observationRegistry)
+				.hasObservationWithNameEqualTo("http.client.requests")
 				.that().hasLowCardinalityKeyValue("uri", "/greeting");
 	}
 
 	@ParameterizedAdapterTest
-	void greetingById(MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
+	void greetingById(
+			MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
+
 		ResponseEntity<String> response = service.getGreetingById("456");
 
 		RecordedRequest request = server.takeRequest();
@@ -141,12 +147,15 @@ class RestClientAdapterTests {
 		assertThat(response.getBody()).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getPath()).isEqualTo("/greeting/456");
-		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests")
+		TestObservationRegistryAssert.assertThat(observationRegistry)
+				.hasObservationWithNameEqualTo("http.client.requests")
 				.that().hasLowCardinalityKeyValue("uri", "/greeting/{id}");
 	}
 
 	@ParameterizedAdapterTest
-	void greetingWithDynamicUri(MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
+	void greetingWithDynamicUri(
+			MockWebServer server, Service service, TestObservationRegistry observationRegistry) throws Exception {
+
 		URI dynamicUri = server.url("/greeting/123").uri();
 		Optional<String> response = service.getGreetingWithDynamicUri(dynamicUri, "456");
 
@@ -154,7 +163,8 @@ class RestClientAdapterTests {
 		assertThat(response.orElse("empty")).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getRequestUrl().uri()).isEqualTo(dynamicUri);
-		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests")
+		TestObservationRegistryAssert.assertThat(observationRegistry)
+				.hasObservationWithNameEqualTo("http.client.requests")
 				.that().hasLowCardinalityKeyValue("uri", "none");
 	}
 
@@ -218,8 +228,8 @@ class RestClientAdapterTests {
 
 	@ParameterizedAdapterTest
 	void getWithUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
-		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
-				.toString());
+		String url = this.anotherServer.url("/").toString();
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(url);
 
 		ResponseEntity<String> actualResponse = service.getWithUriBuilderFactory(factory);
 
@@ -233,11 +243,10 @@ class RestClientAdapterTests {
 
 	@ParameterizedAdapterTest
 	void getWithFactoryPathVariableAndRequestParam(MockWebServer server, Service service) throws InterruptedException {
-		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
-				.toString());
+		String url = this.anotherServer.url("/").toString();
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(url);
 
-		ResponseEntity<String> actualResponse = service.getWithUriBuilderFactory(factory, "123",
-				"test");
+		ResponseEntity<String> actualResponse = service.getWithUriBuilderFactory(factory, "123", "test");
 
 		RecordedRequest request = this.anotherServer.takeRequest();
 		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -250,8 +259,7 @@ class RestClientAdapterTests {
 	@ParameterizedAdapterTest
 	void getWithIgnoredUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
 		URI dynamicUri = server.url("/greeting/123").uri();
-		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/")
-				.toString());
+		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
 		ResponseEntity<String> actualResponse = service.getWithIgnoredUriBuilderFactory(dynamicUri, factory);
 
@@ -265,11 +273,11 @@ class RestClientAdapterTests {
 
 
 	private static MockWebServer anotherServer() {
-		MockWebServer anotherServer = new MockWebServer();
+		MockWebServer server = new MockWebServer();
 		MockResponse response = new MockResponse();
 		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!");
-		anotherServer.enqueue(response);
-		return anotherServer;
+		server.enqueue(response);
+		return server;
 	}
 
 
