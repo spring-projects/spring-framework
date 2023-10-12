@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.MethodSpec;
@@ -61,11 +63,10 @@ class CodeWarningsTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void registerWarningSuppressesIt() {
-		Class<?> deprecatedBeanClass = org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
 		this.codeWarnings.register("deprecation");
 		compile(method -> {
 			this.codeWarnings.suppress(method);
-			method.addStatement("$T bean = new $T()", deprecatedBeanClass, deprecatedBeanClass);
+			method.addStatement("$T bean = new $T()", DeprecatedBean.class, DeprecatedBean.class);
 		}, compiled -> assertThat(compiled.getSourceFile())
 				.contains("@SuppressWarnings(\"deprecation\")"));
 	}
@@ -73,14 +74,12 @@ class CodeWarningsTests {
 	@Test
 	@SuppressWarnings({ "deprecation", "removal" })
 	void registerSeveralWarningsSuppressesThem() {
-		Class<?> deprecatedBeanClass = org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
-		Class<?> deprecatedForRemovalBeanClass = org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean.class;
 		this.codeWarnings.register("deprecation");
 		this.codeWarnings.register("removal");
 		compile(method -> {
 			this.codeWarnings.suppress(method);
-			method.addStatement("$T bean = new $T()", deprecatedBeanClass, deprecatedBeanClass);
-			method.addStatement("$T another = new $T()", deprecatedForRemovalBeanClass, deprecatedForRemovalBeanClass);
+			method.addStatement("$T bean = new $T()", DeprecatedBean.class, DeprecatedBean.class);
+			method.addStatement("$T another = new $T()", DeprecatedForRemovalBean.class, DeprecatedForRemovalBean.class);
 		}, compiled -> assertThat(compiled.getSourceFile())
 				.contains("@SuppressWarnings({ \"deprecation\", \"removal\" })"));
 	}
@@ -88,16 +87,14 @@ class CodeWarningsTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void detectDeprecationOnAnnotatedElementWithDeprecated() {
-		Class<?> deprecatedBeanClass = org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
-		this.codeWarnings.detectDeprecation(deprecatedBeanClass);
+		this.codeWarnings.detectDeprecation(DeprecatedBean.class);
 		assertThat(this.codeWarnings.getWarnings()).containsExactly("deprecation");
 	}
 
 	@Test
 	@SuppressWarnings("removal")
 	void detectDeprecationOnAnnotatedElementWithDeprecatedForRemoval() {
-		Class<?> deprecatedForRemovalBeanClass = org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean.class;
-		this.codeWarnings.detectDeprecation(deprecatedForRemovalBeanClass);
+		this.codeWarnings.detectDeprecation(DeprecatedForRemovalBean.class);
 		assertThat(this.codeWarnings.getWarnings()).containsExactly("removal");
 	}
 

@@ -53,6 +53,7 @@ import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Implementation;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.One;
 import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Two;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
@@ -751,8 +752,7 @@ class BeanDefinitionMethodGeneratorTests {
 
 		@Test
 		void generateBeanDefinitionMethodWithDeprecatedTargetClass() {
-			Class<?> beanClass = org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean.class;
-			RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
+			RootBeanDefinition beanDefinition = new RootBeanDefinition(DeprecatedBean.class);
 			RegisteredBean registeredBean = registerBean(beanDefinition);
 			BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 					methodGeneratorFactory, registeredBean, null,
