@@ -367,6 +367,7 @@ class BeanDefinitionMethodGeneratorTests {
 				assertThat(instance.getName()).isEqualTo("postprocessed");
 			}
 			catch (Exception ex) {
+				throw new IllegalStateException(ex);
 			}
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile).contains("instanceSupplier.andThen(");
@@ -405,6 +406,7 @@ class BeanDefinitionMethodGeneratorTests {
 				assertThat(instance.getName()).isEqualTo("postprocessed");
 			}
 			catch (Exception ex) {
+				throw new IllegalStateException(ex);
 			}
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile).contains("instanceSupplier.andThen(");
