@@ -105,8 +105,7 @@ class InstanceSupplierCodeGeneratorTests {
 		this.beanFactory.registerSingleton("injected", "injected");
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
 			InjectionComponent bean = getBean(beanDefinition, instanceSupplier);
-			assertThat(bean).isInstanceOf(InjectionComponent.class).extracting("bean")
-					.isEqualTo("injected");
+			assertThat(bean).isInstanceOf(InjectionComponent.class).extracting("bean").isEqualTo("injected");
 		});
 		assertThat(getReflectionHints().getTypeHint(InjectionComponent.class))
 				.satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT));
@@ -114,12 +113,10 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasConstructorWithInnerClassAndDefaultConstructor() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				NoDependencyComponent.class);
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(NoDependencyComponent.class);
 		this.beanFactory.registerSingleton("configuration", new InnerComponentConfiguration());
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
-			NoDependencyComponent bean = getBean(beanDefinition,
-					instanceSupplier);
+			NoDependencyComponent bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(NoDependencyComponent.class);
 			assertThat(compiled.getSourceFile()).contains(
 					"getBeanFactory().getBean(InnerComponentConfiguration.class).new NoDependencyComponent()");
@@ -130,13 +127,11 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasConstructorWithInnerClassAndParameter() {
-		BeanDefinition beanDefinition = new RootBeanDefinition(
-				EnvironmentAwareComponent.class);
+		BeanDefinition beanDefinition = new RootBeanDefinition(EnvironmentAwareComponent.class);
 		this.beanFactory.registerSingleton("configuration", new InnerComponentConfiguration());
 		this.beanFactory.registerSingleton("environment", new StandardEnvironment());
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
-			EnvironmentAwareComponent bean = getBean(beanDefinition,
-					instanceSupplier);
+			EnvironmentAwareComponent bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(EnvironmentAwareComponent.class);
 			assertThat(compiled.getSourceFile()).contains(
 					"getBeanFactory().getBean(InnerComponentConfiguration.class).new EnvironmentAwareComponent(");
@@ -147,8 +142,7 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasConstructorWithGeneric() {
-		BeanDefinition beanDefinition = new RootBeanDefinition(
-				NumberHolderFactoryBean.class);
+		BeanDefinition beanDefinition = new RootBeanDefinition(NumberHolderFactoryBean.class);
 		this.beanFactory.registerSingleton("number", 123);
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
 			NumberHolder<?> bean = getBean(beanDefinition, instanceSupplier);
@@ -162,11 +156,9 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasPrivateConstructor() {
-		BeanDefinition beanDefinition = new RootBeanDefinition(
-				TestBeanWithPrivateConstructor.class);
+		BeanDefinition beanDefinition = new RootBeanDefinition(TestBeanWithPrivateConstructor.class);
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
-			TestBeanWithPrivateConstructor bean = getBean(beanDefinition,
-					instanceSupplier);
+			TestBeanWithPrivateConstructor bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(TestBeanWithPrivateConstructor.class);
 			assertThat(compiled.getSourceFile())
 					.contains("return BeanInstanceSupplier.<TestBeanWithPrivateConstructor>forConstructor();");
