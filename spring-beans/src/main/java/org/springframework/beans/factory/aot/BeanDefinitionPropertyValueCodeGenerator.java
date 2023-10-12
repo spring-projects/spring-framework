@@ -449,17 +449,17 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				return CodeBlock.of("new $T($L)", LinkedHashSet.class,
 						generateCollectionOf(set, List.class, elementType));
 			}
-			try {
-				set = orderForCodeConsistency(set);
-			}
-			catch (ClassCastException ex) {
-				// If elements are not comparable, just keep the original set
-			}
-			return super.generateCollectionCode(elementType, set);
+			return super.generateCollectionCode(elementType, orderForCodeConsistency(set));
 		}
 
 		private Set<?> orderForCodeConsistency(Set<?> set) {
-			return new TreeSet<Object>(set);
+			try {
+				return new TreeSet<Object>(set);
+			}
+			catch (ClassCastException ex) {
+				// If elements are not comparable, just keep the original set
+				return set;
+			}
 		}
 	}
 
@@ -515,7 +515,13 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		}
 
 		private <K, V> Map<K, V> orderForCodeConsistency(Map<K, V> map) {
-			return new TreeMap<>(map);
+			try {
+				return new TreeMap<>(map);
+			}
+			catch (ClassCastException ex) {
+				// If elements are not comparable, just keep the original map
+				return map;
+			}
 		}
 
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
