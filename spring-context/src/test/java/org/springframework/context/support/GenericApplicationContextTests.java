@@ -29,7 +29,11 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -59,6 +63,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -300,6 +305,39 @@ class GenericApplicationContextTests {
 		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
 			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
 			.isEqualTo("pong:foo");
+	}
+
+	@Test
+	void refreshWithRuntimeFailureOnBeanCreationDisposeExistingBeans() {
+		BeanE one = new BeanE();
+		context.registerBean("one", BeanE.class, () -> one);
+		context.registerBean("two", BeanE.class, () -> new BeanE() {
+			@Override
+			public void afterPropertiesSet() {
+				throw new IllegalStateException("Expected");
+			}
+		});
+		assertThatThrownBy(context::refresh).isInstanceOf(BeanCreationException.class)
+				.hasMessageContaining("two");
+		assertThat(one.initialized).isTrue();
+		assertThat(one.destroyed).isTrue();
+	}
+
+	@Test
+	void refreshWithRuntimeFailureOnAfterSingletonInstantiatedDisposeExistingBeans() {
+		BeanE one = new BeanE();
+		BeanE two = new BeanE();
+		context.registerBean("one", BeanE.class, () -> one);
+		context.registerBean("two", BeanE.class, () -> two);
+		context.registerBean("int", SmartInitializingSingleton.class, () -> () -> {
+			throw new IllegalStateException("expected");
+		});
+		assertThatThrownBy(context::refresh).isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("expected");
+		assertThat(one.initialized).isTrue();
+		assertThat(two.initialized).isTrue();
+		assertThat(one.destroyed).isTrue();
+		assertThat(two.destroyed).isTrue();
 	}
 
 	@Test
@@ -643,6 +681,29 @@ class GenericApplicationContextTests {
 
 		public void setCounter(Integer counter) {
 			this.counter = counter;
+		}
+	}
+
+	static class BeanE implements InitializingBean, DisposableBean {
+
+		private boolean initialized;
+
+		private boolean destroyed;
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			if (initialized) {
+				throw new IllegalStateException("AfterPropertiesSet called twice");
+			}
+			this.initialized = true;
+		}
+
+		@Override
+		public void destroy() throws Exception {
+			if (destroyed) {
+				throw new IllegalStateException("Destroy called twice");
+			}
+			this.destroyed = true;
 		}
 	}
 

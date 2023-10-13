@@ -619,12 +619,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				finishRefresh();
 			}
 
-			catch (BeansException ex) {
+			catch (RuntimeException | Error ex ) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Exception encountered during context initialization - " +
 							"cancelling refresh attempt: " + ex);
 				}
-
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
 
@@ -974,7 +973,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * after an exception got thrown.
 	 * @param ex the exception that led to the cancellation
 	 */
-	protected void cancelRefresh(BeansException ex) {
+	protected void cancelRefresh(Throwable ex) {
 		this.active.set(false);
 
 		// Reset common introspection caches in Spring's core infrastructure.

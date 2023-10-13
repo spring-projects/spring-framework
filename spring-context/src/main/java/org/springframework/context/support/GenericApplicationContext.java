@@ -297,7 +297,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	@Override
-	protected void cancelRefresh(BeansException ex) {
+	protected void cancelRefresh(Throwable ex) {
 		this.beanFactory.setSerializationId(null);
 		super.cancelRefresh(ex);
 	}
