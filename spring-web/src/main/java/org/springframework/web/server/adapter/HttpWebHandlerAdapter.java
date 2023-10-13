@@ -389,7 +389,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 		private final Observation observation;
 
-		private AtomicBoolean observationRecorded = new AtomicBoolean();
+		private final AtomicBoolean observationRecorded = new AtomicBoolean();
 
 		public ObservationSignalListener(ServerRequestObservationContext observationContext) {
 			this.observationContext = observationContext;

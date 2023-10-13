@@ -62,9 +62,6 @@ public class ServerHttpObservationFilter implements WebFilter {
 
 	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultServerRequestObservationConvention();
 
-	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = Set.of("AbortedException",
-			"ClientAbortException", "EOFException", "EofException");
-
 	private final ObservationRegistry observationRegistry;
 
 	private final ServerRequestObservationConvention observationConvention;
@@ -116,7 +113,7 @@ public class ServerHttpObservationFilter implements WebFilter {
 
 		private final Observation observation;
 
-		private AtomicBoolean observationRecorded = new AtomicBoolean();
+		private final AtomicBoolean observationRecorded = new AtomicBoolean();
 
 		public ObservationSignalListener(ServerRequestObservationContext observationContext) {
 			this.observationContext = observationContext;
