@@ -36,6 +36,7 @@ import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrat
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
 import org.springframework.beans.testfixture.beans.factory.aot.NumberFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
+import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanArrayFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanFactoryBean;
 import org.springframework.core.ResolvableType;
@@ -73,6 +74,13 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	void getTargetOnConstructorToPublicFactoryBean() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class,
 				SimpleBeanFactoryBean.class.getDeclaredConstructors()[0]);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean), SimpleBean.class);
+	}
+
+	@Test
+	void getTargetOnConstructorToPublicFactoryBeanProducingArray() {
+		RegisteredBean registeredBean = registerTestBean(SimpleBean[].class,
+				SimpleBeanArrayFactoryBean.class.getDeclaredConstructors()[0]);
 		assertTarget(createInstance(registeredBean).getTarget(registeredBean), SimpleBean.class);
 	}
 

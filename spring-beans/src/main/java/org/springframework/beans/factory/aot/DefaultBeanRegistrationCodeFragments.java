@@ -83,7 +83,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			Assert.state(parent != null, "No parent available for inner bean");
 			target = parent.getBeanClass();
 		}
-		return ClassName.get(target);
+		return (target.isArray() ? ClassName.get(target.getComponentType()) : ClassName.get(target));
 	}
 
 	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
