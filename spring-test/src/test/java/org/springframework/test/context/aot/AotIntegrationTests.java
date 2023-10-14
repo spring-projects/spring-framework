@@ -122,7 +122,7 @@ class AotIntegrationTests extends AbstractAotTests {
 				// Scan all packages.
 				.scan()
 				// Or limit execution to a particular package and its subpackages.
-				// .scan("org.springframework.test.context.aot.samples.web")
+				// .scan("org.springframework.test.context.junit4")
 				// Only include test classes named *Tests so that we don't pick up
 				// internal TestCase classes that aren't really tests.
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
@@ -130,7 +130,8 @@ class AotIntegrationTests extends AbstractAotTests {
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		// Set failOnError flag to false to allow processing to continue.
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), false);
 		generator.processAheadOfTime(testClasses.stream());
 
 		// AOT BUILD-TIME: COMPILATION
