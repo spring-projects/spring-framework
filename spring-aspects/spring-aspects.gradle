@@ -2,12 +2,6 @@ description = "Spring Aspects"
 
 apply plugin: "io.freefair.aspectj"
 
-sourceSets.main.aspectj.srcDir "src/main/java"
-sourceSets.main.java.srcDirs = files()
-
-sourceSets.test.aspectj.srcDir "src/test/java"
-sourceSets.test.java.srcDirs = files()
-
 compileAspectj {
 	sourceCompatibility "17"
 	targetCompatibility "17"
