@@ -86,6 +86,8 @@ class ClassUtilsTests {
 	void forNameWithNestedType() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass", classLoader)).isEqualTo(NestedClass.class);
 		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass", classLoader)).isEqualTo(NestedClass.class);
+		assertThat(ClassUtils.forName("a.ClassHavingNestedClass$NestedClass", classLoader)).isEqualTo(a.ClassHavingNestedClass.NestedClass.class);
+		assertThat(ClassUtils.forName("a.ClassHavingNestedClass.NestedClass", classLoader)).isEqualTo(a.ClassHavingNestedClass.NestedClass.class);
 	}
 
 	@Test
