@@ -15,12 +15,23 @@
  */
 package org.springframework.cglib.beans;
 
-import java.beans.*;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.beans.PropertyDescriptor;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ObjectSwitchCallback;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class BeanMapEmitter extends ClassEmitter {
@@ -50,7 +61,7 @@ class BeanMapEmitter extends ClassEmitter {
         EmitUtils.null_constructor(this);
         EmitUtils.factory_method(this, NEW_INSTANCE);
         generateConstructor();
-            
+
         Map getters = makePropertyMap(ReflectUtils.getBeanGetters(type));
         Map setters = makePropertyMap(ReflectUtils.getBeanSetters(type));
         Map allProps = new HashMap();
@@ -79,8 +90,8 @@ class BeanMapEmitter extends ClassEmitter {
 
     private Map makePropertyMap(PropertyDescriptor[] props) {
         Map names = new HashMap();
-        for (int i = 0; i < props.length; i++) {
-            names.put(props[i].getName(), props[i]);
+        for (PropertyDescriptor prop : props) {
+            names.put(prop.getName(), prop);
         }
         return names;
     }
@@ -97,7 +108,7 @@ class BeanMapEmitter extends ClassEmitter {
         e.return_value();
         e.end_method();
     }
-        
+
     private void generateGet(Class type, final Map getters) {
         final CodeEmitter e = begin_method(Constants.ACC_PUBLIC, BEAN_MAP_GET, null);
         e.load_arg(0);
@@ -105,14 +116,16 @@ class BeanMapEmitter extends ClassEmitter {
         e.load_arg(1);
         e.checkcast(Constants.TYPE_STRING);
         EmitUtils.string_switch(e, getNames(getters), Constants.SWITCH_STYLE_HASH, new ObjectSwitchCallback() {
-            public void processCase(Object key, Label end) {
+            @Override
+			public void processCase(Object key, Label end) {
                 PropertyDescriptor pd = (PropertyDescriptor)getters.get(key);
                 MethodInfo method = ReflectUtils.getMethodInfo(pd.getReadMethod());
                 e.invoke(method);
                 e.box(method.getSignature().getReturnType());
                 e.return_value();
             }
-            public void processDefault() {
+            @Override
+			public void processDefault() {
                 e.aconst_null();
                 e.return_value();
             }
@@ -127,7 +140,8 @@ class BeanMapEmitter extends ClassEmitter {
         e.load_arg(1);
         e.checkcast(Constants.TYPE_STRING);
         EmitUtils.string_switch(e, getNames(setters), Constants.SWITCH_STYLE_HASH, new ObjectSwitchCallback() {
-            public void processCase(Object key, Label end) {
+            @Override
+			public void processCase(Object key, Label end) {
                 PropertyDescriptor pd = (PropertyDescriptor)setters.get(key);
                 if (pd.getReadMethod() == null) {
                     e.aconst_null();
@@ -144,7 +158,8 @@ class BeanMapEmitter extends ClassEmitter {
                 e.invoke(write);
                 e.return_value();
             }
-            public void processDefault() {
+            @Override
+			public void processDefault() {
                 // fall-through
             }
         });
@@ -152,7 +167,7 @@ class BeanMapEmitter extends ClassEmitter {
         e.return_value();
         e.end_method();
     }
-            
+
     private void generateKeySet(String[] allNames) {
         // static initializer
         declare_field(Constants.ACC_STATIC | Constants.ACC_PRIVATE, "keys", FIXED_KEY_SET, null);
@@ -178,12 +193,14 @@ class BeanMapEmitter extends ClassEmitter {
         final CodeEmitter e = begin_method(Constants.ACC_PUBLIC, GET_PROPERTY_TYPE, null);
         e.load_arg(0);
         EmitUtils.string_switch(e, allNames, Constants.SWITCH_STYLE_HASH, new ObjectSwitchCallback() {
-            public void processCase(Object key, Label end) {
+            @Override
+			public void processCase(Object key, Label end) {
                 PropertyDescriptor pd = (PropertyDescriptor)allProps.get(key);
                 EmitUtils.load_class(e, Type.getType(pd.getPropertyType()));
                 e.return_value();
             }
-            public void processDefault() {
+            @Override
+			public void processDefault() {
                 e.aconst_null();
                 e.return_value();
             }
