@@ -49,9 +49,7 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 		project.getPlugins().withType(JavaPlugin.class, javaPlugin -> {
 			RuntimeHintsAgentExtension agentExtension = createRuntimeHintsAgentExtension(project);
 			Test agentTest = project.getTasks().create(RUNTIMEHINTS_TEST_TASK, Test.class, test -> {
-				test.useJUnitPlatform(options -> {
-					options.includeTags("RuntimeHintsTests");
-				});
+				test.useJUnitPlatform(options -> options.includeTags("RuntimeHintsTests"));
 				test.include("**/*Tests.class", "**/*Test.class");
 				test.systemProperty("java.awt.headless", "true");
 				test.systemProperty("org.graalvm.nativeimage.imagecode", "runtime");

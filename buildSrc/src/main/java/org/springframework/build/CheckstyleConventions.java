@@ -43,7 +43,7 @@ public class CheckstyleConventions {
 	 * @param project the current project
 	 */
 	public void apply(Project project) {
-		project.getPlugins().withType(JavaBasePlugin.class, (java) -> {
+		project.getPlugins().withType(JavaBasePlugin.class, java -> {
 			if (project.getRootProject() == project) {
 				configureNoHttpPlugin(project);
 			}

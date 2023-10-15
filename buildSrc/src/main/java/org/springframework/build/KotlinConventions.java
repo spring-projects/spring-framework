@@ -30,7 +30,7 @@ public class KotlinConventions {
 
 	void apply(Project project) {
 		project.getPlugins().withId("org.jetbrains.kotlin.jvm",
-				(plugin) -> project.getTasks().withType(KotlinCompile.class, this::configure));
+				plugin -> project.getTasks().withType(KotlinCompile.class, this::configure));
 	}
 
 	private void configure(KotlinCompile compile) {

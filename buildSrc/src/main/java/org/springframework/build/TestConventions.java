@@ -38,7 +38,7 @@ import org.gradle.testretry.TestRetryTaskExtension;
 class TestConventions {
 
 	void apply(Project project) {
-		project.getPlugins().withType(JavaBasePlugin.class, (java) -> configureTestConventions(project));
+		project.getPlugins().withType(JavaBasePlugin.class, java -> configureTestConventions(project));
 	}
 
 	private void configureTestConventions(Project project) {
