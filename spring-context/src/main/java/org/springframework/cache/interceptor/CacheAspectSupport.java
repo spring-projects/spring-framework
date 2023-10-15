@@ -48,6 +48,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.expression.EvaluationContext;
@@ -85,6 +86,7 @@ import org.springframework.util.function.SupplierUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
@@ -1023,6 +1025,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							cache.retrieve(key,
 									() -> Mono.from(adapter.toPublisher(invokeOperation(invoker))).toFuture())));
 				}
+			}
+			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isSuspendingFunction(method)) {
+				return Mono.fromFuture(cache.retrieve(key, () -> ((Mono<?>) invokeOperation(invoker)).toFuture()));
 			}
 			return NOT_HANDLED;
 		}

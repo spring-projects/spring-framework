@@ -19,6 +19,7 @@ package org.springframework.context.expression;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
@@ -37,6 +38,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.2
  */
 public class MethodBasedEvaluationContext extends StandardEvaluationContext {
@@ -55,7 +57,8 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 
 		super(rootObject);
 		this.method = method;
-		this.arguments = arguments;
+		this.arguments = (KotlinDetector.isSuspendingFunction(method) ?
+				Arrays.copyOf(arguments, arguments.length - 1) : arguments);
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 

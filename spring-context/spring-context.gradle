@@ -30,6 +30,7 @@ dependencies {
 	optional("org.hibernate:hibernate-validator")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.reactivestreams:reactive-streams")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation(testFixtures(project(":spring-beans")))
