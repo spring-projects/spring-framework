@@ -18,9 +18,11 @@ package org.springframework.test.context.aot;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -90,6 +92,9 @@ public class TestContextAotGenerator {
 	public static final String FAIL_ON_ERROR_PROPERTY_NAME = "spring.test.aot.processing.failOnError";
 
 	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
+
+	private static final Predicate<? super Class<?>> isDisabledInAotMode =
+			testClass -> MergedAnnotations.from(testClass).isPresent(DisabledInAotMode.class);
 
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
@@ -235,35 +240,56 @@ public class TestContextAotGenerator {
 		ClassLoader classLoader = getClass().getClassLoader();
 		MultiValueMap<ClassName, Class<?>> initializerClassMappings = new LinkedMultiValueMap<>();
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Generating AOT artifacts for test classes " +
-						testClasses.stream().map(Class::getName).toList());
-			}
-			this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
-			try {
-				// Use first test class discovered for a given unique MergedContextConfiguration.
-				Class<?> testClass = testClasses.get(0);
-				DefaultGenerationContext generationContext = createGenerationContext(testClass);
-				ClassName initializer = processAheadOfTime(mergedConfig, generationContext);
-				Assert.state(!initializerClassMappings.containsKey(initializer),
-						() -> "ClassName [%s] already encountered".formatted(initializer.reflectionName()));
-				initializerClassMappings.addAll(initializer, testClasses);
-				generationContext.writeGeneratedContent();
-			}
-			catch (Exception ex) {
-				if (this.failOnError) {
-					throw new TestContextAotException("Failed to generate AOT artifacts for test classes " +
-							testClasses.stream().map(Class::getName).toList(), ex);
+			long numDisabled = testClasses.stream().filter(isDisabledInAotMode).count();
+			// At least one test class is disabled?
+			if (numDisabled > 0) {
+				// Then all related test classes should be disabled.
+				if (numDisabled != testClasses.size()) {
+					if (this.failOnError) {
+						throw new TestContextAotException("""
+								All test classes that share an ApplicationContext must be annotated
+								with @DisabledInAotMode if one of them is: """ + classNames(testClasses));
+					}
+					else if (logger.isWarnEnabled()) {
+						logger.warn("""
+								All test classes that share an ApplicationContext must be annotated
+								with @DisabledInAotMode if one of them is: """ + classNames(testClasses));
+					}
 				}
+				if (logger.isInfoEnabled()) {
+					logger.info("Skipping AOT processing due to the presence of @DisabledInAotMode for test classes " +
+							classNames(testClasses));
+				}
+			}
+			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to generate AOT artifacts for test classes " +
-							testClasses.stream().map(Class::getName).toList(), ex);
+					logger.debug("Generating AOT artifacts for test classes " + classNames(testClasses));
 				}
-				else if (logger.isWarnEnabled()) {
-					logger.warn("""
+				this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
+				try {
+					// Use first test class discovered for a given unique MergedContextConfiguration.
+					Class<?> testClass = testClasses.get(0);
+					DefaultGenerationContext generationContext = createGenerationContext(testClass);
+					ClassName initializer = processAheadOfTime(mergedConfig, generationContext);
+					Assert.state(!initializerClassMappings.containsKey(initializer),
+							() -> "ClassName [%s] already encountered".formatted(initializer.reflectionName()));
+					initializerClassMappings.addAll(initializer, testClasses);
+					generationContext.writeGeneratedContent();
+				}
+				catch (Exception ex) {
+					if (this.failOnError) {
+						throw new TestContextAotException("Failed to generate AOT artifacts for test classes " +
+								classNames(testClasses), ex);
+					}
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to generate AOT artifacts for test classes " + classNames(testClasses), ex);
+					}
+					else if (logger.isWarnEnabled()) {
+						logger.warn("""
 							Failed to generate AOT artifacts for test classes %s. \
 							Enable DEBUG logging to view the stack trace. %s"""
-								.formatted(testClasses.stream().map(Class::getName).toList(), ex));
+								.formatted(classNames(testClasses), ex));
+					}
 				}
 			}
 		});
@@ -399,6 +425,10 @@ public class TestContextAotGenerator {
 			return Boolean.parseBoolean(failOnError.trim());
 		}
 		return true;
+	}
+
+	private static List<String> classNames(List<Class<?>> classes) {
+		return classes.stream().map(Class::getName).toList();
 	}
 
 }

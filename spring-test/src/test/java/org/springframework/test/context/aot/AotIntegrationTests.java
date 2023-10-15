@@ -45,6 +45,9 @@ import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterShar
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotProcessingTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeClassLevelTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeMethodLevelTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -98,15 +101,20 @@ class AotIntegrationTests extends AbstractAotTests {
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(6, List.of(
-					BasicSpringJupiterSharedConfigTests.class,
-					BasicSpringJupiterTests.class, // NestedTests get executed automatically
+				runTestsInAotMode(7, List.of(
+					// The #s represent how many tests should run from each test class, which
+					// must add up to the expectedNumTests above.
+					/* 1 */ BasicSpringJupiterSharedConfigTests.class,
+					/* 2 */ BasicSpringJupiterTests.class, // NestedTests get executed automatically
 					// Run @Import tests AFTER the tests with otherwise identical config
 					// in order to ensure that the other test classes are not accidentally
 					// using the config for the @Import tests.
-					BasicSpringJupiterImportedConfigTests.class,
-					BasicSpringTestNGTests.class,
-					BasicSpringVintageTests.class)));
+					/* 1 */ BasicSpringJupiterImportedConfigTests.class,
+					/* 1 */ BasicSpringTestNGTests.class,
+					/* 1 */ BasicSpringVintageTests.class,
+					/* 0 */ DisabledInAotProcessingTests.class,
+					/* 0 */ DisabledInAotRuntimeClassLevelTests.class,
+					/* 1 */ DisabledInAotRuntimeMethodLevelTests.class)));
 	}
 
 	@Disabled("Uncomment to run all Spring integration tests in `spring-test`")
