@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sam Brannen
  * @since 5.0
- * @see org.springframework.test.context.junit.jupiter.nested.NestedTestsWithSpringAndJUnitJupiterTestCase
+ * @see org.springframework.test.context.junit.jupiter.nested.ContextConfigurationNestedTests
  */
 @RunWith(HierarchicalContextRunner.class)
 @ContextConfiguration(classes = TopLevelConfig.class)

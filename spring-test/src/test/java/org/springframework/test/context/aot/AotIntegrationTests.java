@@ -132,11 +132,12 @@ class AotIntegrationTests extends AbstractAotTests {
 		//
 		// 2) Or you can use the TestClassScanner to find test classes.
 		List<Class<?>> testClasses = createTestClassScanner()
-				// Scan all packages.
-				.scan()
+				// Scan all base packages in spring-test.
+				.scan("org.springframework.mock", "org.springframework.test")
 				// Or limit execution to a particular package and its subpackages.
-				// .scan("org.springframework.test.context.junit4")
-				// Only include test classes named *Tests so that we don't pick up
+				//   - For example, to test @EJB and @PersistenceContext DI support:
+				//     .scan("org.springframework.test.context.testng.transaction.ejb")
+				// We only include test classes named *Tests so that we don't pick up
 				// internal TestCase classes that aren't really tests.
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
 				.toList();
