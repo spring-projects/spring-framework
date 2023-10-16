@@ -25,6 +25,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -35,6 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aot.generate.AccessControl;
+import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -43,20 +51,30 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.aot.ResourceFieldValueResolver;
+import org.springframework.context.aot.ResourceMethodArgumentResolver;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.javapoet.ClassName;
+import org.springframework.javapoet.CodeBlock;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -296,6 +314,37 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
 		InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
+	}
+
+	@Override
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		BeanRegistrationAotContribution parentAotContribution = super.processAheadOfTime(registeredBean);
+		Class<?> beanClass = registeredBean.getBeanClass();
+		String beanName = registeredBean.getBeanName();
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		InjectionMetadata metadata = findResourceMetadata(beanName, beanClass,
+				beanDefinition.getPropertyValues());
+		Collection<LookupElement> injectedElements = getInjectedElements(metadata,
+				beanDefinition.getPropertyValues());
+		if (!ObjectUtils.isEmpty(injectedElements)) {
+			AotContribution aotContribution = new AotContribution(beanClass, injectedElements,
+					getAutowireCandidateResolver(registeredBean));
+			return BeanRegistrationAotContribution.concat(parentAotContribution, aotContribution);
+		}
+		return parentAotContribution;
+	}
+
+	@Nullable
+	private AutowireCandidateResolver getAutowireCandidateResolver(RegisteredBean registeredBean) {
+		if (registeredBean.getBeanFactory() instanceof DefaultListableBeanFactory lbf) {
+			return lbf.getAutowireCandidateResolver();
+		}
+		return null;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Collection<LookupElement> getInjectedElements(InjectionMetadata metadata, PropertyValues propertyValues) {
+		return (Collection) metadata.getInjectedElements(propertyValues);
 	}
 
 	@Override
@@ -784,6 +833,146 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		@Override
 		public Class<?> getDependencyType() {
 			return this.lookupType;
+		}
+	}
+
+	/**
+	 * {@link BeanRegistrationAotContribution} to inject resources on fields and methods.
+	 */
+	private static class AotContribution implements BeanRegistrationAotContribution {
+
+		private static final String REGISTERED_BEAN_PARAMETER = "registeredBean";
+
+		private static final String INSTANCE_PARAMETER = "instance";
+
+		private final Class<?> target;
+
+		private final Collection<LookupElement> lookupElements;
+
+		@Nullable
+		private final AutowireCandidateResolver candidateResolver;
+
+		AotContribution(Class<?> target, Collection<LookupElement> lookupElements,
+				@Nullable AutowireCandidateResolver candidateResolver) {
+
+			this.target = target;
+			this.lookupElements = lookupElements;
+			this.candidateResolver = candidateResolver;
+		}
+
+		@Override
+		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.addForFeatureComponent("ResourceAutowiring", this.target, type -> {
+						type.addJavadoc("Resource autowiring for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			GeneratedMethod generateMethod = generatedClass.getMethods().add("apply", method -> {
+				method.addJavadoc("Apply resource autowiring.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(generatedClass.getName(),
+						generationContext.getRuntimeHints()));
+			});
+			beanRegistrationCode.addInstancePostProcessor(generateMethod.toMethodReference());
+
+			registerHints(generationContext.getRuntimeHints());
+		}
+
+		private CodeBlock generateMethodCode(ClassName targetClassName, RuntimeHints hints) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			for (LookupElement lookupElement : this.lookupElements) {
+				code.addStatement(generateMethodStatementForElement(
+						targetClassName, lookupElement, hints));
+			}
+			code.addStatement("return $L", INSTANCE_PARAMETER);
+			return code.build();
+		}
+
+		private CodeBlock generateMethodStatementForElement(ClassName targetClassName,
+				LookupElement lookupElement, RuntimeHints hints) {
+
+			Member member = lookupElement.getMember();
+			if (member instanceof Field field) {
+				return generateMethodStatementForField(
+						targetClassName, field, lookupElement, hints);
+			}
+			if (member instanceof Method method) {
+				return generateMethodStatementForMethod(
+						targetClassName, method, lookupElement, hints);
+			}
+			throw new IllegalStateException(
+					"Unsupported member type " + member.getClass().getName());
+		}
+
+		private CodeBlock generateMethodStatementForField(ClassName targetClassName,
+				Field field, LookupElement lookupElement, RuntimeHints hints) {
+
+			hints.reflection().registerField(field);
+			CodeBlock resolver = generateFieldResolverCode(field, lookupElement);
+			AccessControl accessControl = AccessControl.forMember(field);
+			if (!accessControl.isAccessibleFrom(targetClassName)) {
+				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
+						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
+			}
+			return CodeBlock.of("$L.$L = $L.resolve($L)", INSTANCE_PARAMETER,
+					field.getName(), resolver, REGISTERED_BEAN_PARAMETER);
+		}
+
+		private CodeBlock generateFieldResolverCode(Field field, LookupElement lookupElement) {
+			if (lookupElement.isDefaultName) {
+				return CodeBlock.of("$T.$L($S)", ResourceFieldValueResolver.class,
+						"forField", field.getName());
+			}
+			else {
+				return CodeBlock.of("$T.$L($S, $S)", ResourceFieldValueResolver.class,
+						"forField", field.getName(), lookupElement.getName());
+			}
+		}
+
+		private CodeBlock generateMethodStatementForMethod(ClassName targetClassName,
+				Method method, LookupElement lookupElement, RuntimeHints hints) {
+
+			CodeBlock resolver = generateMethodResolverCode(method, lookupElement);
+			AccessControl accessControl = AccessControl.forMember(method);
+			if (!accessControl.isAccessibleFrom(targetClassName)) {
+				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
+				return CodeBlock.of("$L.resolveAndInvoke($L, $L)", resolver,
+						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
+			}
+			hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
+			return CodeBlock.of("$L.$L($L.resolve($L))", INSTANCE_PARAMETER,
+					method.getName(), resolver, REGISTERED_BEAN_PARAMETER);
+
+		}
+
+		private CodeBlock generateMethodResolverCode(Method method, LookupElement lookupElement) {
+			if (lookupElement.isDefaultName) {
+				return CodeBlock.of("$T.$L($S, $T.class)", ResourceMethodArgumentResolver.class,
+						"forMethod", method.getName(), lookupElement.getLookupType());
+			}
+			else {
+				return CodeBlock.of("$T.$L($S, $T.class, $S)", ResourceMethodArgumentResolver.class,
+						"forMethod", method.getName(), lookupElement.getLookupType(), lookupElement.getName());
+			}
+		}
+
+		private void registerHints(RuntimeHints runtimeHints) {
+			this.lookupElements.forEach(lookupElement ->
+					registerProxyIfNecessary(runtimeHints, lookupElement.getDependencyDescriptor()));
+		}
+
+		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
+			if (this.candidateResolver != null) {
+				Class<?> proxyClass =
+						this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
+				if (proxyClass != null) {
+					ClassHintUtils.registerProxyIfNecessary(proxyClass, runtimeHints);
+				}
+			}
 		}
 	}
 
