@@ -61,7 +61,7 @@ public class DisabledInAotRuntimeClassLevelTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	static class BasicTestConfiguration {
+	static class Config {
 
 		@Bean
 		MessageService defaultMessageService() {

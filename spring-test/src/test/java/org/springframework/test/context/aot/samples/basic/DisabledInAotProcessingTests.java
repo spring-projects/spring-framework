@@ -47,7 +47,7 @@ public class DisabledInAotProcessingTests {
 		assertThat(enigma).isEqualTo("puzzle");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean
