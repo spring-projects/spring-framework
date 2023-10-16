@@ -20,6 +20,7 @@ import org.junit.BeforeClass;
 
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 /**
  * <p>
@@ -36,6 +37,8 @@ import org.springframework.test.annotation.ProfileValueSourceConfiguration;
  * @see EnabledAndIgnoredSpringRunnerTests
  */
 @ProfileValueSourceConfiguration(HardCodedProfileValueSourceSpringRunnerTests.HardCodedProfileValueSource.class)
+// Since EnabledAndIgnoredSpringRunnerTests is disabled in AOT mode, this test class must be also.
+@DisabledInAotMode
 public class HardCodedProfileValueSourceSpringRunnerTests extends EnabledAndIgnoredSpringRunnerTests {
 
 	@BeforeClass

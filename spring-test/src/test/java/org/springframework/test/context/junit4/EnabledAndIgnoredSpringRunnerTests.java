@@ -26,6 +26,7 @@ import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -47,6 +48,9 @@ import static org.assertj.core.api.Assertions.fail;
  */
 @RunWith(SpringRunner.class)
 @TestExecutionListeners({})
+// Since this test class does not load an ApplicationContext,
+// this test class simply is not supported for AOT processing.
+@DisabledInAotMode
 public class EnabledAndIgnoredSpringRunnerTests {
 
 	protected static final String NAME = "EnabledAndIgnoredSpringRunnerTests.profile_value.name";

@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 /**
  * <p>
@@ -37,6 +38,9 @@ import org.springframework.test.context.TestExecutionListeners;
  */
 @RunWith(SpringRunner.class)
 @TestExecutionListeners({})
+// Since this test class does not load an ApplicationContext,
+// this test class simply is not supported for AOT processing.
+@DisabledInAotMode
 public class StandardJUnit4FeaturesSpringRunnerTests extends StandardJUnit4FeaturesTests {
 
 	/* All tests are in the parent class... */

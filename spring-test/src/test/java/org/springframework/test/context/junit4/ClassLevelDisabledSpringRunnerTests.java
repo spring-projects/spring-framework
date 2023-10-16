@@ -23,6 +23,7 @@ import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 import static org.assertj.core.api.Assertions.fail;
 
@@ -33,6 +34,9 @@ import static org.assertj.core.api.Assertions.fail;
 @RunWith(SpringRunner.class)
 @TestExecutionListeners(ClassLevelDisabledSpringRunnerTests.CustomTestExecutionListener.class)
 @IfProfileValue(name = "ClassLevelDisabledSpringRunnerTests.profile_value.name", value = "enigmaX")
+// Since Spring test's AOT processing support does not evaluate @IfProfileValue,
+// this test class simply is not supported for AOT processing.
+@DisabledInAotMode
 public class ClassLevelDisabledSpringRunnerTests {
 
 	@Test
