@@ -81,7 +81,7 @@ class InfrastructureProxyTransactionalSqlScriptsTests extends AbstractTransactio
 		@Bean
 		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
-					.setName("empty-sql-scripts-test-db")//
+					.generateUniqueName(true)
 					.build();
 		}
 

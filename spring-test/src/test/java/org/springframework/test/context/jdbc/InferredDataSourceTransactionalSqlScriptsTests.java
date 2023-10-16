@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,20 +97,20 @@ class InferredDataSourceTransactionalSqlScriptsTests {
 
 		@Bean
 		DataSource dataSource1() {
-			return new EmbeddedDatabaseBuilder()//
-			.setName("database1")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
-			.build();
+			return new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")
+					.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")
+					.build();
 		}
 
 		@Bean
 		DataSource dataSource2() {
-			return new EmbeddedDatabaseBuilder()//
-			.setName("database2")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
-			.build();
+			return new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")
+					.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")
+					.build();
 		}
 	}
 
