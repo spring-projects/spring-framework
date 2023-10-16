@@ -16,16 +16,20 @@
 
 package org.springframework.test.context.aot;
 
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.engine.discovery.ClassNameFilter;
+import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
@@ -123,7 +127,8 @@ class AotIntegrationTests extends AbstractAotTests {
 		// AOT BUILD-TIME: CLASSPATH SCANNING
 		//
 		// 1) You can limit execution to a particular set of test classes.
-		// List<Class<?>> testClasses = List.of(DirtiesContextTransactionalTestNGSpringContextTests.class);
+		// List<Class<?>> testClasses = List.of(org.springframework.test.web.servlet.samples.spr.EncodedUriTests.class,
+		// 		org.springframework.test.web.servlet.samples.spr.HttpOptionsTests.class);
 		//
 		// 2) Or you can use the TestClassScanner to find test classes.
 		List<Class<?>> testClasses = createTestClassScanner()
@@ -138,7 +143,7 @@ class AotIntegrationTests extends AbstractAotTests {
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		// Set failOnError flag to false to allow processing to continue.
+		// Optionally set failOnError flag to true to halt processing at the first failure.
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), false);
 		generator.processAheadOfTime(testClasses.stream());
 
@@ -166,7 +171,22 @@ class AotIntegrationTests extends AbstractAotTests {
 			SummaryGeneratingListener listener = new SummaryGeneratingListener();
 			LauncherFactory.create().execute(request, listener);
 			TestExecutionSummary summary = listener.getSummary();
+			if (expectedNumTests < 0) {
+				summary.printTo(new PrintWriter(System.err));
+			}
 			if (summary.getTotalFailureCount() > 0) {
+				System.err.println("Failing Test Classes:");
+				summary.getFailures().stream()
+						.map(Failure::getTestIdentifier)
+						.map(TestIdentifier::getSource)
+						.flatMap(Optional::stream)
+						.filter(ClassSource.class::isInstance)
+						.map(ClassSource.class::cast)
+						.map(AotIntegrationTests::getJavaClass)
+						.flatMap(Optional::stream)
+						.map(Class::getName)
+						.forEach(System.err::println);
+				System.err.println();
 				List<Throwable> exceptions = summary.getFailures().stream().map(Failure::getException).toList();
 				throw new MultipleFailuresError("Test execution failures", exceptions);
 			}
@@ -176,6 +196,16 @@ class AotIntegrationTests extends AbstractAotTests {
 		}
 		finally {
 			System.clearProperty(AotDetector.AOT_ENABLED);
+		}
+	}
+
+	private static Optional<Class<?>> getJavaClass(ClassSource classSource) {
+		try {
+			return Optional.of(classSource.getJavaClass());
+		}
+		catch (Exception ex) {
+			// ignore exception
+			return Optional.empty();
 		}
 	}
 
