@@ -55,6 +55,7 @@ import org.springframework.test.context.ContextLoadException;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -94,7 +95,7 @@ public class TestContextAotGenerator {
 	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
 
 	private static final Predicate<? super Class<?>> isDisabledInAotMode =
-			testClass -> MergedAnnotations.from(testClass).isPresent(DisabledInAotMode.class);
+			testClass -> TestContextAnnotationUtils.hasAnnotation(testClass, DisabledInAotMode.class);
 
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
