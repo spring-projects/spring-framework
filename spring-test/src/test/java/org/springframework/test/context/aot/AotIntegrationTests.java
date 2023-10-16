@@ -26,8 +26,10 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.support.descriptor.ClassSource;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -176,18 +178,7 @@ class AotIntegrationTests extends AbstractAotTests {
 				summary.printTo(new PrintWriter(System.err));
 			}
 			if (summary.getTotalFailureCount() > 0) {
-				System.err.println("Failing Test Classes:");
-				summary.getFailures().stream()
-						.map(Failure::getTestIdentifier)
-						.map(TestIdentifier::getSource)
-						.flatMap(Optional::stream)
-						.filter(ClassSource.class::isInstance)
-						.map(ClassSource.class::cast)
-						.map(AotIntegrationTests::getJavaClass)
-						.flatMap(Optional::stream)
-						.map(Class::getName)
-						.forEach(System.err::println);
-				System.err.println();
+				printFailingTestClasses(summary);
 				List<Throwable> exceptions = summary.getFailures().stream().map(Failure::getException).toList();
 				throw new MultipleFailuresError("Test execution failures", exceptions);
 			}
@@ -200,9 +191,43 @@ class AotIntegrationTests extends AbstractAotTests {
 		}
 	}
 
+	private static void printFailingTestClasses(TestExecutionSummary summary) {
+		System.err.println("Failing Test Classes:");
+		summary.getFailures().stream()
+				.map(Failure::getTestIdentifier)
+				.map(TestIdentifier::getSource)
+				.flatMap(Optional::stream)
+				.map(TestSource.class::cast)
+				.map(source -> {
+					if (source instanceof ClassSource classSource) {
+						return getJavaClass(classSource);
+					}
+					else if (source instanceof MethodSource methodSource) {
+						return getJavaClass(methodSource);
+					}
+					return Optional.<Class<?>> empty();
+				})
+				.flatMap(Optional::stream)
+				.map(Class::getName)
+				.distinct()
+				.sorted()
+				.forEach(System.err::println);
+		System.err.println();
+	}
+
 	private static Optional<Class<?>> getJavaClass(ClassSource classSource) {
 		try {
 			return Optional.of(classSource.getJavaClass());
+		}
+		catch (Exception ex) {
+			// ignore exception
+			return Optional.empty();
+		}
+	}
+
+	private static Optional<Class<?>> getJavaClass(MethodSource methodSource) {
+		try {
+			return Optional.of(methodSource.getJavaClass());
 		}
 		catch (Exception ex) {
 			// ignore exception
