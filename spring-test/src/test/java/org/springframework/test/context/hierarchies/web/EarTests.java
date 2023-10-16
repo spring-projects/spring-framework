@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig
 class EarTests {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class EarConfig {
 
 		@Bean

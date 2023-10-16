@@ -65,7 +65,7 @@ public class HttpOptionsTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableWebMvc
 	static class WebConfig implements WebMvcConfigurer {
 
@@ -76,7 +76,7 @@ public class HttpOptionsTests {
 	}
 
 	@Controller
-	private static class MyController {
+	static class MyController {
 
 		private final AtomicInteger counter = new AtomicInteger();
 

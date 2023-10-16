@@ -72,7 +72,7 @@ public class EncodedUriTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableWebMvc
 	static class WebConfig implements WebMvcConfigurer {
 
@@ -93,7 +93,7 @@ public class EncodedUriTests {
 	}
 
 	@Controller
-	private static class MyController {
+	static class MyController {
 
 		@RequestMapping(value = "/circuit/{id}", method = RequestMethod.GET)
 		String getCircuit(@PathVariable String id, Model model) {
@@ -103,7 +103,7 @@ public class EncodedUriTests {
 	}
 
 	@Component
-	private static class HandlerMappingConfigurer implements BeanPostProcessor, PriorityOrdered {
+	static class HandlerMappingConfigurer implements BeanPostProcessor, PriorityOrdered {
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
