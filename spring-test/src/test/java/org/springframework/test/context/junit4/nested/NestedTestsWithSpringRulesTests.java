@@ -54,7 +54,7 @@ public class NestedTestsWithSpringRulesTests extends SpringRuleConfigurer {
 
 
 	@ContextConfiguration(classes = NestedConfig.class)
-	public class NestedTestCase extends SpringRuleConfigurer {
+	public class NestedTests extends SpringRuleConfigurer {
 
 		@Autowired
 		String bar;
