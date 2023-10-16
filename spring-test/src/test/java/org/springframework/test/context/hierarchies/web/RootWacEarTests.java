@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @WebAppConfiguration
 @ContextHierarchy(@ContextConfiguration)
+@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
 class RootWacEarTests extends EarTests {
 
 	@Configuration(proxyBeanMethods = false)

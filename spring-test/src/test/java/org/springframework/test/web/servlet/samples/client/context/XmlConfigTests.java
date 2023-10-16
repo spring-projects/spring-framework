@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.Person;
@@ -46,6 +47,7 @@ import static org.mockito.BDDMockito.given;
 	@ContextConfiguration("../../context/root-context.xml"),
 	@ContextConfiguration("../../context/servlet-context.xml")
 })
+@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
 public class XmlConfigTests {
 
 	@Autowired
