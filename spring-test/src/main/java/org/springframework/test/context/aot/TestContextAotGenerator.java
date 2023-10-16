@@ -258,13 +258,15 @@ public class TestContextAotGenerator {
 				if (numDisabled != testClasses.size()) {
 					if (this.failOnError) {
 						throw new TestContextAotException("""
-								All test classes that share an ApplicationContext must be annotated
-								with @DisabledInAotMode if one of them is: """ + classNames(testClasses));
+								All test classes that share an ApplicationContext must be annotated \
+								with @DisabledInAotMode if one of them is: \
+								""" + classNames(testClasses));
 					}
 					else if (logger.isWarnEnabled()) {
 						logger.warn("""
-								All test classes that share an ApplicationContext must be annotated
-								with @DisabledInAotMode if one of them is: """ + classNames(testClasses));
+								All test classes that share an ApplicationContext must be annotated \
+								with @DisabledInAotMode if one of them is: \
+								""" + classNames(testClasses));
 					}
 				}
 				if (logger.isInfoEnabled()) {
