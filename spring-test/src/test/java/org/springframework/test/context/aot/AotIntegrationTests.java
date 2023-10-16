@@ -137,11 +137,13 @@ class AotIntegrationTests extends AbstractAotTests {
 				// Scan all base packages in spring-test.
 				.scan("org.springframework.mock", "org.springframework.test")
 				// Or limit execution to a particular package and its subpackages.
-				//   - For example, to test @EJB and @PersistenceContext DI support:
-				//     .scan("org.springframework.test.context.testng.transaction.ejb")
+				//   - For example, to test JDBC support:
+				//     .scan("org.springframework.test.context.jdbc")
 				// We only include test classes named *Tests so that we don't pick up
 				// internal TestCase classes that aren't really tests.
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
+				// We don't have a way to abort a TestNG test mid-flight, and @EJB is not supported in AOT.
+				.filter(clazz -> !clazz.getPackageName().contains("testng.transaction.ejb"))
 				.toList();
 
 		// AOT BUILD-TIME: PROCESSING
