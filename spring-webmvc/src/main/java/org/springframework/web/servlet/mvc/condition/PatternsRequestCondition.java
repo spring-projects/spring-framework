@@ -50,9 +50,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
-	private final static Set<String> EMPTY_PATH_PATTERN = Collections.singleton("");
+	private static final Set<String> EMPTY_PATH_PATTERN = Collections.singleton("");
 
-	private final static String[] ROOT_PATH_PATTERNS = new String[] {"", "/"};
+	private static final String[] ROOT_PATH_PATTERNS = new String[] {"", "/"};
 
 
 	private final Set<String> patterns;

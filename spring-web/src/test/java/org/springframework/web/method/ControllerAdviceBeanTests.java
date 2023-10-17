@@ -333,7 +333,7 @@ public class ControllerAdviceBeanTests {
 
 	static class ImplementationController implements ControllerInterface {}
 
-	static abstract class AbstractController {}
+	abstract static class AbstractController {}
 
 	static class InheritanceController extends AbstractController {}
 

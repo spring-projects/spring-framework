@@ -140,7 +140,7 @@ public interface PathContainer {
 		 * Options for HTTP URL paths.
 		 * <p>Separator '/' with URL decoding and parsing of path parameters.
 		 */
-		public final static Options HTTP_PATH = Options.create('/', true);
+		public static final Options HTTP_PATH = Options.create('/', true);
 
 		/**
 		 * Options for a message route.
@@ -148,7 +148,7 @@ public interface PathContainer {
 		 * Escape sequences for the separator character in segment values are still
 		 * decoded.
 		 */
-		public final static Options MESSAGE_ROUTE = Options.create('.', false);
+		public static final Options MESSAGE_ROUTE = Options.create('.', false);
 
 		private final char separator;
 

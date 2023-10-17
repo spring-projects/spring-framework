@@ -68,7 +68,7 @@ public abstract class AbstractEntityManagerFactoryBeanTests {
 
 		private static final long serialVersionUID = 1L;
 
-		private transient final EntityManagerFactory emf;
+		private final transient EntityManagerFactory emf;
 
 		public DummyEntityManagerFactoryBean(EntityManagerFactory emf) {
 			this.emf = emf;

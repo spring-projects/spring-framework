@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class ClassFileTests {
 
-	private final static byte[] TEST_CONTENT = new byte[]{'a'};
+	private static final byte[] TEST_CONTENT = new byte[]{'a'};
 
 	@Test
 	void ofNameAndByteArrayCreatesClass() {

@@ -270,7 +270,7 @@ public class HttpEntityMethodProcessorTests {
 
 
 	@SuppressWarnings("unused")
-	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+	private abstract static class MyParameterizedController<DTO extends Identifiable> {
 
 		public void handleDto(HttpEntity<DTO> dto) {
 		}

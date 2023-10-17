@@ -151,7 +151,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 	private static class EntryExtractor<T> {
 
 		// We only need this to wrap ByteBufs
-		private final static NettyDataBufferFactory bufferFactory =
+		private static final NettyDataBufferFactory bufferFactory =
 				new NettyDataBufferFactory(ByteBufAllocator.DEFAULT);
 
 

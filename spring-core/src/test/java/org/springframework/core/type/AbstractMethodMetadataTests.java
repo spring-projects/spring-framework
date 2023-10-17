@@ -269,7 +269,7 @@ public abstract class AbstractMethodMetadataTests {
 
 	}
 
-	public static abstract class WithDirectAnnotation {
+	public abstract static class WithDirectAnnotation {
 
 		@Tag
 		@DirectAnnotation
@@ -277,7 +277,7 @@ public abstract class AbstractMethodMetadataTests {
 
 	}
 
-	public static abstract class WithMetaAnnotation {
+	public abstract static class WithMetaAnnotation {
 
 		@Tag
 		@MetaAnnotation
@@ -294,7 +294,7 @@ public abstract class AbstractMethodMetadataTests {
 	@interface MetaAnnotation {
 	}
 
-	public static abstract class WithAnnotationAttributes {
+	public abstract static class WithAnnotationAttributes {
 
 		@Tag
 		@AnnotationAttributes(name = "test", size = 1)
@@ -302,7 +302,7 @@ public abstract class AbstractMethodMetadataTests {
 
 	}
 
-	public static abstract class WithMetaAnnotationAttributes {
+	public abstract static class WithMetaAnnotationAttributes {
 
 		@Tag
 		@MetaAnnotationAttributes1

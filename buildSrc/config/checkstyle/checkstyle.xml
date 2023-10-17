@@ -19,6 +19,9 @@
 			<property name="processJavadoc" value="true"/>
 		</module>
 
+		<!-- Modifiers -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
+
 	</module>
 
 </module>

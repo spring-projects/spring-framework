@@ -51,7 +51,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpConnector.class);
 
-	private final static Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
+	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
 
 	private HttpClient httpClient;

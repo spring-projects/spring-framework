@@ -492,7 +492,7 @@ public class TransactionalEventListenerTests {
 	}
 
 
-	static abstract class BaseTransactionalTestListener {
+	abstract static class BaseTransactionalTestListener {
 
 		static final String FAIL_MSG = "FAIL";
 

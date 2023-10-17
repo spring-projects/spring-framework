@@ -770,7 +770,7 @@ class AnnotationsScannerTests {
 		void method();
 	}
 
-	static abstract class MultipleMethods implements MultipleMethodsInterface {
+	abstract static class MultipleMethods implements MultipleMethodsInterface {
 
 		@TestAnnotation1
 		public void method() {
@@ -800,7 +800,7 @@ class AnnotationsScannerTests {
 		void method(T argument);
 	}
 
-	static abstract class GenericNonOverride implements GenericNonOverrideInterface<String> {
+	abstract static class GenericNonOverride implements GenericNonOverrideInterface<String> {
 
 		@TestAnnotation1
 		public void method(StringBuilder argument) {

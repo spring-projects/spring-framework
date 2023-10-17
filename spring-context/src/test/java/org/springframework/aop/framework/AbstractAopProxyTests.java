@@ -1915,7 +1915,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 
-	static abstract class ExposedInvocationTestBean extends TestBean {
+	abstract static class ExposedInvocationTestBean extends TestBean {
 
 		@Override
 		public String getName() {

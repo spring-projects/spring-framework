@@ -204,7 +204,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 	}
 
 
-	private final static class CallbackTaskInterceptor implements ExecutorChannelInterceptor {
+	private static final class CallbackTaskInterceptor implements ExecutorChannelInterceptor {
 
 		@Override
 		public void afterMessageHandled(

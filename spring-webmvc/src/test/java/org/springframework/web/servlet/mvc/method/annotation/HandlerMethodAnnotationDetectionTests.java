@@ -187,7 +187,7 @@ class HandlerMethodAnnotationDetectionTests {
 
 
 	@Controller
-	static abstract class MappingAbstractClass {
+	abstract static class MappingAbstractClass {
 
 		@InitBinder
 		public abstract void initBinder(WebDataBinder dataBinder, String pattern);
@@ -286,7 +286,7 @@ class HandlerMethodAnnotationDetectionTests {
 
 
 	@Controller
-	static abstract class MappingGenericAbstractClass<A, B, C> {
+	abstract static class MappingGenericAbstractClass<A, B, C> {
 
 		@InitBinder
 		public abstract void initBinder(WebDataBinder dataBinder, A thePattern);
@@ -334,7 +334,7 @@ class HandlerMethodAnnotationDetectionTests {
 
 
 	@Controller
-	static abstract class MappedGenericAbstractClassWithConcreteImplementations<A, B, C> {
+	abstract static class MappedGenericAbstractClassWithConcreteImplementations<A, B, C> {
 
 		@InitBinder
 		public abstract void initBinder(WebDataBinder dataBinder, A thePattern);
@@ -378,7 +378,7 @@ class HandlerMethodAnnotationDetectionTests {
 
 
 	@Controller
-	static abstract class GenericAbstractClassDeclaresDefaultMappings<A, B, C> {
+	abstract static class GenericAbstractClassDeclaresDefaultMappings<A, B, C> {
 
 		@InitBinder
 		public abstract void initBinder(WebDataBinder dataBinder, A thePattern);

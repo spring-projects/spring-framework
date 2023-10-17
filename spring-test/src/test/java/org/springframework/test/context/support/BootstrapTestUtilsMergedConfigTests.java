@@ -450,10 +450,10 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	}
 
 	@SpringAppConfig(classes = { FooConfig.class, BarConfig.class })
-	public static abstract class Dog {
+	public abstract static class Dog {
 	}
 
-	public static abstract class WorkingDog extends Dog {
+	public abstract static class WorkingDog extends Dog {
 	}
 
 	public static class GermanShepherd extends WorkingDog {

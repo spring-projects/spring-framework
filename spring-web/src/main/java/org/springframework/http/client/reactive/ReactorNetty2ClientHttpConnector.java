@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public class ReactorNetty2ClientHttpConnector implements ClientHttpConnector {
 
-	private final static Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
+	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
 
 	private final HttpClient httpClient;

@@ -156,7 +156,7 @@ public class LookupAnnotationTests {
 	}
 
 
-	public static abstract class AbstractBean {
+	public abstract static class AbstractBean {
 
 		@Lookup("testBean")
 		public abstract TestBean get();
@@ -194,7 +194,7 @@ public class LookupAnnotationTests {
 	}
 
 
-	public static abstract class NumberBean {
+	public abstract static class NumberBean {
 
 		@Lookup
 		public abstract NumberStore<Double> getDoubleStore();

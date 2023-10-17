@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public class SetValueTests extends AbstractExpressionTests {
 
-	private final static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
 
 
 	@Test

@@ -88,7 +88,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	public static final String CHECKPOINT_ON_REFRESH_VALUE = "onRefresh";
 
 
-	private final static boolean checkpointOnRefresh =
+	private static final boolean checkpointOnRefresh =
 			CHECKPOINT_ON_REFRESH_VALUE.equalsIgnoreCase(SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
 
 	private final Log logger = LogFactory.getLog(getClass());

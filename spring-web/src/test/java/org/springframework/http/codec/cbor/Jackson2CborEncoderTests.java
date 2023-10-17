@@ -45,7 +45,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  */
 public class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
 
-	private final static MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");
+	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");
 
 	private final ObjectMapper mapper = Jackson2ObjectMapperBuilder.cbor().build();
 

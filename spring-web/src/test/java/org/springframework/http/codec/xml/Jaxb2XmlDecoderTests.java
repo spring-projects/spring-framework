@@ -272,7 +272,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 	@jakarta.xml.bind.annotation.XmlType
 	@XmlSeeAlso(Child.class)
-	public static abstract class Parent {
+	public abstract static class Parent {
 
 		private String foo;
 

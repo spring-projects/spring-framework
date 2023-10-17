@@ -54,7 +54,7 @@ public class ReflectionUtilsIntegrationTests {
 
 
 	@Configuration
-	static abstract class Parent {
+	abstract static class Parent {
 		public abstract Number m1();
 	}
 

@@ -146,7 +146,7 @@ public class FailingBeforeAndAfterMethodsSpringRunnerTests {
 	}
 
 	@RunWith(SpringRunner.class)
-	public static abstract class BaseTestCase {
+	public abstract static class BaseTestCase {
 
 		@Test
 		public void testNothing() {

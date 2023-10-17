@@ -139,7 +139,7 @@ public class PathPatternParser {
 	 * <li>{@code pathOptions = PathContainer.Options.HTTP_PATH}
 	 * </ul>
 	 */
-	public final static PathPatternParser defaultInstance = new PathPatternParser() {
+	public static final PathPatternParser defaultInstance = new PathPatternParser() {
 
 		@SuppressWarnings("deprecation")
 		@Override

@@ -1388,7 +1388,7 @@ class AnnotatedElementUtilsTests {
 		void handleFromInterface();
 	}
 
-	static abstract class AbstractClassWithInheritedAnnotation<T> implements InterfaceWithInheritedAnnotation {
+	abstract static class AbstractClassWithInheritedAnnotation<T> implements InterfaceWithInheritedAnnotation {
 
 		@Transactional
 		public abstract void handle();
