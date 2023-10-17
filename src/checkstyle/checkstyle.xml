@@ -188,7 +188,7 @@
 		</module>
 
 		<!-- Modifiers -->
-		<module name="ModifierOrder" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
 
 		<!-- Miscellaneous -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck">

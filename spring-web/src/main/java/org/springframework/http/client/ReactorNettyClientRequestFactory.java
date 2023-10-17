@@ -47,7 +47,7 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyClientRequestFactory.class);
 
-	private final static Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
+	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
 
 	private HttpClient httpClient;
