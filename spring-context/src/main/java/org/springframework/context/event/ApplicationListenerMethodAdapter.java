@@ -38,6 +38,8 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.CoroutinesUtils;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -64,6 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 4.2
  */
 public class ApplicationListenerMethodAdapter implements GenericApplicationListener {
@@ -121,7 +124,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	private static List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
-		int count = method.getParameterCount();
+		int count = (KotlinDetector.isSuspendingFunction(method) ? method.getParameterCount() - 1 : method.getParameterCount());
 		if (count > 1) {
 			throw new IllegalStateException(
 					"Maximum one parameter is allowed for event listener method: " + method);
@@ -356,6 +359,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 		ReflectionUtils.makeAccessible(this.method);
 		try {
+			if (KotlinDetector.isSuspendingFunction(this.method)) {
+				return CoroutinesUtils.invokeSuspendingFunction(this.method, bean, args);
+			}
 			return this.method.invoke(bean, args);
 		}
 		catch (IllegalArgumentException ex) {
