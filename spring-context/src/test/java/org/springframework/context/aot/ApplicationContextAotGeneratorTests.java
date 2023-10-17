@@ -111,164 +111,161 @@ class ApplicationContextAotGeneratorTests {
 		});
 	}
 
-	@Test
-	void processAheadOfTimeWhenHasAutowiring() {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder
-						.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		applicationContext.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
-		applicationContext.registerBeanDefinition("number",
-				BeanDefinitionBuilder
-						.rootBeanDefinition(Integer.class, "valueOf")
-						.addConstructorArgValue("42").getBeanDefinition());
-		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("autowiredComponent", "number");
-			AutowiredComponent bean = freshApplicationContext.getBean(AutowiredComponent.class);
-			assertThat(bean.getEnvironment()).isSameAs(freshApplicationContext.getEnvironment());
-			assertThat(bean.getCounter()).isEqualTo(42);
-		});
+	@Nested
+	class Autowiring {
+
+		@Test
+		void processAheadOfTimeWhenHasAutowiring() {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, AutowiredAnnotationBeanPostProcessor.class);
+			applicationContext.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
+			registerIntegerBean(applicationContext, "number", 42);
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("autowiredComponent", "number");
+				AutowiredComponent bean = freshApplicationContext.getBean(AutowiredComponent.class);
+				assertThat(bean.getEnvironment()).isSameAs(freshApplicationContext.getEnvironment());
+				assertThat(bean.getCounter()).isEqualTo(42);
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasAutowiringOnUnresolvedGeneric() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(GenericTemplateConfiguration.class);
+			applicationContext.registerBean("autowiredComponent", AutowiredGenericTemplate.class);
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				AutowiredGenericTemplate bean = freshApplicationContext.getBean(AutowiredGenericTemplate.class);
+				assertThat(bean).hasFieldOrPropertyWithValue("genericTemplate", applicationContext.getBean("genericTemplate"));
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasLazyAutowiringOnField() {
+			testAutowiredComponent(LazyAutowiredFieldComponent.class, (bean, generationContext) -> {
+				Environment environment = bean.getEnvironment();
+				assertThat(environment).isInstanceOf(Proxy.class);
+				ResourceLoader resourceLoader = bean.getResourceLoader();
+				assertThat(resourceLoader).isNotInstanceOf(Proxy.class);
+				RuntimeHints runtimeHints = generationContext.getRuntimeHints();
+				assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(ResourceLoader.class));
+				assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
+						assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
+								environment.getClass().getInterfaces())));
+
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasLazyAutowiringOnMethod() {
+			testAutowiredComponent(LazyAutowiredMethodComponent.class, (bean, generationContext) -> {
+				Environment environment = bean.getEnvironment();
+				assertThat(environment).isNotInstanceOf(Proxy.class);
+				ResourceLoader resourceLoader = bean.getResourceLoader();
+				assertThat(resourceLoader).isInstanceOf(Proxy.class);
+				RuntimeHints runtimeHints = generationContext.getRuntimeHints();
+				assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(Environment.class));
+				assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
+						assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
+								resourceLoader.getClass().getInterfaces())));
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasLazyAutowiringOnConstructor() {
+			testAutowiredComponent(LazyConstructorArgumentComponent.class, (bean, generationContext) -> {
+				Environment environment = bean.getEnvironment();
+				assertThat(environment).isInstanceOf(Proxy.class);
+				ResourceLoader resourceLoader = bean.getResourceLoader();
+				assertThat(resourceLoader).isNotInstanceOf(Proxy.class);
+				RuntimeHints runtimeHints = generationContext.getRuntimeHints();
+				assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(ResourceLoader.class));
+				assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
+						assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
+								environment.getClass().getInterfaces())));
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasLazyAutowiringOnFactoryMethod() {
+			RootBeanDefinition bd = new RootBeanDefinition(LazyFactoryMethodArgumentComponent.class);
+			bd.setFactoryMethodName("of");
+			testAutowiredComponent(LazyFactoryMethodArgumentComponent.class, bd, (bean, generationContext) -> {
+				Environment environment = bean.getEnvironment();
+				assertThat(environment).isInstanceOf(Proxy.class);
+				ResourceLoader resourceLoader = bean.getResourceLoader();
+				assertThat(resourceLoader).isNotInstanceOf(Proxy.class);
+				RuntimeHints runtimeHints = generationContext.getRuntimeHints();
+				assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(ResourceLoader.class));
+				assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
+						assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
+								environment.getClass().getInterfaces())));
+			});
+		}
+
+		private <T> void testAutowiredComponent(Class<T> type, BiConsumer<T, GenerationContext> assertions) {
+			testAutowiredComponent(type, new RootBeanDefinition(type), assertions);
+		}
+
+		private <T> void testAutowiredComponent(Class<T> type, RootBeanDefinition beanDefinition,
+				BiConsumer<T, GenerationContext> assertions) {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			applicationContext.getDefaultListableBeanFactory().setAutowireCandidateResolver(
+					new ContextAnnotationAutowireCandidateResolver());
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, AutowiredAnnotationBeanPostProcessor.class);
+			applicationContext.registerBeanDefinition("testComponent", beanDefinition);
+			TestGenerationContext generationContext = processAheadOfTime(applicationContext);
+			testCompiledResult(generationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("testComponent");
+				assertions.accept(freshApplicationContext.getBean("testComponent", type), generationContext);
+			});
+		}
+
 	}
 
-	@Test
-	void processAheadOfTimeWhenHasAutowiringOnUnresolvedGeneric() {
-		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
-		applicationContext.registerBean(GenericTemplateConfiguration.class);
-		applicationContext.registerBean("autowiredComponent", AutowiredGenericTemplate.class);
-		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
-			AutowiredGenericTemplate bean = freshApplicationContext.getBean(AutowiredGenericTemplate.class);
-			assertThat(bean).hasFieldOrPropertyWithValue("genericTemplate", applicationContext.getBean("genericTemplate"));
-		});
-	}
+	@Nested
+	class InitDestroy {
 
-	@Test
-	void processAheadOfTimeWhenHasLazyAutowiringOnField() {
-		testAutowiredComponent(LazyAutowiredFieldComponent.class, (bean, generationContext) -> {
-			Environment environment = bean.getEnvironment();
-			assertThat(environment).isInstanceOf(Proxy.class);
-			ResourceLoader resourceLoader = bean.getResourceLoader();
-			assertThat(resourceLoader).isNotInstanceOf(Proxy.class);
-			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(ResourceLoader.class));
-			assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
-					assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
-							environment.getClass().getInterfaces())));
+		@Test
+		void processAheadOfTimeWhenHasInitDestroyMethods() {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME, CommonAnnotationBeanPostProcessor.class);
+			applicationContext.registerBeanDefinition("initDestroyComponent",
+					new RootBeanDefinition(InitDestroyComponent.class));
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
+				InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
+				assertThat(bean.events).containsExactly("init");
+				freshApplicationContext.close();
+				assertThat(bean.events).containsExactly("init", "destroy");
+			});
+		}
 
-		});
-	}
+		@Test
+		void processAheadOfTimeWhenHasMultipleInitDestroyMethods() {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME, CommonAnnotationBeanPostProcessor.class);
+			RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
+			beanDefinition.setInitMethodName("customInit");
+			beanDefinition.setDestroyMethodName("customDestroy");
+			applicationContext.registerBeanDefinition("initDestroyComponent", beanDefinition);
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
+				InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
+				assertThat(bean.events).containsExactly("init", "customInit");
+				freshApplicationContext.close();
+				assertThat(bean.events).containsExactly("init", "customInit", "destroy", "customDestroy");
+			});
+		}
 
-	@Test
-	void processAheadOfTimeWhenHasLazyAutowiringOnMethod() {
-		testAutowiredComponent(LazyAutowiredMethodComponent.class, (bean, generationContext) -> {
-			Environment environment = bean.getEnvironment();
-			assertThat(environment).isNotInstanceOf(Proxy.class);
-			ResourceLoader resourceLoader = bean.getResourceLoader();
-			assertThat(resourceLoader).isInstanceOf(Proxy.class);
-			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(Environment.class));
-			assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
-					assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
-							resourceLoader.getClass().getInterfaces())));
-		});
-	}
-
-	@Test
-	void processAheadOfTimeWhenHasLazyAutowiringOnConstructor() {
-		testAutowiredComponent(LazyConstructorArgumentComponent.class, (bean, generationContext) -> {
-			Environment environment = bean.getEnvironment();
-			assertThat(environment).isInstanceOf(Proxy.class);
-			ResourceLoader resourceLoader = bean.getResourceLoader();
-			assertThat(resourceLoader).isNotInstanceOf(Proxy.class);
-			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(ResourceLoader.class));
-			assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
-					assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
-							environment.getClass().getInterfaces())));
-		});
-	}
-
-	@Test
-	void processAheadOfTimeWhenHasLazyAutowiringOnFactoryMethod() {
-		RootBeanDefinition bd = new RootBeanDefinition(LazyFactoryMethodArgumentComponent.class);
-		bd.setFactoryMethodName("of");
-		testAutowiredComponent(LazyFactoryMethodArgumentComponent.class, bd, (bean, generationContext) -> {
-			Environment environment = bean.getEnvironment();
-			assertThat(environment).isInstanceOf(Proxy.class);
-			ResourceLoader resourceLoader = bean.getResourceLoader();
-			assertThat(resourceLoader).isNotInstanceOf(Proxy.class);
-			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			assertThat(runtimeHints.proxies().jdkProxyHints()).satisfies(doesNotHaveProxyFor(ResourceLoader.class));
-			assertThat(runtimeHints.proxies().jdkProxyHints()).anySatisfy(proxyHint ->
-					assertThat(proxyHint.getProxiedInterfaces()).isEqualTo(TypeReference.listOf(
-							environment.getClass().getInterfaces())));
-		});
-	}
-
-	private <T> void testAutowiredComponent(Class<T> type, BiConsumer<T, GenerationContext> assertions) {
-		testAutowiredComponent(type, new RootBeanDefinition(type), assertions);
-	}
-
-	private <T> void testAutowiredComponent(Class<T> type, RootBeanDefinition beanDefinition,
-			BiConsumer<T, GenerationContext> assertions) {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.getDefaultListableBeanFactory().setAutowireCandidateResolver(
-				new ContextAnnotationAutowireCandidateResolver());
-		applicationContext.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder
-						.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		applicationContext.registerBeanDefinition("testComponent", beanDefinition);
-		TestGenerationContext generationContext = processAheadOfTime(applicationContext);
-		testCompiledResult(generationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("testComponent");
-			assertions.accept(freshApplicationContext.getBean("testComponent", type), generationContext);
-		});
-	}
-
-	@Test
-	void processAheadOfTimeWhenHasInitDestroyMethods() {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition(
-				AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder
-						.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		applicationContext.registerBeanDefinition("initDestroyComponent",
-				new RootBeanDefinition(InitDestroyComponent.class));
-		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
-			InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
-			assertThat(bean.events).containsExactly("init");
-			freshApplicationContext.close();
-			assertThat(bean.events).containsExactly("init", "destroy");
-		});
-	}
-
-	@Test
-	void processAheadOfTimeWhenHasMultipleInitDestroyMethods() {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition(
-				AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder
-						.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
-		beanDefinition.setInitMethodName("customInit");
-		beanDefinition.setDestroyMethodName("customDestroy");
-		applicationContext.registerBeanDefinition("initDestroyComponent", beanDefinition);
-		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
-			InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
-			assertThat(bean.events).containsExactly("init", "customInit");
-			freshApplicationContext.close();
-			assertThat(bean.events).containsExactly("init", "customInit", "destroy", "customDestroy");
-		});
 	}
 
 	@Test
@@ -512,6 +509,22 @@ class ApplicationContextAotGeneratorTests {
 			});
 		}
 
+	}
+
+	private static void registerBeanPostProcessor(GenericApplicationContext applicationContext,
+			String beanName, Class<?> beanPostProcessorClass) {
+
+		applicationContext.registerBeanDefinition(beanName, BeanDefinitionBuilder
+				.rootBeanDefinition(beanPostProcessorClass).setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
+				.getBeanDefinition());
+	}
+
+	private static void registerIntegerBean(GenericApplicationContext applicationContext,
+			String beanName, int value) {
+
+		applicationContext.registerBeanDefinition(beanName, BeanDefinitionBuilder
+				.rootBeanDefinition(Integer.class, "valueOf").addConstructorArgValue(value)
+				.getBeanDefinition());
 	}
 
 	private Consumer<List<? extends JdkProxyHint>> doesNotHaveProxyFor(Class<?> target) {
