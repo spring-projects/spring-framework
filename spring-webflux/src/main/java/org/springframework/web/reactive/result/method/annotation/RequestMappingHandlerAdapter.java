@@ -47,6 +47,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * Supports the invocation of
@@ -60,6 +61,16 @@ public class RequestMappingHandlerAdapter
 		implements HandlerAdapter, DispatchExceptionHandler, ApplicationContextAware, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
+
+	/**
+	 * Log category to use for network failure after a client has gone away.
+	 * @see DisconnectedClientHelper
+	 */
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.reactive.result.method.annotation.DisconnectedClient";
+
+	private static final DisconnectedClientHelper disconnectedClientHelper =
+			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 
 	private List<HttpMessageReader<?>> messageReaders = Collections.emptyList();
@@ -298,10 +309,12 @@ public class RequestMappingHandlerAdapter
 				return invocable.invoke(exchange, bindingContext, arguments);
 			}
 			catch (Throwable invocationEx) {
-				// Any other than the original exception (or a cause) is unintended here,
-				// probably an accident (e.g. failed assertion or the like).
-				if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
-					logger.warn(exchange.getLogPrefix() + "Failure in @ExceptionHandler " + invocable, invocationEx);
+				if (!disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
+					// Any other than the original exception (or a cause) is unintended here,
+					// probably an accident (e.g. failed assertion or the like).
+					if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
+						logger.warn(exchange.getLogPrefix() + "Failure in @ExceptionHandler " + invocable, invocationEx);
+					}
 				}
 			}
 		}
