@@ -59,17 +59,17 @@ class HttpExchangeBeanRegistrationAotProcessor implements BeanRegistrationAotPro
 			});
 		}
 		if (!exchangeInterfaces.isEmpty()) {
-			return new HttpExchangeBeanRegistrationAotContribution(exchangeInterfaces);
+			return new AotContribution(exchangeInterfaces);
 		}
 		return null;
 	}
 
 
-	private static class HttpExchangeBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private final List<Class<?>> httpExchangeInterfaces;
 
-		public HttpExchangeBeanRegistrationAotContribution(List<Class<?>> httpExchangeInterfaces) {
+		public AotContribution(List<Class<?>> httpExchangeInterfaces) {
 			this.httpExchangeInterfaces = httpExchangeInterfaces;
 		}
 

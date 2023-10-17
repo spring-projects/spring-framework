@@ -40,16 +40,16 @@ class KotlinReflectionBeanRegistrationAotProcessor implements BeanRegistrationAo
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (KotlinDetector.isKotlinType(beanClass)) {
-			return new KotlinReflectionBeanRegistrationAotContribution(beanClass);
+			return new AotContribution(beanClass);
 		}
 		return null;
 	}
 
-	private static class KotlinReflectionBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private final Class<?> beanClass;
 
-		public KotlinReflectionBeanRegistrationAotContribution(Class<?> beanClass) {
+		public AotContribution(Class<?> beanClass) {
 			this.beanClass = beanClass;
 		}
 
