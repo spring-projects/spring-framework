@@ -16,9 +16,7 @@
 
 package org.springframework.util;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,9 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
@@ -508,64 +504,10 @@ class ConcurrentReferenceHashMapTests {
 	}
 
 	@Test
-	@Disabled("Intended for use during development only")
-	void shouldBeFasterThanSynchronizedMap() throws InterruptedException {
-		Map<Integer, WeakReference<String>> synchronizedMap = Collections.synchronizedMap(new WeakHashMap<Integer, WeakReference<String>>());
-		StopWatch mapTime = timeMultiThreaded("SynchronizedMap", synchronizedMap, v -> new WeakReference<>(String.valueOf(v)));
-		System.out.println(mapTime.prettyPrint());
-
-		this.map.setDisableTestHooks(true);
-		StopWatch cacheTime = timeMultiThreaded("WeakConcurrentCache", this.map, String::valueOf);
-		System.out.println(cacheTime.prettyPrint());
-
-		// We should be at least 4 time faster
-		assertThat(cacheTime.getTotalTimeSeconds()).isLessThan(mapTime.getTotalTimeSeconds() / 4.0);
-	}
-
-	@Test
 	void shouldSupportNullReference() {
 		// GC could happen during restructure so we must be able to create a reference for a null entry
 		map.createReferenceManager().createReference(null, 1234, null);
 	}
-
-	/**
-	 * Time a multi-threaded access to a cache.
-	 * @return the timing stopwatch
-	 */
-	private <V> StopWatch timeMultiThreaded(String id, final Map<Integer, V> map,
-			ValueFactory<V> factory) throws InterruptedException {
-
-		StopWatch stopWatch = new StopWatch(id);
-		for (int i = 0; i < 500; i++) {
-			map.put(i, factory.newValue(i));
-		}
-		Thread[] threads = new Thread[30];
-		stopWatch.start("Running threads");
-		for (int threadIndex = 0; threadIndex < threads.length; threadIndex++) {
-			threads[threadIndex] = new Thread("Cache access thread " + threadIndex) {
-				@Override
-				public void run() {
-					for (int j = 0; j < 1000; j++) {
-						for (int i = 0; i < 1000; i++) {
-							map.get(i);
-						}
-					}
-				}
-			};
-		}
-		for (Thread thread : threads) {
-			thread.start();
-		}
-
-		for (Thread thread : threads) {
-			if (thread.isAlive()) {
-				thread.join(2000);
-			}
-		}
-		stopWatch.stop();
-		return stopWatch;
-	}
-
 
 	private interface ValueFactory<V> {
 
