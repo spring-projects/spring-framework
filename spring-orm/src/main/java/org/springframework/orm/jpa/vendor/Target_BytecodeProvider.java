@@ -31,7 +31,7 @@ import org.hibernate.property.access.spi.PropertyAccess;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-@TargetClass(className = "org.hibernate.bytecode.internal.none.BytecodeProviderImpl")
+@TargetClass(className = "org.hibernate.bytecode.internal.none.BytecodeProviderImpl", onlyWith = SubstituteOnlyIfPresent.class)
 final class Target_BytecodeProvider {
 
 	@Substitute
