@@ -19,7 +19,7 @@ package org.springframework.orm.jpa.vendor;
 import java.util.function.Predicate;
 
 /**
- * Predicate intended to enable the related GraalVM substitution only when the class is present in the classpath.
+ * Predicate intended to enable the related GraalVM substitution only when the class is present on the classpath.
  *
  * @author Sebastien Deleuze
  * @since 6.1
