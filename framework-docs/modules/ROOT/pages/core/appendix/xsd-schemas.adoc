@@ -565,6 +565,17 @@ is a convenience mechanism that sets up a xref:core/beans/factory-extension.adoc
  for you. If you need more control over the specific
 `PropertySourcesPlaceholderConfigurer` setup, you can explicitly define it as a bean yourself.
 
+[WARNING]
+=====
+Only one such element should be defined for a given application with the properties
+that it needs. Several property placeholders can be configured as long as they have distinct
+placeholder syntax (`${...}`).
+
+If you need to modularize the source of properties used for the replacement, you should
+not create multiple properties placeholders. Rather, each module should contribute a
+`PropertySource` to the `Environment`. Alternatively, you can create your own
+`PropertySourcesPlaceholderConfigurer` bean that gathers the properties to use.
+=====
 
 [[xsd-schemas-context-ac]]
 === Using `<annotation-config/>`
