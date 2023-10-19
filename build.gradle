@@ -9,6 +9,7 @@ plugins {
 	id 'de.undercouch.download' version '5.4.0'
 	id 'me.champeau.jmh' version '0.7.1' apply false
 	id 'me.champeau.mrjar' version '0.1.1'
+	id "org.owasp.dependencycheck" version "8.4.0"
 }
 
 ext {
@@ -120,4 +121,11 @@ configure(moduleProjects) { project ->
 configure(rootProject) {
 	description = "Spring Framework"
 	apply plugin: 'org.springframework.build.api-diff'
+}
+
+// Gradle plugin org.owasp.dependencycheck: suppress .NET warning
+dependencyCheck {
+	analyzers {
+		assemblyEnabled = false
+	}
 }
