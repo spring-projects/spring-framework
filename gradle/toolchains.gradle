@@ -54,6 +54,11 @@ plugins.withType(JavaPlugin).configureEach {
 			javaLauncher = javaToolchains.launcherFor {
 				languageVersion = testLanguageVersion
 			}
+			// Enable Java experimental support in Bytebuddy
+			// Remove when JDK 22 is supported by Mockito
+			if (testLanguageVersion == JavaLanguageVersion.of(22)) {
+				jvmArgs("-Dnet.bytebuddy.experimental=true")
+			}
 		}
 	}
 }

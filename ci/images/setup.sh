@@ -20,7 +20,7 @@ curl https://raw.githubusercontent.com/spring-io/concourse-java-scripts/v0.0.4/c
 
 mkdir -p /opt/openjdk
 pushd /opt/openjdk > /dev/null
-for jdk in java17 java21
+for jdk in java17 java21 java22
 do
   JDK_URL=$( /get-jdk-url.sh $jdk )
   mkdir $jdk
