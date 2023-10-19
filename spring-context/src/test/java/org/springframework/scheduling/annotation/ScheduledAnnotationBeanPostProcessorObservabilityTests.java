@@ -180,7 +180,7 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 	}
 
 
-	static abstract class TaskTester {
+	abstract static class TaskTester {
 
 		ObservationRegistry observationRegistry;
 

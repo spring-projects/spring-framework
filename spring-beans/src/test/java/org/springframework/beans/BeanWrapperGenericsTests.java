@@ -582,7 +582,7 @@ class BeanWrapperGenericsTests {
 	}
 
 
-	private static abstract class BaseGenericCollectionBean {
+	private abstract static class BaseGenericCollectionBean {
 
 		public abstract Object getMapOfInteger();
 

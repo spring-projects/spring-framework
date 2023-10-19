@@ -157,7 +157,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			if (simpAccessor.isMutable()) {
 				simpAccessor.setDestination(destination);
 				simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-				simpAccessor.setImmutable();
+				// ImmutableMessageChannelInterceptor will make it immutable
 				sendInternal(message);
 				return;
 			}

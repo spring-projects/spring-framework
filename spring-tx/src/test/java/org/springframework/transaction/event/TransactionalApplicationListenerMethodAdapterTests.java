@@ -233,7 +233,7 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 		}
 
 		@TransactionalEventListener
-		@Async @Transactional
+		@Async @Transactional(propagation = Propagation.REQUIRES_NEW)
 		public void withAsyncTransactionalAnnotation(String data) {
 		}
 	}

@@ -142,6 +142,15 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		return this;
 	}
 
+	public WebMvcStompEndpointRegistry setPreserveReceiveOrder(boolean preserveReceiveOrder) {
+		this.stompHandler.setPreserveReceiveOrder(preserveReceiveOrder);
+		return this;
+	}
+
+	protected boolean isPreserveReceiveOrder() {
+		return this.stompHandler.isPreserveReceiveOrder();
+	}
+
 	protected void setApplicationContext(ApplicationContext applicationContext) {
 		this.stompHandler.setApplicationEventPublisher(applicationContext);
 	}

@@ -16,16 +16,22 @@
 
 package org.springframework.test.context.aot;
 
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.discovery.ClassNameFilter;
+import org.junit.platform.engine.support.descriptor.ClassSource;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
@@ -45,6 +51,9 @@ import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterShar
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotProcessingTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeClassLevelTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeMethodLevelTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -98,34 +107,49 @@ class AotIntegrationTests extends AbstractAotTests {
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(6, List.of(
-					BasicSpringJupiterSharedConfigTests.class,
-					BasicSpringJupiterTests.class, // NestedTests get executed automatically
+				runTestsInAotMode(7, List.of(
+					// The #s represent how many tests should run from each test class, which
+					// must add up to the expectedNumTests above.
+					/* 1 */ BasicSpringJupiterSharedConfigTests.class,
+					/* 2 */ BasicSpringJupiterTests.class, // NestedTests get executed automatically
 					// Run @Import tests AFTER the tests with otherwise identical config
 					// in order to ensure that the other test classes are not accidentally
 					// using the config for the @Import tests.
-					BasicSpringJupiterImportedConfigTests.class,
-					BasicSpringTestNGTests.class,
-					BasicSpringVintageTests.class)));
+					/* 1 */ BasicSpringJupiterImportedConfigTests.class,
+					/* 1 */ BasicSpringTestNGTests.class,
+					/* 1 */ BasicSpringVintageTests.class,
+					/* 0 */ DisabledInAotProcessingTests.class,
+					/* 0 */ DisabledInAotRuntimeClassLevelTests.class,
+					/* 1 */ DisabledInAotRuntimeMethodLevelTests.class)));
 	}
 
 	@Disabled("Uncomment to run all Spring integration tests in `spring-test`")
 	@Test
 	void endToEndTestsForEntireSpringTestModule() {
 		// AOT BUILD-TIME: CLASSPATH SCANNING
-		List<Class<?>> testClasses =
-				// FYI: you can limit execution to a particular set of test classes as follows.
-				// List.of(DirtiesContextTransactionalTestNGSpringContextTests.class, ...);
-				createTestClassScanner()
-				.scan()
-				// FYI: you can limit execution to a particular package and its subpackages as follows.
-				// .scan("org.springframework.test.context.junit.jupiter")
+		//
+		// 1) You can limit execution to a particular set of test classes.
+		// List<Class<?>> testClasses = List.of(org.springframework.test.web.servlet.samples.spr.EncodedUriTests.class,
+		// 		org.springframework.test.web.servlet.samples.spr.HttpOptionsTests.class);
+		//
+		// 2) Or you can use the TestClassScanner to find test classes.
+		List<Class<?>> testClasses = createTestClassScanner()
+				// Scan all base packages in spring-test.
+				.scan("org.springframework.mock", "org.springframework.test")
+				// Or limit execution to a particular package and its subpackages.
+				//   - For example, to test JDBC support:
+				//     .scan("org.springframework.test.context.jdbc")
+				// We only include test classes named *Tests so that we don't pick up
+				// internal TestCase classes that aren't really tests.
+				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
+				// We don't have a way to abort a TestNG test mid-flight, and @EJB is not supported in AOT.
+				.filter(clazz -> !clazz.getPackageName().contains("testng.transaction.ejb"))
 				.toList();
-
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		// Optionally set failOnError flag to true to halt processing at the first failure.
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), false);
 		generator.processAheadOfTime(testClasses.stream());
 
 		// AOT BUILD-TIME: COMPILATION
@@ -152,7 +176,11 @@ class AotIntegrationTests extends AbstractAotTests {
 			SummaryGeneratingListener listener = new SummaryGeneratingListener();
 			LauncherFactory.create().execute(request, listener);
 			TestExecutionSummary summary = listener.getSummary();
+			if (expectedNumTests < 0) {
+				summary.printTo(new PrintWriter(System.err));
+			}
 			if (summary.getTotalFailureCount() > 0) {
+				printFailingTestClasses(summary);
 				List<Throwable> exceptions = summary.getFailures().stream().map(Failure::getException).toList();
 				throw new MultipleFailuresError("Test execution failures", exceptions);
 			}
@@ -162,6 +190,50 @@ class AotIntegrationTests extends AbstractAotTests {
 		}
 		finally {
 			System.clearProperty(AotDetector.AOT_ENABLED);
+		}
+	}
+
+	private static void printFailingTestClasses(TestExecutionSummary summary) {
+		System.err.println("Failing Test Classes:");
+		summary.getFailures().stream()
+				.map(Failure::getTestIdentifier)
+				.map(TestIdentifier::getSource)
+				.flatMap(Optional::stream)
+				.map(TestSource.class::cast)
+				.map(source -> {
+					if (source instanceof ClassSource classSource) {
+						return getJavaClass(classSource);
+					}
+					else if (source instanceof MethodSource methodSource) {
+						return getJavaClass(methodSource);
+					}
+					return Optional.<Class<?>> empty();
+				})
+				.flatMap(Optional::stream)
+				.map(Class::getName)
+				.distinct()
+				.sorted()
+				.forEach(System.err::println);
+		System.err.println();
+	}
+
+	private static Optional<Class<?>> getJavaClass(ClassSource classSource) {
+		try {
+			return Optional.of(classSource.getJavaClass());
+		}
+		catch (Exception ex) {
+			// ignore exception
+			return Optional.empty();
+		}
+	}
+
+	private static Optional<Class<?>> getJavaClass(MethodSource methodSource) {
+		try {
+			return Optional.of(methodSource.getJavaClass());
+		}
+		catch (Exception ex) {
+			// ignore exception
+			return Optional.empty();
 		}
 	}
 

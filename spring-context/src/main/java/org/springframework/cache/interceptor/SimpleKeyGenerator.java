@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+
+import org.springframework.core.KotlinDetector;
 
 /**
  * Simple key generator. Returns the parameter itself if a single non-null
@@ -30,6 +33,7 @@ import java.lang.reflect.Method;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.0
  * @see SimpleKey
  * @see org.springframework.cache.annotation.CachingConfigurer
@@ -38,7 +42,8 @@ public class SimpleKeyGenerator implements KeyGenerator {
 
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
-		return generateKey(params);
+		return generateKey((KotlinDetector.isSuspendingFunction(method) ?
+				Arrays.copyOf(params, params.length - 1) : params));
 	}
 
 	/**

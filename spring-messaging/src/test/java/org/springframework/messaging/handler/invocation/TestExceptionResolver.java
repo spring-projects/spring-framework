@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class TestExceptionResolver extends AbstractExceptionHandlerMethodResolver {
 
-	private final static ReflectionUtils.MethodFilter EXCEPTION_HANDLER_METHOD_FILTER =
+	private static final ReflectionUtils.MethodFilter EXCEPTION_HANDLER_METHOD_FILTER =
 			method -> method.getName().matches("handle[\\w]*Exception");
 
 

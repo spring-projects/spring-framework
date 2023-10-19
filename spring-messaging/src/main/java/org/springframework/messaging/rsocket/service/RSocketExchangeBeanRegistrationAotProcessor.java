@@ -61,17 +61,17 @@ class RSocketExchangeBeanRegistrationAotProcessor implements BeanRegistrationAot
 			});
 		}
 		if (!exchangeInterfaces.isEmpty()) {
-			return new RSocketExchangeBeanRegistrationContribution(exchangeInterfaces);
+			return new AotContribution(exchangeInterfaces);
 		}
 		return null;
 	}
 
 
-	private static class RSocketExchangeBeanRegistrationContribution implements BeanRegistrationAotContribution {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private final Set<Class<?>> rSocketExchangeInterfaces;
 
-		public RSocketExchangeBeanRegistrationContribution(Set<Class<?>> rSocketExchangeInterfaces) {
+		public AotContribution(Set<Class<?>> rSocketExchangeInterfaces) {
 			this.rSocketExchangeInterfaces = rSocketExchangeInterfaces;
 		}
 

@@ -376,9 +376,9 @@ class GenericTypeResolverTests {
 	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
 	}
 
-	static abstract class BiGenericClass<T extends B<?>, V extends A> {}
+	abstract static class BiGenericClass<T extends B<?>, V extends A> {}
 
-	static abstract class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U>{}
+	abstract static class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U>{}
 
 	static class TypeFixedBiGenericClass extends SpecializedBiGenericClass<E> {}
 
@@ -392,12 +392,12 @@ class GenericTypeResolverTests {
 		}
 	}
 
-	static abstract class WithArrayBase<T> {
+	abstract static class WithArrayBase<T> {
 
 		public abstract T[] array(T... args);
 	}
 
-	static abstract class WithArray<T> extends WithArrayBase<T> {
+	abstract static class WithArray<T> extends WithArrayBase<T> {
 	}
 
 	interface Repository<T, ID extends Serializable> {

@@ -72,7 +72,13 @@ abstract class AbstractAotTests {
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext005_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_ApplicationContextInitializer.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext005_BeanDefinitions.java"
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext005_BeanDefinitions.java",
+		// DisabledInAotRuntimeMethodLevelTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext006_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext006_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_BeanFactoryRegistrations.java"
 	};
 
 	Stream<Class<?>> scan() {

@@ -131,18 +131,18 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 				constraintDescriptors.addAll(propertyDescriptor.getConstraintDescriptors());
 			}
 			if (!constraintDescriptors.isEmpty()) {
-				return new BeanValidationBeanRegistrationAotContribution(constraintDescriptors);
+				return new AotContribution(constraintDescriptors);
 			}
 			return null;
 		}
 	}
 
 
-	private static class BeanValidationBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private final Collection<ConstraintDescriptor<?>> constraintDescriptors;
 
-		public BeanValidationBeanRegistrationAotContribution(Collection<ConstraintDescriptor<?>> constraintDescriptors) {
+		public AotContribution(Collection<ConstraintDescriptor<?>> constraintDescriptors) {
 			this.constraintDescriptors = constraintDescriptors;
 		}
 

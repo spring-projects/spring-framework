@@ -95,6 +95,7 @@
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/].+" checks="IllegalImport" id="bannedTestNGImports"/>
 	<!-- spring-test - main -->
+	<suppress files="DisabledInAotMode" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Helper" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]client[\\/]match[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]reactive[\\/]server[\\/].+" checks="IllegalImport" id="bannedHamcrestImports"/>

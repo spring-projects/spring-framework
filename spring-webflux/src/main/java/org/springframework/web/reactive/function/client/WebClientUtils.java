@@ -40,7 +40,7 @@ abstract class WebClientUtils {
 	/**
 	 * Predicate that returns true if an exception should be wrapped.
 	 */
-	public final static Predicate<? super Throwable> WRAP_EXCEPTION_PREDICATE =
+	public static final Predicate<? super Throwable> WRAP_EXCEPTION_PREDICATE =
 			t -> !(t instanceof WebClientException) && !(t instanceof CodecException);
 
 

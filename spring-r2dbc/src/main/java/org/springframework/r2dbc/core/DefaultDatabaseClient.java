@@ -190,7 +190,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 	 */
 	private static Connection createConnectionProxy(Connection con) {
 		return (Connection) Proxy.newProxyInstance(DatabaseClient.class.getClassLoader(),
-				new Class<?>[] { Connection.class, Wrapped.class },
+				new Class<?>[] {Connection.class, Wrapped.class},
 				new CloseSuppressingInvocationHandler(con));
 	}
 

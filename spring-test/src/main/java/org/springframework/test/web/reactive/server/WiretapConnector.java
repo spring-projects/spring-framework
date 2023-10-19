@@ -126,7 +126,7 @@ class WiretapConnector implements ClientHttpConnector {
 	/**
 	 * Tap into a Publisher of data buffers to save the content.
 	 */
-	final static class WiretapRecorder {
+	static final class WiretapRecorder {
 
 		@Nullable
 		private final Flux<? extends DataBuffer> publisher;

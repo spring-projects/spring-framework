@@ -20,14 +20,12 @@ import java.lang.reflect.Method;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
 /**
  * Extension of {@link TransactionalEventListenerFactory},
  * detecting invalid transaction configuration for transactional event listeners:
- * {@link Transactional} only supported with {@link Propagation#REQUIRES_NEW} or
- * {@link Async}.
+ * {@link Transactional} only supported with {@link Propagation#REQUIRES_NEW}.
  *
  * @author Juergen Hoeller
  * @since 6.1
@@ -39,10 +37,9 @@ public class RestrictedTransactionalEventListenerFactory extends TransactionalEv
 	@Override
 	public ApplicationListener<?> createApplicationListener(String beanName, Class<?> type, Method method) {
 		Transactional txAnn = AnnotatedElementUtils.findMergedAnnotation(method, Transactional.class);
-		if (txAnn != null && txAnn.propagation() != Propagation.REQUIRES_NEW &&
-				!AnnotatedElementUtils.hasAnnotation(method, Async.class)) {
+		if (txAnn != null && txAnn.propagation() != Propagation.REQUIRES_NEW) {
 			throw new IllegalStateException("@TransactionalEventListener method must not be annotated with " +
-					"@Transactional unless when marked as REQUIRES_NEW or declared as @Async: " + method);
+					"@Transactional unless when declared as REQUIRES_NEW: " + method);
 		}
 		return super.createApplicationListener(beanName, type, method);
 	}

@@ -589,6 +589,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		catch (PersistenceException ex) {
+			DataAccessException dae = getJpaDialect().translateExceptionIfPossible(ex);
+			if (dae != null) {
+				throw dae;
+			}
 			throw new TransactionSystemException("Could not roll back JPA transaction", ex);
 		}
 		finally {

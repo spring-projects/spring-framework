@@ -99,7 +99,7 @@ class ContextFailureThresholdTests {
 
 
 	@TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
-	static abstract class BaseTestCase {
+	abstract static class BaseTestCase {
 
 		@Test
 		void test1() {}

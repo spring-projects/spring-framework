@@ -31,11 +31,13 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * {@link HttpRequestValues} extension for use with {@link ReactorHttpExchangeAdapter}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 6.1
  */
 public final class ReactiveHttpRequestValues extends HttpRequestValues {
@@ -49,12 +51,12 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 
 	private ReactiveHttpRequestValues(
 			@Nullable HttpMethod httpMethod,
-			@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVariables,
+			@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
+			@Nullable String uriTemplate, Map<String, String> uriVars,
 			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue, @Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> elementType) {
 
-		super(httpMethod, uri, uriTemplate, uriVariables, headers, cookies, attributes, bodyValue);
-
+		super(httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars, headers, cookies, attributes, bodyValue);
 		this.body = body;
 		this.bodyElementType = elementType;
 	}
@@ -107,7 +109,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	/**
 	 * Builder for {@link ReactiveHttpRequestValues}.
 	 */
-	public final static class Builder extends HttpRequestValues.Builder {
+	public static final class Builder extends HttpRequestValues.Builder {
 
 		@Nullable
 		private MultipartBodyBuilder multipartBuilder;
@@ -127,6 +129,12 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		@Override
 		public Builder setUri(URI uri) {
 			super.setUri(uri);
+			return this;
+		}
+
+		@Override
+		public Builder setUriBuilderFactory(@Nullable UriBuilderFactory uriBuilderFactory) {
+			super.setUriBuilderFactory(uriBuilderFactory);
 			return this;
 		}
 
@@ -261,15 +269,15 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		@Override
 		protected ReactiveHttpRequestValues createRequestValues(
 				@Nullable HttpMethod httpMethod,
-				@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVars,
+				@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
+				@Nullable String uriTemplate, Map<String, String> uriVars,
 				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 				@Nullable Object bodyValue) {
 
 			return new ReactiveHttpRequestValues(
-					httpMethod, uri, uriTemplate, uriVars, headers, cookies, attributes,
-					bodyValue, this.body, this.bodyElementType);
+					httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
+					headers, cookies, attributes, bodyValue, this.body, this.bodyElementType);
 		}
-
 	}
 
 }

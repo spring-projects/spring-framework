@@ -41,7 +41,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 	int iterations = 10;  // number of times to repeat 'count' evaluations (for averaging)
 
-	private final static boolean noisyTests = true;
+	private static final boolean noisyTests = true;
 
 	Expression expression;
 

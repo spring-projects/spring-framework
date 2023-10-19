@@ -105,8 +105,7 @@ class CodeWarningsTests {
 		assertThat(this.codeWarnings).hasToString("CodeWarnings[deprecation, rawtypes]");
 	}
 
-	private void compile(Consumer<Builder> method,
-			Consumer<Compiled> result) {
+	private void compile(Consumer<Builder> method, Consumer<Compiled> result) {
 		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
 		this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
 		typeBuilder.set(type -> {

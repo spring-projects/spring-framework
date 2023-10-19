@@ -150,7 +150,7 @@ class SimpleJdbcInsertIntegrationTests {
 
 	}
 
-	private static abstract class AbstractSimpleJdbcInsertIntegrationTests {
+	private abstract static class AbstractSimpleJdbcInsertIntegrationTests {
 
 		protected EmbeddedDatabase embeddedDatabase;
 

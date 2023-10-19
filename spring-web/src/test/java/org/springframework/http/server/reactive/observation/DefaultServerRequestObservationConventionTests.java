@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,21 @@ class DefaultServerRequestObservationConventionTests {
 
 		assertThat(this.convention.getLowCardinalityKeyValues(context)).hasSize(5)
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "UNKNOWN"),
+						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
+		assertThat(this.convention.getHighCardinalityKeyValues(context)).hasSize(1)
+				.contains(KeyValue.of("http.url", "/test/resource"));
+	}
+
+	@Test
+	void addsKeyValuesForCancelledExchangeWhenResponseCommitted() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
+		context.setConnectionAborted(true);
+		exchange.getResponse().setRawStatusCode(404);
+		exchange.getResponse().setComplete().block();
+
+		assertThat(this.convention.getLowCardinalityKeyValues(context)).hasSize(5)
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "NOT_FOUND"), KeyValue.of("status", "404"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
 		assertThat(this.convention.getHighCardinalityKeyValues(context)).hasSize(1)
 				.contains(KeyValue.of("http.url", "/test/resource"));

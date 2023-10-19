@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.client.support;
 
+import java.net.URI;
+
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +33,7 @@ import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.invoker.ReactiveHttpRequestValues;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * {@link ReactorHttpExchangeAdapter} that enables an {@link HttpServiceProxyFactory}
@@ -96,32 +99,40 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 	}
 
 	@SuppressWarnings("ReactiveStreamsUnusedPublisher")
-	private WebClient.RequestBodySpec newRequest(HttpRequestValues requestValues) {
+	private WebClient.RequestBodySpec newRequest(HttpRequestValues values) {
 
-		HttpMethod httpMethod = requestValues.getHttpMethod();
+		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
 
 		WebClient.RequestBodyUriSpec uriSpec = this.webClient.method(httpMethod);
 
 		WebClient.RequestBodySpec bodySpec;
-		if (requestValues.getUri() != null) {
-			bodySpec = uriSpec.uri(requestValues.getUri());
+		if (values.getUri() != null) {
+			bodySpec = uriSpec.uri(values.getUri());
 		}
-		else if (requestValues.getUriTemplate() != null) {
-			bodySpec = uriSpec.uri(requestValues.getUriTemplate(), requestValues.getUriVariables());
+
+		else if (values.getUriTemplate() != null) {
+			UriBuilderFactory uriBuilderFactory = values.getUriBuilderFactory();
+			if(uriBuilderFactory != null){
+				URI uri = uriBuilderFactory.expand(values.getUriTemplate(), values.getUriVariables());
+				bodySpec = uriSpec.uri(uri);
+			}
+			else {
+				bodySpec = uriSpec.uri(values.getUriTemplate(), values.getUriVariables());
+			}
 		}
 		else {
 			throw new IllegalStateException("Neither full URL nor URI template");
 		}
 
-		bodySpec.headers(headers -> headers.putAll(requestValues.getHeaders()));
-		bodySpec.cookies(cookies -> cookies.putAll(requestValues.getCookies()));
-		bodySpec.attributes(attributes -> attributes.putAll(requestValues.getAttributes()));
+		bodySpec.headers(headers -> headers.putAll(values.getHeaders()));
+		bodySpec.cookies(cookies -> cookies.putAll(values.getCookies()));
+		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 
-		if (requestValues.getBodyValue() != null) {
-			bodySpec.bodyValue(requestValues.getBodyValue());
+		if (values.getBodyValue() != null) {
+			bodySpec.bodyValue(values.getBodyValue());
 		}
-		else if (requestValues instanceof ReactiveHttpRequestValues reactiveRequestValues) {
+		else if (values instanceof ReactiveHttpRequestValues reactiveRequestValues) {
 			Publisher<?> body = reactiveRequestValues.getBodyPublisher();
 			if (body != null) {
 				ParameterizedTypeReference<?> elementType = reactiveRequestValues.getBodyPublisherElementType();

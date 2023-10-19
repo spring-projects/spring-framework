@@ -16,13 +16,13 @@
 
 package org.springframework.build.hint;
 
+import java.util.Collections;
+
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.process.CommandLineArgumentProvider;
-
-import java.util.Collections;
 
 /**
  * Argument provider for registering the runtime hints agent with a Java process.

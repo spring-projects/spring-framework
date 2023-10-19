@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public abstract class AbstractCacheTests<T extends Cache> {
 
-	protected final static String CACHE_NAME = "testCache";
+	protected static final String CACHE_NAME = "testCache";
 
 	protected abstract T getCache();
 

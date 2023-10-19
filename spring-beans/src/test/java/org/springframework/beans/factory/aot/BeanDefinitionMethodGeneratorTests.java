@@ -367,6 +367,7 @@ class BeanDefinitionMethodGeneratorTests {
 				assertThat(instance.getName()).isEqualTo("postprocessed");
 			}
 			catch (Exception ex) {
+				throw new IllegalStateException(ex);
 			}
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile).contains("instanceSupplier.andThen(");
@@ -398,13 +399,13 @@ class BeanDefinitionMethodGeneratorTests {
 		compile(method, (actual, compiled) -> {
 			assertThat(compiled.getSourceFile(".*BeanDefinitions")).contains("BeanInstanceSupplier");
 			assertThat(actual.getBeanClass()).isEqualTo(TestBean.class);
-			InstanceSupplier<?> supplier = (InstanceSupplier<?>) actual
-					.getInstanceSupplier();
+			InstanceSupplier<?> supplier = (InstanceSupplier<?>) actual.getInstanceSupplier();
 			try {
 				TestBean instance = (TestBean) supplier.get(registeredBean);
 				assertThat(instance.getName()).isEqualTo("postprocessed");
 			}
 			catch (Exception ex) {
+				throw new IllegalStateException(ex);
 			}
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile).contains("instanceSupplier.andThen(");
@@ -527,8 +528,7 @@ class BeanDefinitionMethodGeneratorTests {
 			assertThat(actualInnerBeanDefinition.isPrimary()).isTrue();
 			assertThat(actualInnerBeanDefinition.getRole())
 					.isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
-			Supplier<?> innerInstanceSupplier = actualInnerBeanDefinition
-					.getInstanceSupplier();
+			Supplier<?> innerInstanceSupplier = actualInnerBeanDefinition.getInstanceSupplier();
 			try {
 				assertThat(innerInstanceSupplier.get()).isInstanceOf(AnnotatedBean.class);
 			}
@@ -593,8 +593,7 @@ class BeanDefinitionMethodGeneratorTests {
 			assertThat(actualInnerBeanDefinition.isPrimary()).isTrue();
 			assertThat(actualInnerBeanDefinition.getRole())
 					.isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
-			Supplier<?> innerInstanceSupplier = actualInnerBeanDefinition
-					.getInstanceSupplier();
+			Supplier<?> innerInstanceSupplier = actualInnerBeanDefinition.getInstanceSupplier();
 			try {
 				assertThat(innerInstanceSupplier.get()).isInstanceOf(String.class);
 			}

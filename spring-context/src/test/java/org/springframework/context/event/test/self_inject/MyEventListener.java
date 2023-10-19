@@ -25,6 +25,7 @@ public class MyEventListener implements ApplicationListener<MyEvent> {
 
 	public int eventCount;
 
+	@SuppressWarnings("unused")
 	@Autowired
 	private MyEventListener eventDemoListener;
 

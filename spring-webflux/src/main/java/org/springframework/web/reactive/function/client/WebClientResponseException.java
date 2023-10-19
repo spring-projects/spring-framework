@@ -56,7 +56,7 @@ public class WebClientResponseException extends WebClientException {
 	private final Charset responseCharset;
 
 	@Nullable
-	private transient final HttpRequest request;
+	private final transient HttpRequest request;
 
 	@Nullable
 	private transient Function<ResolvableType, ?> bodyDecodeFunction;

@@ -276,7 +276,7 @@ class CollectionToCollectionConverterTests {
 	public EnumSet<MyEnum> enumSet;
 
 
-	public static abstract class BaseResource implements Resource {
+	public abstract static class BaseResource implements Resource {
 
 		@Override
 		public InputStream getInputStream() throws IOException {

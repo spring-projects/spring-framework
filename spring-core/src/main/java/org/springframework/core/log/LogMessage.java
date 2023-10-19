@@ -163,7 +163,7 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 
-	private static abstract class FormatMessage extends LogMessage {
+	private abstract static class FormatMessage extends LogMessage {
 
 		protected final String format;
 

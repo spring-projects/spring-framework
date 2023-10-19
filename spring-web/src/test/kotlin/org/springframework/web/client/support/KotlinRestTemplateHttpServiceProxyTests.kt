@@ -37,6 +37,7 @@ import org.springframework.web.service.annotation.PutExchange
 import org.springframework.web.service.invoker.HttpServiceProxyFactory
 import org.springframework.web.testfixture.servlet.MockMultipartFile
 import org.springframework.web.util.DefaultUriBuilderFactory
+import org.springframework.web.util.UriBuilderFactory
 import java.net.URI
 import java.util.*
 
@@ -52,10 +53,13 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
     private lateinit var testService: TestService
 
+	private lateinit var anotherServer: MockWebServer
+
     @BeforeEach
     fun setUp() {
         server = MockWebServer()
         prepareResponse()
+		anotherServer = anotherServer()
         testService = initTestService()
     }
 
@@ -71,6 +75,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
     @AfterEach
     fun shutDown() {
         server.shutdown()
+		anotherServer.shutdown()
     }
 
     @Test
@@ -178,12 +183,73 @@ class KotlinRestTemplateHttpServiceProxyTests {
                 .isEqualTo("testCookie=test1; testCookie=test2")
     }
 
+	@Test
+	@Throws(InterruptedException::class)
+	fun getWithUriBuilderFactory() {
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/")
+				.toString())
+
+		val actualResponse: ResponseEntity<String> = testService
+				.getWithUriBuilderFactory(factory)
+
+		val request = anotherServer.takeRequest()
+		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(actualResponse.body).isEqualTo("Hello Spring 2!")
+		assertThat(request.method).isEqualTo("GET")
+		assertThat(request.path).isEqualTo("/greeting")
+		assertThat(server.requestCount).isEqualTo(0)
+	}
+
+	@Test
+	@Throws(InterruptedException::class)
+	fun getWithFactoryPathVariableAndRequestParam() {
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/")
+				.toString())
+
+		val actualResponse: ResponseEntity<String> = testService
+				.getWithUriBuilderFactory(factory, "123",
+				"test")
+
+		val request = anotherServer.takeRequest()
+		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(actualResponse.body).isEqualTo("Hello Spring 2!")
+		assertThat(request.method).isEqualTo("GET")
+		assertThat(request.path).isEqualTo("/greeting/123?param=test")
+		assertThat(server.requestCount).isEqualTo(0)
+	}
+
+	@Test
+	@Throws(InterruptedException::class)
+	fun getWithIgnoredUriBuilderFactory() {
+		val dynamicUri = server.url("/greeting/123").uri()
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/")
+				.toString())
+
+		val actualResponse: ResponseEntity<String> = testService
+				.getWithIgnoredUriBuilderFactory(dynamicUri, factory)
+
+		val request = server.takeRequest()
+		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(actualResponse.body).isEqualTo("Hello Spring!")
+		assertThat(request.method).isEqualTo("GET")
+		assertThat(request.path).isEqualTo("/greeting/123")
+		assertThat(anotherServer.requestCount).isEqualTo(0)
+	}
+
+
     private fun prepareResponse() {
         val response = MockResponse()
         response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
         server.enqueue(response)
     }
 
+	private fun anotherServer(): MockWebServer {
+		val anotherServer = MockWebServer()
+		val response = MockResponse()
+		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!")
+		anotherServer.enqueue(response)
+		return anotherServer
+	}
 
     private interface TestService {
 
@@ -213,6 +279,16 @@ class KotlinRestTemplateHttpServiceProxyTests {
         @PutExchange
         fun putRequestWithSameNameCookies(@CookieValue("testCookie") firstCookie: String,
                                           @CookieValue("testCookie") secondCookie: String)
+
+		@GetExchange("/greeting")
+		fun getWithUriBuilderFactory(uriBuilderFactory: UriBuilderFactory?): ResponseEntity<String>
+
+		@GetExchange("/greeting/{id}")
+		fun getWithUriBuilderFactory(uriBuilderFactory: UriBuilderFactory?,
+									 @PathVariable id: String?, @RequestParam param: String?): ResponseEntity<String>
+
+		@GetExchange("/greeting")
+		fun getWithIgnoredUriBuilderFactory(uri: URI?, uriBuilderFactory: UriBuilderFactory?): ResponseEntity<String>
     }
 
 }

@@ -432,7 +432,7 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithFinalBean {
 
-		public final @Bean TestBean testBean() {
+		@Bean public final TestBean testBean() {
 			return new TestBean();
 		}
 	}
@@ -441,7 +441,7 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithVoidBean {
 
-		public @Bean void testBean() {
+		@Bean public void testBean() {
 		}
 	}
 
@@ -449,7 +449,7 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class SimplestPossibleConfig {
 
-		public @Bean String stringBean() {
+		@Bean public String stringBean() {
 			return "foo";
 		}
 	}
@@ -458,11 +458,11 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithNonSpecificReturnTypes {
 
-		public @Bean Object stringBean() {
+		@Bean public Object stringBean() {
 			return "foo";
 		}
 
-		public @Bean FactoryBean<?> factoryBean() {
+		@Bean public FactoryBean<?> factoryBean() {
 			ListFactoryBean fb = new ListFactoryBean();
 			fb.setSourceList(Arrays.asList("element1", "element2"));
 			return fb;
@@ -473,13 +473,13 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithPrototypeBean {
 
-		public @Bean TestBean foo() {
+		@Bean public TestBean foo() {
 			TestBean foo = new SpousyTestBean("foo");
 			foo.setSpouse(bar());
 			return foo;
 		}
 
-		public @Bean TestBean bar() {
+		@Bean public TestBean bar() {
 			TestBean bar = new SpousyTestBean("bar");
 			bar.setSpouse(baz());
 			return bar;

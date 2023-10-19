@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import jakarta.servlet.Filter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +36,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -85,11 +87,18 @@ public abstract class AbstractWebSocketIntegrationTests {
 	protected AnnotationConfigWebApplicationContext wac;
 
 
-	protected void setup(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
-		this.server = server;
-		this.webSocketClient = webSocketClient;
+	protected void setup(WebSocketTestServer server, WebSocketClient client, TestInfo info) throws Exception {
+		setup(server, null, client, info);
+	}
 
-		logger.debug("Setting up '" + testInfo.getTestMethod().get().getName() + "', client=" +
+	protected void setup(
+			WebSocketTestServer server, @Nullable Filter filter, WebSocketClient client, TestInfo info)
+			throws Exception {
+
+		this.server = server;
+		this.webSocketClient = client;
+
+		logger.debug("Setting up '" + info.getTestMethod().get().getName() + "', client=" +
 				this.webSocketClient.getClass().getSimpleName() + ", server=" +
 				this.server.getClass().getSimpleName());
 
@@ -102,7 +111,12 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 
 		this.server.setup();
-		this.server.deployConfig(this.wac);
+		if (filter != null) {
+			this.server.deployConfig(this.wac, filter);
+		}
+		else {
+			this.server.deployConfig(this.wac);
+		}
 		this.server.start();
 
 		this.wac.setServletContext(this.server.getServletContext());
@@ -150,7 +164,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	static abstract class AbstractRequestUpgradeStrategyConfig {
+	abstract static class AbstractRequestUpgradeStrategyConfig {
 
 		@Bean
 		public DefaultHandshakeHandler handshakeHandler() {

@@ -24,7 +24,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -160,9 +159,8 @@ class AnnotationUtilsTests {
 		assertThat(getAnnotation(bridgeMethod, Order.class)).isNull();
 		assertThat(findAnnotation(bridgeMethod, Order.class)).isNotNull();
 
-		boolean runningInEclipse = Arrays.stream(new Exception().getStackTrace())
-				.anyMatch(element -> element.getClassName().startsWith("org.eclipse.jdt"));
-
+		boolean runningInEclipse = StackWalker.getInstance().walk(stream ->
+				stream.anyMatch(stackFrame -> stackFrame.getClassName().startsWith("org.eclipse.jdt")));
 		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
 		// annotation on its 'bridged' method [1]; however, the Eclipse compiler will not
 		// support this until Eclipse 4.9 [2]. Thus, we effectively ignore the following
@@ -1135,7 +1133,7 @@ class AnnotationUtilsTests {
 		boolean readOnly() default false;
 	}
 
-	public static abstract class Foo<T> {
+	public abstract static class Foo<T> {
 
 		@Order(1)
 		public abstract void something(T arg);
@@ -1245,7 +1243,7 @@ class AnnotationUtilsTests {
 		}
 	}
 
-	public static abstract class BaseClassWithGenericAnnotatedMethod<T> {
+	public abstract static class BaseClassWithGenericAnnotatedMethod<T> {
 
 		@Order
 		abstract void foo(T t);

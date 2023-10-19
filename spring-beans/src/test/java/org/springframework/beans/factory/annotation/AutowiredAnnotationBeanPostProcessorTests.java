@@ -4161,7 +4161,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static abstract class Foo<T extends Runnable, RT extends Callable<T>> {
+	public abstract static class Foo<T extends Runnable, RT extends Callable<T>> {
 
 		private RT obj;
 

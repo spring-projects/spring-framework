@@ -22,15 +22,22 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestAttribute
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.invoker.HttpServiceProxyFactory
 import org.springframework.web.service.invoker.createClient
+import org.springframework.web.util.DefaultUriBuilderFactory
+import org.springframework.web.util.UriBuilderFactory
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
+import java.net.URI
 import java.time.Duration
 import java.util.function.Consumer
 
@@ -40,20 +47,24 @@ import java.util.function.Consumer
  *
  * @author DongHyeon Kim
  * @author Sebastien Deleuze
+ * @author Olga Maciaszek-Sharma
  */
-@Suppress("DEPRECATION")
 class KotlinWebClientHttpServiceProxyTests {
 
 	private lateinit var server: MockWebServer
 
+	private lateinit var anotherServer: MockWebServer
+
 	@BeforeEach
 	fun setUp() {
 		server = MockWebServer()
+		anotherServer = anotherServer()
 	}
 
 	@AfterEach
 	fun shutdown() {
 		server.shutdown()
+		anotherServer.shutdown()
 	}
 
 	@Test
@@ -120,10 +131,48 @@ class KotlinWebClientHttpServiceProxyTests {
 		}
 	}
 
+	@Test
+	@Throws(InterruptedException::class)
+	fun getWithFactoryPathVariableAndRequestParam() {
+		prepareResponse { response: MockResponse ->
+			response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
+		}
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/").toString())
+
+		val actualResponse: ResponseEntity<String> =
+			initHttpService().getWithUriBuilderFactory(factory, "123", "test")
+
+		val request = anotherServer.takeRequest()
+		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(actualResponse.body).isEqualTo("Hello Spring 2!")
+		assertThat(request.method).isEqualTo("GET")
+		assertThat(request.path).isEqualTo("/greeting/123?param=test")
+		assertThat(server.requestCount).isEqualTo(0)
+	}
+
+	@Test
+	@Throws(InterruptedException::class)
+	fun getWithIgnoredUriBuilderFactory() {
+		prepareResponse { response: MockResponse ->
+			response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
+		}
+		val dynamicUri = server.url("/greeting/123").uri()
+		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/").toString())
+
+		val actualResponse: ResponseEntity<String> =
+			initHttpService().getWithIgnoredUriBuilderFactory(dynamicUri, factory)
+
+		val request = server.takeRequest()
+		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(actualResponse.body).isEqualTo("Hello Spring!")
+		assertThat(request.method).isEqualTo("GET")
+		assertThat(request.path).isEqualTo("/greeting/123")
+		assertThat(anotherServer.requestCount).isEqualTo(0)
+	}
+
+
 	private fun initHttpService(): TestHttpService {
-		val webClient = WebClient.builder().baseUrl(
-			server.url("/").toString()
-		).build()
+		val webClient = WebClient.builder().baseUrl(server.url("/").toString()).build()
 		return initHttpService(webClient)
 	}
 
@@ -138,6 +187,14 @@ class KotlinWebClientHttpServiceProxyTests {
 		server.enqueue(response)
 	}
 
+	private fun anotherServer(): MockWebServer {
+		val anotherServer = MockWebServer()
+		val response = MockResponse()
+		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!")
+		anotherServer.enqueue(response)
+		return anotherServer
+	}
+
 	private interface TestHttpService {
 		@GetExchange("/greeting")
 		suspend fun getGreetingSuspending(): String
@@ -150,5 +207,12 @@ class KotlinWebClientHttpServiceProxyTests {
 
 		@GetExchange("/greeting")
 		suspend fun getGreetingSuspendingWithAttribute(@RequestAttribute myAttribute: String): String
+
+		@GetExchange("/greeting/{id}")
+		fun getWithUriBuilderFactory(
+			uriBuilderFactory: UriBuilderFactory?, @PathVariable id: String?, @RequestParam param: String?): ResponseEntity<String>
+
+		@GetExchange("/greeting")
+		fun getWithIgnoredUriBuilderFactory(uri: URI?, uriBuilderFactory: UriBuilderFactory?): ResponseEntity<String>
 	}
 }

@@ -32,7 +32,7 @@ import org.springframework.http.codec.HttpMessageWriter;
  */
 final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 
-	final static ExchangeStrategies DEFAULT_EXCHANGE_STRATEGIES;
+	static final ExchangeStrategies DEFAULT_EXCHANGE_STRATEGIES;
 
 	static {
 		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();

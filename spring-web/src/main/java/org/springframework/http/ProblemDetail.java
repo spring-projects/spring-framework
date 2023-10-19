@@ -218,6 +218,18 @@ public class ProblemDetail {
 	}
 
 	/**
+	 * Setter for the {@link #getProperties() properties map}.
+	 * <p>By default, this is not set.
+	 * <p>When Jackson JSON is present on the classpath, any properties set here
+	 * are rendered as top level key-value pairs in the output JSON. Otherwise,
+	 * they are rendered as a {@code "properties"} sub-map.
+	 * @param properties the properties map
+	 */
+	public void setProperties(@Nullable Map<String, Object> properties) {
+		this.properties = properties;
+	}
+
+	/**
 	 * Return a generic map of properties that are not known ahead of time,
 	 * possibly {@code null} if no properties have been added. To add a property,
 	 * use {@link #setProperty(String, Object)}.

@@ -36,10 +36,11 @@ abstract class CoroutinesUtils {
 		return ReactiveFlowKt.asFlow((Publisher<?>) publisher);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Nullable
-	static Object awaitSingleOrNull(Object mono, Object continuation) {
-		return MonoKt.awaitSingleOrNull((Mono<?>) mono, (Continuation<Object>) continuation);
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static Object awaitSingleOrNull(Object value, Object continuation) {
+		return MonoKt.awaitSingleOrNull(value instanceof Mono mono ? mono : Mono.just(value),
+				(Continuation<Object>) continuation);
 	}
 
 }

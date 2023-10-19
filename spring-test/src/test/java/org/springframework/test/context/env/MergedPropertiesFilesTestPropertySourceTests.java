@@ -19,6 +19,7 @@ package org.springframework.test.context.env;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,6 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.1
  */
 @TestPropertySource("extended.properties")
+// Since ExplicitPropertiesFileTestPropertySourceTests is disabled in AOT mode, this class must be also.
+@DisabledInAotMode
 class MergedPropertiesFilesTestPropertySourceTests extends
 		ExplicitPropertiesFileInClasspathTestPropertySourceTests {
 

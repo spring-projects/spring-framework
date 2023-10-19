@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,17 @@ import org.springframework.core.ResolvableType
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>()` variant.
+ * This extension is not subject to type erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> BeanFactory.getBean(): T = getBean(T::class.java)
+inline fun <reified T : Any> BeanFactory.getBean(): T =
+		getBeanProvider<T>().getObject()
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>("foo")` variant.
+ * Like the original Java method, this extension is subject to type erasure.
  *
  * @see BeanFactory.getBean(String, Class<T>)
  * @author Sebastien Deleuze
@@ -40,13 +43,14 @@ inline fun <reified T : Any> BeanFactory.getBean(name: String): T =
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>(arg1, arg2)` variant.
+ * This extension is not subject to type erasure and retains actual generic type arguments.
  *
  * @see BeanFactory.getBean(Class<T>, Object...)
  * @author Sebastien Deleuze
  * @since 5.0
  */
 inline fun <reified T : Any> BeanFactory.getBean(vararg args:Any): T =
-		getBean(T::class.java, *args)
+		getBeanProvider<T>().getObject(*args)
 
 /**
  * Extension for [BeanFactory.getBeanProvider] providing a `getBeanProvider<Foo>()` variant.

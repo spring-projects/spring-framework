@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,18 @@
 
 package org.springframework.test.web.servlet.samples.spr;
 
-
 import java.net.URI;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.ui.Model;
@@ -59,23 +53,18 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  *
  * @author Sebastien Deleuze
  */
-@ExtendWith(SpringExtension.class)
-@WebAppConfiguration
-@ContextConfiguration
+@SpringJUnitWebConfig
 public class EncodedUriTests {
 
-	@Autowired
-	private WebApplicationContext wac;
+	private final MockMvc mockMvc;
 
-	private MockMvc mockMvc;
-
-	@BeforeEach
-	public void setup() {
-		this.mockMvc = webAppContextSetup(this.wac).build();
+	EncodedUriTests(WebApplicationContext wac) {
+		this.mockMvc = webAppContextSetup(wac).build();
 	}
 
+
 	@Test
-	public void test() throws Exception {
+	void test() throws Exception {
 		String id = "a/b";
 		URI url = UriComponentsBuilder.fromUriString("/circuit").pathSegment(id).build().encode().toUri();
 		ResultActions result = mockMvc.perform(get(url));
@@ -83,17 +72,17 @@ public class EncodedUriTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableWebMvc
 	static class WebConfig implements WebMvcConfigurer {
 
 		@Bean
-		public MyController myController() {
+		MyController myController() {
 			return new MyController();
 		}
 
 		@Bean
-		public HandlerMappingConfigurer myHandlerMappingConfigurer() {
+		HandlerMappingConfigurer myHandlerMappingConfigurer() {
 			return new HandlerMappingConfigurer();
 		}
 
@@ -104,17 +93,17 @@ public class EncodedUriTests {
 	}
 
 	@Controller
-	private static class MyController {
+	static class MyController {
 
 		@RequestMapping(value = "/circuit/{id}", method = RequestMethod.GET)
-		public String getCircuit(@PathVariable String id, Model model) {
+		String getCircuit(@PathVariable String id, Model model) {
 			model.addAttribute("receivedId", id);
 			return "result";
 		}
 	}
 
 	@Component
-	private static class HandlerMappingConfigurer implements BeanPostProcessor, PriorityOrdered {
+	static class HandlerMappingConfigurer implements BeanPostProcessor, PriorityOrdered {
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

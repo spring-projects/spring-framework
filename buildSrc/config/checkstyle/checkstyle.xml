@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="com.puppycrawl.tools.checkstyle.Checker">
+
+	<!-- Root Checks -->
+	<module name="io.spring.javaformat.checkstyle.check.SpringHeaderCheck">
+		<property name="fileExtensions" value="java"/>
+		<property name="headerType" value="apache2"/>
+		<property name="headerCopyrightPattern" value="20\d\d-20\d\d"/>
+		<property name="packageInfoHeaderType" value="none"/>
+	</module>
+	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
+
+	<!-- TreeWalker Checks -->
+	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
+
+		<!-- Imports -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.UnusedImportsCheck">
+			<property name="processJavadoc" value="true"/>
+		</module>
+
+		<!-- Modifiers -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
+
+	</module>
+
+</module>

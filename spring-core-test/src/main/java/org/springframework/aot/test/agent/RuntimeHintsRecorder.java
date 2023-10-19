@@ -47,7 +47,7 @@ public final class RuntimeHintsRecorder {
 	 * @param action the block of code we want to record invocations from
 	 * @return the recorded invocations
 	 */
-	public synchronized static RuntimeHintsInvocations record(Runnable action) {
+	public static synchronized RuntimeHintsInvocations record(Runnable action) {
 		Assert.notNull(action, "Runnable action must not be null");
 		Assert.state(RuntimeHintsAgent.isLoaded(), "RuntimeHintsAgent must be loaded in the current JVM");
 		RuntimeHintsRecorder recorder = new RuntimeHintsRecorder();

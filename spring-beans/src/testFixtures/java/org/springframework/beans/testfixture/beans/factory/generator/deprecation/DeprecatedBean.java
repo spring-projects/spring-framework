@@ -24,4 +24,3 @@ package org.springframework.beans.testfixture.beans.factory.generator.deprecatio
 @Deprecated
 public class DeprecatedBean {
 }
-

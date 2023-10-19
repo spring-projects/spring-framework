@@ -694,7 +694,7 @@ final class MethodWriter extends MethodVisitor {
     if (visible) {
       if (lastRuntimeVisibleParameterAnnotations == null) {
         lastRuntimeVisibleParameterAnnotations =
-            new AnnotationWriter[Type.getArgumentTypes(descriptor).length];
+            new AnnotationWriter[Type.getArgumentCount(descriptor)];
       }
       return lastRuntimeVisibleParameterAnnotations[parameter] =
           AnnotationWriter.create(
@@ -702,7 +702,7 @@ final class MethodWriter extends MethodVisitor {
     } else {
       if (lastRuntimeInvisibleParameterAnnotations == null) {
         lastRuntimeInvisibleParameterAnnotations =
-            new AnnotationWriter[Type.getArgumentTypes(descriptor).length];
+            new AnnotationWriter[Type.getArgumentCount(descriptor)];
       }
       return lastRuntimeInvisibleParameterAnnotations[parameter] =
           AnnotationWriter.create(
