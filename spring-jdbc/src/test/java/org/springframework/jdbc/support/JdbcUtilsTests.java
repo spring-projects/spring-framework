@@ -16,11 +16,19 @@
 
 package org.springframework.jdbc.support;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for {@link JdbcUtils}.
@@ -55,6 +63,25 @@ public class JdbcUtilsTests {
 		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("yOUR_nAME")).isEqualTo("yourName");
 		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("a_name")).isEqualTo("AName");
 		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("someone_elses_name")).isEqualTo("someoneElsesName");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void supportsGeneratedKeys(boolean supports) throws SQLException {
+		Connection con = mock();
+		DatabaseMetaData dmd = mock();
+		given(con.getMetaData()).willReturn(dmd);
+
+		assertThat(JdbcUtils.supportsGeneratedKeys(mockSupportsGetGeneratedKeys(supports))).isEqualTo(supports);
+	}
+
+	private Connection mockSupportsGetGeneratedKeys(boolean ret) throws SQLException {
+		Connection con = mock();
+		DatabaseMetaData dmd = mock();
+
+		given(con.getMetaData()).willReturn(dmd);
+		when(dmd.supportsGetGeneratedKeys()).thenReturn(ret);
+		return con;
 	}
 
 }

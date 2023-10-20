@@ -1568,6 +1568,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps, int rowsExpected) throws SQLException {
+		if(!JdbcUtils.supportsGeneratedKeys(ps.getConnection())){
+			logger.trace("Generated keys is not supported");
+			return;
+		}
 		List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
 		ResultSet keys = ps.getGeneratedKeys();
 		if (keys != null) {

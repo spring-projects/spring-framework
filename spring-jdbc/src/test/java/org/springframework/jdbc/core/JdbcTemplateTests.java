@@ -1112,6 +1112,7 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
 		given(databaseMetaData.supportsBatchUpdates()).willReturn(true);
+		given(databaseMetaData.supportsGetGeneratedKeys()).willReturn(true);
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
 		ResultSet generatedKeysResultSet = mock(ResultSet.class);
 		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
@@ -1149,6 +1150,7 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
 		given(databaseMetaData.supportsBatchUpdates()).willReturn(false);
+		given(databaseMetaData.supportsGetGeneratedKeys()).willReturn(true);
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
 		ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
 		given(rsmd.getColumnCount()).willReturn(1);

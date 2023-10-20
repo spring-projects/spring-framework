@@ -445,6 +445,33 @@ public abstract class JdbcUtils {
 	}
 
 	/**
+	 * Return whether the given JDBC driver supports JDBC generated keys.
+	 *
+	 * @param con
+	 *            the Connection to check
+	 * @return whether JDBC generated keys are supported
+	 * @see DatabaseMetaData#supportsGetGeneratedKeys() ()
+	 */
+	public static boolean supportsGeneratedKeys(Connection con) {
+		try {
+			DatabaseMetaData dbmd = con.getMetaData();
+			if (dbmd != null) {
+				if (dbmd.supportsGetGeneratedKeys()) {
+					logger.debug("JDBC driver supports generated keys");
+					return true;
+				}
+				else {
+					logger.debug("JDBC driver does not support generated keys");
+				}
+			}
+		}
+		catch (SQLException ex) {
+			logger.debug("JDBC driver 'supportsGeneratedKeys' method threw exception", ex);
+		}
+		return false;
+	}
+
+	/**
 	 * Extract a common name for the target database in use even if
 	 * various drivers/platforms provide varying names at runtime.
 	 * @param source the name as provided in database meta-data
