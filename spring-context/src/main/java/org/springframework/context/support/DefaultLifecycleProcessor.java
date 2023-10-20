@@ -16,7 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -561,17 +560,16 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		@Override
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
-			long restartTime = System.nanoTime();
 			logger.info("Restarting Spring-managed lifecycle beans after JVM restore");
 			restartAfterStop();
 
 			// Barrier for prevent-shutdown thread not needed anymore
 			this.barrier = null;
 
-			long timeTakenToRestart = Duration.ofNanos(System.nanoTime() - restartTime).toMillis();
-			long timeTakenToRestoreJvm = CRaCMXBean.getCRaCMXBean().getUptimeSinceRestore();
-			logger.info("Spring-managed lifecycle restart completed in " + timeTakenToRestart
-					+ " ms (restored JVM running for " + timeTakenToRestoreJvm + " ms)");
+			if (!checkpointOnRefresh) {
+				logger.info("Spring-managed lifecycle restart completed (restored JVM running for " +
+						CRaCMXBean.getCRaCMXBean().getUptimeSinceRestore() + " ms)");
+			}
 		}
 
 		private void awaitPreventShutdownBarrier() {
