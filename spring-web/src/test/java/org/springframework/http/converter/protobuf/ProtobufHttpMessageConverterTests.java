@@ -55,11 +55,7 @@ class ProtobufHttpMessageConverterTests {
 		assertThat(this.converter.canRead(Msg.class, null)).isTrue();
 		assertThat(this.converter.canRead(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
 		assertThat(this.converter.canRead(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(this.converter.canRead(Msg.class, MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.converter.canRead(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
-
-		// only supported as an output format
-		assertThat(this.converter.canRead(Msg.class, MediaType.TEXT_HTML)).isFalse();
 	}
 
 	@Test
@@ -67,9 +63,7 @@ class ProtobufHttpMessageConverterTests {
 		assertThat(this.converter.canWrite(Msg.class, null)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(this.converter.canWrite(Msg.class, MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
-		assertThat(this.converter.canWrite(Msg.class, MediaType.TEXT_HTML)).isTrue();
 	}
 
 	@Test
@@ -119,31 +113,6 @@ class ProtobufHttpMessageConverterTests {
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
 
 		final String body = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(body).as("body is empty").isNotEmpty();
-
-		Msg.Builder builder = Msg.newBuilder();
-		JsonFormat.parser().merge(body, builder);
-		assertThat(builder.build()).isEqualTo(this.testMsg);
-
-		assertThat(outputMessage.getHeaders().getFirst(
-				ProtobufHttpMessageConverter.X_PROTOBUF_MESSAGE_HEADER)).isNull();
-		assertThat(outputMessage.getHeaders().getFirst(
-				ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER)).isNull();
-	}
-
-	@Test
-	void writeJsonWithJavaFormat() throws IOException {
-		this.converter = new ProtobufHttpMessageConverter(
-				new ProtobufHttpMessageConverter.ProtobufJavaFormatSupport(),
-				this.extensionRegistry);
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		@SuppressWarnings("deprecation")
-		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
-		this.converter.write(this.testMsg, contentType, outputMessage);
-
-		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
-
-		String body = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(body).as("body is empty").isNotEmpty();
 
 		Msg.Builder builder = Msg.newBuilder();

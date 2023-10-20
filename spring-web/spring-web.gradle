@@ -18,7 +18,6 @@ dependencies {
 	optional("com.fasterxml.woodstox:woodstox-core")
 	optional("com.google.code.gson:gson")
 	optional("com.google.protobuf:protobuf-java-util")
-	optional("com.googlecode.protobuf-java-format:protobuf-java-format")
 	optional("com.rometools:rome")
 	optional("com.squareup.okhttp3:okhttp")
 	optional("io.reactivex.rxjava3:rxjava")
