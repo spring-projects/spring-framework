@@ -94,7 +94,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.service.invoker.RequestParamArgumentResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
@@ -577,7 +576,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			this.methodValidator = HandlerMethodValidator.from(
 					this.webBindingInitializer, this.parameterNameDiscoverer,
 					methodParamPredicate(resolvers, ModelAttributeMethodProcessor.class),
-					methodParamPredicate(resolvers, RequestParamArgumentResolver.class));
+					methodParamPredicate(resolvers, RequestParamMethodArgumentResolver.class));
 		}
 	}
 
