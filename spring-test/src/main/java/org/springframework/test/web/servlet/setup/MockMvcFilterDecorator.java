@@ -49,9 +49,9 @@ final class MockMvcFilterDecorator implements Filter {
 
 	private static final String ALL_MAPPING_PATTERN = "*";
 
-	private static final String EXTENSION_MAPPING_PATTERN = ALL_MAPPING_PATTERN + ".";
+	private static final String EXTENSION_MAPPING_PATTERN = "*.";
 
-	private static final String PATH_MAPPING_PATTERN = "/" + ALL_MAPPING_PATTERN;
+	private static final String PATH_MAPPING_PATTERN = "/*";
 
 	private final Filter delegate;
 
