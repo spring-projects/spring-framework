@@ -3,35 +3,39 @@
 
 package org.springframework.protobuf;
 
-public interface MsgOrBuilder
-    extends com.google.protobuf.MessageOrBuilder {
+public interface MsgOrBuilder extends
+    // @@protoc_insertion_point(interface_extends:Msg)
+    com.google.protobuf.MessageOrBuilder {
 
-  // optional string foo = 1;
   /**
    * <code>optional string foo = 1;</code>
+   * @return Whether the foo field is set.
    */
   boolean hasFoo();
   /**
    * <code>optional string foo = 1;</code>
+   * @return The foo.
    */
-  java.lang.String getFoo();
+  String getFoo();
   /**
    * <code>optional string foo = 1;</code>
+   * @return The bytes for foo.
    */
   com.google.protobuf.ByteString
       getFooBytes();
 
-  // optional .SecondMsg blah = 2;
   /**
    * <code>optional .SecondMsg blah = 2;</code>
+   * @return Whether the blah field is set.
    */
   boolean hasBlah();
   /**
    * <code>optional .SecondMsg blah = 2;</code>
+   * @return The blah.
    */
-  org.springframework.protobuf.SecondMsg getBlah();
+  SecondMsg getBlah();
   /**
    * <code>optional .SecondMsg blah = 2;</code>
    */
-  org.springframework.protobuf.SecondMsgOrBuilder getBlahOrBuilder();
+  SecondMsgOrBuilder getBlahOrBuilder();
 }
