@@ -1046,12 +1046,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes) {
-			CodeBlock.Builder code = CodeBlock.builder();
-			for (int i = 0; i < parameterTypes.length; i++) {
-				code.add((i != 0 ? ", " : ""));
-				code.add("$T.class", parameterTypes[i]);
-			}
-			return code.build();
+			return CodeBlock.join(Arrays.stream(parameterTypes)
+					.map(parameterType -> CodeBlock.of("$T.class", parameterType))
+					.toList(), ", ");
 		}
 
 		private void registerHints(RuntimeHints runtimeHints) {

@@ -235,7 +235,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		}
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
-				.generateCode(this.registeredBean,this.constructorOrFactoryMethod.get());
+				.generateCode(this.registeredBean, this.constructorOrFactoryMethod.get());
 	}
 
 	@Override
