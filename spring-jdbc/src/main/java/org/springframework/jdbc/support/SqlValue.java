@@ -41,7 +41,7 @@ public interface SqlValue {
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @throws SQLException if an SQLException is encountered while setting parameter values
 	 */
-	void setValue(PreparedStatement ps, int paramIndex)	throws SQLException;
+	void setValue(PreparedStatement ps, int paramIndex) throws SQLException;
 
 	/**
 	 * Clean up resources held by this value object.

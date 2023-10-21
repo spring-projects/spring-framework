@@ -30,7 +30,7 @@ class DefaultAsyncServerResponseTests {
 	@Test
 	void block() {
 		ServerResponse wrappee = ServerResponse.ok().build();
-		CompletableFuture<ServerResponse> future =  CompletableFuture.completedFuture(wrappee);
+		CompletableFuture<ServerResponse> future = CompletableFuture.completedFuture(wrappee);
 		AsyncServerResponse response = AsyncServerResponse.create(future);
 
 		assertThat(response.block()).isSameAs(wrappee);

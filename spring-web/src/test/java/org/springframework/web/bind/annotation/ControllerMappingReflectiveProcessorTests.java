@@ -235,12 +235,12 @@ public class ControllerMappingReflectiveProcessorTests {
 		}
 
 		@PostMapping
-		void postHttpEntity(HttpEntity<Request>  entity) {
+		void postHttpEntity(HttpEntity<Request> entity) {
 		}
 
 		@PostMapping
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		void postRawHttpEntity(HttpEntity  entity) {
+		void postRawHttpEntity(HttpEntity entity) {
 		}
 
 		@PostMapping

@@ -54,7 +54,7 @@ import static org.mockito.Mockito.verify;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class SqlQueryTests  {
+public class SqlQueryTests {
 
 	//FIXME inline?
 	private static final String SELECT_ID =

@@ -193,7 +193,7 @@ public abstract class ScriptUtils {
 
 		return executeSqlScript(connection, resource, dataBufferFactory, continueOnError,
 				ignoreFailedDrops, new String[] { commentPrefix }, separator,
-				blockCommentStartDelimiter,	blockCommentEndDelimiter);
+				blockCommentStartDelimiter, blockCommentEndDelimiter);
 	}
 
 	/**

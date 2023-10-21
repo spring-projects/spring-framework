@@ -30,7 +30,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
  * @author Christian Dupuis
  * @since 2.5
  */
-public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser  {
+public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {

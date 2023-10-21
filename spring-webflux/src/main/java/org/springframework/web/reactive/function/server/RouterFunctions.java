@@ -901,7 +901,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder onError(Predicate<? super Throwable> predicate,
-				BiFunction<? super  Throwable, ServerRequest, Mono<ServerResponse>> responseProvider);
+				BiFunction<? super Throwable, ServerRequest, Mono<ServerResponse>> responseProvider);
 
 		/**
 		 * Filters all exceptions of the given type by applying the given response provider
@@ -1199,7 +1199,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
+	private static class ResourcesRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
 		private final Function<ServerRequest, Mono<Resource>> lookupFunction;
 

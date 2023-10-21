@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * @see #setTransactionManager
  * @see JmsMessageEndpointManager
  */
-public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
+public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory {
 
 	@Nullable
 	private MessageListener messageListener;

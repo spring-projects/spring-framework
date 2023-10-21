@@ -30,7 +30,7 @@ public class PassThroughSourceExtractorTests {
 
 	@Test
 	public void testPassThroughContract() throws Exception {
-		Object source  = new Object();
+		Object source = new Object();
 		Object extractedSource = new PassThroughSourceExtractor().extractSource(source, null);
 		assertThat(extractedSource).as("The contract of PassThroughSourceExtractor states that the supplied " +
 				"source object *must* be returned as-is").isSameAs(source);

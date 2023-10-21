@@ -359,7 +359,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			// Add a new element to the list
 			StandardEvaluationContext ctx = new StandardEvaluationContext(instance);
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-			Expression e =  parser.parseExpression("listOfStrings[++index3]='def'");
+			Expression e = parser.parseExpression("listOfStrings[++index3]='def'");
 			e.getValue(ctx);
 			assertThat(instance.listOfStrings).hasSize(2);
 			assertThat(instance.listOfStrings.get(1)).isEqualTo("def");
@@ -367,13 +367,13 @@ class EvaluationTests extends AbstractExpressionTests {
 			// Check reference beyond end of collection
 			ctx = new StandardEvaluationContext(instance);
 			parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-			e =  parser.parseExpression("listOfStrings[0]");
+			e = parser.parseExpression("listOfStrings[0]");
 			String value = e.getValue(ctx, String.class);
 			assertThat(value).isEqualTo("abc");
-			e =  parser.parseExpression("listOfStrings[1]");
+			e = parser.parseExpression("listOfStrings[1]");
 			value = e.getValue(ctx, String.class);
 			assertThat(value).isEqualTo("def");
-			e =  parser.parseExpression("listOfStrings[2]");
+			e = parser.parseExpression("listOfStrings[2]");
 			value = e.getValue(ctx, String.class);
 			assertThat(value).isEmpty();
 
@@ -858,7 +858,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-			Expression e =  parser.parseExpression("#this++");
+			Expression e = parser.parseExpression("#this++");
 			assertThat(i).isEqualTo(42);
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 			e.getValue(ctx, Integer.class))
@@ -993,11 +993,11 @@ class EvaluationTests extends AbstractExpressionTests {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-			Expression e1 =  parser.parseExpression("++1");
+			Expression e1 = parser.parseExpression("++1");
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 			e1.getValue(ctx, Double.TYPE))
 			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
-			Expression e2 =  parser.parseExpression("1++");
+			Expression e2 = parser.parseExpression("1++");
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 			e2.getValue(ctx, Double.TYPE))
 			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
@@ -1008,7 +1008,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-			Expression e =  parser.parseExpression("#this--");
+			Expression e = parser.parseExpression("#this--");
 			assertThat(i).isEqualTo(42);
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 			e.getValue(ctx, Integer.class))
@@ -1169,13 +1169,13 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(helper.intArray[2]).isEqualTo(4);
 
 			// index1 is 3 intArray[3] is 4
-			e =  parser.parseExpression("intArray[#root.index1++]--");
+			e = parser.parseExpression("intArray[#root.index1++]--");
 			assertThat(e.getValue(ctx, Integer.class)).isEqualTo(4);
 			assertThat(helper.index1).isEqualTo(4);
 			assertThat(helper.intArray[3]).isEqualTo(3);
 
 			// index1 is 4, intArray[3] is 3
-			e =  parser.parseExpression("intArray[--#root.index1]++");
+			e = parser.parseExpression("intArray[--#root.index1]++");
 			assertThat(e.getValue(ctx, Integer.class)).isEqualTo(3);
 			assertThat(helper.index1).isEqualTo(3);
 			assertThat(helper.intArray[3]).isEqualTo(4);

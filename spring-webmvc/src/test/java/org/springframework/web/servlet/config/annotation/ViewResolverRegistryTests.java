@@ -205,7 +205,7 @@ public class ViewResolverRegistryTests {
 	}
 
 	private void checkPropertyValues(ViewResolver resolver, Object... nameValuePairs) {
-		DirectFieldAccessor accessor =  new DirectFieldAccessor(resolver);
+		DirectFieldAccessor accessor = new DirectFieldAccessor(resolver);
 		for (int i = 0; i < nameValuePairs.length ; i++, i++) {
 			Object expected = nameValuePairs[i + 1];
 			Object actual = accessor.getPropertyValue((String) nameValuePairs[i]);

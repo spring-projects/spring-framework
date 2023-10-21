@@ -143,7 +143,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 				}
 			}
 		}
-		return  null;
+		return null;
 	}
 
 	@Override

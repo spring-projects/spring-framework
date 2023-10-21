@@ -726,7 +726,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 		else if (this.inputStream != null) {
 			throw new IllegalStateException(
-					"Cannot call getReader() after getInputStream() has already been called for the current request")			;
+					"Cannot call getReader() after getInputStream() has already been called for the current request");
 		}
 
 		if (this.content != null) {

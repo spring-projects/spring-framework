@@ -209,7 +209,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#a0"),  @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#a0"), @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
 	public Object multiEvict(Object arg1) {
 		return this.counter.getAndIncrement();
 	}

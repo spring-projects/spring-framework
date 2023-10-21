@@ -100,7 +100,7 @@ public class ViewResolverRegistryTests {
 		List<ViewResolver> viewResolvers = this.registry.getViewResolvers();
 		assertThat(viewResolvers).hasSize(1);
 		assertThat(viewResolvers.get(0).getClass()).isEqualTo(ScriptTemplateViewResolver.class);
-		DirectFieldAccessor accessor =  new DirectFieldAccessor(viewResolvers.get(0));
+		DirectFieldAccessor accessor = new DirectFieldAccessor(viewResolvers.get(0));
 		assertThat(accessor.getPropertyValue("prefix")).isEqualTo("/");
 		assertThat(accessor.getPropertyValue("suffix")).isEqualTo(".html");
 	}

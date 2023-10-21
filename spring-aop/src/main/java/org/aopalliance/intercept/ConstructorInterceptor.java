@@ -43,7 +43,7 @@ import javax.annotation.Nonnull;
  *
  * @author Rod Johnson
  */
-public interface ConstructorInterceptor extends Interceptor  {
+public interface ConstructorInterceptor extends Interceptor {
 
 	/**
 	 * Implement this method to perform extra treatments before and

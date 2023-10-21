@@ -64,7 +64,7 @@ public class DefaultSubscriptionRegistryBenchmark {
 
 		@Setup(Level.Trial)
 		public void doSetup() {
-			this.findMessage = MessageBuilder.createMessage("",  SimpMessageHeaderAccessor.create().getMessageHeaders());
+			this.findMessage = MessageBuilder.createMessage("", SimpMessageHeaderAccessor.create().getMessageHeaders());
 			this.uniqueIdGenerator = new AtomicInteger();
 
 			this.registry = new DefaultSubscriptionRegistry();

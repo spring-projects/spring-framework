@@ -877,7 +877,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||
 				ex instanceof ForbiddenClassException || ex instanceof ConversionException) {
 			if (marshalling) {
-				return new MarshallingFailureException("XStream marshalling exception",  ex);
+				return new MarshallingFailureException("XStream marshalling exception", ex);
 			}
 			else {
 				return new UnmarshallingFailureException("XStream unmarshalling exception", ex);

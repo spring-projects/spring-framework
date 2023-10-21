@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verify;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class SqlLobValueTests  {
+class SqlLobValueTests {
 
 	@Mock
 	private PreparedStatement preparedStatement;

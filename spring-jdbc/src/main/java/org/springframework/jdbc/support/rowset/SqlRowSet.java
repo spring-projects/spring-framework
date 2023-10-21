@@ -269,7 +269,7 @@ public interface SqlRowSet extends Serializable {
 	 * @see java.sql.ResultSet#getObject(int, Map)
 	 */
 	@Nullable
-	Object getObject(int columnIndex,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(int columnIndex, Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row as an Object.
@@ -279,7 +279,7 @@ public interface SqlRowSet extends Serializable {
 	 * @see java.sql.ResultSet#getObject(String, Map)
 	 */
 	@Nullable
-	Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(String columnLabel, Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row as an Object.

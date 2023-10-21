@@ -113,7 +113,7 @@ public class NameMatchTransactionAttributeSource
 	}
 
 	@Override
-	public void afterPropertiesSet()  {
+	public void afterPropertiesSet() {
 		for (TransactionAttribute attr : this.nameMap.values()) {
 			if (attr instanceof DefaultTransactionAttribute dta) {
 				dta.resolveAttributeStrings(this.embeddedValueResolver);

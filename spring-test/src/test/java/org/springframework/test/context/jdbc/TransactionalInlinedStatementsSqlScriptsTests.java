@@ -35,7 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig(EmptyDatabaseConfig.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Sql(
-	scripts    = "schema.sql",
+	scripts = "schema.sql",
 	statements = "INSERT INTO user VALUES('Dilbert')"
 )
 @DirtiesContext

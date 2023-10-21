@@ -80,7 +80,7 @@ class DefaultRequestExpectationTests {
 
 
 	private ClientHttpRequest createRequest() {
-		return new MockClientHttpRequest(HttpMethod.GET,  URI.create("/foo"));
+		return new MockClientHttpRequest(HttpMethod.GET, URI.create("/foo"));
 	}
 
 }

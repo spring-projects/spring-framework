@@ -97,7 +97,7 @@ public class TestExchangeAdapter implements HttpExchangeAdapter {
 		return true;
 	}
 
-	protected  <T> void saveInput(
+	protected <T> void saveInput(
 			String methodName, HttpRequestValues values, @Nullable ParameterizedTypeReference<T> bodyType) {
 
 		this.invokedMethodName = methodName;

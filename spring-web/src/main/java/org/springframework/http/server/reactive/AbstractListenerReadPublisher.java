@@ -239,7 +239,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private boolean handlePendingCompletionOrError() {
 		State state = this.state.get();
-		if (state == State.DEMAND || state  == State.NO_DEMAND) {
+		if (state == State.DEMAND || state == State.NO_DEMAND) {
 			if (this.completionPending) {
 				rsReadLogger.trace(getLogPrefix() + "Processing pending completion");
 				this.state.get().onAllDataRead(this);

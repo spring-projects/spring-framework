@@ -325,7 +325,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * with a {@value MediaType#ALL_VALUE} expression.
 	 */
 	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
-		return (this.expressions.isEmpty() ? this.mediaTypeAllList  : this.expressions);
+		return (this.expressions.isEmpty() ? this.mediaTypeAllList : this.expressions);
 	}
 
 

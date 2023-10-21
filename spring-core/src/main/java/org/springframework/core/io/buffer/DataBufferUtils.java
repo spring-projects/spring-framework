@@ -1074,7 +1074,7 @@ public abstract class DataBufferUtils {
 			DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers();
 			Assert.state(iterator.hasNext(), "No ByteBuffer available");
 			ByteBuffer byteBuffer = iterator.next();
-			Attachment attachment = new Attachment(dataBuffer,  iterator);
+			Attachment attachment = new Attachment(dataBuffer, iterator);
 			this.channel.read(byteBuffer, this.position.get(), attachment, this);
 		}
 

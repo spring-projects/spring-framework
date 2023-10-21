@@ -478,7 +478,7 @@ class DefaultWebTestClient implements WebTestClient {
 			return new DefaultBodyContentSpec(entityResult);
 		}
 
-		private  <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
+		private <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
 			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
 			result.assertWithDiagnostics(() -> this.entityResultConsumer.accept(result));
 			return result;

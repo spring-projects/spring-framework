@@ -58,7 +58,7 @@ class JmxUtilsTests {
 	}
 
 	@Test
-	void isMBeanWithDynamicMBean()  {
+	void isMBeanWithDynamicMBean() {
 		DynamicMBean mbean = new TestDynamicMBean();
 		assertThat(JmxUtils.isMBean(mbean.getClass())).as("Dynamic MBean not detected correctly").isTrue();
 	}
@@ -76,24 +76,24 @@ class JmxUtilsTests {
 	}
 
 	@Test
-	void notAnMBean()  {
+	void notAnMBean() {
 		assertThat(JmxUtils.isMBean(Object.class)).as("Object incorrectly identified as an MBean").isFalse();
 	}
 
 	@Test
-	void simpleMBean()  {
+	void simpleMBean() {
 		Foo foo = new Foo();
 		assertThat(JmxUtils.isMBean(foo.getClass())).as("Simple MBean not detected correctly").isTrue();
 	}
 
 	@Test
-	void simpleMXBean()  {
+	void simpleMXBean() {
 		FooX foo = new FooX();
 		assertThat(JmxUtils.isMBean(foo.getClass())).as("Simple MXBean not detected correctly").isTrue();
 	}
 
 	@Test
-	void simpleMBeanThroughInheritance()  {
+	void simpleMBeanThroughInheritance() {
 		Bar bar = new Bar();
 		Abc abc = new Abc();
 		assertThat(JmxUtils.isMBean(bar.getClass())).as("Simple MBean (through inheritance) not detected correctly").isTrue();

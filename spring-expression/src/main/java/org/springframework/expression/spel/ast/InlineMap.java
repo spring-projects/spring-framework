@@ -134,7 +134,7 @@ public class InlineMap extends SpelNodeImpl {
 					key = keyChild.getValue(expressionState);
 				}
 				Object value = getChild(c).getValue(expressionState);
-				returnValue.put(key,  value);
+				returnValue.put(key, value);
 			}
 			return new TypedValue(returnValue);
 		}

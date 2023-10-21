@@ -97,7 +97,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void subscribeTwice()  {
+	public void subscribeTwice() {
 		assertThat(this.channel.subscribe(this.handler)).isTrue();
 		assertThat(this.channel.subscribe(this.handler)).isFalse();
 		this.channel.send(this.message);
@@ -105,7 +105,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void unsubscribeTwice()  {
+	public void unsubscribeTwice() {
 		this.channel.subscribe(this.handler);
 		assertThat(this.channel.unsubscribe(this.handler)).isTrue();
 		assertThat(this.channel.unsubscribe(this.handler)).isFalse();
@@ -114,7 +114,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void failurePropagates()  {
+	public void failurePropagates() {
 		RuntimeException ex = new RuntimeException();
 		willThrow(ex).given(this.handler).handleMessage(this.message);
 		MessageHandler secondHandler = mock();
@@ -130,7 +130,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void concurrentModification()  {
+	public void concurrentModification() {
 		this.channel.subscribe(message1 -> channel.unsubscribe(handler));
 		this.channel.subscribe(this.handler);
 		this.channel.send(this.message);

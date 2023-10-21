@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Stephane Nicoll
  */
 public abstract class AbstractValueAdaptingCacheTests<T extends AbstractValueAdaptingCache>
-		extends AbstractCacheTests<T>  {
+		extends AbstractCacheTests<T> {
 
 	protected static final String CACHE_NAME_NO_NULL = "testCacheNoNull";
 

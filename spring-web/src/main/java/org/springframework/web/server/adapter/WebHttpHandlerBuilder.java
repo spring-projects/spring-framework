@@ -429,7 +429,7 @@ public final class WebHttpHandlerBuilder {
 	 */
 	public HttpHandler build() {
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
-		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
+		decorated = new ExceptionHandlingWebHandler(decorated, this.exceptionHandlers);
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {

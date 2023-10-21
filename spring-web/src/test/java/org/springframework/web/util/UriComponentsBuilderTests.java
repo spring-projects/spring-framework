@@ -603,7 +603,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test
-	void queryParamWithoutValueWithEquals()  {
+	void queryParamWithoutValueWithEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=");
 		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEmpty();

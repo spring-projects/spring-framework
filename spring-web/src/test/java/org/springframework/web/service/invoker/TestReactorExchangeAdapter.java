@@ -61,7 +61,7 @@ class TestReactorExchangeAdapter extends TestExchangeAdapter implements ReactorH
 	@Override
 	public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		saveInput("exchangeForBodyMono", requestValues, bodyType);
-		return  bodyType.getType().getTypeName().contains("List") ?
+		return bodyType.getType().getTypeName().contains("List") ?
 				(Mono<T>) Mono.just(Collections.singletonList(getInvokedMethodName())) :
 				(Mono<T>) Mono.just(getInvokedMethodName());
 	}

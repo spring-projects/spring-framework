@@ -310,7 +310,7 @@ public class ReactorNetty2TcpClient<P> implements TcpOperations<P> {
 				}
 			});
 			Sinks.Empty<Void> completionSink = Sinks.empty();
-			TcpConnection<P> connection = new ReactorNetty2TcpConnection<>(inbound, outbound,  codec, completionSink);
+			TcpConnection<P> connection = new ReactorNetty2TcpConnection<>(inbound, outbound, codec, completionSink);
 			scheduler.schedule(() -> this.connectionHandler.afterConnected(connection));
 
 			inbound.withConnection(conn -> conn.addHandlerFirst(new StompMessageDecoder<>(codec)));

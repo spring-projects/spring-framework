@@ -121,7 +121,7 @@ public class ExpressionEvaluatorTests {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE);
 		assertThatExceptionOfType(VariableNotAvailableException.class).isThrownBy(() ->
 				new SpelExpressionParser().parseExpression("#result").getValue(context))
-			.satisfies(ex ->  assertThat(ex.getName()).isEqualTo("result"));
+			.satisfies(ex -> assertThat(ex.getName()).isEqualTo("result"));
 	}
 
 	@Test

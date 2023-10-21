@@ -580,7 +580,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			byte[] payload = message.getPayload();
 			byte[] bytes = ENCODER.encode(accessor.getMessageHeaders(), payload);
 
-			boolean useBinary = (payload.length > 0  &&
+			boolean useBinary = (payload.length > 0 &&
 					!(SockJsSession.class.isAssignableFrom(sessionType)) &&
 					MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(accessor.getContentType()));
 

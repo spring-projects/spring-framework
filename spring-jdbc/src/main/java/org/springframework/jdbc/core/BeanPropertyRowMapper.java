@@ -370,7 +370,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @throws SQLException if an SQLException is encountered
 	 * @since 5.3
 	 */
-	protected T constructMappedInstance(ResultSet rs, TypeConverter tc) throws SQLException  {
+	protected T constructMappedInstance(ResultSet rs, TypeConverter tc) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		return BeanUtils.instantiateClass(this.mappedClass);
 	}

@@ -181,7 +181,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setHeader("Content-Type", "text/plain")
 				.setBody("foo bar"));
 
-		Mono<Void> result  = this.webClient.get()
+		Mono<Void> result = this.webClient.get()
 				.exchangeToMono(ClientResponse::releaseBody);
 
 		StepVerifier.create(result)
@@ -198,7 +198,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setHeader("Foo", "bar")
 				.setBody("foo bar"));
 
-		Mono<ResponseEntity<Void>> result  = this.webClient.get()
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
 				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)

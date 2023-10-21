@@ -129,7 +129,7 @@ public enum SpelMessage {
 	PROBLEM_LOCATING_METHOD(Kind.ERROR, 1031,
 			"Problem locating method {0} on type {1}"),
 
-	SETVALUE_NOT_SUPPORTED(	Kind.ERROR, 1032,
+	SETVALUE_NOT_SUPPORTED(Kind.ERROR, 1032,
 			"setValue(ExpressionState, Object) not supported for ''{0}''"),
 
 	MULTIPLE_POSSIBLE_METHODS(Kind.ERROR, 1033,

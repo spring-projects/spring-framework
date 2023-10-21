@@ -247,7 +247,7 @@ final class BitsCronField extends CronField {
 	}
 
 	private void clearBit(int index) {
-		this.bits &=  ~(1L << index);
+		this.bits &= ~(1L << index);
 	}
 
 	@Override

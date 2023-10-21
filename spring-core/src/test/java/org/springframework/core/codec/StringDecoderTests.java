@@ -139,7 +139,7 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	}
 
 	@Test
-	void decodeNewlinesAcrossBuffers()  {
+	void decodeNewlinesAcrossBuffers() {
 		Flux<DataBuffer> input = Flux.just(
 				stringBuffer("\r"),
 				stringBuffer("\n"),
