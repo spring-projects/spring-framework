@@ -16,20 +16,9 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -88,11 +77,14 @@ import org.springframework.web.method.annotation.RequestParamMapMethodArgumentRe
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.annotation.SessionAttributesHandler;
 import org.springframework.web.method.annotation.SessionStatusMethodArgumentResolver;
+import org.springframework.web.method.support.ControllerInterceptor;
+import org.springframework.web.method.support.ControllerInterceptorComposite;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.method.support.MethodValidatorDelegate;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -101,6 +93,18 @@ import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 /**
  * Extension of {@link AbstractHandlerMethodAdapter} that supports
@@ -155,6 +159,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	@Nullable
 	private List<ModelAndViewResolver> modelAndViewResolvers;
+
+	private final ControllerInterceptorComposite controllerInterceptorComposite = new ControllerInterceptorComposite();
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
@@ -578,6 +584,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 					methodParamPredicate(resolvers, ModelAttributeMethodProcessor.class),
 					methodParamPredicate(resolvers, RequestParamMethodArgumentResolver.class));
 		}
+
+		controllerInterceptorComposite.addAll(initControllerInterceptors());
+		if (this.methodValidator != null) {
+			controllerInterceptorComposite.add(new MethodValidatorDelegate(this.methodValidator));
+		}
 	}
 
 	private void initMessageConverters() {
@@ -634,6 +645,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 						" @InitBinder, " + reqCount + " RequestBodyAdvice, " + resCount + " ResponseBodyAdvice");
 			}
 		}
+	}
+
+	private Collection<ControllerInterceptor> initControllerInterceptors() {
+		if (getApplicationContext() == null) {
+			return Collections.emptyList();
+		}
+		Map<String, ControllerInterceptor> controllerInterceptorMap = getApplicationContext().getBeansOfType(ControllerInterceptor.class);
+		return controllerInterceptorMap.values();
 	}
 
 	// Count all advice, including explicit registrations..
@@ -887,7 +906,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		invocableMethod.setDataBinderFactory(binderFactory);
 		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-		invocableMethod.setMethodValidator(this.methodValidator);
+		invocableMethod.determineValidationGroups(this.methodValidator);
+		invocableMethod.setControllerInterceptors(this.controllerInterceptorComposite);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));

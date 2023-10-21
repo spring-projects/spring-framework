@@ -16,17 +16,11 @@
 
 package org.springframework.web.method.support;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-
+import jakarta.servlet.http.HttpServletRequest;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
-
 import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -42,6 +36,12 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with
@@ -67,9 +67,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	@Nullable
 	private WebDataBinderFactory dataBinderFactory;
 
-	@Nullable
-	private MethodValidator methodValidator;
+	private ControllerInterceptorComposite controllerInterceptorComposite;
 
+	@Nullable
+	private Class<?>[] validationGroups;
 
 	/**
 	 * Create an instance from a {@code HandlerMethod}.
@@ -134,15 +135,25 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Set the {@link MethodValidator} to perform method validation with if the
+	 * Determine the applicable validation groups. By default, obtained from an
+	 * {@link MethodValidator#determineValidationGroups(Object, Method)} if the
 	 * controller method {@link #shouldValidateArguments()} or
 	 * {@link #shouldValidateReturnValue()}.
 	 * @since 6.1
 	 */
-	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
-		this.methodValidator = methodValidator;
+	public void determineValidationGroups(@Nullable MethodValidator methodValidator) {
+		this.validationGroups = (shouldValidateArguments() || shouldValidateReturnValue()) && methodValidator != null
+				? methodValidator.determineValidationGroups(getBean(), getBridgedMethod())
+				: EMPTY_GROUPS;
 	}
 
+	public Class<?>[] getValidationGroups() {
+		return validationGroups;
+	}
+
+	public void setControllerInterceptors(ControllerInterceptorComposite controllerInterceptorComposite) {
+		this.controllerInterceptorComposite = controllerInterceptorComposite;
+	}
 
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given request.
@@ -172,18 +183,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
 
-		Class<?>[] groups = getValidationGroups();
-		if (shouldValidateArguments() && this.methodValidator != null) {
-			this.methodValidator.applyArgumentValidation(
-					getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
-		}
+		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+		controllerInterceptorComposite.beforeInvoke(this, getBridgedMethod(), args, servletRequest);
 
 		Object returnValue = doInvoke(args);
 
-		if (shouldValidateReturnValue() && this.methodValidator != null) {
-			this.methodValidator.applyReturnValueValidation(
-					getBean(), getBridgedMethod(), getReturnType(), returnValue, groups);
-		}
+		returnValue = controllerInterceptorComposite.afterInvoke(this, getBridgedMethod(), args, returnValue, servletRequest);
 
 		return returnValue;
 	}
@@ -228,11 +233,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return args;
-	}
-
-	private Class<?>[] getValidationGroups() {
-		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
-				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 	/**

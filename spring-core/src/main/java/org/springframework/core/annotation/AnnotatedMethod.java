@@ -92,7 +92,7 @@ public class AnnotatedMethod {
 	 * If the annotated method is a bridge method, this method returns the bridged
 	 * (user-defined) method. Otherwise, it returns the same method as {@link #getMethod()}.
 	 */
-	protected final Method getBridgedMethod() {
+	public final Method getBridgedMethod() {
 		return this.bridgedMethod;
 	}
 
