@@ -1116,7 +1116,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
+	private static class ResourcesRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
 		private final Function<ServerRequest, Optional<Resource>> lookupFunction;
 

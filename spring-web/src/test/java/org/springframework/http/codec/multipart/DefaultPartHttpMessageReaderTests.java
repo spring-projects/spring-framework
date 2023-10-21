@@ -63,7 +63,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
 /**
  * @author Arjen Poutsma
  */
-class DefaultPartHttpMessageReaderTests  {
+class DefaultPartHttpMessageReaderTests {
 
 	private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer iaculis metus id vestibulum nullam.";
 
@@ -139,7 +139,7 @@ class DefaultPartHttpMessageReaderTests  {
 	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
-	void noEndHeader(DefaultPartHttpMessageReader reader)  {
+	void noEndHeader(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-end-header.multipart", getClass()), "boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());

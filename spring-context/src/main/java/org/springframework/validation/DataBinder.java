@@ -949,7 +949,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 				if (value == null && !BeanUtils.isSimpleValueType(param.nestedIfOptional().getNestedParameterType())) {
 					ResolvableType type = ResolvableType.forMethodParameter(param);
-					args[i]  = createObject(type, paramPath + ".", valueResolver);
+					args[i] = createObject(type, paramPath + ".", valueResolver);
 				}
 				else {
 					try {

@@ -28,7 +28,7 @@ public interface MessageContentsDelegate {
 
 	void handleMessage(CharSequence message);
 
-	void handleMessage(Map<String, Object>  message);
+	void handleMessage(Map<String, Object> message);
 
 	void handleMessage(byte[] message);
 

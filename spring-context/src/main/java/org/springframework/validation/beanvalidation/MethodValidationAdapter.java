@@ -345,7 +345,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	}
 
 	private MethodParameter initMethodParameter(Method method, int index) {
-		MethodParameter	parameter = new MethodParameter(method, index);
+		MethodParameter parameter = new MethodParameter(method, index);
 		parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
 		return parameter;
 	}

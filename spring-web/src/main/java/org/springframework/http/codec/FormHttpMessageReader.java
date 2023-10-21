@@ -166,7 +166,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 				result.add(URLDecoder.decode(pair, charset), null);
 			}
 			else {
-				String name = URLDecoder.decode(pair.substring(0, idx),  charset);
+				String name = URLDecoder.decode(pair.substring(0, idx), charset);
 				String value = URLDecoder.decode(pair.substring(idx + 1), charset);
 				result.add(name, value);
 			}

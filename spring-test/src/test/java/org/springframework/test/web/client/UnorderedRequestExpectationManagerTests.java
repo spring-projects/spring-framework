@@ -120,7 +120,7 @@ class UnorderedRequestExpectationManagerTests {
 
 
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
-		return new MockClientHttpRequest(method,  URI.create(url));
+		return new MockClientHttpRequest(method, URI.create(url));
 	}
 
 }

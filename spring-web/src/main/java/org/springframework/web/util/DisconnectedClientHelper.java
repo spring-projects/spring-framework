@@ -60,7 +60,7 @@ public class DisconnectedClientHelper {
 	 * <li>IOException "Broken pipe" or "connection reset by peer"
 	 * </ul>
 	 */
-	public boolean isClientDisconnectedException(Throwable ex)  {
+	public boolean isClientDisconnectedException(Throwable ex) {
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
 		if (message != null) {
 			String text = message.toLowerCase();

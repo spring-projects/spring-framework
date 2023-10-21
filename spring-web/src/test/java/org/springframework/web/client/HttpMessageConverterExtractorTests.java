@@ -199,7 +199,7 @@ class HttpMessageConverterExtractorTests {
 		responseHeaders.setContentType(contentType);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes())  {
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()) {
 			@Override
 			public boolean markSupported() {
 				return false;

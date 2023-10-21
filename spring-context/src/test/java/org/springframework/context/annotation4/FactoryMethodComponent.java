@@ -37,7 +37,7 @@ public class FactoryMethodComponent {
 
 	private int i;
 
-	public static TestBean nullInstance()  {
+	public static TestBean nullInstance() {
 		return null;
 	}
 

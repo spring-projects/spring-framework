@@ -51,7 +51,7 @@ public class XmlExpectationsHelper {
 		assertThat("Body content", document, matcher);
 	}
 
-	private Document parseXmlString(String xml) throws Exception  {
+	private Document parseXmlString(String xml) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();

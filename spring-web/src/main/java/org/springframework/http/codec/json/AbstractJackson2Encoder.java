@@ -202,7 +202,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 				}
 
 				return dataBufferFlux
-						.doOnNext(dataBuffer ->	Hints.touchDataBuffer(dataBuffer, hintsToUse, logger))
+						.doOnNext(dataBuffer -> Hints.touchDataBuffer(dataBuffer, hintsToUse, logger))
 						.doAfterTerminate(() -> {
 							try {
 								byteBuilder.release();

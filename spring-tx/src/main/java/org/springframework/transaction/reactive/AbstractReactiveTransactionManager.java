@@ -355,7 +355,7 @@ public abstract class AbstractReactiveTransactionManager
 		if (resourcesHolder != null) {
 			Object suspendedResources = resourcesHolder.suspendedResources;
 			if (suspendedResources != null) {
-				resume =  doResume(synchronizationManager, transaction, suspendedResources);
+				resume = doResume(synchronizationManager, transaction, suspendedResources);
 			}
 			List<TransactionSynchronization> suspendedSynchronizations = resourcesHolder.suspendedSynchronizations;
 			if (suspendedSynchronizations != null) {

@@ -73,7 +73,7 @@ public abstract class AbstractCacheResolver implements CacheResolver, Initializi
 	}
 
 	@Override
-	public void afterPropertiesSet()  {
+	public void afterPropertiesSet() {
 		Assert.notNull(this.cacheManager, "CacheManager is required");
 	}
 

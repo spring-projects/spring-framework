@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * @since 4.0
  * @see StompDecoder
  */
-public class StompEncoder  {
+public class StompEncoder {
 
 	private static final Byte LINE_FEED_BYTE = '\n';
 

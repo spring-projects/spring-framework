@@ -60,7 +60,7 @@ class BeforeTestClassSqlScriptsTests extends AbstractTransactionalTests {
 	}
 
 	@Nested
-	class NestedBeforeTestClassSqlScriptsTests  {
+	class NestedBeforeTestClassSqlScriptsTests {
 
 		@Test
 		void classLevelScriptsHaveBeenRun() {

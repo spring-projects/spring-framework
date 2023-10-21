@@ -42,7 +42,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  */
-public abstract class RequestContextHolder  {
+public abstract class RequestContextHolder {
 
 	private static final boolean jsfPresent =
 			ClassUtils.isPresent("jakarta.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());

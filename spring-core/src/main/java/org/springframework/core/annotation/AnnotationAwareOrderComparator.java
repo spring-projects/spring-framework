@@ -92,7 +92,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			return OrderUtils.getPriority(clazz);
 		}
 		Integer priority = OrderUtils.getPriority(obj.getClass());
-		if (priority == null  && obj instanceof DecoratingProxy decoratingProxy) {
+		if (priority == null && obj instanceof DecoratingProxy decoratingProxy) {
 			return getPriority(decoratingProxy.getDecoratedClass());
 		}
 		return priority;

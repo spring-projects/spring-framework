@@ -188,7 +188,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED &&
-				txObject.isTransactionActive())  {
+				txObject.isTransactionActive()) {
 			return txObject.createSavepoint();
 		}
 

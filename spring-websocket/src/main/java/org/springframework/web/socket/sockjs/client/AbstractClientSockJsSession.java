@@ -186,7 +186,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			throw new IllegalArgumentException("Invalid close status: " + status);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing session with " +  status + " in " + this);
+			logger.debug("Closing session with " + status + " in " + this);
 		}
 		closeInternal(status);
 	}

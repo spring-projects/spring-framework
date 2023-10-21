@@ -190,6 +190,9 @@
 		<!-- Modifiers -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
 
+		<!-- Whitespaces -->
+		<module name="SingleSpaceSeparator"/>
+
 		<!-- Miscellaneous -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck">
 			<property name="tokens" value="BLOCK_COMMENT_BEGIN"/>

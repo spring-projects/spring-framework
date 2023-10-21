@@ -54,7 +54,7 @@ class AotMergedContextConfigurationTests {
 
 
 	@Test
-	void testEquals()  {
+	void testEquals() {
 		assertThat(aotMergedConfig1).isEqualTo(aotMergedConfig1);
 		assertThat(aotMergedConfig1).isEqualTo(aotMergedConfig2);
 

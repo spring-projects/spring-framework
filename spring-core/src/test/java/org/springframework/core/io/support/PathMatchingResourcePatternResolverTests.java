@@ -200,7 +200,7 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar()  {
+			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar() {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned-resources/**", testResourcesDir);
 				String pathPrefix = ".+?resources/";

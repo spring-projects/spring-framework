@@ -570,7 +570,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private static boolean isKotlinProperty(Method method, String methodSuffix) {
 		Class<?> clazz = method.getDeclaringClass();
 		return KotlinDetector.isKotlinReflectPresent() &&
-				KotlinDetector.isKotlinType(clazz)  &&
+				KotlinDetector.isKotlinType(clazz) &&
 				KotlinDelegate.isKotlinProperty(method, methodSuffix);
 	}
 

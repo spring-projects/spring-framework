@@ -26,7 +26,7 @@ import org.springframework.aot.hint.TypeReference;
  * @author Brian Clozel
  * @since 6.1
  */
-class KotlinDetectorRuntimeHints  implements RuntimeHintsRegistrar {
+class KotlinDetectorRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {

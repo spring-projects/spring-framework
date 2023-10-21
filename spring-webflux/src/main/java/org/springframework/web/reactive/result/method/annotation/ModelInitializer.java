@@ -134,7 +134,7 @@ class ModelInitializer {
 	}
 
 
-	private boolean isAsyncVoidType(ResolvableType type, MethodParameter typeSource, @Nullable  ReactiveAdapter adapter) {
+	private boolean isAsyncVoidType(ResolvableType type, MethodParameter typeSource, @Nullable ReactiveAdapter adapter) {
 		Method method = typeSource.getMethod();
 		return (adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class)) ||
 				(method != null && KotlinDetector.isSuspendingFunction(method) && typeSource.getParameterType() == void.class);

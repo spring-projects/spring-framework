@@ -474,7 +474,7 @@ public abstract class AbstractJdbcInsert {
 			if (getGeneratedKeyNames().length > 1) {
 				throw new InvalidDataAccessApiUsageException(
 						"Current database only supports retrieving the key for a single column. There are " +
-						getGeneratedKeyNames().length  + " columns specified: " + Arrays.toString(getGeneratedKeyNames()));
+						getGeneratedKeyNames().length + " columns specified: " + Arrays.toString(getGeneratedKeyNames()));
 			}
 
 			Assert.state(getTableName() != null, "No table name set");

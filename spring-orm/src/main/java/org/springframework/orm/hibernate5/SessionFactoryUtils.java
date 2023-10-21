@@ -202,7 +202,7 @@ public abstract class SessionFactoryUtils {
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
 		}
 		if (ex instanceof ConstraintViolationException hibJdbcEx) {
-			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + hibJdbcEx.getSQL() +
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() +
 					"]; constraint [" + hibJdbcEx.getConstraintName() + "]", ex);
 		}
 		if (ex instanceof DataException hibJdbcEx) {

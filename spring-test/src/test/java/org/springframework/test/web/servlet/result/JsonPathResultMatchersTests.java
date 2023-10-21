@@ -305,7 +305,7 @@ class JsonPathResultMatchersTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", "application/json");
 		response.getWriter().print(new String("test".getBytes(ISO_8859_1)));
-		StubMvcResult result =  new StubMvcResult(null, null, null, null, null, null, response);
+		StubMvcResult result = new StubMvcResult(null, null, null, null, null, null, response);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").prefix("prefix").value("foo").match(result));

@@ -135,6 +135,6 @@ public class SpringConfiguratorTests {
 		}
 	}
 
-	private static class EchoService {	}
+	private static class EchoService { }
 
 }

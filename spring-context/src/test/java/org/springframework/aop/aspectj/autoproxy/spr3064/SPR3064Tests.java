@@ -39,7 +39,7 @@ class SPR3064Tests {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
-		Service service  = ctx.getBean(Service.class);
+		Service service = ctx.getBean(Service.class);
 		assertThatRuntimeException()
 			.isThrownBy(service::serveMe)
 			.withMessage("advice invoked");

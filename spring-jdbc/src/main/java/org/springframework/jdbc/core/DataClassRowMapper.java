@@ -107,7 +107,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	}
 
 	@Override
-	protected T constructMappedInstance(ResultSet rs, TypeConverter tc) throws SQLException  {
+	protected T constructMappedInstance(ResultSet rs, TypeConverter tc) throws SQLException {
 		Assert.state(this.mappedConstructor != null, "Mapped constructor was not initialized");
 
 		Object[] args;

@@ -218,7 +218,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	}
 
 	private BeanRegistrationCodeFragments createCustomCodeFragments(RegisteredBean registeredBean, UnaryOperator<BeanRegistrationCodeFragments> customFragments) {
-		BeanRegistrationAotContribution aotContribution =  BeanRegistrationAotContribution.
+		BeanRegistrationAotContribution aotContribution = BeanRegistrationAotContribution.
 				withCustomCodeFragments(customFragments);
 		BeanRegistrationCodeFragments defaultCodeFragments = createInstance(registeredBean);
 		return aotContribution.customizeBeanRegistrationCodeFragments(

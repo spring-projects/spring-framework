@@ -84,7 +84,7 @@ public class CacheInterceptor extends CacheAspectSupport implements MethodInterc
 	private static class KotlinDelegate {
 
 		public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
-			Continuation<?>  continuation = (Continuation<?>) args[args.length - 1];
+			Continuation<?> continuation = (Continuation<?>) args[args.length - 1];
 			CoroutineContext coroutineContext = continuation.getContext().minusKey(Job.Key);
 			return CoroutinesUtils.invokeSuspendingFunction(coroutineContext, method, target, args);
 		}

@@ -110,7 +110,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * @param formWriter the fallback writer for form data, {@code null} by default
 	 */
 	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters,
-			@Nullable  HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
+			@Nullable HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
 
 		this(() -> partWriters, formWriter);
 	}
@@ -125,7 +125,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * @since 6.0.3
 	 */
 	public MultipartHttpMessageWriter(Supplier<List<HttpMessageWriter<?>>> partWritersSupplier,
-			@Nullable  HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
+			@Nullable HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
 
 		super(initMediaTypes(formWriter));
 		this.partWritersSupplier = partWritersSupplier;

@@ -128,7 +128,7 @@ class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 	}
 
 	@Test
-	void decodeNewlinesAcrossBuffers()  {
+	void decodeNewlinesAcrossBuffers() {
 		Flux<DataBuffer> input = Flux.just(
 				stringBuffer("\r"),
 				stringBuffer("\n"),

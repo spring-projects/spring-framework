@@ -373,7 +373,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test  // SPR-11856
-	void fromHttpRequestForwardedHeader()  {
+	void fromHttpRequestForwardedHeader() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
 		request.setScheme("http");
@@ -389,7 +389,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test
-	void fromHttpRequestForwardedHeaderQuoted()  {
+	void fromHttpRequestForwardedHeaderQuoted() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=\"https\"; host=\"84.198.58.199\"");
 		request.setScheme("http");
@@ -405,7 +405,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test
-	void fromHttpRequestMultipleForwardedHeader()  {
+	void fromHttpRequestMultipleForwardedHeader() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "host=84.198.58.199;proto=https");
 		request.addHeader("Forwarded", "proto=ftp; host=1.2.3.4");
@@ -422,7 +422,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test
-	void fromHttpRequestMultipleForwardedHeaderComma()  {
+	void fromHttpRequestMultipleForwardedHeaderComma() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "host=84.198.58.199 ;proto=https, proto=ftp; host=1.2.3.4");
 		request.setScheme("http");
@@ -438,7 +438,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test
-	void fromHttpRequestForwardedHeaderWithHostPortAndWithoutServerPort()  {
+	void fromHttpRequestForwardedHeaderWithHostPortAndWithoutServerPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199:9090");
 		request.setScheme("http");
@@ -456,7 +456,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test
-	void fromHttpRequestForwardedHeaderWithHostPortAndServerPort()  {
+	void fromHttpRequestForwardedHeaderWithHostPortAndServerPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199:9090");
 		request.setScheme("http");
@@ -475,7 +475,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test
-	void fromHttpRequestForwardedHeaderWithoutHostPortAndWithServerPort()  {
+	void fromHttpRequestForwardedHeaderWithoutHostPortAndWithServerPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
 		request.setScheme("http");
@@ -494,7 +494,7 @@ class ForwardedHeaderUtilsTests {
 	}
 
 	@Test  // SPR-16262
-	void fromHttpRequestForwardedHeaderWithProtoAndServerPort()  {
+	void fromHttpRequestForwardedHeaderWithProtoAndServerPort() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https");
 		request.setScheme("http");

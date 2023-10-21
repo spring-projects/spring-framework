@@ -56,7 +56,7 @@ public class SQLExceptionCustomTranslatorTests {
 
 	@Test
 	public void dataAccessResourceException() {
-		SQLException dataAccessResourceEx =  new SQLDataException("", "", 2);
+		SQLException dataAccessResourceEx = new SQLDataException("", "", 2);
 		DataAccessException dae = sext.translate("task", "SQL", dataAccessResourceEx);
 		assertThat(dae.getCause()).isEqualTo(dataAccessResourceEx);
 		assertThat(dae).isInstanceOf(TransientDataAccessResourceException.class);

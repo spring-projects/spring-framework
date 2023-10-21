@@ -286,7 +286,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
 		if (ex instanceof ConstraintViolationException hibEx) {
-			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + hibEx.getSQL() +
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibEx.getSQL() +
 					"]; constraint [" + hibEx.getConstraintName() + "]", ex);
 		}
 		if (ex instanceof DataException hibEx) {

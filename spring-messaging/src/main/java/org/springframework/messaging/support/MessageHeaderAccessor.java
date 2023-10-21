@@ -600,7 +600,7 @@ public class MessageHeaderAccessor {
 
 		if (messageHeaders instanceof MutableMessageHeaders mutableHeaders) {
 			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
-			if (requiredType == null || requiredType.isInstance(headerAccessor))  {
+			if (requiredType == null || requiredType.isInstance(headerAccessor)) {
 				return (T) headerAccessor;
 			}
 		}

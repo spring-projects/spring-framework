@@ -1357,7 +1357,7 @@ class CronExpressionTests {
 	@Test
 	public void various() {
 		CronExpression cronExpression = CronExpression.parse("3-57 13-28 17,18 1,15 3-12 6#1");
-		LocalDateTime last =     LocalDateTime.of(2022, 9, 15, 17, 44, 11);
+		LocalDateTime last = LocalDateTime.of(2022, 9, 15, 17, 44, 11);
 		LocalDateTime expected = LocalDateTime.of(2022, 10, 1, 17, 13, 3);
 		LocalDateTime actual = cronExpression.next(last);
 		assertThat(actual).isNotNull();

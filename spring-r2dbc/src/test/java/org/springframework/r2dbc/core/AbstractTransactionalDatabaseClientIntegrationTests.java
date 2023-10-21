@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Christoph Strobl
  */
-abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
+abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 
 	private ConnectionFactory connectionFactory;
 

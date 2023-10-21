@@ -243,7 +243,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * as an argument
 	 * @throws MessageConversionException if the message could not be extracted
 	 */
-	protected Object extractMessage(Message message)  {
+	protected Object extractMessage(Message message) {
 		try {
 			MessageConverter converter = getMessageConverter();
 			if (converter != null) {

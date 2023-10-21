@@ -202,7 +202,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-		public SockJsResponseListener(URI url, HttpHeaders headers,	XhrClientSockJsSession sockJsSession,
+		public SockJsResponseListener(URI url, HttpHeaders headers, XhrClientSockJsSession sockJsSession,
 				CompletableFuture<WebSocketSession> connectFuture) {
 
 			this.transportUrl = url;

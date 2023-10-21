@@ -69,7 +69,7 @@ class Spr12334Tests {
 		private static AtomicInteger scanned = new AtomicInteger();
 
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry)  {
+		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 			if (scanned.get() > 0) {
 				throw new IllegalStateException("Already scanned");
 			}

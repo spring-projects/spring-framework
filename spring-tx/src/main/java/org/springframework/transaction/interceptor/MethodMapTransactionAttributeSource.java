@@ -152,7 +152,7 @@ public class MethodMapTransactionAttributeSource
 	public void addTransactionalMethod(Class<?> clazz, String mappedName, TransactionAttribute attr) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(mappedName, "Mapped name must not be null");
-		String name = clazz.getName() + '.'  + mappedName;
+		String name = clazz.getName() + '.' + mappedName;
 
 		Method[] methods = clazz.getDeclaredMethods();
 		List<Method> matchingMethods = new ArrayList<>();

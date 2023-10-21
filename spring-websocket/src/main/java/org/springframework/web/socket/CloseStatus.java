@@ -54,7 +54,7 @@ public final class CloseStatus implements Serializable {
 	 * "1002 indicates that an endpoint is terminating the connection due to a protocol
 	 * error."
 	 */
-	public static final CloseStatus PROTOCOL_ERROR  = new CloseStatus(1002);
+	public static final CloseStatus PROTOCOL_ERROR = new CloseStatus(1002);
 
 	/**
 	 * "1003 indicates that an endpoint is terminating the connection because it has

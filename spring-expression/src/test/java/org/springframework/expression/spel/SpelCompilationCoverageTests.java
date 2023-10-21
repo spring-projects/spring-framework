@@ -6372,7 +6372,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		private Float _valueF,_valueF2;
 
 		public Reg(int v) {
-			this._value  = v;
+			this._value = v;
 			this._valueL = (long) v;
 			this._valueD = (double) v;
 			this._valueF = (float) v;
@@ -6411,14 +6411,14 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		public void setValue(Integer value) {
-			_value  = value;
+			_value = value;
 			_valueL = value==null?null:Long.valueOf(value);
 			_valueD = value==null?null:Double.valueOf(value);
 			_valueF = value==null?null:Float.valueOf(value);
 		}
 
 		public void setValue2(Integer value) {
-			_value2  = value;
+			_value2 = value;
 			_valueL2 = value==null?null:Long.valueOf(value);
 			_valueD2 = value==null?null:Double.valueOf(value);
 			_valueF2 = value==null?null:Float.valueOf(value);

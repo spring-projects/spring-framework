@@ -74,7 +74,7 @@ public abstract class ReflectionHelper {
 					match = null;
 				}
 			}
-			else if (!expectedArg.equals(suppliedArg))  {
+			else if (!expectedArg.equals(suppliedArg)) {
 				if (suppliedArg.isAssignableTo(expectedArg)) {
 					if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
 						match = ArgumentsMatchKind.CLOSE;
