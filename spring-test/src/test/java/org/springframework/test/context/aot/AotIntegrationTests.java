@@ -31,7 +31,6 @@ import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
@@ -196,45 +195,28 @@ class AotIntegrationTests extends AbstractAotTests {
 	private static void printFailingTestClasses(TestExecutionSummary summary) {
 		System.err.println("Failing Test Classes:");
 		summary.getFailures().stream()
-				.map(Failure::getTestIdentifier)
-				.map(TestIdentifier::getSource)
+				.map(failure -> failure.getTestIdentifier().getSource())
 				.flatMap(Optional::stream)
-				.map(TestSource.class::cast)
-				.map(source -> {
-					if (source instanceof ClassSource classSource) {
-						return getJavaClass(classSource);
-					}
-					else if (source instanceof MethodSource methodSource) {
-						return getJavaClass(methodSource);
-					}
-					return Optional.<Class<?>> empty();
-				})
-				.flatMap(Optional::stream)
-				.map(Class::getName)
+				.map(AotIntegrationTests::getJavaClassName)
 				.distinct()
 				.sorted()
 				.forEach(System.err::println);
 		System.err.println();
 	}
 
-	private static Optional<Class<?>> getJavaClass(ClassSource classSource) {
+	private static String getJavaClassName(TestSource source) {
 		try {
-			return Optional.of(classSource.getJavaClass());
+			if (source instanceof ClassSource classSource) {
+				return classSource.getJavaClass().getName();
+			}
+			else if (source instanceof MethodSource methodSource) {
+				return methodSource.getJavaClass().getName();
+			}
 		}
 		catch (Exception ex) {
-			// ignore exception
-			return Optional.empty();
+			// ignore
 		}
-	}
-
-	private static Optional<Class<?>> getJavaClass(MethodSource methodSource) {
-		try {
-			return Optional.of(methodSource.getJavaClass());
-		}
-		catch (Exception ex) {
-			// ignore exception
-			return Optional.empty();
-		}
+		return "<unknown>";
 	}
 
 	private static TestClassScanner createTestClassScanner() {
