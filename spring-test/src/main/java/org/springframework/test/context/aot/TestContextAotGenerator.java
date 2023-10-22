@@ -17,7 +17,6 @@
 package org.springframework.test.context.aot;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -179,27 +178,18 @@ public class TestContextAotGenerator {
 
 			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
 			ClassLoader classLoader = getClass().getClassLoader();
-			Set<String> visitedTestClassNames = new HashSet<>();
 			testClasses.forEach(testClass -> {
-				String testClassName = testClass.getName();
-				if (visitedTestClassNames.add(testClassName)) {
-					MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
-					mergedConfigMappings.add(mergedConfig, testClass);
-					collectRuntimeHintsRegistrarClasses(testClass, coreRuntimeHintsRegistrarClasses);
-					reflectiveRuntimeHintsRegistrar.registerRuntimeHints(this.runtimeHints, testClass);
-					this.testRuntimeHintsRegistrars.forEach(registrar -> {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Processing RuntimeHints contribution from class [%s]"
-									.formatted(registrar.getClass().getCanonicalName()));
-						}
-						registrar.registerHints(this.runtimeHints, testClass, classLoader);
-					});
-				}
-				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Skipping duplicate test class: " + testClassName);
+				MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+				mergedConfigMappings.add(mergedConfig, testClass);
+				collectRuntimeHintsRegistrarClasses(testClass, coreRuntimeHintsRegistrarClasses);
+				reflectiveRuntimeHintsRegistrar.registerRuntimeHints(this.runtimeHints, testClass);
+				this.testRuntimeHintsRegistrars.forEach(registrar -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Processing RuntimeHints contribution from class [%s]"
+								.formatted(registrar.getClass().getCanonicalName()));
 					}
-				}
+					registrar.registerHints(this.runtimeHints, testClass, classLoader);
+				});
 			});
 
 			coreRuntimeHintsRegistrarClasses.stream()
