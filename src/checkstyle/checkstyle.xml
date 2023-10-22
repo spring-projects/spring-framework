@@ -190,8 +190,8 @@
 		<!-- Modifiers -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
 
-		<!-- Whitespaces -->
-		<module name="SingleSpaceSeparator"/>
+		<!-- Whitespace -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.whitespace.SingleSpaceSeparatorCheck"/>
 
 		<!-- Miscellaneous -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck">
