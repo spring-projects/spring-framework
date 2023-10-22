@@ -23,6 +23,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_CLASS;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.OVERRIDE;
@@ -36,7 +37,7 @@ import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.OVERR
  * @since 6.1
  */
 @SpringJUnitConfig(EmptyDatabaseConfig.class)
-@DirtiesContext
+@DirtiesContext(classMode = BEFORE_CLASS)
 @Sql(scripts = {"recreate-schema.sql", "data-add-catbert.sql"}, executionPhase = BEFORE_TEST_CLASS)
 class BeforeTestClassSqlScriptsTests extends AbstractTransactionalTests {
 
