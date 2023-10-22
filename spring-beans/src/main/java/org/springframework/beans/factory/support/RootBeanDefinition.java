@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * A root bean definition represents the <b>merged bean definition at runtime</b>
  * that backs a specific bean in a Spring BeanFactory. It might have been created
  * from multiple original bean definitions that inherit from each other, e.g.
- * {@link GenericBeanDefinition GenericBeanDefinitions} from XML declarations.
+ * {@link GenericBeanDefinition GenericBeanDefinition} from XML declarations.
  * A root bean definition is essentially the 'unified' bean definition view at runtime.
  *
  * <p>Root bean definitions may also be used for <b>registering individual bean
