@@ -543,6 +543,25 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertThat(tb.getName()).isEqualTo("notLazyAnymore");
 	}
 
+	@Test
+	public void testLazyResolutionWithFallbackTypeMatch() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LazyResourceCglibInjectionBean.class));
+		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class));
+
+		LazyResourceCglibInjectionBean bean = (LazyResourceCglibInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bf.containsSingleton("tb")).isFalse();
+		bean.testBean.setName("notLazyAnymore");
+		assertThat(bf.containsSingleton("tb")).isTrue();
+		TestBean tb = (TestBean) bf.getBean("tb");
+		assertThat(tb.getName()).isEqualTo("notLazyAnymore");
+	}
+
 
 	public static class AnnotatedInitDestroyBean {
 
