@@ -133,12 +133,12 @@ class PropertyPlaceholderHelperTests {
 		Properties props = new Properties();
 		props.setProperty("inner", "ar");
 
-		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${bar}");
+		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${b${inner}}");
 
 		text = "foo=${b\\${in${insideInner}r}}";
 		props = new Properties();
 		props.setProperty("insideInner", "ne");
-		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${b${inner}}");
+		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${b${in${insideInner}r}}");
 	}
 
 }

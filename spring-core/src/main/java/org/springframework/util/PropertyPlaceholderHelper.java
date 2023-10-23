@@ -103,7 +103,7 @@ public class PropertyPlaceholderHelper {
 	 * must not be resolved
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-									 @Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders, char escapeCharacter) {
+			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders, char escapeCharacter) {
 
 		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
 		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
@@ -148,9 +148,32 @@ public class PropertyPlaceholderHelper {
 
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
+		String resolvedPlaceholders = resolvePlaceholders(value, placeholderResolver, visitedPlaceholders);
+		return removeEscapeCharacters(resolvedPlaceholders);
+	}
+
+	private String removeEscapeCharacters(String resolvePlaceholders) {
+		StringBuilder result = new StringBuilder(resolvePlaceholders);
+		String escapedPrefix = this.escapeCharacter + this.placeholderPrefix;
+		int startIndex = result.indexOf(escapedPrefix);
+		while (startIndex != -1) {
+			int endIndex = findPlaceholderEndIndex(result, startIndex + 1);
+			if (endIndex != -1) {
+				result.replace(startIndex, startIndex + escapedPrefix.length(), this.placeholderPrefix);
+				startIndex = result.indexOf(escapedPrefix, endIndex + this.placeholderSuffix.length());
+			}
+			else {
+				break;
+			}
+		}
+		return result.toString();
+	}
+
+	protected String resolvePlaceholders(
+			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
 		StringBuilder result = new StringBuilder(value);
-		int startIndex = findPlaceholderPrefixIndexAndRemoveEscapeCharacters(result, 0);
+		int startIndex = findPlaceholderPrefixIndex(result, 0);
 
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
@@ -165,9 +188,7 @@ public class PropertyPlaceholderHelper {
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
 				}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
-				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
-				// Update result with a placeholder without escape chars
-				result.replace(startIndex + this.placeholderPrefix.length(), endIndex, placeholder);
+				placeholder = resolvePlaceholders(placeholder, placeholderResolver, visitedPlaceholders);
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
@@ -184,7 +205,7 @@ public class PropertyPlaceholderHelper {
 				if (propVal != null) {
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
-					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
+					propVal = resolvePlaceholders(propVal, placeholderResolver, visitedPlaceholders);
 					result.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Resolved placeholder '" + placeholder + "'");
@@ -232,15 +253,18 @@ public class PropertyPlaceholderHelper {
 		return -1;
 	}
 
-	private int findPlaceholderPrefixIndexAndRemoveEscapeCharacters(StringBuilder value, int startIndex) {
+	private int findPlaceholderPrefixIndex(StringBuilder value, int startIndex) {
 		int prefixIndex = value.indexOf(this.placeholderPrefix, startIndex);
 		//check if prefix is not escaped
 		if (prefixIndex < 1) {
 			return prefixIndex;
 		}
-		if (value.charAt(prefixIndex - 1) == escapeCharacter) {
-			value.deleteCharAt(prefixIndex - 1);
-			return findPlaceholderPrefixIndexAndRemoveEscapeCharacters(value, prefixIndex);
+		if (value.charAt(prefixIndex - 1) == this.escapeCharacter) {
+			int endOfEscaped = findPlaceholderEndIndex(value, prefixIndex);
+			if (endOfEscaped == -1) {
+				return -1;
+			}
+			return findPlaceholderPrefixIndex(value, endOfEscaped + 1);
 		}
 		return prefixIndex;
 	}

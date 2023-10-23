@@ -313,11 +313,20 @@ class PropertySourcesPropertyResolverTests {
 				.withProperty("p1", "v1")
 				.withProperty("p2", "\\${p1:default}")
 				.withProperty("p3", "${p2}")
+				.withProperty("p4", "adc${p0:\\${p1}}")
+				.withProperty("p5", "adc${\\${p0}:${p1}}")
+				.withProperty("p6", "adc${p0:def\\${p1}}")
+				.withProperty("p7", "adc\\${")
+
 		);
 		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
 		assertThat(pr.getProperty("p1")).isEqualTo("v1");
 		assertThat(pr.getProperty("p2")).isEqualTo("${p1:default}");
 		assertThat(pr.getProperty("p3")).isEqualTo("${p1:default}");
+		assertThat(pr.getProperty("p4")).isEqualTo("adc${p1}");
+		assertThat(pr.getProperty("p5")).isEqualTo("adcv1");
+		assertThat(pr.getProperty("p6")).isEqualTo("adcdef${p1}");
+		assertThat(pr.getProperty("p7")).isEqualTo("adc\\${");
 	}
 
 	@Test
