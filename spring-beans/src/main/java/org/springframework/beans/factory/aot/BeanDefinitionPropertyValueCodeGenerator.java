@@ -569,6 +569,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		}
 	}
 
+
 	/**
 	 * {@link Delegate} for {@link TypedStringValue} types.
 	 */

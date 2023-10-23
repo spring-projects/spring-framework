@@ -211,7 +211,6 @@ public abstract class ClassFilters {
 		public String toString() {
 			return "Negate " + this.original;
 		}
-
 	}
 
 }
