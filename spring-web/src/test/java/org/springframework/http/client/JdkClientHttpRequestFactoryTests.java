@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2023 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 
@@ -67,12 +68,22 @@ public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactory
 
 	@Test
 	public void customizeDisallowedHeaders() throws IOException {
-			ClientHttpRequest request = factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
+			ClientHttpRequest request = this.factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
 			request.getHeaders().set("Expect", "299");
 
 			try (ClientHttpResponse response = request.execute()) {
 				assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatusCode.valueOf(299));
 			}
+	}
+
+	@Test // gh-31451
+	public void contentLength0() throws IOException {
+		BufferingClientHttpRequestFactory bufferingFactory = new BufferingClientHttpRequestFactory(this.factory);
+		ClientHttpRequest request = bufferingFactory.createRequest(URI.create(this.baseUrl + "/methods/get"), HttpMethod.GET);
+
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+		}
 	}
 
 }
