@@ -86,6 +86,11 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
 
+	private static final Adapt[] ADAPTATIONS = Adapt.values(false, true);
+
+
+	private static final Log logger = LogFactory.getLog(AnnotationBeanNameGenerator.class);
+
 	/**
 	 * Set used to track which stereotype annotations have already been checked
 	 * to see if they use a convention-based override for the {@code value}
@@ -94,11 +99,6 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @see #determineBeanNameFromAnnotation(AnnotatedBeanDefinition)
 	 */
 	private static final Set<String> conventionBasedStereotypeCheckCache = ConcurrentHashMap.newKeySet();
-
-	private static final Adapt[] ADAPTATIONS = Adapt.values(false, true);
-
-
-	private final Log logger = LogFactory.getLog(AnnotationBeanNameGenerator.class);
 
 	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
 

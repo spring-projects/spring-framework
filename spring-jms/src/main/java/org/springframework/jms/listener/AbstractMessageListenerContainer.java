@@ -576,16 +576,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Return the {@link ObservationRegistry} used for recording
-	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
-	 * @since 6.1
-	 */
-	@Nullable
-	public ObservationRegistry getObservationRegistry() {
-		return this.observationRegistry;
-	}
-
-	/**
 	 * Set the {@link ObservationRegistry} to be used for recording
 	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
 	 * Defaults to no-op observations if the registry is not set.
@@ -593,6 +583,16 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	public void setObservationRegistry(@Nullable ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
+	}
+
+	/**
+	 * Return the {@link ObservationRegistry} used for recording
+	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
+	 * @since 6.1
+	 */
+	@Nullable
+	public ObservationRegistry getObservationRegistry() {
+		return this.observationRegistry;
 	}
 
 	/**
