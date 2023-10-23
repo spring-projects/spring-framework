@@ -581,7 +581,11 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 						return;
 					}
-					if (!method.getDeclaringClass().isRecord() && method.getParameterCount() == 0) {
+					if (method.getParameterCount() == 0) {
+						if (method.getDeclaringClass().isRecord()) {
+							// Annotations on the compact constructor arguments made available on accessors, ignoring.
+							return;
+						}
 						if (logger.isInfoEnabled()) {
 							logger.info("Autowired annotation should only be used on methods with parameters: " +
 									method);
