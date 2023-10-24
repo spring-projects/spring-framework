@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,8 +200,8 @@ class ResolvableTypeTests {
 	@Test
 	void forFieldMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forField(null))
-			.withMessage("Field must not be null");
+				.isThrownBy(() -> ResolvableType.forField(null))
+				.withMessage("Field must not be null");
 	}
 
 	@Test
@@ -214,8 +214,8 @@ class ResolvableTypeTests {
 	@Test
 	void forConstructorParameterMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forConstructorParameter(null, 0))
-			.withMessage("Constructor must not be null");
+				.isThrownBy(() -> ResolvableType.forConstructorParameter(null, 0))
+				.withMessage("Constructor must not be null");
 	}
 
 	@Test
@@ -228,8 +228,8 @@ class ResolvableTypeTests {
 	@Test
 	void forMethodParameterByIndexMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forMethodParameter(null, 0))
-			.withMessage("Method must not be null");
+				.isThrownBy(() -> ResolvableType.forMethodParameter(null, 0))
+				.withMessage("Method must not be null");
 	}
 
 	@Test
@@ -268,8 +268,8 @@ class ResolvableTypeTests {
 	@Test
 	void forMethodParameterMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forMethodParameter(null))
-			.withMessage("MethodParameter must not be null");
+				.isThrownBy(() -> ResolvableType.forMethodParameter(null))
+				.withMessage("MethodParameter must not be null");
 	}
 
 	@Test  // SPR-16210
@@ -295,8 +295,8 @@ class ResolvableTypeTests {
 	@Test
 	void forMethodReturnMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forMethodReturnType(null))
-			.withMessage("Method must not be null");
+				.isThrownBy(() -> ResolvableType.forMethodReturnType(null))
+				.withMessage("Method must not be null");
 	}
 
 	@Test
@@ -343,7 +343,7 @@ class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forField(field);
 		assertThat(type.isArray()).isTrue();
 		assertThat(type.getComponentType().getType())
-			.isEqualTo(((Class) field.getGenericType()).getComponentType());
+				.isEqualTo(((Class) field.getGenericType()).getComponentType());
 	}
 
 	@Test
@@ -535,7 +535,7 @@ class ResolvableTypeTests {
 	void getGenericsFromParameterizedType() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		ResolvableType[] generics = type.getGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0].resolve()).isEqualTo(CharSequence.class);
 	}
 
@@ -543,7 +543,7 @@ class ResolvableTypeTests {
 	void getGenericsFromClass() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class);
 		ResolvableType[] generics = type.getGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0].getType().toString()).isEqualTo("E");
 	}
 
@@ -558,7 +558,7 @@ class ResolvableTypeTests {
 	void getResolvedGenerics() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		Class<?>[] generics = type.resolveGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0]).isEqualTo(CharSequence.class);
 	}
 
@@ -686,7 +686,6 @@ class ResolvableTypeTests {
 		assertThat(type.resolve()).isEqualTo(CharSequence.class);
 	}
 
-
 	@Test
 	void resolveBoundedTypeVariableWildcardResult() throws Exception {
 		ResolvableType type = ResolvableType.forMethodReturnType(Methods.class.getMethod("boundedTypeVariableWildcardResult"));
@@ -701,30 +700,26 @@ class ResolvableTypeTests {
 
 	@Test
 	void resolveTypeVariableFromSimpleInterfaceType() {
-		ResolvableType type = ResolvableType.forClass(
-				MySimpleInterfaceType.class).as(MyInterfaceType.class);
+		ResolvableType type = ResolvableType.forClass(MySimpleInterfaceType.class).as(MyInterfaceType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(String.class);
 	}
 
 	@Test
 	void resolveTypeVariableFromSimpleCollectionInterfaceType() {
-		ResolvableType type = ResolvableType.forClass(
-				MyCollectionInterfaceType.class).as(MyInterfaceType.class);
+		ResolvableType type = ResolvableType.forClass(MyCollectionInterfaceType.class).as(MyInterfaceType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(Collection.class);
 		assertThat(type.resolveGeneric(0, 0)).isEqualTo(String.class);
 	}
 
 	@Test
 	void resolveTypeVariableFromSimpleSuperclassType() {
-		ResolvableType type = ResolvableType.forClass(
-				MySimpleSuperclassType.class).as(MySuperclassType.class);
+		ResolvableType type = ResolvableType.forClass(MySimpleSuperclassType.class).as(MySuperclassType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(String.class);
 	}
 
 	@Test
 	void resolveTypeVariableFromSimpleCollectionSuperclassType() {
-		ResolvableType type = ResolvableType.forClass(
-				MyCollectionSuperclassType.class).as(MySuperclassType.class);
+		ResolvableType type = ResolvableType.forClass(MyCollectionSuperclassType.class).as(MySuperclassType.class);
 		assertThat(type.resolveGeneric()).isEqualTo(Collection.class);
 		assertThat(type.resolveGeneric(0, 0)).isEqualTo(String.class);
 	}
@@ -751,8 +746,7 @@ class ResolvableTypeTests {
 	void resolveTypeVariableFromSuperType() throws Exception {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.resolve()).isEqualTo(ExtendsList.class);
-		assertThat(type.asCollection().resolveGeneric())
-			.isEqualTo(CharSequence.class);
+		assertThat(type.asCollection().resolveGeneric()).isEqualTo(CharSequence.class);
 	}
 
 	@Test
@@ -964,8 +958,8 @@ class ResolvableTypeTests {
 	@Test
 	void isAssignableFromMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forClass(Object.class).isAssignableFrom((ResolvableType) null))
-			.withMessage("ResolvableType must not be null");
+				.isThrownBy(() -> ResolvableType.forClass(Object.class).isAssignableFrom((ResolvableType) null))
+				.withMessage("ResolvableType must not be null");
 	}
 
 	@Test
@@ -1004,6 +998,7 @@ class ResolvableTypeTests {
 	void isAssignableFromCannotBeResolved() throws Exception {
 		ResolvableType objectType = ResolvableType.forClass(Object.class);
 		ResolvableType unresolvableVariable = ResolvableType.forField(AssignmentBase.class.getField("o"));
+
 		assertThat(unresolvableVariable.resolve()).isNull();
 		assertThatResolvableType(objectType).isAssignableFrom(unresolvableVariable);
 		assertThatResolvableType(unresolvableVariable).isAssignableFrom(objectType);
@@ -1220,9 +1215,9 @@ class ResolvableTypeTests {
 	@Test
 	void forClassWithMismatchedGenerics() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forClassWithGenerics(Map.class, Integer.class))
-			.withMessageContaining("Mismatched number of generics specified for")
-			.withMessageContaining("java.util.Map<K,V>");
+				.isThrownBy(() -> ResolvableType.forClassWithGenerics(Map.class, Integer.class))
+				.withMessageContaining("Mismatched number of generics specified for")
+				.withMessageContaining("java.util.Map<K,V>");
 	}
 
 	@Test
@@ -1277,7 +1272,7 @@ class ResolvableTypeTests {
 	}
 
 	@Test
-	void hasUnresolvableGenericsWhenImplementesRawInterface() throws Exception {
+	void hasUnresolvableGenericsWhenImplementingRawInterface() throws Exception {
 		ResolvableType type = ResolvableType.forClass(MySimpleInterfaceTypeWithImplementsRaw.class);
 		for (ResolvableType generic : type.getGenerics()) {
 			assertThat(generic.resolve()).isNotNull();
@@ -1307,7 +1302,7 @@ class ResolvableTypeTests {
 		Type type = resolvableType.getType();
 		assertThat(type).isInstanceOf(ParameterizedType.class);
 		assertThat(((ParameterizedType) type).getRawType()).isEqualTo(Callable.class);
-		assertThat(((ParameterizedType) type).getActualTypeArguments().length).isEqualTo(1);
+		assertThat(((ParameterizedType) type).getActualTypeArguments()).hasSize(1);
 		assertThat(((ParameterizedType) type).getActualTypeArguments()[0]).isEqualTo(String.class);
 	}
 
