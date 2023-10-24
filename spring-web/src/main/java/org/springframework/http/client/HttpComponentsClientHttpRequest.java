@@ -153,12 +153,12 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 
 		@Override
 		public boolean isRepeatable() {
-			return false;
+			return this.body.repeatable();
 		}
 
 		@Override
 		public boolean isStreaming() {
-			return true;
+			return false;
 		}
 
 		@Override

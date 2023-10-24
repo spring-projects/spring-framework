@@ -17,6 +17,7 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
@@ -55,7 +56,17 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 		this.request.getHeaders().putAll(headers);
 
 		if (this.request instanceof StreamingHttpOutputMessage streamingHttpOutputMessage) {
-			streamingHttpOutputMessage.setBody(outputStream -> StreamUtils.copy(bufferedOutput, outputStream));
+			streamingHttpOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					StreamUtils.copy(bufferedOutput, outputStream);
+				}
+
+				@Override
+				public boolean repeatable() {
+					return true;
+				}
+			});
 		}
 		else {
 			StreamUtils.copy(bufferedOutput, this.request.getBody());
