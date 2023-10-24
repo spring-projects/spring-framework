@@ -799,7 +799,7 @@ public abstract class BeanUtils {
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
 					if (readMethod != null) {
-						if (isAssignable(writeMethod, readMethod)) {
+						if (isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
 							try {
 								ReflectionUtils.makeAccessible(readMethod);
 								Object value = readMethod.invoke(source);
@@ -817,7 +817,9 @@ public abstract class BeanUtils {
 		}
 	}
 
-	private static boolean isAssignable(Method writeMethod, Method readMethod) {
+	private static boolean isAssignable(Method writeMethod, Method readMethod,
+			PropertyDescriptor sourcePd, PropertyDescriptor targetPd) {
+
 		Type paramType = writeMethod.getGenericParameterTypes()[0];
 		if (paramType instanceof Class<?> clazz) {
 			return ClassUtils.isAssignable(clazz, readMethod.getReturnType());
@@ -826,8 +828,8 @@ public abstract class BeanUtils {
 			return true;
 		}
 		else {
-			ResolvableType sourceType = ResolvableType.forMethodReturnType(readMethod);
-			ResolvableType targetType = ResolvableType.forMethodParameter(writeMethod, 0);
+			ResolvableType sourceType = ((GenericTypeAwarePropertyDescriptor) sourcePd).getReadMethodType();
+			ResolvableType targetType = ((GenericTypeAwarePropertyDescriptor) targetPd).getWriteMethodType();
 			// Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
 			return (sourceType.hasUnresolvableGenerics() || targetType.hasUnresolvableGenerics() ?
 					ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :

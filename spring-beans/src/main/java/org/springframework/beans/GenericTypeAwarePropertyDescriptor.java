@@ -26,8 +26,10 @@ import java.util.Set;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.Property;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -56,6 +58,15 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	@Nullable
 	private MethodParameter writeMethodParameter;
+
+	@Nullable
+	private volatile ResolvableType writeMethodType;
+
+	@Nullable
+	private ResolvableType readMethodType;
+
+	@Nullable
+	private volatile TypeDescriptor typeDescriptor;
 
 	@Nullable
 	private Class<?> propertyType;
@@ -107,7 +118,8 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		}
 
 		if (this.readMethod != null) {
-			this.propertyType = GenericTypeResolver.resolveReturnType(this.readMethod, this.beanClass);
+			this.readMethodType = ResolvableType.forMethodReturnType(this.readMethod, this.beanClass);
+			this.propertyType = this.readMethodType.resolve(this.readMethod.getReturnType());
 		}
 		else if (this.writeMethodParameter != null) {
 			this.propertyType = this.writeMethodParameter.getParameterType();
@@ -148,6 +160,30 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	public MethodParameter getWriteMethodParameter() {
 		Assert.state(this.writeMethodParameter != null, "No write method available");
 		return this.writeMethodParameter;
+	}
+
+	public ResolvableType getWriteMethodType() {
+		ResolvableType writeMethodType = this.writeMethodType;
+		if (writeMethodType == null) {
+			writeMethodType = ResolvableType.forMethodParameter(getWriteMethodParameter());
+			this.writeMethodType = writeMethodType;
+		}
+		return writeMethodType;
+	}
+
+	public ResolvableType getReadMethodType() {
+		Assert.state(this.readMethodType != null, "No read method available");
+		return this.readMethodType;
+	}
+
+	public TypeDescriptor getTypeDescriptor() {
+		TypeDescriptor typeDescriptor = this.typeDescriptor;
+		if (typeDescriptor == null) {
+			Property property = new Property(getBeanClass(), getReadMethod(), getWriteMethod(), getName());
+			typeDescriptor = new TypeDescriptor(property);
+			this.typeDescriptor = typeDescriptor;
+		}
+		return typeDescriptor;
 	}
 
 	@Override
