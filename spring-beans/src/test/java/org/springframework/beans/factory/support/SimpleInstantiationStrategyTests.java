@@ -54,6 +54,14 @@ class SimpleInstantiationStrategyTests {
 	}
 
 	@Test
+	void instantiateWitSubClassFactoryArgs() {
+		RootBeanDefinition bd = new RootBeanDefinition(String.class);
+		Object simpleBean = instantiate(bd, new ExtendedSampleFactory(),
+				method(SampleFactory.class, "beanWithTwoArgs"), "Test", 42);
+		assertThat(simpleBean).isEqualTo("42Test");
+	}
+
+	@Test
 	void instantiateWithNullValueReturnsNullBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(String.class);
 		Object simpleBean = instantiate(bd, new SampleFactory(),
@@ -69,6 +77,28 @@ class SimpleInstantiationStrategyTests {
 						method(SampleFactory.class, "beanWithTwoArgs"), 42, "Test"))
 				.withMessageContaining("Illegal arguments to factory method 'beanWithTwoArgs'")
 				.withMessageContaining("args: 42,Test");
+	}
+
+	@Test
+	void instantiateWithTargetTypeMismatch() {
+		RootBeanDefinition bd = new RootBeanDefinition(String.class);
+		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() -> instantiate(
+						bd, new AnotherFactory(),
+						method(SampleFactory.class, "beanWithTwoArgs"), "Test", 42))
+				.withMessageContaining("Illegal factory instance for factory method 'beanWithTwoArgs'")
+				.withMessageContaining("instance: " + AnotherFactory.class.getName())
+				.withMessageNotContaining("args: Test,42");
+	}
+
+	@Test
+	void instantiateWithTargetTypeNotAssignable() {
+		RootBeanDefinition bd = new RootBeanDefinition(String.class);
+		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() -> instantiate(
+						bd, new SampleFactory(),
+						method(ExtendedSampleFactory.class, "beanWithTwoArgs"), "Test", 42))
+				.withMessageContaining("Illegal factory instance for factory method 'beanWithTwoArgs'")
+				.withMessageContaining("instance: " + SampleFactory.class.getName())
+				.withMessageNotContaining("args: Test,42");
 	}
 
 	@Test
@@ -112,6 +142,22 @@ class SimpleInstantiationStrategyTests {
 
 		String errorBean(String msg) {
 			throw new IllegalStateException(msg);
+		}
+
+	}
+
+	static class ExtendedSampleFactory extends SampleFactory {
+
+		@Override
+		String beanWithTwoArgs(String first, Integer second) {
+			return second + first;
+		}
+	}
+
+	static class AnotherFactory {
+
+		String beanWithTwoArgs(String first, Integer second) {
+			return second + first;
 		}
 
 	}
