@@ -55,6 +55,7 @@ import org.springframework.web.util.UriComponents;
  * @author Rossen Stoyanchev
  * @since 5.1
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/webflux/reactive-spring.html#webflux-forwarded-headers">Forwarded Headers</a>
  */
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 

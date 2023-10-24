@@ -69,6 +69,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rob Winch
  * @since 4.3
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/filters.html#filters-forwarded-headers">Forwarded Headers</a>
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
