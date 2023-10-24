@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -68,11 +67,17 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 				(Map<String, MultiValueMap<String, String>>) request.getAttribute(
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		if (CollectionUtils.isEmpty(matrixVariables)) {
-			return Collections.emptyMap();
-		}
+		MultiValueMap<String, String> map = mapMatrixVariables(parameter, matrixVariables);
+		return (isSingleValueMap(parameter) ? map.toSingleValueMap() : map);
+	}
+
+	private MultiValueMap<String,String> mapMatrixVariables(MethodParameter parameter,
+			@Nullable Map<String, MultiValueMap<String, String>> matrixVariables) {
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		if (CollectionUtils.isEmpty(matrixVariables)) {
+			return map;
+		}
 		MatrixVariable ann = parameter.getParameterAnnotation(MatrixVariable.class);
 		Assert.state(ann != null, "No MatrixVariable annotation");
 		String pathVariable = ann.pathVar();
@@ -80,7 +85,7 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 		if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
 			MultiValueMap<String, String> mapForPathVariable = matrixVariables.get(pathVariable);
 			if (mapForPathVariable == null) {
-				return Collections.emptyMap();
+				return map;
 			}
 			map.putAll(mapForPathVariable);
 		}
@@ -93,8 +98,7 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 				});
 			}
 		}
-
-		return (isSingleValueMap(parameter) ? map.toSingleValueMap() : map);
+		return map;
 	}
 
 	private boolean isSingleValueMap(MethodParameter parameter) {
