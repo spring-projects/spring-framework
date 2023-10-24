@@ -360,7 +360,7 @@ class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forField(field);
 		assertThat(type.isArray()).isTrue();
 		assertThat(type.getComponentType().getType())
-			.isEqualTo(((Class) field.getGenericType()).componentType());
+				.isEqualTo(((Class) field.getGenericType()).componentType());
 	}
 
 	@Test

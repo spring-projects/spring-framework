@@ -1013,18 +1013,20 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	protected abstract static class PropertyHandler {
 
+		@Nullable
 		private final Class<?> propertyType;
 
 		private final boolean readable;
 
 		private final boolean writable;
 
-		public PropertyHandler(Class<?> propertyType, boolean readable, boolean writable) {
+		public PropertyHandler(@Nullable Class<?> propertyType, boolean readable, boolean writable) {
 			this.propertyType = propertyType;
 			this.readable = readable;
 			this.writable = writable;
 		}
 
+		@Nullable
 		public Class<?> getPropertyType() {
 			return this.propertyType;
 		}

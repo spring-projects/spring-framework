@@ -144,7 +144,6 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 				ReflectionUtils.makeAccessible(this.field);
 				return this.field.get(getWrappedInstance());
 			}
-
 			catch (IllegalAccessException ex) {
 				throw new InvalidPropertyException(getWrappedClass(),
 						this.field.getName(), "Field is not accessible", ex);
