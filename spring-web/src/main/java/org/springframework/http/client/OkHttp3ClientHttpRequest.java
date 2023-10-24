@@ -132,7 +132,7 @@ class OkHttp3ClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 		@Override
 		public boolean isOneShot() {
-			return true;
+			return !this.body.repeatable();
 		}
 	}
 
