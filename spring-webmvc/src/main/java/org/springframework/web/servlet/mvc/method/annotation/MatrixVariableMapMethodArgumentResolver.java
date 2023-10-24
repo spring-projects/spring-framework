@@ -69,7 +69,7 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
 		if (CollectionUtils.isEmpty(matrixVariables)) {
-			return Collections.emptyMap();
+			return (isSingleValueMap(parameter) ? Collections.emptyMap() : new LinkedMultiValueMap<>(0));
 		}
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();

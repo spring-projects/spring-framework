@@ -156,6 +156,18 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void resolveMultiValueMapArgumentNoParams() throws Exception {
+
+		MethodParameter param = this.testMethod.annot(matrixAttribute().noPathVar())
+				.arg(MultiValueMap.class, String.class, String.class);
+
+		Object result = this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
+
+		//noinspection unchecked
+		assertThat(result).isInstanceOfSatisfying(MultiValueMap.class, map -> assertThat(map).isEmpty());
+	}
+
+	@Test
 	public void resolveArgumentNoMatch() throws Exception {
 		MultiValueMap<String, String> params2 = getVariablesFor("planes");
 		params2.add("colors", "yellow");
