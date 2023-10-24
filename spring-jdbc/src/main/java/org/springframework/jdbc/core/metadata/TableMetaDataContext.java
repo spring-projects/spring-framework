@@ -312,7 +312,7 @@ public class TableMetaDataContext {
 		if (schemaName != null) {
 			if (quoting) {
 				insertStatement.append(identifierQuoteString);
-				insertStatement.append(this.metaDataProvider.schemaNameToUse(schemaName));
+				insertStatement.append(schemaName);
 				insertStatement.append(identifierQuoteString);
 			}
 			else {
@@ -324,7 +324,7 @@ public class TableMetaDataContext {
 		String tableName = getTableName();
 		if (quoting) {
 			insertStatement.append(identifierQuoteString);
-			insertStatement.append(this.metaDataProvider.tableNameToUse(tableName));
+			insertStatement.append(tableName);
 			insertStatement.append(identifierQuoteString);
 		}
 		else {
@@ -341,7 +341,7 @@ public class TableMetaDataContext {
 				}
 				if (quoting) {
 					insertStatement.append(identifierQuoteString);
-					insertStatement.append(this.metaDataProvider.columnNameToUse(columnName));
+					insertStatement.append(columnName);
 					insertStatement.append(identifierQuoteString);
 				}
 				else {

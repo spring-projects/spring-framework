@@ -73,9 +73,23 @@ public interface SimpleJdbcInsertOperations {
 	 * <p>If this method is invoked, the identifier quote string for the underlying
 	 * database will be used to quote SQL identifiers in generated SQL statements.
 	 * In this context, SQL identifiers refer to schema, table, and column names.
+	 * <p>When identifiers are quoted, explicit column names must be supplied via
+	 * {@link #usingColumns(String...)}. Furthermore, all identifiers for the
+	 * schema name, table name, and column names must match the corresponding
+	 * identifiers in the database's metadata regarding casing (mixed case,
+	 * uppercase, or lowercase).
 	 * @return this {@code SimpleJdbcInsert} (for method chaining)
 	 * @since 6.1
+	 * @see #withSchemaName(String)
+	 * @see #withTableName(String)
+	 * @see #usingColumns(String...)
 	 * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
+	 * @see java.sql.DatabaseMetaData#storesMixedCaseIdentifiers()
+	 * @see java.sql.DatabaseMetaData#storesMixedCaseQuotedIdentifiers()
+	 * @see java.sql.DatabaseMetaData#storesUpperCaseIdentifiers()
+	 * @see java.sql.DatabaseMetaData#storesUpperCaseQuotedIdentifiers()
+	 * @see java.sql.DatabaseMetaData#storesLowerCaseIdentifiers()
+	 * @see java.sql.DatabaseMetaData#storesLowerCaseQuotedIdentifiers()
 	 */
 	SimpleJdbcInsertOperations usingQuotedIdentifiers();
 

@@ -275,6 +275,10 @@ public abstract class AbstractJdbcInsert {
 			if (getTableName() == null) {
 				throw new InvalidDataAccessApiUsageException("Table name is required");
 			}
+			if (isQuoteIdentifiers() && this.declaredColumns.isEmpty()) {
+				throw new InvalidDataAccessApiUsageException(
+						"Explicit column names must be provided when using quoted identifiers");
+			}
 			try {
 				this.jdbcTemplate.afterPropertiesSet();
 			}

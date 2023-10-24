@@ -56,25 +56,13 @@ class SimpleJdbcInsertIntegrationTests {
 			insertJaneSmith(insert);
 		}
 
-		@Test  //  gh-24013
-		void retrieveColumnNamesFromMetadataAndUsingQuotedIdentifiers() throws Exception {
-			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
-					.withTableName("users")
-					.usingGeneratedKeyColumns("id")
-					.usingQuotedIdentifiers();
-
-			insert.compile();
-			// NOTE: quoted identifiers in H2/HSQL will be UPPERCASE!
-			assertThat(insert.getInsertString()).isEqualTo("INSERT INTO \"USERS\" (\"FIRST_NAME\", \"LAST_NAME\") VALUES(?, ?)");
-
-			insertJaneSmith(insert);
-		}
-
 		@Test
 		void usingColumns() {
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
+					.withoutTableColumnMetaDataAccess()
 					.withTableName("users")
-					.usingColumns("first_name", "last_name");
+					.usingColumns("first_name", "last_name")
+					.usingGeneratedKeyColumns("id");
 
 			insert.compile();
 			assertThat(insert.getInsertString()).isEqualTo("INSERT INTO users (first_name, last_name) VALUES(?, ?)");
@@ -84,13 +72,16 @@ class SimpleJdbcInsertIntegrationTests {
 
 		@Test  // gh-24013
 		void usingColumnsAndQuotedIdentifiers() throws Exception {
+			// NOTE: unquoted identifiers in H2/HSQL must be converted to UPPERCASE
+			// since that's how they are stored in the DB metadata.
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
-					.withTableName("users")
-					.usingColumns("first_name", "last_name")
+					.withoutTableColumnMetaDataAccess()
+					.withTableName("USERS")
+					.usingColumns("FIRST_NAME", "LAST_NAME")
+					.usingGeneratedKeyColumns("id")
 					.usingQuotedIdentifiers();
 
 			insert.compile();
-			// NOTE: quoted identifiers in H2/HSQL will be UPPERCASE!
 			assertThat(insert.getInsertString()).isEqualToIgnoringNewLines("""
 					INSERT INTO "USERS" ("FIRST_NAME", "LAST_NAME") VALUES(?, ?)
 					""");
@@ -116,9 +107,11 @@ class SimpleJdbcInsertIntegrationTests {
 		@Test
 		void usingColumnsWithSchemaName() {
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
+					.withoutTableColumnMetaDataAccess()
 					.withSchemaName("my_schema")
 					.withTableName("users")
-					.usingColumns("first_name", "last_name");
+					.usingColumns("first_name", "last_name")
+					.usingGeneratedKeyColumns("id");
 
 			insert.compile();
 			assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_schema.users (first_name, last_name) VALUES(?, ?)");
@@ -128,14 +121,17 @@ class SimpleJdbcInsertIntegrationTests {
 
 		@Test  // gh-24013
 		void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
+			// NOTE: unquoted identifiers in H2/HSQL must be converted to UPPERCASE
+			// since that's how they are stored in the DB metadata.
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
-					.withSchemaName("my_schema")
-					.withTableName("users")
-					.usingColumns("first_name", "last_name")
+					.withoutTableColumnMetaDataAccess()
+					.withSchemaName("MY_SCHEMA")
+					.withTableName("USERS")
+					.usingColumns("FIRST_NAME", "LAST_NAME")
+					.usingGeneratedKeyColumns("id")
 					.usingQuotedIdentifiers();
 
 			insert.compile();
-			// NOTE: quoted identifiers in H2/HSQL will be UPPERCASE!
 			assertThat(insert.getInsertString()).isEqualToIgnoringNewLines("""
 					INSERT INTO "MY_SCHEMA"."USERS" ("FIRST_NAME", "LAST_NAME") VALUES(?, ?)
 					""");
@@ -182,7 +178,8 @@ class SimpleJdbcInsertIntegrationTests {
 		}
 
 		protected void insertJaneSmith(SimpleJdbcInsert insert) {
-			insert.execute(Map.of("first_name", "Jane", "last_name", "Smith"));
+			Number id = insert.executeAndReturnKey(Map.of("first_name", "Jane", "last_name", "Smith"));
+			assertThat(id.intValue()).isEqualTo(2);
 			assertNumUsers(2);
 		}
 
