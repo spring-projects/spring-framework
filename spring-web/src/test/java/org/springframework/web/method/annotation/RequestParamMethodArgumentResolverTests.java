@@ -447,6 +447,20 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(arg).isNull();
 	}
 
+	@Test  // gh-31336
+	public void missingRequestParamAfterConversionWithDefaultValue() throws Exception {
+		WebDataBinder binder = new WebRequestDataBinder(null);
+
+		WebDataBinderFactory binderFactory = mock();
+		given(binderFactory.createBinder(webRequest, null, "booleanParam")).willReturn(binder);
+
+		request.addParameter("booleanParam", " ");
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Boolean.class);
+		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertThat(arg).isEqualTo(Boolean.FALSE);
+	}
+
 	@Test
 	public void missingRequestParamEmptyValueNotRequired() throws Exception {
 		WebDataBinder binder = new WebRequestDataBinder(null);
@@ -687,7 +701,8 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") Optional<Integer> paramOptional,
 			@RequestParam("name") Optional<Integer[]> paramOptionalArray,
 			@RequestParam("name") Optional<List<?>> paramOptionalList,
-			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional) {
+			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional,
+			@RequestParam(defaultValue = "false") Boolean booleanParam) {
 	}
 
 }

@@ -274,9 +274,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		return value;
 	}
 
+	@Nullable
 	private static Object convertIfNecessary(
 			MethodParameter parameter, NativeWebRequest webRequest, WebDataBinderFactory binderFactory,
-			NamedValueInfo namedValueInfo, Object arg) throws Exception {
+			NamedValueInfo namedValueInfo, @Nullable Object arg) throws Exception {
 
 		WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 		try {
