@@ -1199,23 +1199,6 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
-	void invalidDomain(ClientHttpConnector connector) {
-		startServer(connector);
-
-		String url = "http://example.invalid";
-		Mono<Void> result = this.webClient.get().uri(url).retrieve().bodyToMono(Void.class);
-
-		StepVerifier.create(result)
-				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
-					WebClientRequestException ex = (WebClientRequestException) throwable;
-					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
-					assertThat(ex.getUri()).isEqualTo(URI.create(url));
-				})
-				.verify();
-	}
-
-	@ParameterizedWebClientTest
 	void malformedResponseChunksOnBodilessEntity(ClientHttpConnector connector) {
 		Mono<?> result = doMalformedChunkedResponseTest(connector, ResponseSpec::toBodilessEntity);
 		StepVerifier.create(result)

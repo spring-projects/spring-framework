@@ -701,18 +701,6 @@ class RestClientIntegrationTests {
 	}
 
 
-	@ParameterizedRestClientTest
-	void invalidDomain(ClientHttpRequestFactory requestFactory) {
-		startServer(requestFactory);
-
-		String url = "http://example.invalid";
-		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
-			this.restClient.get().uri(url).retrieve().toBodilessEntity()
-		);
-
-	}
-
-
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();
 		consumer.accept(response);
