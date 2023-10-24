@@ -135,7 +135,7 @@ import org.springframework.core.annotation.AliasFor;
  * <h3>{@code @Bean} <em>Lite</em> Mode</h3>
  *
  * <p>{@code @Bean} methods may also be declared within classes that are <em>not</em>
- * annotated with {@code @Configuration}. If a bean methods is declared on a bean
+ * annotated with {@code @Configuration}. If a bean method is declared on a bean
  * that is <em>not</em> annotated with {@code @Configuration} it is processed in a
  * so-called <em>'lite'</em> mode.
  *
