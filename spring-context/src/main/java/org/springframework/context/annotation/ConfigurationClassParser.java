@@ -238,11 +238,18 @@ class ConfigurationClassParser {
 		}
 
 		// Recursively process the configuration class and its superclass hierarchy.
-		SourceClass sourceClass = asSourceClass(configClass, filter);
-		do {
-			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
+		SourceClass sourceClass = null;
+		try {
+			sourceClass = asSourceClass(configClass, filter);
+			do {
+				sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
+			}
+			while (sourceClass != null);
 		}
-		while (sourceClass != null);
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException(
+					"I/O failure while processing configuration class [" + sourceClass + "]", ex);
+		}
 
 		this.configurationClasses.put(configClass, configClass);
 	}
