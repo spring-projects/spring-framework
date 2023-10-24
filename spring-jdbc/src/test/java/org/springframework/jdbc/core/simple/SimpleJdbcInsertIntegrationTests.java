@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sam Brannen
  * @since 6.1
+ * @see SimpleJdbcInsertTests
  */
 class SimpleJdbcInsertIntegrationTests {
 
@@ -81,7 +82,7 @@ class SimpleJdbcInsertIntegrationTests {
 			insertJaneSmith(insert);
 		}
 
-		@Test  //  gh-24013
+		@Test  // gh-24013
 		void usingColumnsAndQuotedIdentifiers() throws Exception {
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
 					.withTableName("users")
@@ -90,7 +91,9 @@ class SimpleJdbcInsertIntegrationTests {
 
 			insert.compile();
 			// NOTE: quoted identifiers in H2/HSQL will be UPPERCASE!
-			assertThat(insert.getInsertString()).isEqualTo("INSERT INTO \"USERS\" (\"FIRST_NAME\", \"LAST_NAME\") VALUES(?, ?)");
+			assertThat(insert.getInsertString()).isEqualToIgnoringNewLines("""
+					INSERT INTO "USERS" ("FIRST_NAME", "LAST_NAME") VALUES(?, ?)
+					""");
 
 			insertJaneSmith(insert);
 		}
@@ -123,7 +126,7 @@ class SimpleJdbcInsertIntegrationTests {
 			insertJaneSmith(insert);
 		}
 
-		@Test  //  gh-24013
+		@Test  // gh-24013
 		void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
 					.withSchemaName("my_schema")
@@ -133,7 +136,9 @@ class SimpleJdbcInsertIntegrationTests {
 
 			insert.compile();
 			// NOTE: quoted identifiers in H2/HSQL will be UPPERCASE!
-			assertThat(insert.getInsertString()).isEqualTo("INSERT INTO \"MY_SCHEMA\".\"USERS\" (\"FIRST_NAME\", \"LAST_NAME\") VALUES(?, ?)");
+			assertThat(insert.getInsertString()).isEqualToIgnoringNewLines("""
+					INSERT INTO "MY_SCHEMA"."USERS" ("FIRST_NAME", "LAST_NAME") VALUES(?, ?)
+					""");
 
 			insertJaneSmith(insert);
 		}
