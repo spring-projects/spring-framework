@@ -132,22 +132,12 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		if (binderFactory != null && (arg != null || !hasDefaultValue)) {
-			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
-			try {
-				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
-			}
-			catch (ConversionNotSupportedException ex) {
-				throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),
-						namedValueInfo.name, parameter, ex.getCause());
-			}
-			catch (TypeMismatchException ex) {
-				throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
-						namedValueInfo.name, parameter, ex.getCause());
-			}
+			arg = convertIfNecessary(parameter, webRequest, binderFactory, namedValueInfo, arg);
 			// Check for null value after conversion of incoming argument value
 			if (arg == null) {
 				if (namedValueInfo.defaultValue != null) {
 					arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
+					arg = convertIfNecessary(parameter, webRequest, binderFactory, namedValueInfo, arg);
 				}
 				else if (namedValueInfo.required && !nestedParameter.isOptional()) {
 					handleMissingValueAfterConversion(namedValueInfo.name, nestedParameter, webRequest);
@@ -282,6 +272,25 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			}
 		}
 		return value;
+	}
+
+	private static Object convertIfNecessary(
+			MethodParameter parameter, NativeWebRequest webRequest, WebDataBinderFactory binderFactory,
+			NamedValueInfo namedValueInfo, Object arg) throws Exception {
+
+		WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
+		try {
+			arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
+		}
+		catch (ConversionNotSupportedException ex) {
+			throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),
+					namedValueInfo.name, parameter, ex.getCause());
+		}
+		catch (TypeMismatchException ex) {
+			throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
+					namedValueInfo.name, parameter, ex.getCause());
+		}
+		return arg;
 	}
 
 	/**

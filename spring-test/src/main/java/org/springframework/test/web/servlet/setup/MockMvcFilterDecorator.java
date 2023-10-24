@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
@@ -56,7 +57,7 @@ final class MockMvcFilterDecorator implements Filter {
 	private final Filter delegate;
 
 	@Nullable
-	private final Map<String, String> initParams;
+	private final Function<ServletContext, FilterConfig> filterConfigInitializer;
 
 	@Nullable
 	private final EnumSet<DispatcherType> dispatcherTypes;
@@ -78,7 +79,12 @@ final class MockMvcFilterDecorator implements Filter {
 	 * <p>Note: when this constructor is used, the Filter is not initialized.
 	 */
 	public MockMvcFilterDecorator(Filter delegate, String[] urlPatterns) {
-		this(delegate, null, null, urlPatterns);
+		Assert.notNull(delegate, "filter cannot be null");
+		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
+		this.delegate = delegate;
+		this.filterConfigInitializer = null;
+		this.dispatcherTypes = null;
+		this.hasPatterns = initPatterns(urlPatterns);
 	}
 
 	/**
@@ -86,38 +92,51 @@ final class MockMvcFilterDecorator implements Filter {
 	 * as well as dispatcher types and URL patterns to match.
 	 */
 	public MockMvcFilterDecorator(
-			Filter delegate, @Nullable Map<String, String> initParams,
+			Filter delegate, @Nullable String filterName, @Nullable Map<String, String> initParams,
 			@Nullable EnumSet<DispatcherType> dispatcherTypes, String... urlPatterns) {
 
 		Assert.notNull(delegate, "filter cannot be null");
 		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
 		this.delegate = delegate;
-		this.initParams = initParams;
+		this.filterConfigInitializer = getFilterConfigInitializer(filterName, initParams);
 		this.dispatcherTypes = dispatcherTypes;
-		this.hasPatterns = (urlPatterns.length != 0);
-		for (String urlPattern : urlPatterns) {
-			addUrlPattern(urlPattern);
-		}
+		this.hasPatterns = initPatterns(urlPatterns);
 	}
 
-	private void addUrlPattern(String urlPattern) {
-		Assert.notNull(urlPattern, "Found null URL Pattern");
-		if (urlPattern.startsWith(EXTENSION_MAPPING_PATTERN)) {
-			this.endsWithMatches.add(urlPattern.substring(1));
-		}
-		else if (urlPattern.equals(PATH_MAPPING_PATTERN) || urlPattern.equals(ALL_MAPPING_PATTERN)) {
-			this.startsWithMatches.add("");
-		}
-		else if (urlPattern.endsWith(PATH_MAPPING_PATTERN)) {
-			this.startsWithMatches.add(urlPattern.substring(0, urlPattern.length() - 1));
-			this.exactMatches.add(urlPattern.substring(0, urlPattern.length() - 2));
-		}
-		else {
-			if (urlPattern.isEmpty()) {
-				urlPattern = "/";
+	private static Function<ServletContext, FilterConfig> getFilterConfigInitializer(
+			@Nullable String filterName, @Nullable Map<String, String> initParams) {
+
+		return servletContext -> {
+			MockFilterConfig filterConfig = (filterName != null ?
+					new MockFilterConfig(servletContext, filterName) : new MockFilterConfig(servletContext));
+			if (initParams != null) {
+				initParams.forEach(filterConfig::addInitParameter);
 			}
-			this.exactMatches.add(urlPattern);
+			return filterConfig;
+		};
+	}
+
+	private boolean initPatterns(String... urlPatterns) {
+		for (String urlPattern : urlPatterns) {
+			Assert.notNull(urlPattern, "Found null URL Pattern");
+			if (urlPattern.startsWith(EXTENSION_MAPPING_PATTERN)) {
+				this.endsWithMatches.add(urlPattern.substring(1));
+			}
+			else if (urlPattern.equals(PATH_MAPPING_PATTERN) || urlPattern.equals(ALL_MAPPING_PATTERN)) {
+				this.startsWithMatches.add("");
+			}
+			else if (urlPattern.endsWith(PATH_MAPPING_PATTERN)) {
+				this.startsWithMatches.add(urlPattern.substring(0, urlPattern.length() - 1));
+				this.exactMatches.add(urlPattern.substring(0, urlPattern.length() - 2));
+			}
+			else {
+				if (urlPattern.isEmpty()) {
+					urlPattern = "/";
+				}
+				this.exactMatches.add(urlPattern);
+			}
 		}
+		return (urlPatterns.length != 0);
 	}
 
 
@@ -177,9 +196,8 @@ final class MockMvcFilterDecorator implements Filter {
 	}
 
 	public void initIfRequired(@Nullable ServletContext servletContext) throws ServletException {
-		if (this.initParams != null) {
-			MockFilterConfig filterConfig = new MockFilterConfig(servletContext);
-			this.initParams.forEach(filterConfig::addInitParameter);
+		if (this.filterConfigInitializer != null) {
+			FilterConfig filterConfig = this.filterConfigInitializer.apply(servletContext);
 			this.delegate.init(filterConfig);
 		}
 	}

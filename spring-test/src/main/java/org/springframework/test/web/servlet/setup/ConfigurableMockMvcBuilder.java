@@ -24,6 +24,7 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterConfig;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -51,7 +52,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Add a filter mapped to specific patterns.
 	 * <p>Note: if you need the filter to be initialized with {@link Filter#init(FilterConfig)},
-	 * please use {@link #addFilter(Filter, Map, EnumSet, String...)} instead.
+	 * please use {@link #addFilter(Filter, String, Map, EnumSet, String...)} instead.
 	 * @param filter the filter to add
 	 * @param urlPatterns the URL patterns to map to; if empty, matches all requests
 	 */
@@ -62,6 +63,9 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * with the given init parameters, and will also apply only to requests that
 	 * match the given dispatcher types and URL patterns.
 	 * @param filter the filter to add
+	 * @param filterName the name to use for the filter; if {@code null}, then
+	 * {@link org.springframework.mock.web.MockFilterConfig} is created without
+	 * a name, which defaults to an empty String for the name
 	 * @param initParams the init parameters to initialize the filter with
 	 * @param dispatcherTypes dispatcher types the filter applies to
 	 * @param urlPatterns the URL patterns to map to; if empty, matches all requests
@@ -69,7 +73,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * @see org.springframework.mock.web.MockFilterConfig
 	 */
 	<T extends B> T addFilter(
-			Filter filter, Map<String, String> initParams,
+			Filter filter, @Nullable String filterName, Map<String, String> initParams,
 			EnumSet<DispatcherType> dispatcherTypes, String... urlPatterns);
 
 	/**
