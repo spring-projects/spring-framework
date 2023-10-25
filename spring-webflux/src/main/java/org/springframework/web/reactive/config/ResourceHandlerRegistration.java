@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
@@ -31,6 +32,7 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Assist with creating and configuring a static resources handler.
@@ -53,6 +55,9 @@ public class ResourceHandlerRegistration {
 	private ResourceChainRegistration resourceChainRegistration;
 
 	private boolean useLastModified = true;
+
+	@Nullable
+	private Function<Resource, String> etagGenerator;
 
 	private boolean optimizeLocations = false;
 
@@ -114,6 +119,22 @@ public class ResourceHandlerRegistration {
 	 */
 	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
 		this.useLastModified = useLastModified;
+		return this;
+	}
+
+
+	/**
+	 * Configure a generator function that will be used to create the ETag information,
+	 * given a {@link Resource} that is about to be written to the response.
+	 * <p>This function should return a String that will be used as an argument in
+	 * {@link ServerWebExchange#checkNotModified(String)}, or {@code null} if no value
+	 * can be generated for the given resource.
+	 * @param etagGenerator the HTTP ETag generator function to use.
+	 * @since 6.1
+	 * @see ResourceWebHandler#setEtagGenerator(Function)
+	 */
+	public ResourceHandlerRegistration setEtagGenerator(@Nullable Function<Resource, String> etagGenerator) {
+		this.etagGenerator = etagGenerator;
 		return this;
 	}
 
@@ -211,6 +232,7 @@ public class ResourceHandlerRegistration {
 			handler.setCacheControl(this.cacheControl);
 		}
 		handler.setUseLastModified(this.useLastModified);
+		handler.setEtagGenerator(this.etagGenerator);
 		handler.setOptimizeLocations(this.optimizeLocations);
 		if (this.mediaTypes != null) {
 			handler.setMediaTypes(this.mediaTypes);
