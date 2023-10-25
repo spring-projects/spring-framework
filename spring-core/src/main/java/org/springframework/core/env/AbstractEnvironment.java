@@ -97,7 +97,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
 	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
 	 */
-	protected static final String RESERVED_DEFAULT_PROFILE_NAME = "default";
+	public static final String RESERVED_DEFAULT_PROFILE_NAME = "default";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
