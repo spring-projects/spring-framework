@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.jdbc.core.ShardingKeyProvider;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * An adapter for a target {@link DataSource}, designed to apply sharding keys, if specified,
@@ -22,24 +23,15 @@ import org.springframework.lang.Nullable;
  * otherwise, a {@link java.sql.SQLFeatureNotSupportedException} will be thrown when attempting
  * to acquire shard connections.</p>
  *
- * <p>This proxy datasource also takes a {@link ShardingKeyProvider} object as an attribute,
- * which is used to get the sharding keys in case the thread-bound sharding key is null.</p>
- *
- * <p>This proxy is used internally by {@link org.springframework.jdbc.core.DirectShardCallbackTemplate}.</p>
+ * <p>This proxy datasource takes a {@link ShardingKeyProvider} object as an attribute,
+ * which is used to get the sharding keys.</p>
  *
  * @author Mohamed Lahyane (Anir)
  * @see #getConnection
  * @see #createConnectionBuilder()
  * @see UserCredentialsDataSourceAdapter
- * @see org.springframework.jdbc.core.DirectShardCallbackTemplate
  */
 public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
-
-	private final ThreadLocal<ShardingKey> threadBoundShardingKey =
-			new NamedThreadLocal<>("Current Sharding key");
-	private final ThreadLocal<ShardingKey> threadBoundSuperShardingKey =
-			new NamedThreadLocal<>("Current Super Sharding key");
-
 	@Nullable
 	private ShardingKeyProvider shardingkeyProvider;
 
@@ -53,60 +45,23 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 	}
 
 	/**
+	 * Creates a new instance of ShardingKeyDataSourceAdapter, wrapping the given {@link DataSource}.
+	 *
+	 * @param dataSource the target DataSource to be wrapped.
+	 * @param shardingKeyProvider the ShardingKeyProvider used to get the shardingKeys.
+	 */
+	public ShardingKeyDataSourceAdapter(DataSource dataSource, ShardingKeyProvider shardingKeyProvider) {
+		super(dataSource);
+		this.shardingkeyProvider = shardingKeyProvider;
+	}
+
+	/**
 	 * Sets the {@link ShardingKeyProvider} for this adapter.
 	 *
 	 * @param shardingKeyProvider the ShardingKeyProvider to set.
 	 */
 	public void setShardingKeyProvider(ShardingKeyProvider shardingKeyProvider) {
 		this.shardingkeyProvider = shardingKeyProvider;
-	}
-
-	/**
-	 * Set the sharding key for the current thread.
-	 * The given sharding key will be used to get direct shard connections
-	 * in all subsequent {@code getConnection} calls on this DataSource proxy.
-	 *
-	 * @param shardingKey the sharding key to apply.
-	 * @see #removeShardingKeyFromCurrentThread()
-	 */
-	public void setShardingKeyForCurrentThread(ShardingKey shardingKey) {
-		this.threadBoundShardingKey.set(shardingKey);
-	}
-
-	/**
-	 * Sets the super sharding key for the current thread.
-	 *
-	 * @param superShardingKey the super sharding key to apply.
-	 * @see #setShardingKeyForCurrentThread
-	 */
-	public void setSuperShardingKeyForCurrentThread(ShardingKey superShardingKey) {
-		this.threadBoundSuperShardingKey.set(superShardingKey);
-	}
-
-	/**
-	 * Removes any {@code ShardingKey} for this proxy from the current thread.
-	 * @see #setShardingKeyForCurrentThread
-	 */
-	public void removeShardingKeyFromCurrentThread() {
-		this.threadBoundShardingKey.remove();
-	}
-
-	/**
-	 * Removes any super sharding key for this proxy from the current thread.
-	 * @see #setSuperShardingKeyForCurrentThread
-	 */
-	public void removeSuperShardingKeyFromCurrentThread() {
-		this.threadBoundSuperShardingKey.remove();
-	}
-
-	/**
-	 * Removes any sharding key and super sharding key for this proxy from the current thread.
-	 * @see #setShardingKeyForCurrentThread
-	 * @see #setSuperShardingKeyForCurrentThread
-	 */
-	public void clearShardingKeysFromCurrentThread() {
-		removeShardingKeyFromCurrentThread();
-		removeSuperShardingKeyFromCurrentThread();
 	}
 
 	/**
@@ -150,10 +105,10 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 	public ConnectionBuilder createConnectionBuilder() throws SQLException {
 		ConnectionBuilder connectionBuilder = obtainTargetDataSource().createConnectionBuilder();
 
-		ShardingKey shardingKey = this.threadBoundShardingKey.get();
-		ShardingKey superShardingKey = this.threadBoundSuperShardingKey.get();
+		ShardingKey shardingKey = null;
+		ShardingKey superShardingKey = null;
 
-		if (shardingKey == null && shardingkeyProvider != null) {
+		if (shardingkeyProvider != null) {
 			shardingKey = shardingkeyProvider.getShardingKey();
 			superShardingKey = shardingkeyProvider.getSuperShardingKey();
 		}
@@ -171,25 +126,5 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 	@Override
 	public ShardingKeyBuilder createShardingKeyBuilder() throws SQLException {
 		return obtainTargetDataSource().createShardingKeyBuilder();
-	}
-
-	/**
-	 * Retrieves the sharding key bound to the current thread, if any.
-	 *
-	 * @return the ShardingKey object representing the sharding key for the current thread, or null if none is bound.
-	 */
-	@Nullable
-	public ShardingKey getShardingKeyForCurrentThread() {
-		return this.threadBoundShardingKey.get();
-	}
-
-	/**
-	 * Retrieves the super sharding key bound to the current thread, if any.
-	 *
-	 * @return the ShardingKey object representing the super sharding key for the current thread, or null if none is bound.
-	 */
-	@Nullable
-	public ShardingKey getSuperShardingKeyForCurrentThread() {
-		return this.threadBoundSuperShardingKey.get();
 	}
 }

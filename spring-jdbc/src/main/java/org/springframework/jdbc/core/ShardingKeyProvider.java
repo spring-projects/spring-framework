@@ -8,19 +8,10 @@ import org.springframework.lang.Nullable;
 /**
  * Interface defines methods for retrieving sharding keys, which are used to establish
  * direct shard connections (in the context of sharded databases). This is used as a
- * way of providing the sharding key, besides the thread-bound sharding keys in
+ * way of providing the sharding key in
  * {@link org.springframework.jdbc.datasource.ShardingKeyDataSourceAdapter}.
  *
- * <p>It is particularly useful in scenarios where using {@link DirectShardCallbackTemplate} is not
- * practical, like when the sharding key is independent of the specific query being executed.
- * For instance, the sharding key may depend on an HTTP session (authenticated user's data).</p>
- *
- * <p>In cases where used in parallel with {@link DirectShardCallbackTemplate}, the sharding key
- * provided in the {@link DirectShardCallbackTemplate} method is the one that will be used, and
- * not the one provided by {@link ShardingKeyProvider}.</p>
- *
  * @author Mohamed Lahyane (Anir)
- * @see DirectShardCallbackTemplate
  */
 
 
