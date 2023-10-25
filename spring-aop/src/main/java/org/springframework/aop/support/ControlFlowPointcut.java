@@ -18,6 +18,9 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.aop.ClassFilter;
@@ -25,10 +28,14 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Pointcut and method matcher for use as a simple <b>cflow</b>-style pointcut.
+ *
+ * <p>Each configured method name pattern can be an exact method name or a
+ * pattern (see {@link #isMatch(String, String)} for details on the supported
+ * pattern styles).
  *
  * <p>Note that evaluating such pointcuts is 10-15 times slower than evaluating
  * normal pointcuts, but they are useful in some cases.
@@ -37,6 +44,9 @@ import org.springframework.util.ObjectUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @see #isMatch
+ * @see NameMatchMethodPointcut
+ * @see JdkRegexpMethodPointcut
  */
 @SuppressWarnings("serial")
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
@@ -48,11 +58,10 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	protected final Class<?> clazz;
 
 	/**
-	 * The method against which to match, potentially {@code null}.
-	 * <p>Available for use in subclasses since 6.1.
+	 * An immutable list of method name patterns against which to match.
+	 * @since 6.1
 	 */
-	@Nullable
-	protected final String methodName;
+	protected final List<String> methodNamePatterns;
 
 	private final AtomicInteger evaluationCount = new AtomicInteger();
 
@@ -62,21 +71,52 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * @param clazz the class
 	 */
 	public ControlFlowPointcut(Class<?> clazz) {
-		this(clazz, null);
+		this(clazz, (String) null);
 	}
 
 	/**
-	 * Construct a new pointcut that matches all calls below the given method
-	 * in the given class.
-	 * <p>If no method name is given, the pointcut matches all control flows
+	 * Construct a new pointcut that matches all calls below a method matching
+	 * the given method name pattern in the given class.
+	 * <p>If no method name pattern is given, the pointcut matches all control flows
 	 * below the given class.
 	 * @param clazz the class
-	 * @param methodName the name of the method (may be {@code null})
+	 * @param methodNamePattern the method name pattern (may be {@code null})
 	 */
-	public ControlFlowPointcut(Class<?> clazz, @Nullable String methodName) {
+	public ControlFlowPointcut(Class<?> clazz, @Nullable String methodNamePattern) {
 		Assert.notNull(clazz, "Class must not be null");
 		this.clazz = clazz;
-		this.methodName = methodName;
+		this.methodNamePatterns = (methodNamePattern != null ?
+				Collections.singletonList(methodNamePattern) : Collections.emptyList());
+	}
+
+	/**
+	 * Construct a new pointcut that matches all calls below a method matching
+	 * one of the given method name patterns in the given class.
+	 * <p>If no method name pattern is given, the pointcut matches all control flows
+	 * below the given class.
+	 * @param clazz the class
+	 * @param methodNamePatterns the method name patterns (potentially empty)
+	 * @since 6.1
+	 */
+	public ControlFlowPointcut(Class<?> clazz, String... methodNamePatterns) {
+		this(clazz, Arrays.asList(methodNamePatterns));
+	}
+
+	/**
+	 * Construct a new pointcut that matches all calls below a method matching
+	 * one of the given method name patterns in the given class.
+	 * <p>If no method name pattern is given, the pointcut matches all control flows
+	 * below the given class.
+	 * @param clazz the class
+	 * @param methodNamePatterns the method name patterns (potentially empty)
+	 * @since 6.1
+	 */
+	public ControlFlowPointcut(Class<?> clazz, List<String> methodNamePatterns) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(methodNamePatterns, "List of method name patterns must not be null");
+		Assert.noNullElements(methodNamePatterns, "List of method name patterns must not contain null elements");
+		this.clazz = clazz;
+		this.methodNamePatterns = methodNamePatterns.stream().distinct().toList();
 	}
 
 
@@ -108,9 +148,15 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		incrementEvaluationCount();
 
 		for (StackTraceElement element : new Throwable().getStackTrace()) {
-			if (element.getClassName().equals(this.clazz.getName()) &&
-					(this.methodName == null || element.getMethodName().equals(this.methodName))) {
-				return true;
+			if (element.getClassName().equals(this.clazz.getName())) {
+				if (this.methodNamePatterns.isEmpty()) {
+					return true;
+				}
+				for (String methodNamePattern : this.methodNamePatterns) {
+					if (isMatch(element.getMethodName(), methodNamePattern)) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -134,6 +180,23 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		this.evaluationCount.incrementAndGet();
 	}
 
+	/**
+	 * Determine if the given method name matches the method name pattern.
+	 * <p>The default implementation checks for direct equality as well as
+	 * {@code xxx*}, {@code *xxx}, {@code *xxx*}, and {@code xxx*yyy} matches.
+	 * <p>Can be overridden in subclasses.
+	 * @param methodName the method name to check
+	 * @param methodNamePattern the method name pattern
+	 * @return {@code true} if the method name matches the pattern
+	 * @since 6.1
+	 * @see #matches(Method, Class, Object...)
+	 * @see PatternMatchUtils#simpleMatch(String, String)
+	 */
+	protected boolean isMatch(String methodName, String methodNamePattern) {
+		return (methodName.equals(methodNamePattern) ||
+				PatternMatchUtils.simpleMatch(methodNamePattern, methodName));
+	}
+
 
 	@Override
 	public ClassFilter getClassFilter() {
@@ -149,22 +212,19 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ControlFlowPointcut that &&
-				this.clazz.equals(that.clazz)) &&
-				ObjectUtils.nullSafeEquals(this.methodName, that.methodName));
+				this.clazz.equals(that.clazz)) && this.methodNamePatterns.equals(that.methodNamePatterns));
 	}
 
 	@Override
 	public int hashCode() {
 		int code = this.clazz.hashCode();
-		if (this.methodName != null) {
-			code = 37 * code + this.methodName.hashCode();
-		}
+		code = 37 * code + this.methodNamePatterns.hashCode();
 		return code;
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ": class = " + this.clazz.getName() + "; methodName = " + this.methodName;
+		return getClass().getName() + ": class = " + this.clazz.getName() + "; methodNamePatterns = " + this.methodNamePatterns;
 	}
 
 }
