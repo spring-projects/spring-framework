@@ -61,6 +61,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
@@ -78,6 +79,7 @@ import static org.mockito.BDDMockito.mock;
  * Unit tests for {@link ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class ResponseEntityExceptionHandlerTests {
 
@@ -288,6 +290,11 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void asyncRequestTimeoutException() {
 		testException(new AsyncRequestTimeoutException());
+	}
+
+	@Test
+	public void maxUploadSizeExceededException() {
+		testException(new MaxUploadSizeExceededException(1000));
 	}
 
 	@Test

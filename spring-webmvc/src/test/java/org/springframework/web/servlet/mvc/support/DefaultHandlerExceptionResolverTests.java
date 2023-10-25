@@ -44,6 +44,7 @@ import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -58,6 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link DefaultHandlerExceptionResolver}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public class DefaultHandlerExceptionResolverTests {
 
@@ -244,6 +246,16 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(503);
+	}
+
+	@Test
+	public void handleMaxUploadSizeExceededException() {
+		MaxUploadSizeExceededException ex = new MaxUploadSizeExceededException(1000);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(413);
+		assertThat(response.getErrorMessage()).isEqualTo("Maximum upload size exceeded");
 	}
 
 	@Test
