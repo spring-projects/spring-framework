@@ -41,10 +41,18 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
 
-	private final Class<?> clazz;
+	/**
+	 * The class against which to match.
+	 * <p>Available for use in subclasses since 6.1.
+	 */
+	protected final Class<?> clazz;
 
+	/**
+	 * The method against which to match, potentially {@code null}.
+	 * <p>Available for use in subclasses since 6.1.
+	 */
 	@Nullable
-	private final String methodName;
+	protected final String methodName;
 
 	private final AtomicInteger evaluationCount = new AtomicInteger();
 
@@ -97,7 +105,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass, Object... args) {
-		this.evaluationCount.incrementAndGet();
+		incrementEvaluationCount();
 
 		for (StackTraceElement element : new Throwable().getStackTrace()) {
 			if (element.getClassName().equals(this.clazz.getName()) &&
@@ -115,6 +123,15 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 */
 	public int getEvaluations() {
 		return this.evaluationCount.get();
+	}
+
+	/**
+	 * Increment the {@link #getEvaluations() evaluation count}.
+	 * @since 6.1
+	 * @see #matches(Method, Class, Object...)
+	 */
+	protected final void incrementEvaluationCount() {
+		this.evaluationCount.incrementAndGet();
 	}
 
 

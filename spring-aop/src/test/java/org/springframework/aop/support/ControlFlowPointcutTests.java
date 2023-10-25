@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Pointcut;
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Sam Brannen
  */
 class ControlFlowPointcutTests {
 
@@ -58,6 +61,57 @@ class ControlFlowPointcutTests {
 		assertThat(new One().nomatch(proxied)).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(1);
 		assertThat(cflow.getEvaluations()).isEqualTo(3);
+	}
+
+	@Test
+	void controlFlowPointcutIsExtensible() {
+		@SuppressWarnings("serial")
+		class CustomControlFlowPointcut extends ControlFlowPointcut {
+
+			CustomControlFlowPointcut(Class<?> clazz, String methodName) {
+				super(clazz, methodName);
+			}
+
+			@Override
+			public boolean matches(Method method, Class<?> targetClass, Object... args) {
+				super.incrementEvaluationCount();
+				return super.matches(method, targetClass, args);
+			}
+
+			Class<?> trackedClass() {
+				return super.clazz;
+			}
+
+			String trackedMethod() {
+				return super.methodName;
+			}
+		}
+
+		CustomControlFlowPointcut cflow = new CustomControlFlowPointcut(One.class, "getAge");
+
+		assertThat(cflow.trackedClass()).isEqualTo(One.class);
+		assertThat(cflow.trackedMethod()).isEqualTo("getAge");
+
+		TestBean target = new TestBean("Jane", 27);
+		ProxyFactory pf = new ProxyFactory(target);
+		NopInterceptor nop = new NopInterceptor();
+		pf.addAdvisor(new DefaultPointcutAdvisor(cflow, nop));
+		ITestBean proxy = (ITestBean) pf.getProxy();
+
+		// Not advised: the proxy is not invoked under One#getAge
+		assertThat(proxy.getAge()).isEqualTo(target.getAge());
+		assertThat(nop.getCount()).isEqualTo(0);
+		assertThat(cflow.getEvaluations()).isEqualTo(2); // intentional double increment
+
+		// Will be advised: the proxy is invoked under One#getAge
+		assertThat(new One().getAge(proxy)).isEqualTo(target.getAge());
+		assertThat(nop.getCount()).isEqualTo(1);
+		assertThat(cflow.getEvaluations()).isEqualTo(4); // intentional double increment
+
+		// Won't be advised: the proxy is not invoked under One#getAge
+		assertThat(new One().nomatch(proxy)).isEqualTo(target.getAge());
+		assertThat(nop.getCount()).isEqualTo(1);
+		assertThat(cflow.getEvaluations()).isEqualTo(6); // intentional double increment
 	}
 
 	/**
