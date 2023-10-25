@@ -5,7 +5,6 @@ antora:
   - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
   - '@antora/collector-extension'
   - '@antora/atlas-extension'
-  - '@opendevise/antora-release-line-extension'
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: 'framework'
   - '@springio/antora-extensions/static-page-extension'
