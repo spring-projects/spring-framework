@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -947,7 +948,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				Class<?> paramType = paramTypes[i];
 				Object value = valueResolver.resolveValue(paramPath, paramType);
 
-				if (value == null && !BeanUtils.isSimpleValueType(param.nestedIfOptional().getNestedParameterType())) {
+				if (value == null && shouldCreateObject(param)) {
 					ResolvableType type = ResolvableType.forMethodParameter(param);
 					args[i] = createObject(type, paramPath + ".", valueResolver);
 				}
@@ -1005,6 +1006,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 
 		return (isOptional && !nestedPath.isEmpty() ? Optional.ofNullable(result) : result);
+	}
+
+	private static boolean shouldCreateObject(MethodParameter param) {
+		Class<?> type = param.nestedIfOptional().getNestedParameterType();
+		return !(BeanUtils.isSimpleValueType(type) ||
+				Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || type.isArray());
 	}
 
 	private void validateConstructorArgument(
