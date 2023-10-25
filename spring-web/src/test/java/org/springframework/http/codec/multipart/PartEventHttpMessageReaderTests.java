@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.ContentDisposition;
@@ -226,6 +227,38 @@ class PartEventHttpMessageReaderTests {
 				.verifyComplete();
 	}
 
+	@Test
+	void tooManyParts() {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+
+		PartEventHttpMessageReader reader = new PartEventHttpMessageReader();
+		reader.setMaxParts(1);
+
+		Flux<PartEvent> result = reader.read(forClass(PartEvent.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.expectError(DecodingException.class)
+				.verify();
+	}
+
+	@Test
+	void partSizeTooLarge() {
+		MockServerHttpRequest request = createRequest(new ClassPathResource("safari.multipart", getClass()),
+				"----WebKitFormBoundaryG8fJ50opQOML0oGD");
+
+		PartEventHttpMessageReader reader = new PartEventHttpMessageReader();
+		reader.setMaxPartSize(60);
+
+		Flux<PartEvent> result = reader.read(forClass(PartEvent.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.assertNext(data(headersFormField("text1"), bodyText("a"), true))
+				.assertNext(data(headersFormField("text2"), bodyText("b"), true))
+				.expectError(DataBufferLimitException.class)
+				.verify();
+
+	}
 
 	@Test
 	public void utf8Headers() {

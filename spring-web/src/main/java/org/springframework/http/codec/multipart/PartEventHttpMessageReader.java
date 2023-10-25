@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -53,6 +55,10 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 
 	private int maxHeadersSize = 10 * 1024;
 
+	private int maxParts = -1;
+
+	private long maxPartSize = -1;
+
 	private Charset headersCharset = StandardCharsets.UTF_8;
 
 
@@ -83,6 +89,24 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 	 */
 	public void setMaxHeadersSize(int byteCount) {
 		this.maxHeadersSize = byteCount;
+	}
+
+	/**
+	 * Specify the maximum number of parts allowed in a given multipart request.
+	 * <p>By default this is set to -1, meaning that there is no maximum.
+	 * @since 6.1
+	 */
+	public void setMaxParts(int maxParts) {
+		this.maxParts = maxParts;
+	}
+
+	/**
+	 * Configure the maximum size allowed for any part.
+	 * <p>By default this is set to -1, meaning that there is no maximum.
+	 * @since 6.1
+	 */
+	public void setMaxPartSize(long maxPartSize) {
+		this.maxPartSize = maxPartSize;
 	}
 
 	/**
@@ -125,31 +149,50 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 				return Flux.error(new DecodingException("No multipart boundary found in Content-Type: \"" +
 						message.getHeaders().getContentType() + "\""));
 			}
-			return MultipartParser.parse(message.getBody(), boundary, this.maxHeadersSize, this.headersCharset)
-					.windowUntil(t -> t instanceof MultipartParser.HeadersToken, true)
-					.concatMap(tokens -> tokens.switchOnFirst((signal, flux) -> {
-						if (signal.hasValue()) {
-							MultipartParser.HeadersToken headersToken = (MultipartParser.HeadersToken) signal.get();
-							Assert.state(headersToken != null, "Signal should be headers token");
+			Flux<MultipartParser.Token> allPartsTokens = MultipartParser.parse(message.getBody(), boundary,
+					this.maxHeadersSize, this.headersCharset);
 
-							HttpHeaders headers = headersToken.headers();
-							Flux<MultipartParser.BodyToken> bodyTokens =
-									flux.filter(t -> t instanceof MultipartParser.BodyToken)
-											.cast(MultipartParser.BodyToken.class);
-							return createEvents(headers, bodyTokens);
+			AtomicInteger partCount = new AtomicInteger();
+			return allPartsTokens
+					.windowUntil(t -> t instanceof MultipartParser.HeadersToken, true)
+					.concatMap(partTokens -> {
+						if (tooManyParts(partCount)) {
+							return Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
+									this.maxParts + " allowed)"));
 						}
 						else {
-							// complete or error signal
-							return flux.cast(PartEvent.class);
+							return partTokens.switchOnFirst((signal, flux) -> {
+								if (signal.hasValue()) {
+									MultipartParser.HeadersToken headersToken = (MultipartParser.HeadersToken) signal.get();
+									Assert.state(headersToken != null, "Signal should be headers token");
+
+									HttpHeaders headers = headersToken.headers();
+									Flux<MultipartParser.BodyToken> bodyTokens =
+											flux.filter(t -> t instanceof MultipartParser.BodyToken)
+													.cast(MultipartParser.BodyToken.class);
+									return createEvents(headers, bodyTokens);
+								}
+								else {
+									// complete or error signal
+									return flux.cast(PartEvent.class);
+								}
+							});
 						}
-					}));
+					});
 		});
 	}
+
+	private boolean tooManyParts(AtomicInteger partCount) {
+		int count = partCount.incrementAndGet();
+		return this.maxParts > 0 && count > this.maxParts;
+	}
+
 
 	private Publisher<? extends PartEvent> createEvents(HttpHeaders headers, Flux<MultipartParser.BodyToken> bodyTokens) {
 		if (MultipartUtils.isFormField(headers)) {
 			Flux<DataBuffer> contents = bodyTokens.map(MultipartParser.BodyToken::buffer);
-			return DataBufferUtils.join(contents, this.maxInMemorySize)
+			int maxSize = (int) Math.min(this.maxInMemorySize, this.maxPartSize);
+			return DataBufferUtils.join(contents, maxSize)
 					.map(content -> {
 						String value = content.toString(MultipartUtils.charset(headers));
 						DataBufferUtils.release(content);
@@ -157,18 +200,30 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 					})
 					.switchIfEmpty(Mono.fromCallable(() -> DefaultPartEvents.form(headers)));
 		}
-		else if (headers.getContentDisposition().getFilename() != null) {
-			return bodyTokens
-					.map(body -> DefaultPartEvents.file(headers, body.buffer(), body.isLast()))
-					.switchIfEmpty(Mono.fromCallable(() -> DefaultPartEvents.file(headers)));
-		}
 		else {
+			boolean isFilePart = headers.getContentDisposition().getFilename() != null;
+			AtomicLong partSize = new AtomicLong();
 			return bodyTokens
-					.map(body -> DefaultPartEvents.create(headers, body.buffer(), body.isLast()))
-					.switchIfEmpty(Mono.fromCallable(() -> DefaultPartEvents.create(headers))); // empty body
+					.concatMap(body -> {
+						DataBuffer buffer = body.buffer();
+						if (tooLarge(partSize, buffer)) {
+							DataBufferUtils.release(buffer);
+							return Mono.error(new DataBufferLimitException("Part exceeded the limit of " +
+									this.maxPartSize + " bytes"));
+						}
+						else {
+							return isFilePart ? Mono.just(DefaultPartEvents.file(headers, buffer, body.isLast()))
+									: Mono.just(DefaultPartEvents.create(headers, body.buffer(), body.isLast()));
+						}
+					})
+					.switchIfEmpty(Mono.fromCallable(() ->
+							isFilePart ? DefaultPartEvents.file(headers) : DefaultPartEvents.create(headers)));
 		}
+	}
 
-
+	private boolean tooLarge(AtomicLong partSize, DataBuffer buffer) {
+		long size = partSize.addAndGet(buffer.readableByteCount());
+		return this.maxPartSize > 0 && size > this.maxPartSize;
 	}
 
 }
