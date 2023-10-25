@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -49,7 +50,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @see org.springframework.test.context.junit.jupiter.SpringExtensionTests
  * @see org.springframework.test.context.junit.jupiter.ComposedSpringExtensionTests
  */
-@SpringJUnitWebConfig(WebConfig.class)
+@SpringJUnitWebConfig(classes = WebConfig.class, loader = AnnotationConfigWebContextLoader.class)
 @DisplayName("Web SpringExtension Tests")
 class WebSpringExtensionTests {
 

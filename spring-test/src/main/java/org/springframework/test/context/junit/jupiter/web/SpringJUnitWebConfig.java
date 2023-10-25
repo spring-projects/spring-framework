@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -95,6 +96,13 @@ public @interface SpringJUnitWebConfig {
 	 */
 	@AliasFor(annotation = ContextConfiguration.class)
 	boolean inheritInitializers() default true;
+
+	/**
+	 * Alias for {@link ContextConfiguration#loader}.
+	 * @since 6.1
+	 */
+	@AliasFor(annotation = ContextConfiguration.class)
+	Class<? extends ContextLoader> loader() default ContextLoader.class;
 
 	/**
 	 * Alias for {@link ContextConfiguration#name}.
