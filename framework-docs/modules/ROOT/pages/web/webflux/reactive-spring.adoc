@@ -372,7 +372,7 @@ include::partial$web/forwarded-headers.adoc[]
 
 
 
-[[webflux-forwarded-headers-forwardedheadertransformer]]
+[[webflux-forwarded-headers-transformer]]
 === ForwardedHeaderTransformer
 
 `ForwardedHeaderTransformer` is a component that modifies the host, port, and scheme of
@@ -390,7 +390,7 @@ filters, and `ForwardedHeaderTransformer` is used instead.
 [[webflux-forwarded-headers-security]]
 === Security Considerations
 
-There are security considerations for forwarded headers, since an application cannot know
+There are security considerations for forwarded headers since an application cannot know
 if the headers were added by a proxy, as intended, or by a malicious client. This is why
 a proxy at the boundary of trust should be configured to remove untrusted forwarded traffic coming
 from the outside. You can also configure the `ForwardedHeaderTransformer` with

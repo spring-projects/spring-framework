@@ -57,7 +57,7 @@ with `removeOnly=true`, in which case it removes but does not use the headers.
 
 
 [[filters-forwarded-headers-dispatcher]]
-=== About Dispatcher Types
+=== Dispatcher Types
 
 In order to support xref:web/webmvc/mvc-ann-async.adoc[asynchronous requests] and error dispatches this
 filter should be mapped with `DispatcherType.ASYNC` and also `DispatcherType.ERROR`.
