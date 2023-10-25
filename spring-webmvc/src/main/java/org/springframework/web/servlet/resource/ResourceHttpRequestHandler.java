@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -140,6 +141,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private UrlPathHelper urlPathHelper;
 
 	private boolean useLastModified = true;
+
+	@Nullable
+	private Function<Resource, String> etagGenerator;
 
 	private boolean optimizeLocations = false;
 
@@ -384,6 +388,29 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
+	 * Configure a generator function that will be used to create the ETag information,
+	 * given a {@link Resource} that is about to be written to the response.
+	 * <p>This function should return a String that will be used as an argument in
+	 * {@link ServletWebRequest#checkNotModified(String)}, or {@code null} if no value
+	 * can be generated for the given resource.
+	 * @param etagGenerator the HTTP ETag generator function to use.
+	 * @since 6.1
+	 */
+	public void setEtagGenerator(@Nullable Function<Resource, String> etagGenerator) {
+		this.etagGenerator = etagGenerator;
+	}
+
+	/**
+	 * Return the HTTP ETag generator function to be used when serving resources.
+	 * @return the HTTP ETag generator function
+	 * @since 6.1
+	 */
+	@Nullable
+	public Function<Resource, String> getEtagGenerator() {
+		return this.etagGenerator;
+	}
+
+	/**
 	 * Set whether to optimize the specified locations through an existence
 	 * check on startup, filtering non-existing directories upfront so that
 	 * they do not have to be checked on every resource access.
@@ -567,7 +594,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		checkRequest(request);
 
 		// Header phase
-		if (isUseLastModified() && new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
+		String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
+		long lastModified = (this.isUseLastModified()) ? resource.lastModified() : -1;
+		if (new ServletWebRequest(request, response).checkNotModified(eTagValue, lastModified)) {
 			logger.trace("Resource not modified");
 			return;
 		}

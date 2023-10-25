@@ -478,7 +478,7 @@ class ResourceHttpRequestHandlerTests {
 		}
 
 		@Test
-		void shouldRespondWithNotModified() throws Exception {
+		void shouldRespondWithNotModifiedWhenModifiedSince() throws Exception {
 			this.handler.afterPropertiesSet();
 			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 			this.request.addHeader("If-Modified-Since", resourceLastModified("test/foo.css"));
@@ -494,6 +494,38 @@ class ResourceHttpRequestHandlerTests {
 			this.handler.handleRequest(this.request, this.response);
 			assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 			assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
+		}
+
+		@Test
+		void shouldRespondWithNotModifiedWhenEtag() throws Exception {
+			this.handler.setEtagGenerator(resource -> "testEtag");
+			this.handler.afterPropertiesSet();
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+			this.request.addHeader("If-None-Match", "\"testEtag\"");
+			this.handler.handleRequest(this.request, this.response);
+			assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_MODIFIED);
+		}
+
+		@Test
+		void shouldRespondWithModifiedResourceWhenEtagNoMatch() throws Exception {
+			this.handler.setEtagGenerator(resource -> "noMatch");
+			this.handler.afterPropertiesSet();
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+			this.request.addHeader("If-None-Match", "\"testEtag\"");
+			this.handler.handleRequest(this.request, this.response);
+			assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
+			assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
+		}
+
+		@Test
+		void shouldRespondWithNotModifiedWhenEtagAndLastModified() throws Exception {
+			this.handler.setEtagGenerator(resource -> "testEtag");
+			this.handler.afterPropertiesSet();
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+			this.request.addHeader("If-None-Match", "\"testEtag\"");
+			this.request.addHeader("If-Modified-Since", resourceLastModified("test/foo.css"));
+			this.handler.handleRequest(this.request, this.response);
+			assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_MODIFIED);
 		}
 
 		@Test  // SPR-14005
