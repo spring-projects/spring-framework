@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.AfterAdvice;
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -78,21 +79,44 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
-			if (method.getName().equals(AFTER_THROWING) &&
-					(method.getParameterCount() == 1 || method.getParameterCount() == 4)) {
-				Class<?> throwableParam = method.getParameterTypes()[method.getParameterCount() - 1];
-				if (Throwable.class.isAssignableFrom(throwableParam)) {
-					// An exception handler to register...
-					this.exceptionHandlerMap.put(throwableParam, method);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found exception handler method on throws advice: " + method);
+			if (method.getName().equals(AFTER_THROWING)) {
+				Class<?> throwableParam = null;
+				if (method.getParameterCount() == 1) {
+					// just a Throwable parameter
+					throwableParam = method.getParameterTypes()[0];
+					if (!Throwable.class.isAssignableFrom(throwableParam)) {
+						throw new AopConfigException("Invalid afterThrowing signature: " +
+								"single argument must be a Throwable subclass");
 					}
+				}
+				else if (method.getParameterCount() == 4) {
+					// Method, Object[], target, throwable
+					Class<?>[] paramTypes = method.getParameterTypes();
+					if (!Method.class.equals(paramTypes[0]) || !Object[].class.equals(paramTypes[1]) ||
+							Throwable.class.equals(paramTypes[2]) || !Throwable.class.isAssignableFrom(paramTypes[3])) {
+						throw new AopConfigException("Invalid afterThrowing signature: " +
+								"four arguments must be Method, Object[], target, throwable: " + method);
+					}
+					throwableParam = paramTypes[3];
+				}
+				if (throwableParam == null) {
+					throw new AopConfigException("Unsupported afterThrowing signature: single throwable argument " +
+							"or four arguments Method, Object[], target, throwable expected: " + method);
+				}
+				// An exception handler to register...
+				Method existingMethod = this.exceptionHandlerMap.put(throwableParam, method);
+				if (existingMethod != null) {
+					throw new AopConfigException("Only one afterThrowing method per specific Throwable subclass " +
+							"allowed: " + method + " / " + existingMethod);
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found exception handler method on throws advice: " + method);
 				}
 			}
 		}
 
 		if (this.exceptionHandlerMap.isEmpty()) {
-			throw new IllegalArgumentException(
+			throw new AopConfigException(
 					"At least one handler method must be found in class [" + throwsAdvice.getClass() + "]");
 		}
 	}

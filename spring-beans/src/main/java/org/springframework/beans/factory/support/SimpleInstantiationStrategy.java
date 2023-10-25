@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 1.1
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
@@ -152,6 +153,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			}
 		}
 		catch (IllegalArgumentException ex) {
+			if (factoryBean != null
+					&& !factoryMethod.getDeclaringClass().isAssignableFrom(factoryBean.getClass())) {
+				throw new BeanInstantiationException(factoryMethod,
+						"Illegal factory instance for factory method '" + factoryMethod.getName() + "'; " +
+						"instance: " + factoryBean.getClass().getName(), ex);
+			}
 			throw new BeanInstantiationException(factoryMethod,
 					"Illegal arguments to factory method '" + factoryMethod.getName() + "'; " +
 					"args: " + StringUtils.arrayToCommaDelimitedString(args), ex);

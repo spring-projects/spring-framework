@@ -19,13 +19,13 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import io.vavr.control.Try;
 import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
 import kotlinx.coroutines.Job;
-import kotlinx.coroutines.reactive.AwaitKt;
-import kotlinx.coroutines.reactive.ReactiveFlowKt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -106,16 +106,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	/**
+	 * Reactive Streams API present on the classpath?
+	 */
+	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+			"org.reactivestreams.Publisher", TransactionAspectSupport.class.getClassLoader());
+
+	/**
 	 * Vavr library present on the classpath?
 	 */
 	private static final boolean vavrPresent = ClassUtils.isPresent(
 			"io.vavr.control.Try", TransactionAspectSupport.class.getClassLoader());
-
-	/**
-	 * Reactive Streams API present on the classpath?
-	 */
-	private static final boolean reactiveStreamsPresent =
-			ClassUtils.isPresent("org.reactivestreams.Publisher", TransactionAspectSupport.class.getClassLoader());
 
 	/**
 	 * Holder to support the {@code currentTransactionStatus()} method,
@@ -368,13 +368,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			if (corInv != null) {
 				callback = () -> KotlinDelegate.invokeSuspendingFunction(method, corInv);
 			}
-			Object result = txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, rtm);
-			if (corInv != null) {
-				Publisher<?> pr = (Publisher<?>) result;
-				return (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow(pr) :
-						KotlinDelegate.awaitSingleOrNull(pr, corInv.getContinuation()));
-			}
-			return result;
+			return txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, rtm);
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
@@ -399,11 +393,26 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				cleanupTransactionInfo(txInfo);
 			}
 
-			if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
-				// Set rollback-only in case of Vavr failure matching our rollback rules...
+			if (retVal != null && txAttr != null) {
 				TransactionStatus status = txInfo.getTransactionStatus();
-				if (status != null && txAttr != null) {
-					retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
+				if (status != null) {
+					if (retVal instanceof Future<?> future && future.isDone()) {
+						try {
+							future.get();
+						}
+						catch (ExecutionException ex) {
+							if (txAttr.rollbackOn(ex.getCause())) {
+								status.setRollbackOnly();
+							}
+						}
+						catch (InterruptedException ex) {
+							Thread.currentThread().interrupt();
+						}
+					}
+					else if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+						// Set rollback-only in case of Vavr failure matching our rollback rules...
+						retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
+					}
 				}
 			}
 
@@ -879,16 +888,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
 	private static class KotlinDelegate {
-
-		private static Object asFlow(Publisher<?> publisher) {
-			return ReactiveFlowKt.asFlow(publisher);
-		}
-
-		@SuppressWarnings({"unchecked", "deprecation"})
-		@Nullable
-		private static Object awaitSingleOrNull(Publisher<?> publisher, Object continuation) {
-			return AwaitKt.awaitSingleOrNull(publisher, (Continuation<Object>) continuation);
-		}
 
 		public static Publisher<?> invokeSuspendingFunction(Method method, CoroutinesInvocationCallback callback) {
 			CoroutineContext coroutineContext = ((Continuation<?>) callback.getContinuation()).getContext().minusKey(Job.Key);

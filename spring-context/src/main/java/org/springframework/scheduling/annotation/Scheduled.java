@@ -28,18 +28,33 @@ import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
- * Annotation that marks a method to be scheduled. Exactly one of the
- * {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes
- * must be specified.
+ * Annotation that marks a method to be scheduled. For periodic tasks, exactly one
+ * of the {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes
+ * must be specified, and additionally an optional {@link #initialDelay}.
+ * For a one-time task, it is sufficient to just specify an {@link #initialDelay}.
  *
- * <p>The annotated method must expect no arguments. It will typically have
+ * <p>The annotated method must not accept arguments. It will typically have
  * a {@code void} return type; if not, the returned value will be ignored
  * when called through the scheduler.
  *
- * <p>Processing of {@code @Scheduled} annotations is performed by
- * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
- * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
- * XML element or {@link EnableScheduling @EnableScheduling} annotation.
+ * <p>Methods that return a reactive {@code Publisher} or a type which can be adapted
+ * to {@code Publisher} by the default {@code ReactiveAdapterRegistry} are supported.
+ * The {@code Publisher} must support multiple subsequent subscriptions. The returned
+ * {@code Publisher} is only produced once, and the scheduling infrastructure then
+ * periodically subscribes to it according to configuration. Values emitted by
+ * the publisher are ignored. Errors are logged at {@code WARN} level, which
+ * doesn't prevent further iterations. If a fixed delay is configured, the
+ * subscription is blocked in order to respect the fixed delay semantics.
+ *
+ * <p>Kotlin suspending functions are also supported, provided the coroutine-reactor
+ * bridge ({@code kotlinx.coroutine.reactor}) is present at runtime. This bridge is
+ * used to adapt the suspending function to a {@code Publisher} which is treated
+ * the same way as in the reactive method case (see above).
+ *
+ * <p>Processing of {@code @Scheduled} annotations is performed by registering a
+ * {@link ScheduledAnnotationBeanPostProcessor}. This can be done manually or,
+ * more conveniently, through the {@code <task:annotation-driven/>} XML element
+ * or {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>This annotation can be used as a <em>{@linkplain Repeatable repeatable}</em>
  * annotation. If several scheduled declarations are found on the same method,
@@ -191,5 +206,17 @@ public @interface Scheduled {
 	 * @since 5.3.10
 	 */
 	TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
+
+	/**
+	 * A qualifier for determining a scheduler to run this scheduled method on.
+	 * <p>Defaults to an empty String, suggesting the default scheduler.
+	 * <p>May be used to determine the target scheduler to be used,
+	 * matching the qualifier value (or the bean name) of a specific
+	 * {@link org.springframework.scheduling.TaskScheduler} or
+	 * {@link java.util.concurrent.ScheduledExecutorService} bean definition.
+	 * @since 6.1
+	 * @see org.springframework.scheduling.SchedulingAwareRunnable#getQualifier()
+	 */
+	String scheduler() default "";
 
 }

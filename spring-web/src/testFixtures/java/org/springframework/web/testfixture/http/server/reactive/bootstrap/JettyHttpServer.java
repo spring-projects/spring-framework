@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 
 import org.springframework.http.server.reactive.JettyHttpHandlerAdapter;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
@@ -45,15 +45,16 @@ public class JettyHttpServer extends AbstractHttpServer {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		servletHolder.setAsyncSupported(true);
 
-		this.contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);
+		this.contextHandler = new ServletContextHandler("", false, false);
 		this.contextHandler.addServlet(servletHolder, "/");
 		this.contextHandler.addServletContainerInitializer(new JettyWebSocketServletContainerInitializer());
-		this.contextHandler.start();
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);
 		connector.setHost(getHost());
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
+		this.jettyServer.setHandler(this.contextHandler);
+		this.contextHandler.start();
 	}
 
 	private ServletHttpHandlerAdapter createServletAdapter() {

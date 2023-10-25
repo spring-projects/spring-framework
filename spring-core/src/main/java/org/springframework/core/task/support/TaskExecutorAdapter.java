@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,15 +93,8 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			doExecute(this.concurrentExecutor, this.taskDecorator, task);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
-	}
-
-	@Deprecated
-	@Override
-	public void execute(Runnable task, long startTimeout) {
-		execute(task);
 	}
 
 	@Override
@@ -118,8 +111,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			}
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -137,8 +129,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			}
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -150,8 +141,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			return future;
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -163,8 +153,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			return future;
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 

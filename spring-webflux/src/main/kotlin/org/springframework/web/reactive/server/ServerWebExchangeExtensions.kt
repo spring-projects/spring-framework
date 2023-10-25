@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.http.codec.multipart.Part
 import org.springframework.util.MultiValueMap
@@ -31,6 +31,10 @@ import java.security.Principal
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Use the variant with the org.springframework.web.server package instead.",
+	ReplaceWith("awaitFormData()", "org.springframework.web.server.awaitFormData"),
+)
 suspend fun ServerWebExchange.awaitFormData(): MultiValueMap<String, String> =
 		this.formData.awaitSingle()
 
@@ -40,6 +44,10 @@ suspend fun ServerWebExchange.awaitFormData(): MultiValueMap<String, String> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Use the variant with the org.springframework.web.server package instead.",
+	ReplaceWith("awaitMultipartData()", "org.springframework.web.server.awaitMultipartData"),
+)
 suspend fun ServerWebExchange.awaitMultipartData(): MultiValueMap<String, Part> =
 		this.multipartData.awaitSingle()
 
@@ -49,6 +57,10 @@ suspend fun ServerWebExchange.awaitMultipartData(): MultiValueMap<String, Part> 
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Use the variant with the org.springframework.web.server package instead.",
+	ReplaceWith("awaitPrincipal<T>()", "org.springframework.web.server.awaitPrincipal"),
+)
 suspend fun <T : Principal> ServerWebExchange.awaitPrincipal(): T =
 		this.getPrincipal<T>().awaitSingle()
 
@@ -58,6 +70,10 @@ suspend fun <T : Principal> ServerWebExchange.awaitPrincipal(): T =
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Use the variant with the org.springframework.web.server package instead.",
+	ReplaceWith("awaitSession()", "org.springframework.web.server.awaitSession"),
+)
 suspend fun ServerWebExchange.awaitSession(): WebSession =
 		this.session.awaitSingle()
 
@@ -67,5 +83,9 @@ suspend fun ServerWebExchange.awaitSession(): WebSession =
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Deprecated(
+	message = "Use the variant with the org.springframework.web.server package instead.",
+	ReplaceWith("principal(supplier)", "org.springframework.web.server.principal"),
+)
 fun ServerWebExchange.Builder.principal(supplier: suspend () -> Principal): ServerWebExchange.Builder
         = principal(mono(Dispatchers.Unconfined) { supplier.invoke() })

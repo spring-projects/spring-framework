@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -127,6 +130,28 @@ public class RouterFunctionBuilderTests {
 				.map(ServerResponse::statusCode);
 
 		StepVerifier.create(responseMono)
+				.verifyComplete();
+	}
+
+	@Test
+	public void resourcesCaching() {
+		Resource resource = new ClassPathResource("/org/springframework/web/reactive/function/server/");
+		assertThat(resource.exists()).isTrue();
+
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.resources("/resources/**", resource, (r, headers) -> headers.setCacheControl(CacheControl.maxAge(Duration.ofSeconds(60))))
+				.build();
+
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/resources/response.txt").build();
+		ServerRequest resourceRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<String> responseMono = route.route(resourceRequest)
+				.flatMap(handlerFunction -> handlerFunction.handle(resourceRequest))
+				.map(ServerResponse::headers)
+				.mapNotNull(HttpHeaders::getCacheControl);
+
+		StepVerifier.create(responseMono)
+				.expectNext("max-age=60")
 				.verifyComplete();
 	}
 

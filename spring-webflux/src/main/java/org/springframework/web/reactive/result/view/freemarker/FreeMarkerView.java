@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,10 @@ import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -202,12 +204,30 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		}
 		catch (ParseException ex) {
 			throw new ApplicationContextException(
-					"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
+					"Failed to parse FreeMarker template for URL [" + getUrl() + "]", ex);
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(
 					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
 		}
+	}
+
+	/**
+	 * Check that the FreeMarker template used for this view exists and is valid.
+	 * <p>Can be overridden to customize the behavior, for example in case of
+	 * multiple templates to be rendered into a single view.
+	 * @since 6.1
+	 */
+	@Override
+	public Mono<Boolean> resourceExists(Locale locale) {
+		return lookupTemplate(locale)
+				.map(template -> Boolean.TRUE)
+				.switchIfEmpty(Mono.just(Boolean.FALSE))
+				.onErrorReturn(FileNotFoundException.class, Boolean.FALSE)
+				.onErrorMap(ParseException.class, ex -> new ApplicationContextException(
+						"Failed to parse FreeMarker template for URL [" + getUrl() + "]", ex))
+				.onErrorMap(IOException.class, ex -> new ApplicationContextException(
+						"Could not load FreeMarker template for URL [" + getUrl() + "]", ex));
 	}
 
 	/**
@@ -243,7 +263,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			@Nullable MediaType contentType, ServerWebExchange exchange) {
 
 		return exchange.getResponse().writeWith(Mono
-				.fromCallable(() -> {
+				.defer(() -> {
 					// Expose all standard FreeMarker hash models.
 					SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
 
@@ -252,19 +272,22 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 					}
 
 					Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
-					FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
-					try {
-						Charset charset = getCharset(contentType);
-						Writer writer = new OutputStreamWriter(bos, charset);
-						getTemplate(locale).process(freeMarkerModel, writer);
-
-						byte[] bytes = bos.toByteArrayUnsafe();
-						return exchange.getResponse().bufferFactory().wrap(bytes);
-					}
-					catch (IOException ex) {
-						String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
-						throw new IllegalStateException(message, ex);
-					}
+					return lookupTemplate(locale)
+							.flatMap(template -> {
+								try {
+									FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
+									Charset charset = getCharset(contentType);
+									Writer writer = new OutputStreamWriter(bos, charset);
+									template.process(freeMarkerModel, writer);
+									byte[] bytes = bos.toByteArrayUnsafe();
+									DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+									return Mono.just(buffer);
+								}
+								catch (TemplateException | IOException ex ) {
+									String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
+									return Mono.error(new IllegalStateException(message, ex));
+								}
+							});
 				})
 				.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
 	}
@@ -302,11 +325,32 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * <p>By default, the template specified by the "url" bean property will be retrieved.
 	 * @param locale the current locale
 	 * @return the FreeMarker template to render
+	 * @deprecated since 6.1, in favor of {@link #lookupTemplate(Locale)}, to be
+	 * removed in 6.2
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	protected Template getTemplate(Locale locale) throws IOException {
 		return (getEncoding() != null ?
 				obtainConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
 				obtainConfiguration().getTemplate(getUrl(), locale));
+	}
+
+	/**
+	 * Retrieve the FreeMarker template for the given locale, to be rendered by this view.
+	 * <p>By default, the template specified by the "url" bean property will be retrieved,
+	 * and the returned mono will subscribe on the
+	 * {@linkplain Schedulers#boundedElastic() bounded elastic scheduler} as template
+	 * lookups can be blocking operations.
+	 * @param locale the current locale
+	 * @return the FreeMarker template to render
+	 * @since 6.1
+	 */
+	protected Mono<Template> lookupTemplate(Locale locale) {
+		return Mono.fromCallable(() ->
+						getEncoding() != null ?
+								obtainConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
+								obtainConfiguration().getTemplate(getUrl(), locale))
+				.subscribeOn(Schedulers.boundedElastic());
 	}
 
 }

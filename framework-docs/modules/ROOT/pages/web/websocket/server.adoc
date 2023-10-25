@@ -280,9 +280,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 NOTE: For client-side WebSocket configuration, you should use `WebSocketContainerFactoryBean`
 (XML) or `ContainerProvider.getWebSocketContainer()` (Java configuration).
 
-For Jetty, you need to supply a pre-configured Jetty `WebSocketServerFactory` and plug
-that into Spring's `DefaultHandshakeHandler` through your WebSocket Java config.
-The following example shows how to do so:
+For Jetty, you need to supply a `Consumer` callback to configure the WebSocket server. For example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -292,62 +290,20 @@ The following example shows how to do so:
 
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+
+			JettyRequestUpgradeStrategy upgradeStrategy = new JettyRequestUpgradeStrategy();
+			upgradeStrategy.addWebSocketConfigurer(configurable -> {
+					policy.setInputBufferSize(8192);
+					policy.setIdleTimeout(600000);
+			});
+
 			registry.addHandler(echoWebSocketHandler(),
-				"/echo").setHandshakeHandler(handshakeHandler());
-		}
-
-		@Bean
-		public DefaultHandshakeHandler handshakeHandler() {
-
-			WebSocketPolicy policy = new WebSocketPolicy(WebSocketBehavior.SERVER);
-			policy.setInputBufferSize(8192);
-			policy.setIdleTimeout(600000);
-
-			return new DefaultHandshakeHandler(
-					new JettyRequestUpgradeStrategy(new WebSocketServerFactory(policy)));
+				"/echo").setHandshakeHandler(new DefaultHandshakeHandler(upgradeStrategy));
 		}
 
 	}
 ----
 
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:handlers>
-			<websocket:mapping path="/echo" handler="echoHandler"/>
-			<websocket:handshake-handler ref="handshakeHandler"/>
-		</websocket:handlers>
-
-		<bean id="handshakeHandler" class="org.springframework...DefaultHandshakeHandler">
-			<constructor-arg ref="upgradeStrategy"/>
-		</bean>
-
-		<bean id="upgradeStrategy" class="org.springframework...JettyRequestUpgradeStrategy">
-			<constructor-arg ref="serverFactory"/>
-		</bean>
-
-		<bean id="serverFactory" class="org.eclipse.jetty...WebSocketServerFactory">
-			<constructor-arg>
-				<bean class="org.eclipse.jetty...WebSocketPolicy">
-					<constructor-arg value="SERVER"/>
-					<property name="inputBufferSize" value="8092"/>
-					<property name="idleTimeout" value="600000"/>
-				</bean>
-			</constructor-arg>
-		</bean>
-
-	</beans>
-----
 
 
 

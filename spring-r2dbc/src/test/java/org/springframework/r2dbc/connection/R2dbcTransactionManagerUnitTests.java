@@ -145,12 +145,16 @@ class R2dbcTransactionManagerUnitTests {
 		definition.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
-
-		ConnectionFactoryUtils.getConnection(connectionFactoryMock)
-				.as(operator::transactional)
-				.as(StepVerifier::create)
-				.expectNextCount(1)
-				.verifyComplete();
+		operator.execute(tx -> {
+			assertThat(tx.getTransactionName()).isEqualTo("my-transaction");
+			assertThat(tx.hasTransaction()).isTrue();
+			assertThat(tx.isNewTransaction()).isTrue();
+			assertThat(tx.isNested()).isFalse();
+			assertThat(tx.isReadOnly()).isTrue();
+			assertThat(tx.isRollbackOnly()).isFalse();
+			assertThat(tx.isCompleted()).isFalse();
+			return Mono.empty();
+		}).as(StepVerifier::create).verifyComplete();
 
 		ArgumentCaptor<io.r2dbc.spi.TransactionDefinition> txCaptor = ArgumentCaptor.forClass(io.r2dbc.spi.TransactionDefinition.class);
 		verify(connectionMock).beginTransaction(txCaptor.capture());
@@ -320,8 +324,15 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm);
 		operator.execute(tx -> {
-			tx.setRollbackOnly();
+			assertThat(tx.getTransactionName()).isEmpty();
+			assertThat(tx.hasTransaction()).isTrue();
 			assertThat(tx.isNewTransaction()).isTrue();
+			assertThat(tx.isNested()).isFalse();
+			assertThat(tx.isReadOnly()).isFalse();
+			assertThat(tx.isRollbackOnly()).isFalse();
+			tx.setRollbackOnly();
+			assertThat(tx.isRollbackOnly()).isTrue();
+			assertThat(tx.isCompleted()).isFalse();
 			return TransactionSynchronizationManager.forCurrentTransaction().doOnNext(
 					synchronizationManager -> {
 						assertThat(synchronizationManager.hasResource(connectionFactoryMock)).isTrue();
@@ -350,7 +361,13 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
 		operator.execute(tx1 -> {
+			assertThat(tx1.getTransactionName()).isEmpty();
+			assertThat(tx1.hasTransaction()).isTrue();
 			assertThat(tx1.isNewTransaction()).isTrue();
+			assertThat(tx1.isNested()).isFalse();
+			assertThat(tx1.isReadOnly()).isFalse();
+			assertThat(tx1.isRollbackOnly()).isFalse();
+			assertThat(tx1.isCompleted()).isFalse();
 			definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NEVER);
 			return operator.execute(tx2 -> {
 				fail("Should have thrown IllegalTransactionStateException");
@@ -374,39 +391,53 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
 		operator.execute(tx -> {
+			assertThat(tx.hasTransaction()).isTrue();
 			assertThat(tx.isNewTransaction()).isTrue();
+			assertThat(tx.isNested()).isFalse();
 			definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			return Flux.concat(
 					TransactionalOperator.create(tm, definition).execute(ntx1 -> {
+						assertThat(ntx1.hasTransaction()).as("ntx1.hasTransaction()").isTrue();
 						assertThat(ntx1.isNewTransaction()).as("ntx1.isNewTransaction()").isTrue();
+						assertThat(ntx1.isNested()).as("ntx1.isNested()").isTrue();
 						assertThat(ntx1.isRollbackOnly()).as("ntx1.isRollbackOnly()").isFalse();
 						return Mono.empty();
 					}),
 					TransactionalOperator.create(tm, definition).execute(ntx2 -> {
+						assertThat(ntx2.hasTransaction()).as("ntx2.hasTransaction()").isTrue();
 						assertThat(ntx2.isNewTransaction()).as("ntx2.isNewTransaction()").isTrue();
+						assertThat(ntx2.isNested()).as("ntx2.isNested()").isTrue();
 						assertThat(ntx2.isRollbackOnly()).as("ntx2.isRollbackOnly()").isFalse();
 						ntx2.setRollbackOnly();
 						assertThat(ntx2.isRollbackOnly()).isTrue();
 						return Mono.empty();
 					}),
 					TransactionalOperator.create(tm, definition).execute(ntx3 -> {
+						assertThat(ntx3.hasTransaction()).as("ntx3.hasTransaction()").isTrue();
 						assertThat(ntx3.isNewTransaction()).as("ntx3.isNewTransaction()").isTrue();
+						assertThat(ntx3.isNested()).as("ntx3.isNested()").isTrue();
 						assertThat(ntx3.isRollbackOnly()).as("ntx3.isRollbackOnly()").isFalse();
 						return Mono.empty();
 					}),
 					TransactionalOperator.create(tm, definition).execute(ntx4 -> {
+						assertThat(ntx4.hasTransaction()).as("ntx4.hasTransaction()").isTrue();
 						assertThat(ntx4.isNewTransaction()).as("ntx4.isNewTransaction()").isTrue();
+						assertThat(ntx4.isNested()).as("ntx4.isNested()").isTrue();
 						assertThat(ntx4.isRollbackOnly()).as("ntx4.isRollbackOnly()").isFalse();
 						ntx4.setRollbackOnly();
 						assertThat(ntx4.isRollbackOnly()).isTrue();
 						return Flux.concat(
 								TransactionalOperator.create(tm, definition).execute(ntx4n1 -> {
+									assertThat(ntx4n1.hasTransaction()).as("ntx4n1.hasTransaction()").isTrue();
 									assertThat(ntx4n1.isNewTransaction()).as("ntx4n1.isNewTransaction()").isTrue();
+									assertThat(ntx4n1.isNested()).as("ntx4n1.isNested()").isTrue();
 									assertThat(ntx4n1.isRollbackOnly()).as("ntx4n1.isRollbackOnly()").isFalse();
 									return Mono.empty();
 								}),
 								TransactionalOperator.create(tm, definition).execute(ntx4n2 -> {
+									assertThat(ntx4n2.hasTransaction()).as("ntx4n2.hasTransaction()").isTrue();
 									assertThat(ntx4n2.isNewTransaction()).as("ntx4n2.isNewTransaction()").isTrue();
+									assertThat(ntx4n2.isNested()).as("ntx4n2.isNested()").isTrue();
 									assertThat(ntx4n2.isRollbackOnly()).as("ntx4n2.isRollbackOnly()").isFalse();
 									ntx4n2.setRollbackOnly();
 									assertThat(ntx4n2.isRollbackOnly()).isTrue();
@@ -415,18 +446,24 @@ class R2dbcTransactionManagerUnitTests {
 						);
 					}),
 					TransactionalOperator.create(tm, definition).execute(ntx5 -> {
+						assertThat(ntx5.hasTransaction()).as("ntx5.hasTransaction()").isTrue();
 						assertThat(ntx5.isNewTransaction()).as("ntx5.isNewTransaction()").isTrue();
+						assertThat(ntx5.isNested()).as("ntx5.isNested()").isTrue();
 						assertThat(ntx5.isRollbackOnly()).as("ntx5.isRollbackOnly()").isFalse();
 						ntx5.setRollbackOnly();
 						assertThat(ntx5.isRollbackOnly()).isTrue();
 						return Flux.concat(
 								TransactionalOperator.create(tm, definition).execute(ntx5n1 -> {
+									assertThat(ntx5n1.hasTransaction()).as("ntx5n1.hasTransaction()").isTrue();
 									assertThat(ntx5n1.isNewTransaction()).as("ntx5n1.isNewTransaction()").isTrue();
+									assertThat(ntx5n1.isNested()).as("ntx5n1.isNested()").isTrue();
 									assertThat(ntx5n1.isRollbackOnly()).as("ntx5n1.isRollbackOnly()").isFalse();
 									return Mono.empty();
 								}),
 								TransactionalOperator.create(tm, definition).execute(ntx5n2 -> {
+									assertThat(ntx5n2.hasTransaction()).as("ntx5n2.hasTransaction()").isTrue();
 									assertThat(ntx5n2.isNewTransaction()).as("ntx5n2.isNewTransaction()").isTrue();
+									assertThat(ntx5n2.isNested()).as("ntx5n2.isNested()").isTrue();
 									assertThat(ntx5n2.isRollbackOnly()).as("ntx5n2.isRollbackOnly()").isFalse();
 									ntx5n2.setRollbackOnly();
 									assertThat(ntx5n2.isRollbackOnly()).isTrue();
@@ -479,12 +516,16 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
 		operator.execute(tx1 -> {
+			assertThat(tx1.hasTransaction()).isFalse();
 			assertThat(tx1.isNewTransaction()).isFalse();
+			assertThat(tx1.isNested()).isFalse();
 			DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
 			innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
 			return inner.execute(tx2 -> {
+				assertThat(tx2.hasTransaction()).isTrue();
 				assertThat(tx2.isNewTransaction()).isTrue();
+				assertThat(tx2.isNested()).isFalse();
 				return Mono.empty();
 			});
 		}).as(StepVerifier::create).verifyComplete();
@@ -502,12 +543,16 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
 		operator.execute(tx1 -> {
+			assertThat(tx1.hasTransaction()).isFalse();
 			assertThat(tx1.isNewTransaction()).isFalse();
+			assertThat(tx1.isNested()).isFalse();
 			DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
 			innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
 			return inner.execute(tx2 -> {
+				assertThat(tx2.hasTransaction()).isTrue();
 				assertThat(tx2.isNewTransaction()).isTrue();
+				assertThat(tx2.isNested()).isFalse();
 				assertThat(tx2.isRollbackOnly()).isFalse();
 				tx2.setRollbackOnly();
 				assertThat(tx2.isRollbackOnly()).isTrue();
@@ -528,12 +573,16 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
 		operator.execute(tx1 -> {
+			assertThat(tx1.hasTransaction()).isFalse();
 			assertThat(tx1.isNewTransaction()).isFalse();
+			assertThat(tx1.isNested()).isFalse();
 			DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
 			innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
 			return inner.execute(tx2 -> {
+				assertThat(tx2.hasTransaction()).isTrue();
 				assertThat(tx2.isNewTransaction()).isTrue();
+				assertThat(tx2.isNested()).isFalse();
 				return Mono.empty();
 			});
 		}).as(StepVerifier::create).verifyComplete();
@@ -551,12 +600,16 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
 		operator.execute(tx1 -> {
+			assertThat(tx1.hasTransaction()).isFalse();
 			assertThat(tx1.isNewTransaction()).isFalse();
+			assertThat(tx1.isNested()).isFalse();
 			DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
 			innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
 			return inner.execute(tx2 -> {
+				assertThat(tx2.hasTransaction()).isTrue();
 				assertThat(tx2.isNewTransaction()).isTrue();
+				assertThat(tx2.isNested()).isFalse();
 				assertThat(tx2.isRollbackOnly()).isFalse();
 				tx2.setRollbackOnly();
 				assertThat(tx2.isRollbackOnly()).isTrue();

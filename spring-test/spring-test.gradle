@@ -27,6 +27,7 @@ dependencies {
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
+	optional("javax.inject:javax.inject")
 	optional("junit:junit")
 	optional("net.sourceforge.htmlunit:htmlunit") {
 		exclude group: "commons-logging", module: "commons-logging"
@@ -73,6 +74,7 @@ dependencies {
 	testImplementation("org.apache.httpcomponents:httpclient") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
+	testImplementation("org.awaitility:awaitility")
 	testImplementation("org.hibernate:hibernate-core-jakarta")
 	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
@@ -84,6 +86,7 @@ dependencies {
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
+	testRuntimeOnly("org.yaml:snakeyaml")
 }
 
 // Prevent xml-apis from being used so that the corresponding XML APIs from

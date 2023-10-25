@@ -3,16 +3,18 @@
 
 package org.springframework.protobuf;
 
-public interface SecondMsgOrBuilder
-    extends com.google.protobuf.MessageOrBuilder {
+public interface SecondMsgOrBuilder extends
+    // @@protoc_insertion_point(interface_extends:SecondMsg)
+    com.google.protobuf.MessageOrBuilder {
 
-  // optional int32 blah = 1;
   /**
    * <code>optional int32 blah = 1;</code>
+   * @return Whether the blah field is set.
    */
   boolean hasBlah();
   /**
    * <code>optional int32 blah = 1;</code>
+   * @return The blah.
    */
   int getBlah();
 }

@@ -30,6 +30,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.lang.Nullable;
 
 /**
@@ -50,7 +55,8 @@ import org.springframework.lang.Nullable;
  */
 @SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
-		implements BeanNameAware, InitializingBean, DisposableBean {
+		implements BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean,
+		SmartLifecycle, ApplicationListener<ContextClosedEvent> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -60,15 +66,25 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 
+	private boolean acceptTasksAfterContextClose = false;
+
 	private boolean waitForTasksToCompleteOnShutdown = false;
 
 	private long awaitTerminationMillis = 0;
+
+	private int phase = DEFAULT_PHASE;
 
 	@Nullable
 	private String beanName;
 
 	@Nullable
+	private ApplicationContext applicationContext;
+
+	@Nullable
 	private ExecutorService executor;
+
+	@Nullable
+	private ExecutorLifecycleDelegate lifecycleDelegate;
 
 
 	/**
@@ -103,6 +119,26 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	public void setRejectedExecutionHandler(@Nullable RejectedExecutionHandler rejectedExecutionHandler) {
 		this.rejectedExecutionHandler =
 				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
+	}
+
+	/**
+	 * Set whether to accept further tasks after the application context close phase
+	 * has begun.
+	 * <p>Default is {@code false} as of 6.1, triggering an early soft shutdown of
+	 * the executor and therefore rejecting any further task submissions. Switch this
+	 * to {@code true} in order to let other components submit tasks even during their
+	 * own destruction callbacks, at the expense of a longer shutdown phase.
+	 * This will usually go along with
+	 * {@link #setWaitForTasksToCompleteOnShutdown "waitForTasksToCompleteOnShutdown"}.
+	 * <p>This flag will only have effect when the executor is running in a Spring
+	 * application context and able to receive the {@link ContextClosedEvent}.
+	 * @since 6.1
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
+	 * @see DisposableBean#destroy()
+	 * @see #shutdown()
+	 */
+	public void setAcceptTasksAfterContextClose(boolean acceptTasksAfterContextClose) {
+		this.acceptTasksAfterContextClose = acceptTasksAfterContextClose;
 	}
 
 	/**
@@ -161,9 +197,34 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		this.awaitTerminationMillis = awaitTerminationMillis;
 	}
 
+	/**
+	 * Specify the lifecycle phase for pausing and resuming this executor.
+	 * The default is {@link #DEFAULT_PHASE}.
+	 * @since 6.1
+	 * @see SmartLifecycle#getPhase()
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * Return the lifecycle phase for pausing and resuming this executor.
+	 * @since 6.1
+	 * @see #setPhase
+	 */
+	@Override
+	public int getPhase() {
+		return this.phase;
+	}
+
 	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
 
 
@@ -187,6 +248,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 			setThreadNamePrefix(this.beanName + "-");
 		}
 		this.executor = initializeExecutor(this.threadFactory, this.rejectedExecutionHandler);
+		this.lifecycleDelegate = new ExecutorLifecycleDelegate(this.executor);
 	}
 
 	/**
@@ -211,8 +273,28 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	/**
+	 * Initiate a shutdown on the underlying ExecutorService,
+	 * rejecting further task submissions.
+	 * <p>The executor will not accept further tasks and will prevent further
+	 * scheduling of periodic tasks, letting existing tasks complete still.
+	 * This step is non-blocking and can be applied as an early shutdown signal
+	 * before following up with a full {@link #shutdown()} call later on.
+	 * @since 6.1
+	 * @see #shutdown()
+	 * @see java.util.concurrent.ExecutorService#shutdown()
+	 */
+	public void initiateShutdown() {
+		if (this.executor != null) {
+			this.executor.shutdown();
+		}
+	}
+
+	/**
 	 * Perform a full shutdown on the underlying ExecutorService,
 	 * according to the corresponding configuration settings.
+	 * <p>This step potentially blocks for the configured termination period,
+	 * waiting for remaining tasks to complete. For an early shutdown signal
+	 * to not accept further tasks, call {@link #initiateShutdown()} first.
 	 * @see #setWaitForTasksToCompleteOnShutdown
 	 * @see #setAwaitTerminationMillis
 	 * @see java.util.concurrent.ExecutorService#shutdown()
@@ -271,6 +353,96 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 				}
 				Thread.currentThread().interrupt();
 			}
+		}
+	}
+
+
+	/**
+	 * Resume this executor if paused before (otherwise a no-op).
+	 * @since 6.1
+	 */
+	@Override
+	public void start() {
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.start();
+		}
+	}
+
+	/**
+	 * Pause this executor, not waiting for tasks to complete.
+	 * @since 6.1
+	 */
+	@Override
+	public void stop() {
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.stop();
+		}
+	}
+
+	/**
+	 * Pause this executor, triggering the given callback
+	 * once all currently executing tasks have completed.
+	 * @since 6.1
+	 */
+	@Override
+	public void stop(Runnable callback) {
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.stop(callback);
+		}
+	}
+
+	/**
+	 * Check whether this executor is not paused and has not been shut down either.
+	 * @since 6.1
+	 * @see #start()
+	 * @see #stop()
+	 */
+	@Override
+	public boolean isRunning() {
+		return (this.lifecycleDelegate != null && this.lifecycleDelegate.isRunning());
+	}
+
+	/**
+	 * A before-execute callback for framework subclasses to delegate to
+	 * (for start/stop handling), and possibly also for custom subclasses
+	 * to extend (making sure to call this implementation as well).
+	 * @param thread the thread to run the task
+	 * @param task the task to be executed
+	 * @since 6.1
+	 * @see ThreadPoolExecutor#beforeExecute(Thread, Runnable)
+	 */
+	protected void beforeExecute(Thread thread, Runnable task) {
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.beforeExecute(thread);
+		}
+	}
+
+	/**
+	 * An after-execute callback for framework subclasses to delegate to
+	 * (for start/stop handling), and possibly also for custom subclasses
+	 * to extend (making sure to call this implementation as well).
+	 * @param task the task that has been executed
+	 * @param ex the exception thrown during execution, if any
+	 * @since 6.1
+	 * @see ThreadPoolExecutor#afterExecute(Runnable, Throwable)
+	 */
+	protected void afterExecute(Runnable task, @Nullable Throwable ex) {
+		if (this.lifecycleDelegate != null) {
+			this.lifecycleDelegate.afterExecute();
+		}
+	}
+
+	/**
+	 * {@link ContextClosedEvent} handler for initiating an early shutdown.
+	 * @since 6.1
+	 * @see #initiateShutdown()
+	 */
+	@Override
+	public void onApplicationEvent(ContextClosedEvent event) {
+		if (event.getApplicationContext() == this.applicationContext && !this.acceptTasksAfterContextClose) {
+			// Early shutdown signal: accept no further tasks, let existing tasks complete
+			// before hitting the actual destruction step in the shutdown() method above.
+			initiateShutdown();
 		}
 	}
 

@@ -295,14 +295,56 @@ behavior after your test runs (if the test was configured to commit the transact
 `TransactionalTestExecutionListener` supports the `@BeforeTransaction` and
 `@AfterTransaction` annotations for exactly such scenarios. You can annotate any `void`
 method in a test class or any `void` default method in a test interface with one of these
-annotations, and the `TransactionalTestExecutionListener` ensures that your before
-transaction method or after transaction method runs at the appropriate time.
+annotations, and the `TransactionalTestExecutionListener` ensures that your
+before-transaction method or after-transaction method runs at the appropriate time.
 
-TIP: Any before methods (such as methods annotated with JUnit Jupiter's `@BeforeEach`)
-and any after methods (such as methods annotated with JUnit Jupiter's `@AfterEach`) are
-run within a transaction. In addition, methods annotated with `@BeforeTransaction` or
-`@AfterTransaction` are not run for test methods that are not configured to run within a
-transaction.
+[NOTE]
+====
+Generally speaking, `@BeforeTransaction` and `@AfterTransaction` methods must not accept
+any arguments.
+
+However, as of Spring Framework 6.1, for tests using the 
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+with JUnit Jupiter, `@BeforeTransaction` and `@AfterTransaction` methods may optionally
+accept arguments which will be resolved by any registered JUnit `ParameterResolver`
+extension such as the `SpringExtension`. This means that JUnit-specific arguments like
+`TestInfo` or beans from the test's `ApplicationContext` may be provided to
+`@BeforeTransaction` and `@AfterTransaction` methods, as demonstrated in the following
+example.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+@BeforeTransaction
+void verifyInitialDatabaseState(@Autowired DataSource dataSource) {
+	// Use the DataSource to verify the initial state before a transaction is started
+}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+@BeforeTransaction
+fun verifyInitialDatabaseState(@Autowired dataSource: DataSource) {
+	// Use the DataSource to verify the initial state before a transaction is started
+}
+----
+======
+====
+
+[TIP]
+====
+Any before methods (such as methods annotated with JUnit Jupiter's `@BeforeEach`) and any
+after methods (such as methods annotated with JUnit Jupiter's `@AfterEach`) are run
+within the test-managed transaction for a transactional test method.
+
+Similarly, methods annotated with `@BeforeTransaction` or `@AfterTransaction` are only
+run for transactional test methods.
+====
 
 [[testcontext-tx-mgr-config]]
 == Configuring a Transaction Manager

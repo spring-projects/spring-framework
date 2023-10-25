@@ -51,8 +51,10 @@ public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}; scheduled for
 	 * removal in 6.2
 	 */
-	@Deprecated(since = "6.0")
-	int getRawStatusCode() throws IOException;
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int getRawStatusCode() throws IOException {
+		return getStatusCode().value();
+	}
 
 	/**
 	 * Get the HTTP status text of the response.

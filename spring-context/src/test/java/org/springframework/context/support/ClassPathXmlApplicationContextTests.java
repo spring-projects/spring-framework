@@ -222,6 +222,7 @@ public class ClassPathXmlApplicationContextTests {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(CONTEXT_WILDCARD);
 		Service service = ctx.getBean("service", Service.class);
 		assertThat(service.getResources()).containsExactlyInAnyOrder(contextA, contextB, contextC);
+		assertThat(service.getResourceSet()).containsExactlyInAnyOrder(contextA, contextB, contextC);
 		ctx.close();
 	}
 

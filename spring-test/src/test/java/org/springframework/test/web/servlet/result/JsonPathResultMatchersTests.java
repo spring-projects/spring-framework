@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,7 +305,7 @@ class JsonPathResultMatchersTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", "application/json");
 		response.getWriter().print(new String("test".getBytes(ISO_8859_1)));
-		StubMvcResult result =  new StubMvcResult(null, null, null, null, null, null, response);
+		StubMvcResult result = new StubMvcResult(null, null, null, null, null, null, response);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").prefix("prefix").value("foo").match(result));

@@ -40,6 +40,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.support.HttpComponentsHeadersAdapter;
 import org.springframework.lang.Nullable;
 
 /**

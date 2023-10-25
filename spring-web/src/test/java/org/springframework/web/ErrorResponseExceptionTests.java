@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -36,9 +34,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.validation.BindException;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.MethodValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingMatrixVariableException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -48,6 +46,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.MissingRequestValueException;
@@ -56,8 +55,12 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.util.BindErrorUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.when;
 
 /**
  * Unit tests that verify the HTTP response details exposed by exceptions in the
@@ -244,17 +247,33 @@ public class ErrorResponseExceptionTests {
 	@Test
 	void methodArgumentNotValidException() {
 
-		MessageSourceTestHelper messageSourceHelper = new MessageSourceTestHelper(MethodArgumentNotValidException.class);
-		BindingResult bindingResult = messageSourceHelper.initBindingResult();
+		ValidationTestHelper testHelper = new ValidationTestHelper(MethodArgumentNotValidException.class);
+		BindingResult result = testHelper.bindingResult();
 
-		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(this.methodParameter, bindingResult);
+		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(this.methodParameter, result);
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
 		assertDetail(ex, "Invalid request content.");
-		messageSourceHelper.assertDetailMessage(ex);
-		messageSourceHelper.assertErrorMessages(ex::resolveErrorMessages);
+		testHelper.assertMessages(ex, ex.getAllErrors());
 
 		assertThat(ex.getHeaders()).isEmpty();
+	}
+
+	@Test
+	void handlerMethodValidationException() {
+		MethodValidationResult result = mock(MethodValidationResult.class);
+		when(result.isForReturnValue()).thenReturn(false);
+		HandlerMethodValidationException ex = new HandlerMethodValidationException(result);
+
+		assertStatus(ex, HttpStatus.BAD_REQUEST);
+		assertDetail(ex, "Validation failure");
+
+		reset(result);
+		when(result.isForReturnValue()).thenReturn(true);
+		ex = new HandlerMethodValidationException(result);
+
+		assertStatus(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+		assertDetail(ex, "Validation failure");
 	}
 
 	@Test
@@ -358,15 +377,14 @@ public class ErrorResponseExceptionTests {
 	@Test
 	void webExchangeBindException() {
 
-		MessageSourceTestHelper messageSourceHelper = new MessageSourceTestHelper(WebExchangeBindException.class);
-		BindingResult bindingResult = messageSourceHelper.initBindingResult();
+		ValidationTestHelper testHelper = new ValidationTestHelper(WebExchangeBindException.class);
+		BindingResult result = testHelper.bindingResult();
 
-		WebExchangeBindException ex = new WebExchangeBindException(this.methodParameter, bindingResult);
+		WebExchangeBindException ex = new WebExchangeBindException(this.methodParameter, result);
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
 		assertDetail(ex, "Invalid request content.");
-		messageSourceHelper.assertDetailMessage(ex);
-		messageSourceHelper.assertErrorMessages(ex::resolveErrorMessages);
+		testHelper.assertMessages(ex, ex.getAllErrors());
 
 		assertThat(ex.getHeaders()).isEmpty();
 	}
@@ -432,59 +450,52 @@ public class ErrorResponseExceptionTests {
 	private void handle(String arg) {}
 
 
-	private static class MessageSourceTestHelper {
+	private static class ValidationTestHelper {
 
-		private final String code;
+		private final BindingResult bindingResult;
 
-		public MessageSourceTestHelper(Class<? extends ErrorResponse> exceptionType) {
-			this.code = "problemDetail." + exceptionType.getName();
+		private final StaticMessageSource messageSource = new StaticMessageSource();
+
+		public ValidationTestHelper(Class<? extends ErrorResponse> exceptionType) {
+
+			this.bindingResult = new BeanPropertyBindingResult(new TestBean(), "myBean");
+			this.bindingResult.reject("bean.invalid.A", "Invalid bean message");
+			this.bindingResult.reject("bean.invalid.B");
+			this.bindingResult.rejectValue("name", "name.required", "must be provided");
+			this.bindingResult.rejectValue("age", "age.min");
+
+			String code = "problemDetail." + exceptionType.getName();
+			this.messageSource.addMessage(code, Locale.UK, "Failed because {0}. Also because {1}");
+			this.messageSource.addMessage("bean.invalid.A", Locale.UK, "Bean A message");
+			this.messageSource.addMessage("bean.invalid.B", Locale.UK, "Bean B message");
+			this.messageSource.addMessage("name.required", Locale.UK, "name is required");
+			this.messageSource.addMessage("age.min", Locale.UK, "age is below minimum");
 		}
 
-		public BindingResult initBindingResult() {
-			BindingResult bindingResult = new BindException(new TestBean(), "myBean");
-			bindingResult.reject("bean.invalid.A", "Invalid bean message");
-			bindingResult.reject("bean.invalid.B");
-			bindingResult.rejectValue("name", "name.required", "Name is required");
-			bindingResult.rejectValue("age", "age.min");
-			return bindingResult;
+		public BindingResult bindingResult() {
+			return this.bindingResult;
 		}
 
-		private void assertDetailMessage(ErrorResponse ex) {
+		private void assertMessages(ErrorResponse ex, List<? extends MessageSourceResolvable> errors) {
 
-			StaticMessageSource messageSource = initMessageSource();
-
-			String message = messageSource.getMessage(
+			String message = this.messageSource.getMessage(
 					ex.getDetailMessageCode(), ex.getDetailMessageArguments(), Locale.UK);
 
-			assertThat(message).isEqualTo("" +
-					"Failures ['Invalid bean message', 'bean.invalid.B']. " +
-					"nested failures: [name: 'Name is required', age: 'age.min']");
+			assertThat(message).isEqualTo(
+					"Failed because Invalid bean message, and bean.invalid.B.myBean. " +
+							"Also because name: must be provided, and age: age.min.myBean.age");
 
-			message = messageSource.getMessage(
-					ex.getDetailMessageCode(), ex.getDetailMessageArguments(messageSource, Locale.UK), Locale.UK);
+			message = this.messageSource.getMessage(
+					ex.getDetailMessageCode(), ex.getDetailMessageArguments(this.messageSource, Locale.UK), Locale.UK);
 
-			assertThat(message).isEqualTo("" +
-					"Failures ['Bean A message', 'Bean B message']. " +
-					"nested failures: [name: 'Required name message', age: 'Minimum age message']");
+			assertThat(message).isEqualTo(
+					"Failed because Bean A message, and Bean B message. " +
+							"Also because name is required, and age is below minimum");
+
+			assertThat(BindErrorUtils.resolve(errors, this.messageSource, Locale.UK)).hasSize(4)
+					.containsValues("Bean A message", "Bean B message", "name is required", "age is below minimum");
 		}
 
-		private void assertErrorMessages(BiFunction<MessageSource, Locale, Map<ObjectError, String>> expectedMessages) {
-			StaticMessageSource messageSource = initMessageSource();
-			Map<ObjectError, String> map = expectedMessages.apply(messageSource, Locale.UK);
-
-			assertThat(map).hasSize(4).containsValues(
-					"'Bean A message'", "'Bean B message'", "name: 'Required name message'", "age: 'Minimum age message'");
-		}
-
-		private StaticMessageSource initMessageSource() {
-			StaticMessageSource messageSource = new StaticMessageSource();
-			messageSource.addMessage(this.code, Locale.UK, "Failures {0}. nested failures: {1}");
-			messageSource.addMessage("bean.invalid.A", Locale.UK, "Bean A message");
-			messageSource.addMessage("bean.invalid.B", Locale.UK, "Bean B message");
-			messageSource.addMessage("name.required", Locale.UK, "Required name message");
-			messageSource.addMessage("age.min", Locale.UK, "Minimum age message");
-			return messageSource;
-		}
 	}
 
 }

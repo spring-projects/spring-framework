@@ -1,5 +1,6 @@
 plugins {
 	id 'org.springframework.build.runtimehints-agent'
+	id 'kotlin'
 }
 
 description = "Spring Integration Tests"
@@ -26,6 +27,7 @@ dependencies {
 	testImplementation("org.aspectj:aspectjweaver")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.hibernate:hibernate-core-jakarta")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 }
 
 normalization {

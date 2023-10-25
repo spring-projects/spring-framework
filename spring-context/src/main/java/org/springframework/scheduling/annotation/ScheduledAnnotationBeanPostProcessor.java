@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -42,19 +43,16 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.event.ApplicationContextEvent;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
@@ -67,12 +65,15 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
+import org.springframework.scheduling.config.OneTimeTask;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.config.TaskSchedulerRouter;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -98,6 +99,7 @@ import org.springframework.util.StringValueResolver;
  * @author Elizabeth Chatman
  * @author Victor Brown
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 3.0
  * @see Scheduled
  * @see EnableScheduling
@@ -109,7 +111,7 @@ import org.springframework.util.StringValueResolver;
 public class ScheduledAnnotationBeanPostProcessor
 		implements ScheduledTaskHolder, MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
 		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
-		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
+		SmartInitializingSingleton, DisposableBean, ApplicationListener<ApplicationContextEvent> {
 
 	/**
 	 * The default name of the {@link TaskScheduler} bean to pick up: {@value}.
@@ -117,8 +119,14 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * in case of multiple scheduler beans found in the context.
 	 * @since 4.2
 	 */
-	public static final String DEFAULT_TASK_SCHEDULER_BEAN_NAME = "taskScheduler";
+	public static final String DEFAULT_TASK_SCHEDULER_BEAN_NAME = TaskSchedulerRouter.DEFAULT_TASK_SCHEDULER_BEAN_NAME;
 
+
+	/**
+	 * Reactive Streams API present on the classpath?
+	 */
+	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+			"org.reactivestreams.Publisher", ScheduledAnnotationBeanPostProcessor.class.getClassLoader());
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -139,9 +147,14 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
+	private TaskSchedulerRouter localScheduler;
+
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
+
+	private final Map<Object, List<Runnable>> reactiveSubscriptions = new IdentityHashMap<>(16);
 
 
 	/**
@@ -229,19 +242,15 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 	}
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() == this.applicationContext) {
-			// Running in an ApplicationContext -> register tasks this late...
-			// giving other ContextRefreshedEvent listeners a chance to perform
-			// their work at the same time (e.g. Spring Batch's job registration).
-			finishRegistration();
-		}
-	}
-
 	private void finishRegistration() {
 		if (this.scheduler != null) {
 			this.registrar.setScheduler(this.scheduler);
+		}
+		else {
+			this.localScheduler = new TaskSchedulerRouter();
+			this.localScheduler.setBeanName(this.beanName);
+			this.localScheduler.setBeanFactory(this.beanFactory);
+			this.registrar.setTaskScheduler(this.localScheduler);
 		}
 
 		if (this.beanFactory instanceof ListableBeanFactory lbf) {
@@ -253,89 +262,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 		}
 
-		if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
-			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
-			try {
-				// Search for TaskScheduler bean...
-				this.registrar.setTaskScheduler(resolveSchedulerBean(this.beanFactory, TaskScheduler.class, false));
-			}
-			catch (NoUniqueBeanDefinitionException ex) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Could not find unique TaskScheduler bean - attempting to resolve by name: " +
-							ex.getMessage());
-				}
-				try {
-					this.registrar.setTaskScheduler(resolveSchedulerBean(this.beanFactory, TaskScheduler.class, true));
-				}
-				catch (NoSuchBeanDefinitionException ex2) {
-					if (logger.isInfoEnabled()) {
-						logger.info("More than one TaskScheduler bean exists within the context, and " +
-								"none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " +
-								"(possibly as an alias); or implement the SchedulingConfigurer interface and call " +
-								"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback: " +
-								ex.getBeanNamesFound());
-					}
-				}
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Could not find default TaskScheduler bean - attempting to find ScheduledExecutorService: " +
-							ex.getMessage());
-				}
-				// Search for ScheduledExecutorService bean next...
-				try {
-					this.registrar.setScheduler(resolveSchedulerBean(this.beanFactory, ScheduledExecutorService.class, false));
-				}
-				catch (NoUniqueBeanDefinitionException ex2) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Could not find unique ScheduledExecutorService bean - attempting to resolve by name: " +
-								ex2.getMessage());
-					}
-					try {
-						this.registrar.setScheduler(resolveSchedulerBean(this.beanFactory, ScheduledExecutorService.class, true));
-					}
-					catch (NoSuchBeanDefinitionException ex3) {
-						if (logger.isInfoEnabled()) {
-							logger.info("More than one ScheduledExecutorService bean exists within the context, and " +
-									"none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " +
-									"(possibly as an alias); or implement the SchedulingConfigurer interface and call " +
-									"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback: " +
-									ex2.getBeanNamesFound());
-						}
-					}
-				}
-				catch (NoSuchBeanDefinitionException ex2) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Could not find default ScheduledExecutorService bean - falling back to default: " +
-								ex2.getMessage());
-					}
-					// Giving up -> falling back to default scheduler within the registrar...
-					logger.info("No TaskScheduler/ScheduledExecutorService bean found for scheduled processing");
-				}
-			}
-		}
-
 		this.registrar.afterPropertiesSet();
-	}
-
-	private <T> T resolveSchedulerBean(BeanFactory beanFactory, Class<T> schedulerType, boolean byName) {
-		if (byName) {
-			T scheduler = beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
-			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
-				cbf.registerDependentBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
-			}
-			return scheduler;
-		}
-		else if (beanFactory instanceof AutowireCapableBeanFactory acbf) {
-			NamedBeanHolder<T> holder = acbf.resolveNamedBean(schedulerType);
-			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory cbf) {
-				cbf.registerDependentBean(holder.getBeanName(), this.beanName);
-			}
-			return holder.getBeanInstance();
-		}
-		else {
-			return beanFactory.getBean(schedulerType);
-		}
 	}
 
 
@@ -385,15 +312,87 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Process the given {@code @Scheduled} method declaration on the given bean.
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * attempting to distinguish {@linkplain #processScheduledAsync(Scheduled, Method, Object)
+	 * reactive} methods from {@linkplain #processScheduledSync(Scheduled, Method, Object)
+	 * synchronous} methods.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
 	 * @param bean the target bean instance
-	 * @see #createRunnable(Object, Method)
+	 * @see #processScheduledSync(Scheduled, Method, Object)
+	 * @see #processScheduledAsync(Scheduled, Method, Object)
 	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
+		// Is the method a Kotlin suspending function? Throws if true and the reactor bridge isn't on the classpath.
+		// Does the method return a reactive type? Throws if true and it isn't a deferred Publisher type.
+		if (reactiveStreamsPresent && ScheduledAnnotationReactiveSupport.isReactive(method)) {
+			processScheduledAsync(scheduled, method, bean);
+			return;
+		}
+		processScheduledSync(scheduled, method, bean);
+	}
+
+	/**
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * as a synchronous method. The method must accept no arguments. Its return value
+	 * is ignored (if any), and the scheduled invocations of the method take place
+	 * using the underlying {@link TaskScheduler} infrastructure.
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
+	 */
+	private void processScheduledSync(Scheduled scheduled, Method method, Object bean) {
+		Runnable task;
 		try {
-			Runnable runnable = createRunnable(bean, method);
+			task = createRunnable(bean, method, scheduled.scheduler());
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" +
+					method.getName() + "': " + ex.getMessage());
+		}
+		processScheduledTask(scheduled, task, method, bean);
+	}
+
+	/**
+	 * Process the given {@code @Scheduled} bean method declaration which returns
+	 * a {@code Publisher}, or the given Kotlin suspending function converted to a
+	 * {@code Publisher}. A {@code Runnable} which subscribes to that publisher is
+	 * then repeatedly scheduled according to the annotation configuration.
+	 * <p>Note that for fixed delay configuration, the subscription is turned into a blocking
+	 * call instead. Types for which a {@code ReactiveAdapter} is registered but which cannot
+	 * be deferred (i.e. not a {@code Publisher}) are not supported.
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param method the method that the annotation has been declared on, which
+	 * must either return a Publisher-adaptable type or be a Kotlin suspending function
+	 * @param bean the target bean instance
+	 * @see ScheduledAnnotationReactiveSupport
+	 */
+	private void processScheduledAsync(Scheduled scheduled, Method method, Object bean) {
+		Runnable task;
+		try {
+			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
+					this.registrar::getObservationRegistry,
+					this.reactiveSubscriptions.computeIfAbsent(bean, k -> new CopyOnWriteArrayList<>()));
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" +
+					method.getName() + "': " + ex.getMessage());
+		}
+		processScheduledTask(scheduled, task, method, bean);
+	}
+
+	/**
+	 * Parse the {@code Scheduled} annotation and schedule the provided {@code Runnable}
+	 * accordingly. The Runnable can represent either a synchronous method invocation
+	 * (see {@link #processScheduledSync(Scheduled, Method, Object)}) or an asynchronous
+	 * one (see {@link #processScheduledAsync(Scheduled, Method, Object)}).
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param runnable the runnable to be scheduled
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
+	 */
+	private void processScheduledTask(Scheduled scheduled, Runnable runnable, Method method, Object bean) {
+		try {
 			boolean processedSchedule = false;
 			String errorMessage = "Exactly one of the 'cron', 'fixedDelay' or 'fixedRate' attributes is required";
 
@@ -443,16 +442,14 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
-			if (initialDelay.isNegative()) {
-				initialDelay = Duration.ZERO;
-			}
+			Duration delayToUse = (initialDelay.isNegative() ? Duration.ZERO : initialDelay);
 
 			// Check fixed delay
 			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
 			if (!fixedDelay.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
+				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse)));
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
@@ -469,7 +466,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
 					}
-					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
+					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse)));
 				}
 			}
 
@@ -478,7 +475,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
+				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse)));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -495,12 +492,16 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
 					}
-					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
+					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse)));
 				}
 			}
 
-			// Check whether we had any attribute set
-			Assert.isTrue(processedSchedule, errorMessage);
+			if (!processedSchedule) {
+				if (initialDelay.isNegative()) {
+					throw new IllegalArgumentException("One-time task only supported with specified initial delay");
+				}
+				tasks.add(this.registrar.scheduleOneTimeTask(new OneTimeTask(runnable, delayToUse)));
+			}
 
 			// Finally register the scheduled tasks
 			synchronized (this.scheduledTasks) {
@@ -520,13 +521,31 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * <p>The default implementation creates a {@link ScheduledMethodRunnable}.
 	 * @param target the target bean instance
 	 * @param method the scheduled method to call
-	 * @since 5.1
-	 * @see ScheduledMethodRunnable#ScheduledMethodRunnable(Object, Method)
+	 * @since 6.1
 	 */
-	protected Runnable createRunnable(Object target, Method method) {
+	@SuppressWarnings("deprecation")
+	protected Runnable createRunnable(Object target, Method method, @Nullable String qualifier) {
+		Runnable runnable = createRunnable(target, method);
+		if (runnable != null) {
+			return runnable;
+		}
 		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
-		return new ScheduledMethodRunnable(target, invocableMethod);
+		return new ScheduledMethodRunnable(target, invocableMethod, qualifier, this.registrar::getObservationRegistry);
+	}
+
+	/**
+	 * Create a {@link Runnable} for the given bean instance,
+	 * calling the specified scheduled method.
+	 * @param target the target bean instance
+	 * @param method the scheduled method to call
+	 * @since 5.1
+	 * @deprecated in favor of {@link #createRunnable(Object, Method, String)}
+	 */
+	@Deprecated(since = "6.1")
+	@Nullable
+	protected Runnable createRunnable(Object target, Method method) {
+		return null;
 	}
 
 	private static Duration toDuration(long value, TimeUnit timeUnit) {
@@ -558,6 +577,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods
 	 * as well as from programmatic {@link SchedulingConfigurer} interaction.
+	 * <p>Note that this includes upcoming scheduled subscriptions for reactive
+	 * methods but doesn't cover any currently active subscription for such methods.
 	 * @since 5.0.2
 	 */
 	@Override
@@ -576,12 +597,19 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		Set<ScheduledTask> tasks;
+		List<Runnable> liveSubscriptions;
 		synchronized (this.scheduledTasks) {
 			tasks = this.scheduledTasks.remove(bean);
+			liveSubscriptions = this.reactiveSubscriptions.remove(bean);
 		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
 				task.cancel(false);
+			}
+		}
+		if (liveSubscriptions != null) {
+			for (Runnable subscription : liveSubscriptions) {
+				subscription.run();  // equivalent to cancelling the subscription
 			}
 		}
 	}
@@ -589,7 +617,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public boolean requiresDestruction(Object bean) {
 		synchronized (this.scheduledTasks) {
-			return this.scheduledTasks.containsKey(bean);
+			return (this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean));
 		}
 	}
 
@@ -603,8 +631,46 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			}
 			this.scheduledTasks.clear();
+			Collection<List<Runnable>> allLiveSubscriptions = this.reactiveSubscriptions.values();
+			for (List<Runnable> liveSubscriptions : allLiveSubscriptions) {
+				for (Runnable liveSubscription : liveSubscriptions) {
+					liveSubscription.run();  // equivalent to cancelling the subscription
+				}
+			}
 		}
 		this.registrar.destroy();
+		if (this.localScheduler != null) {
+			this.localScheduler.destroy();
+		}
+	}
+
+
+	/**
+	 * Reacts to {@link ContextRefreshedEvent} as well as {@link ContextClosedEvent}:
+	 * performing {@link #finishRegistration()} and early cancelling of scheduled tasks,
+	 * respectively.
+	 */
+	@Override
+	public void onApplicationEvent(ApplicationContextEvent event) {
+		if (event.getApplicationContext() == this.applicationContext) {
+			if (event instanceof ContextRefreshedEvent) {
+				// Running in an ApplicationContext -> register tasks this late...
+				// giving other ContextRefreshedEvent listeners a chance to perform
+				// their work at the same time (e.g. Spring Batch's job registration).
+				finishRegistration();
+			}
+			else if (event instanceof ContextClosedEvent) {
+				synchronized (this.scheduledTasks) {
+					Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
+					for (Set<ScheduledTask> tasks : allTasks) {
+						for (ScheduledTask task : tasks) {
+							// At this early point, let in-progress tasks complete still
+							task.cancel(false);
+						}
+					}
+				}
+			}
+		}
 	}
 
 }

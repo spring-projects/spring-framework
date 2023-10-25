@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Nullable
 	private PathMatchConfigurer pathMatchConfigurer;
+
+	@Nullable
+	private BlockingExecutionConfigurer blockingExecutionConfigurer;
 
 	@Nullable
 	private ViewResolverRegistry viewResolverRegistry;
@@ -282,6 +285,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(conversionService, validator));
 		adapter.setReactiveAdapterRegistry(reactiveAdapterRegistry);
 
+		BlockingExecutionConfigurer executorConfigurer = getBlockingExecutionConfigurer();
+		if (executorConfigurer.getExecutor() != null) {
+			adapter.setBlockingExecutor(executorConfigurer.getExecutor());
+		}
+		if (executorConfigurer.getBlockingControllerMethodPredicate() != null) {
+			adapter.setBlockingMethodPredicate(executorConfigurer.getBlockingControllerMethodPredicate());
+		}
+
 		ArgumentResolverConfigurer configurer = new ArgumentResolverConfigurer();
 		configureArgumentResolvers(configurer);
 		adapter.setArgumentResolverConfigurer(configurer);
@@ -417,6 +428,27 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Nullable
 	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
+	}
+
+	/**
+	 * Callback to build and cache the {@link BlockingExecutionConfigurer}.
+	 * This method is final, but subclasses can override
+	 * {@link #configureBlockingExecution}.
+	 * @since 6.1
+	 */
+	protected final BlockingExecutionConfigurer getBlockingExecutionConfigurer() {
+		if (this.blockingExecutionConfigurer == null) {
+			this.blockingExecutionConfigurer = new BlockingExecutionConfigurer();
+			configureBlockingExecution(this.blockingExecutionConfigurer);
+		}
+		return this.blockingExecutionConfigurer;
+	}
+
+	/**
+	 * Override this method to configure blocking execution.
+	 * @since 6.1
+	 */
+	protected void configureBlockingExecution(BlockingExecutionConfigurer configurer) {
 	}
 
 	@Bean

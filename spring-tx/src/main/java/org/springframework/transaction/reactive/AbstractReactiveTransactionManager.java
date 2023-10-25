@@ -19,6 +19,8 @@ package org.springframework.transaction.reactive;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,12 +32,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.ConfigurableTransactionManager;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionExecutionListener;
 import org.springframework.transaction.TransactionSuspensionNotSupportedException;
 import org.springframework.transaction.UnexpectedRollbackException;
 
@@ -77,9 +81,23 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * @see TransactionSynchronizationManager
  */
 @SuppressWarnings("serial")
-public abstract class AbstractReactiveTransactionManager implements ReactiveTransactionManager, Serializable {
+public abstract class AbstractReactiveTransactionManager
+		implements ReactiveTransactionManager, ConfigurableTransactionManager, Serializable {
 
 	protected transient Log logger = LogFactory.getLog(getClass());
+
+	private Collection<TransactionExecutionListener> transactionExecutionListeners = new ArrayList<>();
+
+
+	@Override
+	public final void setTransactionExecutionListeners(Collection<TransactionExecutionListener> listeners) {
+		this.transactionExecutionListeners = listeners;
+	}
+
+	@Override
+	public final Collection<TransactionExecutionListener> getTransactionExecutionListeners() {
+		return this.transactionExecutionListeners;
+	}
 
 
 	//---------------------------------------------------------------------
@@ -99,8 +117,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 		// Use defaults if no transaction definition given.
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
-		return TransactionSynchronizationManager.forCurrentTransaction()
-				.flatMap(synchronizationManager -> {
+		return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 
 			Object transaction = doGetTransaction(synchronizationManager);
 
@@ -139,13 +156,16 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 							return Mono.defer(() -> {
 								GenericReactiveTransaction status = newReactiveTransaction(
 										nestedSynchronizationManager, def, transaction, true,
-										debugEnabled, suspendedResources.orElse(null));
+										false, debugEnabled, suspendedResources.orElse(null));
+								this.transactionExecutionListeners.forEach(listener -> listener.beforeBegin(status));
 								return doBegin(nestedSynchronizationManager, transaction, def)
 										.doOnSuccess(ignore -> prepareSynchronization(nestedSynchronizationManager, status, def))
+										.doOnError(ex -> this.transactionExecutionListeners.forEach(listener -> listener.afterBegin(status, ex)))
 										.thenReturn(status);
-							}).onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR,
+							}).doOnSuccess(status -> this.transactionExecutionListeners.forEach(listener -> listener.afterBegin(status, null)))
+							.onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR,
 									ex -> resume(nestedSynchronizationManager, null, suspendedResources.orElse(null))
-									.then(Mono.error(ex)));
+											.then(Mono.error(ex)));
 						}));
 			}
 			else {
@@ -190,9 +210,13 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			Mono<SuspendedResourcesHolder> suspendedResources = suspend(synchronizationManager, transaction);
 			return suspendedResources.flatMap(suspendedResourcesHolder -> {
 				GenericReactiveTransaction status = newReactiveTransaction(synchronizationManager,
-						definition, transaction, true, debugEnabled, suspendedResourcesHolder);
-				return doBegin(synchronizationManager, transaction, definition).doOnSuccess(ignore ->
-						prepareSynchronization(synchronizationManager, status, definition)).thenReturn(status)
+						definition, transaction, true, false, debugEnabled, suspendedResourcesHolder);
+				this.transactionExecutionListeners.forEach(listener -> listener.beforeBegin(status));
+				return doBegin(synchronizationManager, transaction, definition)
+						.doOnSuccess(ignore -> prepareSynchronization(synchronizationManager, status, definition))
+						.doOnError(ex -> this.transactionExecutionListeners.forEach(listener -> listener.afterBegin(status, ex)))
+						.thenReturn(status)
+						.doOnSuccess(ignore -> this.transactionExecutionListeners.forEach(listener -> listener.afterBegin(status, null)))
 						.onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR, beginEx ->
 								resumeAfterBeginException(synchronizationManager, transaction, suspendedResourcesHolder, beginEx)
 										.then(Mono.error(beginEx)));
@@ -205,7 +229,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			}
 			// Nested transaction through nested begin and commit/rollback calls.
 			GenericReactiveTransaction status = newReactiveTransaction(synchronizationManager,
-					definition, transaction, true, debugEnabled, null);
+					definition, transaction, true, true, debugEnabled, null);
 			return doBegin(synchronizationManager, transaction, definition).doOnSuccess(ignore ->
 					prepareSynchronization(synchronizationManager, status, definition)).thenReturn(status);
 		}
@@ -228,7 +252,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			@Nullable Object transaction, boolean newTransaction, boolean debug, @Nullable Object suspendedResources) {
 
 		GenericReactiveTransaction status = newReactiveTransaction(synchronizationManager,
-				definition, transaction, newTransaction, debug, suspendedResources);
+				definition, transaction, newTransaction, false, debug, suspendedResources);
 		prepareSynchronization(synchronizationManager, status, definition);
 		return status;
 	}
@@ -238,11 +262,12 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 	 */
 	private GenericReactiveTransaction newReactiveTransaction(
 			TransactionSynchronizationManager synchronizationManager, TransactionDefinition definition,
-			@Nullable Object transaction, boolean newTransaction, boolean debug, @Nullable Object suspendedResources) {
+			@Nullable Object transaction, boolean newTransaction, boolean nested, boolean debug,
+			@Nullable Object suspendedResources) {
 
-		return new GenericReactiveTransaction(transaction, newTransaction,
-				!synchronizationManager.isSynchronizationActive(),
-				definition.isReadOnly(), debug, suspendedResources);
+		return new GenericReactiveTransaction(definition.getName(), transaction,
+				newTransaction, !synchronizationManager.isSynchronizationActive(),
+				nested, definition.isReadOnly(), debug, suspendedResources);
 	}
 
 	/**
@@ -330,7 +355,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 		if (resourcesHolder != null) {
 			Object suspendedResources = resourcesHolder.suspendedResources;
 			if (suspendedResources != null) {
-				resume =  doResume(synchronizationManager, transaction, suspendedResources);
+				resume = doResume(synchronizationManager, transaction, suspendedResources);
 			}
 			List<TransactionSynchronization> suspendedSynchronizations = resourcesHolder.suspendedSynchronizations;
 			if (suspendedSynchronizations != null) {
@@ -438,6 +463,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 						if (status.isDebug()) {
 							logger.debug("Initiating transaction commit");
 						}
+						this.transactionExecutionListeners.forEach(listener -> listener.beforeCommit(status));
 						return doCommit(synchronizationManager, status);
 					}
 					return Mono.empty();
@@ -449,11 +475,21 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 					Mono<Void> result = propagateException;
 					if (ErrorPredicates.UNEXPECTED_ROLLBACK.test(ex)) {
 						result = triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK)
-								.then(propagateException);
+								.then(Mono.defer(() -> {
+									if (status.isNewTransaction()) {
+										this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, null));
+									}
+									return propagateException;
+								}));
 					}
 					else if (ErrorPredicates.TRANSACTION_EXCEPTION.test(ex)) {
 						result = triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN)
-								.then(propagateException);
+								.then(Mono.defer(() -> {
+									if (status.isNewTransaction()) {
+										this.transactionExecutionListeners.forEach(listener -> listener.afterCommit(status, ex));
+									}
+									return propagateException;
+								}));
 					}
 					else if (ErrorPredicates.RUNTIME_OR_ERROR.test(ex)) {
 						Mono<Void> mono;
@@ -471,7 +507,13 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 				})
 				.then(Mono.defer(() -> triggerAfterCommit(synchronizationManager, status).onErrorResume(ex ->
 						triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED).then(Mono.error(ex)))
-						.then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED))));
+						.then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED))
+						.then(Mono.defer(() -> {
+							if (status.isNewTransaction()) {
+								this.transactionExecutionListeners.forEach(listener -> listener.afterCommit(status, null));
+							}
+							return Mono.empty();
+						}))));
 
 		return commit
 				.onErrorResume(ex -> cleanupAfterCompletion(synchronizationManager, status)
@@ -510,6 +552,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 				if (status.isDebug()) {
 					logger.debug("Initiating transaction rollback");
 				}
+				this.transactionExecutionListeners.forEach(listener -> listener.beforeRollback(status));
 				return doRollback(synchronizationManager, status);
 			}
 			else {
@@ -528,10 +571,22 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			}
 		})).onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR, ex -> triggerAfterCompletion(
 				synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN)
-				.then(Mono.error(ex)))
+						.then(Mono.defer(() -> {
+							if (status.isNewTransaction()) {
+								this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, ex));
+							}
+							return Mono.empty();
+						}))
+						.then(Mono.error(ex)))
 				.then(Mono.defer(() -> triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK)))
+				.then(Mono.defer(() -> {
+					if (status.isNewTransaction()) {
+						this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, null));
+					}
+					return Mono.empty();
+				}))
 				.onErrorResume(ex -> cleanupAfterCompletion(synchronizationManager, status).then(Mono.error(ex)))
-			.then(cleanupAfterCompletion(synchronizationManager, status));
+				.then(cleanupAfterCompletion(synchronizationManager, status));
 	}
 
 	/**
@@ -561,8 +616,16 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 		}).onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR, rbex -> {
 			logger.error("Commit exception overridden by rollback exception", ex);
 			return triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN)
-				.then(Mono.error(rbex));
-		}).then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK));
+					.then(Mono.defer(() -> {
+						this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, rbex));
+						return Mono.empty();
+					}))
+					.then(Mono.error(rbex));
+		}).then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK))
+				.then(Mono.defer(() -> {
+					this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, null));
+					return Mono.empty();
+				}));
 	}
 
 

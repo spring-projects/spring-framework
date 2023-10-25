@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -201,15 +202,42 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setCharacterEncoding(String characterEncoding) {
+	public void setCharacterEncoding(@Nullable String characterEncoding) {
 		setExplicitCharacterEncoding(characterEncoding);
 		updateContentTypePropertyAndHeader();
 	}
 
-	private void setExplicitCharacterEncoding(String characterEncoding) {
-		Assert.notNull(characterEncoding, "'characterEncoding' must not be null");
-		this.characterEncoding = characterEncoding;
-		this.characterEncodingSet = true;
+	private void setExplicitCharacterEncoding(@Nullable String characterEncoding) {
+		if (characterEncoding == null) {
+			this.characterEncoding = this.defaultCharacterEncoding;
+			this.characterEncodingSet = false;
+			if (this.contentType != null) {
+				try {
+					MediaType mediaType = MediaType.parseMediaType(this.contentType);
+					if (mediaType.getCharset() != null) {
+						Map<String, String> parameters = new LinkedHashMap<>(mediaType.getParameters());
+						parameters.remove("charset");
+						mediaType = new MediaType(mediaType.getType(), mediaType.getSubtype(), parameters);
+						this.contentType = mediaType.toString();
+					}
+				}
+				catch (Exception ignored) {
+					String value = this.contentType;
+					int charsetIndex = value.toLowerCase().indexOf(CHARSET_PREFIX);
+					if (charsetIndex != -1) {
+						value = value.substring(0, charsetIndex).trim();
+						if (value.endsWith(";")) {
+							value = value.substring(0, value.length() - 1);
+						}
+						this.contentType = value;
+					}
+				}
+			}
+		}
+		else {
+			this.characterEncoding = characterEncoding;
+			this.characterEncodingSet = true;
+		}
 	}
 
 	private void updateContentTypePropertyAndHeader() {

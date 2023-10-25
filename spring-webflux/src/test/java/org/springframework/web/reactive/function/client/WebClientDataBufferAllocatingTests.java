@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocati
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ReactorResourceFactory;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorResourceFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -181,7 +181,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setHeader("Content-Type", "text/plain")
 				.setBody("foo bar"));
 
-		Mono<Void> result  = this.webClient.get()
+		Mono<Void> result = this.webClient.get()
 				.exchangeToMono(ClientResponse::releaseBody);
 
 		StepVerifier.create(result)
@@ -198,7 +198,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setHeader("Foo", "bar")
 				.setBody("foo bar"));
 
-		Mono<ResponseEntity<Void>> result  = this.webClient.get()
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
 				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)

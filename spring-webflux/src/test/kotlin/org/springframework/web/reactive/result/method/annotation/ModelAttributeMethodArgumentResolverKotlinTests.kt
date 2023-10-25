@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation
 
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
@@ -24,14 +25,15 @@ import org.springframework.http.MediaType
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
+import org.springframework.web.bind.support.WebExchangeBindException
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.server.ServerWebExchange
-import org.springframework.web.server.ServerWebInputException
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
 import org.springframework.web.testfixture.method.ResolvableMethod
 import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
+import java.util.function.Function
 
 /**
  * Kotlin test fixture for [ModelAttributeMethodArgumentResolver].
@@ -54,13 +56,28 @@ class ModelAttributeMethodArgumentResolverKotlinTests {
 	}
 
 	@Test
-	fun bindDataClassError() {
-		val parameter: MethodParameter = this.testMethod.annotNotPresent(ModelAttribute::class.java).arg(DataClass::class.java)
-		val mono: Mono<Any> =
-			createResolver().resolveArgument(parameter, this.bindContext, postForm("name=Robert&age=invalid&count=1"))
+	fun validationErrorForDataClass() {
+		val parameter = this.testMethod.annotNotPresent(ModelAttribute::class.java).arg(DataClass::class.java)
+		testValidationError(parameter, Function.identity())
+	}
+
+	private fun testValidationError(parameter: MethodParameter, valueMonoExtractor: Function<Mono<*>, Mono<*>>) {
+		testValidationError(parameter, valueMonoExtractor, "age=invalid", "age", "invalid")
+	}
+
+	private fun testValidationError(param: MethodParameter, valueMonoExtractor: Function<Mono<*>, Mono<*>>,
+									formData: String, field: String, rejectedValue: String) {
+		var mono: Mono<*> = createResolver().resolveArgument(param, this.bindContext, postForm(formData))
+		mono = valueMonoExtractor.apply(mono)
 		StepVerifier.create(mono)
-			.expectNextCount(0)
-			.expectError(ServerWebInputException::class.java)
+			.consumeErrorWith { ex: Throwable ->
+				Assertions.assertThat(ex).isInstanceOf(WebExchangeBindException::class.java)
+				val bindException = ex as WebExchangeBindException
+				Assertions.assertThat(bindException.errorCount).isEqualTo(1)
+				Assertions.assertThat(bindException.hasFieldErrors(field)).isTrue()
+				Assertions.assertThat(bindException.getFieldError(field)!!.rejectedValue)
+					.isEqualTo(rejectedValue)
+			}
 			.verify()
 	}
 

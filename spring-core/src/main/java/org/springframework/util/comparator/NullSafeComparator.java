@@ -30,7 +30,10 @@ import org.springframework.util.Assert;
  * @since 1.2.2
  * @param <T> the type of objects that may be compared by this comparator
  * @see Comparable
+ * @see Comparators
+ * @deprecated as of 6.1 in favor of {@link Comparator#nullsLast} and {@link Comparator#nullsFirst}
  */
+@Deprecated(since = "6.1")
 public class NullSafeComparator<T> implements Comparator<T> {
 
 	/**
@@ -69,9 +72,8 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * @see #NULLS_LOW
 	 * @see #NULLS_HIGH
 	 */
-	@SuppressWarnings("unchecked")
 	private NullSafeComparator(boolean nullsLow) {
-		this.nonNullComparator = ComparableComparator.INSTANCE;
+		this.nonNullComparator = Comparators.comparable();
 		this.nullsLow = nullsLow;
 	}
 
@@ -92,17 +94,9 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 
 	@Override
-	public int compare(@Nullable T o1, @Nullable T o2) {
-		if (o1 == o2) {
-			return 0;
-		}
-		if (o1 == null) {
-			return (this.nullsLow ? -1 : 1);
-		}
-		if (o2 == null) {
-			return (this.nullsLow ? 1 : -1);
-		}
-		return this.nonNullComparator.compare(o1, o2);
+	public int compare(@Nullable T left, @Nullable T right) {
+		Comparator<T> comparator = this.nullsLow ? Comparator.nullsFirst(this.nonNullComparator) : Comparator.nullsLast(this.nonNullComparator);
+		return comparator.compare(left, right);
 	}
 
 
@@ -115,7 +109,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	public int hashCode() {
-		return this.nonNullComparator.hashCode() * (this.nullsLow ? -1 : 1);
+		return Boolean.hashCode(this.nullsLow);
 	}
 
 	@Override

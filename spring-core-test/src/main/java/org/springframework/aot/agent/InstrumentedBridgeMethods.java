@@ -479,7 +479,7 @@ public abstract class InstrumentedBridgeMethods {
 		return result;
 	}
 
-	public static ResourceBundle resourcebundlegetBundle( String baseName, Locale targetLocale,	ResourceBundle.Control control) {
+	public static ResourceBundle resourcebundlegetBundle(String baseName, Locale targetLocale, ResourceBundle.Control control) {
 		RecordedInvocation.Builder builder = RecordedInvocation.of(InstrumentedMethod.RESOURCEBUNDLE_GETBUNDLE).withArguments(baseName, targetLocale, control);
 		ResourceBundle result = null;
 		try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.servlet.resource;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.servlet.ServletException;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,12 +31,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
@@ -114,6 +120,34 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 		assertThat(response.getContentAsString()).as(description).isEqualTo("h1 { color:red; }");
 	}
 
+	@Test
+	void testNoResourceFoundException() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletConfig(this.servletConfig);
+		context.register(WebConfig.class);
+		context.register(GlobalExceptionHandler.class);
+		context.refresh();
+
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setApplicationContext(context);
+		servlet.init(this.servletConfig);
+
+		MockHttpServletRequest request = initRequest("/cp/non-existing");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+
+		assertThat(response.getStatus()).isEqualTo(404);
+		assertThat(response.getContentType()).isEqualTo("application/problem+json");
+		assertThat(response.getContentAsString()).isEqualTo("""
+				{"type":"about:blank",\
+				"title":"Not Found",\
+				"status":404,\
+				"detail":"No static resource non-existing.",\
+				"instance":"/cp/non-existing"}\
+				""");
+	}
+
 	private DispatcherServlet initDispatcherServlet(
 			boolean usePathPatterns, boolean decodingUrlPathHelper, Class<?>... configClasses) throws ServletException {
 
@@ -176,6 +210,11 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 			}
 			return urlResource;
 		}
+
+		@Override
+		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+			converters.add(new MappingJackson2HttpMessageConverter());
+		}
 	}
 
 
@@ -207,6 +246,11 @@ public class ResourceHttpRequestHandlerIntegrationTests {
 			helper.setUrlDecode(false);
 			configurer.setUrlPathHelper(helper);
 		}
+	}
+
+
+	@ControllerAdvice
+	private static class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 }

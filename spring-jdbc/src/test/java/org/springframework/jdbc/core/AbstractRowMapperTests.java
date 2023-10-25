@@ -167,6 +167,7 @@ public abstract class AbstractRowMapperTests {
 			}
 			else {
 				given(resultSet.findColumn("birthdate")).willThrow(new SQLException());
+				given(resultSet.findColumn("birthDate")).willThrow(new SQLException());
 				given(resultSet.findColumn("birth_date")).willReturn(3);
 			}
 			given(resultSet.findColumn("balance")).willReturn(4);

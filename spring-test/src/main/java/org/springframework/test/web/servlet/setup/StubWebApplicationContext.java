@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -421,6 +421,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 			return BeanUtils.instantiateClass(beanClass);
 		}
 
+		@Deprecated
 		@Override
 		public Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
 			return BeanUtils.instantiateClass(beanClass);
@@ -471,11 +472,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
 			return existingBean;
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
 			return existingBean;

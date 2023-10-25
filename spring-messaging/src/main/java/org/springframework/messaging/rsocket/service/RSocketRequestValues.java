@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public final class RSocketRequestValues {
 
 
 	public RSocketRequestValues(
-			@Nullable String route, @Nullable List<Object> routeVariables,  @Nullable MetadataHelper metadataHelper,
+			@Nullable String route, @Nullable List<Object> routeVariables, @Nullable MetadataHelper metadataHelper,
 			@Nullable Object payloadValue, @Nullable Publisher<?> payload,
 			@Nullable ParameterizedTypeReference<?> payloadElementType) {
 
@@ -134,7 +134,7 @@ public final class RSocketRequestValues {
 	/**
 	 * Builder for {@link RSocketRequestValues}.
 	 */
-	public final static class Builder {
+	public static final class Builder {
 
 		@Nullable
 		private String route;

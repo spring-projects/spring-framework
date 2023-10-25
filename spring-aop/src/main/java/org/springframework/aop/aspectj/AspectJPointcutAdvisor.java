@@ -25,8 +25,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * AspectJ {@link PointcutAdvisor} that adapts an {@link AbstractAspectJAdvice}
- * to the {@link org.springframework.aop.PointcutAdvisor} interface.
+ * {@code AspectJPointcutAdvisor} adapts an {@link AbstractAspectJAdvice} to the
+ * {@link PointcutAdvisor} interface.
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller

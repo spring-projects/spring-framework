@@ -23,6 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import org.springframework.core.testfixture.security.TestPrincipal;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -50,7 +51,8 @@ class UserDestinationMessageHandlerTests {
 
 	private final SubscribableChannel brokerChannel = mock();
 
-	private final UserDestinationMessageHandler handler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, new DefaultUserDestinationResolver(this.registry));
+	private final UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
+			new StubMessageChannel(), this.brokerChannel, new DefaultUserDestinationResolver(this.registry));
 
 
 	@Test
@@ -184,7 +186,9 @@ class UserDestinationMessageHandlerTests {
 	}
 
 
-	private Message<?> createWith(SimpMessageType type, String user, String sessionId, String destination) {
+	private Message<?> createWith(
+			SimpMessageType type, @Nullable String user, @Nullable String sessionId, @Nullable String destination) {
+
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(type);
 		if (destination != null) {
 			headers.setDestination(destination);

@@ -22,7 +22,6 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
@@ -87,9 +86,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory
 	@Override
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
 		Object job = (this.applicationContext != null ?
-				// to be replaced with createBean(Class) in 6.1
-				this.applicationContext.getAutowireCapableBeanFactory().createBean(
-						bundle.getJobDetail().getJobClass(), AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false) :
+				this.applicationContext.getAutowireCapableBeanFactory().createBean(bundle.getJobDetail().getJobClass()) :
 				super.createJobInstance(bundle));
 
 		if (isEligibleForPropertyPopulation(job)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,11 @@ import org.springframework.test.context.MergedContextConfiguration;
  * keyed by {@link MergedContextConfiguration} instances, potentially configured
  * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size} and
  * a custom eviction policy.
+ *
+ * <p>As of Spring Framework 6.1, this SPI includes optional support for
+ * {@linkplain #getFailureCount(MergedContextConfiguration) tracking} and
+ * {@linkplain #incrementFailureCount(MergedContextConfiguration) incrementing}
+ * failure counts.
  *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
@@ -62,7 +67,8 @@ public interface ContextCache {
 
 	/**
 	 * System property used to configure the maximum size of the {@link ContextCache}
-	 * as a positive integer. May alternatively be configured via the
+	 * as a positive integer: {@value}.
+	 * <p>May alternatively be configured via the
 	 * {@link org.springframework.core.SpringProperties} mechanism.
 	 * <p>Note that implementations of {@code ContextCache} are not required to
 	 * actually support a maximum cache size. Consult the documentation of the
@@ -115,6 +121,37 @@ public interface ContextCache {
 	 * is not part of a hierarchy
 	 */
 	void remove(MergedContextConfiguration key, @Nullable HierarchyMode hierarchyMode);
+
+	/**
+	 * Get the failure count for the given key.
+	 * <p>A <em>failure</em> is any attempt to load the {@link ApplicationContext}
+	 * for the given key that results in an exception.
+	 * <p>The default implementation of this method always returns {@code 0}.
+	 * Concrete implementations are therefore highly encouraged to override this
+	 * method and {@link #incrementFailureCount(MergedContextConfiguration)} with
+	 * appropriate behavior. Note that the standard {@code ContextContext}
+	 * implementation in Spring overrides these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @since 6.1
+	 * @see #incrementFailureCount(MergedContextConfiguration)
+	 */
+	default int getFailureCount(MergedContextConfiguration key) {
+		return 0;
+	}
+
+	/**
+	 * Increment the failure count for the given key.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method and {@link #getFailureCount(MergedContextConfiguration)} with
+	 * appropriate behavior. Note that the standard {@code ContextContext}
+	 * implementation in Spring overrides these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @since 6.1
+	 * @see #getFailureCount(MergedContextConfiguration)
+	 */
+	default void incrementFailureCount(MergedContextConfiguration key) {
+	}
 
 	/**
 	 * Determine the number of contexts currently stored in the cache.

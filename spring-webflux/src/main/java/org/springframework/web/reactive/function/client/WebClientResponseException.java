@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  * Exceptions that contain actual HTTP response data.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 @SuppressWarnings("RedundantSuppression")
@@ -56,7 +57,7 @@ public class WebClientResponseException extends WebClientException {
 	private final Charset responseCharset;
 
 	@Nullable
-	private transient final HttpRequest request;
+	private final transient HttpRequest request;
 
 	@Nullable
 	private transient Function<ResolvableType, ?> bodyDecodeFunction;
@@ -202,11 +203,11 @@ public class WebClientResponseException extends WebClientException {
 	/**
 	 * Return the response content as a String using the charset of media type
 	 * for the response, if available, or otherwise falling back on
-	 * {@literal ISO-8859-1}. Use {@link #getResponseBodyAsString(Charset)} if
+	 * {@literal UTF-8}. Use {@link #getResponseBodyAsString(Charset)} if
 	 * you want to fall back on a different, default charset.
 	 */
 	public String getResponseBodyAsString() {
-		return getResponseBodyAsString(StandardCharsets.ISO_8859_1);
+		return getResponseBodyAsString(StandardCharsets.UTF_8);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.support;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
@@ -71,7 +74,7 @@ public abstract class ReflectionHelper {
 					match = null;
 				}
 			}
-			else if (!expectedArg.equals(suppliedArg))  {
+			else if (!expectedArg.equals(suppliedArg)) {
 				if (suppliedArg.isAssignableTo(expectedArg)) {
 					if (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {
 						match = ArgumentsMatchKind.CLOSE;
@@ -331,6 +334,92 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
+	 * Takes an input set of argument values and converts them to the types specified as the
+	 * required parameter types. The arguments are converted 'in-place' in the input array.
+	 * @param converter the type converter to use for attempting conversions
+	 * @param arguments the actual arguments that need conversion
+	 * @param methodHandle the target MethodHandle
+	 * @param varargsPosition the known position of the varargs argument, if any
+	 * ({@code null} if not varargs)
+	 * @return {@code true} if some kind of conversion occurred on an argument
+	 * @throws EvaluationException if a problem occurs during conversion
+	 * @since 6.1
+	 */
+	public static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,
+			MethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {
+
+		boolean conversionOccurred = false;
+		final MethodType methodHandleArgumentTypes = methodHandle.type();
+		if (varargsPosition == null) {
+			for (int i = 0; i < arguments.length; i++) {
+				Class<?> argumentClass = methodHandleArgumentTypes.parameterType(i);
+				ResolvableType resolvableType = ResolvableType.forClass(argumentClass);
+				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
+
+				Object argument = arguments[i];
+				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[i]);
+			}
+		}
+		else {
+			// Convert everything up to the varargs position
+			for (int i = 0; i < varargsPosition; i++) {
+				Class<?> argumentClass = methodHandleArgumentTypes.parameterType(i);
+				ResolvableType resolvableType = ResolvableType.forClass(argumentClass);
+				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
+
+				Object argument = arguments[i];
+				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[i]);
+			}
+
+			final Class<?> varArgClass = methodHandleArgumentTypes.lastParameterType().componentType();
+			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
+			TypeDescriptor varArgContentType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
+
+			// If the target is varargs and there is just one more argument, then convert it here.
+			if (varargsPosition == arguments.length - 1) {
+				Object argument = arguments[varargsPosition];
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				if (argument == null) {
+					// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.
+					if (varArgContentType.getElementTypeDescriptor().getObjectType() == Optional.class) {
+						arguments[varargsPosition] = Optional.empty();
+						conversionOccurred = true;
+					}
+				}
+				// If the argument type is equal to the varargs element type, there is no need to
+				// convert it or wrap it in an array. For example, using StringToArrayConverter to
+				// convert a String containing a comma would result in the String being split and
+				// repackaged in an array when it should be used as-is.
+				else if (!sourceType.equals(varArgContentType.getElementTypeDescriptor())) {
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, varArgContentType);
+				}
+				// Possible outcomes of the above if-else block:
+				// 1) the input argument was null, and nothing was done.
+				// 2) the input argument was null; the varargs element type is Optional; and the argument was converted to Optional.empty().
+				// 3) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.
+				// 5) the input argument was the wrong type and got converted and wrapped in an array.
+				if (argument != arguments[varargsPosition] &&
+						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
+					conversionOccurred = true; // case 5
+				}
+			}
+			// Otherwise, convert remaining arguments to the varargs element type.
+			else {
+				Assert.state(varArgContentType != null, "No element type");
+				for (int i = varargsPosition; i < arguments.length; i++) {
+					Object argument = arguments[i];
+					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), varArgContentType);
+					conversionOccurred |= (argument != arguments[i]);
+				}
+			}
+		}
+		return conversionOccurred;
+	}
+
+	/**
 	 * Check if the supplied value is the first entry in the array represented by the possibleArray value.
 	 * @param value the value to check for in the array
 	 * @param possibleArray an array object that may have the supplied value as the first element
@@ -342,11 +431,11 @@ public abstract class ReflectionHelper {
 		}
 		Class<?> type = possibleArray.getClass();
 		if (!type.isArray() || Array.getLength(possibleArray) == 0 ||
-				!ClassUtils.isAssignableValue(type.getComponentType(), value)) {
+				!ClassUtils.isAssignableValue(type.componentType(), value)) {
 			return false;
 		}
 		Object arrayValue = Array.get(possibleArray, 0);
-		return (type.getComponentType().isPrimitive() ? arrayValue.equals(value) : arrayValue == value);
+		return (type.componentType().isPrimitive() ? arrayValue.equals(value) : arrayValue == value);
 	}
 
 	/**
@@ -379,7 +468,7 @@ public abstract class ReflectionHelper {
 			if (argumentCount >= parameterCount) {
 				varargsArraySize = argumentCount - (parameterCount - 1);
 			}
-			Class<?> componentType = requiredParameterTypes[parameterCount - 1].getComponentType();
+			Class<?> componentType = requiredParameterTypes[parameterCount - 1].componentType();
 			Object varargsArray = Array.newInstance(componentType, varargsArraySize);
 			for (int i = 0; i < varargsArraySize; i++) {
 				Array.set(varargsArray, i, args[parameterCount - 1 + i]);

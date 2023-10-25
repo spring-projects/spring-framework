@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,14 @@ import org.springframework.core.env.Profiles;
  * environment variable, or as a Servlet context parameter in {@code web.xml}
  * for web applications. Profiles may also be activated declaratively in
  * integration tests via the {@code @ActiveProfiles} annotation.
+ *
+ * <p>If no profile is active using one of those options, a default profile is
+ * enabled as a fallback. The name of the default profile is
+ * {@value AbstractEnvironment#RESERVED_DEFAULT_PROFILE_NAME}. This can be changed
+ * via {@link ConfigurableEnvironment#setDefaultProfiles} or declaratively by
+ * setting the {@link AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
+ * spring.profiles.default} property as a JVM system property, as an environment
+ * variable, or as a Servlet context parameter in {@code web.xml} for web applications.
  *
  * <p>The {@code @Profile} annotation may be used in any of the following ways:
  * <ul>

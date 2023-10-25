@@ -480,7 +480,7 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 
 		@Override
 		public String toString() {
-			return "command=" + this.command  + ", session=\"" + this.sessionId + "\"";
+			return "command=" + this.command + ", session=\"" + this.sessionId + "\"";
 		}
 	}
 

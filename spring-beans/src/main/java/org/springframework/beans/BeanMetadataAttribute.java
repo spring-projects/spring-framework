@@ -90,7 +90,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 
 	@Override
 	public int hashCode() {
-		return this.name.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.value);
+		return ObjectUtils.nullSafeHash(this.name, this.value);
 	}
 
 	@Override

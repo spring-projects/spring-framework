@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ public final class AccessControl {
 			clazz = ClassUtils.getUserClass(clazz);
 			Visibility visibility = forModifiers(clazz.getModifiers());
 			if (clazz.isArray()) {
-				visibility = lowest(visibility, forClass(clazz.getComponentType()));
+				visibility = lowest(visibility, forClass(clazz.componentType()));
 			}
 			Class<?> enclosingClass = clazz.getEnclosingClass();
 			if (enclosingClass != null) {

@@ -36,16 +36,21 @@ public interface SmartTransactionObject extends Flushable {
 	/**
 	 * Return whether the transaction is internally marked as rollback-only.
 	 * Can, for example, check the JTA UserTransaction.
+	 * <p>The default implementation returns {@code false}.
 	 * @see jakarta.transaction.UserTransaction#getStatus
 	 * @see jakarta.transaction.Status#STATUS_MARKED_ROLLBACK
 	 */
-	boolean isRollbackOnly();
+	default boolean isRollbackOnly() {
+		return false;
+	}
 
 	/**
 	 * Flush the underlying sessions to the datastore, if applicable:
 	 * for example, all affected Hibernate/JPA sessions.
+	 * <p>The default implementation is empty, considering flush as a no-op.
 	 */
 	@Override
-	void flush();
+	default void flush() {
+	}
 
 }

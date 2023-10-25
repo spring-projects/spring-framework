@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
-import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * An adapter for a target {@link javax.sql.DataSource}, applying the current
@@ -47,6 +47,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <b>Make sure that the target DataSource properly cleans up such transaction state.</b>
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0.3
  * @see #setIsolationLevel
  * @see #setIsolationLevelName
@@ -55,8 +56,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAdapter {
 
-	/** Constants instance for TransactionDefinition. */
-	private static final Constants constants = new Constants(TransactionDefinition.class);
+	/**
+	 * Map of constant names to constant values for the isolation constants
+	 * defined in {@link TransactionDefinition}.
+	 */
+	static final Map<String, Integer> constants = Map.of(
+			"ISOLATION_DEFAULT", TransactionDefinition.ISOLATION_DEFAULT,
+			"ISOLATION_READ_UNCOMMITTED", TransactionDefinition.ISOLATION_READ_UNCOMMITTED,
+			"ISOLATION_READ_COMMITTED", TransactionDefinition.ISOLATION_READ_COMMITTED,
+			"ISOLATION_REPEATABLE_READ", TransactionDefinition.ISOLATION_REPEATABLE_READ,
+			"ISOLATION_SERIALIZABLE", TransactionDefinition.ISOLATION_SERIALIZABLE
+		);
+
 
 	@Nullable
 	private Integer isolationLevel;
@@ -64,8 +75,8 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 
 	/**
 	 * Set the default isolation level by the name of the corresponding constant
-	 * in {@link org.springframework.transaction.TransactionDefinition}, e.g.
-	 * "ISOLATION_SERIALIZABLE".
+	 * in {@link org.springframework.transaction.TransactionDefinition} &mdash;
+	 * for example, {@code "ISOLATION_SERIALIZABLE"}.
 	 * <p>If not specified, the target DataSource's default will be used.
 	 * Note that a transaction-specific isolation value will always override
 	 * any isolation setting specified at the DataSource level.
@@ -77,10 +88,10 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see #setIsolationLevel
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
-		if (!constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
-			throw new IllegalArgumentException("Only isolation constants allowed");
-		}
-		setIsolationLevel(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer isolationLevel = constants.get(constantName);
+		Assert.notNull(isolationLevel, "Only isolation constants allowed");
+		setIsolationLevel(isolationLevel);
 	}
 
 	/**
@@ -103,9 +114,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()
 	 */
 	public void setIsolationLevel(int isolationLevel) {
-		if (!constants.getValues(DefaultTransactionDefinition.PREFIX_ISOLATION).contains(isolationLevel)) {
-			throw new IllegalArgumentException("Only values of isolation constants allowed");
-		}
+		Assert.isTrue(constants.containsValue(isolationLevel), "Only values of isolation constants allowed");
 		this.isolationLevel = (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT ? isolationLevel : null);
 	}
 

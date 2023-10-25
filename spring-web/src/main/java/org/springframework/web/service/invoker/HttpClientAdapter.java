@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,11 @@ import org.springframework.http.ResponseEntity;
  * {@linkplain HttpServiceProxyFactory#createClient(Class) HTTP service proxy}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 6.0
+ * @deprecated in favor of {@link ReactorHttpExchangeAdapter}
  */
+@Deprecated(since = "6.1", forRemoval = true)
 public interface HttpClientAdapter {
 
 	/**
@@ -85,5 +88,60 @@ public interface HttpClientAdapter {
 	 * with additional access to the response status and headers.
 	 */
 	<T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
+
+
+	/**
+	 * Adapt this instance to {@link ReactorHttpExchangeAdapter}.
+	 * @since 6.1
+	 */
+	default ReactorHttpExchangeAdapter asReactorExchangeAdapter() {
+
+		return new AbstractReactorHttpExchangeAdapter() {
+
+			@Override
+			public boolean supportsRequestAttributes() {
+				return true;
+			}
+
+			@Override
+			public Mono<Void> exchangeForMono(HttpRequestValues values) {
+				return HttpClientAdapter.this.requestToVoid(values);
+			}
+
+			@Override
+			public Mono<HttpHeaders> exchangeForHeadersMono(HttpRequestValues values) {
+				return HttpClientAdapter.this.requestToHeaders(values);
+			}
+
+			@Override
+			public <T> Mono<T> exchangeForBodyMono(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+				return HttpClientAdapter.this.requestToBody(values, bodyType);
+			}
+
+			@Override
+			public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+				return HttpClientAdapter.this.requestToBodyFlux(values, bodyType);
+			}
+
+			@Override
+			public Mono<ResponseEntity<Void>> exchangeForBodilessEntityMono(HttpRequestValues values) {
+				return HttpClientAdapter.this.requestToBodilessEntity(values);
+			}
+
+			@Override
+			public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(
+					HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+
+				return HttpClientAdapter.this.requestToEntity(requestValues, bodyType);
+			}
+
+			@Override
+			public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(
+					HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+
+				return HttpClientAdapter.this.requestToEntityFlux(requestValues, bodyType);
+			}
+		};
+	}
 
 }

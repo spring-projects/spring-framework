@@ -40,19 +40,18 @@ import org.springframework.web.util.pattern.PatternParseException;
  * Wraps a {@link HandlerInterceptor} and uses URL patterns to determine whether
  * it applies to a given request.
  *
- * <p>Pattern matching can be done with {@link PathMatcher} or with parsed
+ * <p>Pattern matching can be done with a {@link PathMatcher} or with a parsed
  * {@link PathPattern}. The syntax is largely the same with the latter being more
  * tailored for web usage and more efficient. The choice is driven by the
- * presence of a {@link UrlPathHelper#resolveAndCacheLookupPath resolved}
- * {@code String} lookupPath or a {@link ServletRequestPathUtils#parseAndCache
- * parsed} {@code RequestPath} which in turn depends on the
- * {@link HandlerMapping} that matched the current request.
+ * presence of a {@linkplain UrlPathHelper#resolveAndCacheLookupPath resolved}
+ * {@code String} lookupPath or a {@linkplain ServletRequestPathUtils#parseAndCache
+ * parsed} {@code RequestPath} which in turn depends on the {@link HandlerMapping}
+ * that matched the current request.
  *
  * <p>{@code MappedInterceptor} is supported by subclasses of
  * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping
- * AbstractHandlerMethodMapping} which detect beans of type
- * {@code MappedInterceptor} and also check if interceptors directly registered
- * with it are of this type.
+ * AbstractHandlerMethodMapping} which detect beans of type {@code MappedInterceptor}
+ * and also check if interceptors directly registered with it are of this type.
  *
  * @author Keith Donald
  * @author Rossen Stoyanchev
@@ -137,12 +136,38 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 
 	/**
-	 * Return the patterns this interceptor is mapped to.
+	 * Get the include path patterns this interceptor is mapped to.
+	 * @see #getIncludePathPatterns()
+	 * @see #getExcludePathPatterns()
+	 * @deprecated since 6.1 in favor of {@link #getIncludePathPatterns()}
 	 */
 	@Nullable
+	@Deprecated(since = "6.1", forRemoval = true)
 	public String[] getPathPatterns() {
+		return getIncludePathPatterns();
+	}
+
+	/**
+	 * Get the include path patterns this interceptor is mapped to.
+	 * @since 6.1
+	 * @see #getExcludePathPatterns()
+	 */
+	@Nullable
+	public String[] getIncludePathPatterns() {
 		return (!ObjectUtils.isEmpty(this.includePatterns) ?
 				Arrays.stream(this.includePatterns).map(PatternAdapter::getPatternString).toArray(String[]::new) :
+				null);
+	}
+
+	/**
+	 * Get the exclude path patterns this interceptor is mapped to.
+	 * @since 6.1
+	 * @see #getIncludePathPatterns()
+	 */
+	@Nullable
+	public String[] getExcludePathPatterns() {
+		return (!ObjectUtils.isEmpty(this.excludePatterns) ?
+				Arrays.stream(this.excludePatterns).map(PatternAdapter::getPatternString).toArray(String[]::new) :
 				null);
 	}
 
@@ -161,7 +186,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * <p>By default this is {@link AntPathMatcher}.
 	 * <p><strong>Note:</strong> Setting {@code PathMatcher} enforces use of
 	 * String pattern matching even when a
-	 * {@link ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
+	 * {@linkplain ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
 	 * is available.
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
@@ -169,7 +194,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * The {@link #setPathMatcher(PathMatcher) configured} PathMatcher.
+	 * Get the {@linkplain #setPathMatcher(PathMatcher) configured} PathMatcher.
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
@@ -208,13 +233,13 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * Determine a match for the given lookup path.
+	 * Determine if there is a match for the given lookup path.
 	 * @param lookupPath the current request path
 	 * @param pathMatcher a path matcher for path pattern matching
 	 * @return {@code true} if the interceptor applies to the given request path
 	 * @deprecated as of 5.3 in favor of {@link #matches(HttpServletRequest)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
 		pathMatcher = (this.pathMatcher != defaultPathMatcher ? this.pathMatcher : pathMatcher);
 		if (!ObjectUtils.isEmpty(this.excludePatterns)) {

@@ -347,7 +347,7 @@ public class EmitUtils {
 
     public static void push_array(CodeEmitter e, Object[] array) {
         e.push(array.length);
-        e.newarray(Type.getType(remapComponentType(array.getClass().getComponentType())));
+        e.newarray(Type.getType(remapComponentType(array.getClass().componentType())));
         for (int i = 0; i < array.length; i++) {
             e.dup();
             e.push(i);

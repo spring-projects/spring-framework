@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -25,7 +26,6 @@ import jakarta.jms.JMSException;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
 
-import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.JmsException;
@@ -117,6 +117,7 @@ import org.springframework.util.backoff.FixedBackOff;
  * before listener execution, with no redelivery in case of an exception.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
@@ -173,7 +174,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public static final int CACHE_AUTO = 4;
 
 
-	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
+	/**
+	 * Map of constant names to constant values for the cache constants defined
+	 * in this class.
+	 */
+	private static final Map<String, Integer> constants = Map.of(
+			"CACHE_NONE", CACHE_NONE,
+			"CACHE_CONNECTION", CACHE_CONNECTION,
+			"CACHE_SESSION", CACHE_SESSION,
+			"CACHE_CONSUMER", CACHE_CONSUMER,
+			"CACHE_AUTO", CACHE_AUTO
+		);
 
 
 	@Nullable
@@ -258,14 +269,20 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Specify the level of caching that this listener container is allowed to apply,
-	 * in the form of the name of the corresponding constant: e.g. "CACHE_CONNECTION".
+	 * in the form of the name of the corresponding constant &mdash; for example,
+	 * {@code "CACHE_CONNECTION"}.
 	 * @see #setCacheLevel
+	 * @see #CACHE_NONE
+	 * @see #CACHE_CONNECTION
+	 * @see #CACHE_SESSION
+	 * @see #CACHE_CONSUMER
+	 * @see #CACHE_AUTO
 	 */
 	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
-		if (!constantName.startsWith("CACHE_")) {
-			throw new IllegalArgumentException("Only cache constants allowed");
-		}
-		setCacheLevel(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer cacheLevel = constants.get(constantName);
+		Assert.notNull(cacheLevel, "Only cache constants allowed");
+		this.cacheLevel = cacheLevel;
 	}
 
 	/**
@@ -284,10 +301,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
 	 * @see #CACHE_CONSUMER
+	 * @see #CACHE_AUTO
 	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
 	 */
 	public void setCacheLevel(int cacheLevel) {
+		Assert.isTrue(constants.containsValue(cacheLevel), "Only values of cache constants allowed");
 		this.cacheLevel = cacheLevel;
 	}
 
@@ -1247,9 +1266,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private void decreaseActiveInvokerCount() {
 			activeInvokerCount--;
-			if (stopCallback != null && activeInvokerCount == 0) {
-				stopCallback.run();
-				stopCallback = null;
+			if (activeInvokerCount == 0) {
+				if (!isRunning()) {
+					// Proactively release shared Connection when stopped.
+					releaseSharedConnection();
+				}
+				if (stopCallback != null) {
+					stopCallback.run();
+					stopCallback = null;
+				}
 			}
 		}
 

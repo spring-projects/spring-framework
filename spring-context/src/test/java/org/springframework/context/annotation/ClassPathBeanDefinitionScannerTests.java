@@ -203,6 +203,31 @@ public class ClassPathBeanDefinitionScannerTests {
 	}
 
 	@Test
+	public void testSimpleScanWithDefaultFiltersAndOverridingBeanNotAllowed() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getDefaultListableBeanFactory().setAllowBeanDefinitionOverriding(false);
+		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(false);
+
+		assertThatIllegalStateException().isThrownBy(() -> scanner.scan(BASE_PACKAGE))
+				.withMessageContaining("stubFooDao")
+				.withMessageContaining(StubFooDao.class.getName());
+	}
+
+	@Test
+	public void testSimpleScanWithDefaultFiltersAndOverridingBeanAcceptedForSameBeanClass() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getDefaultListableBeanFactory().setAllowBeanDefinitionOverriding(false);
+		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(StubFooDao.class));
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(false);
+
+		// should not fail!
+		scanner.scan(BASE_PACKAGE);
+	}
+
+	@Test
 	public void testSimpleScanWithDefaultFiltersAndDefaultBeanNameClash() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);

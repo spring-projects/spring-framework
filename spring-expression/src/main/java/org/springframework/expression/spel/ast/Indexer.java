@@ -384,7 +384,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
-		Class<?> arrayComponentType = ctx.getClass().getComponentType();
+		Class<?> arrayComponentType = ctx.getClass().componentType();
 		if (arrayComponentType == Boolean.TYPE) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);

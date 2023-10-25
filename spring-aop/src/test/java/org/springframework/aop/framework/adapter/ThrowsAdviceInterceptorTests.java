@@ -23,25 +23,26 @@ import java.rmi.RemoteException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.testfixture.advice.MyThrowsHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ThrowsAdviceInterceptorTests {
 
 	@Test
 	public void testNoHandlerMethods() {
 		// should require one handler method at least
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
 				new ThrowsAdviceInterceptor(new Object()));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,11 @@ public abstract class AbstractMockWebServerTests {
 				}
 				else if(request.getPath().equals("/status/notfound")) {
 					return new MockResponse().setResponseCode(404);
+				}
+				else if (request.getPath().equals("/status/299")) {
+					assertThat(request.getHeader("Expect"))
+							.contains("299");
+					return new MockResponse().setResponseCode(299);
 				}
 				else if(request.getPath().startsWith("/params")) {
 					assertThat(request.getPath()).contains("param1=value");

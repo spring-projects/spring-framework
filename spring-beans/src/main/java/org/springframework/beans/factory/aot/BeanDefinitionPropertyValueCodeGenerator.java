@@ -38,6 +38,7 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
@@ -69,6 +70,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods,
 			@Nullable BiFunction<Object, ResolvableType, CodeBlock> customValueGenerator) {
+
 		this.generatedMethods = generatedMethods;
 		this.delegates = new ArrayList<>();
 		if (customValueGenerator != null) {
@@ -88,7 +90,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				new ListDelegate(),
 				new SetDelegate(),
 				new MapDelegate(),
-				new BeanReferenceDelegate()
+				new BeanReferenceDelegate(),
+				new TypedStringValueDelegate()
 		));
 	}
 
@@ -143,7 +146,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		@Nullable
 		CodeBlock generateCode(Object value, ResolvableType type);
-
 	}
 
 
@@ -162,7 +164,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				'\'', "\\'",
 				'\\', "\\\\"
 		);
-
 
 		@Override
 		@Nullable
@@ -231,7 +232,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -321,8 +321,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			this.emptyResult = emptyResult;
 		}
 
-		@Override
 		@SuppressWarnings("unchecked")
+		@Override
 		@Nullable
 		public CodeBlock generateCode(Object value, ResolvableType type) {
 			if (this.collectionType.isInstance(value)) {
@@ -449,17 +449,17 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				return CodeBlock.of("new $T($L)", LinkedHashSet.class,
 						generateCollectionOf(set, List.class, elementType));
 			}
-			try {
-				set = orderForCodeConsistency(set);
-			}
-			catch (ClassCastException ex) {
-				// If elements are not comparable, just keep the original set
-			}
-			return super.generateCollectionCode(elementType, set);
+			return super.generateCollectionCode(elementType, orderForCodeConsistency(set));
 		}
 
 		private Set<?> orderForCodeConsistency(Set<?> set) {
-			return new TreeSet<Object>(set);
+			try {
+				return new TreeSet<Object>(set);
+			}
+			catch (ClassCastException ex) {
+				// If elements are not comparable, just keep the original set
+				return set;
+			}
 		}
 	}
 
@@ -515,7 +515,13 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		}
 
 		private <K, V> Map<K, V> orderForCodeConsistency(Map<K, V> map) {
-			return new TreeMap<>(map);
+			try {
+				return new TreeMap<>(map);
+			}
+			catch (ClassCastException ex) {
+				// If elements are not comparable, just keep the original map
+				return map;
+			}
 		}
 
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
@@ -560,6 +566,34 @@ class BeanDefinitionPropertyValueCodeGenerator {
 						beanReference.getBeanName());
 			}
 			return null;
+		}
+	}
+
+
+	/**
+	 * {@link Delegate} for {@link TypedStringValue} types.
+	 */
+	private class TypedStringValueDelegate implements Delegate {
+
+		@Override
+		public CodeBlock generateCode(Object value, ResolvableType type) {
+			if (value instanceof TypedStringValue typedStringValue) {
+				return generateTypeStringValueCode(typedStringValue);
+			}
+			return null;
+		}
+
+		private CodeBlock generateTypeStringValueCode(TypedStringValue typedStringValue) {
+			String value = typedStringValue.getValue();
+			if (typedStringValue.hasTargetType()) {
+				return CodeBlock.of("new $T($S, $L)", TypedStringValue.class, value,
+						generateCode(typedStringValue.getTargetType()));
+			}
+			return generateCode(value);
+		}
+
+		private CodeBlock generateCode(@Nullable Object value) {
+			return BeanDefinitionPropertyValueCodeGenerator.this.generateCode(value);
 		}
 	}
 

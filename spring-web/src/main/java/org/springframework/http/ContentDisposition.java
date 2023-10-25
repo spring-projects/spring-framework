@@ -50,10 +50,10 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  */
 public final class ContentDisposition {
 
-	private final static Pattern BASE64_ENCODED_PATTERN =
+	private static final Pattern BASE64_ENCODED_PATTERN =
 			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
 
-	private final static Pattern QUOTED_PRINTABLE_ENCODED_PATTERN =
+	private static final Pattern QUOTED_PRINTABLE_ENCODED_PATTERN =
 			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?Q\\?([!->@-~]+)\\?="); // Printable ASCII other than "?" or SPACE
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
@@ -240,15 +240,8 @@ public final class ContentDisposition {
 
 	@Override
 	public int hashCode() {
-		int result = ObjectUtils.nullSafeHashCode(this.type);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.name);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.creationDate);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.modificationDate);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.readDate);
-		return result;
+		return ObjectUtils.nullSafeHash(this.type, this.name,this.filename,
+				this.charset, this.size, this.creationDate, this.modificationDate, this.readDate);
 	}
 
 	/**

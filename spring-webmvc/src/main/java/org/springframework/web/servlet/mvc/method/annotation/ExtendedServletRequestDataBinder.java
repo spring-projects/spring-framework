@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import jakarta.servlet.ServletRequest;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -67,14 +68,17 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	}
 
 
+	@Override
+	protected ServletRequestValueResolver createValueResolver(ServletRequest request) {
+		return new ExtendedServletRequestValueResolver(request, this);
+	}
+
 	/**
 	 * Merge URI variables into the property values to use for data binding.
 	 */
 	@Override
 	protected void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
-		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		@SuppressWarnings("unchecked")
-		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(attr);
+		Map<String, String> uriVars = getUriVars(request);
 		if (uriVars != null) {
 			uriVars.forEach((name, value) -> {
 				if (mpvs.contains(name)) {
@@ -86,6 +90,36 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 					mpvs.addPropertyValue(name, value);
 				}
 			});
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static Map<String, String> getUriVars(ServletRequest request) {
+		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		return (Map<String, String>) request.getAttribute(attr);
+	}
+
+
+	/**
+	 * Resolver of values that looks up URI path variables.
+	 */
+	private static class ExtendedServletRequestValueResolver extends ServletRequestValueResolver {
+
+		ExtendedServletRequestValueResolver(ServletRequest request, WebDataBinder dataBinder) {
+			super(request, dataBinder);
+		}
+
+		@Override
+		protected Object getRequestParameter(String name, Class<?> type) {
+			Object value = super.getRequestParameter(name, type);
+			if (value == null) {
+				Map<String, String> uriVars = getUriVars(getRequest());
+				if (uriVars != null) {
+					value = uriVars.get(name);
+				}
+			}
+			return value;
 		}
 	}
 

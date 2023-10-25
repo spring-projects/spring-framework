@@ -177,7 +177,7 @@ following features above and beyond the feature set that Spring supports for JUn
 TestNG:
 
 * Dependency injection for test constructors, test methods, and test lifecycle callback
-  methods. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with `SpringExtension`] for further details.
+  methods. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with the `SpringExtension`] for further details.
 * Powerful support for link:https://junit.org/junit5/docs/current/user-guide/#extensions-conditions[conditional
   test execution] based on SpEL expressions, environment variables, system properties,
   and so on. See the documentation for `@EnabledIf` and `@DisabledIf` in
@@ -310,17 +310,19 @@ See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
 xref:testing/annotations/integration-junit-jupiter.adoc[Spring JUnit Jupiter Testing Annotations] for further details.
 
 [[testcontext-junit-jupiter-di]]
-=== Dependency Injection with `SpringExtension`
+=== Dependency Injection with the `SpringExtension`
 
-`SpringExtension` implements the
+The `SpringExtension` implements the
 link:https://junit.org/junit5/docs/current/user-guide/#extensions-parameter-resolution[`ParameterResolver`]
 extension API from JUnit Jupiter, which lets Spring provide dependency injection for test
 constructors, test methods, and test lifecycle callback methods.
 
-Specifically, `SpringExtension` can inject dependencies from the test's
+Specifically, the `SpringExtension` can inject dependencies from the test's
 `ApplicationContext` into test constructors and methods that are annotated with
-`@BeforeAll`, `@AfterAll`, `@BeforeEach`, `@AfterEach`, `@Test`, `@RepeatedTest`,
-`@ParameterizedTest`, and others.
+Spring's `@BeforeTransaction` and `@AfterTransaction` or JUnit's `@BeforeAll`,
+`@AfterAll`, `@BeforeEach`, `@AfterEach`, `@Test`, `@RepeatedTest`, `@ParameterizedTest`,
+and others.
+
 
 [[testcontext-junit-jupiter-di-constructor]]
 ==== Constructor Injection
@@ -534,7 +536,7 @@ The _Spring TestContext Framework_ has supported the use of test-related annotat
 Framework 5.3 class-level test configuration annotations were not _inherited_ from
 enclosing classes like they are from superclasses.
 
-Spring Framework 5.3 introduces first-class support for inheriting test class
+Spring Framework 5.3 introduced first-class support for inheriting test class
 configuration from enclosing classes, and such configuration will be inherited by
 default. To change from the default `INHERIT` mode to `OVERRIDE` mode, you may annotate
 an individual `@Nested` test class with

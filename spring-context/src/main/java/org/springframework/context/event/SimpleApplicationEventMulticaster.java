@@ -83,6 +83,10 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * until all listeners have been executed. However, note that asynchronous execution
 	 * will not participate in the caller's thread context (class loader, transaction context)
 	 * unless the TaskExecutor explicitly supports this.
+	 * <p>{@link ApplicationListener} instances which declare no support for asynchronous
+	 * execution ({@link ApplicationListener#supportsAsyncExecution()} always run within
+	 * the original thread which published the event, e.g. the transaction-synchronized
+	 * {@link org.springframework.transaction.event.TransactionalApplicationListener}.
 	 * @since 2.0
 	 * @see org.springframework.core.task.SyncTaskExecutor
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
@@ -138,7 +142,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		ResolvableType type = (eventType != null ? eventType : ResolvableType.forInstance(event));
 		Executor executor = getTaskExecutor();
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
-			if (executor != null) {
+			if (executor != null && listener.supportsAsyncExecution()) {
 				executor.execute(() -> invokeListener(listener, event));
 			}
 			else {

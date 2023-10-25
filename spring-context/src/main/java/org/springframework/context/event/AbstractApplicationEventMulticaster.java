@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -262,6 +263,24 @@ public abstract class AbstractApplicationEventMulticaster
 					if (supportsEvent(beanFactory, listenerBeanName, eventType)) {
 						ApplicationListener<?> listener =
 								beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+
+						// Despite best efforts to avoid it, unwrapped proxies (singleton targets) can end up in the
+						// list of programmatically registered listeners. In order to avoid duplicates, we need to find
+						// and replace them by their proxy counterparts, because if both a proxy and its target end up
+						// in 'allListeners', listeners will fire twice.
+						ApplicationListener<?> unwrappedListener =
+								(ApplicationListener<?>) AopProxyUtils.getSingletonTarget(listener);
+						if (listener != unwrappedListener) {
+							if (filteredListeners != null && filteredListeners.contains(unwrappedListener)) {
+								filteredListeners.remove(unwrappedListener);
+								filteredListeners.add(listener);
+							}
+							if (allListeners.contains(unwrappedListener)) {
+								allListeners.remove(unwrappedListener);
+								allListeners.add(listener);
+							}
+						}
+
 						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
 							if (retriever != null) {
 								if (beanFactory.isSingleton(listenerBeanName)) {
@@ -404,7 +423,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 		@Override
 		public int hashCode() {
-			return this.eventType.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.sourceType);
+			return Objects.hash(this.eventType, this.sourceType);
 		}
 
 		@Override

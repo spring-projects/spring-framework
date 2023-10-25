@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.groovy.util.Maps;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -52,21 +51,14 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class NamedValueArgumentResolverTests {
 
-	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
+	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
 	private final TestNamedValueArgumentResolver argumentResolver = new TestNamedValueArgumentResolver();
 
-	private Service service;
-
-
-	@BeforeEach
-	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client)
-				.customArgumentResolver(this.argumentResolver)
-				.build();
-
-		this.service = proxyFactory.createClient(Service.class);
-	}
+	private final Service service = HttpServiceProxyFactory.builderFor(this.client)
+			.customArgumentResolver(this.argumentResolver)
+			.build()
+			.createClient(Service.class);
 
 
 	@Test

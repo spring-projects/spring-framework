@@ -39,11 +39,6 @@ resolvable otherwise. See
 {api-spring-framework}++/core/env/AbstractEnvironment.html#IGNORE_GETENV_PROPERTY_NAME++[`AbstractEnvironment`]
 for details.
 
-| `spring.index.ignore`
-| Instructs Spring to ignore the components index located in
-`META-INF/spring.components`. See xref:core/beans/classpath-scanning.adoc#beans-scanning-index[Generating an Index of Candidate Components]
-.
-
 | `spring.jdbc.getParameterType.ignore`
 | Instructs Spring to ignore `java.sql.ParameterMetaData.getParameterType` completely.
 See the note in xref:data-access/jdbc/advanced.adoc#jdbc-batch-list[Batch Operations with a List of Objects].
@@ -60,19 +55,27 @@ for details.
 {api-spring-framework}++/objenesis/SpringObjenesis.html#IGNORE_OBJENESIS_PROPERTY_NAME++[`SpringObjenesis`]
 for details.
 
+| `spring.test.aot.processing.failOnError`
+| A boolean flag that controls whether errors encountered during AOT processing in the
+_Spring TestContext Framework_ should result in an exception that fails the overall process.
+See xref:testing/testcontext-framework/aot.adoc[Ahead of Time Support for Tests].
+
 | `spring.test.constructor.autowire.mode`
 | The default _test constructor autowire mode_ to use if `@TestConstructor` is not present
-on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[Changing the default test constructor autowire mode]
-.
+on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[Changing the default test constructor autowire mode].
 
 | `spring.test.context.cache.maxSize`
 | The maximum size of the context cache in the _Spring TestContext Framework_. See
 xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching].
 
+| `spring.test.context.failure.threshold`
+| The failure threshold for errors encountered while attempting to load an `ApplicationContext`
+in the _Spring TestContext Framework_. See
+xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context Failure Threshold].
+
 | `spring.test.enclosing.configuration`
 | The default _enclosing configuration inheritance mode_ to use if
 `@NestedTestConfiguration` is not present on a test class. See
-xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[Changing the default enclosing configuration inheritance mode]
-.
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[Changing the default enclosing configuration inheritance mode].
 
 |===

@@ -106,7 +106,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 	void transferTo(HttpServer httpServer) throws Exception {
 		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
-
 		verifyTransferTo(httpServer);
 	}
 
@@ -164,7 +163,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 	@ParameterizedHttpServerTest
 	void proxy(HttpServer httpServer) throws Exception {
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails proxying requests");
-
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient

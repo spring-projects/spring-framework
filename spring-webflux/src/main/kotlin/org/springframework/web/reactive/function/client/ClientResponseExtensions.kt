@@ -18,7 +18,7 @@ package org.springframework.web.reactive.function.client
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
@@ -115,7 +115,6 @@ suspend fun <T : Any> ClientResponse.awaitBody(clazz: KClass<T>): T =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@Suppress("DEPRECATION")
 suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitSingleOrNull()
 
@@ -126,7 +125,6 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
  * @author Igor Manushin
  * @since 5.3
  */
-@Suppress("DEPRECATION")
 suspend fun <T : Any> ClientResponse.awaitBodyOrNull(clazz: KClass<T>): T? =
 		bodyToMono(clazz.java).awaitSingleOrNull()
 

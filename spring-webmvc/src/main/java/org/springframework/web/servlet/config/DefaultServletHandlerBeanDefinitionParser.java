@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
 
 /**
  * {@link BeanDefinitionParser} that parses a {@code default-servlet-handler} element to
- * register a {@link DefaultServletHttpRequestHandler}.  Will also register a
+ * register a {@link DefaultServletHttpRequestHandler}. Will also register a
  * {@link SimpleUrlHandlerMapping} for mapping resource requests, and a
  * {@link HttpRequestHandlerAdapter}.
  *

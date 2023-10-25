@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,18 +34,23 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
+import org.springframework.web.method.annotation.HandlerMethodValidator;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
@@ -81,8 +87,11 @@ class ControllerMethodResolver {
 			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
 					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
 
+	private static final boolean BEAN_VALIDATION_PRESENT =
+			ClassUtils.isPresent("jakarta.validation.Validator", HandlerMethod.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ControllerMethodResolver.class);
+
 
 	private final List<SyncHandlerMethodArgumentResolver> initBinderResolvers;
 
@@ -93,6 +102,9 @@ class ControllerMethodResolver {
 	private final List<HandlerMethodArgumentResolver> exceptionHandlerResolvers;
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+
+	@Nullable
+	private final MethodValidator methodValidator;
 
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
 
@@ -110,8 +122,10 @@ class ControllerMethodResolver {
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache = new ConcurrentHashMap<>(64);
 
 
-	ControllerMethodResolver(ArgumentResolverConfigurer customResolvers, ReactiveAdapterRegistry adapterRegistry,
-			ConfigurableApplicationContext context, List<HttpMessageReader<?>> readers) {
+	ControllerMethodResolver(
+			ArgumentResolverConfigurer customResolvers, ReactiveAdapterRegistry adapterRegistry,
+			ConfigurableApplicationContext context, List<HttpMessageReader<?>> readers,
+			@Nullable WebBindingInitializer webBindingInitializer) {
 
 		Assert.notNull(customResolvers, "ArgumentResolverConfigurer is required");
 		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
@@ -123,6 +137,15 @@ class ControllerMethodResolver {
 		this.requestMappingResolvers = requestMappingResolvers(customResolvers, adapterRegistry, context, readers);
 		this.exceptionHandlerResolvers = exceptionHandlerResolvers(customResolvers, adapterRegistry, context);
 		this.reactiveAdapterRegistry = adapterRegistry;
+
+		if (BEAN_VALIDATION_PRESENT) {
+			this.methodValidator = HandlerMethodValidator.from(webBindingInitializer, null,
+					methodParamPredicate(this.requestMappingResolvers, ModelAttributeMethodArgumentResolver.class),
+					methodParamPredicate(this.requestMappingResolvers, RequestParamMethodArgumentResolver.class));
+		}
+		else {
+			this.methodValidator = null;
+		}
 
 		initControllerAdviceCaches(context);
 	}
@@ -251,6 +274,19 @@ class ControllerMethodResolver {
 		}
 	}
 
+	private static Predicate<MethodParameter> methodParamPredicate(
+			List<HandlerMethodArgumentResolver> resolvers, Class<?> resolverType) {
+
+		return parameter -> {
+			for (HandlerMethodArgumentResolver resolver : resolvers) {
+				if (resolver.supportsParameter(parameter)) {
+					return resolverType.isInstance(resolver);
+				}
+			}
+			return false;
+		};
+	}
+
 
 	/**
 	 * Return an {@link InvocableHandlerMethod} for the given
@@ -260,6 +296,7 @@ class ControllerMethodResolver {
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setArgumentResolvers(this.requestMappingResolvers);
 		invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
+		invocable.setMethodValidator(this.methodValidator);
 		return invocable;
 	}
 
@@ -373,6 +410,10 @@ class ControllerMethodResolver {
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(exceptionHandlerObject, exceptionHandlerMethod);
 		invocable.setArgumentResolvers(this.exceptionHandlerResolvers);
 		return invocable;
+	}
+
+	public boolean hasMethodValidator() {
+		return (this.methodValidator != null);
 	}
 
 	/**

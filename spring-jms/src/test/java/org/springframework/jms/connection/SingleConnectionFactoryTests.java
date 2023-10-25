@@ -367,13 +367,12 @@ public class SingleConnectionFactoryTests {
 		// Prepare base JMS ConnectionFactory
 		// - createConnection(1st) -> TestConnection,
 		// - createConnection(2nd and next) -> FailingTestConnection
-		TestConnection testCon = new TestConnection();
 		FailingTestConnection failingCon = new FailingTestConnection();
 		AtomicInteger createConnectionMethodCounter = new AtomicInteger();
 		ConnectionFactory cf = mock(ConnectionFactory.class);
 		given(cf.createConnection()).willAnswer(invocation -> {
 			int methodInvocationCounter = createConnectionMethodCounter.incrementAndGet();
-			return methodInvocationCounter == 1 ? testCon : failingCon;
+			return (methodInvocationCounter >= 4 ? failingCon : new TestConnection());
 		});
 
 		// Prepare SingleConnectionFactory (setReconnectOnException())
@@ -382,18 +381,43 @@ public class SingleConnectionFactoryTests {
 		scf.setReconnectOnException(true);
 		Field conField = ReflectionUtils.findField(SingleConnectionFactory.class, "connection");
 		conField.setAccessible(true);
+		assertThat(scf.isRunning()).isFalse();
 
 		// Get connection (1st)
 		Connection con1 = scf.getConnection();
 		assertThat(createConnectionMethodCounter.get()).isEqualTo(1);
-		assertThat(con1).isNotNull();
 		assertThat(con1.getExceptionListener()).isNotNull();
-		assertThat(con1).isSameAs(testCon);
+		assertThat(con1).isSameAs(conField.get(scf));
+		assertThat(scf.isRunning()).isTrue();
+
 		// Get connection again, the same should be returned (shared connection till some problem)
 		Connection con2 = scf.getConnection();
 		assertThat(createConnectionMethodCounter.get()).isEqualTo(1);
 		assertThat(con2.getExceptionListener()).isNotNull();
 		assertThat(con2).isSameAs(con1);
+		assertThat(scf.isRunning()).isTrue();
+
+		// Explicit stop should reset connection
+		scf.stop();
+		assertThat(conField.get(scf)).isNull();
+		assertThat(scf.isRunning()).isFalse();
+		Connection con3 = scf.getConnection();
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(2);
+		assertThat(con3.getExceptionListener()).isNotNull();
+		assertThat(con3).isNotSameAs(con2);
+		assertThat(scf.isRunning()).isTrue();
+
+		// Explicit stop-and-restart should refresh connection
+		scf.stop();
+		assertThat(conField.get(scf)).isNull();
+		assertThat(scf.isRunning()).isFalse();
+		scf.start();
+		assertThat(scf.isRunning()).isTrue();
+		assertThat(conField.get(scf)).isNotNull();
+		Connection con4 = scf.getConnection();
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(3);
+		assertThat(con4.getExceptionListener()).isNotNull();
+		assertThat(con4).isNotSameAs(con3);
 
 		// Invoke reset connection to simulate problem with connection
 		// - SCF exception listener should be invoked -> connection should be set to null
@@ -405,16 +429,21 @@ public class SingleConnectionFactoryTests {
 		// - JMSException should be returned from FailingTestConnection
 		// - connection should be still null (no new connection without exception listener like before fix)
 		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> scf.getConnection());
-		assertThat(createConnectionMethodCounter.get()).isEqualTo(2);
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(4);
 		assertThat(conField.get(scf)).isNull();
 
 		// Attempt to get connection again -> FailingTestConnection should be returned
-		//  - no JMSException is thrown, exception listener should be present
-		Connection con3 = scf.getConnection();
-		assertThat(createConnectionMethodCounter.get()).isEqualTo(3);
-		assertThat(con3).isNotNull();
-		assertThat(con3).isSameAs(failingCon);
-		assertThat(con3.getExceptionListener()).isNotNull();
+		// - no JMSException is thrown, exception listener should be present
+		Connection con5 = scf.getConnection();
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(5);
+		assertThat(con5).isNotNull();
+		assertThat(con5).isSameAs(failingCon);
+		assertThat(con5.getExceptionListener()).isNotNull();
+		assertThat(con5).isNotSameAs(con4);
+
+		scf.destroy();
+		assertThat(conField.get(scf)).isNull();
+		assertThat(scf.isRunning()).isFalse();
 	}
 
 	@Test

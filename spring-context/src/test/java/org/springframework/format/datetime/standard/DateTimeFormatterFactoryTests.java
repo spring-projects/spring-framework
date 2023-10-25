@@ -41,7 +41,7 @@ public class DateTimeFormatterFactoryTests {
 	private static final TimeZone NEW_YORK = TimeZone.getTimeZone("America/New_York");
 
 	// Ensure that we are testing against a timezone other than the default.
-	private static final TimeZone TEST_TIMEZONE = ZURICH.equals(TimeZone.getDefault()) ? NEW_YORK : ZURICH;
+	private static final TimeZone TEST_TIMEZONE = (ZURICH.equals(TimeZone.getDefault()) ? NEW_YORK : ZURICH);
 
 
 	private DateTimeFormatterFactory factory = new DateTimeFormatterFactory();

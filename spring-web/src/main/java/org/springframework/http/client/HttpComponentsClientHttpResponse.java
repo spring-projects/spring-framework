@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.support.HttpComponentsHeadersAdapter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpResponse} implementation based on
@@ -58,12 +59,6 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.httpResponse.getCode();
-	}
-
-	@Override
 	public String getStatusText() {
 		return this.httpResponse.getReasonPhrase();
 	}
@@ -71,10 +66,8 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			for (Header header : this.httpResponse.getHeaders()) {
-				this.headers.add(header.getName(), header.getValue());
-			}
+			MultiValueMap<String, String> adapter = new HttpComponentsHeadersAdapter(this.httpResponse);
+			this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		}
 		return this.headers;
 	}

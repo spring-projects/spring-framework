@@ -17,8 +17,11 @@
 package org.springframework.cache.caffeine;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
@@ -29,7 +32,11 @@ import org.springframework.util.Assert;
  * Spring {@link org.springframework.cache.Cache} adapter implementation
  * on top of a Caffeine {@link com.github.benmanes.caffeine.cache.Cache} instance.
  *
- * <p>Requires Caffeine 2.1 or higher.
+ * <p>Supports the {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}
+ * operations through Caffeine's {@link AsyncCache}, when provided via the
+ * {@link #CaffeineCache(String, AsyncCache, boolean)} constructor.
+ *
+ * <p>Requires Caffeine 3.0 or higher, as of Spring Framework 6.1.
  *
  * @author Ben Manes
  * @author Juergen Hoeller
@@ -42,6 +49,9 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	private final String name;
 
 	private final com.github.benmanes.caffeine.cache.Cache<Object, Object> cache;
+
+	@Nullable
+	private AsyncCache<Object, Object> asyncCache;
 
 
 	/**
@@ -72,15 +82,50 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		this.cache = cache;
 	}
 
+	/**
+	 * Create a {@link CaffeineCache} instance with the specified name and the
+	 * given internal {@link AsyncCache} to use.
+	 * @param name the name of the cache
+	 * @param cache the backing Caffeine AsyncCache instance
+	 * @param allowNullValues whether to accept and convert {@code null} values
+	 * for this cache
+	 * @since 6.1
+	 */
+	public CaffeineCache(String name, AsyncCache<Object, Object> cache, boolean allowNullValues) {
+		super(allowNullValues);
+		Assert.notNull(name, "Name must not be null");
+		Assert.notNull(cache, "Cache must not be null");
+		this.name = name;
+		this.cache = cache.synchronous();
+		this.asyncCache = cache;
+	}
+
 
 	@Override
 	public final String getName() {
 		return this.name;
 	}
 
+	/**
+	 * Return the internal Caffeine Cache
+	 * (possibly an adapter on top of an {@link #getAsyncCache()}).
+	 */
 	@Override
 	public final com.github.benmanes.caffeine.cache.Cache<Object, Object> getNativeCache() {
 		return this.cache;
+	}
+
+	/**
+	 * Return the internal Caffeine AsyncCache.
+	 * @throws IllegalStateException if no AsyncCache is available
+	 * @since 6.1
+	 * @see #CaffeineCache(String, AsyncCache, boolean)
+	 * @see CaffeineCacheManager#setAsyncCacheMode
+	 */
+	public final AsyncCache<Object, Object> getAsyncCache() {
+		Assert.state(this.asyncCache != null,
+				"No Caffeine AsyncCache available: set CaffeineCacheManager.setAsyncCacheMode(true)");
+		return this.asyncCache;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,6 +133,22 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
 		return (T) fromStoreValue(this.cache.get(key, new LoadFunction(valueLoader)));
+	}
+
+	@Override
+	@Nullable
+	public CompletableFuture<?> retrieve(Object key) {
+		CompletableFuture<?> result = getAsyncCache().getIfPresent(key);
+		if (result != null && isAllowNullValues()) {
+			result = result.handle((value, ex) -> fromStoreValue(value));
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> CompletableFuture<T> retrieve(Object key, Supplier<CompletableFuture<T>> valueLoader) {
+		return (CompletableFuture<T>) getAsyncCache().get(key, (k, e) -> valueLoader.get());
 	}
 
 	@Override

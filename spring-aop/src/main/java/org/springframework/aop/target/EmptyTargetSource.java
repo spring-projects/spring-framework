@@ -17,6 +17,7 @@
 package org.springframework.aop.target;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.lang.Nullable;
@@ -140,7 +141,7 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 
 	@Override
 	public int hashCode() {
-		return EmptyTargetSource.class.hashCode() * 13 + ObjectUtils.nullSafeHashCode(this.targetClass);
+		return Objects.hash(getClass(), this.targetClass);
 	}
 
 	@Override

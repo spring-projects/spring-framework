@@ -419,6 +419,8 @@ public abstract class ConnectionFactoryUtils {
 
 		private final boolean transacted;
 
+		private boolean commitProcessed;
+
 		public JmsResourceSynchronization(JmsResourceHolder resourceHolder, Object resourceKey, boolean transacted) {
 			super(resourceHolder, resourceKey);
 			this.transacted = transacted;
@@ -431,12 +433,23 @@ public abstract class ConnectionFactoryUtils {
 
 		@Override
 		protected void processResourceAfterCommit(JmsResourceHolder resourceHolder) {
+			this.commitProcessed = true;
 			try {
 				resourceHolder.commitAll();
 			}
 			catch (JMSException ex) {
 				throw new SynchedLocalTransactionFailedException("Local JMS transaction failed to commit", ex);
 			}
+		}
+
+		@Override
+		public void afterCompletion(int status) {
+			if (status == STATUS_COMMITTED && this.transacted && !this.commitProcessed) {
+				// JmsResourceSynchronization registered in afterCommit phase of other synchronization
+				// -> late local JMS transaction commit here, otherwise it would silently get dropped.
+				afterCommit();
+			}
+			super.afterCompletion(status);
 		}
 
 		@Override

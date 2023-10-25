@@ -37,7 +37,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
-import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.util.Assert;
@@ -308,11 +307,6 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	//---------------------------------------------------------------------
 
 	@Override
-	public void send(SimpleMailMessage simpleMessage) throws MailException {
-		send(new SimpleMailMessage[] {simpleMessage});
-	}
-
-	@Override
 	public void send(SimpleMailMessage... simpleMessages) throws MailException {
 		List<MimeMessage> mimeMessages = new ArrayList<>(simpleMessages.length);
 		for (SimpleMailMessage simpleMessage : simpleMessages) {
@@ -352,40 +346,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	@Override
-	public void send(MimeMessage mimeMessage) throws MailException {
-		send(new MimeMessage[] {mimeMessage});
-	}
-
-	@Override
 	public void send(MimeMessage... mimeMessages) throws MailException {
 		doSend(mimeMessages, null);
-	}
-
-	@Override
-	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
-		send(new MimeMessagePreparator[] {mimeMessagePreparator});
-	}
-
-	@Override
-	public void send(MimeMessagePreparator... mimeMessagePreparators) throws MailException {
-		try {
-			List<MimeMessage> mimeMessages = new ArrayList<>(mimeMessagePreparators.length);
-			for (MimeMessagePreparator preparator : mimeMessagePreparators) {
-				MimeMessage mimeMessage = createMimeMessage();
-				preparator.prepare(mimeMessage);
-				mimeMessages.add(mimeMessage);
-			}
-			send(mimeMessages.toArray(new MimeMessage[0]));
-		}
-		catch (MailException ex) {
-			throw ex;
-		}
-		catch (MessagingException ex) {
-			throw new MailParseException(ex);
-		}
-		catch (Exception ex) {
-			throw new MailPreparationException(ex);
-		}
 	}
 
 	/**
@@ -528,7 +490,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @see #getProtocol()
 	 */
 	protected Transport getTransport(Session session) throws NoSuchProviderException {
-		String protocol	= getProtocol();
+		String protocol = getProtocol();
 		if (protocol == null) {
 			protocol = session.getProperty("mail.transport.protocol");
 			if (protocol == null) {

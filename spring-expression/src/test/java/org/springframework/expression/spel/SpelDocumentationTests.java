@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -127,7 +130,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		String helloWorld = (String) parser.parseExpression("'Hello World'").getValue(); // evals to "Hello World"
 		assertThat(helloWorld).isEqualTo("Hello World");
 
-		double avogadrosNumber  = (Double) parser.parseExpression("6.0221415E+23").getValue();
+		double avogadrosNumber = (Double) parser.parseExpression("6.0221415E+23").getValue();
 		assertThat(avogadrosNumber).isCloseTo(6.0221415E+23, within((double) 0));
 
 		int maxValue = (Integer) parser.parseExpression("0x7FFFFFFF").getValue();  // evals to 2147483647
@@ -260,7 +263,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		boolean falseValue = parser.parseExpression("true and false").getValue(Boolean.class);
 		assertThat(falseValue).isFalse();
 		// evaluates to true
-		String expression =  "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')";
+		String expression = "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')";
 		boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 		// -- OR --
@@ -270,7 +273,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		assertThat(trueValue).isTrue();
 
 		// evaluates to true
-		expression =  "isMember('Nikola Tesla') or isMember('Albert Einstien')";
+		expression = "isMember('Nikola Tesla') or isMember('Albert Einstien')";
 		trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 		assertThat(trueValue).isTrue();
 
@@ -282,7 +285,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 
 		// -- AND and NOT --
-		expression =  "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
+		expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
 		falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 		assertThat(falseValue).isFalse();
 	}
@@ -299,28 +302,28 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		assertThat(testString).isEqualTo("test string");
 
 		// Subtraction
-		int four =  parser.parseExpression("1 - -3").getValue(Integer.class); // 4
+		int four = parser.parseExpression("1 - -3").getValue(Integer.class); // 4
 		assertThat(four).isEqualTo(4);
 
 		double d = parser.parseExpression("1000.00 - 1e4").getValue(Double.class); // -9000
 		assertThat(d).isCloseTo(-9000.0d, within((double) 0));
 
 		// Multiplication
-		int six =  parser.parseExpression("-2 * -3").getValue(Integer.class); // 6
+		int six = parser.parseExpression("-2 * -3").getValue(Integer.class); // 6
 		assertThat(six).isEqualTo(6);
 
 		double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double.class); // 24.0
 		assertThat(twentyFour).isCloseTo(24.0d, within((double) 0));
 
 		// Division
-		int minusTwo =  parser.parseExpression("6 / -3").getValue(Integer.class); // -2
+		int minusTwo = parser.parseExpression("6 / -3").getValue(Integer.class); // -2
 		assertThat(minusTwo).isEqualTo(-2);
 
 		double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double.class); // 1.0
 		assertThat(one).isCloseTo(1.0d, within((double) 0));
 
 		// Modulus
-		int three =  parser.parseExpression("7 % 4").getValue(Integer.class); // 3
+		int three = parser.parseExpression("7 % 4").getValue(Integer.class); // 3
 		assertThat(three).isEqualTo(3);
 
 		int oneInt = parser.parseExpression("8 / 5 % 2").getValue(Integer.class); // 1
@@ -413,6 +416,38 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 		String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
 		assertThat(helloWorldReversed).isEqualTo("dlrow olleh");
+	}
+
+	@Test
+	void methodHandlesNotBound() throws Throwable {
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+				MethodType.methodType(String.class, Object[].class));
+		context.setVariable("message", mh);
+
+		String message = parser.parseExpression("#message('Simple message: <%s>', 'Hello World', 'ignored')")
+				.getValue(context, String.class);
+		assertThat(message).isEqualTo("Simple message: <Hello World>");
+	}
+
+	@Test
+	void methodHandlesFullyBound() throws Throwable {
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		String template = "This is a %s message with %s words: <%s>";
+		Object varargs = new Object[] { "prerecorded", 3, "Oh Hello World!", "ignored" };
+		MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+						MethodType.methodType(String.class, Object[].class))
+				.bindTo(template)
+				.bindTo(varargs); //here we have to provide arguments in a single array binding
+		context.setVariable("message", mh);
+
+		String message = parser.parseExpression("#message()")
+				.getValue(context, String.class);
+		assertThat(message).isEqualTo("This is a prerecorded message with 3 words: <Oh Hello World!>");
 	}
 
 	// 7.5.10

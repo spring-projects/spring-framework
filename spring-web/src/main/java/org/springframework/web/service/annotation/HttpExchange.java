@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.Mapping;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Annotation to declare a method on an HTTP service interface as an HTTP
@@ -59,6 +60,13 @@ import org.springframework.web.bind.annotation.Mapping;
  * <td>Dynamically set the URL for the request, overriding the annotation's
  * {@link #url()} attribute</td>
  * <td>{@link org.springframework.web.service.invoker.UrlArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link UriBuilderFactory}</td>
+ * <td>Dynamically set the {@code base URI} for the request, overriding the
+ * one from the annotation's {@link #url()} attribute, while keeping the
+ * subsequent path segments as defined there</td>
+ * <td>{@link org.springframework.web.service.invoker.UriBuilderFactoryArgumentResolver}</td>
  * </tr>
  * <tr>
  * <td>{@link org.springframework.http.HttpMethod HttpMethod}</td>

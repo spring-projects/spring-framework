@@ -18,7 +18,8 @@ package org.springframework.test.context.support;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -26,9 +27,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -37,9 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.springframework.test.context.support.TestPropertySourceUtils.INLINED_PROPERTIES_PROPERTY_SOURCE_NAME;
 import static org.springframework.test.context.support.TestPropertySourceUtils.addInlinedPropertiesToEnvironment;
 import static org.springframework.test.context.support.TestPropertySourceUtils.addPropertiesFilesToEnvironment;
 import static org.springframework.test.context.support.TestPropertySourceUtils.buildMergedTestPropertySources;
@@ -55,19 +61,20 @@ class TestPropertySourceUtilsTests {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-	private static final String[] KEY_VALUE_PAIR = new String[] {"key = value"};
+	private static final String[] KEY_VALUE_PAIR = {"key = value"};
 
-	private static final String[] FOO_LOCATIONS = new String[] {"classpath:/foo.properties"};
+	private static final String[] FOO_LOCATIONS = {"classpath:/foo.properties"};
 
 
 	@Test
 	void emptyAnnotation() {
 		assertThatIllegalStateException()
 			.isThrownBy(() -> buildMergedTestPropertySources(EmptyPropertySources.class))
-			.withMessageStartingWith("Could not detect default properties file for test class")
-			.withMessageContaining("class path resource")
-			.withMessageContaining("does not exist")
-			.withMessageContaining("EmptyPropertySources.properties");
+			.withMessageContainingAll(
+					"Could not detect default properties file for test class",
+					"class path resource",
+					"does not exist",
+					"EmptyPropertySources.properties");
 	}
 
 	@Test
@@ -257,16 +264,26 @@ class TestPropertySourceUtilsTests {
 
 	@Test
 	void addInlinedPropertiesToEnvironmentWithMalformedUnicodeInValue() {
+		String properties = "key = \\uZZZZ";
 		assertThatIllegalStateException()
-			.isThrownBy(() -> addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("key = \\uZZZZ")))
-			.withMessageContaining("Failed to load test environment property");
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment(new MockEnvironment(), properties))
+			.withMessageContaining("Failed to load test environment properties from [%s]", properties);
 	}
 
 	@Test
 	void addInlinedPropertiesToEnvironmentWithMultipleKeyValuePairsInSingleInlinedProperty() {
-		assertThatIllegalStateException()
-			.isThrownBy(() -> addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("a=b\nx=y")))
-			.withMessageContaining("Failed to load exactly one test environment property");
+		ConfigurableEnvironment environment = new MockEnvironment();
+		MutablePropertySources propertySources = environment.getPropertySources();
+		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
+		assertThat(propertySources).isEmpty();
+		addInlinedPropertiesToEnvironment(environment, """
+				a=b
+				x=y
+				""");
+		assertThat(propertySources).hasSize(1);
+		PropertySource<?> propertySource = propertySources.get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+		assertThat(propertySource).isInstanceOf(MapPropertySource.class);
+		assertThat(((MapPropertySource) propertySource).getSource()).containsExactly(entry("a", "b"), entry("x", "y"));
 	}
 
 	@Test
@@ -276,9 +293,11 @@ class TestPropertySourceUtilsTests {
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
 		assertThat(propertySources).isEmpty();
-		addInlinedPropertiesToEnvironment(environment, asArray("  "));
+		addInlinedPropertiesToEnvironment(environment, "  ");
 		assertThat(propertySources).hasSize(1);
-		assertThat(((Map<?, ?>) propertySources.iterator().next().getSource())).isEmpty();
+		PropertySource<?> propertySource = propertySources.get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+		assertThat(propertySource).isInstanceOf(MapPropertySource.class);
+		assertThat(((MapPropertySource) propertySource).getSource()).isEmpty();
 	}
 
 	@Test
@@ -295,7 +314,9 @@ class TestPropertySourceUtilsTests {
 		MergedTestPropertySources mergedPropertySources = buildMergedTestPropertySources(testClass);
 		SoftAssertions.assertSoftly(softly -> {
 			softly.assertThat(mergedPropertySources).isNotNull();
-			softly.assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
+			Stream<String> locations = mergedPropertySources.getPropertySourceDescriptors().stream()
+					.map(PropertySourceDescriptor::locations).flatMap(List::stream);
+			softly.assertThat(locations).containsExactly(expectedLocations);
 			softly.assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
 		});
 	}

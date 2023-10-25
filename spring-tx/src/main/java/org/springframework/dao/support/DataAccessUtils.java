@@ -17,6 +17,10 @@
 package org.springframework.dao.support;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -55,6 +59,94 @@ public abstract class DataAccessUtils {
 			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
 		return results.iterator().next();
+	}
+
+	/**
+	 * Return a single result object from the given Stream.
+	 * <p>Returns {@code null} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Stream (can be {@code null})
+	 * @return the single result object, or {@code null} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Stream
+	 * @since 6.1
+	 */
+	@Nullable
+	public static <T> T singleResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
+		if (results == null) {
+			return null;
+		}
+		try (results) {
+			List<T> resultList = results.limit(2).toList();
+			if (resultList.size() > 1) {
+				throw new IncorrectResultSizeDataAccessException(1);
+			}
+			return (!resultList.isEmpty() ? resultList.get(0) : null);
+		}
+	}
+
+	/**
+	 * Return a single result object from the given Iterator.
+	 * <p>Returns {@code null} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Iterator (can be {@code null})
+	 * @return the single result object, or {@code null} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Iterator
+	 * @since 6.1
+	 */
+	@Nullable
+	public static <T> T singleResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
+		if (results == null) {
+			return null;
+		}
+		T result = (results.hasNext() ? results.next() : null);
+		if (results.hasNext()) {
+			throw new IncorrectResultSizeDataAccessException(1);
+		}
+		return result;
+	}
+
+	/**
+	 * Return a single result object from the given Collection.
+	 * <p>Returns {@code Optional.empty()} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Collection (can be {@code null})
+	 * @return the single optional result object, or {@code Optional.empty()} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Collection
+	 * @since 6.1
+	 */
+	public static <T> Optional<T> optionalResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
+		return Optional.ofNullable(singleResult(results));
+	}
+
+	/**
+	 * Return a single result object from the given Stream.
+	 * <p>Returns {@code Optional.empty()} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Stream (can be {@code null})
+	 * @return the single optional result object, or {@code Optional.empty()} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Stream
+	 * @since 6.1
+	 */
+	public static <T> Optional<T> optionalResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
+		return Optional.ofNullable(singleResult(results));
+	}
+
+	/**
+	 * Return a single result object from the given Iterator.
+	 * <p>Returns {@code Optional.empty()} if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Iterator (can be {@code null})
+	 * @return the single optional result object, or {@code Optional.empty()} if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Iterator
+	 * @since 6.1
+	 */
+	public static <T> Optional<T> optionalResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
+		return Optional.ofNullable(singleResult(results));
 	}
 
 	/**

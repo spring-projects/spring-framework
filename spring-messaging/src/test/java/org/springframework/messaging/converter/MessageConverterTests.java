@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,19 @@ public class MessageConverterTests {
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(MimeTypeUtils.TEXT_PLAIN);
 	}
 
+	@Test // gh-29768
+	public void toMessageDefaultContentType() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeTypeUtils.TEXT_PLAIN);
+
+		TestMessageConverter converter = new TestMessageConverter();
+		converter.setContentTypeResolver(resolver);
+		converter.setStrictContentTypeMatch(true);
+
+		Message<?> message = converter.toMessage("ABC", null);
+		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(MimeTypeUtils.TEXT_PLAIN);
+	}
+
 
 	private static class TestMessageConverter extends AbstractMessageConverter {
 
@@ -155,16 +168,12 @@ public class MessageConverterTests {
 		}
 
 		@Override
-		protected Object convertFromInternal(
-				Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
-
+		protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object hint) {
 			return "success-from";
 		}
 
 		@Override
-		protected Object convertToInternal(
-				Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
-
+		protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object hint) {
 			return "success-to";
 		}
 	}

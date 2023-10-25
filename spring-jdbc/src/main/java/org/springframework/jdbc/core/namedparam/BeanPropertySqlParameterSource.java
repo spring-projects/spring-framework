@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see NamedParameterJdbcTemplate
- * @see org.springframework.beans.BeanWrapper
+ * @see SimplePropertySqlParameterSource
  */
 public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 

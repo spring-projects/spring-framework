@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,35 +97,45 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public URI getURI() {
 		if (this.uri == null) {
-			String urlString = null;
-			boolean hasQuery = false;
-			try {
-				StringBuffer url = this.servletRequest.getRequestURL();
-				String query = this.servletRequest.getQueryString();
-				hasQuery = StringUtils.hasText(query);
-				if (hasQuery) {
-					url.append('?').append(query);
-				}
-				urlString = url.toString();
-				this.uri = new URI(urlString);
-			}
-			catch (URISyntaxException ex) {
-				if (!hasQuery) {
-					throw new IllegalStateException(
-							"Could not resolve HttpServletRequest as URI: " + urlString, ex);
-				}
-				// Maybe a malformed query string... try plain request URL
-				try {
-					urlString = this.servletRequest.getRequestURL().toString();
-					this.uri = new URI(urlString);
-				}
-				catch (URISyntaxException ex2) {
-					throw new IllegalStateException(
-							"Could not resolve HttpServletRequest as URI: " + urlString, ex2);
-				}
-			}
+			this.uri = initURI(this.servletRequest);
 		}
 		return this.uri;
+	}
+
+	/**
+	 * Initialize a URI from the given Servlet request.
+	 * @param servletRequest the request
+	 * @return the initialized URI
+	 * @since 6.1
+	 */
+	public static URI initURI(HttpServletRequest servletRequest) {
+		String urlString = null;
+		boolean hasQuery = false;
+		try {
+			StringBuffer url = servletRequest.getRequestURL();
+			String query = servletRequest.getQueryString();
+			hasQuery = StringUtils.hasText(query);
+			if (hasQuery) {
+				url.append('?').append(query);
+			}
+			urlString = url.toString();
+			return new URI(urlString);
+		}
+		catch (URISyntaxException ex) {
+			if (!hasQuery) {
+				throw new IllegalStateException(
+						"Could not resolve HttpServletRequest as URI: " + urlString, ex);
+			}
+			// Maybe a malformed query string... try plain request URL
+			try {
+				urlString = servletRequest.getRequestURL().toString();
+				return new URI(urlString);
+			}
+			catch (URISyntaxException ex2) {
+				throw new IllegalStateException(
+						"Could not resolve HttpServletRequest as URI: " + urlString, ex2);
+			}
+		}
 	}
 
 	@Override
@@ -199,7 +209,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public InputStream getBody() throws IOException {
-		if (isFormPost(this.servletRequest)) {
+		if (isFormPost(this.servletRequest) && this.servletRequest.getQueryString() == null) {
 			return getBodyFromServletRequestParameters(this.servletRequest);
 		}
 		else {

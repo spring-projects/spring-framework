@@ -165,11 +165,27 @@ class AnnotationDrivenEventListenerTests {
 		assertThat(events).as("Wrong number of initial context events").hasSize(1);
 		assertThat(events.get(0).getClass()).isEqualTo(ContextRefreshedEvent.class);
 
+		this.context.start();
+		List<Object> eventsAfterStart = this.eventCollector.getEvents(listener);
+		assertThat(eventsAfterStart).as("Wrong number of context events on start").hasSize(2);
+		assertThat(eventsAfterStart.get(1).getClass()).isEqualTo(ContextStartedEvent.class);
+		this.eventCollector.assertTotalEventsCount(2);
+
 		this.context.stop();
 		List<Object> eventsAfterStop = this.eventCollector.getEvents(listener);
-		assertThat(eventsAfterStop).as("Wrong number of context events on shutdown").hasSize(2);
-		assertThat(eventsAfterStop.get(1).getClass()).isEqualTo(ContextStoppedEvent.class);
-		this.eventCollector.assertTotalEventsCount(2);
+		assertThat(eventsAfterStop).as("Wrong number of context events on stop").hasSize(3);
+		assertThat(eventsAfterStop.get(2).getClass()).isEqualTo(ContextStoppedEvent.class);
+		this.eventCollector.assertTotalEventsCount(3);
+
+		this.context.close();
+		List<Object> eventsAfterClose = this.eventCollector.getEvents(listener);
+		assertThat(eventsAfterClose).as("Wrong number of context events on close").hasSize(4);
+		assertThat(eventsAfterClose.get(3).getClass()).isEqualTo(ContextClosedEvent.class);
+		this.eventCollector.assertTotalEventsCount(4);
+
+		// Further events are supposed to be ignored after context close
+		this.context.publishEvent(new ContextClosedEvent(this.context));
+		this.eventCollector.assertTotalEventsCount(4);
 	}
 
 	@Test
@@ -713,7 +729,7 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 
-	static abstract class AbstractTestEventListener extends AbstractIdentifiable {
+	abstract static class AbstractTestEventListener extends AbstractIdentifiable {
 
 		@Autowired
 		private EventCollector eventCollector;

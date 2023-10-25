@@ -46,8 +46,9 @@ public class PreparedStatementCreatorFactory {
 	/** The SQL, which won't change when the parameters change. */
 	private final String sql;
 
-	/** List of SqlParameter objects (may not be {@code null}). */
-	private final List<SqlParameter> declaredParameters;
+	/** List of SqlParameter objects (may be {@code null}). */
+	@Nullable
+	private List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
@@ -66,7 +67,6 @@ public class PreparedStatementCreatorFactory {
 	 */
 	public PreparedStatementCreatorFactory(String sql) {
 		this.sql = sql;
-		this.declaredParameters = new ArrayList<>();
 	}
 
 	/**
@@ -104,6 +104,9 @@ public class PreparedStatementCreatorFactory {
 	 * @param param the parameter to add to the list of declared parameters
 	 */
 	public void addParameter(SqlParameter param) {
+		if (this.declaredParameters == null) {
+			this.declaredParameters = new ArrayList<>();
+		}
 		this.declaredParameters.add(param);
 	}
 
@@ -201,7 +204,7 @@ public class PreparedStatementCreatorFactory {
 		public PreparedStatementCreatorImpl(String actualSql, List<?> parameters) {
 			this.actualSql = actualSql;
 			this.parameters = parameters;
-			if (parameters.size() != declaredParameters.size()) {
+			if (declaredParameters != null && parameters.size() != declaredParameters.size()) {
 				// Account for named parameters being used multiple times
 				Set<String> names = new HashSet<>();
 				for (int i = 0; i < parameters.size(); i++) {
@@ -249,14 +252,14 @@ public class PreparedStatementCreatorFactory {
 			int sqlColIndx = 1;
 			for (int i = 0; i < this.parameters.size(); i++) {
 				Object in = this.parameters.get(i);
-				SqlParameter declaredParameter;
+				SqlParameter declaredParameter = null;
 				// SqlParameterValue overrides declared parameter meta-data, in particular for
 				// independence from the declared parameter position in case of named parameters.
 				if (in instanceof SqlParameterValue sqlParameterValue) {
 					in = sqlParameterValue.getValue();
 					declaredParameter = sqlParameterValue;
 				}
-				else {
+				else if (declaredParameters != null) {
 					if (declaredParameters.size() <= i) {
 						throw new InvalidDataAccessApiUsageException(
 								"SQL [" + sql + "]: unable to access parameter number " + (i + 1) +
@@ -265,7 +268,10 @@ public class PreparedStatementCreatorFactory {
 					}
 					declaredParameter = declaredParameters.get(i);
 				}
-				if (in instanceof Iterable<?> entries && declaredParameter.getSqlType() != Types.ARRAY) {
+				if (declaredParameter == null) {
+					StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, SqlTypeValue.TYPE_UNKNOWN, in);
+				}
+				else if (in instanceof Iterable<?> entries && declaredParameter.getSqlType() != Types.ARRAY) {
 					for (Object entry : entries) {
 						if (entry instanceof Object[] valueArray) {
 							for (Object argValue : valueArray) {

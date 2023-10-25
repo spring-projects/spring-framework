@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -31,12 +32,14 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.ForwardedHeaderUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -66,6 +69,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rob Winch
  * @since 4.3
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/filters.html#filters-forwarded-headers">Forwarded Headers</a>
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
@@ -236,7 +240,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			super(servletRequest);
 
 			ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
-			UriComponents uriComponents = UriComponentsBuilder.fromHttpRequest(request).build();
+			URI uri = request.getURI();
+			HttpHeaders headers = request.getHeaders();
+			UriComponents uriComponents = ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers).build();
 			int port = uriComponents.getPort();
 
 			this.scheme = uriComponents.getScheme();
@@ -244,7 +250,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
-			this.remoteAddress = UriComponentsBuilder.parseForwardedFor(request, request.getRemoteAddress());
+			this.remoteAddress = ForwardedHeaderUtils.parseForwardedFor(uri, headers, request.getRemoteAddress());
 
 			String baseUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port);
 			Supplier<HttpServletRequest> delegateRequest = () -> (HttpServletRequest) getRequest();
@@ -453,8 +459,11 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 						StringUtils.applyRelativePath(this.request.getRequestURI(), path));
 			}
 
-			String result = UriComponentsBuilder
-					.fromHttpRequest(new ServletServerHttpRequest(this.request))
+			ServletServerHttpRequest httpRequest = new ServletServerHttpRequest(this.request);
+			URI uri = httpRequest.getURI();
+			HttpHeaders headers = httpRequest.getHeaders();
+
+			String result = ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers)
 					.replacePath(path)
 					.replaceQuery(uriComponents.getQuery())
 					.fragment(uriComponents.getFragment())

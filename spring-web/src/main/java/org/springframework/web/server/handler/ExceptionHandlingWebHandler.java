@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,13 @@ import org.springframework.web.server.WebHandler;
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the exception handled by {@link WebExceptionHandler WebExceptionHandlers}.
+	 * @since 6.1
+	 */
+	public static final String HANDLED_WEB_EXCEPTION = ExceptionHandlingWebHandler.class.getSimpleName() + ".handledException";
+
 	private final List<WebExceptionHandler> exceptionHandlers;
 
 
@@ -74,7 +81,8 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 		}
 
 		for (WebExceptionHandler handler : this.exceptionHandlers) {
-			completion = completion.onErrorResume(ex -> handler.handle(exchange, ex));
+			completion = completion.doOnError(error -> exchange.getAttributes().put(HANDLED_WEB_EXCEPTION, error))
+					.onErrorResume(ex -> handler.handle(exchange, ex));
 		}
 		return completion;
 	}

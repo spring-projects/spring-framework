@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.test.self_inject.MyAspect;
+import org.springframework.context.event.test.self_inject.MyEventListener;
+import org.springframework.context.event.test.self_inject.MyEventPublisher;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
@@ -54,6 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -129,7 +136,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		else {
 			smc.multicastEvent(event);
 		}
-		int invocation = match ? 1 : 0;
+		int invocation = (match ? 1 : 0);
 		verify(listener, times(invocation)).onApplicationEvent(event);
 	}
 
@@ -137,17 +144,42 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void simpleApplicationEventMulticasterWithTaskExecutor() {
 		@SuppressWarnings("unchecked")
 		ApplicationListener<ApplicationEvent> listener = mock();
+		willReturn(true).given(listener).supportsAsyncExecution();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		AtomicBoolean invoked = new AtomicBoolean();
 		smc.setTaskExecutor(command -> {
+			invoked.set(true);
 			command.run();
 			command.run();
 		});
 		smc.addApplicationListener(listener);
 
 		smc.multicastEvent(evt);
+		assertThat(invoked.get()).isTrue();
 		verify(listener, times(2)).onApplicationEvent(evt);
+	}
+
+	@Test
+	public void simpleApplicationEventMulticasterWithTaskExecutorAndNonAsyncListener() {
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener = mock();
+		willReturn(false).given(listener).supportsAsyncExecution();
+		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		AtomicBoolean invoked = new AtomicBoolean();
+		smc.setTaskExecutor(command -> {
+			invoked.set(true);
+			command.run();
+			command.run();
+		});
+		smc.addApplicationListener(listener);
+
+		smc.multicastEvent(evt);
+		assertThat(invoked.get()).isFalse();
+		verify(listener, times(1)).onApplicationEvent(evt);
 	}
 
 	@Test
@@ -242,6 +274,24 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
 		assertThat(listener1.seenEvents).hasSize(2);
+	}
+
+	/**
+	 * Regression test for <a href="https://github.com/spring-projects/spring-framework/issues/28283">issue 28283</a>,
+	 * where event listeners proxied due to e.g.
+	 * <ul>
+	 * <li>{@code @Transactional} annotations in their methods or</li>
+	 * <li>being targeted by aspects</li>
+	 * </ul>
+	 * were added to the list of application listener beans twice (both proxy and unwrapped target).
+	 */
+	@Test
+	public void eventForSelfInjectedProxiedListenerFiredOnlyOnce() {
+		AbstractApplicationContext context = new AnnotationConfigApplicationContext(
+				MyAspect.class, MyEventListener.class, MyEventPublisher.class);
+		context.getBean(MyEventPublisher.class).publishMyEvent("hello");
+		assertThat(context.getBean(MyEventListener.class).eventCount).isEqualTo(1);
+		context.close();
 	}
 
 	@Test
@@ -568,7 +618,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	}
 
 
-	public static abstract class MyOrderedListenerBase implements MyOrderedListenerIfc<MyEvent> {
+	public abstract static class MyOrderedListenerBase implements MyOrderedListenerIfc<MyEvent> {
 
 		@Override
 		public int getOrder() {

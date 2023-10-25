@@ -131,7 +131,7 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known
+	 * Registers an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
 	private static void registerBeanNameUrlHandlerMapping(ParserContext context, @Nullable Object source) {
@@ -148,7 +148,7 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known
+	 * Registers an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
 	private static void registerHttpRequestHandlerAdapter(ParserContext context, @Nullable Object source) {
@@ -203,7 +203,7 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers  an {@link HandlerMappingIntrospector} under a well-known name
+	 * Registers an {@link HandlerMappingIntrospector} under a well-known name
 	 * unless already registered.
 	 */
 	private static void registerHandlerMappingIntrospector(ParserContext context, @Nullable Object source) {

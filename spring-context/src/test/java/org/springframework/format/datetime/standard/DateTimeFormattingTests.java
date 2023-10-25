@@ -621,6 +621,19 @@ class DateTimeFormattingTests {
 								.hasMessageStartingWith("Text '210302'")
 								.hasNoCause();
 		}
+
+		@Test
+		void testBindInstantAsLongEpochMillis() {
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add("instant", 1234L);
+			binder.bind(propertyValues);
+			assertThat(binder.getBindingResult().getErrorCount()).isZero();
+			assertThat(binder.getBindingResult().getRawFieldValue("instant"))
+					.isInstanceOf(Instant.class)
+					.isEqualTo(Instant.ofEpochMilli(1234L));
+			assertThat(binder.getBindingResult().getFieldValue("instant"))
+					.hasToString("1970-01-01T00:00:01.234Z");
+		}
 	}
 
 

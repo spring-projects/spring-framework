@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.lang.Nullable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
@@ -49,15 +47,15 @@ public class AsyncSupportConfigurer {
 
 
 	/**
-	 * The provided task executor is used to:
+	 * The provided task executor is used for the following:
 	 * <ol>
 	 * <li>Handle {@link Callable} controller method return values.
 	 * <li>Perform blocking writes when streaming to the response
 	 * through a reactive (e.g. Reactor, RxJava) controller method return value.
 	 * </ol>
-	 * <p>By default only a {@link SimpleAsyncTaskExecutor} is used. However when
-	 * using the above two use cases, it's recommended to configure an executor
-	 * backed by a thread pool such as {@link ThreadPoolTaskExecutor}.
+	 * <p>If your application has controllers with such return types, please
+	 * configure an {@link AsyncTaskExecutor} as the one used by default is not
+	 * suitable for production under load.
 	 * @param taskExecutor the task executor instance to use by default
 	 */
 	public AsyncSupportConfigurer setTaskExecutor(AsyncTaskExecutor taskExecutor) {

@@ -113,7 +113,10 @@ abstract class AbstractMockWebServerTests {
 
 	private MockResponse jsonPostRequest(RecordedRequest request, String location, String contentType) {
 		if (request.getBodySize() > 0) {
-			assertThat(Integer.parseInt(request.getHeader(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
+			String contentLength = request.getHeader(CONTENT_LENGTH);
+			if (contentLength != null) {
+				assertThat(Integer.parseInt(contentLength)).as("Invalid request content-length").isGreaterThan(0);
+			}
 			assertThat(request.getHeader(CONTENT_TYPE)).as("No content-type").isNotNull();
 		}
 		return new MockResponse()

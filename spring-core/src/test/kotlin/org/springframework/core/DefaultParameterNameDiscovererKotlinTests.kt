@@ -19,9 +19,13 @@ package org.springframework.core
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class DefaultParameterNameDiscovererKotlinTests {
-
-	private val parameterNameDiscoverer = DefaultParameterNameDiscoverer()
+/**
+ * Tests for Kotlin support in [DefaultParameterNameDiscoverer].
+ *
+ * @author Sebastien Deleuze
+ */
+class DefaultParameterNameDiscovererKotlinTests :
+	AbstractReflectionParameterNameDiscovererKotlinTests(DefaultParameterNameDiscoverer()){
 
 	enum class MyEnum {
 		ONE, TWO
@@ -31,6 +35,7 @@ class DefaultParameterNameDiscovererKotlinTests {
 	fun getParameterNamesOnEnum() {
 		val constructor = MyEnum::class.java.declaredConstructors[0]
 		val actualParams = parameterNameDiscoverer.getParameterNames(constructor)
-		assertThat(actualParams!!.size).isEqualTo(2)
+		assertThat(actualParams).containsExactly("\$enum\$name", "\$enum\$ordinal")
 	}
+
 }

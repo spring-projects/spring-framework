@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -192,14 +193,14 @@ class ExtendedBeanInfo implements BeanInfo {
 			if (pd instanceof IndexedPropertyDescriptor indexedPd) {
 				candidateType = indexedPd.getIndexedPropertyType();
 				if (candidateName.equals(propertyName) &&
-						(candidateType.equals(propertyType) || candidateType.equals(propertyType.getComponentType()))) {
+						(candidateType.equals(propertyType) || candidateType.equals(propertyType.componentType()))) {
 					return pd;
 				}
 			}
 			else {
 				candidateType = pd.getPropertyType();
 				if (candidateName.equals(propertyName) &&
-						(candidateType.equals(propertyType) || propertyType.equals(candidateType.getComponentType()))) {
+						(candidateType.equals(propertyType) || propertyType.equals(candidateType.componentType()))) {
 					return pd;
 				}
 			}
@@ -345,7 +346,7 @@ class ExtendedBeanInfo implements BeanInfo {
 
 		@Override
 		public int hashCode() {
-			return (ObjectUtils.nullSafeHashCode(getReadMethod()) * 29 + ObjectUtils.nullSafeHashCode(getWriteMethod()));
+			return Objects.hash(getReadMethod(), getWriteMethod());
 		}
 
 		@Override
@@ -500,11 +501,8 @@ class ExtendedBeanInfo implements BeanInfo {
 
 		@Override
 		public int hashCode() {
-			int hashCode = ObjectUtils.nullSafeHashCode(getReadMethod());
-			hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getWriteMethod());
-			hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getIndexedReadMethod());
-			hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getIndexedWriteMethod());
-			return hashCode;
+			return Objects.hash(getReadMethod(), getWriteMethod(),
+					getIndexedReadMethod(), getIndexedWriteMethod());
 		}
 
 		@Override

@@ -176,6 +176,10 @@ Kotlin::
 ======
 --
 
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. See the section on
+xref:web/webflux/controller/ann-validation.adoc[Validation].
+
 To access all multipart data as a `MultiValueMap`, you can use `@RequestBody`,
 as the following example shows:
 
@@ -306,5 +310,3 @@ file upload.
 
 Received part events can also be relayed to another service by using the `WebClient`.
 See xref:web/webflux-webclient/client-body.adoc#webflux-client-body-multipart[Multipart Data].
-
-

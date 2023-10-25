@@ -37,6 +37,31 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 public interface CacheAwareContextLoaderDelegate {
 
 	/**
+	 * The default failure threshold for errors encountered while attempting to
+	 * load an application context: {@value}.
+	 * @since 6.1
+	 * @see #CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME
+	 */
+	int DEFAULT_CONTEXT_FAILURE_THRESHOLD = 1;
+
+	/**
+	 * System property used to configure the failure threshold for errors
+	 * encountered while attempting to load an application context: {@value}.
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties} mechanism.
+	 * <p>Implementations of {@code CacheAwareContextLoaderDelegate} are not
+	 * required to support this feature. Consult the documentation of the
+	 * corresponding implementation for details. Note, however, that the standard
+	 * {@code CacheAwareContextLoaderDelegate} implementation in Spring supports
+	 * this feature.
+	 * @since 6.1
+	 * @see #DEFAULT_CONTEXT_FAILURE_THRESHOLD
+	 * @see #loadContext(MergedContextConfiguration)
+	 */
+	String CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME = "spring.test.context.failure.threshold";
+
+
+	/**
 	 * Determine if the {@linkplain ApplicationContext application context} for
 	 * the supplied {@link MergedContextConfiguration} has been loaded (i.e.,
 	 * is present in the {@code ContextCache}).
@@ -49,14 +74,14 @@ public interface CacheAwareContextLoaderDelegate {
 	 * therefore highly encouraged to override this method with a more meaningful
 	 * implementation. Note that the standard {@code CacheAwareContextLoaderDelegate}
 	 * implementation in Spring overrides this method appropriately.
-	 * @param mergedContextConfiguration the merged context configuration used
-	 * to load the application context; never {@code null}
+	 * @param mergedConfig the merged context configuration used to load the
+	 * application context; never {@code null}
 	 * @return {@code true} if the application context has been loaded
 	 * @since 5.2
 	 * @see #loadContext
 	 * @see #closeContext
 	 */
-	default boolean isContextLoaded(MergedContextConfiguration mergedContextConfiguration) {
+	default boolean isContextLoaded(MergedContextConfiguration mergedConfig) {
 		return false;
 	}
 
@@ -72,17 +97,27 @@ public interface CacheAwareContextLoaderDelegate {
 	 * mechanism, catch any exception thrown by the {@link ContextLoader}, and
 	 * delegate to each of the configured failure processors to process the context
 	 * load failure if the exception is an instance of {@link ContextLoadException}.
+	 * <p>As of Spring Framework 6.1, implementations of this method are encouraged
+	 * to support the <em>failure threshold</em> feature. Specifically, if repeated
+	 * attempts are made to load an application context and that application
+	 * context consistently fails to load &mdash; for example, due to a configuration
+	 * error that prevents the context from successfully loading &mdash; this
+	 * method should preemptively throw an {@link IllegalStateException} if the
+	 * configured failure threshold has been exceeded. Note that the {@code ContextCache}
+	 * provides support for tracking and incrementing the failure count for a given
+	 * context cache key.
 	 * <p>The cache statistics should be logged by invoking
 	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
-	 * @param mergedContextConfiguration the merged context configuration to use
-	 * to load the application context; never {@code null}
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context; never {@code null}
 	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving or loading
 	 * the application context
 	 * @see #isContextLoaded
 	 * @see #closeContext
+	 * @see #CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME
 	 */
-	ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration);
+	ApplicationContext loadContext(MergedContextConfiguration mergedConfig);
 
 	/**
 	 * Remove the {@linkplain ApplicationContext application context} for the
@@ -96,14 +131,14 @@ public interface CacheAwareContextLoaderDelegate {
 	 * a singleton bean has been changed (potentially affecting future interaction
 	 * with the context) or if the context needs to be prematurely removed from
 	 * the cache.
-	 * @param mergedContextConfiguration the merged context configuration for the
-	 * application context to close; never {@code null}
+	 * @param mergedConfig the merged context configuration for the application
+	 * context to close; never {@code null}
 	 * @param hierarchyMode the hierarchy mode; may be {@code null} if the context
 	 * is not part of a hierarchy
 	 * @since 4.1
 	 * @see #isContextLoaded
 	 * @see #loadContext
 	 */
-	void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode);
+	void closeContext(MergedContextConfiguration mergedConfig, @Nullable HierarchyMode hierarchyMode);
 
 }

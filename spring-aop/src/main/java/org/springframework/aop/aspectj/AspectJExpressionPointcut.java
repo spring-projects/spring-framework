@@ -525,11 +525,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(getExpression());
-		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
-		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
-		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);
-		return hashCode;
+		return ObjectUtils.nullSafeHash(getExpression(), this.pointcutDeclarationScope,
+				this.pointcutParameterNames, this.pointcutParameterTypes);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,9 +135,9 @@ import org.springframework.core.annotation.AliasFor;
  * <h3>{@code @Bean} <em>Lite</em> Mode</h3>
  *
  * <p>{@code @Bean} methods may also be declared within classes that are <em>not</em>
- * annotated with {@code @Configuration}. For example, bean methods may be declared
- * in a {@code @Component} class or even in a <em>plain old class</em>. In such cases,
- * a {@code @Bean} method will get processed in a so-called <em>'lite'</em> mode.
+ * annotated with {@code @Configuration}. If a bean method is declared on a bean
+ * that is <em>not</em> annotated with {@code @Configuration} it is processed in a
+ * so-called <em>'lite'</em> mode.
  *
  * <p>Bean methods in <em>lite</em> mode will be treated as plain <em>factory
  * methods</em> by the container (similar to {@code factory-method} declarations

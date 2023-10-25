@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.test.context.junit.jupiter.event;
 
 import java.util.stream.Stream;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.awaitility.Awaitility;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -235,6 +238,38 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 						"CustomEvent", "AfterTestExecutionEvent", "CustomEvent");
 			}
 		}
+	}
+
+	@Nested
+	@TestInstance(PER_CLASS)
+	class AsyncEventTests {
+
+		@Autowired
+		ApplicationEvents applicationEvents;
+
+		@Test
+		void asyncPublication() throws InterruptedException {
+			Thread t = new Thread(() -> context.publishEvent(new CustomEvent("async")));
+			t.start();
+			t.join();
+
+			assertThat(this.applicationEvents.stream(CustomEvent.class))
+					.singleElement()
+					.extracting(CustomEvent::getMessage, InstanceOfAssertFactories.STRING)
+					.isEqualTo("async");
+		}
+
+		@Test
+		void asyncConsumption() {
+			context.publishEvent(new CustomEvent("sync"));
+
+			Awaitility.await().atMost(Durations.ONE_SECOND)
+					.untilAsserted(() -> assertThat(this.applicationEvents.stream(CustomEvent.class))
+							.singleElement()
+							.extracting(CustomEvent::getMessage, InstanceOfAssertFactories.STRING)
+							.isEqualTo("sync"));
+		}
+
 	}
 
 

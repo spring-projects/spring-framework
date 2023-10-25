@@ -147,11 +147,9 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * ConfigurableEnvironment} and {@link org.springframework.core.env.MutablePropertySources
  * MutablePropertySources} javadocs for details.
  *
- * <p><b>NOTE: This annotation is repeatable according to Java 8 conventions.</b>
- * However, all such {@code @PropertySource} annotations need to be declared at the same
- * level: either directly on the configuration class or as meta-annotations on the
- * same custom annotation. Mixing direct annotations and meta-annotations is not
- * recommended since direct annotations will effectively override meta-annotations.
+ * <p>{@code @PropertySource} can be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation. {@code @PropertySource} may also be used as a <em>meta-annotation</em>
+ * to create custom <em>composed annotations</em> with attribute overrides.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -203,13 +201,14 @@ public @interface PropertySource {
 	 * <p>The default {@link #factory() factory} supports both traditional and
 	 * XML-based properties file formats &mdash; for example,
 	 * {@code "classpath:/com/myco/app.properties"} or {@code "file:/path/to/file.xml"}.
-	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
-	 * each location must evaluate to exactly one resource.
-	 * <p>${...} placeholders will be resolved against property sources already
+	 * <p>As of Spring Framework 6.1, resource location wildcards are also
+	 * supported &mdash; for example, {@code "classpath*:/config/*.properties"}.
+	 * <p>{@code ${...}} placeholders will be resolved against property sources already
 	 * registered with the {@code Environment}. See {@linkplain PropertySource above}
 	 * for examples.
 	 * <p>Each location will be added to the enclosing {@code Environment} as its own
-	 * property source, and in the order declared.
+	 * property source, and in the order declared (or in the order in which resource
+	 * locations are resolved when location wildcards are used).
 	 */
 	String[] value();
 

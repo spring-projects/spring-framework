@@ -21,11 +21,20 @@ As outlined xref:integration/observability.adoc[at the beginning of this section
 |===
 |Observation name |Description
 
-|xref:integration/observability.adoc#http-client[`"http.client.requests"`]
+|xref:integration/observability.adoc#observability.http-client[`"http.client.requests"`]
 |Time spent for HTTP client exchanges
 
-|xref:integration/observability.adoc#http-server[`"http.server.requests"`]
+|xref:integration/observability.adoc#observability.http-server[`"http.server.requests"`]
 |Processing time for HTTP server exchanges at the Framework level
+
+|xref:integration/observability.adoc#observability.jms.publish[`"jms.message.publish"`]
+|Time spent sending a JMS message to a destination by a message producer.
+
+|xref:integration/observability.adoc#observability.jms.process[`"jms.message.process"`]
+|Processing time for a JMS message that was previously received by a message consumer.
+
+|xref:integration/observability.adoc#observability.tasks-scheduled[`"tasks.scheduled.execution"`]
+|Processing time for an execution of a `@Scheduled` task
 |===
 
 NOTE: Observations are using Micrometer's official naming convention, but Metrics names will be automatically converted
@@ -79,6 +88,97 @@ include-code::./ServerRequestObservationFilter[]
 
 You can configure `ObservationFilter` instances on the `ObservationRegistry`.
 
+[[observability.tasks-scheduled]]
+== @Scheduled tasks instrumentation
+
+An Observation is created for xref:integration/scheduling.adoc#scheduling-enable-annotation-support[each execution of an `@Scheduled` task].
+Applications need to configure the `ObservationRegistry` on the `ScheduledTaskRegistrar` to enable the recording of observations.
+This can be done by declaring a `SchedulingConfigurer` bean that sets the observation registry:
+
+include-code::./ObservationSchedulingConfigurer[]
+
+It is using the `org.springframework.scheduling.support.DefaultScheduledTaskObservationConvention` by default, backed by the `ScheduledTaskObservationContext`.
+You can configure a custom implementation on the `ObservationRegistry` directly.
+During the execution of the scheduled method, the current observation is restored in the `ThreadLocal` context or the Reactor context (if the scheduled method returns a `Mono` or `Flux` type).
+
+By default, the following `KeyValues` are created:
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`code.function` _(required)_|Name of Java `Method` that is scheduled for execution.
+|`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method.
+|`exception` _(required)_|Name of the exception thrown during the execution, or `"none"` if no exception happened.
+|`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution).
+|===
+
+
+[[observability.jms]]
+== JMS messaging instrumentation
+
+Spring Framework uses the Jakarta JMS instrumentation provided by Micrometer if the `io.micrometer:micrometer-jakarta9` dependency is on the classpath.
+The `io.micrometer.jakarta9.instrument.jms.JmsInstrumentation` instruments `jakarta.jms.Session` and records the relevant observations.
+
+This instrumentation will create 2 types of observations:
+
+* `"jms.message.publish"` when a JMS message is sent to the broker, typically with `JmsTemplate`.
+* `"jms.message.process"` when a JMS message is processed by the application, typically with a `MessageListener` or a `@JmsListener` annotated method.
+
+NOTE: currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the reception of a message.
+Such an integration would typically instrument `MessageConsumer#receive` method calls. But once those return, the processing time is not measured and the trace scope cannot be propagated to the application.
+
+By default, both observations share the same set of possible `KeyValues`:
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`exception` |Class name of the exception thrown during the messaging operation (or "none").
+|`messaging.destination.temporary` _(required)_|Whether the destination is a `TemporaryQueue` or `TemporaryTopic` (values: `"true"` or `"false"`).
+|`messaging.operation` _(required)_|Name of JMS operation being performed (values: `"publish"` or `"process"`).
+|===
+
+.High cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`messaging.message.conversation_id` |The correlation ID of the JMS message.
+|`messaging.destination.name` |The name of destination the current message was sent to.
+|`messaging.message.id` |Value used by the messaging system as an identifier for the message.
+|===
+
+[[observability.jms.publish]]
+=== JMS message Publication instrumentation
+
+`"jms.message.publish"` observations are recorded when a JMS message is sent to the broker.
+They measure the time spent sending the message and propagate the tracing information with outgoing JMS message headers.
+
+You will need to configure the `ObservationRegistry` on the `JmsTemplate` to enable observations:
+
+include-code::./JmsTemplatePublish[]
+
+It uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsPublishObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsPublishObservationContext`.
+
+[[observability.jms.process]]
+=== JMS message Processing instrumentation
+
+`"jms.message.process"` observations are recorded when a JMS message is processed by the application.
+They measure the time spent processing the message and propagate the tracing context with incoming JMS message headers.
+
+Most applications will use the xref:integration/jms/annotated.adoc#jms-annotated[`@JmsListener` annotated methods] mechanism to process incoming messages.
+You will need to ensure that the `ObservationRegistry` is configured on the dedicated `JmsListenerContainerFactory`:
+
+include-code::./JmsConfiguration[]
+
+A xref:integration/jms/annotated.adoc#jms-annotated-support[default container factory is required to enable the annotation support],
+but note that `@JmsListener` annotations can refer to specific container factory beans for specific purposes.
+In all cases, Observations are only recorded if the observation registry is configured on the container factory.
+
+Similar observations are recorded with `JmsTemplate` when messages are processed by a `MessageListener`.
+Such listeners are set on a `MessageConsumer` within a session callback (see `JmsTemplate.execute(SessionCallback<T>)`).
+
+This observation uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsProcessObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext`.
 
 [[observability.http-server]]
 == HTTP Server instrumentation
@@ -107,7 +207,7 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `KeyValue#NONE_VALUE`} if no exception happened.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
@@ -125,11 +225,15 @@ By default, the following `KeyValues` are created:
 [[observability.http-server.reactive]]
 === Reactive applications
 
-Applications need to configure the `org.springframework.web.filter.reactive.ServerHttpObservationFilter` reactive `WebFilter` in their application.
-It uses the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
+Applications need to configure the `WebHttpHandlerBuilder` with a `MeterRegistry` to enable server instrumentation.
+This can be done on the `WebHttpHandlerBuilder`, as follows:
 
-This will only record an observation as an error if the `Exception` has not been handled by the web framework and has bubbled up to the `WebFilter`.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
+include-code::./HttpHandlerConfiguration[]
+
+It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
+
+This will only record an observation as an error if the `Exception` has not been handled by an application Controller.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include-code::./UserController[]
@@ -190,6 +294,32 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 |===
 
 
+[[observability.http-client.restclient]]
+=== RestClient
+
+Applications must configure an `ObservationRegistry` on the `RestClient.Builder` to enable the instrumentation; without that, observations are "no-ops".
+
+Instrumentation uses the `org.springframework.http.client.observation.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
+|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
+|`client.name` _(required)_|Client name derived from the request URI host.
+|`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
+|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|===
+
+.High cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`http.url` _(required)_|HTTP request URI.
+|===
+
 
 [[observability.http-client.webclient]]
 === WebClient
@@ -219,3 +349,28 @@ Instrumentation uses the `org.springframework.web.reactive.function.client.Clien
 |===
 
 
+[[observability.application-events]]
+== Application Events and `@EventListener`
+
+Spring Framework does not contribute Observations for xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[`@EventListener` calls],
+as they don't have the right semantics for such instrumentation.
+By default, event publication and processing is done synchronously and on the same Thread.
+This means that during the execution of that task, the ThreadLocals and logging context will be the same as the event publisher.
+
+If the application configures globally a custom `ApplicationEventMulticaster` with a strategy that schedules event processing on different threads, this is no longer true.
+All `@EventListener` methods will be processed on a different thread, outstide of the main event publication thread.
+In these cases, the https://micrometer.io/docs/contextPropagation[Micrometer Context Propagation library] can help propagating such values and better correlate the processing of the events.
+The application can configure the chosen `TaskExecutor` to use a `ContextPropagatingTaskDecorator` that decorates tasks and propagates context.
+For this to work, the `io.micrometer:context-propagation` library must be present on the classpath:
+
+include-code::./ApplicationEventsConfiguration[]
+
+Similarly, if that asynchronous choice is made locally for each `@EventListener` annotated method, by adding an `@Async` method to it,
+you can choose a `TaskExecutor` that propagates context by referring to it by its qualifier.
+Given the following `TaskExecutor` bean definition, configured with the dedicated task decorator:
+
+include-code::./EventAsyncExecutionConfiguration[]
+
+Annotating event listeners with `@Async` and the relevant qualifier will achieve similar context propagation results:
+
+include-code::./EmailNotificationListener[]

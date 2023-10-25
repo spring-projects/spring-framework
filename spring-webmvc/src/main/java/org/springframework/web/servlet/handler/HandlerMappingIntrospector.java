@@ -261,6 +261,7 @@ public class HandlerMappingIntrospector
 		AttributesPreservingRequest(HttpServletRequest request) {
 			super(request);
 			this.attributes = initAttributes(request);
+			this.attributes.put(AbstractHandlerMapping.SUPPRESS_LOGGING_ATTRIBUTE, Boolean.TRUE);
 		}
 
 		private Map<String, Object> initAttributes(HttpServletRequest request) {

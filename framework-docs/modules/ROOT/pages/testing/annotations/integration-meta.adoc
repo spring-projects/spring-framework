@@ -11,6 +11,7 @@ xref:testing/testcontext-framework.adoc[TestContext framework].
 * `@BootstrapWith`
 * `@ContextConfiguration`
 * `@ContextHierarchy`
+* `@ContextCustomizerFactories`
 * `@ActiveProfiles`
 * `@TestPropertySource`
 * `@DirtiesContext`

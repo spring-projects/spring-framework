@@ -137,6 +137,7 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 		SQLException integrityViolationEx = new SQLException("", "", 6);
 
 		translator = new SQLErrorCodeSQLExceptionTranslator() {
+			@SuppressWarnings("deprecation")
 			@Override
 			@Nullable
 			protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlException) {

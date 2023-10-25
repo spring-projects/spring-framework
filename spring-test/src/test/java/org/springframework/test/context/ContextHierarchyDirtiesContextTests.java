@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ class ContextHierarchyDirtiesContextTests {
 
 	@RunWith(SpringRunner.class)
 	@ContextHierarchy(@ContextConfiguration(name = "foo"))
-	static abstract class FooTestCase implements ApplicationContextAware {
+	abstract static class FooTestCase implements ApplicationContextAware {
 
 		@Configuration
 		static class Config {
@@ -134,7 +134,7 @@ class ContextHierarchyDirtiesContextTests {
 	}
 
 	@ContextHierarchy(@ContextConfiguration(name = "bar"))
-	static abstract class BarTestCase extends FooTestCase {
+	abstract static class BarTestCase extends FooTestCase {
 
 		@Configuration
 		static class Config {
@@ -147,7 +147,7 @@ class ContextHierarchyDirtiesContextTests {
 	}
 
 	@ContextHierarchy(@ContextConfiguration(name = "baz"))
-	static abstract class BazTestCase extends BarTestCase {
+	abstract static class BazTestCase extends BarTestCase {
 
 		@Configuration
 		static class Config {

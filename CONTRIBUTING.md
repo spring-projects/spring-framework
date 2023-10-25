@@ -123,13 +123,13 @@ define the source file coding standards we use along with some IDEA editor setti
 
 ### Reference Docs
 
-The reference documentation is in the [framework-docs/src/docs/asciidoc](framework-docs/src/docs/asciidoc) directory, in
-[Asciidoctor](https://asciidoctor.org/) format. For trivial changes, you may be able to browse,
-edit source files, and submit directly from GitHub.
+The reference documentation is authored in [Asciidoctor](https://asciidoctor.org/) format
+using [Antora](https://docs.antora.org/antora/latest/). The source files for the documentation
+reside in the [framework-docs/modules/ROOT](framework-docs/modules/ROOT) directory. For
+trivial changes, you may be able to browse, edit source files, and submit directly from GitHub.
 
-When making changes locally, execute `./gradlew :framework-docs:asciidoctor` and then browse the result under
-`framework-docs/build/docs/ref-docs/html5/index.html`.
+When making changes locally, execute `./gradlew antora` and then browse the results under
+`framework-docs/build/site/index.html`.
 
 Asciidoctor also supports live editing. For more details see
 [AsciiDoc Tooling](https://docs.asciidoctor.org/asciidoctor/latest/tooling/).
-

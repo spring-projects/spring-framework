@@ -125,8 +125,38 @@ public class LookupAnnotationTests {
 		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
 	}
 
+	@Test
+	public void testSingletonWithoutMetadataCaching() {
+		beanFactory.setCacheBeanMetadata(false);
 
-	public static abstract class AbstractBean {
+		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class));
+		beanFactory.registerBeanDefinition("doubleStore", new RootBeanDefinition(DoubleStore.class));
+		beanFactory.registerBeanDefinition("floatStore", new RootBeanDefinition(FloatStore.class));
+
+		NumberBean bean = (NumberBean) beanFactory.getBean("numberBean");
+		assertThat(beanFactory.getBean(DoubleStore.class)).isSameAs(bean.getDoubleStore());
+		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
+	}
+
+	@Test
+	public void testPrototypeWithoutMetadataCaching() {
+		beanFactory.setCacheBeanMetadata(false);
+
+		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class, BeanDefinition.SCOPE_PROTOTYPE, null));
+		beanFactory.registerBeanDefinition("doubleStore", new RootBeanDefinition(DoubleStore.class));
+		beanFactory.registerBeanDefinition("floatStore", new RootBeanDefinition(FloatStore.class));
+
+		NumberBean bean = (NumberBean) beanFactory.getBean("numberBean");
+		assertThat(beanFactory.getBean(DoubleStore.class)).isSameAs(bean.getDoubleStore());
+		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
+
+		bean = (NumberBean) beanFactory.getBean("numberBean");
+		assertThat(beanFactory.getBean(DoubleStore.class)).isSameAs(bean.getDoubleStore());
+		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
+	}
+
+
+	public abstract static class AbstractBean {
 
 		@Lookup("testBean")
 		public abstract TestBean get();
@@ -164,7 +194,7 @@ public class LookupAnnotationTests {
 	}
 
 
-	public static abstract class NumberBean {
+	public abstract static class NumberBean {
 
 		@Lookup
 		public abstract NumberStore<Double> getDoubleStore();

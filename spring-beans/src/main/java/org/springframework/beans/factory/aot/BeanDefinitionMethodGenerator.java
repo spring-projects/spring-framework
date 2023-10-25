@@ -16,10 +16,6 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -29,14 +25,8 @@ import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
-import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.support.AutowireCandidateResolver;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.MethodParameter;
 import org.springframework.javapoet.ClassName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -55,8 +45,6 @@ class BeanDefinitionMethodGenerator {
 	private final BeanDefinitionMethodGeneratorFactory methodGeneratorFactory;
 
 	private final RegisteredBean registeredBean;
-
-	private final Executable constructorOrFactoryMethod;
 
 	@Nullable
 	private final String currentPropertyName;
@@ -77,13 +65,8 @@ class BeanDefinitionMethodGenerator {
 			RegisteredBean registeredBean, @Nullable String currentPropertyName,
 			List<BeanRegistrationAotContribution> aotContributions) {
 
-		RootBeanDefinition mbd = registeredBean.getMergedBeanDefinition();
-		if (mbd.getInstanceSupplier() != null && aotContributions.isEmpty()) {
-			throw new IllegalArgumentException("Code generation is not supported for bean definitions declaring an instance supplier callback : " + mbd);
-		}
 		this.methodGeneratorFactory = methodGeneratorFactory;
 		this.registeredBean = registeredBean;
-		this.constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod();
 		this.currentPropertyName = currentPropertyName;
 		this.aotContributions = aotContributions;
 	}
@@ -98,9 +81,8 @@ class BeanDefinitionMethodGenerator {
 	MethodReference generateBeanDefinitionMethod(GenerationContext generationContext,
 			BeanRegistrationsCode beanRegistrationsCode) {
 
-		registerRuntimeHintsIfNecessary(generationContext.getRuntimeHints());
 		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext, beanRegistrationsCode);
-		ClassName target = codeFragments.getTarget(this.registeredBean, this.constructorOrFactoryMethod);
+		ClassName target = codeFragments.getTarget(this.registeredBean);
 		if (isWritablePackageName(target)) {
 			GeneratedClass generatedClass = lookupGeneratedClass(generationContext, target);
 			GeneratedMethods generatedMethods = generatedClass.getMethods().withPrefix(getName());
@@ -178,16 +160,18 @@ class BeanDefinitionMethodGenerator {
 			BeanRegistrationCodeFragments codeFragments, Modifier modifier) {
 
 		BeanRegistrationCodeGenerator codeGenerator = new BeanRegistrationCodeGenerator(
-				className, generatedMethods, this.registeredBean,
-				this.constructorOrFactoryMethod, codeFragments);
+				className, generatedMethods, this.registeredBean, codeFragments);
 
 		this.aotContributions.forEach(aotContribution -> aotContribution.applyTo(generationContext, codeGenerator));
 
+		CodeWarnings codeWarnings = new CodeWarnings();
+		codeWarnings.detectDeprecation(this.registeredBean.getBeanClass());
 		return generatedMethods.add("getBeanDefinition", method -> {
 			method.addJavadoc("Get the $L definition for '$L'.",
 					(this.registeredBean.isInnerBean() ? "inner-bean" : "bean"),
 					getName());
 			method.addModifiers(modifier, Modifier.STATIC);
+			codeWarnings.suppress(method);
 			method.returns(BeanDefinition.class);
 			method.addCode(codeGenerator.generateCode(generationContext));
 		});
@@ -216,54 +200,6 @@ class BeanDefinitionMethodGenerator {
 		int lastDollar = beanName.lastIndexOf('$');
 		beanName = (lastDollar != -1 ? beanName.substring(lastDollar + 1) : beanName);
 		return StringUtils.uncapitalize(beanName);
-	}
-
-	private void registerRuntimeHintsIfNecessary(RuntimeHints runtimeHints) {
-		if (this.registeredBean.getBeanFactory() instanceof DefaultListableBeanFactory dlbf) {
-			ProxyRuntimeHintsRegistrar registrar = new ProxyRuntimeHintsRegistrar(dlbf.getAutowireCandidateResolver());
-			if (this.constructorOrFactoryMethod instanceof Method method) {
-				registrar.registerRuntimeHints(runtimeHints, method);
-			}
-			else if (this.constructorOrFactoryMethod instanceof Constructor<?> constructor) {
-				registrar.registerRuntimeHints(runtimeHints, constructor);
-			}
-		}
-	}
-
-
-	private static class ProxyRuntimeHintsRegistrar {
-
-		private final AutowireCandidateResolver candidateResolver;
-
-		public ProxyRuntimeHintsRegistrar(AutowireCandidateResolver candidateResolver) {
-			this.candidateResolver = candidateResolver;
-		}
-
-		public void registerRuntimeHints(RuntimeHints runtimeHints, Method method) {
-			Class<?>[] parameterTypes = method.getParameterTypes();
-			for (int i = 0; i < parameterTypes.length; i++) {
-				MethodParameter methodParam = new MethodParameter(method, i);
-				DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(methodParam, true);
-				registerProxyIfNecessary(runtimeHints, dependencyDescriptor);
-			}
-		}
-
-		public void registerRuntimeHints(RuntimeHints runtimeHints, Constructor<?> constructor) {
-			Class<?>[] parameterTypes = constructor.getParameterTypes();
-			for (int i = 0; i < parameterTypes.length; i++) {
-				MethodParameter methodParam = new MethodParameter(constructor, i);
-				DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(
-						methodParam, true);
-				registerProxyIfNecessary(runtimeHints, dependencyDescriptor);
-			}
-		}
-
-		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
-			Class<?> proxyType = this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
-			if (proxyType != null && Proxy.isProxyClass(proxyType)) {
-				runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
-			}
-		}
 	}
 
 }

@@ -25,7 +25,6 @@ import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
 /**
@@ -87,10 +86,10 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		if (TransactionSynchronizationManager.isSynchronizationActive() &&
-				TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronizationManager.registerSynchronization(
-					new TransactionalApplicationListenerSynchronization<>(event, this, this.callbacks));
+		if (TransactionalApplicationListenerSynchronization.register(event, this, this.callbacks)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registered transaction synchronization for " + event);
+			}
 		}
 		else if (this.fallbackExecution) {
 			if (getTransactionPhase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {

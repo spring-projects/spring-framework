@@ -221,7 +221,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void urlResourceWithCharset()  {
+	public void urlResourceWithCharset() {
 		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp");
 		this.registration.resourceChain(true);
 

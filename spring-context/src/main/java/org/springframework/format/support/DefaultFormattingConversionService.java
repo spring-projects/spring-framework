@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.util.StringValueResolver;
  * as {@code DefaultConversionService} exposes its own
  * {@link DefaultConversionService#addDefaultConverters addDefaultConverters} method.
  *
- * <p>Automatically registers formatters for JSR-354 Money &amp; Currency, JSR-310 Date-Time
- * and/or Joda-Time 2.x, depending on the presence of the corresponding API on the classpath.
+ * <p>Automatically registers formatters for JSR-354 Money &amp; Currency and JSR-310 Date-Time
+ * depending on the presence of the corresponding API on the classpath.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

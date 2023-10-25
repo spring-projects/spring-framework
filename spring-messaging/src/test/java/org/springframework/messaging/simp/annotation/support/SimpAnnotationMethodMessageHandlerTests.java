@@ -241,6 +241,19 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	public void interfaceBasedController() {
+		InterfaceBasedController controller = new InterfaceBasedController();
+
+		Message<?> message = createMessage("/pre/binding/id/12");
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.handleMessage(message);
+
+		assertThat(controller.method).isEqualTo("simpleBinding");
+		assertThat(controller.arguments.get("id")).as("should be bound to type long").isInstanceOf(Long.class);
+		assertThat(controller.arguments.get("id")).isEqualTo(12L);
+	}
+
+	@Test
 	public void dotPathSeparator() {
 		DotPathSeparatorController controller = new DotPathSeparatorController();
 
@@ -425,9 +438,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@MessageMapping("/pre")
 	private static class TestController {
 
-		private String method;
+		String method;
 
-		private Map<String, Object> arguments = new LinkedHashMap<>();
+		Map<String, Object> arguments = new LinkedHashMap<>();
 
 		@MessageMapping("/headers")
 		public void headers(@Header String foo, @Headers Map<String, Object> headers) {
@@ -519,11 +532,34 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 
+	private interface ControllerInterface {
+
+		void simpleBinding(@DestinationVariable("id") Long id);
+	}
+
+
+	@Controller
+	@MessageMapping("pre")
+	private static class InterfaceBasedController implements ControllerInterface {
+
+		String method;
+
+		Map<String, Object> arguments = new LinkedHashMap<>();
+
+		@MessageMapping("/binding/id/{id}")
+		public void simpleBinding(Long id) {
+			this.method = "simpleBinding";
+			this.arguments.put("id", id);
+		}
+
+	}
+
+
 	@Controller
 	@MessageMapping("pre")
 	private static class DotPathSeparatorController {
 
-		private String method;
+		String method;
 
 		@MessageMapping("foo")
 		public void handleFoo() {
@@ -537,9 +573,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@SuppressWarnings("deprecation")
 	private static class ListenableFutureController {
 
-		private org.springframework.util.concurrent.ListenableFutureTask<String> future;
+		org.springframework.util.concurrent.ListenableFutureTask<String> future;
 
-		private boolean exceptionCaught = false;
+		boolean exceptionCaught = false;
 
 		@MessageMapping("success")
 		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFuture() {
@@ -565,9 +601,9 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@Controller
 	private static class CompletableFutureController {
 
-		private CompletableFuture<String> future;
+		CompletableFuture<String> future;
 
-		private boolean exceptionCaught = false;
+		boolean exceptionCaught = false;
 
 		@MessageMapping("completable-future")
 		public CompletableFuture<String> handleCompletableFuture() {
@@ -581,14 +617,15 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
+
 	@Controller
 	private static class ReactiveController {
 
-		private Sinks.One<String> sinkOne;
+		Sinks.One<String> sinkOne;
 
-		private Sinks.Many<String> sinkMany;
+		Sinks.Many<String> sinkMany;
 
-		private boolean exceptionCaught = false;
+		boolean exceptionCaught = false;
 
 		@MessageMapping("mono")
 		public Mono<String> handleMono() {
@@ -611,7 +648,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	private static class StringTestValidator implements Validator {
 
-		private final String invalidValue;
+		final String invalidValue;
 
 		public StringTestValidator(String invalidValue) {
 			this.invalidValue = invalidValue;

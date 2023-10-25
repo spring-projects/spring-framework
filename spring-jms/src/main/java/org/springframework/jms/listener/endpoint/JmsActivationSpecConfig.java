@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.jms.listener.endpoint;
 
+import java.util.Map;
+
 import jakarta.jms.Session;
 
-import org.springframework.core.Constants;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Common configuration object for activating a JMS message endpoint.
@@ -33,6 +35,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see JmsActivationSpecFactory
  * @see JmsMessageEndpointManager#setActivationSpecConfig
@@ -40,8 +43,16 @@ import org.springframework.lang.Nullable;
  */
 public class JmsActivationSpecConfig {
 
-	/** Constants instance for {@code jakarta.jms.Session}. */
-	private static final Constants sessionConstants = new Constants(Session.class);
+	/**
+	 * Map of constant names to constant values for the constants defined in
+	 * {@link jakarta.jms.Session}.
+	 */
+	private static final Map<String, Integer> sessionConstants = Map.of(
+			"AUTO_ACKNOWLEDGE", Session.AUTO_ACKNOWLEDGE,
+			"CLIENT_ACKNOWLEDGE", Session.CLIENT_ACKNOWLEDGE,
+			"DUPS_OK_ACKNOWLEDGE", Session.DUPS_OK_ACKNOWLEDGE,
+			"SESSION_TRANSACTED", Session.SESSION_TRANSACTED
+		);
 
 
 	@Nullable
@@ -177,8 +188,8 @@ public class JmsActivationSpecConfig {
 	}
 
 	/**
-	 * Set the JMS acknowledgement mode by the name of the corresponding constant
-	 * in the JMS {@link Session} interface, e.g. "CLIENT_ACKNOWLEDGE".
+	 * Set the JMS acknowledgement mode by the name of the corresponding constant in
+	 * the JMS {@link Session} interface &mdash; for example, {@code "CLIENT_ACKNOWLEDGE"}.
 	 * <p>Note that JCA resource adapters generally only support auto and dups-ok
 	 * (see Spring's {@link StandardJmsActivationSpecFactory}). ActiveMQ also
 	 * supports "SESSION_TRANSACTED" in the form of RA-managed transactions
@@ -192,7 +203,10 @@ public class JmsActivationSpecConfig {
 	 * @see DefaultJmsActivationSpecFactory
 	 */
 	public void setAcknowledgeModeName(String constantName) {
-		setAcknowledgeMode(sessionConstants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer acknowledgeMode = sessionConstants.get(constantName);
+		Assert.notNull(acknowledgeMode, "Only acknowledge mode constants allowed");
+		this.acknowledgeMode = acknowledgeMode;
 	}
 
 	/**
@@ -203,6 +217,8 @@ public class JmsActivationSpecConfig {
 	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 */
 	public void setAcknowledgeMode(int acknowledgeMode) {
+		Assert.isTrue(sessionConstants.containsValue(acknowledgeMode),
+				"Only values of acknowledge mode constants allowed");
 		this.acknowledgeMode = acknowledgeMode;
 	}
 

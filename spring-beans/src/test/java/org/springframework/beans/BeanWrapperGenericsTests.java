@@ -36,6 +36,8 @@ import org.springframework.beans.testfixture.beans.GenericIntegerBean;
 import org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.UrlResource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -430,6 +432,18 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
+	void testComplexGenericIndexedMapEntryWithPlainValue() {
+		String inputValue = "10";
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
+
+		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(1);
+		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+	}
+
+	@Test
 	void testComplexDerivedIndexedMapEntry() {
 		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
@@ -453,6 +467,56 @@ class BeanWrapperGenericsTests {
 
 		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
 		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+	}
+
+	@Test
+	void testComplexDerivedIndexedMapEntryWithPlainValue() {
+		String inputValue = "10";
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
+
+		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
+		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+	}
+
+	@Test
+	void testComplexMultiValueMapEntry() {
+		List<String> inputValue = new ArrayList<>();
+		inputValue.add("10");
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("multiValueMap[1]", inputValue);
+
+		assertThat(holder.getMultiValueMap().keySet().iterator().next()).isEqualTo(1);
+		assertThat(holder.getMultiValueMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+	}
+
+	@Test
+	void testComplexMultiValueMapEntryWithCollectionConversion() {
+		Set<String> inputValue = new HashSet<>();
+		inputValue.add("10");
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("multiValueMap[1]", inputValue);
+
+		assertThat(holder.getMultiValueMap().keySet().iterator().next()).isEqualTo(1);
+		assertThat(holder.getMultiValueMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+	}
+
+	@Test
+	void testComplexMultiValueMapEntryWithPlainValue() {
+		String inputValue = "10";
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("multiValueMap[1]", inputValue);
+
+		assertThat(holder.getMultiValueMap().keySet().iterator().next()).isEqualTo(1);
+		assertThat(holder.getMultiValueMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
 	}
 
 	@Test
@@ -518,7 +582,7 @@ class BeanWrapperGenericsTests {
 	}
 
 
-	private static abstract class BaseGenericCollectionBean {
+	private abstract static class BaseGenericCollectionBean {
 
 		public abstract Object getMapOfInteger();
 
@@ -585,6 +649,8 @@ class BeanWrapperGenericsTests {
 
 		private DerivedMap derivedIndexedMap = new DerivedMap();
 
+		private MultiValueMap<Integer, Long> multiValueMap = new LinkedMultiValueMap<>();
+
 		public void setGenericMap(Map<List<Integer>, List<Long>> genericMap) {
 			this.genericMap = genericMap;
 		}
@@ -607,6 +673,14 @@ class BeanWrapperGenericsTests {
 
 		public DerivedMap getDerivedIndexedMap() {
 			return derivedIndexedMap;
+		}
+
+		public void setMultiValueMap(MultiValueMap<Integer, Long> multiValueMap) {
+			this.multiValueMap = multiValueMap;
+		}
+
+		public MultiValueMap<Integer, Long> getMultiValueMap() {
+			return multiValueMap;
 		}
 	}
 

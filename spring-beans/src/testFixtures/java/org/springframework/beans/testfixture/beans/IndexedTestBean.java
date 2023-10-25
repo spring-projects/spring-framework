@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.beans.testfixture.beans;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,6 +49,8 @@ public class IndexedTestBean {
 
 	private SortedMap sortedMap;
 
+	private MyTestBeans myTestBeans;
+
 
 	public IndexedTestBean() {
 		this(true);
@@ -71,6 +75,7 @@ public class IndexedTestBean {
 		TestBean tb8 = new TestBean("name8", 0);
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
+		TestBean tbZ = new TestBean("nameZ", 0);
 		this.array = new TestBean[] {tb0, tb1};
 		this.list = new ArrayList<>();
 		this.list.add(tb2);
@@ -87,6 +92,7 @@ public class IndexedTestBean {
 		list.add(tbY);
 		this.map.put("key4", list);
 		this.map.put("key5[foo]", tb8);
+		this.myTestBeans = new MyTestBeans(tbZ);
 	}
 
 
@@ -144,6 +150,29 @@ public class IndexedTestBean {
 
 	public void setSortedMap(SortedMap sortedMap) {
 		this.sortedMap = sortedMap;
+	}
+
+	public MyTestBeans getMyTestBeans() {
+		return myTestBeans;
+	}
+
+	public void setMyTestBeans(MyTestBeans myTestBeans) {
+		this.myTestBeans = myTestBeans;
+	}
+
+
+	public static class MyTestBeans implements Iterable<TestBean> {
+
+		private final Collection<TestBean> testBeans;
+
+		public MyTestBeans(TestBean... testBeans) {
+			this.testBeans = Arrays.asList(testBeans);
+		}
+
+		@Override
+		public Iterator<TestBean> iterator() {
+			return this.testBeans.iterator();
+		}
 	}
 
 }

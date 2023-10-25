@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class ImportResourceTests {
 	static class ImportXmlConfig {
 		@Value("${name}")
 		private String name;
-		public @Bean TestBean javaDeclaredBean() {
+		@Bean public TestBean javaDeclaredBean() {
 			return new TestBean(this.name);
 		}
 	}
@@ -160,7 +160,7 @@ public class ImportResourceTests {
 	static class ImportXmlAutowiredConfig {
 		@Autowired TestBean xmlDeclaredBean;
 
-		public @Bean String xmlBeanName() {
+		@Bean public String xmlBeanName() {
 			return xmlDeclaredBean.getName();
 		}
 	}

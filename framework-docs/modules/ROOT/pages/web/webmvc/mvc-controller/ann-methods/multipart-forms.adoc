@@ -188,8 +188,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@PostMapping("/")
-	public String handle(@Valid @RequestPart("meta-data") MetaData metadata,
-			BindingResult result) {
+	public String handle(@Valid @RequestPart("meta-data") MetaData metadata, Errors errors) {
 		// ...
 	}
 ----
@@ -199,12 +198,14 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@PostMapping("/")
-	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData,
-			result: BindingResult): String {
+	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData, errors: Errors): String {
 		// ...
 	}
 ----
 ======
 
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. For more details, see the
+section on xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
 
 

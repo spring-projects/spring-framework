@@ -36,7 +36,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Propagation;
@@ -170,6 +172,19 @@ public class TransactionalEventListenerTests {
 	@Test
 	public void afterRollback() {
 		load(AfterCompletionExplicitTestListener.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().publishEvent("test");
+			getEventCollector().assertNoEventReceived();
+			status.setRollbackOnly();
+			return null;
+		});
+		getEventCollector().assertEvents(EventCollector.AFTER_ROLLBACK, "test");
+		getEventCollector().assertTotalEventsCount(1); // After commit not invoked
+	}
+
+	@Test
+	public void afterRollbackWithCustomExecutor() {
+		load(AfterCompletionExplicitTestListener.class, MulticasterWithCustomExecutor.class);
 		this.transactionTemplate.execute(status -> {
 			getContext().publishEvent("test");
 			getEventCollector().assertNoEventReceived();
@@ -386,6 +401,18 @@ public class TransactionalEventListenerTests {
 	}
 
 
+	@Configuration
+	static class MulticasterWithCustomExecutor {
+
+		@Bean
+		public SimpleApplicationEventMulticaster applicationEventMulticaster() {
+			SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
+			multicaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
+			return multicaster;
+		}
+	}
+
+
 	static class EventCollector {
 
 		public static final String IMMEDIATELY = "IMMEDIATELY";
@@ -465,7 +492,7 @@ public class TransactionalEventListenerTests {
 	}
 
 
-	static abstract class BaseTransactionalTestListener {
+	abstract static class BaseTransactionalTestListener {
 
 		static final String FAIL_MSG = "FAIL";
 

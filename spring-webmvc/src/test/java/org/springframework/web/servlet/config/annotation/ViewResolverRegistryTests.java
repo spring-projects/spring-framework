@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,7 +205,7 @@ public class ViewResolverRegistryTests {
 	}
 
 	private void checkPropertyValues(ViewResolver resolver, Object... nameValuePairs) {
-		DirectFieldAccessor accessor =  new DirectFieldAccessor(resolver);
+		DirectFieldAccessor accessor = new DirectFieldAccessor(resolver);
 		for (int i = 0; i < nameValuePairs.length ; i++, i++) {
 			Object expected = nameValuePairs[i + 1];
 			Object actual = accessor.getPropertyValue((String) nameValuePairs[i]);

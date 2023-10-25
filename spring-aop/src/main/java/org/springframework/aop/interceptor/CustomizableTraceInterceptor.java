@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
-import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -62,6 +61,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2
  * @see #setEnterMessage
  * @see #setExitMessage
@@ -152,8 +152,15 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The {@code Set} of allowed placeholders.
 	 */
-	private static final Set<Object> ALLOWED_PLACEHOLDERS =
-			new Constants(CustomizableTraceInterceptor.class).getValues("PLACEHOLDER_");
+	static final Set<String> ALLOWED_PLACEHOLDERS = Set.of(
+			PLACEHOLDER_METHOD_NAME,
+			PLACEHOLDER_TARGET_CLASS_NAME,
+			PLACEHOLDER_TARGET_CLASS_SHORT_NAME,
+			PLACEHOLDER_RETURN_VALUE,
+			PLACEHOLDER_ARGUMENT_TYPES,
+			PLACEHOLDER_ARGUMENTS,
+			PLACEHOLDER_EXCEPTION,
+			PLACEHOLDER_INVOCATION_TIME);
 
 
 	/**
@@ -295,43 +302,38 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
 			@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime) {
 
-		Matcher matcher = PATTERN.matcher(message);
 		Object target = methodInvocation.getThis();
 		Assert.state(target != null, "Target must not be null");
 
 		StringBuilder output = new StringBuilder();
+		Matcher matcher = PATTERN.matcher(message);
 		while (matcher.find()) {
 			String match = matcher.group();
-			if (PLACEHOLDER_METHOD_NAME.equals(match)) {
-				matcher.appendReplacement(output, Matcher.quoteReplacement(methodInvocation.getMethod().getName()));
-			}
-			else if (PLACEHOLDER_TARGET_CLASS_NAME.equals(match)) {
-				String className = getClassForLogging(target).getName();
-				matcher.appendReplacement(output, Matcher.quoteReplacement(className));
-			}
-			else if (PLACEHOLDER_TARGET_CLASS_SHORT_NAME.equals(match)) {
-				String shortName = ClassUtils.getShortName(getClassForLogging(target));
-				matcher.appendReplacement(output, Matcher.quoteReplacement(shortName));
-			}
-			else if (PLACEHOLDER_ARGUMENTS.equals(match)) {
-				matcher.appendReplacement(output,
+			switch (match) {
+				case PLACEHOLDER_METHOD_NAME -> matcher.appendReplacement(output,
+						Matcher.quoteReplacement(methodInvocation.getMethod().getName()));
+				case PLACEHOLDER_TARGET_CLASS_NAME -> {
+					String className = getClassForLogging(target).getName();
+					matcher.appendReplacement(output, Matcher.quoteReplacement(className));
+				}
+				case PLACEHOLDER_TARGET_CLASS_SHORT_NAME -> {
+					String shortName = ClassUtils.getShortName(getClassForLogging(target));
+					matcher.appendReplacement(output, Matcher.quoteReplacement(shortName));
+				}
+				case PLACEHOLDER_ARGUMENTS -> matcher.appendReplacement(output,
 						Matcher.quoteReplacement(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));
-			}
-			else if (PLACEHOLDER_ARGUMENT_TYPES.equals(match)) {
-				appendArgumentTypes(methodInvocation, matcher, output);
-			}
-			else if (PLACEHOLDER_RETURN_VALUE.equals(match)) {
-				appendReturnValue(methodInvocation, matcher, output, returnValue);
-			}
-			else if (throwable != null && PLACEHOLDER_EXCEPTION.equals(match)) {
-				matcher.appendReplacement(output, Matcher.quoteReplacement(throwable.toString()));
-			}
-			else if (PLACEHOLDER_INVOCATION_TIME.equals(match)) {
-				matcher.appendReplacement(output, Long.toString(invocationTime));
-			}
-			else {
-				// Should not happen since placeholders are checked earlier.
-				throw new IllegalArgumentException("Unknown placeholder [" + match + "]");
+				case PLACEHOLDER_ARGUMENT_TYPES -> appendArgumentTypes(methodInvocation, matcher, output);
+				case PLACEHOLDER_RETURN_VALUE -> appendReturnValue(methodInvocation, matcher, output, returnValue);
+				case PLACEHOLDER_EXCEPTION -> {
+					if (throwable != null) {
+						matcher.appendReplacement(output, Matcher.quoteReplacement(throwable.toString()));
+					}
+				}
+				case PLACEHOLDER_INVOCATION_TIME -> matcher.appendReplacement(output, Long.toString(invocationTime));
+				default -> {
+					// Should not happen since placeholders are checked earlier.
+					throw new IllegalArgumentException("Unknown placeholder [" + match + "]");
+				}
 			}
 		}
 		matcher.appendTail(output);
@@ -348,7 +350,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param output the {@code StringBuilder} to write output to
 	 * @param returnValue the value returned by the method invocation.
 	 */
-	private void appendReturnValue(
+	private static void appendReturnValue(
 			MethodInvocation methodInvocation, Matcher matcher, StringBuilder output, @Nullable Object returnValue) {
 
 		if (methodInvocation.getMethod().getReturnType() == void.class) {
@@ -372,7 +374,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param matcher the {@code Matcher} containing the state of the output
 	 * @param output the {@code StringBuilder} containing the output
 	 */
-	private void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuilder output) {
+	private static void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuilder output) {
 		Class<?>[] argumentTypes = methodInvocation.getMethod().getParameterTypes();
 		String[] argumentTypeShortNames = new String[argumentTypes.length];
 		for (int i = 0; i < argumentTypeShortNames.length; i++) {
@@ -387,7 +389,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * that are not specified as constants on this class and throws an
 	 * {@code IllegalArgumentException} if so.
 	 */
-	private void checkForInvalidPlaceholders(String message) throws IllegalArgumentException {
+	private static void checkForInvalidPlaceholders(String message) throws IllegalArgumentException {
 		Matcher matcher = PATTERN.matcher(message);
 		while (matcher.find()) {
 			String match = matcher.group();

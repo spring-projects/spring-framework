@@ -16,6 +16,8 @@
 
 package org.springframework.web.server
 
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
@@ -24,9 +26,11 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
+import kotlin.coroutines.CoroutineContext
 
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 class CoWebFilterTests {
 
@@ -45,6 +49,26 @@ class CoWebFilterTests {
 
 		assertThat(exchange.attributes["foo"]).isEqualTo("bar")
 	}
+
+	@Test
+	fun filterWithContext() {
+		val exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"))
+
+		val chain = Mockito.mock(WebFilterChain::class.java)
+		given(chain.filter(exchange)).willReturn(Mono.empty())
+
+		val filter = MyCoWebFilterWithContext()
+		val result = filter.filter(exchange, chain)
+
+		StepVerifier.create(result).verifyComplete()
+
+		val context = exchange.attributes[CoWebFilter.COROUTINE_CONTEXT_ATTRIBUTE] as CoroutineContext
+		assertThat(context).isNotNull()
+		val coroutineName = context[CoroutineName.Key] as CoroutineName
+		assertThat(coroutineName).isNotNull()
+		assertThat(coroutineName.name).isEqualTo("foo")
+	}
+
 }
 
 
@@ -52,5 +76,13 @@ private class MyCoWebFilter : CoWebFilter() {
 	override suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain) {
 		exchange.attributes["foo"] = "bar"
 		chain.filter(exchange)
+	}
+}
+
+private class MyCoWebFilterWithContext : CoWebFilter() {
+	override suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain) {
+		withContext(CoroutineName("foo")) {
+			chain.filter(exchange)
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.adapter.jetty;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
@@ -24,9 +25,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.ExtensionConfig;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 
 import org.springframework.http.HttpHeaders;
@@ -131,18 +133,17 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	@Override
 	public InetSocketAddress getLocalAddress() {
 		checkNativeSessionInitialized();
-		return (InetSocketAddress) getNativeSession().getLocalAddress();
+		return (InetSocketAddress) getNativeSession().getLocalSocketAddress();
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		checkNativeSessionInitialized();
-		return (InetSocketAddress) getNativeSession().getRemoteAddress();
+		return (InetSocketAddress) getNativeSession().getRemoteSocketAddress();
 	}
 
 	/**
-	 * This method is a no-op for Jetty. As per {@link Session#getPolicy()}, the
-	 * returned {@code WebSocketPolicy} is read-only and changing it has no effect.
+	 * This method is a no-op for Jetty.
 	 */
 	@Override
 	public void setTextMessageSizeLimit(int messageSizeLimit) {
@@ -155,8 +156,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	/**
-	 * This method is a no-op for Jetty. As per {@link Session#getPolicy()}, the
-	 * returned {@code WebSocketPolicy} is read-only and changing it has no effect.
+	 * This method is a no-op for Jetty.
 	 */
 	@Override
 	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
@@ -191,7 +191,13 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		this.extensions = getExtensions(session);
 
 		if (this.user == null) {
-			this.user = session.getUpgradeRequest().getUserPrincipal();
+			try {
+				this.user = session.getUpgradeRequest().getUserPrincipal();
+			}
+			catch (NullPointerException ex) {
+				// Necessary until https://github.com/eclipse/jetty.project/issues/10498 is resolved
+				logger.error("Failure from UpgradeRequest while getting Principal", ex);
+			}
 		}
 	}
 
@@ -210,31 +216,57 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
-		getRemoteEndpoint().sendString(message.getPayload());
+		useSession((session, callback) -> session.sendText(message.getPayload(), callback));
 	}
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		getRemoteEndpoint().sendBytes(message.getPayload());
+		useSession((session, callback) -> session.sendBinary(message.getPayload(), callback));
 	}
 
 	@Override
 	protected void sendPingMessage(PingMessage message) throws IOException {
-		getRemoteEndpoint().sendPing(message.getPayload());
+		useSession((session, callback) -> session.sendPing(message.getPayload(), callback));
 	}
 
 	@Override
 	protected void sendPongMessage(PongMessage message) throws IOException {
-		getRemoteEndpoint().sendPong(message.getPayload());
-	}
-
-	private RemoteEndpoint getRemoteEndpoint() {
-		return getNativeSession().getRemote();
+		useSession((session, callback) -> session.sendPong(message.getPayload(), callback));
 	}
 
 	@Override
 	protected void closeInternal(CloseStatus status) throws IOException {
-		getNativeSession().close(status.getCode(), status.getReason());
+		useSession((session, callback) -> session.close(status.getCode(), status.getReason(), callback));
+	}
+
+	private void useSession(SessionConsumer sessionConsumer) throws IOException {
+		try {
+			Callback.Completable completable = new Callback.Completable();
+			sessionConsumer.consume(getNativeSession(), completable);
+			completable.get();
+		}
+		catch (ExecutionException ex) {
+			Throwable cause = ex.getCause();
+
+			if (cause instanceof IOException ioEx) {
+				throw ioEx;
+			}
+			else if (cause instanceof UncheckedIOException uioEx) {
+				throw uioEx.getCause();
+			}
+			else {
+				throw new IOException(ex.getMessage(), cause);
+			}
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	@FunctionalInterface
+	private interface SessionConsumer {
+
+		void consume(Session session, Callback callback) throws IOException;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,8 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin;
  * Plugin to apply conventions to projects that are part of Spring Framework's build.
  * Conventions are applied in response to various plugins being applied.
  *
- * When the {@link JavaBasePlugin} is applied, the conventions in {@link TestConventions}
- * are applied.
- * When the {@link JavaBasePlugin} is applied, the conventions in {@link JavaConventions}
- * are applied.
+ * <p>When the {@link JavaBasePlugin} is applied, the conventions in {@link CheckstyleConventions},
+ * {@link TestConventions} and {@link JavaConventions} are applied.
  * When the {@link KotlinBasePlugin} is applied, the conventions in {@link KotlinConventions}
  * are applied.
  *
@@ -38,8 +36,10 @@ public class ConventionsPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		new CheckstyleConventions().apply(project);
 		new JavaConventions().apply(project);
 		new KotlinConventions().apply(project);
 		new TestConventions().apply(project);
 	}
+
 }

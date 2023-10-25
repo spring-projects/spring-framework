@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import java.util.Objects;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -147,7 +149,7 @@ public abstract class PropertySource<T> {
 	 */
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(getName());
+		return Objects.hashCode(getName());
 	}
 
 	/**

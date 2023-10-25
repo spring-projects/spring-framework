@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -217,6 +218,18 @@ public class ProblemDetail {
 	}
 
 	/**
+	 * Setter for the {@link #getProperties() properties map}.
+	 * <p>By default, this is not set.
+	 * <p>When Jackson JSON is present on the classpath, any properties set here
+	 * are rendered as top level key-value pairs in the output JSON. Otherwise,
+	 * they are rendered as a {@code "properties"} sub-map.
+	 * @param properties the properties map
+	 */
+	public void setProperties(@Nullable Map<String, Object> properties) {
+		this.properties = properties;
+	}
+
+	/**
 	 * Return a generic map of properties that are not known ahead of time,
 	 * possibly {@code null} if no properties have been added. To add a property,
 	 * use {@link #setProperty(String, Object)}.
@@ -244,13 +257,8 @@ public class ProblemDetail {
 
 	@Override
 	public int hashCode() {
-		int result = this.type.hashCode();
-		result = 31 * result + ObjectUtils.nullSafeHashCode(getTitle());
-		result = 31 * result + this.status;
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.detail);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.instance);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.properties);
-		return result;
+		return Objects.hash(this.type, getTitle(), this.status, this.detail,
+				this.instance, this.properties);
 	}
 
 	@Override

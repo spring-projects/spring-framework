@@ -16,6 +16,8 @@
 
 package org.springframework.aop.aspectj;
 
+import java.util.Objects;
+
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.TypePatternMatcher;
 
@@ -124,7 +126,7 @@ public class TypePatternClassFilter implements ClassFilter {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.typePattern);
+		return Objects.hashCode(this.typePattern);
 	}
 
 	@Override

@@ -92,7 +92,7 @@ Kotlin::
 ======
 
 The return value can then be obtained by running the given task through the
-xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `TaskExecutor`.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `AsyncTaskExecutor`.
 
 
 
@@ -128,7 +128,7 @@ Here is a very concise overview of Servlet asynchronous request processing:
 
 * The controller returns a `Callable`.
 * Spring MVC calls `request.startAsync()` and submits the `Callable` to
-  a `TaskExecutor` for processing in a separate thread.
+  an `AsyncTaskExecutor` for processing in a separate thread.
 * Meanwhile, the `DispatcherServlet` and all filters exit the Servlet container thread,
   but the response remains open.
 * Eventually the `Callable` produces a result, and Spring MVC dispatches the request back
@@ -404,11 +404,10 @@ TIP: Spring MVC supports Reactor and RxJava through the
 
 For streaming to the response, reactive back pressure is supported, but writes to the
 response are still blocking and are run on a separate thread through the
-xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `TaskExecutor`, to avoid
-blocking the upstream source (such as a `Flux` returned from `WebClient`).
-By default, `SimpleAsyncTaskExecutor` is used for the blocking writes, but that is not
-suitable under load. If you plan to stream with a reactive type, you should use the
-xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[MVC configuration] to configure a task executor.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured]
+`AsyncTaskExecutor`, to avoid blocking the upstream source such as a `Flux` returned
+from `WebClient`.
+
 
 
 
@@ -494,7 +493,7 @@ In `web.xml` configuration, you can add `<async-supported>true</async-supported>
 [[mvc-ann-async-configuration-spring-mvc]]
 === Spring MVC
 
-The MVC configuration exposes the following options related to asynchronous request processing:
+The MVC configuration exposes the following options for asynchronous request processing:
 
 * Java configuration: Use the `configureAsyncSupport` callback on `WebMvcConfigurer`.
 * XML namespace: Use the `<async-support>` element under `<mvc:annotation-driven>`.
@@ -504,10 +503,9 @@ You can configure the following:
 * Default timeout value for async requests, which if not set, depends
 on the underlying Servlet container.
 * `AsyncTaskExecutor` to use for blocking writes when streaming with
-xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] and for executing `Callable` instances returned from
-controller methods. We highly recommended configuring this property if you
-stream with reactive types or have controller methods that return `Callable`, since
-by default, it is a `SimpleAsyncTaskExecutor`.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] and for
+executing `Callable` instances returned from controller methods.
+The one used by default is not suitable for production under load.
 * `DeferredResultProcessingInterceptor` implementations and `CallableProcessingInterceptor` implementations.
 
 Note that you can also set the default timeout value on a `DeferredResult`,

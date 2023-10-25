@@ -238,11 +238,18 @@ class ConfigurationClassParser {
 		}
 
 		// Recursively process the configuration class and its superclass hierarchy.
-		SourceClass sourceClass = asSourceClass(configClass, filter);
-		do {
-			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
+		SourceClass sourceClass = null;
+		try {
+			sourceClass = asSourceClass(configClass, filter);
+			do {
+				sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
+			}
+			while (sourceClass != null);
 		}
-		while (sourceClass != null);
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException(
+					"I/O failure while processing configuration class [" + sourceClass + "]", ex);
+		}
 
 		this.configurationClasses.put(configClass, configClass);
 	}
@@ -267,8 +274,8 @@ class ConfigurationClassParser {
 
 		// Process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
-				sourceClass.getMetadata(), PropertySources.class,
-				org.springframework.context.annotation.PropertySource.class)) {
+				sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class,
+				PropertySources.class, true)) {
 			if (this.propertySourceRegistry != null) {
 				this.propertySourceRegistry.processPropertySource(propertySource);
 			}
@@ -280,7 +287,7 @@ class ConfigurationClassParser {
 
 		// Process any @ComponentScan annotations
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
-				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+				sourceClass.getMetadata(), ComponentScan.class, ComponentScans.class);
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {

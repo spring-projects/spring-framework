@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ public interface PathContainer {
 		 * Options for HTTP URL paths.
 		 * <p>Separator '/' with URL decoding and parsing of path parameters.
 		 */
-		public final static Options HTTP_PATH = Options.create('/', true);
+		public static final Options HTTP_PATH = Options.create('/', true);
 
 		/**
 		 * Options for a message route.
@@ -148,7 +148,7 @@ public interface PathContainer {
 		 * Escape sequences for the separator character in segment values are still
 		 * decoded.
 		 */
-		public final static Options MESSAGE_ROUTE = Options.create('.', false);
+		public static final Options MESSAGE_ROUTE = Options.create('.', false);
 
 		private final char separator;
 

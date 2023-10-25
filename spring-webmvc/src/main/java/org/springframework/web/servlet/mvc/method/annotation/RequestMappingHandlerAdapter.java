@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -48,8 +50,10 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -72,8 +76,10 @@ import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ErrorsMethodArgumentResolver;
 import org.springframework.web.method.annotation.ExpressionValueMethodArgumentResolver;
+import org.springframework.web.method.annotation.HandlerMethodValidator;
 import org.springframework.web.method.annotation.InitBinderDataBinderFactory;
 import org.springframework.web.method.annotation.MapMethodProcessor;
+import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.annotation.RequestHeaderMapMethodArgumentResolver;
@@ -128,6 +134,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
 					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
 
+	private static final boolean BEAN_VALIDATION_PRESENT =
+			ClassUtils.isPresent("jakarta.validation.Validator", HandlerMethod.class.getClassLoader());
+
 
 	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -156,7 +165,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Nullable
 	private WebBindingInitializer webBindingInitializer;
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
+	@Nullable
+	private MethodValidator methodValidator;
+
+	private AsyncTaskExecutor taskExecutor = new MvcSimpleAsyncTaskExecutor();
 
 	@Nullable
 	private Long asyncRequestTimeout;
@@ -386,9 +398,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * return a {@link Callable}. Controller methods can override this default on
 	 * a per-request basis by returning an {@link WebAsyncTask}.
-	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
-	 * It's recommended to change that default in production as the simple executor
-	 * does not re-use threads.
+	 * <p>If your application has controllers with such return types, please
+	 * configure an {@link AsyncTaskExecutor} as the one used by default is not
+	 * suitable for production under load.
 	 */
 	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
@@ -558,6 +570,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (this.returnValueHandlers == null) {
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
+		}
+		if (BEAN_VALIDATION_PRESENT) {
+			List<HandlerMethodArgumentResolver> resolvers = this.argumentResolvers.getResolvers();
+			this.methodValidator = HandlerMethodValidator.from(
+					this.webBindingInitializer, this.parameterNameDiscoverer,
+					methodParamPredicate(resolvers, ModelAttributeMethodProcessor.class),
+					methodParamPredicate(resolvers, RequestParamMethodArgumentResolver.class));
 		}
 	}
 
@@ -757,6 +776,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return handlers;
 	}
 
+	private static Predicate<MethodParameter> methodParamPredicate(
+			List<HandlerMethodArgumentResolver> resolvers, Class<?> resolverType) {
+
+		return parameter -> {
+			for (HandlerMethodArgumentResolver resolver : resolvers) {
+				if (resolver.supportsParameter(parameter)) {
+					return resolverType.isInstance(resolver);
+				}
+			}
+			return false;
+		};
+	}
+
 
 	/**
 	 * Always return {@code true} since any method argument and return value
@@ -855,6 +887,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		invocableMethod.setDataBinderFactory(binderFactory);
 		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+		invocableMethod.setMethodValidator(this.methodValidator);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
@@ -955,7 +988,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			Object bean = handlerMethod.getBean();
 			initBinderMethods.add(createInitBinderMethod(bean, method));
 		}
-		return createDataBinderFactory(initBinderMethods);
+		DefaultDataBinderFactory factory = createDataBinderFactory(initBinderMethods);
+		factory.setMethodValidationApplicable(this.methodValidator != null && handlerMethod.shouldValidateArguments());
+		return factory;
 	}
 
 	private InvocableHandlerMethod createInitBinderMethod(Object bean, Method method) {
@@ -1003,6 +1038,39 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 		}
 		return mav;
+	}
+
+
+	/**
+	 * A default Spring MVC AsyncTaskExecutor that warns if used.
+	 */
+	@SuppressWarnings("serial")
+	private class MvcSimpleAsyncTaskExecutor extends SimpleAsyncTaskExecutor {
+
+		private static boolean taskExecutorWarning = true;
+
+		public MvcSimpleAsyncTaskExecutor() {
+			super("MvcAsync");
+		}
+
+		@Override
+		public void execute(Runnable task) {
+			if (taskExecutorWarning && logger.isWarnEnabled()) {
+				synchronized (this) {
+					if (taskExecutorWarning) {
+						logger.warn("""
+								!!!
+								Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+								This executor is not suitable for production use under load.
+								Please, configure an AsyncTaskExecutor through the WebMvc config.
+								-------------------------------
+								!!!""");
+						taskExecutorWarning = false;
+					}
+				}
+			}
+			super.execute(task);
+		}
 	}
 
 }

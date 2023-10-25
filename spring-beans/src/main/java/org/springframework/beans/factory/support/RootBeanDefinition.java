@@ -384,13 +384,28 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Determine preferred constructors to use for default construction, if any.
 	 * Constructor arguments will be autowired if necessary.
+	 * <p>As of 6.1, the default implementation of this method takes the
+	 * {@link #PREFERRED_CONSTRUCTORS_ATTRIBUTE} attribute into account.
+	 * Subclasses are encouraged to preserve this through a {@code super} call,
+	 * either before or after their own preferred constructor determination.
 	 * @return one or more preferred constructors, or {@code null} if none
 	 * (in which case the regular no-arg default constructor will be called)
 	 * @since 5.1
 	 */
 	@Nullable
 	public Constructor<?>[] getPreferredConstructors() {
-		return null;
+		Object attribute = getAttribute(PREFERRED_CONSTRUCTORS_ATTRIBUTE);
+		if (attribute == null) {
+			return null;
+		}
+		if (attribute instanceof Constructor<?> constructor) {
+			return new Constructor<?>[] {constructor};
+		}
+		if (attribute instanceof Constructor<?>[]) {
+			return (Constructor<?>[]) attribute;
+		}
+		throw new IllegalArgumentException("Invalid value type for attribute '" +
+				PREFERRED_CONSTRUCTORS_ATTRIBUTE + "': " + attribute.getClass().getName());
 	}
 
 	/**

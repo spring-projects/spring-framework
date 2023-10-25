@@ -301,8 +301,12 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		// A bean definition resulting from a component scan can be silently overridden
-		// by an @Bean method, as of 4.2...
-		if (existingBeanDef instanceof ScannedGenericBeanDefinition) {
+		// by an @Bean method - and as of 6.1, even when general overriding is disabled
+		// as long as the bean class is the same.
+		if (existingBeanDef instanceof ScannedGenericBeanDefinition scannedBeanDef) {
+			if (beanMethod.getMetadata().getReturnTypeName().equals(scannedBeanDef.getBeanClassName())) {
+				this.registry.removeBeanDefinition(beanName);
+			}
 			return false;
 		}
 
@@ -314,7 +318,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// At this point, it's a top-level override (probably XML), just having been parsed
 		// before configuration class processing kicks in...
-		if (this.registry instanceof DefaultListableBeanFactory dlbf && !dlbf.isAllowBeanDefinitionOverriding()) {
+		if (this.registry instanceof DefaultListableBeanFactory dlbf && !dlbf.isBeanDefinitionOverridable(beanName)) {
 			throw new BeanDefinitionStoreException(beanMethod.getConfigurationClass().getResource().getDescription(),
 					beanName, "@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}

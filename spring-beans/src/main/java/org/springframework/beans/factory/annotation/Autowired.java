@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * <h3>Autowired Constructors</h3>
  * <p>Only one constructor of any given bean class may declare this annotation with the
  * {@link #required} attribute set to {@code true}, indicating <i>the</i> constructor
- * to autowire when used as a Spring bean. Furthermore, if the {@code required}
+ * to be autowired when used as a Spring bean. Furthermore, if the {@code required}
  * attribute is set to {@code true}, only a single constructor may be annotated
  * with {@code @Autowired}. If multiple <i>non-required</i> constructors declare the
  * annotation, they will be considered as candidates for autowiring. The constructor

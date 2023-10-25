@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class Spr10744Tests {
 	static class MyTestConfiguration extends MyConfiguration {
 
 		@Bean
-		@Scope(value = "myTestScope",  proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(value = "myTestScope", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		@Override
 		public Foo foo() {
 			return new Foo();

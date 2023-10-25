@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.event;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationEvent;
@@ -32,7 +32,7 @@ import org.springframework.context.PayloadApplicationEvent;
  */
 class DefaultApplicationEvents implements ApplicationEvents {
 
-	private final List<ApplicationEvent> events = new ArrayList<>();
+	private final List<ApplicationEvent> events = new CopyOnWriteArrayList<>();
 
 
 	void addEvent(ApplicationEvent event) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.transaction.ejb;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.0.1
  */
 @Rollback
+@DisabledInAotMode // @EJB is not supported in Spring AOT
 class RollbackForRequiredEjbTxDaoTests extends CommitForRequiredEjbTxDaoTests {
 
 	/**

@@ -42,8 +42,13 @@ final class BeanMethod extends ConfigurationMethod {
 
 	@Override
 	public void validate(ProblemReporter problemReporter) {
+		if ("void".equals(getMetadata().getReturnTypeName())) {
+			// declared as void: potential misuse of @Bean, maybe meant as init method instead?
+			problemReporter.error(new VoidDeclaredMethodError());
+		}
+
 		if (getMetadata().isStatic()) {
-			// static @Bean methods have no constraints to validate -> return immediately
+			// static @Bean methods have no further constraints to validate -> return immediately
 			return;
 		}
 
@@ -68,6 +73,15 @@ final class BeanMethod extends ConfigurationMethod {
 	@Override
 	public String toString() {
 		return "BeanMethod: " + this.metadata;
+	}
+
+
+	private class VoidDeclaredMethodError extends Problem {
+
+		VoidDeclaredMethodError() {
+			super("@Bean method '%s' must not be declared as void; change the method's return type or its annotation."
+					.formatted(getMetadata().getMethodName()), getResourceLocation());
+		}
 	}
 
 

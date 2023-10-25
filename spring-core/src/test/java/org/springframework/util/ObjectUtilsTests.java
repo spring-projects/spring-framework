@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
@@ -38,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
@@ -379,119 +381,197 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void nullSafeHashCodeWithBooleanArray() {
-		int expected = 31 * 7 + Boolean.TRUE.hashCode();
-		expected = 31 * expected + Boolean.FALSE.hashCode();
+	void nullSafeHashWithNull() {
+		assertThat(ObjectUtils.nullSafeHash((Object[]) null)).isEqualTo(0);
+	}
 
+	@Test
+	void nullSafeHashWithIntermediateNullElements() {
+		assertThat(ObjectUtils.nullSafeHash(3, null, 5)).isEqualTo(Objects.hash(3, null, 5));
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullBooleanArray() {
+		boolean[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithBooleanArray() {
 		boolean[] array = {true, false};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithBooleanArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((boolean[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingBooleanArray() {
+		Object array = new boolean[] {true, false};
+		int expected = ObjectUtils.nullSafeHashCode((boolean[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullByteArray() {
+		byte[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithByteArray() {
-		int expected = 31 * 7 + 8;
-		expected = 31 * expected + 10;
-
 		byte[] array = {8, 10};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithByteArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((byte[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingByteArray() {
+		Object array = new byte[] {6, 39};
+		int expected = ObjectUtils.nullSafeHashCode((byte[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullCharArray() {
+		char[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithCharArray() {
-		int expected = 31 * 7 + 'a';
-		expected = 31 * expected + 'E';
-
 		char[] array = {'a', 'E'};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithCharArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((char[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingCharArray() {
+		Object array = new char[] {'l', 'M'};
+		int expected = ObjectUtils.nullSafeHashCode((char[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullDoubleArray() {
+		double[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithDoubleArray() {
-		long bits = Double.doubleToLongBits(8449.65);
-		int expected = 31 * 7 + (int) (bits ^ (bits >>> 32));
-		bits = Double.doubleToLongBits(9944.923);
-		expected = 31 * expected + (int) (bits ^ (bits >>> 32));
-
 		double[] array = {8449.65, 9944.923};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithDoubleArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((double[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingDoubleArray() {
+		Object array = new double[] {68930.993, 9022.009};
+		int expected = ObjectUtils.nullSafeHashCode((double[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullFloatArray() {
+		float[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithFloatArray() {
-		int expected = 31 * 7 + Float.floatToIntBits(9.6f);
-		expected = 31 * expected + Float.floatToIntBits(7.4f);
-
 		float[] array = {9.6f, 7.4f};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithFloatArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((float[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingFloatArray() {
+		Object array = new float[] {9.9f, 9.54f};
+		int expected = ObjectUtils.nullSafeHashCode((float[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullIntArray() {
+		int[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithIntArray() {
-		int expected = 31 * 7 + 884;
-		expected = 31 * expected + 340;
-
 		int[] array = {884, 340};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithIntArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((int[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingIntArray() {
+		Object array = new int[] {89, 32};
+		int expected = ObjectUtils.nullSafeHashCode((int[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullLongArray() {
+		long[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithLongArray() {
-		long lng = 7993L;
-		int expected = 31 * 7 + (int) (lng ^ (lng >>> 32));
-		lng = 84320L;
-		expected = 31 * expected + (int) (lng ^ (lng >>> 32));
-
 		long[] array = {7993L, 84320L};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithLongArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((long[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingLongArray() {
+		Object array = new long[] {4389, 320};
+		int expected = ObjectUtils.nullSafeHashCode((long[]) array);
+		assertEqualHashCodes(expected, array);
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullShortArray() {
+		short[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithShortArray() {
+		short[] array = {4, 25};
+		int actual = ObjectUtils.nullSafeHashCode(array);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingShortArray() {
+		Object array = new short[] {5, 3};
+		int expected = ObjectUtils.nullSafeHashCode((short[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
@@ -501,71 +581,21 @@ class ObjectUtilsTests {
 	}
 
 	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectArray() {
-		int expected = 31 * 7 + "Leia".hashCode();
-		expected = 31 * expected + "Han".hashCode();
-
 		Object[] array = {"Leia", "Han"};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectArrayEqualToNull() {
 		assertThat(ObjectUtils.nullSafeHashCode((Object[]) null)).isEqualTo(0);
 	}
 
 	@Test
-	void nullSafeHashCodeWithObjectBeingBooleanArray() {
-		Object array = new boolean[] {true, false};
-		int expected = ObjectUtils.nullSafeHashCode((boolean[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingByteArray() {
-		Object array = new byte[] {6, 39};
-		int expected = ObjectUtils.nullSafeHashCode((byte[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingCharArray() {
-		Object array = new char[] {'l', 'M'};
-		int expected = ObjectUtils.nullSafeHashCode((char[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingDoubleArray() {
-		Object array = new double[] {68930.993, 9022.009};
-		int expected = ObjectUtils.nullSafeHashCode((double[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingFloatArray() {
-		Object array = new float[] {9.9f, 9.54f};
-		int expected = ObjectUtils.nullSafeHashCode((float[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingIntArray() {
-		Object array = new int[] {89, 32};
-		int expected = ObjectUtils.nullSafeHashCode((int[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingLongArray() {
-		Object array = new long[] {4389, 320};
-		int expected = ObjectUtils.nullSafeHashCode((long[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectBeingObjectArray() {
 		Object array = new Object[] {"Luke", "Anakin"};
 		int expected = ObjectUtils.nullSafeHashCode((Object[]) array);
@@ -573,31 +603,10 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void nullSafeHashCodeWithObjectBeingShortArray() {
-		Object array = new short[] {5, 3};
-		int expected = ObjectUtils.nullSafeHashCode((short[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((Object) null)).isEqualTo(0);
-	}
-
-	@Test
-	void nullSafeHashCodeWithShortArray() {
-		int expected = 31 * 7 + 70;
-		expected = 31 * expected + 8;
-
-		short[] array = {70, 8};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
-	}
-
-	@Test
-	void nullSafeHashCodeWithShortArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((short[]) null)).isEqualTo(0);
+		Object[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
 	}
 
 	@Test

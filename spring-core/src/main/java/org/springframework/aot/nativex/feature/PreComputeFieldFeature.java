@@ -26,13 +26,20 @@ import org.graalvm.nativeimage.hosted.Feature;
  * GraalVM {@link Feature} that substitutes boolean field values that match a certain pattern
  * with values pre-computed AOT without causing class build-time initialization.
  *
+ * <p>It is possible to pass <pre style="code">-Dspring.native.precompute.log=verbose</pre> as a
+ * <pre style="code">native-image</pre> compiler build argument to display detailed logs
+ * about pre-computed fields.</p>
+ *
  * @author Sebastien Deleuze
  * @author Phillip Webb
  * @since 6.0
  */
 class PreComputeFieldFeature implements Feature {
 
-	private static Pattern[] patterns = {
+	private static final boolean verbose =
+			"verbose".equalsIgnoreCase(System.getProperty("spring.native.precompute.log"));
+
+	private static final Pattern[] patterns = {
 			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#inNativeImage")),
 			Pattern.compile(Pattern.quote("org.springframework.cglib.core.AbstractClassGenerator#inNativeImage")),
 			Pattern.compile(Pattern.quote("org.springframework.aot.AotDetector#inNativeImage")),
@@ -42,14 +49,15 @@ class PreComputeFieldFeature implements Feature {
 			Pattern.compile(Pattern.quote("org.apache.commons.logging.LogAdapter") + "#.*Present")
 	};
 
-	private final ThrowawayClassLoader throwawayClassLoader = new ThrowawayClassLoader(PreComputeFieldFeature.class.getClassLoader());
+	private final ThrowawayClassLoader throwawayClassLoader = new ThrowawayClassLoader(getClass().getClassLoader());
+
 
 	@Override
 	public void beforeAnalysis(BeforeAnalysisAccess access) {
 		access.registerSubtypeReachabilityHandler(this::iterateFields, Object.class);
 	}
 
-	/* This method is invoked for every type that is reachable. */
+	// This method is invoked for every type that is reachable.
 	private void iterateFields(DuringAnalysisAccess access, Class<?> subtype) {
 		try {
 			for (Field field : subtype.getDeclaredFields()) {
@@ -64,10 +72,16 @@ class PreComputeFieldFeature implements Feature {
 						try {
 							Object fieldValue = provideFieldValue(field);
 							access.registerFieldValueTransformer(field, (receiver, originalValue) -> fieldValue);
-							System.out.println("Field " + fieldIdentifier + " set to " + fieldValue + " at build time");
+							if (verbose) {
+								System.out.println(
+										"Field " + fieldIdentifier + " set to " + fieldValue + " at build time");
+							}
 						}
 						catch (Throwable ex) {
-							System.out.println("Field " + fieldIdentifier + " will be evaluated at runtime due to this error during build time evaluation: " + ex.getMessage());
+							if (verbose) {
+								System.out.println("Field " + fieldIdentifier + " will be evaluated at runtime " +
+										"due to this error during build time evaluation: " + ex);
+							}
 						}
 					}
 				}
@@ -78,8 +92,10 @@ class PreComputeFieldFeature implements Feature {
 		}
 	}
 
-	/* This method is invoked when the field value is written to the image heap or the field is constant folded. */
-	private Object provideFieldValue(Field field) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+	// This method is invoked when the field value is written to the image heap or the field is constant folded.
+	private Object provideFieldValue(Field field)
+			throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+
 		Class<?> throwawayClass = this.throwawayClassLoader.loadClass(field.getDeclaringClass().getName());
 		Field throwawayField = throwawayClass.getDeclaredField(field.getName());
 		throwawayField.setAccessible(true);

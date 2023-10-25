@@ -91,7 +91,7 @@ import org.springframework.util.CollectionUtils;
  * used as the connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * <p>This transaction manager supports nested transactions via JDBC Savepoints.
  * The {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
  * to {@code false} though, since nested transactions will just apply to the JDBC
  * Connection, not to the JPA EntityManager and its cached entity objects and related
@@ -589,6 +589,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		catch (PersistenceException ex) {
+			DataAccessException dae = getJpaDialect().translateExceptionIfPossible(ex);
+			if (dae != null) {
+				throw dae;
+			}
 			throw new TransactionSystemException("Could not roll back JPA transaction", ex);
 		}
 		finally {

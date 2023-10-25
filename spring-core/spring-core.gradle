@@ -1,15 +1,25 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.springframework.build.shadow.ShadowSource
 
+plugins {
+	id 'me.champeau.mrjar'
+}
+
 description = "Spring Core"
 
 apply plugin: "kotlin"
 apply plugin: "kotlinx-serialization"
 
+multiRelease {
+	targetVersions 17, 21
+}
+
 def javapoetVersion = "1.13.0"
 def objenesisVersion = "3.3"
 
 configurations {
+	java21Api.extendsFrom(api)
+	java21Implementation.extendsFrom(implementation)
 	javapoet
 	objenesis
 	graalvm
@@ -63,6 +73,7 @@ dependencies {
 	api(project(":spring-jcl"))
 	compileOnly("io.projectreactor.tools:blockhound")
 	compileOnly("org.graalvm.sdk:graal-sdk")
+	optional("io.micrometer:context-propagation")
 	optional("io.netty:netty-buffer")
 	optional("io.netty:netty5-buffer")
 	optional("io.projectreactor:reactor-core")

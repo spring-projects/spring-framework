@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,53 +46,6 @@ import org.springframework.web.reactive.socket.server.WebSocketService;
 public interface WebFluxConfigurer {
 
 	/**
-	 * Configure how the content type requested for the response is resolved
-	 * when handling requests with annotated controllers.
-	 * @param builder for configuring the resolvers to use
-	 */
-	default void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-	}
-
-	/**
-	 * Configure "global" cross-origin request processing. The configured CORS
-	 * mappings apply to annotated controllers, functional endpoints, and static
-	 * resources.
-	 * <p>Annotated controllers can further declare more fine-grained config via
-	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
-	 * In such cases "global" CORS configuration declared here is
-	 * {@link org.springframework.web.cors.CorsConfiguration#combine(CorsConfiguration) combined}
-	 * with local CORS configuration defined on a controller method.
-	 * @see CorsRegistry
-	 * @see CorsConfiguration#combine(CorsConfiguration)
-	 */
-	default void addCorsMappings(CorsRegistry registry) {
-	}
-
-	/**
-	 * Configure path matching options.
-	 * <p>The configured path matching options will be used for mapping to
-	 * annotated controllers and also
-	 * {@link #addResourceHandlers(ResourceHandlerRegistry) static resources}.
-	 * @param configurer the {@link PathMatchConfigurer} instance
-	 */
-	default void configurePathMatching(PathMatchConfigurer configurer) {
-	}
-
-	/**
-	 * Add resource handlers for serving static resources.
-	 * @see ResourceHandlerRegistry
-	 */
-	default void addResourceHandlers(ResourceHandlerRegistry registry) {
-	}
-
-	/**
-	 * Configure resolvers for custom {@code @RequestMapping} method arguments.
-	 * @param configurer to configurer to use
-	 */
-	default void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
-	}
-
-	/**
 	 * Configure the HTTP message readers and writers for reading from the
 	 * request body and for writing to the response body in annotated controllers
 	 * and functional endpoints.
@@ -134,15 +87,50 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Provide the {@link WebSocketService} to create
-	 * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter}
-	 * with. This can be used to configure server-specific properties through the
-	 * {@link org.springframework.web.reactive.socket.server.RequestUpgradeStrategy}.
-	 * @since 5.3
+	 * Configure "global" cross-origin request processing. The configured CORS
+	 * mappings apply to annotated controllers, functional endpoints, and static
+	 * resources.
+	 * <p>Annotated controllers can further declare more fine-grained config via
+	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
+	 * In such cases "global" CORS configuration declared here is
+	 * {@link org.springframework.web.cors.CorsConfiguration#combine(CorsConfiguration) combined}
+	 * with local CORS configuration defined on a controller method.
+	 * @see CorsRegistry
+	 * @see CorsConfiguration#combine(CorsConfiguration)
 	 */
-	@Nullable
-	default WebSocketService getWebSocketService() {
-		return null;
+	default void addCorsMappings(CorsRegistry registry) {
+	}
+
+	/**
+	 * Configure settings related to blocking execution in WebFlux.
+	 * @since 6.1
+	 */
+	default void configureBlockingExecution(BlockingExecutionConfigurer configurer) {
+	}
+
+	/**
+	 * Configure how the content type requested for the response is resolved
+	 * when handling requests with annotated controllers.
+	 * @param builder for configuring the resolvers to use
+	 */
+	default void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+	}
+
+	/**
+	 * Configure path matching options.
+	 * <p>The configured path matching options will be used for mapping to
+	 * annotated controllers and also
+	 * {@link #addResourceHandlers(ResourceHandlerRegistry) static resources}.
+	 * @param configurer the {@link PathMatchConfigurer} instance
+	 */
+	default void configurePathMatching(PathMatchConfigurer configurer) {
+	}
+
+	/**
+	 * Configure resolvers for custom {@code @RequestMapping} method arguments.
+	 * @param configurer to configurer to use
+	 */
+	default void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 	}
 
 	/**
@@ -153,6 +141,25 @@ public interface WebFluxConfigurer {
 	 * controllers and functional endpoints.
 	 */
 	default void configureViewResolvers(ViewResolverRegistry registry) {
+	}
+
+	/**
+	 * Add resource handlers for serving static resources.
+	 * @see ResourceHandlerRegistry
+	 */
+	default void addResourceHandlers(ResourceHandlerRegistry registry) {
+	}
+
+	/**
+	 * Provide the {@link WebSocketService} to create
+	 * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter}
+	 * with. This can be used to configure server-specific properties through the
+	 * {@link org.springframework.web.reactive.socket.server.RequestUpgradeStrategy}.
+	 * @since 5.3
+	 */
+	@Nullable
+	default WebSocketService getWebSocketService() {
+		return null;
 	}
 
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.jms.support;
 
+import java.util.Map;
+
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.JMSException;
@@ -24,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.Constants;
 import org.springframework.jms.JmsException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -40,14 +41,23 @@ import org.springframework.util.Assert;
  * See {@link org.springframework.jms.core.JmsTemplate}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2
  * @see org.springframework.jms.support.destination.JmsDestinationAccessor
  * @see org.springframework.jms.core.JmsTemplate
  */
 public abstract class JmsAccessor implements InitializingBean {
 
-	/** Constants instance for {@code jakarta.jms.Session}. */
-	private static final Constants sessionConstants = new Constants(Session.class);
+	/**
+	 * Map of constant names to constant values for the constants defined in
+	 * {@link jakarta.jms.Session}.
+	 */
+	private static final Map<String, Integer> sessionConstants = Map.of(
+			"AUTO_ACKNOWLEDGE", Session.AUTO_ACKNOWLEDGE,
+			"CLIENT_ACKNOWLEDGE", Session.CLIENT_ACKNOWLEDGE,
+			"DUPS_OK_ACKNOWLEDGE", Session.DUPS_OK_ACKNOWLEDGE,
+			"SESSION_TRANSACTED", Session.SESSION_TRANSACTED
+		);
 
 
 	/** Logger available to subclasses. */
@@ -121,18 +131,22 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Set the JMS acknowledgement mode by the name of the corresponding constant
-	 * in the JMS {@link Session} interface, e.g. "CLIENT_ACKNOWLEDGE".
+	 * Set the JMS acknowledgement mode by the name of the corresponding constant in
+	 * the JMS {@link Session} interface &mdash; for example, {@code "CLIENT_ACKNOWLEDGE"}.
 	 * <p>If you want to use vendor-specific extensions to the acknowledgement mode,
 	 * use {@link #setSessionAcknowledgeMode(int)} instead.
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
 	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see jakarta.jms.Connection#createSession(boolean, int)
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
+	 * @see jakarta.jms.Connection#createSession(int)
 	 */
 	public void setSessionAcknowledgeModeName(String constantName) {
-		setSessionAcknowledgeMode(sessionConstants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer sessionAcknowledgeMode = sessionConstants.get(constantName);
+		Assert.notNull(sessionAcknowledgeMode, "Only acknowledge mode constants allowed");
+		this.sessionAcknowledgeMode = sessionAcknowledgeMode;
 	}
 
 	/**
@@ -149,6 +163,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 * @see jakarta.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionAcknowledgeMode(int sessionAcknowledgeMode) {

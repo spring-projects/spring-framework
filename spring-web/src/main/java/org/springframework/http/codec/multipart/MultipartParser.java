@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	/**
 	 * Represents a token that contains {@link HttpHeaders}.
 	 */
-	public final static class HeadersToken extends Token {
+	public static final class HeadersToken extends Token {
 
 		private final HttpHeaders headers;
 
@@ -240,7 +240,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	/**
 	 * Represents a token that contains {@link DataBuffer}.
 	 */
-	public final static class BodyToken extends Token {
+	public static final class BodyToken extends Token {
 
 		private final DataBuffer buffer;
 

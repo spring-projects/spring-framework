@@ -17,7 +17,6 @@
 package org.springframework.web.bind.support;
 
 import java.beans.PropertyEditor;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,8 +31,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.util.BindErrorUtils;
 
 /**
  * {@link ServerWebInputException} subclass that indicates a data binding or
@@ -49,16 +48,9 @@ public class WebExchangeBindException extends ServerWebInputException implements
 
 
 	public WebExchangeBindException(MethodParameter parameter, BindingResult bindingResult) {
-		super("Validation failure", parameter, null, null, initMessageDetailArguments(bindingResult));
+		super("Validation failure", parameter, null, null, null);
 		this.bindingResult = bindingResult;
 		getBody().setDetail("Invalid request content.");
-	}
-
-	private static Object[] initMessageDetailArguments(BindingResult bindingResult) {
-		return new Object[] {
-				MethodArgumentNotValidException.errorsToStringList(bindingResult.getGlobalErrors()),
-				MethodArgumentNotValidException.errorsToStringList(bindingResult.getFieldErrors())
-		};
 	}
 
 
@@ -70,6 +62,37 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public final BindingResult getBindingResult() {
 		return this.bindingResult;
 	}
+
+
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return new Object[] {
+				BindErrorUtils.resolveAndJoin(getGlobalErrors()),
+				BindErrorUtils.resolveAndJoin(getFieldErrors())};
+	}
+
+	@Override
+	public Object[] getDetailMessageArguments(MessageSource source, Locale locale) {
+		return new Object[] {
+				BindErrorUtils.resolveAndJoin(getGlobalErrors(), source, locale),
+				BindErrorUtils.resolveAndJoin(getFieldErrors(), source, locale)};
+	}
+
+	/**
+	 * Resolve global and field errors to messages with the given
+	 * {@link MessageSource} and {@link Locale}.
+	 * @return a Map with errors as key and resolves messages as value
+	 * @since 6.0.3
+	 * @deprecated in favor of using {@link BindErrorUtils} and
+	 * {@link #getAllErrors()}, to be removed in 6.2
+	 */
+	@Deprecated(since = "6.1", forRemoval = true)
+	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
+		return BindErrorUtils.resolve(getAllErrors(), messageSource, locale);
+	}
+
+
+	// BindingResult implementation methods
 
 	@Override
 	public String getObjectName() {
@@ -283,6 +306,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 		return this.bindingResult.getSuppressedFields();
 	}
 
+
 	/**
 	 * Returns diagnostic information about the errors held in this object.
 	 */
@@ -299,38 +323,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 		}
 		return sb.toString();
 	}
-
-	@Override
-	public Object[] getDetailMessageArguments(MessageSource source, Locale locale) {
-		return new Object[] {
-				MethodArgumentNotValidException.errorsToStringList(getGlobalErrors(), source, locale),
-				MethodArgumentNotValidException.errorsToStringList(getFieldErrors(), source, locale)
-		};
-	}
-
-	/**
-	 * Resolve global and field errors to messages with the given
-	 * {@link MessageSource} and {@link Locale}.
-	 * @return a Map with errors as key and resolves messages as value
-	 * @since 6.0.3
-	 */
-	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
-		Map<ObjectError, String> map = new LinkedHashMap<>();
-		addMessages(map, getGlobalErrors(), messageSource, locale);
-		addMessages(map, getFieldErrors(), messageSource, locale);
-		return map;
-	}
-
-	private static void addMessages(
-			Map<ObjectError, String> map, List<? extends ObjectError> errors,
-			MessageSource messageSource, Locale locale) {
-
-		List<String> messages = MethodArgumentNotValidException.errorsToStringList(errors, messageSource, locale);
-		for (int i = 0; i < errors.size(); i++) {
-			map.put(errors.get(i), messages.get(i));
-		}
-	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {

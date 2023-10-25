@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,47 @@
 
 package org.springframework.test.transaction;
 
+import org.assertj.core.api.AbstractBooleanAssert;
+
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Collection of assertions for tests involving transactions. Intended for
- * internal use within the Spring testing suite.
+ * Collection of assertions for tests involving transactions.
+ *
+ * <p>Intended for internal use within the Spring testing suite.
  *
  * @author Sam Brannen
  * @author Phillip Webb
  * @since 5.2
  */
-public class TransactionAssert {
+public final class TransactionAssert {
 
 	private static final TransactionAssert instance = new TransactionAssert();
 
-	public TransactionAssert isActive() {
-		return isInTransaction(true);
-	}
-
-	public TransactionAssert isNotActive() {
-		return isInTransaction(false);
-
-	}
-
-	public TransactionAssert isInTransaction(boolean expected) {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive())
-				.as("active transaction")
-				.isEqualTo(expected);
-		return this;
-	}
-
 	public static TransactionAssert assertThatTransaction() {
 		return instance;
+	}
+
+	public void isActive() {
+		isInTransaction(true);
+	}
+
+	public void isNotActive() {
+		isInTransaction(false);
+	}
+
+	private void isInTransaction(boolean expected) {
+		AbstractBooleanAssert<?> assertInTransaction =
+				assertThat(TransactionSynchronizationManager.isActualTransactionActive())
+					.as("active transaction");
+		if (expected) {
+			assertInTransaction.isTrue();
+		}
+		else {
+			assertInTransaction.isFalse();
+		}
 	}
 
 }

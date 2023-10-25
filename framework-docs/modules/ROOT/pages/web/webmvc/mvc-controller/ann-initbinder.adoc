@@ -1,25 +1,27 @@
 [[mvc-ann-initbinder]]
-= `DataBinder`
+= `@InitBinder`
 
 [.small]#xref:web/webflux/controller/ann-initbinder.adoc[See equivalent in the Reactive stack]#
 
-`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods that
-initialize instances of `WebDataBinder`, and those, in turn, can:
+`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods to
+initialize `WebDataBinder` instances that in turn can:
 
-* Bind request parameters (that is, form or query data) to a model object.
-* Convert String-based request values (such as request parameters, path variables,
-headers, cookies, and others) to the target type of controller method arguments.
-* Format model object values as `String` values when rendering HTML forms.
+* Bind request parameters to a model object.
+* Convert request values from string to object property types.
+* Format model object properties as strings when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
-Spring `Converter` and `Formatter` components. In addition, you can use the
-xref:web/webmvc/mvc-config/conversion.adoc[MVC config] to register `Converter` and `Formatter`
-types in a globally shared `FormattingConversionService`.
+In an `@Controller`, `DataBinder` customizations apply locally within the controller,
+or even to a specific model attribute referenced by name through the annotation.
+In an `@ControllerAdvice` customizations can apply to all or a subset of controllers.
 
-`@InitBinder` methods support many of the same arguments that `@RequestMapping` methods
-do, except for `@ModelAttribute` (command object) arguments. Typically, they are declared
-with a `WebDataBinder` argument (for registrations) and a `void` return value.
-The following listing shows an example:
+You can register `PropertyEditor`, `Converter`, and `Formatter` components in the
+`DataBinder` for type conversion. Alternatively, you can use the
+xref:web/webmvc/mvc-config/conversion.adoc[MVC config] to register `Converter` and
+`Formatter` components  in a globally shared `FormattingConversionService`.
+
+`@InitBinder` methods can have many of the same arguments that `@RequestMapping` methods
+have, with the notable exception of `@ModelAttribute`. Typically, such methods have a
+`WebDataBinder` argument (for registrations) and a `void` return value, for example:
 
 [tabs]
 ======

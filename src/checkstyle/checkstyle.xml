@@ -187,6 +187,12 @@
 			<property name="tagOrder" value="@param, @return, @throws, @since, @see, @deprecated"/>
 		</module>
 
+		<!-- Modifiers -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
+
+		<!-- Whitespace -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.whitespace.SingleSpaceSeparatorCheck"/>
+
 		<!-- Miscellaneous -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck">
 			<property name="tokens" value="BLOCK_COMMENT_BEGIN"/>

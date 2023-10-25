@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ abstract class WebClientUtils {
 	/**
 	 * Predicate that returns true if an exception should be wrapped.
 	 */
-	public final static Predicate<? super Throwable> WRAP_EXCEPTION_PREDICATE =
+	public static final Predicate<? super Throwable> WRAP_EXCEPTION_PREDICATE =
 			t -> !(t instanceof WebClientException) && !(t instanceof CodecException);
 
 

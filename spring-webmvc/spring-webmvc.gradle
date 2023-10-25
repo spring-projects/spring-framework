@@ -25,6 +25,7 @@ dependencies {
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
 	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
+	optional("jakarta.validation:jakarta.validation-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("org.apache.groovy:groovy-templates")
 	optional("org.apache.poi:poi-ooxml")
@@ -54,10 +55,7 @@ dependencies {
 		exclude group: "pull-parser", module: "pull-parser"
 		exclude group: "xpp3", module: "xpp3"
 	}
-	testImplementation("org.eclipse.jetty:jetty-server") {
-		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
-	}
-	testImplementation("org.eclipse.jetty:jetty-servlet") {
+	testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	testImplementation("org.hibernate:hibernate-validator")

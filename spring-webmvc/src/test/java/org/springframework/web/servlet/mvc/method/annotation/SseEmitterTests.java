@@ -105,6 +105,16 @@ public class SseEmitterTests {
 	}
 
 	@Test
+	public void sendEventWithMultiline() throws Exception {
+		this.emitter.send(event().data("foo\nbar\nbaz"));
+		this.handler.assertSentObjectCount(3);
+		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
+		this.handler.assertObject(1, "foo\ndata:bar\ndata:baz");
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
+	}
+
+	@Test
 	public void sendEventFull() throws Exception {
 		this.emitter.send(event().comment("blah").name("test").reconnectTime(5000L).id("1").data("foo"));
 		this.handler.assertSentObjectCount(3);

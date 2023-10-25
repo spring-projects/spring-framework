@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,6 +77,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
+
+	static final String SUPPRESS_LOGGING_ATTRIBUTE = AbstractHandlerMapping.class.getName() + ".SUPPRESS_LOGGING";
+
 
 	/** Dedicated "hidden" logger for request mappings. */
 	protected final Log mappingsLogger =
@@ -399,7 +401,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	protected String formatMappingName() {
-		return this.beanName != null ? "'" + this.beanName + "'" : getClass().getName();
+		return (this.beanName != null ? "'" + this.beanName + "'" : getClass().getName());
 	}
 
 
@@ -521,11 +523,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Mapped to " + handler);
-		}
-		else if (logger.isDebugEnabled() && !DispatcherType.ASYNC.equals(request.getDispatcherType())) {
-			logger.debug("Mapped to " + executionChain.getHandler());
+		if (request.getAttribute(SUPPRESS_LOGGING_ATTRIBUTE) == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Mapped to " + handler);
+			}
+			else if (logger.isDebugEnabled() && !DispatcherType.ASYNC.equals(request.getDispatcherType())) {
+				logger.debug("Mapped to " + executionChain.getHandler());
+			}
 		}
 
 		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
@@ -589,9 +593,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private RequestPath getRequestPath(HttpServletRequest request) {
 		// Expect pre-parsed path with DispatcherServlet,
 		// but otherwise parse per handler lookup + cache for handling
-		return request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null ?
+		return (request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null ?
 				ServletRequestPathUtils.getParsedRequestPath(request) :
-				ServletRequestPathUtils.parseAndCache(request);
+				ServletRequestPathUtils.parseAndCache(request));
 	}
 
 	/**
@@ -662,49 +666,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Update the HandlerExecutionChain for CORS-related handling.
-	 * <p>For pre-flight requests, the default implementation replaces the selected
-	 * handler with a simple HttpRequestHandler that invokes the configured
-	 * {@link #setCorsProcessor}.
-	 * <p>For actual requests, the default implementation inserts a
-	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
+	 * Update {@link HandlerExecutionChain} for CORS requests, inserting an
+	 * interceptor at the start of the chain to perform CORS checks, and
+	 * also using a no-op handler for preflight requests.
 	 * @param request the current request
-	 * @param chain the handler chain
-	 * @param config the applicable CORS configuration (possibly {@code null})
+	 * @param chain the chain to update
+	 * @param config the CORS configuration applicable to the handler
 	 * @since 4.2
 	 */
-	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
-			HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
+	protected HandlerExecutionChain getCorsHandlerExecutionChain(
+			HttpServletRequest request, HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
 
 		if (CorsUtils.isPreFlightRequest(request)) {
-			HandlerInterceptor[] interceptors = chain.getInterceptors();
-			return new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+			PreFlightHandler preFlightHandler = new PreFlightHandler(config);
+			chain.addInterceptor(0, preFlightHandler);
+			return new HandlerExecutionChain(preFlightHandler, chain.getInterceptors());
 		}
 		else {
 			chain.addInterceptor(0, new CorsInterceptor(config));
 			return chain;
-		}
-	}
-
-
-	private class PreFlightHandler implements HttpRequestHandler, CorsConfigurationSource {
-
-		@Nullable
-		private final CorsConfiguration config;
-
-		public PreFlightHandler(@Nullable CorsConfiguration config) {
-			this.config = config;
-		}
-
-		@Override
-		public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-			corsProcessor.processRequest(this.config, request, response);
-		}
-
-		@Override
-		@Nullable
-		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-			return this.config;
 		}
 	}
 
@@ -735,6 +715,19 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		@Nullable
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.config;
+		}
+	}
+
+
+	private class PreFlightHandler extends CorsInterceptor implements HttpRequestHandler {
+
+		public PreFlightHandler(@Nullable CorsConfiguration config) {
+			super(config);
+		}
+
+		@Override
+		public void handleRequest(HttpServletRequest request, HttpServletResponse response) {
+			// no-op
 		}
 	}
 

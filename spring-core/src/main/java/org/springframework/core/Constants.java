@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * in public static final members. The {@code asXXXX} methods of this class
  * allow these constant values to be accessed via their string names.
  *
- * <p>Consider class Foo containing {@code public final static int CONSTANT1 = 66;}
+ * <p>Consider class Foo containing {@code public static final int CONSTANT1 = 66;}
  * An instance of this class wrapping {@code Foo.class} will return the constant value
  * of 66 from its {@code asNumber} method given the argument {@code "CONSTANT1"}.
  *
@@ -43,7 +43,10 @@ import org.springframework.util.ReflectionUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16.03.2003
+ * @deprecated since 6.1 with no replacement; use an enum, map, or similar custom
+ * solution instead
  */
+@Deprecated(since = "6.1")
 public class Constants {
 
 	/** The name of the introspected class. */

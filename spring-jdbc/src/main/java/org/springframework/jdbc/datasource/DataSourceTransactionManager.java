@@ -82,7 +82,7 @@ import org.springframework.util.Assert;
  * until a {@code Statement} gets executed, lazily applying the specified transaction
  * settings to the target {@code Connection}.
  *
- * <p>This transaction manager supports nested transactions via the JDBC 3.0
+ * <p>This transaction manager supports nested transactions via the JDBC
  * {@link java.sql.Savepoint} mechanism. The
  * {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
  * to "true", since nested transactions will work without restrictions on JDBC

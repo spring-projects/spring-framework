@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.validation.beanvalidation;
 import java.lang.annotation.Annotation;
 import java.util.function.Supplier;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -34,6 +36,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationException;
+import org.springframework.validation.method.MethodValidationResult;
 
 /**
  * A convenient {@link BeanPostProcessor} implementation that delegates to a
@@ -46,6 +50,10 @@ import org.springframework.validation.annotation.Validated;
  * <pre class="code">
  * public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)
  * </pre>
+ *
+ * <p>In case of validation errors, the interceptor can raise
+ * {@link ConstraintViolationException}, or adapt the violations to
+ * {@link MethodValidationResult} and raise {@link MethodValidationException}.
  *
  * <p>Target classes with such annotated methods need to be annotated with Spring's
  * {@link Validated} annotation at the type level, for their methods to be searched for
@@ -67,6 +75,8 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 
 	private Supplier<Validator> validator = SingletonSupplier.of(() ->
 			Validation.buildDefaultValidatorFactory().getValidator());
+
+	private boolean adaptConstraintViolations;
 
 
 	/**
@@ -109,6 +119,18 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 		this.validator = validatorProvider::getObject;
 	}
 
+	/**
+	 * Whether to adapt {@link ConstraintViolation}s to {@link MethodValidationResult}.
+	 * <p>By default {@code false} in which case
+	 * {@link jakarta.validation.ConstraintViolationException} is raised in case of
+	 * violations. When set to {@code true}, {@link MethodValidationException}
+	 * is raised instead with the method validation results.
+	 * @since 6.1
+	 */
+	public void setAdaptConstraintViolations(boolean adaptViolations) {
+		this.adaptConstraintViolations = adaptViolations;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -125,7 +147,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * @since 6.0
 	 */
 	protected Advice createMethodValidationAdvice(Supplier<Validator> validator) {
-		return new MethodValidationInterceptor(validator);
+		return new MethodValidationInterceptor(validator, this.adaptConstraintViolations);
 	}
 
 }

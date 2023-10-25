@@ -161,8 +161,7 @@ public abstract class AbstractBrokerMessageHandler
 	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
 	 * <p>When this flag is set to {@code true} messages within the same session
 	 * will be sent to the {@code "clientOutboundChannel"} one at a time in
-	 * order to preserve the order of publication. Enable this only if needed
-	 * since there is some performance overhead to keep messages in order.
+	 * order to preserve the order of publication.
 	 * @param preservePublishOrder whether to publish in order
 	 * @since 5.1
 	 */

@@ -26,18 +26,16 @@ available through the `ServletRequest.getParameter{asterisk}()` family of method
 
 
 
-[[filters-forwarded-headers]]
+[[forwarded-headers]]
 == Forwarded Headers
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-forwarded-headers[See equivalent in the Reactive stack]#
 
-As a request goes through proxies (such as load balancers) the host, port, and
-scheme may change, and that makes it a challenge to create links that point to the correct
-host, port, and scheme from a client perspective.
+include::partial$web/forwarded-headers.adoc[]
 
-https://tools.ietf.org/html/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
-that proxies can use to provide information about the original request. There are other
-non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
-`X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
+
+
+[[filters-forwarded-headers-non-forwardedheaderfilter]]
+=== ForwardedHeaderFilter
 
 `ForwardedHeaderFilter` is a Servlet filter that modifies the request in order to
 a) change the host, port, and scheme based on `Forwarded` headers, and b) to remove those
@@ -45,11 +43,21 @@ headers to eliminate further impact. The filter relies on wrapping the request, 
 therefore it must be ordered ahead of other filters, such as `RequestContextFilter`, that
 should work with the modified and not the original request.
 
+
+
+[[filters-forwarded-headers-security]]
+=== Security Considerations
+
 There are security considerations for forwarded headers since an application cannot know
 if the headers were added by a proxy, as intended, or by a malicious client. This is why
 a proxy at the boundary of trust should be configured to remove untrusted `Forwarded`
 headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
 with `removeOnly=true`, in which case it removes but does not use the headers.
+
+
+
+[[filters-forwarded-headers-dispatcher]]
+=== Dispatcher Types
 
 In order to support xref:web/webmvc/mvc-ann-async.adoc[asynchronous requests] and error dispatches this
 filter should be mapped with `DispatcherType.ASYNC` and also `DispatcherType.ERROR`.

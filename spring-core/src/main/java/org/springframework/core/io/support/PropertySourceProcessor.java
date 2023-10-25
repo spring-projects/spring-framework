@@ -46,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 6.0
  * @see PropertySourceDescriptor
  */
@@ -58,14 +59,14 @@ public class PropertySourceProcessor {
 
 	private final ConfigurableEnvironment environment;
 
-	private final ResourceLoader resourceLoader;
+	private final ResourcePatternResolver resourcePatternResolver;
 
 	private final List<String> propertySourceNames = new ArrayList<>();
 
 
 	public PropertySourceProcessor(ConfigurableEnvironment environment, ResourceLoader resourceLoader) {
 		this.environment = environment;
-		this.resourceLoader = resourceLoader;
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
@@ -87,8 +88,9 @@ public class PropertySourceProcessor {
 		for (String location : locations) {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
-				Resource resource = this.resourceLoader.getResource(resolvedLocation);
-				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
+				for (Resource resource : this.resourcePatternResolver.getResources(resolvedLocation)) {
+					addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
+				}
 			}
 			catch (RuntimeException | IOException ex) {
 				// Placeholders not resolvable (IllegalArgumentException) or resource not found when trying to open it
@@ -135,8 +137,8 @@ public class PropertySourceProcessor {
 			propertySources.addLast(propertySource);
 		}
 		else {
-			String firstProcessed = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
-			propertySources.addBefore(firstProcessed, propertySource);
+			String lastAdded = this.propertySourceNames.get(this.propertySourceNames.size() - 1);
+			propertySources.addBefore(lastAdded, propertySource);
 		}
 		this.propertySourceNames.add(name);
 	}

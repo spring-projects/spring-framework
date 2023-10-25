@@ -61,6 +61,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
@@ -917,7 +918,7 @@ class ConstructorResolver {
 				// Single constructor or factory method -> let's return an empty array/collection
 				// for e.g. a vararg or a non-null List/Set/Map parameter.
 				if (paramType.isArray()) {
-					return Array.newInstance(paramType.getComponentType(), 0);
+					return Array.newInstance(paramType.componentType(), 0);
 				}
 				else if (CollectionFactory.isApproximableCollectionType(paramType)) {
 					return CollectionFactory.createCollection(paramType, 0);
@@ -999,6 +1000,9 @@ class ConstructorResolver {
 		for (ValueHolder valueHolder : mbd.getConstructorArgumentValues().getIndexedArgumentValues().values()) {
 			parameterTypes.add(determineParameterValueType(mbd, valueHolder));
 		}
+		for (ValueHolder valueHolder : mbd.getConstructorArgumentValues().getGenericArgumentValues()) {
+			parameterTypes.add(determineParameterValueType(mbd, valueHolder));
+		}
 		return parameterTypes;
 	}
 
@@ -1022,6 +1026,12 @@ class ConstructorResolver {
 					this.beanFactory.getMergedBeanDefinition(nameToUse, innerBd, mbd));
 			return (FactoryBean.class.isAssignableFrom(type.toClass()) ?
 					type.as(FactoryBean.class).getGeneric(0) : type);
+		}
+		if (value instanceof TypedStringValue typedValue) {
+			if (typedValue.hasTargetType()) {
+				return ResolvableType.forClass(typedValue.getTargetType());
+			}
+			return ResolvableType.forClass(String.class);
 		}
 		if (value instanceof Class<?> clazz) {
 			return ResolvableType.forClassWithGenerics(Class.class, clazz);

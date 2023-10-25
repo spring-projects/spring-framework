@@ -113,9 +113,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.methodName);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.source);
-		return hashCode;
+		return ObjectUtils.nullSafeHash(this.methodName, this.source);
 	}
 
 }

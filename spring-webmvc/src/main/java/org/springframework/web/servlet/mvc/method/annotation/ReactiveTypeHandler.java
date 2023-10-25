@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +38,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
@@ -78,9 +76,7 @@ class ReactiveTypeHandler {
 
 	private static final long STREAMING_TIMEOUT_VALUE = -1;
 
-	@SuppressWarnings("deprecation")
-	private static final List<MediaType> JSON_STREAMING_MEDIA_TYPES =
-			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON);
+	private static final MediaType WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON = MediaType.valueOf("application/*+x-ndjson");
 
 	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
 			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
@@ -94,8 +90,6 @@ class ReactiveTypeHandler {
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
-	private boolean taskExecutorWarning;
-
 
 	public ReactiveTypeHandler() {
 		this(ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(), new ContentNegotiationManager());
@@ -108,9 +102,6 @@ class ReactiveTypeHandler {
 		this.adapterRegistry = registry;
 		this.taskExecutor = executor;
 		this.contentNegotiationManager = manager;
-
-		this.taskExecutorWarning =
-				(executor instanceof SimpleAsyncTaskExecutor || executor instanceof SyncTaskExecutor);
 	}
 
 
@@ -150,26 +141,20 @@ class ReactiveTypeHandler {
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
 					ServerSentEvent.class.isAssignableFrom(elementClass)) {
-				logExecutorWarning(returnType);
 				SseEmitter emitter = new SseEmitter(STREAMING_TIMEOUT_VALUE);
 				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			if (CharSequence.class.isAssignableFrom(elementClass)) {
-				logExecutorWarning(returnType);
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
-			for (MediaType type : mediaTypes) {
-				for (MediaType streamingType : JSON_STREAMING_MEDIA_TYPES) {
-					if (streamingType.includes(type)) {
-						logExecutorWarning(returnType);
-						ResponseBodyEmitter emitter = getEmitter(streamingType);
-						new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
-						return emitter;
-					}
-				}
+			MediaType streamingResponseType = findConcreteStreamingMediaType(mediaTypes);
+			if (streamingResponseType != null) {
+				ResponseBodyEmitter emitter = getEmitter(streamingResponseType);
+				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
+				return emitter;
 			}
 		}
 
@@ -179,6 +164,45 @@ class ReactiveTypeHandler {
 		WebAsyncUtils.getAsyncManager(request).startDeferredResultProcessing(result, mav);
 
 		return null;
+	}
+
+	/**
+	 * Attempts to find a concrete {@code MediaType} that can be streamed (as json separated
+	 * by newlines in the response body). This method considers two concrete types
+	 * {@code APPLICATION_NDJSON} and {@code APPLICATION_STREAM_JSON}) as well as any
+	 * subtype of application that has the {@code +x-ndjson} suffix. In the later case,
+	 * the media type MUST be concrete for it to be considered.
+	 *
+	 * <p>For example {@code application/vnd.myapp+x-ndjson} is considered a streaming type
+	 * while {@code application/*+x-ndjson} isn't.
+	 * @param acceptedMediaTypes the collection of acceptable media types in the request
+	 * @return the concrete streaming {@code MediaType} if one could be found or {@code null}
+	 * if none could be found
+	 */
+	@SuppressWarnings("deprecation")
+	@Nullable
+	static MediaType findConcreteStreamingMediaType(Collection<MediaType> acceptedMediaTypes) {
+		for (MediaType acceptedType : acceptedMediaTypes) {
+			if (WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON.includes(acceptedType)) {
+				if (acceptedType.isConcrete()) {
+					return acceptedType;
+				}
+				else {
+					// if not concrete, it must be application/*+x-ndjson: we assume
+					// that the requester is only interested in the ndjson nature of
+					// the underlying representation and can parse any example of that
+					// underlying representation, so we use the ndjson media type.
+					return MediaType.APPLICATION_NDJSON;
+				}
+			}
+			else if (MediaType.APPLICATION_NDJSON.includes(acceptedType)) {
+				return MediaType.APPLICATION_NDJSON;
+			}
+			else if (MediaType.APPLICATION_STREAM_JSON.includes(acceptedType)) {
+				return MediaType.APPLICATION_STREAM_JSON;
+			}
+		}
+		return null; // not a concrete streaming type
 	}
 
 	@SuppressWarnings("unchecked")
@@ -199,27 +223,6 @@ class ReactiveTypeHandler {
 				outputMessage.getHeaders().setContentType(mediaType);
 			}
 		};
-	}
-
-	@SuppressWarnings("ConstantConditions")
-	private void logExecutorWarning(MethodParameter returnType) {
-		if (this.taskExecutorWarning && logger.isWarnEnabled()) {
-			synchronized (this) {
-				if (this.taskExecutorWarning) {
-					String executorTypeName = this.taskExecutor.getClass().getSimpleName();
-					logger.warn("\n!!!\n" +
-							"Streaming through a reactive type requires an Executor to write to the response.\n" +
-							"Please, configure a TaskExecutor in the MVC config under \"async support\".\n" +
-							"The " + executorTypeName + " currently in use is not suitable under load.\n" +
-							"-------------------------------\n" +
-							"Controller:\t" + returnType.getContainingClass().getName() + "\n" +
-							"Method:\t\t" + returnType.getMethod().getName() + "\n" +
-							"Returning:\t" + ResolvableType.forMethodParameter(returnType) + "\n" +
-							"!!!");
-					this.taskExecutorWarning = false;
-				}
-			}
-		}
 	}
 
 

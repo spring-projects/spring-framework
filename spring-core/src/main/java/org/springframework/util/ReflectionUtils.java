@@ -463,7 +463,7 @@ public abstract class ReflectionUtils {
 		if (result == null) {
 			try {
 				Method[] declaredMethods = clazz.getDeclaredMethods();
-				List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
+				List<Method> defaultMethods = findDefaultMethodsOnInterfaces(clazz);
 				if (defaultMethods != null) {
 					result = new Method[declaredMethods.length + defaultMethods.size()];
 					System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
@@ -487,15 +487,15 @@ public abstract class ReflectionUtils {
 	}
 
 	@Nullable
-	private static List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
+	private static List<Method> findDefaultMethodsOnInterfaces(Class<?> clazz) {
 		List<Method> result = null;
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			for (Method ifcMethod : ifc.getMethods()) {
-				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
+			for (Method method : ifc.getMethods()) {
+				if (method.isDefault()) {
 					if (result == null) {
 						result = new ArrayList<>();
 					}
-					result.add(ifcMethod);
+					result.add(method);
 				}
 			}
 		}
@@ -601,6 +601,31 @@ public abstract class ReflectionUtils {
 			for (Field field : fields) {
 				if ((name == null || name.equals(field.getName())) &&
 						(type == null || type.equals(field.getType()))) {
+					return field;
+				}
+			}
+			searchType = searchType.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
+	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
+	 * supplied {@code name}. Searches all superclasses up to {@link Object}.
+	 * @param clazz the class to introspect
+	 * @param name the name of the field (with upper/lower case to be ignored)
+	 * @return the corresponding Field object, or {@code null} if not found
+	 * @since 6.1
+	 */
+	@Nullable
+	public static Field findFieldIgnoreCase(Class<?> clazz, String name) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(name, "Name must not be null");
+		Class<?> searchType = clazz;
+		while (Object.class != searchType && searchType != null) {
+			Field[] fields = getDeclaredFields(searchType);
+			for (Field field : fields) {
+				if (name.equalsIgnoreCase(field.getName())) {
 					return field;
 				}
 			}

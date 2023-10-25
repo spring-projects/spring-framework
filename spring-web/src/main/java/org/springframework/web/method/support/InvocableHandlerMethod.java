@@ -19,6 +19,13 @@ package org.springframework.web.method.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.jvm.KCallablesJvm;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
@@ -27,7 +34,9 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -48,6 +57,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
+	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
+
 
 	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -55,6 +66,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	@Nullable
 	private WebDataBinderFactory dataBinderFactory;
+
+	@Nullable
+	private MethodValidator methodValidator;
 
 
 	/**
@@ -119,6 +133,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		this.dataBinderFactory = dataBinderFactory;
 	}
 
+	/**
+	 * Set the {@link MethodValidator} to perform method validation with if the
+	 * controller method {@link #shouldValidateArguments()} or
+	 * {@link #shouldValidateReturnValue()}.
+	 * @since 6.1
+	 */
+	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
+		this.methodValidator = methodValidator;
+	}
+
 
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given request.
@@ -147,7 +171,21 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
-		return doInvoke(args);
+
+		Class<?>[] groups = getValidationGroups();
+		if (shouldValidateArguments() && this.methodValidator != null) {
+			this.methodValidator.applyArgumentValidation(
+					getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
+		}
+
+		Object returnValue = doInvoke(args);
+
+		if (shouldValidateReturnValue() && this.methodValidator != null) {
+			this.methodValidator.applyReturnValueValidation(
+					getBean(), getBridgedMethod(), getReturnType(), returnValue, groups);
+		}
+
+		return returnValue;
 	}
 
 	/**
@@ -192,6 +230,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return args;
 	}
 
+	private Class<?>[] getValidationGroups() {
+		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
+				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
+	}
+
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
@@ -199,8 +242,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	protected Object doInvoke(Object... args) throws Exception {
 		Method method = getBridgedMethod();
 		try {
-			if (KotlinDetector.isSuspendingFunction(method)) {
-				return invokeSuspendingFunction(method, getBean(), args);
+			if (KotlinDetector.isKotlinReflectPresent()) {
+				if (KotlinDetector.isSuspendingFunction(method)) {
+					return invokeSuspendingFunction(method, getBean(), args);
+				}
+				else if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					return KotlinDelegate.invokeFunction(method, getBean(), args);
+				}
 			}
 			return method.invoke(getBean(), args);
 		}
@@ -240,6 +288,35 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	protected Object invokeSuspendingFunction(Method method, Object target, Object[] args) {
 		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		@Nullable
+		@SuppressWarnings("deprecation")
+		public static Object invokeFunction(Method method, Object target, Object[] args) {
+			KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+			if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+				KCallablesJvm.setAccessible(function, true);
+			}
+			Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
+			int index = 0;
+			for (KParameter parameter : function.getParameters()) {
+				switch (parameter.getKind()) {
+					case INSTANCE -> argMap.put(parameter, target);
+					case VALUE -> {
+						if (!parameter.isOptional() || args[index] != null) {
+							argMap.put(parameter, args[index]);
+						}
+						index++;
+					}
+				}
+			}
+			return function.callBy(argMap);
+		}
 	}
 
 }

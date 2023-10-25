@@ -16,6 +16,8 @@
 
 package org.springframework.context.testfixture.cache.beans;
 
+import java.util.Objects;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -38,7 +40,7 @@ public class TestEntity {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.id);
+		return Objects.hashCode(this.id);
 	}
 
 	@Override

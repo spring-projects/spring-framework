@@ -33,6 +33,7 @@ import org.springframework.core.io.buffer.Netty5DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.http.support.Netty5HeadersAdapter;
 
 /**
  * {@link ClientHttpRequest} implementation for the Reactor Netty 2 (Netty 5) HTTP client.

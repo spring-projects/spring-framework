@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,15 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertySourceDescriptor;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.core.log.LogMessage;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -61,7 +64,7 @@ class TestPropertySourceAttributes {
 
 	private final MergedAnnotation<?> rootAnnotation;
 
-	private final List<String> locations = new ArrayList<>();
+	private final List<PropertySourceDescriptor> descriptors = new ArrayList<>();
 
 	private final boolean inheritLocations;
 
@@ -70,12 +73,13 @@ class TestPropertySourceAttributes {
 	private final boolean inheritProperties;
 
 
-	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> annotation) {
-		this.declaringClass = declaringClass(annotation);
-		this.rootAnnotation = annotation.getRoot();
-		this.inheritLocations = annotation.getBoolean("inheritLocations");
-		this.inheritProperties = annotation.getBoolean("inheritProperties");
-		addPropertiesAndLocationsFrom(annotation);
+	@SuppressWarnings("unchecked")
+	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> mergedAnnotation) {
+		this.declaringClass = declaringClass(mergedAnnotation);
+		this.rootAnnotation = mergedAnnotation.getRoot();
+		this.inheritLocations = mergedAnnotation.getBoolean("inheritLocations");
+		this.inheritProperties = mergedAnnotation.getBoolean("inheritProperties");
+		addPropertiesAndLocationsFrom(mergedAnnotation, this.declaringClass);
 	}
 
 	/**
@@ -112,27 +116,59 @@ class TestPropertySourceAttributes {
 			attributeName));
 	}
 
-	private void addPropertiesAndLocationsFrom(MergedAnnotation<TestPropertySource> mergedAnnotation) {
+	@SuppressWarnings("unchecked")
+	private void addPropertiesAndLocationsFrom(MergedAnnotation<TestPropertySource> mergedAnnotation,
+			Class<?> declaringClass) {
+
 		String[] locations = mergedAnnotation.getStringArray("locations");
 		String[] properties = mergedAnnotation.getStringArray("properties");
-		addPropertiesAndLocations(locations, properties, declaringClass(mergedAnnotation), false);
+		String[] convertedLocations =
+				TestContextResourceUtils.convertToClasspathResourcePaths(declaringClass, true, locations);
+		Class<? extends PropertySourceFactory> factoryClass =
+				(Class<? extends PropertySourceFactory>) mergedAnnotation.getClass("factory");
+		if (factoryClass == PropertySourceFactory.class) {
+			factoryClass = null; // default factory type will be inferred
+		}
+		String encoding = mergedAnnotation.getString("encoding");
+		if (encoding.isBlank()) {
+			encoding = null; // default encoding will be inferred
+		}
+		PropertySourceDescriptor descriptor = new PropertySourceDescriptor(
+				List.of(convertedLocations), false, null, factoryClass, encoding);
+		addPropertiesAndLocations(List.of(descriptor), properties, declaringClass, encoding, false);
 	}
 
 	private void mergePropertiesAndLocationsFrom(TestPropertySourceAttributes attributes) {
-		addPropertiesAndLocations(attributes.getLocations(), attributes.getProperties(),
-				attributes.getDeclaringClass(), true);
+		addPropertiesAndLocations(attributes.getPropertySourceDescriptors(), attributes.getProperties(),
+				attributes.getDeclaringClass(), null, true);
 	}
 
-	private void addPropertiesAndLocations(String[] locations, String[] properties,
-			Class<?> declaringClass, boolean prepend) {
+	private void addPropertiesAndLocations(List<PropertySourceDescriptor> descriptors, String[] properties,
+			Class<?> declaringClass, String encoding, boolean prepend) {
 
-		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
-			addAll(prepend, this.locations, detectDefaultPropertiesFile(declaringClass));
+		if (hasNoLocations(descriptors) && ObjectUtils.isEmpty(properties)) {
+			String defaultPropertiesFile = detectDefaultPropertiesFile(declaringClass);
+			PropertySourceDescriptor descriptor = new PropertySourceDescriptor(
+					List.of(defaultPropertiesFile), false, null, null, encoding);
+			addAll(prepend, this.descriptors, List.of(descriptor));
 		}
 		else {
-			addAll(prepend, this.locations, locations);
+			addAll(prepend, this.descriptors, descriptors);
 			addAll(prepend, this.properties, properties);
 		}
+	}
+
+	/**
+	 * Add all the supplied elements to the provided list, honoring the
+	 * {@code prepend} flag.
+	 * <p>If the {@code prepend} flag is {@code false}, the elements will be appended
+	 * to the list.
+	 * @param prepend whether the elements should be prepended to the list
+	 * @param list the list to which to add the elements
+	 * @param elements the elements to add to the list
+	 */
+	private void addAll(boolean prepend, List<PropertySourceDescriptor> list, List<PropertySourceDescriptor> elements) {
+		list.addAll((prepend ? 0 : list.size()), elements);
 	}
 
 	/**
@@ -177,16 +213,18 @@ class TestPropertySourceAttributes {
 	}
 
 	/**
-	 * Get the resource locations that were declared via {@code @TestPropertySource}.
+	 * Get the descriptors for resource locations that were declared via
+	 * {@code @TestPropertySource}.
 	 * <p>Note: The returned value may represent a <em>detected default</em>
 	 * or merged locations that do not match the original value declared via a
 	 * single {@code @TestPropertySource} annotation.
-	 * @return the resource locations; potentially <em>empty</em>
+	 * @return the resource location descriptors; potentially <em>empty</em>
 	 * @see TestPropertySource#value
 	 * @see TestPropertySource#locations
+	 * @see TestPropertySource#factory
 	 */
-	String[] getLocations() {
-		return StringUtils.toStringArray(this.locations);
+	List<PropertySourceDescriptor> getPropertySourceDescriptors() {
+		return this.descriptors;
 	}
 
 	/**
@@ -220,7 +258,7 @@ class TestPropertySourceAttributes {
 	}
 
 	boolean isEmpty() {
-		return (this.locations.isEmpty() && this.properties.isEmpty());
+		return (hasNoLocations(this.descriptors) && this.properties.isEmpty());
 	}
 
 	@Override
@@ -233,7 +271,7 @@ class TestPropertySourceAttributes {
 		}
 
 		TestPropertySourceAttributes that = (TestPropertySourceAttributes) other;
-		if (!this.locations.equals(that.locations)) {
+		if (!this.descriptors.equals(that.descriptors)) {
 			return false;
 		}
 		if (!this.properties.equals(that.properties)) {
@@ -251,7 +289,7 @@ class TestPropertySourceAttributes {
 
 	@Override
 	public int hashCode() {
-		int result = this.locations.hashCode();
+		int result = this.descriptors.hashCode();
 		result = 31 * result + this.properties.hashCode();
 		result = 31 * result + (this.inheritLocations ? 1231 : 1237);
 		result = 31 * result + (this.inheritProperties ? 1231 : 1237);
@@ -265,8 +303,8 @@ class TestPropertySourceAttributes {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
-				.append("declaringClass", this.declaringClass)
-				.append("locations", this.locations)
+				.append("declaringClass", this.declaringClass.getName())
+				.append("descriptors", this.descriptors)
 				.append("inheritLocations", this.inheritLocations)
 				.append("properties", this.properties)
 				.append("inheritProperties", this.inheritProperties)
@@ -277,6 +315,14 @@ class TestPropertySourceAttributes {
 		Object source = mergedAnnotation.getSource();
 		Assert.state(source instanceof Class, "No source class available");
 		return (Class<?>) source;
+	}
+
+	/**
+	 * Determine if the supplied list contains no descriptor with locations.
+	 */
+	private static boolean hasNoLocations(List<PropertySourceDescriptor> descriptors) {
+		return descriptors.stream().map(PropertySourceDescriptor::locations)
+				.flatMap(List::stream).findAny().isEmpty();
 	}
 
 }

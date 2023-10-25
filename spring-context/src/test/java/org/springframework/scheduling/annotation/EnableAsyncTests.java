@@ -26,6 +26,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
@@ -140,13 +141,18 @@ public class EnableAsyncTests {
 					context.getBean(AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder.class);
 
 			Future<Thread> workerThread1 = asyncBean.myWork1();
-			assertThat(workerThread1.get().getName()).startsWith("myExecutor1-");
+			assertThat(workerThread1.get(100, TimeUnit.MILLISECONDS).getName()).startsWith("myExecutor1-");
 
+			context.stop();
 			Future<Thread> workerThread2 = asyncBean.myWork2();
-			assertThat(workerThread2.get().getName()).startsWith("myExecutor2-");
+			assertThatExceptionOfType(TimeoutException.class).isThrownBy(
+					() -> workerThread2.get(100, TimeUnit.MILLISECONDS));
+
+			context.start();
+			assertThat(workerThread2.get(100, TimeUnit.MILLISECONDS).getName()).startsWith("myExecutor2-");
 
 			Future<Thread> workerThread3 = asyncBean.fallBackToDefaultExecutor();
-			assertThat(workerThread3.get().getName()).startsWith("SimpleAsyncTaskExecutor");
+			assertThat(workerThread3.get(100, TimeUnit.MILLISECONDS).getName()).startsWith("SimpleAsyncTaskExecutor");
 		}
 		finally {
 			System.clearProperty("myExecutor");

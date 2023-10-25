@@ -28,17 +28,19 @@ import java.util.function.Predicate;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.1
+ * @see Environment#acceptsProfiles(Profiles)
+ * @see Environment#matchesProfiles(String...)
  */
 @FunctionalInterface
 public interface Profiles {
 
 	/**
 	 * Test if this {@code Profiles} instance <em>matches</em> against the given
-	 * active profiles predicate.
-	 * @param activeProfiles a predicate that tests whether a given profile is
+	 * predicate.
+	 * @param isProfileActive a predicate that tests whether a given profile is
 	 * currently active
 	 */
-	boolean matches(Predicate<String> activeProfiles);
+	boolean matches(Predicate<String> isProfileActive);
 
 
 	/**

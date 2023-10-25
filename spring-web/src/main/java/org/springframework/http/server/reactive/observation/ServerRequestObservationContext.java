@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive.observation;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 
@@ -37,6 +38,14 @@ import org.springframework.lang.Nullable;
  * @since 6.0
  */
 public class ServerRequestObservationContext extends RequestReplyReceiverContext<ServerHttpRequest, ServerHttpResponse> {
+
+	/**
+	 * Name of the request attribute holding the {@link ServerRequestObservationContext context}
+	 * for the current observation.
+	 * @since 6.1
+	 */
+	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerRequestObservationContext.class.getName();
+
 
 	private final Map<String, Object> attributes;
 
@@ -107,6 +116,19 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 */
 	public void setConnectionAborted(boolean connectionAborted) {
 		this.connectionAborted = connectionAborted;
+	}
+
+
+	/**
+	 * Get the current {@link ServerRequestObservationContext observation context}
+	 * from the given attributes, if available.
+	 * @param attributes the current exchange attributes
+	 * @return the current observation context
+	 * @since 6.1
+	 */
+	public static Optional<ServerRequestObservationContext> findCurrent(Map<String, Object> attributes) {
+		return Optional.ofNullable(
+				(ServerRequestObservationContext) attributes.get(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
 
 }

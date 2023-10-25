@@ -45,6 +45,7 @@ class HttpRequestValuesTests {
 
 		assertThat(requestValues.getUri()).isNull();
 		assertThat(requestValues.getUriTemplate()).isEmpty();
+		assertThat(requestValues.getUriBuilderFactory()).isNull();
 	}
 
 	@ParameterizedTest
@@ -125,9 +126,9 @@ class HttpRequestValuesTests {
 				.build();
 
 		@SuppressWarnings("unchecked")
-		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) requestValues.getBodyValue();
+		MultiValueMap<String, Object> map = (MultiValueMap<String, Object>) requestValues.getBodyValue();
 		assertThat(map).hasSize(2);
-		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
+		assertThat(map.getFirst("form field")).isEqualTo("form value");
 		assertThat(map.getFirst("entity")).isEqualTo(entity);
 	}
 
@@ -146,9 +147,9 @@ class HttpRequestValuesTests {
 		assertThat(uriTemplate).isEqualTo("/path?{queryParam0}={queryParam0[0]}");
 
 		@SuppressWarnings("unchecked")
-		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) requestValues.getBodyValue();
+		MultiValueMap<String, Object> map = (MultiValueMap<String, Object>) requestValues.getBodyValue();
 		assertThat(map).hasSize(1);
-		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
+		assertThat(map.getFirst("form field")).isEqualTo("form value");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import javax.cache.spi.CachingProvider;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -71,12 +74,30 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 
 	@Override
 	protected JCacheCache getCache(boolean allowNull) {
-		return allowNull ? this.cache : this.cacheNoNull;
+		return (allowNull ? this.cache : this.cacheNoNull);
 	}
 
 	@Override
 	protected Object getNativeCache() {
 		return this.nativeCache;
+	}
+
+	@Test
+	void testPutIfAbsentNullValue() {
+		JCacheCache cache = getCache(true);
+
+		String key = createRandomKey();
+		String value = null;
+
+		assertThat(cache.get(key)).isNull();
+		assertThat(cache.putIfAbsent(key, value)).isNull();
+		assertThat(cache.get(key).get()).isEqualTo(value);
+		org.springframework.cache.Cache.ValueWrapper wrapper = cache.putIfAbsent(key, "anotherValue");
+		// A value is set but is 'null'
+		assertThat(wrapper).isNotNull();
+		assertThat(wrapper.get()).isNull();
+		// not changed
+		assertThat(cache.get(key).get()).isEqualTo(value);
 	}
 
 }

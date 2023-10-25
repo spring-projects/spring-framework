@@ -40,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -319,6 +320,24 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test
+	void stringToPatternEmptyString() {
+		assertThat(conversionService.convert("", Pattern.class)).isNull();
+	}
+
+	@Test
+	void stringToPattern() {
+		String pattern = "\\s";
+		assertThat(conversionService.convert(pattern, Pattern.class))
+				.isInstanceOfSatisfying(Pattern.class, regex -> assertThat(regex.pattern()).isEqualTo(pattern));
+	}
+
+	@Test
+	void patternToString() {
+		String regex = "\\d";
+		assertThat(conversionService.convert(Pattern.compile(regex), String.class)).isEqualTo(regex);
+	}
+
+	@Test
 	void numberToNumber() {
 		assertThat(conversionService.convert(1, Long.class)).isEqualTo(Long.valueOf(1));
 	}
@@ -345,7 +364,8 @@ class DefaultConversionServiceTests {
 	void convertArrayToCollectionInterface() {
 		@SuppressWarnings("unchecked")
 		Collection<String> result = conversionService.convert(new String[] {"1", "2", "3"}, Collection.class);
-		assertThat(result).isExactlyInstanceOf(LinkedHashSet.class).containsExactly("1", "2", "3");
+		assertThat(result).isEqualTo(List.of("1", "2", "3"));
+		assertThat(result).isExactlyInstanceOf(ArrayList.class).containsExactly("1", "2", "3");
 	}
 
 	@Test

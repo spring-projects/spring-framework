@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,6 +187,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		assertMergedConfigForLocationPaths(RelativeFooXmlLocation.class);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void assertMergedConfigForLocationPaths(Class<?> testClass) {
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -449,10 +450,10 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	}
 
 	@SpringAppConfig(classes = { FooConfig.class, BarConfig.class })
-	public static abstract class Dog {
+	public abstract static class Dog {
 	}
 
-	public static abstract class WorkingDog extends Dog {
+	public abstract static class WorkingDog extends Dog {
 	}
 
 	public static class GermanShepherd extends WorkingDog {

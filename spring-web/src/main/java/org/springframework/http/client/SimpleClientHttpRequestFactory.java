@@ -22,9 +22,11 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Duration;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
@@ -43,15 +45,11 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	@Nullable
 	private Proxy proxy;
 
-	private boolean bufferRequestBody = true;
-
 	private int chunkSize = DEFAULT_CHUNK_SIZE;
 
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
-
-	private boolean outputStreaming = true;
 
 
 	/**
@@ -73,9 +71,10 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * (if the {@code Content-Length} is not known in advance).
 	 * @see #setChunkSize(int)
 	 * @see HttpURLConnection#setFixedLengthStreamingMode(int)
+	 * @deprecated since 6.1 requests are never buffered, as if this property is {@code false}
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	public void setBufferRequestBody(boolean bufferRequestBody) {
-		this.bufferRequestBody = bufferRequestBody;
 	}
 
 	/**
@@ -102,6 +101,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
+	 * Set the underlying URLConnection's connect timeout as {@code Duration}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.1
+	 * @see URLConnection#setConnectTimeout(int)
+	 */
+	public void setConnectTimeout(Duration connectTimeout) {
+		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
+		this.connectTimeout = (int) connectTimeout.toMillis();
+	}
+
+	/**
 	 * Set the underlying URLConnection's read timeout (in milliseconds).
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Default is the system's default timeout.
@@ -112,6 +123,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
+	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.1
+	 * @see URLConnection#setReadTimeout(int)
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		this.readTimeout = (int) readTimeout.toMillis();
+	}
+
+	/**
 	 * Set if the underlying URLConnection can be set to 'output streaming' mode.
 	 * Default is {@code true}.
 	 * <p>When output streaming is enabled, authentication and redirection cannot be handled automatically.
@@ -119,9 +142,11 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
 	 * be called.
 	 * @param outputStreaming if output streaming is enabled
+	 * @deprecated as of 6.1, this property is ignored with no direct replacement.
+	 * @deprecated since 6.1 requests are always streamed, as if this property is {@code true}
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	public void setOutputStreaming(boolean outputStreaming) {
-		this.outputStreaming = outputStreaming;
 	}
 
 
@@ -130,12 +155,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
 
-		if (this.bufferRequestBody) {
-			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
-		}
-		else {
-			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
-		}
+		return new SimpleClientHttpRequest(connection, this.chunkSize);
 	}
 
 	/**

@@ -154,7 +154,7 @@ abstract public class ParallelSorter extends SorterTemplate {
 
     private void chooseComparer(int index, Comparator cmp) {
         Object array = a[index];
-        Class type = array.getClass().getComponentType();
+        Class type = array.getClass().componentType();
         if (type.equals(Integer.TYPE)) {
             comparer = new IntComparer((int[])array);
         } else if (type.equals(Long.TYPE)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpResponse} implementation that uses standard JDK facilities.
- * Obtained via {@link SimpleBufferingClientHttpRequest#execute()} and
- * {@link SimpleStreamingClientHttpRequest#execute()}.
+ * Obtained via {@link SimpleClientHttpRequest#execute()}.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
@@ -54,12 +53,6 @@ final class SimpleClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpStatusCode getStatusCode() throws IOException {
 		return HttpStatusCode.valueOf(this.connection.getResponseCode());
-	}
-
-	@Override
-	@Deprecated
-	public int getRawStatusCode() throws IOException {
-		return this.connection.getResponseCode();
 	}
 
 	@Override

@@ -48,6 +48,18 @@ public interface ApplicationListener<E extends ApplicationEvent> extends EventLi
 	 */
 	void onApplicationEvent(E event);
 
+	/**
+	 * Return whether this listener supports asynchronous execution.
+	 * @return {@code true} if this listener instance can be executed asynchronously
+	 * depending on the multicaster configuration (the default), or {@code false} if it
+	 * needs to immediately run within the original thread which published the event
+	 * @since 6.1
+	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster#setTaskExecutor
+	 */
+	default boolean supportsAsyncExecution() {
+		return true;
+	}
+
 
 	/**
 	 * Create a new {@code ApplicationListener} for the given payload consumer.

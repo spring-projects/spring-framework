@@ -116,7 +116,7 @@ final class MethodName {
 		StringBuilder name = new StringBuilder(chars.length);
 		boolean uppercase = false;
 		for (char ch : chars) {
-			char outputChar = (!uppercase) ? ch : Character.toUpperCase(ch);
+			char outputChar = (!uppercase ? ch : Character.toUpperCase(ch));
 			name.append((!Character.isLetter(ch)) ? "" : outputChar);
 			uppercase = (ch == '.');
 		}

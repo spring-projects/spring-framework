@@ -170,8 +170,9 @@ of a test class constructor are autowired from components in the test's
 
 If `@TestConstructor` is not present or meta-present on a test class, the default _test
 constructor autowire mode_ will be used. See the tip below for details on how to change
-the default mode. Note, however, that a local declaration of `@Autowired` on a
-constructor takes precedence over both `@TestConstructor` and the default mode.
+the default mode. Note, however, that a local declaration of `@Autowired`,
+`@jakarta.inject.Inject`, or `@javax.inject.Inject` on a constructor takes precedence
+over both `@TestConstructor` and the default mode.
 
 .Changing the default test constructor autowire mode
 [TIP]
@@ -222,6 +223,7 @@ following annotations.
 * xref:testing/annotations/integration-spring/annotation-contextconfiguration.adoc[`@ContextConfiguration`]
 * xref:testing/annotations/integration-spring/annotation-webappconfiguration.adoc[`@WebAppConfiguration`]
 * xref:testing/annotations/integration-spring/annotation-contexthierarchy.adoc[`@ContextHierarchy`]
+* xref:testing/annotations/integration-spring/annotation-contextcustomizerfactories.adoc[`@ContextCustomizerFactories`]
 * xref:testing/annotations/integration-spring/annotation-activeprofiles.adoc[`@ActiveProfiles`]
 * xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
 * xref:testing/annotations/integration-spring/annotation-dynamicpropertysource.adoc[`@DynamicPropertySource`]

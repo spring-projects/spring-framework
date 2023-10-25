@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -770,7 +770,7 @@ class AnnotationsScannerTests {
 		void method();
 	}
 
-	static abstract class MultipleMethods implements MultipleMethodsInterface {
+	abstract static class MultipleMethods implements MultipleMethodsInterface {
 
 		@TestAnnotation1
 		public void method() {
@@ -800,7 +800,7 @@ class AnnotationsScannerTests {
 		void method(T argument);
 	}
 
-	static abstract class GenericNonOverride implements GenericNonOverrideInterface<String> {
+	abstract static class GenericNonOverride implements GenericNonOverrideInterface<String> {
 
 		@TestAnnotation1
 		public void method(StringBuilder argument) {

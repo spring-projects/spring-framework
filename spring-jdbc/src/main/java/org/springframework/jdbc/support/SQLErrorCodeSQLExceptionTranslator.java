@@ -309,7 +309,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * resulting from custom translation. This exception should include the {@code sqlEx} parameter
 	 * as a nested root cause. This implementation always returns {@code null}, meaning that the
 	 * translator always falls back to the default error codes.
+	 * @deprecated as of 6.1, in favor of {@link #setCustomTranslator}
 	 */
+	@Deprecated(since = "6.1")
 	@Nullable
 	protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
 		return null;

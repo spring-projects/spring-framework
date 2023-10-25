@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.BeansException;
-import org.springframework.core.Constants;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -45,6 +46,7 @@ import org.springframework.util.StringValueResolver;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 02.10.2003
  * @see #setSystemPropertiesModeName
  * @see PlaceholderConfigurerSupport
@@ -72,7 +74,16 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	public static final int SYSTEM_PROPERTIES_MODE_OVERRIDE = 2;
 
 
-	private static final Constants constants = new Constants(PropertyPlaceholderConfigurer.class);
+	/**
+	 * Map of constant names to constant values for the system properties mode
+	 * constants defined in this class.
+	 */
+	private static final Map<String, Integer> constants = Map.of(
+			"SYSTEM_PROPERTIES_MODE_NEVER", SYSTEM_PROPERTIES_MODE_NEVER,
+			"SYSTEM_PROPERTIES_MODE_FALLBACK", SYSTEM_PROPERTIES_MODE_FALLBACK,
+			"SYSTEM_PROPERTIES_MODE_OVERRIDE", SYSTEM_PROPERTIES_MODE_OVERRIDE
+		);
+
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
@@ -87,7 +98,10 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * @see #setSystemPropertiesMode
 	 */
 	public void setSystemPropertiesModeName(String constantName) throws IllegalArgumentException {
-		this.systemPropertiesMode = constants.asNumber(constantName).intValue();
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer mode = constants.get(constantName);
+		Assert.notNull(mode, "Only system properties mode constants allowed");
+		this.systemPropertiesMode = mode;
 	}
 
 	/**

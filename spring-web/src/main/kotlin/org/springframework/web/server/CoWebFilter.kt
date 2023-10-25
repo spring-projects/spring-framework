@@ -17,6 +17,8 @@
 package org.springframework.web.server
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
@@ -26,6 +28,7 @@ import reactor.core.publisher.Mono
  * using coroutines.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 6.0.5
  */
 abstract class CoWebFilter : WebFilter {
@@ -34,6 +37,7 @@ abstract class CoWebFilter : WebFilter {
 		return mono(Dispatchers.Unconfined) {
 			filter(exchange, object : CoWebFilterChain {
 				override suspend fun filter(exchange: ServerWebExchange) {
+					exchange.attributes[COROUTINE_CONTEXT_ATTRIBUTE] = currentCoroutineContext().minusKey(Job.Key)
 					chain.filter(exchange).awaitSingleOrNull()
 				}
 			})}.then()
@@ -46,6 +50,17 @@ abstract class CoWebFilter : WebFilter {
 	 * @param chain provides a way to delegate to the next filter
 	 */
 	protected abstract suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain)
+
+	companion object {
+
+		/**
+		 * Name of the [ServerWebExchange] attribute that contains the
+		 * [kotlin.coroutines.CoroutineContext] to be passed to the
+		 * [org.springframework.web.reactive.result.method.InvocableHandlerMethod].
+		 */
+		@JvmField
+		val COROUTINE_CONTEXT_ATTRIBUTE = CoWebFilter::class.java.getName() + ".context"
+	}
 
 }
 

@@ -143,7 +143,7 @@ class DynamicPropertySourceNestedTests {
 
 	}
 
-	static abstract class DynamicPropertySourceSuperclass {
+	abstract static class DynamicPropertySourceSuperclass {
 
 		@DynamicPropertySource
 		static void containerProperties(DynamicPropertyRegistry registry) {

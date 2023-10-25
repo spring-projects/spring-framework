@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,26 @@
 
 package org.springframework.web.multipart;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
+import org.springframework.web.ErrorResponse;
 
 /**
  * MultipartException subclass thrown when an upload exceeds the
  * maximum upload size allowed.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 1.0.1
  */
 @SuppressWarnings("serial")
-public class MaxUploadSizeExceededException extends MultipartException {
+public class MaxUploadSizeExceededException extends MultipartException implements ErrorResponse {
+
+	private static final ProblemDetail body =
+			ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE, "Maximum upload size exceeded");
+
 
 	private final long maxUploadSize;
 
@@ -58,6 +67,16 @@ public class MaxUploadSizeExceededException extends MultipartException {
 	 */
 	public long getMaxUploadSize() {
 		return this.maxUploadSize;
+	}
+
+	@Override
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.PAYLOAD_TOO_LARGE;
+	}
+
+	@Override
+	public ProblemDetail getBody() {
+		return body;
 	}
 
 }

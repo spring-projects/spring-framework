@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,12 +114,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	@Override
 	public EntityResponse.Builder<T> cookies(
 			Consumer<MultiValueMap<String, Cookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "cookiesConsumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> header(String headerName, String... headerValues) {
+		Assert.notNull(headerName, "headerName must not be null");
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
 		}
@@ -128,18 +130,21 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 	@Override
 	public EntityResponse.Builder<T> headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "headersConsumer must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> allow(HttpMethod... allowedMethods) {
+		Assert.notNull(allowedMethods, "allowedMethods must not be null");
 		this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> allow(Set<HttpMethod> allowedMethods) {
+		Assert.notNull(allowedMethods, "allowedMethods must not be null");
 		this.headers.setAllow(allowedMethods);
 		return this;
 	}
@@ -152,6 +157,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 	@Override
 	public EntityResponse.Builder<T> contentType(MediaType contentType) {
+		Assert.notNull(contentType, "contentType must not be null");
 		this.headers.setContentType(contentType);
 		return this;
 	}
@@ -170,24 +176,28 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 	@Override
 	public EntityResponse.Builder<T> lastModified(ZonedDateTime lastModified) {
+		Assert.notNull(lastModified, "lastModified must not be null");
 		this.headers.setLastModified(lastModified);
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> lastModified(Instant lastModified) {
+		Assert.notNull(lastModified, "lastModified must not be null");
 		this.headers.setLastModified(lastModified);
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> location(URI location) {
+		Assert.notNull(location, "location must not be null");
 		this.headers.setLocation(location);
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> cacheControl(CacheControl cacheControl) {
+		Assert.notNull(cacheControl, "cacheControl must not be null");
 		this.headers.setCacheControl(cacheControl);
 		return this;
 	}

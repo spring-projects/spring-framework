@@ -265,18 +265,32 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * Return the type of the proxy. Will check the singleton instance if
 	 * already created, else fall back to the proxy interface (in case of just
 	 * a single one), the target bean type, or the TargetSource's target class.
-	 * @see org.springframework.aop.TargetSource#getTargetClass
+	 * @see org.springframework.aop.framework.AopProxy#getProxyClass
 	 */
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		synchronized (this) {
 			if (this.singletonInstance != null) {
 				return this.singletonInstance.getClass();
 			}
 		}
-		// This might be incomplete since it potentially misses introduced interfaces
-		// from Advisors that will be lazily retrieved via setInterceptorNames.
-		return createAopProxy().getProxyClass(this.proxyClassLoader);
+		try {
+			// This might be incomplete since it potentially misses introduced interfaces
+			// from Advisors that will be lazily retrieved via setInterceptorNames.
+			return createAopProxy().getProxyClass(this.proxyClassLoader);
+		}
+		catch (AopConfigException ex) {
+			if (getTargetClass() == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to determine early proxy class: " + ex.getMessage());
+				}
+				return null;
+			}
+			else {
+				throw ex;
+			}
+		}
 	}
 
 	@Override

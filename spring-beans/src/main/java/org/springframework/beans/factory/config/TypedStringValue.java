@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Comparator;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -35,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @see BeanDefinition#getPropertyValues
  * @see org.springframework.beans.MutablePropertyValues#addPropertyValue
  */
-public class TypedStringValue implements BeanMetadataElement {
+public class TypedStringValue implements BeanMetadataElement, Comparable<TypedStringValue> {
 
 	@Nullable
 	private String value;
@@ -213,6 +215,10 @@ public class TypedStringValue implements BeanMetadataElement {
 		return this.dynamic;
 	}
 
+	@Override
+	public int compareTo(@Nullable TypedStringValue o) {
+		return Comparator.comparing(TypedStringValue::getValue).compare(this, o);
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -223,7 +229,7 @@ public class TypedStringValue implements BeanMetadataElement {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.targetType);
+		return ObjectUtils.nullSafeHash(this.value, this.targetType);
 	}
 
 	@Override

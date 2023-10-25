@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  */
 public class Jackson2SmileDecoderTests extends AbstractDecoderTests<Jackson2SmileDecoder> {
 
-	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
-	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
+	private static final MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
+	private static final MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
 
 	private Pojo pojo1 = new Pojo("f1", "b1");
 

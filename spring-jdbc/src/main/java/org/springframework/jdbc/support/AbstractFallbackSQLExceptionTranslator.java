@@ -26,13 +26,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Base class for {@link SQLExceptionTranslator} implementations that allow for
- * fallback to some other {@link SQLExceptionTranslator}.
+ * Base class for {@link SQLExceptionTranslator} implementations that allow for a
+ * fallback to some other {@link SQLExceptionTranslator}, as well as for custom
+ * overrides.
  *
  * @author Juergen Hoeller
  * @since 2.5.6
  * @see #doTranslate
  * @see #setFallbackTranslator
+ * @see #setCustomTranslator
  */
 public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExceptionTranslator {
 
@@ -41,6 +43,9 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 
 	@Nullable
 	private SQLExceptionTranslator fallbackTranslator;
+
+	@Nullable
+	private SQLExceptionTranslator customTranslator;
 
 
 	/**
@@ -60,6 +65,26 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 		return this.fallbackTranslator;
 	}
 
+	/**
+	 * Set a custom exception translator to override any match that this translator
+	 * would find. Note that such a custom {@link SQLExceptionTranslator} delegate
+	 * is meant to return {@code null} if it does not have an override itself.
+	 * @since 6.1
+	 */
+	public void setCustomTranslator(@Nullable SQLExceptionTranslator customTranslator) {
+		this.customTranslator = customTranslator;
+	}
+
+	/**
+	 * Return a custom exception translator, if any.
+	 * @since 6.1
+	 * @see #setCustomTranslator
+	 */
+	@Nullable
+	public SQLExceptionTranslator getCustomTranslator() {
+		return this.customTranslator;
+	}
+
 
 	/**
 	 * Pre-checks the arguments, calls {@link #doTranslate}, and invokes the
@@ -69,6 +94,15 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	@Nullable
 	public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
 		Assert.notNull(ex, "Cannot translate a null SQLException");
+
+		SQLExceptionTranslator custom = getCustomTranslator();
+		if (custom != null) {
+			DataAccessException dae = custom.translate(task, sql, ex);
+			if (dae != null) {
+				// Custom exception match found.
+				return dae;
+			}
+		}
 
 		DataAccessException dae = doTranslate(task, sql, ex);
 		if (dae != null) {

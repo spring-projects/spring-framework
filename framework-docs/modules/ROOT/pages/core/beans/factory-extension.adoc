@@ -372,6 +372,17 @@ The `PropertySourcesPlaceholderConfigurer` not only looks for properties in the 
 file you specify. By default, if it cannot find a property in the specified properties files,
 it checks against Spring `Environment` properties and regular Java `System` properties.
 
+[WARNING]
+=====
+Only one such element should be defined for a given application with the properties
+that it needs. Several property placeholders can be configured as long as they have distinct
+placeholder syntax (`${...}`).
+
+If you need to modularize the source of properties used for the replacement, you should
+not create multiple properties placeholders. Rather, you should create your own
+`PropertySourcesPlaceholderConfigurer` bean that gathers the properties to use.
+=====
+
 [TIP]
 =====
 You can use the `PropertySourcesPlaceholderConfigurer` to substitute class names, which

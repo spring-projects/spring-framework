@@ -28,6 +28,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -45,6 +46,8 @@ import org.springframework.util.StringUtils;
  * @see java.net.URL
  */
 public class UrlResource extends AbstractFileResolvingResource {
+
+	private static final String AUTHORIZATION = "Authorization";
 
 	/**
 	 * Original URI, if available; used for URI and File access.
@@ -89,33 +92,31 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new {@code UrlResource} based on a URL path.
+	 * Create a new {@code UrlResource} based on a URI path.
 	 * <p>Note: The given path needs to be pre-encoded if necessary.
-	 * @param path a URL path
-	 * @throws MalformedURLException if the given URL path is not valid
-	 * @see java.net.URL#URL(String)
+	 * @param path a URI path
+	 * @throws MalformedURLException if the given URI path is not valid
+	 * @see ResourceUtils#toURI(String)
 	 */
 	public UrlResource(String path) throws MalformedURLException {
 		Assert.notNull(path, "Path must not be null");
+		String cleanedPath = StringUtils.cleanPath(path);
+		URI uri;
+		URL url;
 
-		// Equivalent without java.net.URL constructor - for building on JDK 20+
-		/*
 		try {
-			String cleanedPath = StringUtils.cleanPath(path);
-			this.uri = ResourceUtils.toURI(cleanedPath);
-			this.url = this.uri.toURL();
-			this.cleanedUrl = cleanedPath;
+			// Prefer URI construction with toURL conversion (as of 6.1)
+			uri = ResourceUtils.toURI(cleanedPath);
+			url = uri.toURL();
 		}
 		catch (URISyntaxException | IllegalArgumentException ex) {
-			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
-			exToThrow.initCause(ex);
-			throw exToThrow;
+			uri = null;
+			url = ResourceUtils.toURL(path);
 		}
-		*/
 
-		this.uri = null;
-		this.url = ResourceUtils.toURL(path);
-		this.cleanedUrl = StringUtils.cleanPath(path);
+		this.uri = uri;
+		this.url = url;
+		this.cleanedUrl = cleanedPath;
 	}
 
 	/**
@@ -128,7 +129,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location) throws MalformedURLException  {
+	public UrlResource(String protocol, String location) throws MalformedURLException {
 		this(protocol, location, null);
 	}
 
@@ -144,7 +145,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location, @Nullable String fragment) throws MalformedURLException  {
+	public UrlResource(String protocol, String location, @Nullable String fragment) throws MalformedURLException {
 		try {
 			this.uri = new URI(protocol, location, fragment);
 			this.url = this.uri.toURL();
@@ -236,6 +237,16 @@ public class UrlResource extends AbstractFileResolvingResource {
 				httpConn.disconnect();
 			}
 			throw ex;
+		}
+	}
+
+	@Override
+	protected void customizeConnection(URLConnection con) throws IOException {
+		super.customizeConnection(con);
+		String userInfo = this.url.getUserInfo();
+		if (userInfo != null) {
+			String encodedCredentials = Base64.getUrlEncoder().encodeToString(userInfo.getBytes());
+			con.setRequestProperty(AUTHORIZATION, "Basic " + encodedCredentials);
 		}
 	}
 

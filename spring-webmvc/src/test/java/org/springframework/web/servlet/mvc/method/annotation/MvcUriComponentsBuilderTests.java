@@ -666,7 +666,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 
-	static abstract class AbstractCrudController<T, ID> {
+	abstract static class AbstractCrudController<T, ID> {
 
 		abstract T get(ID id);
 	}

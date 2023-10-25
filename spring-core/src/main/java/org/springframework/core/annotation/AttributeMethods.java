@@ -45,7 +45,7 @@ final class AttributeMethods {
 		if (m1 != null && m2 != null) {
 			return m1.getName().compareTo(m2.getName());
 		}
-		return m1 != null ? -1 : 1;
+		return (m1 != null ? -1 : 1);
 	};
 
 
@@ -73,7 +73,7 @@ final class AttributeMethods {
 			if (!foundDefaultValueMethod && (method.getDefaultValue() != null)) {
 				foundDefaultValueMethod = true;
 			}
-			if (!foundNestedAnnotation && (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation()))) {
+			if (!foundNestedAnnotation && (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation()))) {
 				foundNestedAnnotation = true;
 			}
 			ReflectionUtils.makeAccessible(method);
@@ -147,7 +147,7 @@ final class AttributeMethods {
 	@Nullable
 	Method get(String name) {
 		int index = indexOf(name);
-		return index != -1 ? this.attributeMethods[index] : null;
+		return (index != -1 ? this.attributeMethods[index] : null);
 	}
 
 	/**

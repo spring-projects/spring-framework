@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.transaction.reactive.TransactionalOperator
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.PlatformTransactionManager
+ * @see ConfigurableTransactionManager
  */
 public interface ReactiveTransactionManager extends TransactionManager {
 

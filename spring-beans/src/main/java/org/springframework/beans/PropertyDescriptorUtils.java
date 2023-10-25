@@ -233,7 +233,7 @@ abstract class PropertyDescriptorUtils {
 		}
 
 		if (propertyType != null && (!propertyType.isArray() ||
-				propertyType.getComponentType() != indexedPropertyType)) {
+				propertyType.componentType() != indexedPropertyType)) {
 			throw new IntrospectionException("Type mismatch between indexed and non-indexed methods: " +
 					indexedReadMethod + " - " + indexedWriteMethod);
 		}

@@ -252,7 +252,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	@Nullable
 	private Class<?> getContextClass(@Nullable ResolvableType elementType) {
-		MethodParameter param = (elementType != null ? getParameter(elementType)  : null);
+		MethodParameter param = (elementType != null ? getParameter(elementType) : null);
 		return (param != null ? param.getContainingClass() : null);
 	}
 

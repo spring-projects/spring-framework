@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,16 +229,29 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 		StepVerifier.create(result).expectComplete().verify();
 	}
 
-	@Test
+	@Test // gh-27511
 	public void noDefaultConstructor() {
 		Flux<DataBuffer> input = Flux.from(stringBuffer("{\"property1\":\"foo\",\"property2\":\"bar\"}"));
+
+		testDecode(input, BeanWithNoDefaultConstructor.class, step -> step
+				.consumeNextWith(o -> {
+					assertThat(o.getProperty1()).isEqualTo("foo");
+					assertThat(o.getProperty2()).isEqualTo("bar");
+				})
+				.verifyComplete()
+		);
+	}
+
+	@Test
+	public void codecException() {
+		Flux<DataBuffer> input = Flux.from(stringBuffer("["));
 		ResolvableType elementType = ResolvableType.forClass(BeanWithNoDefaultConstructor.class);
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(input, elementType, null, Collections.emptyMap());
 		StepVerifier.create(flux).verifyError(CodecException.class);
 	}
 
 	@Test  // SPR-15975
-	public void  customDeserializer() {
+	public void customDeserializer() {
 		Mono<DataBuffer> input = stringBuffer("{\"test\": 1}");
 
 		testDecode(input, TestObject.class, step -> step

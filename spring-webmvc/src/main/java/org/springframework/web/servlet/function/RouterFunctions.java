@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -139,7 +141,26 @@ public abstract class RouterFunctions {
 	 * @see #resourceLookupFunction(String, Resource)
 	 */
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
-		return resources(resourceLookupFunction(pattern, location));
+		return resources(resourceLookupFunction(pattern, location), (resource, httpHeaders) -> {});
+	}
+
+	/**
+	 * Route requests that match the given pattern to resources relative to the given root location.
+	 * For instance
+	 * <pre class="code">
+	 * Resource location = new FileSystemResource("public-resources/");
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
+     * </pre>
+	 * @param pattern the pattern to match
+	 * @param location the location directory relative to which resources should be resolved
+	 * @param headersConsumer provides access to the HTTP headers for served resources
+	 * @return a router function that routes to resources
+	 * @since 6.1
+	 * @see #resourceLookupFunction(String, Resource)
+	 */
+	public static RouterFunction<ServerResponse> resources(String pattern, Resource location,
+			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+		return resources(resourceLookupFunction(pattern, location), headersConsumer);
 	}
 
 	/**
@@ -169,8 +190,22 @@ public abstract class RouterFunctions {
 	 * @return a router function that routes to resources
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
-		return new ResourcesRouterFunction(lookupFunction);
+		return new ResourcesRouterFunction(lookupFunction, (resource, httpHeaders) -> {});
 	}
+
+	/**
+	 * Route to resources using the provided lookup function. If the lookup function provides a
+	 * {@link Resource} for the given request, it will be it will be exposed using a
+	 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
+	 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+	 * @param headersConsumer provides access to the HTTP headers for served resources
+	 * @return a router function that routes to resources
+	 * @since 6.1
+	 */
+	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Optional<Resource>> lookupFunction, BiConsumer<Resource, HttpHeaders> headersConsumer) {
+		return new ResourcesRouterFunction(lookupFunction, headersConsumer);
+	}
+
 
 	/**
 	 * Changes the {@link PathPatternParser} on the given {@linkplain RouterFunction router function}. This method
@@ -564,6 +599,21 @@ public abstract class RouterFunctions {
 		Builder resources(String pattern, Resource location);
 
 		/**
+		 * Route requests that match the given pattern to resources relative to the given root location.
+		 * For instance
+		 * <pre class="code">
+		 * Resource location = new FileSystemResource("public-resources/");
+		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
+	     * </pre>
+		 * @param pattern the pattern to match
+		 * @param location the location directory relative to which resources should be resolved
+		 * @param headersConsumer provides access to the HTTP headers for served resources
+		 * @return this builder
+		 * @since 6.1
+		 */
+		Builder resources(String pattern, Resource location, BiConsumer<Resource, HttpHeaders> headersConsumer);
+
+		/**
 		 * Route to resources using the provided lookup function. If the lookup function provides a
 		 * {@link Resource} for the given request, it will be it will be exposed using a
 		 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
@@ -571,6 +621,17 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder resources(Function<ServerRequest, Optional<Resource>> lookupFunction);
+
+		/**
+		 * Route to resources using the provided lookup function. If the lookup function provides a
+		 * {@link Resource} for the given request, it will be it will be exposed using a
+		 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
+		 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+		 * @param headersConsumer provides access to the HTTP headers for served resources
+		 * @return this builder
+		 * @since 6.1
+		 */
+		Builder resources(Function<ServerRequest, Optional<Resource>> lookupFunction, BiConsumer<Resource, HttpHeaders> headersConsumer);
 
 		/**
 		 * Route to the supplied router function if the given request predicate applies. This method
@@ -1055,18 +1116,24 @@ public abstract class RouterFunctions {
 	}
 
 
-	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
+	private static class ResourcesRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
 		private final Function<ServerRequest, Optional<Resource>> lookupFunction;
 
-		public ResourcesRouterFunction(Function<ServerRequest, Optional<Resource>> lookupFunction) {
+		private final BiConsumer<Resource, HttpHeaders> headersConsumer;
+
+
+		public ResourcesRouterFunction(Function<ServerRequest, Optional<Resource>> lookupFunction,
+				BiConsumer<Resource, HttpHeaders> headersConsumer) {
 			Assert.notNull(lookupFunction, "Function must not be null");
+			Assert.notNull(headersConsumer, "HeadersConsumer must not be null");
 			this.lookupFunction = lookupFunction;
+			this.headersConsumer = headersConsumer;
 		}
 
 		@Override
 		public Optional<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.lookupFunction.apply(request).map(ResourceHandlerFunction::new);
+			return this.lookupFunction.apply(request).map(resource -> new ResourceHandlerFunction(resource, this.headersConsumer));
 		}
 
 		@Override

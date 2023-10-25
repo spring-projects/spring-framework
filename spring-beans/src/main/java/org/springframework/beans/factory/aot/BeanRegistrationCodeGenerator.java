@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -47,19 +46,15 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 
 	private final RegisteredBean registeredBean;
 
-	private final Executable constructorOrFactoryMethod;
-
 	private final BeanRegistrationCodeFragments codeFragments;
 
 
 	BeanRegistrationCodeGenerator(ClassName className, GeneratedMethods generatedMethods,
-			RegisteredBean registeredBean, Executable constructorOrFactoryMethod,
-			BeanRegistrationCodeFragments codeFragments) {
+			RegisteredBean registeredBean, BeanRegistrationCodeFragments codeFragments) {
 
 		this.className = className;
 		this.generatedMethods = generatedMethods;
 		this.registeredBean = registeredBean;
-		this.constructorOrFactoryMethod = constructorOrFactoryMethod;
 		this.codeFragments = codeFragments;
 	}
 
@@ -87,8 +82,7 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 				generationContext, this, this.registeredBean.getMergedBeanDefinition(),
 				REJECT_ALL_ATTRIBUTES_FILTER));
 		CodeBlock instanceSupplierCode = this.codeFragments.generateInstanceSupplierCode(
-				generationContext, this, this.constructorOrFactoryMethod,
-				this.instancePostProcessors.isEmpty());
+				generationContext, this, this.instancePostProcessors.isEmpty());
 		code.add(this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
 				this, instanceSupplierCode, this.instancePostProcessors));
 		code.add(this.codeFragments.generateReturnCode(generationContext, this));

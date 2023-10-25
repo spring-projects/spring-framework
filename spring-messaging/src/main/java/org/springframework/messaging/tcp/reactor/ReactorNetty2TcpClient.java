@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,12 +256,12 @@ public class ReactorNetty2TcpClient<P> implements TcpOperations<P> {
 			this.channelGroup.close().addListener(future -> channnelGroupCloseSink.tryEmitEmpty());
 			result = channnelGroupCloseSink.asMono();
 			if (this.loopResources != null) {
-				result = result.onErrorResume(ex -> Mono.empty()).then(this.loopResources.disposeLater());
+				result = result.onErrorComplete().then(this.loopResources.disposeLater());
 			}
 			if (this.poolResources != null) {
-				result = result.onErrorResume(ex -> Mono.empty()).then(this.poolResources.disposeLater());
+				result = result.onErrorComplete().then(this.poolResources.disposeLater());
 			}
-			result = result.onErrorResume(ex -> Mono.empty()).then(stopScheduler());
+			result = result.onErrorComplete().then(stopScheduler());
 		}
 		else {
 			result = stopScheduler();
@@ -310,7 +310,7 @@ public class ReactorNetty2TcpClient<P> implements TcpOperations<P> {
 				}
 			});
 			Sinks.Empty<Void> completionSink = Sinks.empty();
-			TcpConnection<P> connection = new ReactorNetty2TcpConnection<>(inbound, outbound,  codec, completionSink);
+			TcpConnection<P> connection = new ReactorNetty2TcpConnection<>(inbound, outbound, codec, completionSink);
 			scheduler.schedule(() -> this.connectionHandler.afterConnected(connection));
 
 			inbound.withConnection(conn -> conn.addHandlerFirst(new StompMessageDecoder<>(codec)));

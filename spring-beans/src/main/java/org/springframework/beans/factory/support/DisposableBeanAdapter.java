@@ -21,13 +21,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -67,6 +74,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
+
+	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+			"org.reactivestreams.Publisher", DisposableBeanAdapter.class.getClassLoader());
+
 
 	private final Object bean;
 
@@ -289,37 +300,66 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * assuming a "force" parameter), else logging an error.
 	 */
 	private void invokeCustomDestroyMethod(Method destroyMethod) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Invoking custom destroy method '" + destroyMethod.getName() +
+					"' on bean with name '" + this.beanName + "': " + destroyMethod);
+		}
+
 		int paramCount = destroyMethod.getParameterCount();
 		Object[] args = new Object[paramCount];
 		if (paramCount == 1) {
 			args[0] = Boolean.TRUE;
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("Invoking custom destroy method '" + destroyMethod.getName() +
-					"' on bean with name '" + this.beanName + "'");
-		}
+
 		try {
 			ReflectionUtils.makeAccessible(destroyMethod);
-			destroyMethod.invoke(this.bean, args);
-		}
-		catch (InvocationTargetException ex) {
-			if (logger.isWarnEnabled()) {
-				String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
-						this.beanName + "' threw an exception";
+			Object returnValue = destroyMethod.invoke(this.bean, args);
+
+			if (returnValue == null) {
+				// Regular case: a void method
+				logDestroyMethodCompletion(destroyMethod, false);
+			}
+			else if (returnValue instanceof Future<?> future) {
+				// An async task: await its completion.
+				future.get();
+				logDestroyMethodCompletion(destroyMethod, true);
+			}
+			else if (!reactiveStreamsPresent || !new ReactiveDestroyMethodHandler().await(destroyMethod, returnValue)) {
 				if (logger.isDebugEnabled()) {
-					// Log at warn level like below but add the exception stacktrace only with debug level
-					logger.warn(msg, ex.getTargetException());
-				}
-				else {
-					logger.warn(msg + ": " + ex.getTargetException());
+					logger.debug("Unknown return value type from custom destroy method '" + destroyMethod.getName() +
+							"' on bean with name '" + this.beanName + "': " + returnValue.getClass());
 				}
 			}
+		}
+		catch (InvocationTargetException | ExecutionException ex) {
+			logDestroyMethodException(destroyMethod, ex.getCause());
 		}
 		catch (Throwable ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Failed to invoke custom destroy method '" + destroyMethod.getName() +
 						"' on bean with name '" + this.beanName + "'", ex);
 			}
+		}
+	}
+
+	void logDestroyMethodException(Method destroyMethod, Throwable ex) {
+		if (logger.isWarnEnabled()) {
+			String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
+					this.beanName + "' propagated an exception";
+			if (logger.isDebugEnabled()) {
+				// Log at warn level like below but add the exception stacktrace only with debug level
+				logger.warn(msg, ex);
+			}
+			else {
+				logger.warn(msg + ": " + ex);
+			}
+		}
+	}
+
+	void logDestroyMethodCompletion(Method destroyMethod, boolean async) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Custom destroy method '" + destroyMethod.getName() +
+					"' on bean with name '" + this.beanName + "' completed" + (async ? " asynchronously" : ""));
 		}
 	}
 
@@ -443,6 +483,61 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		return filteredPostProcessors;
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on the Reactive Streams API at runtime.
+	 */
+	private class ReactiveDestroyMethodHandler {
+
+		public boolean await(Method destroyMethod, Object returnValue) throws InterruptedException {
+			ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(returnValue.getClass());
+			if (adapter != null) {
+				CountDownLatch latch = new CountDownLatch(1);
+				adapter.toPublisher(returnValue).subscribe(new DestroyMethodSubscriber(destroyMethod, latch));
+				latch.await();
+				return true;
+			}
+			return false;
+		}
+	}
+
+
+	/**
+	 * Reactive Streams Subscriber for destroy method completion.
+	 */
+	private class DestroyMethodSubscriber implements Subscriber<Object> {
+
+		private final Method destroyMethod;
+
+		private final CountDownLatch latch;
+
+		public DestroyMethodSubscriber(Method destroyMethod, CountDownLatch latch) {
+			this.destroyMethod = destroyMethod;
+			this.latch = latch;
+		}
+
+		@Override
+		public void onSubscribe(Subscription s) {
+			s.request(Integer.MAX_VALUE);
+		}
+
+		@Override
+		public void onNext(Object o) {
+		}
+
+		@Override
+		public void onError(Throwable t) {
+			this.latch.countDown();
+			logDestroyMethodException(this.destroyMethod, t);
+		}
+
+		@Override
+		public void onComplete() {
+			this.latch.countDown();
+			logDestroyMethodCompletion(this.destroyMethod, true);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.core;
 
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
- * delegating to the Java 8 standard reflection mechanism, with a deprecated fallback
- * to {@link LocalVariableTableParameterNameDiscoverer}.
+ * delegating to the Java 8 standard reflection mechanism.
  *
  * <p>If a Kotlin reflection implementation is present,
  * {@link KotlinReflectionParameterNameDiscoverer} is added first in the list and
@@ -36,7 +35,6 @@ package org.springframework.core;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
-	@SuppressWarnings("removal")
 	public DefaultParameterNameDiscoverer() {
 		if (KotlinDetector.isKotlinReflectPresent()) {
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
@@ -44,12 +42,6 @@ public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDisc
 
 		// Recommended approach on Java 8+: compilation with -parameters.
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-
-		// Deprecated fallback to class file parsing for -debug symbols.
-		// Does not work on native images without class file resources.
-		if (!NativeDetector.inNativeImage()) {
-			addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
-		}
 	}
 
 }

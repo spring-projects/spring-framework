@@ -52,12 +52,7 @@ public class CollectionUtils {
     }
 
     public static Collection filter(Collection c, Predicate p) {
-        Iterator it = c.iterator();
-        while (it.hasNext()) {
-            if (!p.evaluate(it.next())) {
-                it.remove();
-            }
-        }
+        c.removeIf(o -> !p.evaluate(o));
         return c;
     }
 

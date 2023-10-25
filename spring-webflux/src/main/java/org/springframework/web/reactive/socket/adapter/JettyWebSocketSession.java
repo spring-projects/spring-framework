@@ -20,17 +20,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.SuspendToken;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -47,10 +44,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
-	@Nullable
-	private volatile SuspendToken suspendToken;
-
-
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
 		this(session, info, factory, null);
 	}
@@ -66,32 +59,26 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected boolean canSuspendReceiving() {
-		return true;
+		// Jetty 12 TODO: research suspend functionality in Jetty 12
+		return false;
 	}
 
 	@Override
 	protected void suspendReceiving() {
-		Assert.state(this.suspendToken == null, "Already suspended");
-		this.suspendToken = getDelegate().suspend();
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		SuspendToken tokenToUse = this.suspendToken;
-		this.suspendToken = null;
-		if (tokenToUse != null) {
-			tokenToUse.resume();
-		}
 	}
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		DataBuffer dataBuffer = message.getPayload();
-		RemoteEndpoint remote = getDelegate().getRemote();
+		Session session = getDelegate();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			getSendProcessor().setReadyToSend(false);
 			String text = dataBuffer.toString(StandardCharsets.UTF_8);
-			remote.sendString(text, new SendProcessorCallback());
+			session.sendText(text, new SendProcessorCallback());
 		}
 		else {
 			if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
@@ -101,9 +88,9 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 				while (iterator.hasNext()) {
 					ByteBuffer byteBuffer = iterator.next();
 					switch (message.getType()) {
-						case BINARY -> remote.sendBytes(byteBuffer, new SendProcessorCallback());
-						case PING -> remote.sendPing(byteBuffer);
-						case PONG -> remote.sendPong(byteBuffer);
+						case BINARY -> session.sendBinary(byteBuffer, new SendProcessorCallback());
+						case PING -> session.sendPing(byteBuffer, new SendProcessorCallback());
+						case PONG -> session.sendPong(byteBuffer, new SendProcessorCallback());
 						default -> throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 					}
 				}
@@ -119,21 +106,23 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	public Mono<Void> close(CloseStatus status) {
-		getDelegate().close(status.getCode(), status.getReason());
-		return Mono.empty();
+		Callback.Completable callback = new Callback.Completable();
+		getDelegate().close(status.getCode(), status.getReason(), callback);
+
+		return Mono.fromFuture(callback);
 	}
 
 
-	private final class SendProcessorCallback implements WriteCallback {
+	private final class SendProcessorCallback implements Callback {
 
 		@Override
-		public void writeFailed(Throwable x) {
+		public void fail(Throwable x) {
 			getSendProcessor().cancel();
 			getSendProcessor().onError(x);
 		}
 
 		@Override
-		public void writeSuccess() {
+		public void succeed() {
 			getSendProcessor().setReadyToSend(true);
 			getSendProcessor().onWritePossible();
 		}

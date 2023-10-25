@@ -360,6 +360,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void onlyBonaFideMBeanIsExportedWhenAutodetectIsMBeanOnly() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -380,6 +381,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void bonaFideMBeanAndRegularBeanExporterWithAutodetectAll() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -403,6 +405,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void bonaFideMBeanIsNotExportedWithAutodetectAssembler() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -425,6 +428,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	 * Want to ensure that said MBean is not exported twice.
 	 */
 	@Test
+	@SuppressWarnings("deprecation")
 	void bonaFideMBeanExplicitlyExportedAndAutodetectionIsOn() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -442,6 +446,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeToOutOfRangeNegativeValue() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectMode(-1))
@@ -450,6 +455,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeToOutOfRangePositiveValue() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectMode(5))
@@ -462,6 +468,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	 * configured for all autodetect constants defined in {@link MBeanExporter}.
 	 */
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeToAllSupportedValues() {
 		streamAutodetectConstants()
 				.map(MBeanExporterTests::getFieldValue)
@@ -469,12 +476,14 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeToSupportedValue() {
 		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
 		assertThat(exporter.autodetectMode).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeNameToNull() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName(null))
@@ -483,6 +492,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeNameToAnEmptyString() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName(""))
@@ -491,6 +501,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeNameToWhitespace() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName("  \t"))
@@ -499,6 +510,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeNameToBogusValue() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> exporter.setAutodetectModeName("Bogus"))
@@ -511,6 +523,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	 * configured for all autodetect constants defined in {@link MBeanExporter}.
 	 */
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeNameToAllSupportedValues() {
 		streamAutodetectConstants()
 				.map(Field::getName)
@@ -518,6 +531,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void setAutodetectModeNameToSupportedValue() {
 		exporter.setAutodetectModeName("AUTODETECT_ASSEMBLER");
 		assertThat(exporter.autodetectMode).isEqualTo(MBeanExporter.AUTODETECT_ASSEMBLER);

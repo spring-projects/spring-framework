@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.springframework.core.ResolvableType.forClass;
  */
 public class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> {
 
-	private final static MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
+	private static final MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
 	private Msg msg1 =
 			Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();

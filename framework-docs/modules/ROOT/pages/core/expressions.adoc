@@ -46,7 +46,9 @@ The expression language supports the following functionality:
 * Inline maps
 * Ternary operator
 * Variables
-* User-defined functions
+* User-defined functions added to the context
+  * reflective invocation of `Method`
+  * various cases of `MethodHandle`
 * Collection projection
 * Collection selection
 * Templated expressions

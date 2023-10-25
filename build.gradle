@@ -1,22 +1,24 @@
 plugins {
-	id 'io.spring.nohttp' version '0.0.11'
-	id 'io.freefair.aspectj' version '8.0.1' apply false
+	id 'io.freefair.aspectj' version '8.4' apply false
 	// kotlinVersion is managed in gradle.properties
 	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
-	id 'org.jetbrains.dokka' version '1.8.10'
+	id 'org.jetbrains.dokka' version '1.8.20'
 	id 'org.unbroken-dome.xjc' version '2.0.0' apply false
 	id 'com.github.ben-manes.versions' version '0.49.0'
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 	id 'de.undercouch.download' version '5.4.0'
 	id 'me.champeau.jmh' version '0.7.1' apply false
+	id 'me.champeau.mrjar' version '0.1.1'
 }
 
 ext {
 	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
-	javaProjects = subprojects - project(":framework-bom") - project(":framework-platform")
+	javaProjects = subprojects.findAll { !it.name.startsWith("framework-") }
 }
 
 configure(allprojects) { project ->
+	apply plugin: "org.springframework.build.localdev"
+	group = "org.springframework"
 	repositories {
 		mavenCentral()
 		maven {
@@ -41,16 +43,7 @@ configure(allprojects) { project ->
 	}
 }
 
-configure([rootProject] + javaProjects) { project ->
-	group = "org.springframework"
-
-	apply plugin: "java"
-	apply plugin: "java-test-fixtures"
-	apply plugin: "checkstyle"
-	apply plugin: 'org.springframework.build.conventions'
-	apply from: "${rootDir}/gradle/toolchains.gradle"
-	apply from: "${rootDir}/gradle/ide.gradle"
-
+configure(allprojects - project(":framework-platform")) {
 	configurations {
 		dependencyManagement {
 			canBeConsumed = false
@@ -59,36 +52,19 @@ configure([rootProject] + javaProjects) { project ->
 		}
 		matching { it.name.endsWith("Classpath") }.all { it.extendsFrom(dependencyManagement) }
 	}
-
-	test {
-		useJUnitPlatform()
-		include(["**/*Tests.class", "**/*Test.class"])
-		systemProperty("java.awt.headless", "true")
-		systemProperty("testGroups", project.properties.get("testGroups"))
-		systemProperty("io.netty.leakDetection.level", "paranoid")
-		systemProperty("io.netty5.leakDetectionLevel", "paranoid")
-		systemProperty("io.netty5.leakDetection.targetRecords", "32")
-		systemProperty("io.netty5.buffer.lifecycleTracingEnabled", "true")
-		systemProperty("io.netty5.buffer.leakDetectionEnabled", "true")
-		jvmArgs(["--add-opens=java.base/java.lang=ALL-UNNAMED",
-				 "--add-opens=java.base/java.util=ALL-UNNAMED"])
-	}
-
-	checkstyle {
-		toolVersion = "10.12.4"
-		configDirectory.set(rootProject.file("src/checkstyle"))
-	}
-
-	tasks.named("checkstyleMain").configure {
-		maxHeapSize = "1g"
-	}
-
-	tasks.named("checkstyleTest").configure {
-		maxHeapSize = "1g"
-	}
-
 	dependencies {
 		dependencyManagement(enforcedPlatform(dependencies.project(path: ":framework-platform")))
+	}
+}
+
+configure([rootProject] + javaProjects) { project ->
+	apply plugin: "java"
+	apply plugin: "java-test-fixtures"
+	apply plugin: 'org.springframework.build.conventions'
+	apply from: "${rootDir}/gradle/toolchains.gradle"
+	apply from: "${rootDir}/gradle/ide.gradle"
+
+	dependencies {
 		testImplementation("org.junit.jupiter:junit-jupiter-api")
 		testImplementation("org.junit.jupiter:junit-jupiter-params")
 		testImplementation("org.junit.platform:junit-platform-suite-api")
@@ -106,7 +82,6 @@ configure([rootProject] + javaProjects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.39")
 	}
 
 	ext.javadocLinks = [
@@ -118,23 +93,23 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-core/2.14.1/",
-			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.14.1/",
-			"https://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.14.1/",
+			"https://fasterxml.github.io/jackson-core/javadoc/2.14/",
+			"https://fasterxml.github.io/jackson-databind/javadoc/2.14/",
+			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.14/",
 			"https://hc.apache.org/httpcomponents-client-5.2.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
 			// TODO Uncomment link to JUnit 5 docs once we execute Gradle with Java 18+.
 			// See https://github.com/spring-projects/spring-framework/issues/27497
 			//
-			// "https://junit.org/junit5/docs/5.9.3/api/",
+			// "https://junit.org/junit5/docs/5.10.0/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
-			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
+			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
 			// Previously there could be a split-package issue between JSR250 and JSR305 javax.annotation packages,
 			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
 			// JakartaEE equivalents in the jakarta.annotation package.
-			"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
+			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
 	] as String[]
 }
 
@@ -144,28 +119,5 @@ configure(moduleProjects) { project ->
 
 configure(rootProject) {
 	description = "Spring Framework"
-
-	apply plugin: "io.spring.nohttp"
 	apply plugin: 'org.springframework.build.api-diff'
-
-	nohttp {
-		source.exclude "**/test-output/**"
-		source.exclude "**/.gradle/**"
-		allowlistFile = project.file("src/nohttp/allowlist.lines")
-		def rootPath = file(rootDir).toPath()
-		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
-		projectDirs.forEach { dir ->
-			[ 'bin', 'build', 'out', '.settings' ]
-				.collect { rootPath.relativize(new File(dir, it).toPath()) }
-				.forEach { source.exclude "$it/**" }
-			[ '.classpath', '.project' ]
-				.collect { rootPath.relativize(new File(dir, it).toPath()) }
-				.forEach { source.exclude "$it" }
-		}
-	}
-
-	tasks.named("checkstyleNohttp").configure {
-		maxHeapSize = "1g"
-	}
-
 }

@@ -43,7 +43,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * the {@code labelProperty}). These properties are then used when
  * rendering each element of the array/{@link Collection} as an '{@code option}'.
  * If either property name is omitted, the value of {@link Object#toString()} of
- * the corresponding array/{@link Collection} element is used instead.  However,
+ * the corresponding array/{@link Collection} element is used instead. However,
  * if the item is an enum, {@link Enum#name()} is used as the default value.
  * </p>
  * <h3>Using a {@link Map}:</h3>

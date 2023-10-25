@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import javax.naming.NamingException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.lang.Nullable;
 
 /**
  * JNDI-based variant of {@link ConcurrentTaskExecutor}, performing a default lookup for
@@ -43,8 +42,13 @@ public class DefaultManagedTaskExecutor extends ConcurrentTaskExecutor implement
 
 	private final JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
 
-	@Nullable
 	private String jndiName = "java:comp/DefaultManagedExecutorService";
+
+
+	public DefaultManagedTaskExecutor() {
+		// Executor initialization happens in afterPropertiesSet
+		super(null);
+	}
 
 
 	/**
@@ -87,9 +91,7 @@ public class DefaultManagedTaskExecutor extends ConcurrentTaskExecutor implement
 
 	@Override
 	public void afterPropertiesSet() throws NamingException {
-		if (this.jndiName != null) {
-			setConcurrentExecutor(this.jndiLocator.lookup(this.jndiName, Executor.class));
-		}
+		setConcurrentExecutor(this.jndiLocator.lookup(this.jndiName, Executor.class));
 	}
 
 }

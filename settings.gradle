@@ -1,14 +1,7 @@
-pluginManagement {
-	repositories {
-		mavenCentral()
-		gradlePluginPortal()
-		maven { url "https://repo.spring.io/release" }
-	}
-}
-
 plugins {
-	id "com.gradle.enterprise" version "3.12.6"
+	id "com.gradle.enterprise" version "3.14"
 	id "io.spring.ge.conventions" version "0.0.13"
+	id "org.gradle.toolchains.foojay-resolver-convention" version "0.7.0"
 }
 
 include "spring-aop"
@@ -34,6 +27,7 @@ include "spring-web"
 include "spring-webflux"
 include "spring-webmvc"
 include "spring-websocket"
+include "framework-api"
 include "framework-bom"
 include "framework-docs"
 include "framework-platform"
@@ -47,7 +41,8 @@ rootProject.children.each {project ->
 settings.gradle.projectsLoaded {
 	gradleEnterprise {
 		buildScan {
-			File buildDir = settings.gradle.rootProject.getBuildDir()
+			File buildDir = settings.gradle.rootProject
+					.getLayout().getBuildDirectory().getAsFile().get()
 			buildDir.mkdirs()
 			new File(buildDir, "build-scan-uri.txt").text = "(build scan not generated)"
 			buildScanPublished { scan ->

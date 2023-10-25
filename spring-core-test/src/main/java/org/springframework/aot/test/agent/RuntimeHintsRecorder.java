@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public final class RuntimeHintsRecorder {
 	 * @param action the block of code we want to record invocations from
 	 * @return the recorded invocations
 	 */
-	public synchronized static RuntimeHintsInvocations record(Runnable action) {
+	public static synchronized RuntimeHintsInvocations record(Runnable action) {
 		Assert.notNull(action, "Runnable action must not be null");
 		Assert.state(RuntimeHintsAgent.isLoaded(), "RuntimeHintsAgent must be loaded in the current JVM");
 		RuntimeHintsRecorder recorder = new RuntimeHintsRecorder();

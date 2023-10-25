@@ -16,6 +16,8 @@
 
 package org.springframework.jms.core;
 
+import io.micrometer.jakarta9.instrument.jms.JmsInstrumentation;
+import io.micrometer.observation.ObservationRegistry;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.DeliveryMode;
@@ -40,6 +42,7 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that simplifies synchronous JMS access code.
@@ -78,6 +81,7 @@ import org.springframework.util.Assert;
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
@@ -87,6 +91,9 @@ import org.springframework.util.Assert;
  * @see jakarta.jms.MessageConsumer
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
+
+	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
+			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", JmsTemplate.class.getClassLoader());
 
 	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils. */
 	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
@@ -117,6 +124,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	private int priority = Message.DEFAULT_PRIORITY;
 
 	private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
+
+	@Nullable
+	private ObservationRegistry observationRegistry;
 
 
 	/**
@@ -460,6 +470,15 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		return this.timeToLive;
 	}
 
+	/**
+	 * Configure the {@link ObservationRegistry} to use for recording JMS observations.
+	 * @param observationRegistry the observation registry to use.
+	 * @since 6.1
+	 * @see io.micrometer.jakarta9.instrument.jms.JmsInstrumentation
+	 */
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
 
 	//---------------------------------------------------------------------------------------
 	// JmsOperations execute methods
@@ -485,6 +504,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #execute(SessionCallback)
 	 * @see #receive
 	 */
+	@SuppressWarnings("resource")
 	@Nullable
 	public <T> T execute(SessionCallback<T> action, boolean startConnection) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
@@ -503,6 +523,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing callback on JMS Session: " + sessionToUse);
+			}
+			if (micrometerJakartaPresent && this.observationRegistry != null) {
+				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
 			}
 			return action.doInJms(sessionToUse);
 		}
@@ -1192,6 +1215,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		public boolean isSynchedLocalTransactionAllowed() {
 			return JmsTemplate.this.isSessionTransacted();
 		}
+	}
+
+	private abstract static class MicrometerInstrumentation {
+
+		static Session instrumentSession(Session session, ObservationRegistry registry) {
+			return JmsInstrumentation.instrumentSession(session, registry);
+		}
+
 	}
 
 }

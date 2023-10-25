@@ -272,6 +272,12 @@ class ProfilesTests {
 		assertComplexExpression(profiles);
 	}
 
+	@Test
+	void ofComplexExpressionEnclosedInParentheses() {
+		Profiles profiles = Profiles.of("((spring & framework) | (spring & java))");
+		assertComplexExpression(profiles);
+	}
+
 	private void assertComplexExpression(Profiles profiles) {
 		assertThat(profiles.matches(activeProfiles("spring"))).isFalse();
 		assertThat(profiles.matches(activeProfiles("spring", "framework"))).isTrue();
@@ -291,8 +297,27 @@ class ProfilesTests {
 		assertThat(Profiles.of("spring")).hasToString("spring");
 		assertThat(Profiles.of("(spring & framework) | (spring & java)")).hasToString("(spring & framework) | (spring & java)");
 		assertThat(Profiles.of("(spring&framework)|(spring&java)")).hasToString("(spring&framework)|(spring&java)");
-		assertThat(Profiles.of("spring & framework", "java | kotlin")).hasToString("spring & framework or java | kotlin");
-		assertThat(Profiles.of("java | kotlin", "spring & framework")).hasToString("java | kotlin or spring & framework");
+		assertThat(Profiles.of("spring & framework", "java | kotlin")).hasToString("(spring & framework) | (java | kotlin)");
+		assertThat(Profiles.of("java | kotlin", "spring & framework")).hasToString("(java | kotlin) | (spring & framework)");
+		assertThat(Profiles.of("java | kotlin", "spring & framework", "cat | dog")).hasToString("(java | kotlin) | (spring & framework) | (cat | dog)");
+	}
+
+	@Test
+	void toStringGeneratesValidCompositeProfileExpression() {
+		assertThatToStringGeneratesValidCompositeProfileExpression("spring");
+		assertThatToStringGeneratesValidCompositeProfileExpression("(spring & kotlin) | (spring & java)");
+		assertThatToStringGeneratesValidCompositeProfileExpression("spring & kotlin", "spring & java");
+		assertThatToStringGeneratesValidCompositeProfileExpression("spring & kotlin", "spring & java", "cat | dog");
+	}
+
+	private static void assertThatToStringGeneratesValidCompositeProfileExpression(String... profileExpressions) {
+		Profiles profiles = Profiles.of(profileExpressions);
+		assertThat(profiles.matches(activeProfiles("spring", "java"))).isTrue();
+		assertThat(profiles.matches(activeProfiles("kotlin"))).isFalse();
+
+		Profiles compositeProfiles = Profiles.of(profiles.toString());
+		assertThat(compositeProfiles.matches(activeProfiles("spring", "java"))).isTrue();
+		assertThat(compositeProfiles.matches(activeProfiles("kotlin"))).isFalse();
 	}
 
 	@Test

@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -36,9 +37,12 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.method.MethodValidationException;
+import org.springframework.validation.method.MethodValidationResult;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -52,6 +56,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link ResponseEntityExceptionHandler}.
@@ -105,6 +110,21 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
+	public void handlerMethodValidationException() {
+		testException(new HandlerMethodValidationException(mock(MethodValidationResult.class)));
+	}
+
+	@Test
+	public void methodValidationException() {
+		MethodValidationException ex = new MethodValidationException(mock(MethodValidationResult.class));
+		ResponseEntity<?> entity = this.exceptionHandler.handleException(ex, this.exchange).block();
+
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+		assertThat(entity.getBody()).isInstanceOf(ProblemDetail.class);
+	}
+
+	@Test
 	void handleServerWebInputException() {
 		testException(new ServerWebInputException(""));
 	}
@@ -126,33 +146,35 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void errorResponseProblemDetailViaMessageSource() {
-
 		Locale locale = Locale.UK;
-		LocaleContextHolder.setLocale(locale);
 
-		StaticMessageSource messageSource = new StaticMessageSource();
-		messageSource.addMessage(
-				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
+		String type = "https://example.com/probs/unsupported-content";
+		String title = "Media type is not valid or not supported";
+		Class<UnsupportedMediaTypeStatusException> exceptionType = UnsupportedMediaTypeStatusException.class;
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(ErrorResponse.getDefaultTypeMessageCode(exceptionType), locale, type);
+		source.addMessage(ErrorResponse.getDefaultTitleMessageCode(exceptionType), locale, title);
+		source.addMessage(ErrorResponse.getDefaultDetailMessageCode(exceptionType, null), locale,
 				"Content-Type {0} not supported. Supported: {1}");
-		messageSource.addMessage(
-				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale,
-				"Media type is not valid or not supported");
 
-		this.exceptionHandler.setMessageSource(messageSource);
+		this.exceptionHandler.setMessageSource(source);
 
-		Exception ex = new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON,
-				List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
+		Exception ex = new UnsupportedMediaTypeStatusException(
+				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
-				.acceptLanguageAsLocales(locale).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build());
 
 		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
+		assertThat(responseEntity).isNotNull();
 
-		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
-		assertThat(body.getDetail()).isEqualTo(
+		ProblemDetail problem = (ProblemDetail) responseEntity.getBody();
+		assertThat(problem).isNotNull();
+		assertThat(problem.getType()).isEqualTo(URI.create(type));
+		assertThat(problem.getTitle()).isEqualTo(title);
+		assertThat(problem.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
-		assertThat(body.getTitle()).isEqualTo(
-				"Media type is not valid or not supported");
 	}
 
 	@Test

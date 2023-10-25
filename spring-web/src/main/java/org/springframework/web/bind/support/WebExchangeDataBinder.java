@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,13 +72,32 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 
 	/**
+	 * Use a default or single data constructor to create the target by
+	 * binding request parameters, multipart files, or parts to constructor args.
+	 * <p>After the call, use {@link #getBindingResult()} to check for bind errors.
+	 * If there are none, the target is set, and {@link #bind} can be called for
+	 * further initialization via setters.
+	 * @param exchange the request to bind
+	 * @return a {@code Mono<Void>} that completes when the target is created
+	 * @since 6.1
+	 */
+	public Mono<Void> construct(ServerWebExchange exchange) {
+		return getValuesToBind(exchange)
+				.doOnNext(map -> construct(new MapValueResolver(map)))
+				.then();
+	}
+
+	/**
 	 * Bind query parameters, form data, or multipart form data to the binder target.
 	 * @param exchange the current exchange
-	 * @return a {@code Mono<Void>} when binding is complete
+	 * @return a {@code Mono<Void>} that completes when binding is complete
 	 */
 	public Mono<Void> bind(ServerWebExchange exchange) {
+		if (shouldNotBindPropertyValues()) {
+			return Mono.empty();
+		}
 		return getValuesToBind(exchange)
-				.doOnNext(values -> doBind(new MutablePropertyValues(values)))
+				.doOnNext(map -> doBind(new MutablePropertyValues(map)))
 				.then();
 	}
 
@@ -125,6 +144,18 @@ public class WebExchangeDataBinder extends WebDataBinder {
 					.map(value -> value instanceof FormFieldPart formFieldPart ? formFieldPart.value() : value)
 					.toList();
 			params.put(key, values.size() == 1 ? values.get(0) : values);
+		}
+	}
+
+
+	/**
+	 * Resolve values from a map.
+	 */
+	private record MapValueResolver(Map<String, Object> map) implements ValueResolver {
+
+		@Override
+		public Object resolveValue(String name, Class<?> type) {
+			return this.map.get(name);
 		}
 	}
 

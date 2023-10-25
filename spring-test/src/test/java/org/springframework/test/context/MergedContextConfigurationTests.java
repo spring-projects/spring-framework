@@ -18,6 +18,7 @@ package org.springframework.test.context;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -409,9 +410,9 @@ class MergedContextConfigurationTests {
 	void equalsWithSameContextCustomizers() {
 		Set<ContextCustomizer> customizers = Collections.singleton(mock());
 		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
-			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, List.of(), null, customizers, loader, null, null);
 		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
-			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, List.of(), null, customizers, loader, null, null);
 		assertThat(mergedConfig2).isEqualTo(mergedConfig1);
 	}
 
@@ -424,9 +425,9 @@ class MergedContextConfigurationTests {
 		Set<ContextCustomizer> customizers2 = Collections.singleton(mock());
 
 		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
-			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, List.of(), null, customizers1, loader, null, null);
 		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
-			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers2, loader, null, null);
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, List.of(), null, customizers2, loader, null, null);
 		assertThat(mergedConfig2).isNotEqualTo(mergedConfig1);
 		assertThat(mergedConfig1).isNotEqualTo(mergedConfig2);
 	}

@@ -208,6 +208,76 @@ NOTE: This is an optional feature, and your favorite cache library may not suppo
 All `CacheManager` implementations provided by the core framework support it. See the
 documentation of your cache provider for more details.
 
+[[cache-annotations-cacheable-reactive]]
+=== Caching with CompletableFuture and Reactive Return Types
+
+As of 6.1, cache annotations take `CompletableFuture` and reactive return types
+into account, automatically adapting the cache interaction accordingly.
+
+For a method returning a `CompletableFuture`, the object produced by that future
+will be cached whenever it is complete, and the cache lookup for a cache hit will
+be retrieved via a `CompletableFuture`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable("books")
+	public CompletableFuture<Book> findBook(ISBN isbn) {...}
+----
+
+For a method returning a Reactor `Mono`, the object emitted by that Reactive Streams
+publisher will be cached whenever it is available, and the cache lookup for a cache
+hit will be retrieved as a `Mono` (backed by a `CompletableFuture`):
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable("books")
+	public Mono<Book> findBook(ISBN isbn) {...}
+----
+
+For a method returning a Reactor `Flux`, the objects emitted by that Reactive Streams
+publisher will be collected into a `List` and cached whenever that list is complete,
+and the cache lookup for a cache hit will be retrieved as a `Flux` (backed by a
+`CompletableFuture` for the cached `List` value):
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable("books")
+	public Flux<Book> findBooks(String author) {...}
+----
+
+Such `CompletableFuture` and reactive adaptation also works for synchronized caching,
+computing the value only once in case of a concurrent cache miss:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="foos", sync=true) <1>
+	public CompletableFuture<Foo> executeExpensiveOperation(String id) {...}
+----
+<1> Using the `sync` attribute.
+
+NOTE: In order for such an arrangement to work at runtime, the configured cache
+needs to be capable of `CompletableFuture`-based retrieval. The Spring-provided
+`ConcurrentMapCacheManager` automatically adapts to that retrieval style, and
+`CaffeineCacheManager` natively supports it when its asynchronous cache mode is
+enabled: set `setAsyncCacheMode(true)` on your `CaffeineCacheManager` instance.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Bean
+	CacheManager cacheManager() {
+		CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+		cacheManager.setCacheSpecification(...);
+		cacheManager.setAsyncCacheMode(true);
+		return cacheManager;
+	}
+----
+
+Last but not least, be aware that annotation-driven caching is not appropriate
+for sophisticated reactive interactions involving composition and back pressure.
+If you choose to declare `@Cacheable` on specific reactive methods, consider the
+impact of the rather coarse-granular cache interaction which simply stores the
+emitted object for a `Mono` or even a pre-collected list of objects for a `Flux`.
+
 [[cache-annotations-cacheable-condition]]
 === Conditional Caching
 
@@ -337,6 +407,9 @@ other), such declarations should be avoided. Note also that such conditions shou
 on the result object (that is, the `#result` variable), as these are validated up-front to
 confirm the exclusion.
 
+As of 6.1, `@CachePut` takes `CompletableFuture` and reactive return types into account,
+performing the put operation whenever the produced object is available.
+
 
 [[cache-annotations-evict]]
 == The `@CacheEvict` Annotation
@@ -378,6 +451,9 @@ Note that `void` methods can be used with `@CacheEvict` - as the methods act as 
 trigger, the return values are ignored (as they do not interact with the cache). This is
 not the case with `@Cacheable` which adds data to the cache or updates data in the cache
 and, thus, requires a result.
+
+As of 6.1, `@CacheEvict` takes `CompletableFuture` and reactive return types into account,
+performing an after-invocation evict operation whenever processing has completed.
 
 
 [[cache-annotations-caching]]

@@ -79,7 +79,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
 
-	private final Object status;
+	private final HttpStatusCode status;
 
 
 	/**
@@ -109,16 +109,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
-	 * @param body the entity body
-	 * @param headers the entity headers
-	 * @param status the status code
-	 */
-	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode status) {
-		this(body, headers, (Object) status);
-	}
-
-	/**
 	 * Create a {@code ResponseEntity} with a body, headers, and a raw status code.
 	 * @param body the entity body
 	 * @param headers the entity headers
@@ -126,16 +116,20 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 5.3.2
 	 */
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
-		this(body, headers, (Object) rawStatus);
+		this(body, headers, HttpStatusCode.valueOf(rawStatus));
 	}
 
 	/**
-	 * Private constructor.
+	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param statusCode the status code
 	 */
-	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode statusCode) {
 		super(body, headers);
-		Assert.notNull(status, "HttpStatusCode must not be null");
-		this.status = status;
+		Assert.notNull(statusCode, "HttpStatusCode must not be null");
+
+		this.status = statusCode;
 	}
 
 
@@ -144,12 +138,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the HTTP status as an HttpStatus enum entry
 	 */
 	public HttpStatusCode getStatusCode() {
-		if (this.status instanceof HttpStatusCode statusCode) {
-			return statusCode;
-		}
-		else {
-			return HttpStatusCode.valueOf((Integer) this.status);
-		}
+		return this.status;
 	}
 
 	/**
@@ -161,12 +150,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	@Deprecated(since = "6.0")
 	public int getStatusCodeValue() {
-		if (this.status instanceof HttpStatusCode statusCode) {
-			return statusCode.value();
-		}
-		else {
-			return (Integer) this.status;
-		}
+		return getStatusCode().value();
 	}
 
 
@@ -530,13 +514,19 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	private static class DefaultBuilder implements BodyBuilder {
 
-		private final Object statusCode;
+		private final HttpStatusCode statusCode;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		public DefaultBuilder(Object statusCode) {
+
+		public DefaultBuilder(int statusCode) {
+			this(HttpStatusCode.valueOf(statusCode));
+		}
+
+		public DefaultBuilder(HttpStatusCode statusCode) {
 			this.statusCode = statusCode;
 		}
+
 
 		@Override
 		public BodyBuilder header(String headerName, String... headerValues) {

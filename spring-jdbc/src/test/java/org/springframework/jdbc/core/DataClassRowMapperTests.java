@@ -95,7 +95,7 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 	}
 
 
-	static record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
+	record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
 	}
 
 }

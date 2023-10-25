@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,24 @@ package org.springframework.test.context.aot;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ClassUtils;
 
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
-import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
+import static org.springframework.core.io.ResourceLoader.CLASSPATH_URL_PREFIX;
+import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
 
 /**
  * {@code MergedContextConfigurationRuntimeHints} registers run-time hints for
@@ -52,7 +61,10 @@ class MergedContextConfigurationRuntimeHints {
 
 	private static final Method getResourceBasePathMethod = loadGetResourceBasePathMethod();
 
+	private final Log logger = LogFactory.getLog(getClass());
 
+
+	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig, ClassLoader classLoader) {
 		// @ContextConfiguration(loader = ...)
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
@@ -65,10 +77,18 @@ class MergedContextConfigurationRuntimeHints {
 				.forEach(clazz -> registerDeclaredConstructors(clazz, runtimeHints));
 
 		// @ContextConfiguration(locations = ...)
-		registerClasspathResources(mergedConfig.getLocations(), runtimeHints, classLoader);
+		registerClasspathResources("@ContextConfiguration", mergedConfig.getLocations(), runtimeHints, classLoader);
 
-		// @TestPropertySource(locations = ... )
-		registerClasspathResources(mergedConfig.getPropertySourceLocations(), runtimeHints, classLoader);
+		for (PropertySourceDescriptor descriptor : mergedConfig.getPropertySourceDescriptors()) {
+			// @TestPropertySource(locations = ...)
+			registerClasspathResources("@TestPropertySource", descriptor.locations(), runtimeHints, classLoader);
+
+			// @TestPropertySource(factory = ...)
+			Class<?> factoryClass = descriptor.propertySourceFactory();
+			if (factoryClass != null) {
+				registerDeclaredConstructors(factoryClass, runtimeHints);
+			}
+		}
 
 		// @WebAppConfiguration(value = ...)
 		if (webMergedContextConfigurationClass.isInstance(mergedConfig)) {
@@ -88,12 +108,32 @@ class MergedContextConfigurationRuntimeHints {
 		runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
-	private void registerClasspathResources(String[] paths, RuntimeHints runtimeHints, ClassLoader classLoader) {
+	private void registerClasspathResources(String annotation, String[] locations, RuntimeHints runtimeHints, ClassLoader classLoader) {
+		registerClasspathResources(annotation, Arrays.asList(locations), runtimeHints, classLoader);
+	}
+
+	private void registerClasspathResources(String annotation, List<String> locations, RuntimeHints runtimeHints, ClassLoader classLoader) {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
-		Arrays.stream(paths)
-				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
-				.map(resourceLoader::getResource)
-				.forEach(runtimeHints.resources()::registerResource);
+		ResourceHints resourceHints = runtimeHints.resources();
+		for (String location : locations) {
+			if (location.startsWith(CLASSPATH_ALL_URL_PREFIX) ||
+					(location.startsWith(CLASSPATH_URL_PREFIX) && (location.contains("*") || location.contains("?")))) {
+
+				if (logger.isWarnEnabled()) {
+					logger.warn("""
+							Runtime hint registration is not supported for the 'classpath*:' \
+							prefix or wildcards in %s locations. Please manually register a \
+							resource hint for each location represented by '%s'."""
+								.formatted(annotation, location));
+				}
+			}
+			else {
+				Resource resource = resourceLoader.getResource(location);
+				if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
+					resourceHints.registerPattern(classPathResource.getPath());
+				}
+			}
+		}
 	}
 
 	private void registerClasspathResourceDirectoryStructure(String directory, RuntimeHints runtimeHints) {

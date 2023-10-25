@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package org.springframework.http.client.reactive;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 
+import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.io.ByteBufferPool;
-import org.eclipse.jetty.io.MappedByteBufferPool;
 import org.eclipse.jetty.util.ProcessorUtils;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -69,7 +69,7 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 
 	/**
 	 * Configure the {@link ByteBufferPool} to use.
-	 * <p>By default, initialized with a {@link MappedByteBufferPool}.
+	 * <p>By default, initialized with a {@link ArrayByteBufferPool}.
 	 * @param byteBufferPool the {@link ByteBuffer} pool to use
 	 */
 	public void setByteBufferPool(@Nullable ByteBufferPool byteBufferPool) {
@@ -130,7 +130,7 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 			this.executor = threadPool;
 		}
 		if (this.byteBufferPool == null) {
-			this.byteBufferPool = new MappedByteBufferPool(2048,
+			this.byteBufferPool = new ArrayByteBufferPool(0, 2048, 65536, // from HttpClient:202
 					this.executor instanceof ThreadPool.SizedThreadPool sizedThreadPool ?
 							sizedThreadPool.getMaxThreads() / 2 :
 							ProcessorUtils.availableProcessors() * 2);

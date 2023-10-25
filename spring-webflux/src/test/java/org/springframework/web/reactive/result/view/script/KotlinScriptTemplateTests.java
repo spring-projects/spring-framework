@@ -33,18 +33,18 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_19;
+import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
  */
-@DisabledForJreRange(min = JAVA_19, disabledReason = "Kotlin doesn't support Java 19+ yet")
-public class KotlinScriptTemplateTests {
+@DisabledForJreRange(min = JAVA_21, disabledReason = "Kotlin doesn't support Java 21+ yet")
+class KotlinScriptTemplateTests {
 
 	@Test
-	public void renderTemplateWithFrenchLocale() throws Exception {
+	void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
@@ -53,7 +53,7 @@ public class KotlinScriptTemplateTests {
 	}
 
 	@Test
-	public void renderTemplateWithEnglishLocale() throws Exception {
+	void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
@@ -62,7 +62,7 @@ public class KotlinScriptTemplateTests {
 	}
 
 	@Test
-	public void renderTemplateWithoutRenderFunction() throws Exception {
+	void renderTemplateWithoutRenderFunction() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("header", "<html><body>");
 		model.put("hello", "Hello");

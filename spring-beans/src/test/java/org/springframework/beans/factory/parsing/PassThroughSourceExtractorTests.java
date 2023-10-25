@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class PassThroughSourceExtractorTests {
 
 	@Test
 	public void testPassThroughContract() throws Exception {
-		Object source  = new Object();
+		Object source = new Object();
 		Object extractedSource = new PassThroughSourceExtractor().extractSource(source, null);
 		assertThat(extractedSource).as("The contract of PassThroughSourceExtractor states that the supplied " +
 				"source object *must* be returned as-is").isSameAs(source);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,6 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> message = messages.get(0);
 
 		assertThat(message.getHeaders()).isSameAs(headers);
-		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test
@@ -190,7 +189,6 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> sentMessage = messages.get(0);
 
 		assertThat(sentMessage).isSameAs(message);
-		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test

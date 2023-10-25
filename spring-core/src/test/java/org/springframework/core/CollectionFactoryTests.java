@@ -212,6 +212,8 @@ class CollectionFactoryTests {
 		testCollection(List.class, ArrayList.class);
 		testCollection(Set.class, LinkedHashSet.class);
 		testCollection(Collection.class, LinkedHashSet.class);
+		// on JDK 21: testCollection(SequencedSet.class, LinkedHashSet.class);
+		// on JDK 21: testCollection(SequencedCollection.class, LinkedHashSet.class);
 		testCollection(SortedSet.class, TreeSet.class);
 		testCollection(NavigableSet.class, TreeSet.class);
 
@@ -261,6 +263,7 @@ class CollectionFactoryTests {
 	void createsMapsCorrectly() {
 		// interfaces
 		testMap(Map.class, LinkedHashMap.class);
+		// on JDK 21: testMap(SequencedMap.class, LinkedHashMap.class);
 		testMap(SortedMap.class, TreeMap.class);
 		testMap(NavigableMap.class, TreeMap.class);
 		testMap(MultiValueMap.class, LinkedMultiValueMap.class);

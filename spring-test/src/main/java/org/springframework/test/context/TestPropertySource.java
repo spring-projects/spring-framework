@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
  * {@code @TestPropertySource} is a class-level annotation that is used to
@@ -73,11 +74,12 @@ import org.springframework.core.annotation.AliasFor;
  * <li>{@code @TestPropertySource} can be used as a <em>{@linkplain Repeatable
  * repeatable}</em> annotation.</li>
  * <li>This annotation may be used as a <em>meta-annotation</em> to create
- * custom <em>composed annotations</em>; however, caution should be taken if
+ * custom <em>composed annotations</em>, but caution should be taken if
  * this annotation and {@code @ContextConfiguration} are combined on a composed
  * annotation since the {@code locations} and {@code inheritLocations} attributes
  * of both annotations can lead to ambiguity during the attribute resolution
- * process.</li>
+ * process. Note, however, that ambiguity can be avoided via explicit annotation
+ * attribute overrides using {@link AliasFor @AliasFor}.</li>
  * <li>As of Spring Framework 5.3, this annotation will be inherited from an
  * enclosing test class by default. See
  * {@link NestedTestConfiguration @NestedTestConfiguration} for details.</li>
@@ -109,13 +111,15 @@ public @interface TestPropertySource {
 
 	/**
 	 * The resource locations of properties files to be loaded into the
-	 * {@code Environment}'s set of {@code PropertySources}. Each location
-	 * will be added to the enclosing {@code Environment} as its own property
-	 * source, in the order declared.
+	 * {@code Environment}'s set of {@code PropertySources}.
+	 * <p>Each location will be added to the enclosing {@code Environment} as its
+	 * own property source, in the order declared (or in the order in which resource
+	 * locations are resolved when location wildcards are used).
 	 * <h4>Supported File Formats</h4>
-	 * <p>Both traditional and XML-based properties file formats are supported
-	 * &mdash; for example, {@code "classpath:/com/example/test.properties"}
-	 * or {@code "file:/path/to/file.xml"}.
+	 * <p>By default, both traditional and XML-based properties file formats are
+	 * supported &mdash; for example, {@code "classpath:/com/example/test.properties"}
+	 * or {@code "file:/path/to/file.xml"}. To support a different file format,
+	 * configure an appropriate {@link #factory() PropertySourceFactory}.
 	 * <h4>Path Resource Semantics</h4>
 	 * <p>Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path
@@ -128,12 +132,19 @@ public @interface TestPropertySource {
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
-	 * Resource location wildcards (e.g. <code>*&#42;/*.properties</code>)
-	 * are not permitted: each location must evaluate to exactly one
-	 * {@code .properties} or {@code .xml} resource. Property placeholders
-	 * in paths (i.e., <code>${...}</code>) will be
-	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String) resolved}
-	 * against the {@code Environment}.
+	 * <p>Property placeholders in paths (i.e., <code>${...}</code>) will be
+	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)
+	 * resolved} against the {@code Environment}.
+	 * <p>As of Spring Framework 6.1, resource location patterns are also
+	 * supported &mdash; for example, {@code "classpath*:/config/*.properties"}.
+	 * <p><strong>WARNING</strong>: a pattern such as {@code "classpath*:/config/*.properties"}
+	 * may be effectively equivalent to an explicit enumeration of resource locations such as
+	 * <code>{"classpath:/config/mail.properties", classpath:/config/order.properties"}</code>;
+	 * however, the two declarations will result in different keys for the context
+	 * cache since the pattern cannot be eagerly resolved to concrete locations.
+	 * Consequently, to benefit from the context cache you must ensure that you
+	 * consistently use either patterns or explicit enumerations of resource
+	 * locations within your test suite.
 	 * <h4>Default Properties File Detection</h4>
 	 * <p>See the class-level Javadoc for a discussion on detection of defaults.
 	 * <h4>Precedence</h4>
@@ -144,6 +155,8 @@ public @interface TestPropertySource {
 	 * @see #inheritLocations
 	 * @see #value
 	 * @see #properties
+	 * @see #encoding
+	 * @see #factory
 	 * @see org.springframework.core.env.PropertySource
 	 */
 	@AliasFor("value")
@@ -170,13 +183,13 @@ public @interface TestPropertySource {
 	 * <strong>and</strong> {@code "extended.properties"} files as test property
 	 * source locations.
 	 * <pre class="code">
-	 * &#064;TestPropertySource(&quot;base.properties&quot;)
+	 * &#064;TestPropertySource("base.properties")
 	 * &#064;ContextConfiguration
 	 * public class BaseTest {
 	 *   // ...
 	 * }
 	 *
-	 * &#064;TestPropertySource(&quot;extended.properties&quot;)
+	 * &#064;TestPropertySource("extended.properties")
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
@@ -208,7 +221,8 @@ public @interface TestPropertySource {
 	 * {@link org.springframework.core.env.Environment Environment} before the
 	 * {@code ApplicationContext} is loaded for the test. All key-value pairs
 	 * will be added to the enclosing {@code Environment} as a single test
-	 * {@code PropertySource} with the highest precedence.
+	 * {@code PropertySource} with the highest precedence. As of Spring Framework
+	 * 6.1, multiple key-value pairs may be specified via a single <em>text block</em>.
 	 * <h4>Supported Syntax</h4>
 	 * <p>The supported syntax for key-value pairs is the same as the
 	 * syntax defined for entries in a Java
@@ -218,6 +232,39 @@ public @interface TestPropertySource {
 	 * <li>{@code "key:value"}</li>
 	 * <li>{@code "key value"}</li>
 	 * </ul>
+	 * <p><strong>WARNING</strong>: although properties can be defined using any
+	 * of the above syntax variants and any number of spaces between the key and
+	 * the value, it is recommended that you use one syntax variant and consistent
+	 * spacing within your test suite &mdash; for example, consider always using
+	 * {@code "key = value"} instead of {@code "key= value"}, {@code "key=value"},
+	 * etc. Similarly, if you define inlined properties using <em>text blocks</em>
+	 * you should consistently use text blocks for inlined properties throughout
+	 * your test suite. The reason is that the exact strings you provide will be
+	 * used to determine the key for the context cache. Consequently, to benefit
+	 * from the context cache you must ensure that you define inlined properties
+	 * consistently.
+	 * <h4>Examples</h4>
+	 * <pre class="code">
+	 * &#47;&#47; Using an array of strings
+	 * &#064;TestPropertySource(properties = {
+	 *     "key1 = value1",
+	 *     "key2 = value2"
+	 * })
+	 * &#064;ContextConfiguration
+	 * class MyTests {
+	 *   // ...
+	 * }</pre>
+	 * <pre class="code">
+	 * &#47;&#47; Using a single text block
+	 * &#064;TestPropertySource(properties = """
+	 *     key1 = value1
+	 *     key2 = value2
+	 *     """
+	 * )
+	 * &#064;ContextConfiguration
+	 * class MyTests {
+	 *   // ...
+	 * }</pre>
 	 * <h4>Precedence</h4>
 	 * <p>Properties declared via this attribute have higher precedence than
 	 * properties loaded from resource {@link #locations}.
@@ -247,12 +294,12 @@ public @interface TestPropertySource {
 	 * {@code ExtendedTest} will be loaded using the inlined {@code key1}
 	 * <strong>and</strong> {@code key2} properties.
 	 * <pre class="code">
-	 * &#064;TestPropertySource(properties = &quot;key1 = value1&quot;)
+	 * &#064;TestPropertySource(properties = "key1 = value1")
 	 * &#064;ContextConfiguration
 	 * public class BaseTest {
 	 *   // ...
 	 * }
-	 * &#064;TestPropertySource(properties = &quot;key2 = value2&quot;)
+	 * &#064;TestPropertySource(properties = "key2 = value2")
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
@@ -277,5 +324,24 @@ public @interface TestPropertySource {
 	 * @see #properties
 	 */
 	boolean inheritProperties() default true;
+
+	/**
+	 * Specify the character encoding for the given {@linkplain #locations resources}
+	 * &mdash; for example, "UTF-8".
+	 * <p>If not specified, the default character encoding of the JVM will be used.
+	 * @since 6.1
+	 */
+	String encoding() default "";
+
+	/**
+	 * Specify a custom {@link PropertySourceFactory}, if any.
+	 * <p>By default, a factory for standard resource files will be used which
+	 * supports {@code *.properties} and {@code *.xml} file formats for
+	 * {@link java.util.Properties}.
+	 * @since 6.1
+	 * @see org.springframework.core.io.support.DefaultPropertySourceFactory
+	 * @see org.springframework.core.io.support.ResourcePropertySource
+	 */
+	Class<? extends PropertySourceFactory> factory() default PropertySourceFactory.class;
 
 }

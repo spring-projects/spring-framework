@@ -117,7 +117,7 @@ public final class Parameter {
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.value) + ObjectUtils.nullSafeHashCode(this.type);
+		return ObjectUtils.nullSafeHash(this.value, this.type);
 	}
 
 	@Override

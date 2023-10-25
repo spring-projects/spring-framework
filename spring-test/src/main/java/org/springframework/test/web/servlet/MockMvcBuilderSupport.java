@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,10 @@ public abstract class MockMvcBuilderSupport {
 			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
 			@Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
 
-		MockMvc mockMvc = createMockMvc(filters, servletConfig, webAppContext, defaultRequestBuilder, globalResultMatchers, globalResultHandlers, dispatcherServletCustomizers);
+		MockMvc mockMvc = createMockMvc(
+				filters, servletConfig, webAppContext, defaultRequestBuilder,
+				globalResultMatchers, globalResultHandlers, dispatcherServletCustomizers);
+
 		mockMvc.setDefaultResponseCharacterEncoding(defaultResponseCharacterEncoding);
 		return mockMvc;
 	}
@@ -75,7 +78,7 @@ public abstract class MockMvcBuilderSupport {
 			dispatcherServlet.init(servletConfig);
 		}
 		catch (ServletException ex) {
-			// should never happen..
+			// should never happen...
 			throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet", ex);
 		}
 

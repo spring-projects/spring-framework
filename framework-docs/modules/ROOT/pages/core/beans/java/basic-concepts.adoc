@@ -59,7 +59,7 @@ The preceding `AppConfig` class is equivalent to the following Spring `<beans/>`
 ****
 When `@Bean` methods are declared within classes that are not annotated with
 `@Configuration`, they are referred to as being processed in a "`lite`" mode. Bean methods
-declared in a `@Component` or even in a plain old class are considered to be "`lite`",
+declared on a bean that is not annotated with `@Configuration` are considered to be "`lite`",
 with a different primary purpose of the containing class and a `@Bean` method
 being a sort of bonus there. For example, service components may expose management views
 to the container through an additional `@Bean` method on each applicable component class.

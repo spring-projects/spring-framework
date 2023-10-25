@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterShar
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotProcessingTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeClassLevelTests;
+import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeMethodLevelTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,17 +45,26 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
+				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class,
-				BasicSpringTestNGTests.class
+				DisabledInAotProcessingTests.class,
+				DisabledInAotRuntimeClassLevelTests.class,
+				DisabledInAotRuntimeMethodLevelTests.class
 			);
 	}
 
 	@Test
 	void scanTestSuitesForJupiter() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.jupiter"))
-			.containsExactlyInAnyOrder(BasicSpringJupiterImportedConfigTests.class,
-				BasicSpringJupiterSharedConfigTests.class, BasicSpringJupiterTests.class,
-				BasicSpringJupiterTests.NestedTests.class);
+			.containsExactlyInAnyOrder(
+				BasicSpringJupiterImportedConfigTests.class,
+				BasicSpringJupiterSharedConfigTests.class,
+				BasicSpringJupiterTests.class,
+				BasicSpringJupiterTests.NestedTests.class,
+				DisabledInAotProcessingTests.class,
+				DisabledInAotRuntimeClassLevelTests.class,
+				DisabledInAotRuntimeMethodLevelTests.class
+			);
 	}
 
 	@Test
@@ -76,7 +88,10 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class,
-				BasicSpringTestNGTests.class
+				BasicSpringTestNGTests.class,
+				DisabledInAotProcessingTests.class,
+				DisabledInAotRuntimeClassLevelTests.class,
+				DisabledInAotRuntimeMethodLevelTests.class
 			);
 	}
 
@@ -88,7 +103,10 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
-				BasicSpringVintageTests.class
+				BasicSpringVintageTests.class,
+				DisabledInAotProcessingTests.class,
+				DisabledInAotRuntimeClassLevelTests.class,
+				DisabledInAotRuntimeMethodLevelTests.class
 			);
 	}
 

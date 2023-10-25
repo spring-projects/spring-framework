@@ -682,7 +682,7 @@ public class MessageBrokerConfigurationTests {
 
 
 	@Configuration
-	static abstract class BaseDotSeparatorConfig extends BaseTestMessageBrokerConfig {
+	abstract static class BaseDotSeparatorConfig extends BaseTestMessageBrokerConfig {
 
 		@Override
 		protected void configureMessageBroker(MessageBrokerRegistry registry) {

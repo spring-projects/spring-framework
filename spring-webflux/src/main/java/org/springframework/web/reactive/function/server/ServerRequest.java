@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -196,6 +198,31 @@ public interface ServerRequest {
 	 * @return a flux containing the body of the given type {@code T}
 	 */
 	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
+
+	/**
+	 * Bind to this request and return an instance of the given type.
+	 * @param bindType the type of class to bind this request to
+	 * @param <T> the type to bind to
+	 * @return a mono containing either a constructed and bound instance of
+	 * {@code bindType}, or a {@link BindException} in case of binding errors
+	 * @since 6.1
+	 */
+	default <T> Mono<T> bind(Class<T> bindType) {
+		return bind(bindType, dataBinder -> {});
+	}
+
+	/**
+	 * Bind to this request and return an instance of the given type.
+	 * @param bindType the type of class to bind this request to
+	 * @param dataBinderCustomizer used to customize the data binder, e.g. set
+	 * (dis)allowed fields
+	 * @param <T> the type to bind to
+	 * @return a mono containing either a constructed and bound instance of
+	 * {@code bindType}, or a {@link BindException} in case of binding errors
+	 * @since 6.1
+	 */
+	<T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer);
+
 
 	/**
 	 * Get the request attribute value if present.

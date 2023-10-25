@@ -16,6 +16,8 @@
 
 package org.springframework.r2dbc.connection.lookup;
 
+import java.util.Map;
+
 import io.r2dbc.spi.ConnectionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
-import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -36,9 +38,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Jens Schauder
  */
 @ExtendWith(MockitoExtension.class)
-public class AbstractRoutingConnectionFactoryUnitTests {
+class AbstractRoutingConnectionFactoryUnitTests {
 
 	private static final String ROUTING_KEY = "routingKey";
+
+	final DummyRoutingConnectionFactory connectionFactory = new DummyRoutingConnectionFactory();
 
 	@Mock
 	ConnectionFactory defaultConnectionFactory;
@@ -46,20 +50,16 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	@Mock
 	ConnectionFactory routedConnectionFactory;
 
-	DummyRoutingConnectionFactory connectionFactory;
-
 
 	@BeforeEach
-	public void before() {
-		connectionFactory = new DummyRoutingConnectionFactory();
+	void before() {
 		connectionFactory.setDefaultTargetConnectionFactory(defaultConnectionFactory);
 	}
 
 
 	@Test
-	public void shouldDetermineRoutedFactory() {
-		connectionFactory.setTargetConnectionFactories(
-				singletonMap("key", routedConnectionFactory));
+	void shouldDetermineRoutedFactory() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", routedConnectionFactory));
 		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
 		connectionFactory.afterPropertiesSet();
 
@@ -71,9 +71,8 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldFallbackToDefaultConnectionFactory() {
-		connectionFactory.setTargetConnectionFactories(
-				singletonMap("key", routedConnectionFactory));
+	void shouldFallbackToDefaultConnectionFactory() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", routedConnectionFactory));
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
@@ -83,29 +82,27 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void initializationShouldFailUnsupportedLookupKey() {
-		connectionFactory.setTargetConnectionFactories(singletonMap("key", new Object()));
+	void initializationShouldFailUnsupportedLookupKey() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", new Object()));
 
-		assertThatThrownBy(() -> connectionFactory.afterPropertiesSet())
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatIllegalArgumentException().isThrownBy(connectionFactory::initialize);
 	}
 
 	@Test
-	public void initializationShouldFailUnresolvableKey() {
-		connectionFactory.setTargetConnectionFactories(singletonMap("key", "value"));
+	void initializationShouldFailUnresolvableKey() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", "value"));
 		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
 
-		assertThatThrownBy(() -> connectionFactory.afterPropertiesSet())
+		assertThatThrownBy(connectionFactory::initialize)
 				.isInstanceOf(ConnectionFactoryLookupFailureException.class)
 				.hasMessageContaining("No ConnectionFactory with name 'value' registered");
 	}
 
 	@Test
-	public void unresolvableConnectionFactoryRetrievalShouldFail() {
+	void unresolvableConnectionFactoryRetrievalShouldFail() {
 		connectionFactory.setLenientFallback(false);
 		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
-		connectionFactory.setTargetConnectionFactories(
-				singletonMap("key", routedConnectionFactory));
+		connectionFactory.setTargetConnectionFactories(Map.of("key", routedConnectionFactory));
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
@@ -115,9 +112,8 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void connectionFactoryRetrievalWithUnknownLookupKeyShouldReturnDefaultConnectionFactory() {
-		connectionFactory.setTargetConnectionFactories(
-				singletonMap("key", routedConnectionFactory));
+	void connectionFactoryRetrievalWithUnknownLookupKeyShouldReturnDefaultConnectionFactory() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", routedConnectionFactory));
 		connectionFactory.setDefaultTargetConnectionFactory(defaultConnectionFactory);
 		connectionFactory.afterPropertiesSet();
 
@@ -129,9 +125,8 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void connectionFactoryRetrievalWithoutLookupKeyShouldReturnDefaultConnectionFactory() {
-		connectionFactory.setTargetConnectionFactories(
-				singletonMap("key", routedConnectionFactory));
+	void connectionFactoryRetrievalWithoutLookupKeyShouldReturnDefaultConnectionFactory() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", routedConnectionFactory));
 		connectionFactory.setDefaultTargetConnectionFactory(defaultConnectionFactory);
 		connectionFactory.setLenientFallback(false);
 		connectionFactory.afterPropertiesSet();
@@ -143,12 +138,12 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldLookupFromMap() {
+	void shouldLookupFromMap() {
 		MapConnectionFactoryLookup lookup =
 				new MapConnectionFactoryLookup("lookup-key", routedConnectionFactory);
 
 		connectionFactory.setConnectionFactoryLookup(lookup);
-		connectionFactory.setTargetConnectionFactories(singletonMap("my-key", "lookup-key"));
+		connectionFactory.setTargetConnectionFactories(Map.of("my-key", "lookup-key"));
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
@@ -159,7 +154,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldAllowModificationsAfterInitialization() {
+	void shouldAllowModificationsAfterInitialization() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 
 		connectionFactory.setConnectionFactoryLookup(lookup);
@@ -182,6 +177,18 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 				.verifyComplete();
 	}
 
+	@Test
+	void initializeShouldDetermineRoutedFactory() {
+		connectionFactory.setTargetConnectionFactories(Map.of("key", routedConnectionFactory));
+		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
+		connectionFactory.initialize();
+
+		connectionFactory.determineTargetConnectionFactory()
+				.contextWrite(Context.of(ROUTING_KEY, "key"))
+				.as(StepVerifier::create)
+				.expectNext(routedConnectionFactory)
+				.verifyComplete();
+	}
 
 	static class DummyRoutingConnectionFactory extends AbstractRoutingConnectionFactory {
 

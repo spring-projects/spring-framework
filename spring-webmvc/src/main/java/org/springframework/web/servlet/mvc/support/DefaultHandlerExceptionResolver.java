@@ -33,6 +33,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -45,11 +46,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -117,8 +120,8 @@ import org.springframework.web.util.WebUtils;
  * <td><div class="block">MethodArgumentNotValidException</div></td>
  * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="even-row-color">
- * <td><div class="block">BindException</div></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">{@link HandlerMethodValidationException}</div></td>
  * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
  * <tr class="odd-row-color">
@@ -126,8 +129,16 @@ import org.springframework.web.util.WebUtils;
  * <td><div class="block">404 (SC_NOT_FOUND)</div></td>
  * </tr>
  * <tr class="even-row-color">
+ * <td><div class="block">NoResourceFoundException</div></td>
+ * <td><div class="block">404 (SC_NOT_FOUND)</div></td>
+ * </tr>
+ * <tr class="odd-row-color">
  * <td><div class="block">AsyncRequestTimeoutException</div></td>
  * <td><div class="block">503 (SC_SERVICE_UNAVAILABLE)</div></td>
+ * </tr>
+ * <tr class="odd-row-color">
+ * <td><div class="block">{@link MethodValidationException}</div></td>
+ * <td><div class="block">500 (SC_INTERNAL_SERVER_ERROR)</div></td>
  * </tr>
  * </tbody>
  * </table>
@@ -195,8 +206,14 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				else if (ex instanceof MethodArgumentNotValidException theEx) {
 					mav = handleMethodArgumentNotValidException(theEx, request, response, handler);
 				}
+				else if (ex instanceof HandlerMethodValidationException theEx) {
+					mav = handleHandlerMethodValidationException(theEx, request, response, handler);
+				}
 				else if (ex instanceof NoHandlerFoundException theEx) {
 					mav = handleNoHandlerFoundException(theEx, request, response, handler);
+				}
+				else if (ex instanceof NoResourceFoundException theEx) {
+					mav = handleNoResourceFoundException(theEx, request, response, handler);
 				}
 				else if (ex instanceof AsyncRequestTimeoutException theEx) {
 					mav = handleAsyncRequestTimeoutException(theEx, request, response, handler);
@@ -219,6 +236,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof HttpMessageNotWritableException theEx) {
 				return handleHttpMessageNotWritable(theEx, request, response, handler);
+			}
+			else if (ex instanceof MethodValidationException theEx) {
+				return handleMethodValidationException(theEx, request, response, handler);
 			}
 			else if (ex instanceof BindException theEx) {
 				return handleBindException(theEx, request, response, handler);
@@ -392,6 +412,26 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
+	 * Handle the case where method validation for a controller method failed.
+	 * <p>The default implementation returns {@code null} in which case the
+	 * exception is handled in {@link #handleErrorResponse}.
+	 * @param ex the exception to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @since 6.1
+	 */
+	@Nullable
+	protected ModelAndView handleHandlerMethodValidationException(HandlerMethodValidationException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
+
+		return null;
+	}
+
+	/**
 	 * Handle the case where no handler was found during the dispatch.
 	 * <p>The default implementation returns {@code null} in which case the
 	 * exception is handled in {@link #handleErrorResponse}.
@@ -410,6 +450,26 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		pageNotFoundLogger.warn(ex.getMessage());
+		return null;
+	}
+
+	/**
+	 * Handle the case where no static resource was found.
+	 * <p>The default implementation returns {@code null} in which case the
+	 * exception is handled in {@link #handleErrorResponse}.
+	 * @param ex the {@link NoResourceFoundException} to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the resource handler
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @since 6.1
+	 */
+	@Nullable
+	protected ModelAndView handleNoResourceFoundException(NoResourceFoundException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
+
 		return null;
 	}
 
@@ -438,7 +498,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * Handle an {@link ErrorResponse} exception.
 	 * <p>The default implementation sets status and the headers of the response
 	 * to those obtained from the {@code ErrorResponse}. If available, the
-	 * {@link ProblemDetail#getDetail()}  is used as the message for
+	 * {@link ProblemDetail#getDetail()} is used as the message for
 	 * {@link HttpServletResponse#sendError(int, String)}.
 	 * @param errorResponse the exception to be handled
 	 * @param request current HTTP request
@@ -550,6 +610,27 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
+	 * Handle the case where method validation failed on a component that is
+	 * not a web controller, e.g. on some underlying service.
+	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
+	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could
+	 * be rethrown as-is.
+	 * @param ex the exception to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @since 6.1
+	 */
+	protected ModelAndView handleMethodValidationException(MethodValidationException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
+
+		sendServerError(ex, request, response);
+		return new ModelAndView();
+	}
+
+	/**
 	 * Handle the case where an {@linkplain ModelAttribute @ModelAttribute} method
 	 * argument has binding or validation errors and is not followed by another
 	 * method argument of type {@link BindingResult}.
@@ -579,6 +660,17 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 		request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
+
+	@Override
+	protected void logException(Exception ex, HttpServletRequest request) {
+		if (ex instanceof NoHandlerFoundException || ex instanceof NoResourceFoundException) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(buildLogMessage(ex, request));
+			}
+			return;
+		}
+		super.logException(ex, request);
 	}
 
 }

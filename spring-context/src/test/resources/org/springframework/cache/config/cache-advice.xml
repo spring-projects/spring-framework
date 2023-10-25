@@ -54,6 +54,7 @@
 			<cache:cache-put method="multiUpdate" cache="primary"/>
 			<cache:cache-put method="multiUpdate" cache="secondary"/>
 			<cache:cache-put method="putRefersToResult" cache="primary" key="#result.id"/>
+			<cache:cache-put method="putEvaluatesUnlessBeforeKey" cache="primary" key="#result.id" unless="#result == null"/>
 		</cache:caching>
 	</cache:advice>
 
@@ -93,6 +94,7 @@
 			<cache:cache-put method="multiUpdate" cache="primary"/>
 			<cache:cache-put method="multiUpdate" cache="secondary"/>
 			<cache:cache-put method="putRefersToResult" cache="primary" key="#result.id"/>
+			<cache:cache-put method="putEvaluatesUnlessBeforeKey" cache="primary" key="#result.id" unless="#result == null"/>
 		</cache:caching>
 	</cache:advice>
 

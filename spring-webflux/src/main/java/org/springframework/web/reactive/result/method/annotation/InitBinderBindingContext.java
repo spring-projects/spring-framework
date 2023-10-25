@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -50,12 +51,14 @@ class InitBinderBindingContext extends BindingContext {
 	private Runnable saveModelOperation;
 
 
-	InitBinderBindingContext(@Nullable WebBindingInitializer initializer,
-			List<SyncInvocableHandlerMethod> binderMethods) {
+	InitBinderBindingContext(
+			@Nullable WebBindingInitializer initializer, List<SyncInvocableHandlerMethod> binderMethods,
+			boolean methodValidationApplicable, ReactiveAdapterRegistry registry) {
 
-		super(initializer);
+		super(initializer, registry);
 		this.binderMethods = binderMethods;
-		this.binderMethodContext = new BindingContext(initializer);
+		this.binderMethodContext = new BindingContext(initializer, registry);
+		setMethodValidationApplicable(methodValidationApplicable);
 	}
 
 
@@ -99,8 +102,8 @@ class InitBinderBindingContext extends BindingContext {
 	}
 
 	/**
-	 * Provide the context required to apply {@link #saveModel()} after the
-	 * controller method has been invoked.
+	 * Provide the context required to promote model attributes listed as
+	 * {@code @SessionAttributes} to the session during {@link #updateModel}.
 	 */
 	public void setSessionContext(SessionAttributesHandler attributesHandler, WebSession session) {
 		this.saveModelOperation = () -> {
@@ -113,14 +116,12 @@ class InitBinderBindingContext extends BindingContext {
 		};
 	}
 
-	/**
-	 * Save model attributes in the session based on a type-level declarations
-	 * in an {@code @SessionAttributes} annotation.
-	 */
-	public void saveModel() {
+	@Override
+	public void updateModel(ServerWebExchange exchange) {
 		if (this.saveModelOperation != null) {
 			this.saveModelOperation.run();
 		}
+		super.updateModel(exchange);
 	}
 
 }

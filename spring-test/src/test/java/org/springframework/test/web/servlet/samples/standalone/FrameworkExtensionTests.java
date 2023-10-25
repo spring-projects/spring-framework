@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import java.security.Principal;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -53,13 +52,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  */
 public class FrameworkExtensionTests {
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc = standaloneSetup(new SampleController()).apply(defaultSetup()).build();
 
-
-	@BeforeEach
-	public void setup() {
-		this.mockMvc = standaloneSetup(new SampleController()).apply(defaultSetup()).build();
-	}
 
 	@Test
 	public void fooHeader() throws Exception {
@@ -81,7 +75,7 @@ public class FrameworkExtensionTests {
 
 
 	/**
-	 * Test {@code RequestPostProcessor}.
+	 * Test {@code RequestPostProcessor} for custom headers.
 	 */
 	private static class TestRequestPostProcessor implements RequestPostProcessor {
 
@@ -119,8 +113,9 @@ public class FrameworkExtensionTests {
 		}
 
 		@Override
-		public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder,
-				WebApplicationContext context) {
+		public RequestPostProcessor beforeMockMvcCreated(
+				ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context) {
+
 			return request -> {
 				request.setUserPrincipal(mock());
 				return request;

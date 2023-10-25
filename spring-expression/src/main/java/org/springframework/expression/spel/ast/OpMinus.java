@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.NumberUtils;
  * <ul>
  * <li>subtraction of numbers
  * <li>subtraction of an int from a string of one character
- * (effectively decreasing that character), so 'd'-3='a'
+ * (effectively decreasing that character), so {@code 'd' - 3 = 'a'}
  * </ul>
  *
  * <p>It can be used as a unary operator for numbers.
@@ -44,6 +44,7 @@ import org.springframework.util.NumberUtils;
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
  * @author Sam Brannen
+ * @author Semyon Danilov
  * @since 3.0
  */
 public class OpMinus extends Operator {
@@ -52,6 +53,17 @@ public class OpMinus extends Operator {
 		super("-", startPos, endPos, operands);
 	}
 
+
+	/**
+	 * Determine if this operator is a unary minus and its child is a
+	 * {@linkplain Literal#isNumberLiteral() number literal}.
+	 * @return {@code true} if it is a negative number literal
+	 * @since 6.1
+	 */
+	public boolean isNegativeNumberLiteral() {
+		return (this.children.length == 1 && this.children[0] instanceof Literal literal &&
+				literal.isNumberLiteral());
+	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {

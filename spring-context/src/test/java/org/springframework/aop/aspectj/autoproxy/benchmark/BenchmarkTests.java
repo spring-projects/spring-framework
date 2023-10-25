@@ -117,7 +117,7 @@ class BenchmarkTests {
 		sw.stop();
 		// System.out.println(sw.prettyPrint());
 		ac.close();
-		return sw.getLastTaskTimeMillis();
+		return sw.getTotalTimeMillis();
 	}
 
 	private long testBeforeAdviceWithoutJoinPoint(String file, int howmany, String technology) {
@@ -139,7 +139,7 @@ class BenchmarkTests {
 		sw.stop();
 		// System.out.println(sw.prettyPrint());
 		ac.close();
-		return sw.getLastTaskTimeMillis();
+		return sw.getTotalTimeMillis();
 	}
 
 	private long testAfterReturningAdviceWithoutJoinPoint(String file, int howmany, String technology) {
@@ -162,7 +162,7 @@ class BenchmarkTests {
 		sw.stop();
 		// System.out.println(sw.prettyPrint());
 		ac.close();
-		return sw.getLastTaskTimeMillis();
+		return sw.getTotalTimeMillis();
 	}
 
 	private long testMix(String file, int howmany, String technology) {
@@ -191,7 +191,7 @@ class BenchmarkTests {
 		sw.stop();
 		// System.out.println(sw.prettyPrint());
 		ac.close();
-		return sw.getLastTaskTimeMillis();
+		return sw.getTotalTimeMillis();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,6 @@ public class ExceptionHandlerTests {
 		void noHandlerFound() throws Exception {
 			standaloneSetup(RestPersonController.class)
 				.setControllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
-				.addDispatcherServletCustomizer(servlet -> servlet.setThrowExceptionIfNoHandlerFound(true))
 				.build()
 				.perform(get("/bogus").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())

@@ -27,7 +27,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
+import kotlin.reflect.KMutableProperty;
+import kotlin.reflect.KProperty;
+import kotlin.reflect.full.KClasses;
+import kotlin.reflect.jvm.ReflectJvmMapping;
+
 import org.springframework.asm.MethodVisitor;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
@@ -55,6 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 3.0
  * @see StandardEvaluationContext
  * @see SimpleEvaluationContext
@@ -401,7 +410,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Method[] methods = getSortedMethods(clazz);
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
-				if (isCandidateForProperty(method, clazz) && method.getName().equals(prefix + methodSuffix) &&
+				if (isCandidateForProperty(method, clazz) &&
+						(method.getName().equals(prefix + methodSuffix) || isKotlinProperty(method, methodSuffix)) &&
 						method.getParameterCount() == numberOfParams &&
 						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
 						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
@@ -555,6 +565,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		return this;
+	}
+
+	private static boolean isKotlinProperty(Method method, String methodSuffix) {
+		Class<?> clazz = method.getDeclaringClass();
+		return KotlinDetector.isKotlinReflectPresent() &&
+				KotlinDetector.isKotlinType(clazz) &&
+				KotlinDelegate.isKotlinProperty(method, methodSuffix);
 	}
 
 
@@ -753,6 +770,26 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 						CodeFlow.toJvmDescriptor(((Field) this.member).getType()));
 			}
 		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		public static boolean isKotlinProperty(Method method, String methodSuffix) {
+			KClass<?> kClass = JvmClassMappingKt.getKotlinClass(method.getDeclaringClass());
+			for (KProperty<?> property : KClasses.getMemberProperties(kClass)) {
+				if (methodSuffix.equalsIgnoreCase(property.getName()) &&
+						(method.equals(ReflectJvmMapping.getJavaGetter(property)) ||
+								property instanceof KMutableProperty<?> mutableProperty &&
+										method.equals(ReflectJvmMapping.getJavaSetter(mutableProperty)))) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 	}
 
 }

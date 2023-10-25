@@ -1,7 +1,14 @@
 [[webflux-ann-requestmapping]]
-= Request Mapping
+= Mapping Requests
 
 [.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc[See equivalent in the Servlet stack]#
+
+This section discusses request mapping for annotated controllers.
+
+[[webflux-ann-requestmapping-annotation]]
+== `@RequestMapping`
+
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-annotation[See equivalent in the Servlet stack]#
 
 The `@RequestMapping` annotation is used to map requests to controllers methods. It has
 various attributes to match by URL, HTTP method, request parameters, headers, and media
@@ -500,3 +507,68 @@ Kotlin::
 
 
 
+[[webflux-ann-httpexchange-annotation]]
+== `@HttpExchange`
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
+
+As an alternative to  `@RequestMapping`, you can also handle requests with `@HttpExchange`
+methods. Such methods are declared on an
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] and can be used as
+a client via `HttpServiceProxyFactory` or implemented by a server `@Controller`.
+
+For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@RestController
+	@HttpExchange("/persons")
+	class PersonController {
+
+		@GetExchange("/{id}")
+		public Person getPerson(@PathVariable Long id) {
+			// ...
+		}
+
+		@PostExchange
+		@ResponseStatus(HttpStatus.CREATED)
+		public void add(@RequestBody Person person) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@RestController
+	@HttpExchange("/persons")
+	class PersonController {
+
+		@GetExchange("/{id}")
+		fun getPerson(@PathVariable id: Long): Person {
+			// ...
+		}
+
+		@PostExchange
+		@ResponseStatus(HttpStatus.CREATED)
+		fun add(@RequestBody person: Person) {
+			// ...
+		}
+	}
+----
+======
+
+There some differences between `@HttpExchange` and `@RequestMapping` since the
+former needs to remain suitable for client and server use. For example, while
+`@RequestMapping` can be declared to handle any number of paths and each path can
+be a pattern, `@HttpExchange` must be declared with a single, concrete path. There are
+also differences in the supported method parameters. Generally, `@HttpExchange` supports
+a subset of method parameters that `@RequestMapping` does, excluding any parameters that
+are server side only. For details see the list of supported method parameters for
+xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[HTTP interface] and for
+xref:web/webflux/controller/ann-methods/arguments.adoc[@RequestMapping].

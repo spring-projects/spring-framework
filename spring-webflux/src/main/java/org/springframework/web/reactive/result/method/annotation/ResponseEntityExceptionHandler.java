@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,18 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -97,10 +100,12 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			MissingRequestValueException.class,
 			UnsatisfiedRequestParameterException.class,
 			WebExchangeBindException.class,
+			HandlerMethodValidationException.class,
 			ServerWebInputException.class,
 			ServerErrorException.class,
 			ResponseStatusException.class,
-			ErrorResponseException.class
+			ErrorResponseException.class,
+			MethodValidationException.class
 	})
 	public final Mono<ResponseEntity<Object>> handleException(Exception ex, ServerWebExchange exchange) {
 		if (ex instanceof MethodNotAllowedException theEx) {
@@ -121,6 +126,9 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		else if (ex instanceof WebExchangeBindException theEx) {
 			return handleWebExchangeBindException(theEx, theEx.getHeaders(), theEx.getStatusCode(), exchange);
 		}
+		else if (ex instanceof HandlerMethodValidationException theEx) {
+			return handleHandlerMethodValidationException(theEx, theEx.getHeaders(), theEx.getStatusCode(), exchange);
+		}
 		else if (ex instanceof ServerWebInputException theEx) {
 			return handleServerWebInputException(theEx, theEx.getHeaders(), theEx.getStatusCode(), exchange);
 		}
@@ -132,6 +140,9 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		}
 		else if (ex instanceof ErrorResponseException theEx) {
 			return handleErrorResponseException(theEx, theEx.getHeaders(), theEx.getStatusCode(), exchange);
+		}
+		else if (ex instanceof MethodValidationException theEx) {
+			return handleMethodValidationException(theEx, HttpStatus.INTERNAL_SERVER_ERROR, exchange);
 		}
 		else {
 			if (logger.isWarnEnabled()) {
@@ -238,6 +249,23 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	}
 
 	/**
+	 * Customize the handling of {@link HandlerMethodValidationException}.
+	 * <p>This method delegates to {@link #handleExceptionInternal}.
+	 * @param ex the exception to handle
+	 * @param headers the headers to use for the response
+	 * @param status the status code to use for the response
+	 * @param exchange the current request and response
+	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
+	 * @since 6.1
+	 */
+	protected Mono<ResponseEntity<Object>> handleHandlerMethodValidationException(
+			HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status,
+			ServerWebExchange exchange) {
+
+		return handleExceptionInternal(ex, null, headers, status, exchange);
+	}
+
+	/**
 	 * Customize the handling of {@link ServerWebInputException}.
 	 * <p>This method delegates to {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
@@ -299,6 +327,22 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			ServerWebExchange exchange) {
 
 		return handleExceptionInternal(ex, null, headers, status, exchange);
+	}
+
+	/**
+	 * Customize the handling of {@link MethodValidationException}.
+	 * <p>This method delegates to {@link #handleExceptionInternal}.
+	 * @param ex the exception to handle
+	 * @param status the status code to use for the response
+	 * @param exchange the current request and response
+	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
+	 * @since 6.1
+	 */
+	protected Mono<ResponseEntity<Object>> handleMethodValidationException(
+			MethodValidationException ex, HttpStatus status, ServerWebExchange exchange) {
+
+		ProblemDetail body = createProblemDetail(ex, status, "Validation failed", null, null, exchange);
+		return handleExceptionInternal(ex, body, null, status, exchange);
 	}
 
 	/**

@@ -46,6 +46,7 @@ import org.springframework.web.reactive.result.condition.ConsumesRequestConditio
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -54,10 +55,16 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Olga Maciaszek-Sharma
  * @since 5.0
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements EmbeddedValueResolverAware {
+
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+	private static final RequestMethod[] EMPTY_REQUEST_METHOD_ARRAY = new RequestMethod[0];
+
 
 	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
@@ -170,23 +177,26 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return info;
 	}
 
-	/**
-	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
-	 * supplying the appropriate custom {@link RequestCondition} depending on whether
-	 * the supplied {@code annotatedElement} is a class or method.
-	 * @see #getCustomTypeCondition(Class)
-	 * @see #getCustomMethodCondition(Method)
-	 */
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
-		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
-		RequestCondition<?> condition = (element instanceof Class<?> clazz ?
+		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
-		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
+
+		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
+		if (requestMapping != null) {
+			return createRequestMappingInfo(requestMapping, customCondition);
+		}
+
+		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(element, HttpExchange.class);
+		if (httpExchange != null) {
+			return createRequestMappingInfo(httpExchange, customCondition);
+		}
+
+		return null;
 	}
 
 	/**
-	 * Provide a custom type-level request condition.
+	 * Protected method to provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
@@ -205,7 +215,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Provide a custom method-level request condition.
+	 * Protected method to provide a custom method-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
@@ -225,9 +235,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Create a {@link RequestMappingInfo} from the supplied
-	 * {@link RequestMapping @RequestMapping} annotation, which is either
-	 * a directly declared annotation, a meta-annotation, or the synthesized
-	 * result of merging annotation attributes within an annotation hierarchy.
+	 * {@link RequestMapping @RequestMapping} annotation, or meta-annotation,
+	 * or synthesized result of merging annotation attributes within an
+	 * annotation hierarchy.
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
 			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
@@ -240,9 +250,34 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
 				.mappingName(requestMapping.name());
+
 		if (customCondition != null) {
 			builder.customCondition(customCondition);
 		}
+
+		return builder.options(this.config).build();
+	}
+
+	/**
+	 * Create a {@link RequestMappingInfo} from the supplied
+	 * {@link HttpExchange @HttpExchange} annotation, or meta-annotation,
+	 * or synthesized result of merging annotation attributes within an
+	 * annotation hierarchy.
+	 * @since 6.1
+	 */
+	protected RequestMappingInfo createRequestMappingInfo(
+			HttpExchange httpExchange, @Nullable RequestCondition<?> customCondition) {
+
+		RequestMappingInfo.Builder builder = RequestMappingInfo
+				.paths(resolveEmbeddedValuesInPatterns(toStringArray(httpExchange.value())))
+				.methods(toMethodArray(httpExchange.method()))
+				.consumes(toStringArray(httpExchange.contentType()))
+				.produces(httpExchange.accept());
+
+		if (customCondition != null) {
+			builder.customCondition(customCondition);
+		}
+
 		return builder.options(this.config).build();
 	}
 
@@ -261,6 +296,15 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			}
 			return resolvedPatterns;
 		}
+	}
+
+	private static String[] toStringArray(String value) {
+		return (StringUtils.hasText(value) ? new String[] {value} : EMPTY_STRING_ARRAY);
+	}
+
+	private static RequestMethod[] toMethodArray(String method) {
+		return (StringUtils.hasText(method) ?
+				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
 	}
 
 	@Override

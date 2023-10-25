@@ -52,6 +52,7 @@ import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
+import org.springframework.messaging.rsocket.service.RSocketExchange;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -59,9 +60,10 @@ import org.springframework.util.RouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * Extension of {@link MessageMappingMessageHandler} for handling RSocket
- * requests with {@link ConnectMapping @ConnectMapping} and
- * {@link MessageMapping @MessageMapping} methods.
+ * Extension of {@link MessageMappingMessageHandler} to handle RSocket
+ * requests with {@link MessageMapping @MessageMapping} and
+ * {@link ConnectMapping @ConnectMapping} methods, also supporting use of
+ * {@link RSocketExchange @RSocketExchange}.
  *
  * <p>For server scenarios this class can be declared as a bean in Spring
  * configuration and that would detect {@code @MessageMapping} methods in
@@ -77,13 +79,14 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketConnector
  * RSocketRequester.Builder}.
  *
- * <p>For {@code @MessageMapping} methods, this class automatically determines
- * the RSocket interaction type based on the input and output cardinality of the
- * method. See the
+ * <p>For {@code @MessageMapping} and {@code @RSocketExchange} methods,
+ * this class automatically determines the RSocket interaction type
+ * based on the input and output cardinality of the method. See the
  * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#rsocket-annot-responders">
  * "Annotated Responders"</a> section of the Spring Framework reference for more details.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 5.2
  */
 public class RSocketMessageHandler extends MessageMappingMessageHandler {
@@ -322,6 +325,15 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 					RSocketFrameTypeMessageCondition.CONNECT_CONDITION,
 					new DestinationPatternsMessageCondition(patterns, obtainRouteMatcher()));
 		}
+		RSocketExchange ann3 = AnnotatedElementUtils.findMergedAnnotation(element, RSocketExchange.class);
+		if (ann3 != null && StringUtils.hasText(ann3.value())) {
+			String[] destinations = new String[]{ann3.value()};
+			return new CompositeMessageCondition(
+					RSocketFrameTypeMessageCondition.EMPTY_CONDITION,
+					new DestinationPatternsMessageCondition(processDestinations(destinations),
+							obtainRouteMatcher())
+			);
+		}
 		return null;
 	}
 
@@ -402,7 +414,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * connection. Such a method can also start requests to the client but that
 	 * must be done decoupled from handling and from the current thread.
 	 * <p>Subsequent requests on the connection can be handled with
-	 * {@link MessageMapping MessageMapping} methods.
+	 * {@link MessageMapping MessageMapping}
+	 * and {@link RSocketExchange RSocketExchange} methods.
 	 */
 	public SocketAcceptor responder() {
 		return (setupPayload, sendingRSocket) -> {

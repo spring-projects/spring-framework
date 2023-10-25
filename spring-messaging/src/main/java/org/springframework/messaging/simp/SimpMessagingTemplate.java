@@ -39,8 +39,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Also provides methods for sending messages to a user. See
  * {@link org.springframework.messaging.simp.user.UserDestinationResolver
- * UserDestinationResolver}
- * for more on user destinations.
+ * UserDestinationResolver} for more on user destinations.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -158,7 +157,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			if (simpAccessor.isMutable()) {
 				simpAccessor.setDestination(destination);
 				simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-				simpAccessor.setImmutable();
+				// ImmutableMessageChannelInterceptor will make it immutable
 				sendInternal(message);
 				return;
 			}
@@ -234,12 +233,11 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	/**
 	 * Creates a new map and puts the given headers under the key
-	 * {@link NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS NATIVE_HEADERS}.
-	 * effectively treats the input header map as headers to be sent out to the
+	 * {@link NativeMessageHeaderAccessor#NATIVE_HEADERS NATIVE_HEADERS}.
+	 * <p>Effectively treats the input header map as headers to be sent out to the
 	 * destination.
-	 * <p>However if the given headers already contain the key
-	 * {@code NATIVE_HEADERS NATIVE_HEADERS} then the same headers instance is
-	 * returned without changes.
+	 * <p>However if the given headers already contain the key {@code NATIVE_HEADERS}
+	 * then the same headers instance is returned without changes.
 	 * <p>Also if the given headers were prepared and obtained with
 	 * {@link SimpMessageHeaderAccessor#getMessageHeaders()} then the same headers
 	 * instance is also returned without changes.

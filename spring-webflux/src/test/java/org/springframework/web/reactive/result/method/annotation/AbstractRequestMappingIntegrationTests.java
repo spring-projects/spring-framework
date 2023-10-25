@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,11 +92,11 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 		if (out != null) {
 			headers.setAccept(Collections.singletonList(out));
 		}
-		return  getRestTemplate().exchange(preparePost(url, headers, body), type);
+		return getRestTemplate().exchange(preparePost(url, headers, body), type);
 	}
 
 	<T> ResponseEntity<T> performPost(String url, HttpHeaders headers, Object body, Class<T> type) {
-		return  getRestTemplate().exchange(preparePost(url, headers, body), type);
+		return getRestTemplate().exchange(preparePost(url, headers, body), type);
 	}
 
 	<T> ResponseEntity<T> performPost(String url, MediaType in, Object body, MediaType out, ParameterizedTypeReference<T> type) {

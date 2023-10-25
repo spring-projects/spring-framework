@@ -195,6 +195,12 @@ of Spring Web MVC, you can use the `<spring:bind/>` tag to inspect the error mes
 you can also inspect the `Errors` object yourself. More information about the
 methods it offers can be found in the {api-spring-framework}/validation/Errors.html[javadoc].
 
+Validators may also get locally invoked for the immediate validation of a given object,
+not involving a binding process. As of 6.1, this has been simplified through a new
+`Validator.validateObject(Object)` method which is available by default now, returning
+a simple ´Errors` representation which can be inspected: typically calling `hasErrors()`
+or the new `failOnError` method for turning the error summary message into an exception
+(e.g. `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
 
 
 

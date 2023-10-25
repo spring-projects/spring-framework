@@ -21,16 +21,21 @@ import io.mockk.mockk
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
-import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get
-import org.springframework.web.testfixture.server.MockServerWebExchange
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.reactive.HandlerResult
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod
 import org.springframework.web.reactive.result.method.annotation.ContinuationHandlerMethodArgumentResolver
+import org.springframework.web.reactive.result.method.annotation.RequestParamMethodArgumentResolver
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.lang.reflect.Method
@@ -44,9 +49,10 @@ import kotlin.reflect.jvm.javaMethod
  */
 class InvocableHandlerMethodKotlinTests {
 
-	private val exchange = MockServerWebExchange.from(get("http://localhost:8080/path"))
+	private var exchange = MockServerWebExchange.from(get("http://localhost:8080/path"))
 
-	private val resolvers = mutableListOf<HandlerMethodArgumentResolver>(ContinuationHandlerMethodArgumentResolver())
+	private val resolvers = mutableListOf<HandlerMethodArgumentResolver>(ContinuationHandlerMethodArgumentResolver(),
+		RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance(), false))
 
 	@Test
 	fun resolveNoArg() {
@@ -109,6 +115,58 @@ class InvocableHandlerMethodKotlinTests {
 		assertHandlerResultValue(result, "success:foo")
 	}
 
+	@Test
+	fun defaultValue() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = DefaultValueController::handle.javaMethod!!
+		val result = invoke(DefaultValueController(), method)
+		assertHandlerResultValue(result, "default")
+	}
+
+	@Test
+	fun defaultValueOverridden() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = DefaultValueController::handle.javaMethod!!
+		exchange = MockServerWebExchange.from(get("http://localhost:8080/path").queryParam("value", "override"))
+		val result = invoke(DefaultValueController(), method)
+		assertHandlerResultValue(result, "override")
+	}
+
+	@Test
+	fun defaultValues() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = DefaultValueController::handleMultiple.javaMethod!!
+		val result = invoke(DefaultValueController(), method)
+		assertHandlerResultValue(result, "10-20")
+	}
+
+	@Test
+	fun defaultValuesOverridden() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = DefaultValueController::handleMultiple.javaMethod!!
+		exchange = MockServerWebExchange.from(get("http://localhost:8080/path").queryParam("limit2", "40"))
+		val result = invoke(DefaultValueController(), method)
+		assertHandlerResultValue(result, "10-40")
+	}
+
+	@Test
+	fun suspendingDefaultValue() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = DefaultValueController::handleSuspending.javaMethod!!
+		val result = invoke(DefaultValueController(), method)
+		assertHandlerResultValue(result, "default")
+	}
+
+	@Test
+	fun suspendingDefaultValueOverridden() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = DefaultValueController::handleSuspending.javaMethod!!
+		exchange = MockServerWebExchange.from(get("http://localhost:8080/path").queryParam("value", "override"))
+		val result = invoke(DefaultValueController(), method)
+		assertHandlerResultValue(result, "override")
+	}
+
+
 	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
 		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
 	}
@@ -132,8 +190,13 @@ class InvocableHandlerMethodKotlinTests {
 
 	private fun assertHandlerResultValue(mono: Mono<HandlerResult>, expected: String) {
 		StepVerifier.create(mono)
-				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).expectNext(expected).verifyComplete() }
-				.verifyComplete()
+				.consumeNextWith {
+					if (it.returnValue is Mono<*>) {
+						StepVerifier.create(it.returnValue as Mono<*>).expectNext(expected).verifyComplete()
+					} else {
+						assertThat(it.returnValue).isEqualTo(expected)
+					}
+				}.verifyComplete()
 	}
 
 	class CoroutinesController {
@@ -170,5 +233,17 @@ class InvocableHandlerMethodKotlinTests {
 			delay(1)
 			return "success:$q"
 		}
+	}
+
+	@RestController
+	class DefaultValueController {
+
+		fun handle(@RequestParam value: String = "default") = value
+
+		fun handleMultiple(@RequestParam(defaultValue = "10") limit1: Int, @RequestParam limit2: Int = 20) = "${limit1}-${limit2}"
+
+		@Suppress("RedundantSuspendModifier")
+		suspend fun handleSuspending(@RequestParam value: String = "default") = value
+
 	}
 }

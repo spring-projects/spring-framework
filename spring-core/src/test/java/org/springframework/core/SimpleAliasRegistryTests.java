@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,14 @@ package org.springframework.core;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.util.StringValueResolver;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link SimpleAliasRegistry}.
@@ -29,70 +36,196 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SimpleAliasRegistryTests {
 
+	private static final String REAL_NAME = "real_name";
+	private static final String NICKNAME = "nickname";
+	private static final String NAME1 = "name1";
+	private static final String NAME2 = "name2";
+	private static final String NAME3 = "name3";
+	private static final String NAME4 = "name4";
+	private static final String NAME5 = "name5";
+	private static final String ALIAS1 = "alias1";
+	private static final String ALIAS2 = "alias2";
+	private static final String ALIAS3 = "alias3";
+	// TODO Change ALIAS4 to "alias4".
+	// When ALIAS4 is "testAlias4", resolveAliasesWithComplexPlaceholderReplacement() passes.
+	// If you change ALIAS4 to "alias4", resolveAliasesWithComplexPlaceholderReplacement() fails.
+	// Those assertions pass for values such as "x", "xx", "xxx", and "xxxx" but fail with values
+	// such as "xxxxx", "testAli", ...
+	private static final String ALIAS4 = "testAlias4";
+	private static final String ALIAS5 = "alias5";
+
+
 	private final SimpleAliasRegistry registry = new SimpleAliasRegistry();
+
 
 	@Test
 	void aliasChaining() {
-		registry.registerAlias("test", "testAlias");
-		registry.registerAlias("testAlias", "testAlias2");
-		registry.registerAlias("testAlias2", "testAlias3");
+		registerAlias(NAME1, ALIAS1);
+		registerAlias(ALIAS1, ALIAS2);
+		registerAlias(ALIAS2, ALIAS3);
 
-		assertThat(registry.hasAlias("test", "testAlias")).isTrue();
-		assertThat(registry.hasAlias("test", "testAlias2")).isTrue();
-		assertThat(registry.hasAlias("test", "testAlias3")).isTrue();
-		assertThat(registry.canonicalName("testAlias")).isEqualTo("test");
-		assertThat(registry.canonicalName("testAlias2")).isEqualTo("test");
-		assertThat(registry.canonicalName("testAlias3")).isEqualTo("test");
+		assertHasAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS2);
+		assertHasAlias(NAME1, ALIAS3);
+		assertThat(registry.canonicalName(ALIAS1)).isEqualTo(NAME1);
+		assertThat(registry.canonicalName(ALIAS2)).isEqualTo(NAME1);
+		assertThat(registry.canonicalName(ALIAS3)).isEqualTo(NAME1);
 	}
 
 	@Test  // SPR-17191
 	void aliasChainingWithMultipleAliases() {
-		registry.registerAlias("name", "alias_a");
-		registry.registerAlias("name", "alias_b");
-		assertThat(registry.hasAlias("name", "alias_a")).isTrue();
-		assertThat(registry.hasAlias("name", "alias_b")).isTrue();
+		registerAlias(NAME1, ALIAS1);
+		registerAlias(NAME1, ALIAS2);
+		assertHasAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS2);
 
-		registry.registerAlias("real_name", "name");
-		assertThat(registry.hasAlias("real_name", "name")).isTrue();
-		assertThat(registry.hasAlias("real_name", "alias_a")).isTrue();
-		assertThat(registry.hasAlias("real_name", "alias_b")).isTrue();
+		registerAlias(REAL_NAME, NAME1);
+		assertHasAlias(REAL_NAME, NAME1);
+		assertHasAlias(REAL_NAME, ALIAS1);
+		assertHasAlias(REAL_NAME, ALIAS2);
 
-		registry.registerAlias("name", "alias_c");
-		assertThat(registry.hasAlias("real_name", "name")).isTrue();
-		assertThat(registry.hasAlias("real_name", "alias_a")).isTrue();
-		assertThat(registry.hasAlias("real_name", "alias_b")).isTrue();
-		assertThat(registry.hasAlias("real_name", "alias_c")).isTrue();
+		registerAlias(NAME1, ALIAS3);
+		assertHasAlias(REAL_NAME, NAME1);
+		assertHasAlias(REAL_NAME, ALIAS1);
+		assertHasAlias(REAL_NAME, ALIAS2);
+		assertHasAlias(REAL_NAME, ALIAS3);
 	}
 
 	@Test
 	void removeAlias() {
-		registry.registerAlias("real_name", "nickname");
-		assertThat(registry.hasAlias("real_name", "nickname")).isTrue();
+		registerAlias(REAL_NAME, NICKNAME);
+		assertHasAlias(REAL_NAME, NICKNAME);
 
-		registry.removeAlias("nickname");
-		assertThat(registry.hasAlias("real_name", "nickname")).isFalse();
+		registry.removeAlias(NICKNAME);
+		assertDoesNotHaveAlias(REAL_NAME, NICKNAME);
 	}
 
 	@Test
 	void isAlias() {
-		registry.registerAlias("real_name", "nickname");
-		assertThat(registry.isAlias("nickname")).isTrue();
-		assertThat(registry.isAlias("real_name")).isFalse();
-		assertThat(registry.isAlias("fake")).isFalse();
+		registerAlias(REAL_NAME, NICKNAME);
+		assertThat(registry.isAlias(NICKNAME)).isTrue();
+		assertThat(registry.isAlias(REAL_NAME)).isFalse();
+		assertThat(registry.isAlias("bogus")).isFalse();
 	}
 
 	@Test
 	void getAliases() {
-		registry.registerAlias("test", "testAlias1");
-		assertThat(registry.getAliases("test")).containsExactly("testAlias1");
+		assertThat(registry.getAliases(NAME1)).isEmpty();
 
-		registry.registerAlias("testAlias1", "testAlias2");
-		registry.registerAlias("testAlias2", "testAlias3");
-		assertThat(registry.getAliases("test")).containsExactlyInAnyOrder("testAlias1", "testAlias2", "testAlias3");
-		assertThat(registry.getAliases("testAlias1")).containsExactlyInAnyOrder("testAlias2", "testAlias3");
-		assertThat(registry.getAliases("testAlias2")).containsExactly("testAlias3");
+		registerAlias(NAME1, ALIAS1);
+		assertThat(registry.getAliases(NAME1)).containsExactly(ALIAS1);
 
-		assertThat(registry.getAliases("testAlias3")).isEmpty();
+		registerAlias(ALIAS1, ALIAS2);
+		registerAlias(ALIAS2, ALIAS3);
+		assertThat(registry.getAliases(NAME1)).containsExactlyInAnyOrder(ALIAS1, ALIAS2, ALIAS3);
+		assertThat(registry.getAliases(ALIAS1)).containsExactlyInAnyOrder(ALIAS2, ALIAS3);
+		assertThat(registry.getAliases(ALIAS2)).containsExactly(ALIAS3);
+		assertThat(registry.getAliases(ALIAS3)).isEmpty();
+	}
+
+	@Test
+	void checkForAliasCircle() {
+		// No aliases registered, so no cycles possible.
+		assertThatNoException().isThrownBy(() -> registry.checkForAliasCircle(NAME1, ALIAS1));
+
+		// NAME1 -> ALIAS1
+		registerAlias(NAME1, ALIAS1);
+
+		// No cycles possible.
+		assertThatNoException().isThrownBy(() -> registry.checkForAliasCircle(NAME1, ALIAS1));
+
+		assertThatIllegalStateException()
+				// NAME1 -> ALIAS1 -> NAME1
+				.isThrownBy(() -> registerAlias(ALIAS1, NAME1)) // internally invokes checkForAliasCircle()
+				.withMessageContaining("'%s' is a direct or indirect alias for '%s'", ALIAS1, NAME1);
+
+		// NAME1 -> ALIAS1 -> ALIAS2
+		registerAlias(ALIAS1, ALIAS2);
+		assertThatIllegalStateException()
+				// NAME1 -> ALIAS1 -> ALIAS2 -> NAME1
+				.isThrownBy(() -> registerAlias(ALIAS2, NAME1)) // internally invokes checkForAliasCircle()
+				.withMessageContaining("'%s' is a direct or indirect alias for '%s'", ALIAS2, NAME1);
+	}
+
+	@Test
+	void resolveAliasesPreconditions() {
+		assertThatIllegalArgumentException().isThrownBy(() -> registry.resolveAliases(null));
+	}
+
+	@Test
+	void resolveAliasesWithoutPlaceholderReplacement() {
+		// Resolver returns input unmodified.
+		StringValueResolver valueResolver = str -> str;
+
+		registerAlias(NAME1, ALIAS1);
+		registerAlias(NAME1, ALIAS3);
+		registerAlias(NAME2, ALIAS2);
+		registerAlias(NAME2, ALIAS4);
+
+		registry.resolveAliases(valueResolver);
+		assertThat(registry.getAliases(NAME1)).containsExactlyInAnyOrder(ALIAS1, ALIAS3);
+		assertThat(registry.getAliases(NAME2)).containsExactlyInAnyOrder(ALIAS2, ALIAS4);
+
+		registry.removeAlias(ALIAS1);
+		registry.resolveAliases(valueResolver);
+		assertThat(registry.getAliases(NAME1)).containsExactly(ALIAS3);
+		assertThat(registry.getAliases(NAME2)).containsExactlyInAnyOrder(ALIAS2, ALIAS4);
+	}
+
+	@Test
+	void resolveAliasesWithPlaceholderReplacement() {
+		StringValueResolver mock = mock();
+
+		registerAlias(NAME1, ALIAS1);
+
+		given(mock.resolveStringValue(NAME1)).willReturn(NAME2);
+		given(mock.resolveStringValue(ALIAS1)).willReturn(ALIAS2);
+
+		registry.resolveAliases(mock);
+		assertThat(registry.getAliases(NAME1)).isEmpty();
+		assertThat(registry.getAliases(NAME2)).containsExactly(ALIAS2);
+
+		registry.removeAlias(ALIAS2);
+		assertThat(registry.getAliases(NAME2)).isEmpty();
+	}
+
+	@Test
+	void resolveAliasesWithComplexPlaceholderReplacement() {
+		StringValueResolver mock = mock();
+
+		registerAlias(NAME3, ALIAS3);
+		registerAlias(NAME4, ALIAS4);
+		registerAlias(NAME5, ALIAS5);
+
+		given(mock.resolveStringValue(NAME3)).willReturn(NAME4);
+		given(mock.resolveStringValue(NAME4)).willReturn(NAME4);
+		given(mock.resolveStringValue(NAME5)).willReturn(NAME5);
+		given(mock.resolveStringValue(ALIAS3)).willReturn(ALIAS4);
+		given(mock.resolveStringValue(ALIAS4)).willReturn(ALIAS5);
+		given(mock.resolveStringValue(ALIAS5)).willReturn(ALIAS5);
+		assertThatIllegalStateException().isThrownBy(() -> registry.resolveAliases(mock));
+
+		given(mock.resolveStringValue(NAME4)).willReturn(NAME5);
+		given(mock.resolveStringValue(ALIAS4)).willReturn(ALIAS4);
+		assertThatIllegalStateException().isThrownBy(() -> registry.resolveAliases(mock));
+
+		given(mock.resolveStringValue(NAME4)).willReturn(NAME4);
+		given(mock.resolveStringValue(ALIAS4)).willReturn(ALIAS5);
+		registry.resolveAliases(mock);
+		assertThat(registry.getAliases(NAME4)).containsExactly(ALIAS4);
+		assertThat(registry.getAliases(NAME5)).containsExactly(ALIAS5);
+	}
+
+	private void registerAlias(String name, String alias) {
+		registry.registerAlias(name, alias);
+	}
+
+	private void assertHasAlias(String name, String alias) {
+		assertThat(registry.hasAlias(name, alias)).isTrue();
+	}
+
+	private void assertDoesNotHaveAlias(String name, String alias) {
+		assertThat(registry.hasAlias(name, alias)).isFalse();
 	}
 
 }

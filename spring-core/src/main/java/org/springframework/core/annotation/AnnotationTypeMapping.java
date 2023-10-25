@@ -218,7 +218,7 @@ final class AnnotationTypeMapping {
 	}
 
 	private boolean isCompatibleReturnType(Class<?> attributeType, Class<?> targetType) {
-		return (attributeType == targetType || attributeType == targetType.getComponentType());
+		return (attributeType == targetType || attributeType == targetType.componentType());
 	}
 
 	private void processAliases() {
@@ -400,9 +400,9 @@ final class AnnotationTypeMapping {
 			for (int i = 0; i < attributeMethods.size(); i++) {
 				Method method = attributeMethods.get(i);
 				Class<?> type = method.getReturnType();
-				if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
+				if (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation())) {
 					Class<? extends Annotation> annotationType =
-							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.getComponentType());
+							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.componentType());
 					if (annotationType != this.annotationType) {
 						AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
 						if (mapping.isSynthesizable()) {

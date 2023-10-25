@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import javax.lang.model.element.Modifier;
 
 import org.assertj.core.api.ThrowingConsumer;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedClass;
@@ -44,6 +46,12 @@ import org.springframework.beans.testfixture.beans.factory.generator.InnerCompon
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.EnvironmentAwareComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.NoDependencyComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedConstructor;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalConstructor;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalMemberConfiguration;
+import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedMemberConfiguration;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolder;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolderFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
@@ -57,6 +65,7 @@ import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link InstanceSupplierCodeGenerator}.
@@ -68,18 +77,20 @@ class InstanceSupplierCodeGeneratorTests {
 
 	private final TestGenerationContext generationContext;
 
+	private final DefaultListableBeanFactory beanFactory;
+
 
 	InstanceSupplierCodeGeneratorTests() {
 		this.generationContext = new TestGenerationContext();
+		this.beanFactory = new DefaultListableBeanFactory();
 	}
 
 
 	@Test
 	void generateWhenHasDefaultConstructor() {
 		BeanDefinition beanDefinition = new RootBeanDefinition(TestBean.class);
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			TestBean bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			TestBean bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(TestBean.class);
 			assertThat(compiled.getSourceFile())
 					.contains("InstanceSupplier.using(TestBean::new)");
@@ -91,13 +102,10 @@ class InstanceSupplierCodeGeneratorTests {
 	@Test
 	void generateWhenHasConstructorWithParameter() {
 		BeanDefinition beanDefinition = new RootBeanDefinition(InjectionComponent.class);
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerSingleton("injected", "injected");
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			InjectionComponent bean = getBean(beanFactory, beanDefinition,
-					instanceSupplier);
-			assertThat(bean).isInstanceOf(InjectionComponent.class).extracting("bean")
-					.isEqualTo("injected");
+		this.beanFactory.registerSingleton("injected", "injected");
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			InjectionComponent bean = getBean(beanDefinition, instanceSupplier);
+			assertThat(bean).isInstanceOf(InjectionComponent.class).extracting("bean").isEqualTo("injected");
 		});
 		assertThat(getReflectionHints().getTypeHint(InjectionComponent.class))
 				.satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT));
@@ -105,13 +113,10 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasConstructorWithInnerClassAndDefaultConstructor() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				NoDependencyComponent.class);
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerSingleton("configuration", new InnerComponentConfiguration());
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			NoDependencyComponent bean = getBean(beanFactory, beanDefinition,
-					instanceSupplier);
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(NoDependencyComponent.class);
+		this.beanFactory.registerSingleton("configuration", new InnerComponentConfiguration());
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			NoDependencyComponent bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(NoDependencyComponent.class);
 			assertThat(compiled.getSourceFile()).contains(
 					"getBeanFactory().getBean(InnerComponentConfiguration.class).new NoDependencyComponent()");
@@ -122,14 +127,11 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasConstructorWithInnerClassAndParameter() {
-		BeanDefinition beanDefinition = new RootBeanDefinition(
-				EnvironmentAwareComponent.class);
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerSingleton("configuration", new InnerComponentConfiguration());
-		beanFactory.registerSingleton("environment", new StandardEnvironment());
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			EnvironmentAwareComponent bean = getBean(beanFactory, beanDefinition,
-					instanceSupplier);
+		BeanDefinition beanDefinition = new RootBeanDefinition(EnvironmentAwareComponent.class);
+		this.beanFactory.registerSingleton("configuration", new InnerComponentConfiguration());
+		this.beanFactory.registerSingleton("environment", new StandardEnvironment());
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			EnvironmentAwareComponent bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(EnvironmentAwareComponent.class);
 			assertThat(compiled.getSourceFile()).contains(
 					"getBeanFactory().getBean(InnerComponentConfiguration.class).new EnvironmentAwareComponent(");
@@ -140,12 +142,10 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasConstructorWithGeneric() {
-		BeanDefinition beanDefinition = new RootBeanDefinition(
-				NumberHolderFactoryBean.class);
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerSingleton("number", 123);
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			NumberHolder<?> bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		BeanDefinition beanDefinition = new RootBeanDefinition(NumberHolderFactoryBean.class);
+		this.beanFactory.registerSingleton("number", 123);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			NumberHolder<?> bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(NumberHolder.class);
 			assertThat(bean).extracting("number").isNull(); // No property actually set
 			assertThat(compiled.getSourceFile()).contains("NumberHolderFactoryBean::new");
@@ -156,12 +156,9 @@ class InstanceSupplierCodeGeneratorTests {
 
 	@Test
 	void generateWhenHasPrivateConstructor() {
-		BeanDefinition beanDefinition = new RootBeanDefinition(
-				TestBeanWithPrivateConstructor.class);
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			TestBeanWithPrivateConstructor bean = getBean(beanFactory, beanDefinition,
-					instanceSupplier);
+		BeanDefinition beanDefinition = new RootBeanDefinition(TestBeanWithPrivateConstructor.class);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			TestBeanWithPrivateConstructor bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(TestBeanWithPrivateConstructor.class);
 			assertThat(compiled.getSourceFile())
 					.contains("return BeanInstanceSupplier.<TestBeanWithPrivateConstructor>forConstructor();");
@@ -175,11 +172,10 @@ class InstanceSupplierCodeGeneratorTests {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(String.class)
 				.setFactoryMethodOnBean("stringBean", "config").getBeanDefinition();
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 				.genericBeanDefinition(SimpleConfiguration.class).getBeanDefinition());
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			String bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			String bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(String.class);
 			assertThat(bean).isEqualTo("Hello");
 			assertThat(compiled.getSourceFile()).contains(
@@ -195,11 +191,10 @@ class InstanceSupplierCodeGeneratorTests {
 				.rootBeanDefinition(String.class)
 				.setFactoryMethodOnBean("privateStaticStringBean", "config")
 				.getBeanDefinition();
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 				.genericBeanDefinition(SimpleConfiguration.class).getBeanDefinition());
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			String bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			String bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(String.class);
 			assertThat(bean).isEqualTo("Hello");
 			assertThat(compiled.getSourceFile())
@@ -215,11 +210,10 @@ class InstanceSupplierCodeGeneratorTests {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(Integer.class)
 				.setFactoryMethodOnBean("integerBean", "config").getBeanDefinition();
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 				.genericBeanDefinition(SimpleConfiguration.class).getBeanDefinition());
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			Integer bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			Integer bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(Integer.class);
 			assertThat(bean).isEqualTo(42);
 			assertThat(compiled.getSourceFile())
@@ -236,13 +230,12 @@ class InstanceSupplierCodeGeneratorTests {
 				.setFactoryMethodOnBean("create", "config").getBeanDefinition();
 		beanDefinition.setResolvedFactoryMethod(ReflectionUtils
 				.findMethod(SampleFactory.class, "create", Number.class, String.class));
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 				.genericBeanDefinition(SampleFactory.class).getBeanDefinition());
-		beanFactory.registerSingleton("number", 42);
-		beanFactory.registerSingleton("string", "test");
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			String bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		this.beanFactory.registerSingleton("number", 42);
+		this.beanFactory.registerSingleton("string", "test");
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			String bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(String.class);
 			assertThat(bean).isEqualTo("42test");
 			assertThat(compiled.getSourceFile()).contains("SampleFactory.create(");
@@ -257,17 +250,118 @@ class InstanceSupplierCodeGeneratorTests {
 				.rootBeanDefinition(Integer.class)
 				.setFactoryMethodOnBean("throwingIntegerBean", "config")
 				.getBeanDefinition();
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 				.genericBeanDefinition(SimpleConfiguration.class).getBeanDefinition());
-		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
-			Integer bean = getBean(beanFactory, beanDefinition, instanceSupplier);
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			Integer bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(Integer.class);
 			assertThat(bean).isEqualTo(42);
 			assertThat(compiled.getSourceFile()).doesNotContain(") throws Exception {");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
+	}
+
+	@Nested
+	@SuppressWarnings("deprecation")
+	class DeprecationTests {
+
+		private static final TestCompiler TEST_COMPILER = TestCompiler.forSystem()
+				.withCompilerOptions("-Xlint:all", "-Xlint:-rawtypes", "-Werror");
+
+		@Test
+		@Disabled("Need to move to a separate method so that the warning can be suppressed")
+		void generateWhenTargetClassIsDeprecated() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedBean.class));
+		}
+
+		@Test
+		void generateWhenTargetConstructorIsDeprecated() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedConstructor.class));
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedString", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodParameterIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedParameter", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedBean.class));
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodReturnTypeIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(DeprecatedBean.class)
+					.setFactoryMethodOnBean("deprecatedReturnType", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		private void compileAndCheckWarnings(BeanDefinition beanDefinition) {
+			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
+					((instanceSupplier, compiled) -> {})));
+		}
+
+	}
+
+	@Nested
+	@SuppressWarnings("removal")
+	class DeprecationForRemovalTests {
+
+		private static final TestCompiler TEST_COMPILER = TestCompiler.forSystem()
+				.withCompilerOptions("-Xlint:all", "-Xlint:-rawtypes", "-Werror");
+
+		@Test
+		@Disabled("Need to move to a separate method so that the warning can be suppressed")
+		void generateWhenTargetClassIsDeprecatedForRemoval() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedForRemovalBean.class));
+		}
+
+		@Test
+		void generateWhenTargetConstructorIsDeprecatedForRemoval() {
+			compileAndCheckWarnings(new RootBeanDefinition(DeprecatedForRemovalConstructor.class));
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodIsDeprecatedForRemoval() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedString", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodParameterIsDeprecatedForRemoval() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(String.class)
+					.setFactoryMethodOnBean("deprecatedParameter", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
+			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedForRemovalBean.class));
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		private void compileAndCheckWarnings(BeanDefinition beanDefinition) {
+			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
+					((instanceSupplier, compiled) -> {})));
+		}
+
 	}
 
 	private ReflectionHints getReflectionHints() {
@@ -287,17 +381,20 @@ class InstanceSupplierCodeGeneratorTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T getBean(DefaultListableBeanFactory beanFactory,
-			BeanDefinition beanDefinition, InstanceSupplier<?> instanceSupplier) {
+	private <T> T getBean(BeanDefinition beanDefinition, InstanceSupplier<?> instanceSupplier) {
 		((RootBeanDefinition) beanDefinition).setInstanceSupplier(instanceSupplier);
-		beanFactory.registerBeanDefinition("testBean", beanDefinition);
-		return (T) beanFactory.getBean("testBean");
+		this.beanFactory.registerBeanDefinition("testBean", beanDefinition);
+		return (T) this.beanFactory.getBean("testBean");
 	}
 
-	private void compile(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition,
+	private void compile(BeanDefinition beanDefinition, BiConsumer<InstanceSupplier<?>, Compiled> result) {
+		compile(TestCompiler.forSystem(), beanDefinition, result);
+	}
+
+	private void compile(TestCompiler testCompiler, BeanDefinition beanDefinition,
 			BiConsumer<InstanceSupplier<?>, Compiled> result) {
 
-		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(beanFactory);
+		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(this.beanFactory);
 		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition);
 		RegisteredBean registeredBean = RegisteredBean.of(freshBeanFactory, "testBean");
 		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
@@ -317,8 +414,8 @@ class InstanceSupplierCodeGeneratorTests {
 					.addStatement("return $L", generatedCode).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
-				result.accept((InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
+		testCompiler.with(this.generationContext).compile(compiled -> result.accept(
+				(InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
 }

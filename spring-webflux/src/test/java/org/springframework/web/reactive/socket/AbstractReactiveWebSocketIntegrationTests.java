@@ -91,7 +91,6 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		@SuppressWarnings("removal")
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
-				new org.springframework.web.reactive.socket.client.JettyWebSocketClient(),
 				new ReactorNettyWebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
 		};
@@ -180,7 +179,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 	}
 
 
-	static abstract class AbstractHandlerAdapterConfig {
+	abstract static class AbstractHandlerAdapterConfig {
 
 		@Bean
 		public WebSocketHandlerAdapter handlerAdapter() {

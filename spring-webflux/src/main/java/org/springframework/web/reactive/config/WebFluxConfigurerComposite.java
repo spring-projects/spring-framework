@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,37 +51,6 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 
 
 	@Override
-	public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-		this.delegates.forEach(delegate -> delegate.configureContentTypeResolver(builder));
-	}
-
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		this.delegates.forEach(delegate -> delegate.addCorsMappings(registry));
-	}
-
-	@Override
-	public void configurePathMatching(PathMatchConfigurer configurer) {
-		this.delegates.forEach(delegate -> delegate.configurePathMatching(configurer));
-	}
-
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
-	}
-
-	@Nullable
-	@Override
-	public WebSocketService getWebSocketService() {
-		return createSingleBean(WebFluxConfigurer::getWebSocketService, WebSocketService.class);
-	}
-
-	@Override
-	public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
-		this.delegates.forEach(delegate -> delegate.configureArgumentResolvers(configurer));
-	}
-
-	@Override
 	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 		this.delegates.forEach(delegate -> delegate.configureHttpMessageCodecs(configurer));
 	}
@@ -102,8 +71,44 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		this.delegates.forEach(delegate -> delegate.addCorsMappings(registry));
+	}
+
+	@Override
+	public void configureBlockingExecution(BlockingExecutionConfigurer configurer) {
+		this.delegates.forEach(delegate -> delegate.configureBlockingExecution(configurer));
+	}
+
+	@Override
+	public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+		this.delegates.forEach(delegate -> delegate.configureContentTypeResolver(builder));
+	}
+
+	@Override
+	public void configurePathMatching(PathMatchConfigurer configurer) {
+		this.delegates.forEach(delegate -> delegate.configurePathMatching(configurer));
+	}
+
+	@Override
+	public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+		this.delegates.forEach(delegate -> delegate.configureArgumentResolvers(configurer));
+	}
+
+	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
 		this.delegates.forEach(delegate -> delegate.configureViewResolvers(registry));
+	}
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
+	}
+
+	@Nullable
+	@Override
+	public WebSocketService getWebSocketService() {
+		return createSingleBean(WebFluxConfigurer::getWebSocketService, WebSocketService.class);
 	}
 
 	@Nullable

@@ -16,9 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Collections;
+import java.lang.annotation.Annotation;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -50,6 +49,7 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see ContextAnnotationAutowireCandidateResolver
  * @see ConfigurationClassPostProcessor
@@ -271,48 +271,26 @@ public abstract class AnnotationConfigUtils {
 	}
 
 	@Nullable
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationClass) {
-		return attributesFor(metadata, annotationClass.getName());
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationType) {
+		return attributesFor(metadata, annotationType.getName());
 	}
 
 	@Nullable
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationClassName) {
-		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationClassName));
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationTypeName) {
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationTypeName));
 	}
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
-			Class<?> containerClass, Class<?> annotationClass) {
+			Class<? extends Annotation> annotationType, Class<? extends Annotation> containerType) {
 
-		return attributesForRepeatable(metadata, containerClass.getName(), annotationClass.getName());
+		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, false);
 	}
 
-	@SuppressWarnings("unchecked")
-	static Set<AnnotationAttributes> attributesForRepeatable(
-			AnnotationMetadata metadata, String containerClassName, String annotationClassName) {
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			Class<? extends Annotation> annotationType, Class<? extends Annotation> containerType,
+			boolean sortByReversedMetaDistance) {
 
-		Set<AnnotationAttributes> result = new LinkedHashSet<>();
-
-		// Direct annotation present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName));
-
-		// Container annotation present?
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName);
-		if (container != null && container.containsKey("value")) {
-			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
-				addAttributesIfNotNull(result, containedAttributes);
-			}
-		}
-
-		// Return merged result
-		return Collections.unmodifiableSet(result);
-	}
-
-	private static void addAttributesIfNotNull(
-			Set<AnnotationAttributes> result, @Nullable Map<String, Object> attributes) {
-
-		if (attributes != null) {
-			result.add(AnnotationAttributes.fromMap(attributes));
-		}
+		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, false, sortByReversedMetaDistance);
 	}
 
 }

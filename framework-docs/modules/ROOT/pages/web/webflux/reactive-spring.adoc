@@ -368,30 +368,33 @@ collecting to a `MultiValueMap`.
 === Forwarded Headers
 [.small]#xref:web/webmvc/filters.adoc#filters-forwarded-headers[See equivalent in the Servlet stack]#
 
-As a request goes through proxies (such as load balancers), the host, port, and
-scheme may change. That makes it a challenge, from a client perspective, to create links that point to the correct
-host, port, and scheme.
+include::partial$web/forwarded-headers.adoc[]
 
-https://tools.ietf.org/html/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
-that proxies can use to provide information about the original request. There are other
-non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
-`X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
+
+
+[[webflux-forwarded-headers-transformer]]
+=== ForwardedHeaderTransformer
 
 `ForwardedHeaderTransformer` is a component that modifies the host, port, and scheme of
 the request, based on forwarded headers, and then removes those headers. If you declare
 it as a bean with the name `forwardedHeaderTransformer`, it will be
 xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[detected] and used.
 
-There are security considerations for forwarded headers, since an application cannot know
-if the headers were added by a proxy, as intended, or by a malicious client. This is why
-a proxy at the boundary of trust should be configured to remove untrusted forwarded traffic coming
-from the outside. You can also configure the `ForwardedHeaderTransformer` with
-`removeOnly=true`, in which case it removes but does not use the headers.
-
 NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superseded by
 `ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
 exchange is created. If the filter is configured anyway, it is taken out of the list of
 filters, and `ForwardedHeaderTransformer` is used instead.
+
+
+
+[[webflux-forwarded-headers-security]]
+=== Security Considerations
+
+There are security considerations for forwarded headers since an application cannot know
+if the headers were added by a proxy, as intended, or by a malicious client. This is why
+a proxy at the boundary of trust should be configured to remove untrusted forwarded traffic coming
+from the outside. You can also configure the `ForwardedHeaderTransformer` with
+`removeOnly=true`, in which case it removes but does not use the headers.
 
 
 

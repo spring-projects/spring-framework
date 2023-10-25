@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -164,8 +163,7 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 	@SuppressWarnings("unchecked")
 	public <E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type) {
 		Assert.notNull(type, "Type must not be null");
-		Class<?> arrayType = Array.newInstance(type, 0).getClass();
-		return (E[]) getRequiredAttributeValue(attributeName, arrayType);
+		return (E[]) getRequiredAttributeValue(attributeName, type.arrayType());
 	}
 
 	@Override

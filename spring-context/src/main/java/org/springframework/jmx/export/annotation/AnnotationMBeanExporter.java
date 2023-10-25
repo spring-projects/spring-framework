@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ import org.springframework.jmx.export.naming.MetadataNamingStrategy;
  * {@link ManagedResource}, {@link ManagedAttribute}, {@link ManagedOperation}, etc.
  *
  * <p>Sets a {@link MetadataNamingStrategy} and a {@link MetadataMBeanInfoAssembler}
- * with an {@link AnnotationJmxAttributeSource}, and activates the
- * {@link #AUTODETECT_ALL} mode by default.
+ * with an {@link AnnotationJmxAttributeSource}, and activates
+ * {@link #setAutodetect autodetection} by default.
  *
  * @author Juergen Hoeller
  * @since 2.5
+ * @see #setAutodetect
+ * @see AnnotationJmxAttributeSource
  */
 public class AnnotationMBeanExporter extends MBeanExporter {
 
@@ -48,7 +50,7 @@ public class AnnotationMBeanExporter extends MBeanExporter {
 	public AnnotationMBeanExporter() {
 		setNamingStrategy(this.metadataNamingStrategy);
 		setAssembler(this.metadataAssembler);
-		setAutodetectMode(AUTODETECT_ALL);
+		setAutodetect(true);
 	}
 
 

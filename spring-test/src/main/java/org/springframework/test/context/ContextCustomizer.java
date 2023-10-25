@@ -34,6 +34,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author Sam Brannen
  * @since 4.3
  * @see ContextCustomizerFactory
+ * @see ContextCustomizerFactories @ContextCustomizerFactories
  * @see org.springframework.test.context.support.AbstractContextLoader#customizeContext
  */
 @FunctionalInterface

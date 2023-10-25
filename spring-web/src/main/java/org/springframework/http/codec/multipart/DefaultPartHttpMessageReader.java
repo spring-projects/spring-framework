@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private int maxParts = -1;
 
-	private boolean streaming;
-
 	private Scheduler blockingOperationScheduler = Schedulers.boundedElastic();
 
 	private FileStorage fileStorage = FileStorage.tempDirectory(this::getBlockingOperationScheduler);
@@ -99,8 +97,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * <li>non-file parts are rejected with {@link DataBufferLimitException}.
 	 * </ul>
 	 * <p>By default this is set to 256K.
-	 * <p>Note that this property is ignored when
-	 * {@linkplain #setStreaming(boolean) streaming} is enabled.
 	 * @param maxInMemorySize the in-memory limit in bytes; if set to -1 the entire
 	 * contents will be stored in memory
 	 */
@@ -112,7 +108,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * Configure the maximum amount of disk space allowed for file parts.
 	 * <p>By default this is set to -1, meaning that there is no maximum.
 	 * <p>Note that this property is ignored when
-	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
 	 */
 	public void setMaxDiskUsagePerPart(long maxDiskUsagePerPart) {
@@ -133,7 +128,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * named {@code spring-webflux-multipart} is created under the system
 	 * temporary directory.
 	 * <p>Note that this property is ignored when
-	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
 	 * @throws IOException if an I/O error occurs, or the parent directory
 	 * does not exist
@@ -149,7 +143,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * {@link Schedulers#boundedElastic()} is used, but this property allows for
 	 * changing it to an externally managed scheduler.
 	 * <p>Note that this property is ignored when
-	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
 	 * @see Schedulers#newBoundedElastic
 	 */
@@ -160,30 +153,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private Scheduler getBlockingOperationScheduler() {
 		return this.blockingOperationScheduler;
-	}
-
-	/**
-	 * When set to {@code true}, the {@linkplain Part#content() part content}
-	 * is streamed directly from the parsed input buffer stream, and not stored
-	 * in memory nor file.
-	 * When {@code false}, parts are backed by
-	 * in-memory and/or file storage. Defaults to {@code false}.
-	 * <p><strong>NOTE</strong> that with streaming enabled, the
-	 * {@code Flux<Part>} that is produced by this message reader must be
-	 * consumed in the original order, i.e. the order of the HTTP message.
-	 * Additionally, the {@linkplain Part#content() body contents} must either
-	 * be completely consumed or canceled before moving to the next part.
-	 * <p>Also note that enabling this property effectively ignores
-	 * {@link #setMaxInMemorySize(int) maxInMemorySize},
-	 * {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart},
-	 * {@link #setFileStorageDirectory(Path) fileStorageDirectory}, and
-	 * {@link #setBlockingOperationScheduler(Scheduler) fileCreationScheduler}.
-	 * @deprecated as of 6.0, in favor of {@link PartEvent} and
-	 * {@link PartEventHttpMessageReader}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public void setStreaming(boolean streaming) {
-		this.streaming = streaming;
 	}
 
 	/**
@@ -236,7 +205,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 						}
 						else {
 							return PartGenerator.createPart(partsTokens,
-									this.maxInMemorySize, this.maxDiskUsagePerPart, this.streaming,
+									this.maxInMemorySize, this.maxDiskUsagePerPart,
 									this.fileStorage.directory(), this.blockingOperationScheduler);
 						}
 					});

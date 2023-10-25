@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,6 +193,18 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	@Test
+	void setCharacterEncodingNull() {
+		response.setContentType("test/plain");
+		response.setCharacterEncoding("UTF-8");
+		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
+		response.setCharacterEncoding(null);
+		assertThat(response.getContentType()).isEqualTo("test/plain");
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain");
+		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
 	@Test

@@ -59,6 +59,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.SQLExceptionSubclassTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -74,7 +75,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Hibernate.
- * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1/6.2.
+ * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1/6.2/6.3.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -90,6 +91,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	@Nullable
 	private SQLExceptionTranslator jdbcExceptionTranslator;
+
+	@Nullable
+	private SQLExceptionTranslator transactionExceptionTranslator = new SQLExceptionSubclassTranslator();
 
 
 	/**
@@ -121,14 +125,22 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * <p>Applied to any detected {@link java.sql.SQLException} root cause of a Hibernate
 	 * {@link JDBCException}, overriding Hibernate's own {@code SQLException} translation
 	 * (which is based on a Hibernate Dialect for a specific target database).
+	 * <p>As of 6.1, also applied to {@link org.hibernate.TransactionException} translation
+	 * with a {@link SQLException} root cause (where Hibernate does not translate itself
+	 * at all), overriding Spring's default {@link SQLExceptionSubclassTranslator} there.
+	 * @param exceptionTranslator the {@link SQLExceptionTranslator} to delegate to, or
+	 * {@code null} for none. By default, a {@link SQLExceptionSubclassTranslator} will
+	 * be used for {@link org.hibernate.TransactionException} translation as of 6.1;
+	 * this can be reverted to pre-6.1 behavior through setting {@code null} here.
 	 * @since 5.1
 	 * @see java.sql.SQLException
 	 * @see org.hibernate.JDBCException
 	 * @see org.springframework.jdbc.support.SQLExceptionSubclassTranslator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 */
-	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
-		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
+	public void setJdbcExceptionTranslator(@Nullable SQLExceptionTranslator exceptionTranslator) {
+		this.jdbcExceptionTranslator = exceptionTranslator;
+		this.transactionExceptionTranslator = exceptionTranslator;
 	}
 
 
@@ -248,6 +260,15 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 				return dae;
 			}
 		}
+		if (this.transactionExceptionTranslator != null && ex instanceof org.hibernate.TransactionException) {
+			if (ex.getCause() instanceof SQLException sqlEx) {
+				DataAccessException dae = this.transactionExceptionTranslator.translate(
+						"Hibernate transaction: " + ex.getMessage(), null, sqlEx);
+				if (dae != null) {
+					return dae;
+				}
+			}
+		}
 
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
@@ -265,7 +286,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
 		if (ex instanceof ConstraintViolationException hibEx) {
-			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + hibEx.getSQL() +
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibEx.getSQL() +
 					"]; constraint [" + hibEx.getConstraintName() + "]", ex);
 		}
 		if (ex instanceof DataException hibEx) {

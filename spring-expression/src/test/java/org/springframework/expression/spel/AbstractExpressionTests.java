@@ -258,8 +258,8 @@ public abstract class AbstractExpressionTests {
 		}
 		if (value.getClass().isArray()) {
 			StringBuilder sb = new StringBuilder();
-			if (value.getClass().getComponentType().isPrimitive()) {
-				Class<?> primitiveType = value.getClass().getComponentType();
+			if (value.getClass().componentType().isPrimitive()) {
+				Class<?> primitiveType = value.getClass().componentType();
 				if (primitiveType == Integer.TYPE) {
 					int[] l = (int[]) value;
 					sb.append("int[").append(l.length).append("]{");
@@ -287,10 +287,10 @@ public abstract class AbstractExpressionTests {
 							" in ExpressionTestCase.stringValueOf()");
 				}
 			}
-			else if (value.getClass().getComponentType().isArray()) {
+			else if (value.getClass().componentType().isArray()) {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
-					sb.append(value.getClass().getComponentType().getName());
+					sb.append(value.getClass().componentType().getName());
 				}
 				sb.append('[').append(l.size()).append("]{");
 				int i = 0;
@@ -306,7 +306,7 @@ public abstract class AbstractExpressionTests {
 			else {
 				List<Object> l = Arrays.asList((Object[]) value);
 				if (!isNested) {
-					sb.append(value.getClass().getComponentType().getName());
+					sb.append(value.getClass().componentType().getName());
 				}
 				sb.append('[').append(l.size()).append("]{");
 				int i = 0;

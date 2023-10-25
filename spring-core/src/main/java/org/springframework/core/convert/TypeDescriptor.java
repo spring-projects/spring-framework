@@ -170,6 +170,33 @@ public class TypeDescriptor implements Serializable {
 		return this.resolvableType.getSource();
 	}
 
+
+	/**
+	 * Create a type descriptor for a nested type declared within this descriptor.
+	 * @param nestingLevel the nesting level of the collection/array element or
+	 * map key/value declaration within the property
+	 * @return the nested type descriptor at the specified nesting level, or
+	 * {@code null} if it could not be obtained
+	 * @since 6.1
+	 */
+	@Nullable
+	public TypeDescriptor nested(int nestingLevel) {
+		ResolvableType nested = this.resolvableType;
+		for (int i = 0; i < nestingLevel; i++) {
+			if (Object.class == nested.getType()) {
+				// Could be a collection type but we don't know about its element type,
+				// so let's just assume there is an element type of type Object...
+			}
+			else {
+				nested = nested.getNested(2);
+			}
+		}
+		if (nested == ResolvableType.NONE) {
+			return null;
+		}
+		return getRelatedIfResolvable(nested);
+	}
+
 	/**
 	 * Narrows this {@link TypeDescriptor} by setting its type to the class of the
 	 * provided value.
@@ -335,9 +362,9 @@ public class TypeDescriptor implements Serializable {
 			return new TypeDescriptor(getResolvableType().getComponentType(), null, getAnnotations());
 		}
 		if (Stream.class.isAssignableFrom(getType())) {
-			return getRelatedIfResolvable(this, getResolvableType().as(Stream.class).getGeneric(0));
+			return getRelatedIfResolvable(getResolvableType().as(Stream.class).getGeneric(0));
 		}
-		return getRelatedIfResolvable(this, getResolvableType().asCollection().getGeneric(0));
+		return getRelatedIfResolvable(getResolvableType().asCollection().getGeneric(0));
 	}
 
 	/**
@@ -380,7 +407,7 @@ public class TypeDescriptor implements Serializable {
 	@Nullable
 	public TypeDescriptor getMapKeyTypeDescriptor() {
 		Assert.state(isMap(), "Not a [java.util.Map]");
-		return getRelatedIfResolvable(this, getResolvableType().asMap().getGeneric(0));
+		return getRelatedIfResolvable(getResolvableType().asMap().getGeneric(0));
 	}
 
 	/**
@@ -417,7 +444,7 @@ public class TypeDescriptor implements Serializable {
 	@Nullable
 	public TypeDescriptor getMapValueTypeDescriptor() {
 		Assert.state(isMap(), "Not a [java.util.Map]");
-		return getRelatedIfResolvable(this, getResolvableType().asMap().getGeneric(1));
+		return getRelatedIfResolvable(getResolvableType().asMap().getGeneric(1));
 	}
 
 	/**
@@ -440,6 +467,14 @@ public class TypeDescriptor implements Serializable {
 	@Nullable
 	public TypeDescriptor getMapValueTypeDescriptor(Object mapValue) {
 		return narrow(mapValue, getMapValueTypeDescriptor());
+	}
+
+	@Nullable
+	private TypeDescriptor getRelatedIfResolvable(ResolvableType type) {
+		if (type.resolve() == null) {
+			return null;
+		}
+		return new TypeDescriptor(type, null, getAnnotations());
 	}
 
 	@Nullable
@@ -645,7 +680,7 @@ public class TypeDescriptor implements Serializable {
 			throw new IllegalArgumentException("MethodParameter nesting level must be 1: " +
 					"use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
 		}
-		return nested(new TypeDescriptor(methodParameter), nestingLevel);
+		return new TypeDescriptor(methodParameter).nested(nestingLevel);
 	}
 
 	/**
@@ -671,7 +706,7 @@ public class TypeDescriptor implements Serializable {
 	 */
 	@Nullable
 	public static TypeDescriptor nested(Field field, int nestingLevel) {
-		return nested(new TypeDescriptor(field), nestingLevel);
+		return new TypeDescriptor(field).nested(nestingLevel);
 	}
 
 	/**
@@ -697,33 +732,7 @@ public class TypeDescriptor implements Serializable {
 	 */
 	@Nullable
 	public static TypeDescriptor nested(Property property, int nestingLevel) {
-		return nested(new TypeDescriptor(property), nestingLevel);
-	}
-
-	@Nullable
-	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
-		ResolvableType nested = typeDescriptor.resolvableType;
-		for (int i = 0; i < nestingLevel; i++) {
-			if (Object.class == nested.getType()) {
-				// Could be a collection type but we don't know about its element type,
-				// so let's just assume there is an element type of type Object...
-			}
-			else {
-				nested = nested.getNested(2);
-			}
-		}
-		if (nested == ResolvableType.NONE) {
-			return null;
-		}
-		return getRelatedIfResolvable(typeDescriptor, nested);
-	}
-
-	@Nullable
-	private static TypeDescriptor getRelatedIfResolvable(TypeDescriptor source, ResolvableType type) {
-		if (type.resolve() == null) {
-			return null;
-		}
-		return new TypeDescriptor(type, null, source.getAnnotations());
+		return new TypeDescriptor(property).nested(nestingLevel);
 	}
 
 

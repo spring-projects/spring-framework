@@ -67,51 +67,43 @@ from an existing `ProblemDetail`. This could be done centrally, e.g. from an
 
 
 [[webflux-ann-rest-exceptions-i18n]]
-== Internationalization
+== Customization and i18n
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-i18n[See equivalent in the Servlet stack]#
 
-It is a common requirement to internationalize error response details, and good practice
-to customize the problem details for Spring WebFlux exceptions. This is supported as follows:
+It is a common requirement to customize and internationalize error response details.
+It is also good practice to customize the problem details for Spring WebFlux exceptions
+to avoid revealing implementation details. This section describes the support for that.
 
-- Each `ErrorResponse` exposes a message code and arguments to resolve the "detail" field
-through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource].
-The actual message code value is parameterized with placeholders, e.g.
-`+"HTTP method {0} not supported"+` to be expanded from the arguments.
-- Each `ErrorResponse` also exposes a message code to resolve the "title" field.
-- `ResponseEntityExceptionHandler` uses the message code and arguments to resolve the
-"detail" and the "title" fields.
+An `ErrorResponse` exposes message codes for "type", "title", and "detail", as well as
+message code arguments for the "detail" field. `ResponseEntityExceptionHandler` resolves
+these through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
+and updates the corresponding `ProblemDetail` fields accordingly.
 
-By default, the message code for the "detail" field is "problemDetail." + the fully
-qualified exception class name. Some exceptions may expose additional message codes in
-which case a suffix is added to the default message code. The table below lists message
-arguments and codes for Spring WebFlux exceptions:
+The default strategy for message codes follows the pattern:
+
+`problemDetail.[type|title|detail].[fully qualified exception class name]`
+
+An `ErrorResponse` may expose more than one message code, typically adding a suffix
+to the default message code. The table below lists message codes, and arguments for
+Spring WebFlux exceptions:
 
 [[webflux-ann-rest-exceptions-codes]]
 [cols="1,1,2", options="header"]
 |===
 | Exception | Message Code | Message Code Arguments
 
-| `UnsupportedMediaTypeStatusException`
+| `HandlerMethodValidationException`
 | (default)
-| `+{0}+` the media type that is not supported, `+{1}+` list of supported media types
+| `+{0}+` list all validation errors.
+Message codes and arguments for each error are also resolved via `MessageSource`.
 
-| `UnsupportedMediaTypeStatusException`
-| (default) + ".parseError"
-|
+| `MethodNotAllowedException`
+| (default)
+| `+{0}+` the current HTTP method, `+{1}+` the list of supported HTTP methods
 
 | `MissingRequestValueException`
 | (default)
 | `+{0}+` a label for the value (e.g. "request header", "cookie value", ...), `+{1}+` the value name
-
-| `UnsatisfiedRequestParameterException`
-| (default)
-| `+{0}+` the list of parameter conditions
-
-| `WebExchangeBindException`
-| (default)
-| `+{0}+` the list of global errors, `+{1}+` the list of field errors.
-Message codes and arguments for each error within the `BindingResult` are also resolved
-via `MessageSource`.
 
 | `NotAcceptableStatusException`
 | (default)
@@ -125,14 +117,32 @@ via `MessageSource`.
 | (default)
 | `+{0}+` the failure reason provided to the class constructor
 
-| `MethodNotAllowedException`
+| `UnsupportedMediaTypeStatusException`
 | (default)
-| `+{0}+` the current HTTP method, `+{1}+` the list of supported HTTP methods
+| `+{0}+` the media type that is not supported, `+{1}+` list of supported media types
+
+| `UnsupportedMediaTypeStatusException`
+| (default) + ".parseError"
+|
+
+| `UnsatisfiedRequestParameterException`
+| (default)
+| `+{0}+` the list of parameter conditions
+
+| `WebExchangeBindException`
+| (default)
+| `+{0}+` the list of global errors, `+{1}+` the list of field errors.
+Message codes and arguments for each error are also resolved via `MessageSource`.
 
 |===
 
-By default, the message code for the "title" field is "problemDetail.title." + the fully
-qualified exception class name.
+NOTE: Unlike other exceptions, the message arguments for
+`WebExchangeBindException` and `HandlerMethodValidationException` are based on a list of
+`MessageSourceResolvable` errors that can also be customized through a
+xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
+resource bundle. See
+xref:core/validation/beanvalidation.adoc#validation-beanvalidation-spring-method-i18n[Customizing Validation Errors]
+for more details.
 
 
 

@@ -45,12 +45,15 @@ public interface TransactionStatus extends TransactionExecution, SavepointManage
 	 * <p>This method is mainly here for diagnostic purposes, alongside
 	 * {@link #isNewTransaction()}. For programmatic handling of custom
 	 * savepoints, use the operations provided by {@link SavepointManager}.
+	 * <p>The default implementation returns {@code false}.
 	 * @see #isNewTransaction()
 	 * @see #createSavepoint()
 	 * @see #rollbackToSavepoint(Object)
 	 * @see #releaseSavepoint(Object)
 	 */
-	boolean hasSavepoint();
+	default boolean hasSavepoint() {
+		return false;
+	}
 
 	/**
 	 * Flush the underlying session to the datastore, if applicable:
@@ -59,8 +62,10 @@ public interface TransactionStatus extends TransactionExecution, SavepointManage
 	 * transaction manager does not have a flush concept. A flush signal may
 	 * get applied to the primary resource or to transaction synchronizations,
 	 * depending on the underlying resource.
+	 * <p>The default implementation is empty, considering flush as a no-op.
 	 */
 	@Override
-	void flush();
+	default void flush() {
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Factory for creating a client proxy given an RSocket service interface with
+ * Factory to create a client proxy from an RSocket service interface with
  * {@link RSocketExchange @RSocketExchange} methods.
  *
  * <p>To create an instance, use static methods to obtain a
@@ -59,13 +59,14 @@ public final class RSocketServiceProxyFactory {
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
+	@Nullable
 	private final Duration blockTimeout;
 
 
 	private RSocketServiceProxyFactory(
 			RSocketRequester rsocketRequester, List<RSocketServiceArgumentResolver> argumentResolvers,
 			@Nullable StringValueResolver embeddedValueResolver,
-			ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
+			ReactiveAdapterRegistry reactiveAdapterRegistry, @Nullable Duration blockTimeout) {
 
 		this.rsocketRequester = rsocketRequester;
 		this.argumentResolvers = argumentResolvers;
@@ -139,7 +140,7 @@ public final class RSocketServiceProxyFactory {
 		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		@Nullable
-		private Duration blockTimeout = Duration.ofSeconds(5);
+		private Duration blockTimeout;
 
 		private Builder() {
 		}
@@ -187,13 +188,17 @@ public final class RSocketServiceProxyFactory {
 		}
 
 		/**
-		 * Configure how long to wait for a response for an HTTP service method
+		 * Configure how long to block for the response of an RSocket service method
 		 * with a synchronous (blocking) method signature.
-		 * <p>By default this is 5 seconds.
+		 * <p>By default this is not set, in which case the behavior depends on
+		 * connection and response timeout settings of the underlying RSocket
+		 * {@code ClientTransport} as well as RSocket keep-alive settings.
+		 * We recommend configuring timeout values at the RSocket level which
+		 * provides more control.
 		 * @param blockTimeout the timeout value
 		 * @return this same builder instance
 		 */
-		public Builder blockTimeout(Duration blockTimeout) {
+		public Builder blockTimeout(@Nullable Duration blockTimeout) {
 			this.blockTimeout = blockTimeout;
 			return this;
 		}
@@ -206,8 +211,7 @@ public final class RSocketServiceProxyFactory {
 
 			return new RSocketServiceProxyFactory(
 					this.rsocketRequester, initArgumentResolvers(),
-					this.embeddedValueResolver, this.reactiveAdapterRegistry,
-					(this.blockTimeout != null ? this.blockTimeout : Duration.ofSeconds(5)));
+					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
 		}
 
 		private List<RSocketServiceArgumentResolver> initArgumentResolvers() {

@@ -56,7 +56,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
@@ -74,6 +76,17 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
 		implements ApplicationContextAware, InitializingBean {
+
+	/**
+	 * Log category to use for network failure after a client has gone away.
+	 * @see DisconnectedClientHelper
+	 */
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.servlet.mvc.method.annotation.DisconnectedClient";
+
+	private static final DisconnectedClientHelper disconnectedClientHelper =
+			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
+
 
 	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -372,6 +385,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return !this.exceptionHandlerAdviceCache.isEmpty();
 	}
 
+	@Override
+	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
+		return (handler instanceof ResourceHttpRequestHandler ?
+				hasGlobalExceptionHandlers() : super.shouldApplyTo(request, handler));
+	}
+
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.
 	 */
@@ -413,10 +432,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, arguments);
 		}
 		catch (Throwable invocationEx) {
-			// Any other than the original exception (or a cause) is unintended here,
-			// probably an accident (e.g. failed assertion or the like).
-			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
-				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
+			if (!disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
+				// Any other than the original exception (or a cause) is unintended here,
+				// probably an accident (e.g. failed assertion or the like).
+				if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
+					logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
+				}
 			}
 			// Continue with default processing of the original exception...
 			return null;

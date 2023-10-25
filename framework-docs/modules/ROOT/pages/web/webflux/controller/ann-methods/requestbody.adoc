@@ -89,4 +89,33 @@ Kotlin::
 ----
 ======
 
+You can also declare an `Errors` parameter for access to validation errors, but in
+that case the request body must not be a `Mono`, and will be resolved first:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/accounts")
+	public void handle(@Valid @RequestBody Account account, Errors errors) {
+		// use one of the onError* operators...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/accounts")
+	fun handle(@Valid @RequestBody account: Mono<Account>) {
+		// ...
+	}
+----
+======
+
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. For more details, see the
+section on xref:web/webflux/controller/ann-validation.adoc[Validation].
 

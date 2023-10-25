@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import jakarta.servlet.http.Cookie;
@@ -174,10 +173,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse build(
-			BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
-
-		return new WriterFunctionResponse(this.statusCode, this.headers, this.cookies, writeFunction);
+	public ServerResponse build(WriteFunction writeFunction) {
+		return new WriteFunctionResponse(this.statusCode, this.headers, this.cookies, writeFunction);
 	}
 
 	@Override
@@ -219,12 +216,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 
-	private static class WriterFunctionResponse extends AbstractServerResponse {
+	private static class WriteFunctionResponse extends AbstractServerResponse {
 
-		private final BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction;
+		private final WriteFunction writeFunction;
 
-		public WriterFunctionResponse(HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
-				BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
+		public WriteFunctionResponse(HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
+				WriteFunction writeFunction) {
 
 			super(statusCode, headers, cookies);
 			Assert.notNull(writeFunction, "WriteFunction must not be null");
@@ -232,10 +229,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		protected ModelAndView writeToInternal(
-				HttpServletRequest request, HttpServletResponse response, Context context) {
+		protected ModelAndView writeToInternal(HttpServletRequest request, HttpServletResponse response,
+				Context context) throws Exception {
 
-			return this.writeFunction.apply(request, response);
+			return this.writeFunction.write(request, response);
 		}
 	}
 

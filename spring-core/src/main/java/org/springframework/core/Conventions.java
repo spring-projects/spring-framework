@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public final class Conventions {
 		boolean pluralize = false;
 
 		if (value.getClass().isArray()) {
-			valueClass = value.getClass().getComponentType();
+			valueClass = value.getClass().componentType();
 			pluralize = true;
 		}
 		else if (value instanceof Collection<?> collection) {
@@ -104,7 +104,7 @@ public final class Conventions {
 		String reactiveSuffix = "";
 
 		if (parameter.getParameterType().isArray()) {
-			valueClass = parameter.getParameterType().getComponentType();
+			valueClass = parameter.getParameterType().componentType();
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(parameter.getParameterType())) {
@@ -178,7 +178,7 @@ public final class Conventions {
 		String reactiveSuffix = "";
 
 		if (resolvedType.isArray()) {
-			valueClass = resolvedType.getComponentType();
+			valueClass = resolvedType.componentType();
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(resolvedType)) {

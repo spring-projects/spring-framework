@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.config;
 
+import io.micrometer.observation.ObservationRegistry;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.ExceptionListener;
 import org.apache.commons.logging.Log;
@@ -85,6 +86,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	@Nullable
 	private Boolean autoStartup;
+
+	@Nullable
+	private ObservationRegistry observationRegistry;
 
 
 	/**
@@ -193,6 +197,17 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		this.autoStartup = autoStartup;
 	}
 
+	/**
+	 * Set the {@link ObservationRegistry} to be used for recording
+	 * {@linkplain io.micrometer.jakarta9.instrument.jms.JmsObservationDocumentation#JMS_MESSAGE_PROCESS
+	 * JMS message processing observations}.
+	 * <p>Defaults to no-op observations if the registry is not set.
+	 * @since 6.1
+	 * @see AbstractMessageListenerContainer#setObservationRegistry(ObservationRegistry)
+	 */
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
 
 	@Override
 	public C createListenerContainer(JmsListenerEndpoint endpoint) {
@@ -242,6 +257,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		}
 		if (this.autoStartup != null) {
 			instance.setAutoStartup(this.autoStartup);
+		}
+		if (this.observationRegistry != null) {
+			instance.setObservationRegistry(this.observationRegistry);
 		}
 
 		initializeContainer(instance);

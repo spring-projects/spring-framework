@@ -79,8 +79,20 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Rob Harrop
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Arjen Poutsma
  */
 class DataBinderTests {
+
+	private final Validator spouseValidator = Validator.forInstanceOf(TestBean.class, (tb, errors) -> {
+				if (tb == null || "XXX".equals(tb.getName())) {
+					errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
+					return;
+				}
+				if (tb.getAge() < 32) {
+					errors.rejectValue("age", "TOO_YOUNG", "simply too young");
+				}
+			});
+
 
 	@Test
 	void bindingNoErrors() throws BindException {
@@ -103,7 +115,7 @@ class DataBinderTests {
 		TestBean tb = (TestBean) map.get("person");
 		assertThat(tb.equals(rod)).as("Same object").isTrue();
 
-		BindingResult other = new BeanPropertyBindingResult(rod, "person");
+		BindingResult other = new DataBinder(rod, "person").getBindingResult();
 		assertThat(binder.getBindingResult()).isEqualTo(other);
 		assertThat(other).isEqualTo(binder.getBindingResult());
 		BindException ex = new BindException(other);
@@ -670,6 +682,23 @@ class DataBinderTests {
 	}
 
 	@Test
+	void bindingInDeclarativeMode() throws BindException {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod);
+		binder.setDeclarativeBinding(true);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
+
+		binder.bind(pvs);
+		binder.close();
+
+		assertThat(rod.getName()).isNull();
+		assertThat(rod.getAge()).isEqualTo(0);
+	}
+
+	@Test
 	void bindingWithAllowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -1145,7 +1174,6 @@ class DataBinderTests {
 		errors.setNestedPath("spouse");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
 		assertThat(errors.getFieldValue("age")).isEqualTo("argh");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1195,7 +1223,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1272,7 +1299,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1334,6 +1360,55 @@ class DataBinderTests {
 	}
 
 	@Test
+	void validateObjectWithErrors() {
+		TestBean tb = new TestBean();
+		Errors errors = new SimpleErrors(tb, "tb");
+
+		Validator testValidator = new TestBeanValidator();
+		testValidator.validate(tb, errors);
+
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(5);
+		assertThat(errors.getAllErrors())
+				.containsAll(errors.getGlobalErrors())
+				.containsAll(errors.getFieldErrors());
+
+		assertThat(errors.hasGlobalErrors()).isTrue();
+		assertThat(errors.getGlobalErrorCount()).isEqualTo(2);
+		assertThat(errors.getGlobalError().getCode()).isEqualTo("NAME_TOUCHY_MISMATCH");
+		assertThat((errors.getGlobalErrors().get(0)).getCode()).isEqualTo("NAME_TOUCHY_MISMATCH");
+		assertThat((errors.getGlobalErrors().get(0)).getObjectName()).isEqualTo("tb");
+		assertThat((errors.getGlobalErrors().get(1)).getCode()).isEqualTo("GENERAL_ERROR");
+		assertThat((errors.getGlobalErrors().get(1)).getDefaultMessage()).isEqualTo("msg");
+		assertThat((errors.getGlobalErrors().get(1)).getArguments()[0]).isEqualTo("arg");
+
+		assertThat(errors.hasFieldErrors()).isTrue();
+		assertThat(errors.getFieldErrorCount()).isEqualTo(3);
+		assertThat(errors.getFieldError().getCode()).isEqualTo("TOO_YOUNG");
+		assertThat((errors.getFieldErrors().get(0)).getCode()).isEqualTo("TOO_YOUNG");
+		assertThat((errors.getFieldErrors().get(0)).getField()).isEqualTo("age");
+		assertThat((errors.getFieldErrors().get(1)).getCode()).isEqualTo("AGE_NOT_ODD");
+		assertThat((errors.getFieldErrors().get(1)).getField()).isEqualTo("age");
+		assertThat((errors.getFieldErrors().get(2)).getCode()).isEqualTo("NOT_ROD");
+		assertThat((errors.getFieldErrors().get(2)).getField()).isEqualTo("name");
+
+		assertThat(errors.hasFieldErrors("age")).isTrue();
+		assertThat(errors.getFieldErrorCount("age")).isEqualTo(2);
+		assertThat(errors.getFieldError("age").getCode()).isEqualTo("TOO_YOUNG");
+		assertThat((errors.getFieldErrors("age").get(0)).getCode()).isEqualTo("TOO_YOUNG");
+		assertThat((errors.getFieldErrors("age").get(0)).getObjectName()).isEqualTo("tb");
+		assertThat((errors.getFieldErrors("age").get(0)).getField()).isEqualTo("age");
+		assertThat((errors.getFieldErrors("age").get(0)).getRejectedValue()).isEqualTo(0);
+		assertThat((errors.getFieldErrors("age").get(1)).getCode()).isEqualTo("AGE_NOT_ODD");
+
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldErrorCount("name")).isEqualTo(1);
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("NOT_ROD");
+		assertThat((errors.getFieldErrors("name").get(0)).getField()).isEqualTo("name");
+		assertThat((errors.getFieldErrors("name").get(0)).getRejectedValue()).isNull();
+	}
+
+	@Test
 	void validatorWithNestedObjectNull() {
 		TestBean tb = new TestBean();
 		Errors errors = new DataBinder(tb, "tb").getBindingResult();
@@ -1343,7 +1418,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 		errors.setNestedPath("");
 
@@ -1358,14 +1432,12 @@ class DataBinderTests {
 	void nestedValidatorWithoutNestedPath() {
 		TestBean tb = new TestBean();
 		tb.setName("XXX");
-		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		Validator spouseValidator = new SpouseValidator();
-		spouseValidator.validate(tb, errors);
+		Errors errors = spouseValidator.validateObject(tb);
 
 		assertThat(errors.hasGlobalErrors()).isTrue();
 		assertThat(errors.getGlobalErrorCount()).isEqualTo(1);
 		assertThat(errors.getGlobalError().getCode()).isEqualTo("SPOUSE_NOT_AVAILABLE");
-		assertThat((errors.getGlobalErrors().get(0)).getObjectName()).isEqualTo("tb");
+		assertThat((errors.getGlobalErrors().get(0)).getObjectName()).isEqualTo("TestBean");
 	}
 
 	@Test
@@ -1776,7 +1848,7 @@ class DataBinderTests {
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 
-		BeanPropertyBindingResult errors2 = new BeanPropertyBindingResult(rod, "person");
+		Errors errors2 = new SimpleErrors(rod, "person");
 		errors.rejectValue("name", "badName");
 		errors.addAllErrors(errors2);
 
@@ -1811,7 +1883,7 @@ class DataBinderTests {
 		tb.setName("myName");
 		tb.setAge(99);
 
-		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(tb, "tb");
+		Errors errors = new SimpleErrors(tb, "tb");
 		errors.reject("invalid");
 		errors.rejectValue("age", "invalidField");
 
@@ -2167,27 +2239,6 @@ class DataBinderTests {
 			}
 			if (tb.getAge() == 0) {
 				errors.reject("GENERAL_ERROR", new String[] {"arg"}, "msg");
-			}
-		}
-	}
-
-
-	private static class SpouseValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		@Override
-		public void validate(@Nullable Object obj, Errors errors) {
-			TestBean tb = (TestBean) obj;
-			if (tb == null || "XXX".equals(tb.getName())) {
-				errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
-				return;
-			}
-			if (tb.getAge() < 32) {
-				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
 			}
 		}
 	}

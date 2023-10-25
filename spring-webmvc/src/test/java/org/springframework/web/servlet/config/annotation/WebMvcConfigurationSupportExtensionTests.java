@@ -315,7 +315,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		DirectFieldAccessor accessor = new DirectFieldAccessor(viewResolvers.get(0));
 		assertThat(viewResolvers).hasSize(1);
 		assertThat(viewResolvers.get(0).getClass()).isEqualTo(ContentNegotiatingViewResolver.class);
-		assertThat((boolean) (Boolean) accessor.getPropertyValue("useNotAcceptableStatusCode")).isFalse();
+		assertThat((Boolean) accessor.getPropertyValue("useNotAcceptableStatusCode")).isFalse();
 		assertThat(accessor.getPropertyValue("contentNegotiationManager")).isNotNull();
 
 		List<View> defaultViews = (List<View>) accessor.getPropertyValue("defaultViews");
@@ -393,12 +393,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor())
-					.registerCallableInterceptors(new CallableProcessingInterceptor() {
-					})
-					.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptor() {
-					});
+					.registerCallableInterceptors(new CallableProcessingInterceptor() {})
+					.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptor() {});
 		}
 
 		@Override

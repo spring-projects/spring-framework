@@ -234,11 +234,7 @@ public final class SpelCompiler implements Opcodes {
 		if (compiler == null) {
 			// Full lock now since we're creating a child ClassLoader
 			synchronized (compilers) {
-				compiler = compilers.get(clToUse);
-				if (compiler == null) {
-					compiler = new SpelCompiler(clToUse);
-					compilers.put(clToUse, compiler);
-				}
+				return compilers.computeIfAbsent(clToUse, SpelCompiler::new);
 			}
 		}
 		return compiler;
