@@ -159,7 +159,7 @@ Kotlin::
 ----
 ======
 
-.[[beans-factory-ctor-arguments-type]]Constructor argument type matching
+
 --
 In the preceding scenario, the container can use type matching with simple types if
 you explicitly specify the type of the constructor argument by using the `type` attribute,
@@ -173,8 +173,9 @@ as the following example shows:
 	</bean>
 ----
 --
+.[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 
-.[[beans-factory-ctor-arguments-index]]Constructor argument index
+
 --
 You can use the `index` attribute to specify explicitly the index of constructor arguments,
 as the following example shows:
@@ -186,6 +187,7 @@ as the following example shows:
 		<constructor-arg index="1" value="42"/>
 	</bean>
 ----
+.[[beans-factory-ctor-arguments-index]]Constructor argument index
 
 In addition to resolving the ambiguity of multiple simple values, specifying an index
 resolves ambiguity where a constructor has two arguments of the same type.
@@ -193,7 +195,7 @@ resolves ambiguity where a constructor has two arguments of the same type.
 NOTE: The index is 0-based.
 --
 
-.[[beans-factory-ctor-arguments-name]]Constructor argument name
+
 --
 You can also use the constructor parameter name for value disambiguation, as the following
 example shows:
@@ -205,6 +207,7 @@ example shows:
 		<constructor-arg name="ultimateAnswer" value="42"/>
 	</bean>
 ----
+.[[beans-factory-ctor-arguments-name]]Constructor argument name
 
 Keep in mind that, to make this work out of the box, your code must be compiled with the
 debug flag enabled so that Spring can look up the parameter name from the constructor.
