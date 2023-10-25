@@ -91,6 +91,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.core.io.support.PropertySourceProcessor;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
 import org.springframework.core.type.AnnotationMetadata;
@@ -655,6 +656,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private static final String RESOURCE_LOADER_VARIABLE = "resourceLoader";
 
+		private final Log logger = LogFactory.getLog(getClass());
+
 		private final List<PropertySourceDescriptor> descriptors;
 
 		private final Function<String, Resource> resourceResolver;
@@ -679,9 +682,23 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					hints.reflection().registerType(factoryClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 				}
 				for (String location : descriptor.locations()) {
-					Resource resource = this.resourceResolver.apply(location);
-					if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
-						hints.resources().registerPattern(classPathResource.getPath());
+					if (location.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX) ||
+							(location.startsWith(ResourcePatternResolver.CLASSPATH_URL_PREFIX) &&
+									(location.contains("*") || location.contains("?")))) {
+
+						if (logger.isWarnEnabled()) {
+							logger.warn("""
+									Runtime hint registration is not supported for the 'classpath*:' \
+									prefix or wildcards in @PropertySource locations. Please manually \
+									register a resource hint for each property source location represented \
+									by '%s'.""".formatted(location));
+						}
+					}
+					else {
+						Resource resource = this.resourceResolver.apply(location);
+						if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
+							hints.resources().registerPattern(classPathResource.getPath());
+						}
 					}
 				}
 			}

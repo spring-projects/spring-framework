@@ -65,6 +65,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
@@ -72,6 +73,7 @@ import static org.assertj.core.api.Assertions.entry;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class ConfigurationClassPostProcessorAotContributionTests {
 
@@ -265,6 +267,42 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		}
 
 		@Test
+		void propertySourceWithClassPathStarLocationPattern() {
+			BeanFactoryInitializationAotContribution contribution =
+					getContribution(PropertySourceWithClassPathStarLocationPatternConfiguration.class);
+
+			// We can effectively only assert that an exception is not thrown; however,
+			// a WARN-level log message similar to the following should be logged.
+			//
+			// Runtime hint registration is not supported for the 'classpath*:' prefix or wildcards
+			// in @PropertySource locations. Please manually register a resource hint for each property
+			// source location represented by 'classpath*:org/springframework/context/annotation/*.properties'.
+			assertThatNoException().isThrownBy(() -> contribution.applyTo(generationContext, beanFactoryInitializationCode));
+
+			// But we can also ensure that a resource hint was not registered.
+			assertThat(resource("org/springframework/context/annotation/p1.properties"))
+					.rejects(generationContext.getRuntimeHints());
+		}
+
+		@Test
+		void propertySourceWithWildcardLocationPattern() {
+			BeanFactoryInitializationAotContribution contribution =
+					getContribution(PropertySourceWithWildcardLocationPatternConfiguration.class);
+
+			// We can effectively only assert that an exception is not thrown; however,
+			// a WARN-level log message similar to the following should be logged.
+			//
+			// Runtime hint registration is not supported for the 'classpath*:' prefix or wildcards
+			// in @PropertySource locations. Please manually register a resource hint for each property
+			// source location represented by 'classpath:org/springframework/context/annotation/p?.properties'.
+			assertThatNoException().isThrownBy(() -> contribution.applyTo(generationContext, beanFactoryInitializationCode));
+
+			// But we can also ensure that a resource hint was not registered.
+			assertThat(resource("org/springframework/context/annotation/p1.properties"))
+					.rejects(generationContext.getRuntimeHints());
+		}
+
+		@Test
 		void applyToWhenHasPropertySourcesInvokesPropertySourceProcessorInOrder() {
 			BeanFactoryInitializationAotContribution contribution = getContribution(
 					PropertySourceConfiguration.class, PropertySourceDependentConfiguration.class);
@@ -361,6 +399,16 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				factory = CustomPropertySourcesFactory.class)
 		static class PropertySourceWithCustomFactoryConfiguration {
 
+		}
+
+		@Configuration(proxyBeanMethods = false)
+		@PropertySource("classpath*:org/springframework/context/annotation/*.properties")
+		static class PropertySourceWithClassPathStarLocationPatternConfiguration {
+		}
+
+		@Configuration(proxyBeanMethods = false)
+		@PropertySource("classpath:org/springframework/context/annotation/p?.properties")
+		static class PropertySourceWithWildcardLocationPatternConfiguration {
 		}
 
 	}
