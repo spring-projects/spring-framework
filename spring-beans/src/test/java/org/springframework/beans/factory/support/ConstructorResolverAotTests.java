@@ -415,6 +415,43 @@ class ConstructorResolverAotTests {
 	}
 
 	@Test
+	void beanDefinitionWithMultiConstructorSimilarArgumentsAndMatchingValues() throws NoSuchMethodException {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(MultiConstructorSimilarArgumentsSample.class)
+				.addConstructorArgValue("Test").addConstructorArgValue(1).addConstructorArgValue(2)
+				.getBeanDefinition();
+		Executable executable = resolve(beanFactory, beanDefinition);
+		assertThat(executable).isNotNull()
+				.isEqualTo(MultiConstructorSimilarArgumentsSample.class
+						.getDeclaredConstructor(String.class, Integer.class, Integer.class));
+	}
+
+	@Test
+	void beanDefinitionWithMultiConstructorSimilarArgumentsAndNullValueForCommonArgument() throws NoSuchMethodException {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(MultiConstructorSimilarArgumentsSample.class)
+				.addConstructorArgValue(null).addConstructorArgValue(null).addConstructorArgValue("Test")
+				.getBeanDefinition();
+		Executable executable = resolve(beanFactory, beanDefinition);
+		assertThat(executable).isNotNull()
+				.isEqualTo(MultiConstructorSimilarArgumentsSample.class
+						.getDeclaredConstructor(String.class, Integer.class, String.class));
+	}
+
+	@Test
+	void beanDefinitionWithMultiConstructorSimilarArgumentsAndNullValueForSpecificArgument() throws NoSuchMethodException {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(MultiConstructorSimilarArgumentsSample.class)
+				.addConstructorArgValue(null).addConstructorArgValue(1).addConstructorArgValue(null)
+				.getBeanDefinition();
+		assertThatIllegalStateException().isThrownBy(() -> resolve(beanFactory, beanDefinition))
+				.withMessageContaining(MultiConstructorSimilarArgumentsSample.class.getName());
+	}
+
+	@Test
 	void beanDefinitionWithMultiArgConstructorAndPrimitiveConversion() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(ConstructorPrimitiveFallback.class)
@@ -531,6 +568,15 @@ class ConstructorResolverAotTests {
 		}
 
 		MultiConstructorClassArraySample(String... stringArrayArg) {
+		}
+	}
+
+	static class MultiConstructorSimilarArgumentsSample {
+
+		MultiConstructorSimilarArgumentsSample(String name, Integer counter, String value) {
+		}
+
+		MultiConstructorSimilarArgumentsSample(String name, Integer counter, Integer value) {
 		}
 	}
 

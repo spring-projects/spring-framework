@@ -1200,7 +1200,8 @@ class ConstructorResolver {
 	}
 
 	private Predicate<ResolvableType> isAssignable(ResolvableType valueType) {
-		return parameterType -> parameterType.isAssignableFrom(valueType);
+		return parameterType -> (valueType == ResolvableType.NONE
+				|| parameterType.isAssignableFrom(valueType));
 	}
 
 	private ResolvableType extractElementType(ResolvableType parameterType) {
