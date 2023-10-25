@@ -500,7 +500,48 @@ class ResourceWebHandlerTests {
 		}
 
 		@Test
-			// SPR-14005
+		void shouldRespondWithNotModifiedWhenEtag() throws Exception {
+			this.handler.setEtagGenerator(resource -> "testEtag");
+			this.handler.afterPropertiesSet();
+			MockServerWebExchange exchange = MockServerWebExchange.from(
+					MockServerHttpRequest.get("").ifNoneMatch( "\"testEtag\""));
+
+			setPathWithinHandlerMapping(exchange, "foo.css");
+			setBestMachingPattern(exchange, "/**");
+			this.handler.handle(exchange).block(TIMEOUT);
+			assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+		}
+
+		@Test
+		void shouldRespondWithModifiedResourceWhenEtagNoMatch() throws Exception {
+			this.handler.setEtagGenerator(resource -> "noMatch");
+			this.handler.afterPropertiesSet();
+			MockServerWebExchange exchange = MockServerWebExchange.from(
+					MockServerHttpRequest.get("").ifNoneMatch( "\"testEtag\""));
+
+			setPathWithinHandlerMapping(exchange, "foo.css");
+			setBestMachingPattern(exchange, "/**");
+			this.handler.handle(exchange).block(TIMEOUT);
+			assertThat((Object) exchange.getResponse().getStatusCode()).isNull();
+			assertResponseBody(exchange, "h1 { color:red; }");
+		}
+
+		@Test
+		void shouldRespondWithNotModifiedWhenEtagAndLastModified() throws Exception {
+			this.handler.setEtagGenerator(resource -> "testEtag");
+			this.handler.afterPropertiesSet();
+			MockServerWebExchange exchange = MockServerWebExchange.from(
+					MockServerHttpRequest.get("")
+							.ifModifiedSince(resourceLastModified("test/foo.css"))
+							.ifNoneMatch( "\"testEtag\""));
+
+			setPathWithinHandlerMapping(exchange, "foo.css");
+			setBestMachingPattern(exchange, "/**");
+			this.handler.handle(exchange).block(TIMEOUT);
+			assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+		}
+
+		@Test  // SPR-14005
 		void doOverwriteExistingCacheControlHeaders() throws Exception {
 			this.handler.setCacheControl(CacheControl.maxAge(3600, TimeUnit.SECONDS));
 			this.handler.afterPropertiesSet();

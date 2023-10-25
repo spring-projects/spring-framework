@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -122,6 +123,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	private Map<String, MediaType> mediaTypes;
 
 	private boolean useLastModified = true;
+
+	@Nullable
+	private Function<Resource, String> etagGenerator;
 
 	private boolean optimizeLocations = false;
 
@@ -276,6 +280,29 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	}
 
 	/**
+	 * Configure a generator function that will be used to create the ETag information,
+	 * given a {@link Resource} that is about to be written to the response.
+	 * <p>This function should return a String that will be used as an argument in
+	 * {@link ServerWebExchange#checkNotModified(String)}, or {@code null} if no value
+	 * can be generated for the given resource.
+	 * @param etagGenerator the HTTP ETag generator function to use.
+	 * @since 6.1
+	 */
+	public void setEtagGenerator(@Nullable Function<Resource, String> etagGenerator) {
+		this.etagGenerator = etagGenerator;
+	}
+
+	/**
+	 * Return the HTTP ETag generator function to be used when serving resources.
+	 * @return the HTTP ETag generator function
+	 * @since 6.1
+	 */
+	@Nullable
+	public Function<Resource, String> getEtagGenerator() {
+		return this.etagGenerator;
+	}
+
+	/**
 	 * Set whether to optimize the specified locations through an existence
 	 * check on startup, filtering non-existing directories upfront so that
 	 * they do not have to be checked on every resource access.
@@ -418,7 +445,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						}
 
 						// Header phase
-						if (isUseLastModified() && exchange.checkNotModified(Instant.ofEpochMilli(resource.lastModified()))) {
+						String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
+						Instant lastModified = isUseLastModified() ? Instant.ofEpochMilli(resource.lastModified()) : Instant.MIN;
+						if (exchange.checkNotModified(eTagValue, lastModified)) {
 							logger.trace(exchange.getLogPrefix() + "Resource not modified");
 							return Mono.empty();
 						}
