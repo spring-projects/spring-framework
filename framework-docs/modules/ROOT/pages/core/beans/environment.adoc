@@ -562,8 +562,9 @@ If no profile is active, the `dataSource` is created. You can see this
 as a way to provide a default definition for one or more beans. If any
 profile is enabled, the default profile does not apply.
 
-You can change the name of the default profile by using `setDefaultProfiles()` on
-the `Environment` or, declaratively, by using the `spring.profiles.default` property.
+The name of the default profile is `default`. You can change the name of
+the default profile by using `setDefaultProfiles()` on the `Environment` or,
+declaratively, by using the `spring.profiles.default` property.
 
 
 
