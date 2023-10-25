@@ -95,10 +95,10 @@ have the empty prefix override server prefixes `/app1` and `/app2`.
 ====
 A common case for this deployment scenario is where licenses are paid per
 production application server, and it is preferable to deploy multiple applications per
-server to reduce fees. Another case is I/O bound applications, and the need to deploy
-multiple applications to each application server to consume less resources.
+server to reduce fees. Another reason is to run more applications on the same server in
+order to share the resources required by the server to run.
 
-In this scenario, applications need a non-empty context root because there are multiple
+In these scenarios, applications need a non-empty context root because there are multiple
 applications on the same server. However, this should not be visible in URL paths of
 the public API where applications may use different subdomains that provides benefits
 such as:
