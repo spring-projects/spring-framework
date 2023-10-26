@@ -38,27 +38,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ControlFlowPointcutTests {
 
 	@Test
-	void matches() {
-		TestBean target = new TestBean();
-		target.setAge(27);
+	void matchesExactMethodName() {
+		TestBean target = new TestBean("Jane", 27);
+		ControlFlowPointcut cflow = new ControlFlowPointcut(MyComponent.class, "getAge");
 		NopInterceptor nop = new NopInterceptor();
-		ControlFlowPointcut cflow = new ControlFlowPointcut(One.class, "getAge");
 		ProxyFactory pf = new ProxyFactory(target);
-		ITestBean proxied = (ITestBean) pf.getProxy();
 		pf.addAdvisor(new DefaultPointcutAdvisor(cflow, nop));
+		ITestBean proxy = (ITestBean) pf.getProxy();
 
-		// Not advised, not under One
-		assertThat(proxied.getAge()).isEqualTo(target.getAge());
+		// Not advised, not under MyComponent
+		assertThat(proxy.getAge()).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(0);
 		assertThat(cflow.getEvaluations()).isEqualTo(1);
 
 		// Will be advised
-		assertThat(new One().getAge(proxied)).isEqualTo(target.getAge());
+		assertThat(new MyComponent().getAge(proxy)).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(1);
 		assertThat(cflow.getEvaluations()).isEqualTo(2);
 
 		// Won't be advised
-		assertThat(new One().nomatch(proxied)).isEqualTo(target.getAge());
+		assertThat(new MyComponent().nomatch(proxy)).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(1);
 		assertThat(cflow.getEvaluations()).isEqualTo(3);
 	}
@@ -87,29 +86,29 @@ class ControlFlowPointcutTests {
 			}
 		}
 
-		CustomControlFlowPointcut cflow = new CustomControlFlowPointcut(One.class, "getAge");
+		CustomControlFlowPointcut cflow = new CustomControlFlowPointcut(MyComponent.class, "getAge");
 
-		assertThat(cflow.trackedClass()).isEqualTo(One.class);
+		assertThat(cflow.trackedClass()).isEqualTo(MyComponent.class);
 		assertThat(cflow.trackedMethod()).isEqualTo("getAge");
 
 		TestBean target = new TestBean("Jane", 27);
-		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
+		ProxyFactory pf = new ProxyFactory(target);
 		pf.addAdvisor(new DefaultPointcutAdvisor(cflow, nop));
 		ITestBean proxy = (ITestBean) pf.getProxy();
 
-		// Not advised: the proxy is not invoked under One#getAge
+		// Not advised: the proxy is not invoked under MyComponent#getAge
 		assertThat(proxy.getAge()).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(0);
 		assertThat(cflow.getEvaluations()).isEqualTo(2); // intentional double increment
 
-		// Will be advised: the proxy is invoked under One#getAge
-		assertThat(new One().getAge(proxy)).isEqualTo(target.getAge());
+		// Will be advised: the proxy is invoked under MyComponent#getAge
+		assertThat(new MyComponent().getAge(proxy)).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(1);
 		assertThat(cflow.getEvaluations()).isEqualTo(4); // intentional double increment
 
-		// Won't be advised: the proxy is not invoked under One#getAge
-		assertThat(new One().nomatch(proxy)).isEqualTo(target.getAge());
+		// Won't be advised: the proxy is not invoked under MyComponent#getAge
+		assertThat(new MyComponent().nomatch(proxy)).isEqualTo(target.getAge());
 		assertThat(nop.getCount()).isEqualTo(1);
 		assertThat(cflow.getEvaluations()).isEqualTo(6); // intentional double increment
 	}
@@ -123,25 +122,24 @@ class ControlFlowPointcutTests {
 	 */
 	@Test
 	void selectiveApplication() {
-		TestBean target = new TestBean();
-		target.setAge(27);
+		TestBean target = new TestBean("Jane", 27);
+		ControlFlowPointcut cflow = new ControlFlowPointcut(MyComponent.class);
 		NopInterceptor nop = new NopInterceptor();
-		ControlFlowPointcut cflow = new ControlFlowPointcut(One.class);
-		Pointcut settersUnderOne = Pointcuts.intersection(Pointcuts.SETTERS, cflow);
+		Pointcut settersUnderMyComponent = Pointcuts.intersection(Pointcuts.SETTERS, cflow);
 		ProxyFactory pf = new ProxyFactory(target);
-		ITestBean proxied = (ITestBean) pf.getProxy();
-		pf.addAdvisor(new DefaultPointcutAdvisor(settersUnderOne, nop));
+		pf.addAdvisor(new DefaultPointcutAdvisor(settersUnderMyComponent, nop));
+		ITestBean proxy = (ITestBean) pf.getProxy();
 
-		// Not advised, not under One
+		// Not advised, not under MyComponent
 		target.setAge(16);
 		assertThat(nop.getCount()).isEqualTo(0);
 
-		// Not advised; under One but not a setter
-		assertThat(new One().getAge(proxied)).isEqualTo(16);
+		// Not advised; under MyComponent but not a setter
+		assertThat(new MyComponent().getAge(proxy)).isEqualTo(16);
 		assertThat(nop.getCount()).isEqualTo(0);
 
 		// Won't be advised
-		new One().set(proxied);
+		new MyComponent().set(proxy);
 		assertThat(nop.getCount()).isEqualTo(1);
 
 		// We saved most evaluations
@@ -149,34 +147,34 @@ class ControlFlowPointcutTests {
 	}
 
 	@Test
-	void equalsAndHashCode() throws Exception {
-		assertThat(new ControlFlowPointcut(One.class)).isEqualTo(new ControlFlowPointcut(One.class));
-		assertThat(new ControlFlowPointcut(One.class, "getAge")).isEqualTo(new ControlFlowPointcut(One.class, "getAge"));
-		assertThat(new ControlFlowPointcut(One.class, "getAge")).isNotEqualTo(new ControlFlowPointcut(One.class));
+	void equalsAndHashCode() {
+		assertThat(new ControlFlowPointcut(MyComponent.class)).isEqualTo(new ControlFlowPointcut(MyComponent.class));
+		assertThat(new ControlFlowPointcut(MyComponent.class, "getAge")).isEqualTo(new ControlFlowPointcut(MyComponent.class, "getAge"));
+		assertThat(new ControlFlowPointcut(MyComponent.class, "getAge")).isNotEqualTo(new ControlFlowPointcut(MyComponent.class));
 
-		assertThat(new ControlFlowPointcut(One.class)).hasSameHashCodeAs(new ControlFlowPointcut(One.class));
-		assertThat(new ControlFlowPointcut(One.class, "getAge")).hasSameHashCodeAs(new ControlFlowPointcut(One.class, "getAge"));
-		assertThat(new ControlFlowPointcut(One.class, "getAge")).doesNotHaveSameHashCodeAs(new ControlFlowPointcut(One.class));
+		assertThat(new ControlFlowPointcut(MyComponent.class)).hasSameHashCodeAs(new ControlFlowPointcut(MyComponent.class));
+		assertThat(new ControlFlowPointcut(MyComponent.class, "getAge")).hasSameHashCodeAs(new ControlFlowPointcut(MyComponent.class, "getAge"));
+		assertThat(new ControlFlowPointcut(MyComponent.class, "getAge")).doesNotHaveSameHashCodeAs(new ControlFlowPointcut(MyComponent.class));
 	}
 
 	@Test
 	void testToString() {
-		assertThat(new ControlFlowPointcut(One.class)).asString()
-			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = null");
-		assertThat(new ControlFlowPointcut(One.class, "getAge")).asString()
-			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + One.class.getName() + "; methodName = getAge");
+		assertThat(new ControlFlowPointcut(MyComponent.class)).asString()
+			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + MyComponent.class.getName() + "; methodName = null");
+		assertThat(new ControlFlowPointcut(MyComponent.class, "getAge")).asString()
+			.isEqualTo(ControlFlowPointcut.class.getName() + ": class = " + MyComponent.class.getName() + "; methodName = getAge");
 	}
 
 
-	private static class One {
-		int getAge(ITestBean proxied) {
-			return proxied.getAge();
+	private static class MyComponent {
+		int getAge(ITestBean proxy) {
+			return proxy.getAge();
 		}
-		int nomatch(ITestBean proxied) {
-			return proxied.getAge();
+		int nomatch(ITestBean proxy) {
+			return proxy.getAge();
 		}
-		void set(ITestBean proxied) {
-			proxied.setAge(5);
+		void set(ITestBean proxy) {
+			proxy.setAge(5);
 		}
 	}
 
