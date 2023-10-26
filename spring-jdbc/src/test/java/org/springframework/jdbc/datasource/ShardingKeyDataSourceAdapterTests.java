@@ -7,11 +7,10 @@ import java.sql.ShardingKey;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.ShardingKeyProvider;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -19,101 +18,80 @@ import static org.mockito.BDDMockito.*;
 public class ShardingKeyDataSourceAdapterTests {
 	private final Connection connection = mock();
 	private final Connection shardConnection = mock();
-	private final DataSource dataSource = mock(DataSource.class, RETURNS_DEEP_STUBS);
+	private final DataSource dataSource = mock();
 	private final ConnectionBuilder connectionBuilder = mock(ConnectionBuilder.class, RETURNS_DEEP_STUBS);
-	private final ConnectionBuilder shardConnectionBuilder = mock();
+	private final ConnectionBuilder shardConnectionBuilder = mock(ConnectionBuilder.class, RETURNS_DEEP_STUBS);
+	private final ShardingKey shardingKey = mock();
+	private final ShardingKey superShardingKey = mock();
+	private final ShardingKeyProvider shardingKeyProvider = new ShardingKeyProvider() {
+		@Override
+		public ShardingKey getShardingKey() throws SQLException {
+			return shardingKey;
+		}
+
+		@Override
+		public ShardingKey getSuperShardingKey() throws SQLException {
+			return superShardingKey;
+		}
+	};
+
+	@BeforeEach
+	public void setUp() throws SQLException {
+		given(dataSource.createConnectionBuilder()).willReturn(connectionBuilder);
+		when(connectionBuilder.shardingKey(null).superShardingKey(null)).thenReturn(connectionBuilder);
+		when(connectionBuilder.shardingKey(shardingKey).superShardingKey(superShardingKey))
+				.thenReturn(shardConnectionBuilder);
+	}
 
 	@Test
-	public void testThreadBoundShardingKeys() throws SQLException {
+	public void testGetConnectionNoKeyProvider() throws SQLException {
 		ShardingKeyDataSourceAdapter dataSourceAdapter = new ShardingKeyDataSourceAdapter(dataSource);
-		ShardingKey shardingKey = mock();
-		ShardingKey superShardingKey = mock();
 
-		given(this.dataSource.createConnectionBuilder()).willReturn(this.connectionBuilder);
-		when(this.connectionBuilder.shardingKey(shardingKey).superShardingKey(superShardingKey)).thenReturn(this.shardConnectionBuilder);
-		given(this.shardConnectionBuilder.build()).willReturn(this.shardConnection);
+		when(connectionBuilder.build()).thenReturn(connection);
 
-		dataSourceAdapter.setShardingKeyForCurrentThread(shardingKey);
-		dataSourceAdapter.setSuperShardingKeyForCurrentThread(superShardingKey);
+		assertThat(dataSourceAdapter.getConnection()).isEqualTo(connection);
+	}
+
+	@Test
+	public void testGetConnectionWithKeyProvider() throws SQLException {
+
+		ShardingKeyDataSourceAdapter dataSourceAdapter = new ShardingKeyDataSourceAdapter(
+				dataSource,
+				shardingKeyProvider);
+
+		when(shardConnectionBuilder.build()).thenReturn(shardConnection);
 
 		assertThat(dataSourceAdapter.getConnection()).isEqualTo(shardConnection);
 	}
 
 	@Test
-	public void testThreadBoundShardingKeyAndProviderAreNotNull() throws SQLException {
-		ShardingKey providerKey = mock();
-		ShardingKey threadBoundKey = mock();
-		Connection providerKeyShardConn = mock();
-		Connection threadBoundShardConn = mock();
+	public void testGetConnectionWithCredentialsNoKeyProvider() throws SQLException {
+		ShardingKeyDataSourceAdapter dataSourceAdapter = new ShardingKeyDataSourceAdapter(dataSource);
 
-		Connection resultConnection = getShardedConnection(providerKey, threadBoundKey, providerKeyShardConn, threadBoundShardConn);
-		assertThat(resultConnection).isEqualTo(threadBoundShardConn);
-	}
-
-	@Test
-	public void testThreadBoundKeyIsNullAndProviderKeyIsNotNull() throws SQLException {
-		ShardingKey providerKey = mock();
-		ShardingKey threadBoundKey = null;
-		Connection providerKeyShardConn = mock();
-		Connection threadBoundShardConn = mock();
-
-		Connection resultConnection = getShardedConnection(providerKey, threadBoundKey, providerKeyShardConn, threadBoundShardConn);
-		assertThat(resultConnection).isEqualTo(providerKeyShardConn);
-	}
-
-
-	@Test
-	public void testThreadBoundShardingKeyAndProviderAreNull() throws SQLException {
-		ShardingKey providerKey = null;
-		ShardingKey threadBoundKey = null;
-		Connection providerKeyShardConn = mock();
-		Connection threadBoundShardConn = mock();
-
-		Connection resultConnection = getShardedConnection(providerKey, threadBoundKey, providerKeyShardConn, threadBoundShardConn);
-		assertThat(resultConnection).isEqualTo(this.connection);
-	}
-
-	@Test
-	public void testConnectionWithUsernameAndPassword() throws SQLException {
-		ShardingKeyDataSourceAdapter shardingKeyDataSourceAdapter = new ShardingKeyDataSourceAdapter(dataSource);
-		ShardingKey shardingKey = mock();
-		ShardingKey superShardingKey = mock();
-		String username = "anir";
+		String username = "Anir";
 		String password = "spring";
 
-		given(this.dataSource.createConnectionBuilder()).willReturn(this.connectionBuilder);
-		when(this.connectionBuilder.shardingKey(shardingKey).superShardingKey(superShardingKey)).thenReturn(this.connectionBuilder);
-		when(this.connectionBuilder.user(username).password(password).build()).thenReturn(this.connection);
+		Connection userConnection = mock();
 
-		shardingKeyDataSourceAdapter.setShardingKeyForCurrentThread(shardingKey);
-		shardingKeyDataSourceAdapter.setSuperShardingKeyForCurrentThread(superShardingKey);
+		when(connectionBuilder.user(username).password(password).build()).thenReturn(userConnection);
 
-		Connection resultConnection = shardingKeyDataSourceAdapter.getConnection(username, password);
-
-		Assertions.assertEquals(this.connection, resultConnection);
+		assertThat(dataSourceAdapter.getConnection(username, password)).isEqualTo(userConnection);
 	}
 
-	private Connection getShardedConnection(@Nullable ShardingKey providerKey, @Nullable ShardingKey threadBoundKey, Connection providerKeyShardConn, Connection threadBoundShardConn) throws SQLException {
-		ShardingKeyProvider provider = mock();
-		ConnectionBuilder providerConnectionBuilder = mock();
-		ConnectionBuilder threadBoundConnectionBuilder = mock();
+	@Test
+	public void testGetConnectionWithCredentialsAndKeyProvider() throws SQLException {
+		ShardingKeyDataSourceAdapter dataSourceAdapter = new ShardingKeyDataSourceAdapter(
+				dataSource,
+				shardingKeyProvider);
 
-		given(this.dataSource.createConnectionBuilder()).willReturn(this.connectionBuilder);
-		when(this.connectionBuilder.shardingKey(providerKey).superShardingKey(null)).thenReturn(providerConnectionBuilder);
-		when(this.connectionBuilder.shardingKey(threadBoundKey).superShardingKey(null)).thenReturn(threadBoundConnectionBuilder);
+		String username = "mbekraou";
+		String password = "jdbc";
 
-		when(this.connectionBuilder.shardingKey(null).superShardingKey(null)).thenReturn(this.connectionBuilder);
-		given(this.connectionBuilder.build()).willReturn(this.connection);
+		Connection userWithKeyProviderConnection = mock();
 
-		given(providerConnectionBuilder.build()).willReturn(providerKeyShardConn);
-		given(threadBoundConnectionBuilder.build()).willReturn(threadBoundShardConn);
-		given(provider.getShardingKey()).willReturn(providerKey);
-		given(provider.getSuperShardingKey()).willReturn(null);
+		when(shardConnectionBuilder.user(username).password(password).build())
+				.thenReturn(userWithKeyProviderConnection);
 
-		ShardingKeyDataSourceAdapter dataSourceAdapter = new ShardingKeyDataSourceAdapter(dataSource);
-		dataSourceAdapter.setShardingKeyForCurrentThread(threadBoundKey);
-		dataSourceAdapter.setShardingKeyProvider(provider);
-
-		return dataSourceAdapter.getConnection();
+		assertThat(dataSourceAdapter.getConnection(username, password)).isEqualTo(userWithKeyProviderConnection);
 	}
 }
