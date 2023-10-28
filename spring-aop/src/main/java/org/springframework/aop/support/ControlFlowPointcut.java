@@ -44,7 +44,6 @@ import org.springframework.util.PatternMatchUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @see #isMatch
  * @see NameMatchMethodPointcut
  * @see JdkRegexpMethodPointcut
  */
@@ -58,7 +57,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	protected final Class<?> clazz;
 
 	/**
-	 * An immutable list of method name patterns against which to match.
+	 * An immutable list of distinct method name patterns against which to match.
 	 * @since 6.1
 	 */
 	protected final List<String> methodNamePatterns;
@@ -184,7 +183,8 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * Determine if the given method name matches the method name pattern.
 	 * <p>The default implementation checks for direct equality as well as
 	 * {@code xxx*}, {@code *xxx}, {@code *xxx*}, and {@code xxx*yyy} matches.
-	 * <p>Can be overridden in subclasses.
+	 * <p>Can be overridden in subclasses &mdash; for example, to support a
+	 * different style of simple pattern matching.
 	 * @param methodName the method name to check
 	 * @param methodNamePattern the method name pattern
 	 * @return {@code true} if the method name matches the pattern
