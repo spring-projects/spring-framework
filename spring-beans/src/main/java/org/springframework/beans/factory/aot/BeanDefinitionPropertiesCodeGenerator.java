@@ -174,7 +174,9 @@ class BeanDefinitionPropertiesCodeGenerator {
 		Map<Integer, ValueHolder> indexedValues = constructorValues.getIndexedArgumentValues();
 		if (!indexedValues.isEmpty()) {
 			indexedValues.forEach((index, valueHolder) -> {
-				CodeBlock valueCode = generateValue(valueHolder.getName(), valueHolder.getValue());
+				Object value = valueHolder.getValue();
+				CodeBlock valueCode = castIfNecessary(value == null, Object.class,
+						generateValue(valueHolder.getName(), value));
 				code.addStatement(
 						"$L.getConstructorArgumentValues().addIndexedArgumentValue($L, $L)",
 						BEAN_DEFINITION_VARIABLE, index, valueCode);
@@ -344,6 +346,20 @@ class BeanDefinitionPropertiesCodeGenerator {
 		if (filter.test(defaultValue, actualValue)) {
 			code.addStatement(format, BEAN_DEFINITION_VARIABLE, formatter.apply(actualValue));
 		}
+	}
+
+	/**
+	 * Cast the specified {@code valueCode} to the specified {@code castType} if
+	 * the {@code castNecessary} is {@code true}. Otherwise return the valueCode
+	 * as is.
+	 * @param castNecessary whether a cast is necessary
+	 * @param castType the type to cast to
+	 * @param valueCode the code for the value
+	 * @return the existing value or a form of {@code (CastType) valueCode} if a
+	 * cast is necessary
+	 */
+	private CodeBlock castIfNecessary(boolean castNecessary, Class<?> castType, CodeBlock valueCode) {
+		return (castNecessary ? CodeBlock.of("($T) $L", castType, valueCode) : valueCode);
 	}
 
 	static class PropertyNamesStack {
