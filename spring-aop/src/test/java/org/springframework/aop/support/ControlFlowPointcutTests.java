@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
@@ -70,6 +71,15 @@ class ControlFlowPointcutTests {
 		assertMatchesSetAndGetAge(cflow);
 
 		cflow = pointcut("foo", "get*", "bar", "*se*", "baz");
+		assertMatchesSetAndGetAge(cflow);
+	}
+
+	@Test
+	void regExControlFlowPointcut() {
+		ControlFlowPointcut cflow = new RegExControlFlowPointcut(MyComponent.class, "(set.*?|getAge)");
+		assertMatchesSetAndGetAge(cflow);
+
+		cflow = new RegExControlFlowPointcut(MyComponent.class, "set", "^getAge$");
 		assertMatchesSetAndGetAge(cflow);
 	}
 
@@ -246,6 +256,22 @@ class ControlFlowPointcutTests {
 
 		List<String> trackedMethodNamePatterns() {
 			return super.methodNamePatterns;
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class RegExControlFlowPointcut extends ControlFlowPointcut {
+
+		private final List<Pattern> compiledPatterns;
+
+		RegExControlFlowPointcut(Class<?> clazz, String... methodNamePatterns) {
+			super(clazz, methodNamePatterns);
+			this.compiledPatterns = super.methodNamePatterns.stream().map(Pattern::compile).toList();
+		}
+
+		@Override
+		protected boolean isMatch(String methodName, int patternIndex) {
+			return this.compiledPatterns.get(patternIndex).matcher(methodName).matches();
 		}
 	}
 

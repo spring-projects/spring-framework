@@ -151,8 +151,9 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 				if (this.methodNamePatterns.isEmpty()) {
 					return true;
 				}
-				for (String methodNamePattern : this.methodNamePatterns) {
-					if (isMatch(element.getMethodName(), methodNamePattern)) {
+				String methodName = element.getMethodName();
+				for (int i = 0; i < this.methodNamePatterns.size(); i++) {
+					if (isMatch(methodName, i)) {
 						return true;
 					}
 				}
@@ -180,7 +181,30 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	/**
+	 * Determine if the given method name matches the method name pattern at the
+	 * specified index.
+	 * <p>This method is invoked by {@link #matches(Method, Class, Object...)}.
+	 * <p>The default implementation retrieves the method name pattern from
+	 * {@link #methodNamePatterns} and delegates to {@link #isMatch(String, String)}.
+	 * <p>Can be overridden in subclasses &mdash; for example, to support
+	 * regular expressions.
+	 * @param methodName the method name to check
+	 * @param patternIndex the index of the method name pattern
+	 * @return {@code true} if the method name matches the pattern at the specified
+	 * index
+	 * @since 6.1
+	 * @see #methodNamePatterns
+	 * @see #isMatch(String, String)
+	 * @see #matches(Method, Class, Object...)
+	 */
+	protected boolean isMatch(String methodName, int patternIndex) {
+		String methodNamePattern = this.methodNamePatterns.get(patternIndex);
+		return isMatch(methodName, methodNamePattern);
+	}
+
+	/**
 	 * Determine if the given method name matches the method name pattern.
+	 * <p>This method is invoked by {@link #isMatch(String, int)}.
 	 * <p>The default implementation checks for direct equality as well as
 	 * {@code xxx*}, {@code *xxx}, {@code *xxx*}, and {@code xxx*yyy} matches.
 	 * <p>Can be overridden in subclasses &mdash; for example, to support a
@@ -189,7 +213,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * @param methodNamePattern the method name pattern
 	 * @return {@code true} if the method name matches the pattern
 	 * @since 6.1
-	 * @see #matches(Method, Class, Object...)
+	 * @see #isMatch(String, int)
 	 * @see PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isMatch(String methodName, String methodNamePattern) {
