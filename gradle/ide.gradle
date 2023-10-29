@@ -60,6 +60,13 @@ eclipse.classpath.file.whenMerged {
 	}
 }
 
+// Remove recursive project dependencies
+eclipse.classpath.file.whenMerged {
+	entries.findAll { it instanceof ProjectDependency && it.path == ('/' + project.name) }.each {
+		entries.remove(it)
+	}
+}
+
 // Include project specific settings
 task eclipseSettings(type: Copy) {
 	from rootProject.files(
