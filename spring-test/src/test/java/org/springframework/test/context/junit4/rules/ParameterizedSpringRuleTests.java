@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests
  */
 @RunWith(Parameterized.class)
-@ContextConfiguration("/org/springframework/test/context/junit4/ParameterizedDependencyInjectionTests-context.xml")
+@ContextConfiguration("../ParameterizedDependencyInjectionTests-context.xml")
 public class ParameterizedSpringRuleTests {
 
 	private static final AtomicInteger invocationCount = new AtomicInteger();
