@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Lorenz Simon
  * @since 5.3.16
  */
 class KotlinMergedAnnotationsTests {
@@ -74,6 +75,35 @@ class KotlinMergedAnnotationsTests {
 		assertThat(synthesizedFriends).hasSize(2)
 	}
 
+	@Test  // gh-28012
+	fun recursiveNestedAnnotationWithAlias() {
+		val method = javaClass.getMethod("filterWithAliasMethod")
+
+		// MergedAnnotations
+		val mergedAnnotations = MergedAnnotations.from(method)
+		assertThat(mergedAnnotations.isPresent(FilterWithAlias::class.java)).isTrue();
+
+		// MergedAnnotation
+		val mergedAnnotation = MergedAnnotation.from(method.getAnnotation(FilterWithAlias::class.java))
+		assertThat(mergedAnnotation).isNotNull();
+
+		// Synthesized Annotations
+		val fooFilter = mergedAnnotation.synthesize()
+		assertThat(fooFilter.value).isEqualTo("foo")
+		assertThat(fooFilter.name).isEqualTo("foo")
+		val filters = fooFilter.and
+		assertThat(filters.value).hasSize(2)
+
+		val barFilter = filters.value[0]
+		assertThat(barFilter.value).isEqualTo("bar")
+		assertThat(barFilter.name).isEqualTo("bar")
+		assertThat(barFilter.and.value).isEmpty()
+
+		val bazFilter = filters.value[1]
+		assertThat(bazFilter.value).isEqualTo("baz")
+		assertThat(bazFilter.name).isEqualTo("baz")
+		assertThat(bazFilter.and.value).isEmpty()
+	}
 
 	@PersonWithAlias("jane", friends = [PersonWithAlias("john"), PersonWithAlias("sally")])
 	fun personWithAliasMethod() {
@@ -81,6 +111,10 @@ class KotlinMergedAnnotationsTests {
 
 	@PersonWithoutAlias("jane", friends = [PersonWithoutAlias("john"), PersonWithoutAlias("sally")])
 	fun personWithoutAliasMethod() {
+	}
+
+	@FilterWithAlias("foo", and = FiltersWithoutAlias(FilterWithAlias("bar"), FilterWithAlias("baz")))
+	fun filterWithAliasMethod() {
 	}
 
 }
