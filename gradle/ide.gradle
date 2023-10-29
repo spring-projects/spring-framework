@@ -1,3 +1,4 @@
+import org.gradle.plugins.ide.eclipse.model.Library
 import org.gradle.plugins.ide.eclipse.model.ProjectDependency
 import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
@@ -63,6 +64,14 @@ eclipse.classpath.file.whenMerged {
 // Remove recursive project dependencies
 eclipse.classpath.file.whenMerged {
 	entries.findAll { it instanceof ProjectDependency && it.path == ('/' + project.name) }.each {
+		entries.remove(it)
+	}
+}
+
+// Remove classpath entries for non-existent libraries added by the me.champeau.mrjar
+// plugin, such as "spring-core/build/classes/kotlin/java21".
+eclipse.classpath.file.whenMerged {
+	entries.findAll { it instanceof Library && !file(it.path).exists() }.each {
 		entries.remove(it)
 	}
 }
