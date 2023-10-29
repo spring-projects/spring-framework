@@ -148,125 +148,146 @@ public class PropertyPlaceholderHelper {
 
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
-		String resolvedPlaceholders = resolvePlaceholders(value, placeholderResolver, visitedPlaceholders);
-		return removeEscapeCharacters(resolvedPlaceholders);
+		Property property = new Property(value, placeholderResolver);
+		property.resolvePlaceholders(visitedPlaceholders);
+		return property.removeEscapeCharacters();
 	}
 
-	private String removeEscapeCharacters(String resolvePlaceholders) {
-		StringBuilder result = new StringBuilder(resolvePlaceholders);
-		String escapedPrefix = this.escapeCharacter + this.placeholderPrefix;
-		int startIndex = result.indexOf(escapedPrefix);
-		while (startIndex != -1) {
-			int endIndex = findPlaceholderEndIndex(result, startIndex + 1);
-			if (endIndex != -1) {
-				result.replace(startIndex, startIndex + escapedPrefix.length(), this.placeholderPrefix);
-				startIndex = result.indexOf(escapedPrefix, endIndex + this.placeholderSuffix.length());
-			}
-			else {
-				break;
-			}
+	protected class Property {
+
+		protected final String escapedPrefix = escapeCharacter + placeholderPrefix;
+
+		protected final String originalPlaceholder;
+		protected final StringBuilder result;
+		protected final PlaceholderResolver placeholderResolver;
+
+		protected Property(String value, PlaceholderResolver placeholderResolver) {
+			this.originalPlaceholder = value;
+			this.result = new StringBuilder(value);
+			this.placeholderResolver = placeholderResolver;
 		}
-		return result.toString();
-	}
 
-	protected String resolvePlaceholders(
-			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
+		protected String resolvePlaceholders(Set<String> visitedPlaceholders) {
+			int startIndex = findPlaceholderPrefixIndex(0);
 
-		StringBuilder result = new StringBuilder(value);
-		int startIndex = findPlaceholderPrefixIndex(result, 0);
+			while (startIndex != -1) {
+				int endIndex = findPlaceholderEndIndex(startIndex);
+				if (endIndex != -1) {
+					String placeholderWithoutBrackets = this.result.substring(startIndex + placeholderPrefix.length(), endIndex);
+					visitedPlaceholders = updateVisitedPlaceholders(visitedPlaceholders, placeholderWithoutBrackets);
 
-		while (startIndex != -1) {
-			int endIndex = findPlaceholderEndIndex(result, startIndex);
-			if (endIndex != -1) {
-				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-				String originalPlaceholder = placeholder;
-				if (visitedPlaceholders == null) {
-					visitedPlaceholders = new HashSet<>(4);
-				}
-				if (!visitedPlaceholders.add(originalPlaceholder)) {
-					throw new IllegalArgumentException(
-							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
-				}
-				// Recursive invocation, parsing placeholders contained in the placeholder key.
-				placeholder = resolvePlaceholders(placeholder, placeholderResolver, visitedPlaceholders);
-				// Now obtain the value for the fully resolved key...
-				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
-				if (propVal == null && this.valueSeparator != null) {
-					int separatorIndex = placeholder.indexOf(this.valueSeparator);
-					if (separatorIndex != -1) {
-						String actualPlaceholder = placeholder.substring(0, separatorIndex);
-						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
-						propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
-						if (propVal == null) {
-							propVal = defaultValue;
+					Property property = new Property(placeholderWithoutBrackets, this.placeholderResolver);
+					property.resolvePlaceholders(visitedPlaceholders);
+					String placeholderValue = property.getValue();
+
+					if (placeholderValue != null) {
+						Property valueProperty = new Property(placeholderValue, this.placeholderResolver);
+						placeholderValue = valueProperty.resolvePlaceholders(visitedPlaceholders);
+						this.result.replace(startIndex, endIndex + placeholderSuffix.length(), placeholderValue);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Resolved placeholder '" + property.result + "'");
 						}
+						startIndex = this.result.indexOf(placeholderPrefix, startIndex + placeholderValue.length());
+
 					}
-				}
-				if (propVal != null) {
-					// Recursive invocation, parsing placeholders contained in the
-					// previously resolved placeholder value.
-					propVal = resolvePlaceholders(propVal, placeholderResolver, visitedPlaceholders);
-					result.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Resolved placeholder '" + placeholder + "'");
+					else if (ignoreUnresolvablePlaceholders) {
+						// Proceed with unprocessed value.
+						startIndex = this.result.indexOf(placeholderPrefix, endIndex + placeholderSuffix.length());
 					}
-					startIndex = result.indexOf(this.placeholderPrefix, startIndex + propVal.length());
-				}
-				else if (this.ignoreUnresolvablePlaceholders) {
-					// Proceed with unprocessed value.
-					startIndex = result.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
+					else {
+						throw new IllegalArgumentException("Could not resolve placeholder '" +
+								property.result + "'" + " in value \"" + this.originalPlaceholder + "\"");
+					}
+					visitedPlaceholders.remove(placeholderWithoutBrackets);
 				}
 				else {
-					throw new IllegalArgumentException("Could not resolve placeholder '" +
-							placeholder + "'" + " in value \"" + value + "\"");
+					startIndex = -1;
 				}
-				visitedPlaceholders.remove(originalPlaceholder);
 			}
-			else {
-				startIndex = -1;
-			}
+			return this.result.toString();
 		}
-		return result.toString();
-	}
 
-	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
-		int index = startIndex + this.placeholderPrefix.length();
-		int withinNestedPlaceholder = 0;
-		while (index < buf.length()) {
-			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
-				if (withinNestedPlaceholder > 0) {
-					withinNestedPlaceholder--;
-					index = index + this.placeholderSuffix.length();
-				}
-				else {
-					return index;
-				}
+		protected Set<String> updateVisitedPlaceholders(Set<String> visitedPlaceholders, String placeholderWithoutBrackets) {
+			if (visitedPlaceholders == null) {
+				visitedPlaceholders = new HashSet<>(4);
 			}
-			else if (StringUtils.substringMatch(buf, index, this.simplePrefix)) {
-				withinNestedPlaceholder++;
-				index = index + this.simplePrefix.length();
+			if (!visitedPlaceholders.add(placeholderWithoutBrackets)) {
+				throw new IllegalArgumentException(
+						"Circular placeholder reference '" + placeholderWithoutBrackets + "' in property definitions");
 			}
-			else {
-				index++;
-			}
+			return visitedPlaceholders;
 		}
-		return -1;
-	}
 
-	private int findPlaceholderPrefixIndex(StringBuilder value, int startIndex) {
-		int prefixIndex = value.indexOf(this.placeholderPrefix, startIndex);
-		//check if prefix is not escaped
-		if (prefixIndex < 1) {
+		protected int findPlaceholderPrefixIndex(int startIndex) {
+			int prefixIndex = this.result.indexOf(placeholderPrefix, startIndex);
+			//check if prefix is not escaped
+			if (prefixIndex < 1) {
+				return prefixIndex;
+			}
+			if (this.result.charAt(prefixIndex - 1) == escapeCharacter) {
+				int endOfEscaped = findPlaceholderEndIndex(prefixIndex);
+				if (endOfEscaped == -1) {
+					return -1;
+				}
+				return findPlaceholderPrefixIndex(endOfEscaped + 1);
+			}
 			return prefixIndex;
 		}
-		if (value.charAt(prefixIndex - 1) == this.escapeCharacter) {
-			int endOfEscaped = findPlaceholderEndIndex(value, prefixIndex);
-			if (endOfEscaped == -1) {
-				return -1;
+
+		protected int findPlaceholderEndIndex(int startIndex) {
+			int index = startIndex + placeholderPrefix.length();
+			int withinNestedPlaceholder = 0;
+			while (index < this.result.length()) {
+				if (StringUtils.substringMatch(this.result, index, placeholderSuffix)) {
+					if (withinNestedPlaceholder > 0) {
+						withinNestedPlaceholder--;
+						index = index + placeholderSuffix.length();
+					}
+					else {
+						return index;
+					}
+				}
+				else if (StringUtils.substringMatch(this.result, index, simplePrefix)) {
+					withinNestedPlaceholder++;
+					index = index + simplePrefix.length();
+				}
+				else {
+					index++;
+				}
 			}
-			return findPlaceholderPrefixIndex(value, endOfEscaped + 1);
+			return -1;
 		}
-		return prefixIndex;
+
+		protected String getValue() {
+			String propVal = this.placeholderResolver.resolvePlaceholder(this.result.toString());
+			if (propVal == null && valueSeparator != null) {
+				int separatorIndex = this.result.indexOf(valueSeparator);
+				if (separatorIndex != -1) {
+					String actualPlaceholder = this.result.substring(0, separatorIndex);
+					String defaultValue = this.result.substring(separatorIndex + valueSeparator.length());
+					propVal = this.placeholderResolver.resolvePlaceholder(actualPlaceholder);
+					if (propVal == null) {
+						propVal = defaultValue;
+					}
+				}
+			}
+			return propVal;
+		}
+
+		protected String removeEscapeCharacters() {
+			int startIndex = this.result.indexOf(this.escapedPrefix);
+			while (startIndex != -1) {
+				int endIndex = findPlaceholderEndIndex(startIndex + 1);
+				if (endIndex != -1) {
+					this.result.replace(startIndex, startIndex + this.escapedPrefix.length(), placeholderPrefix);
+					startIndex = this.result.indexOf(this.escapedPrefix, endIndex + placeholderSuffix.length());
+				}
+				else {
+					break;
+				}
+			}
+			return this.result.toString();
+		}
 	}
 
 	/**
