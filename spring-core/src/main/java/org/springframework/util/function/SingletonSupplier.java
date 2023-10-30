@@ -49,7 +49,7 @@ public class SingletonSupplier<T> implements Supplier<T> {
 	private volatile T singletonInstance;
 
 	/**
-	 * Guards access to write operations on the response.
+	 * Guards access to write operations on the {@code singletonInstance} field.
 	 */
 	private final Lock writeLock = new ReentrantLock();
 

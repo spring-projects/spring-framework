@@ -240,7 +240,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 				ReactiveAdapterRegistry.getSharedInstance();
 
 
-		public static Object[] insertAsyncValidation(
+		static Object[] insertAsyncValidation(
 				Supplier<SpringValidatorAdapter> validatorAdapterSupplier, boolean adaptViolations,
 				Object target, Method method, Object[] arguments) {
 

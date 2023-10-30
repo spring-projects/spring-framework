@@ -287,7 +287,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("spring")).isEqualTo("framework");
 		});
 		assertHasMethodInvokeHints(PropertyValuesBean.class, "setTest", "setSpring");
-		assertHasDecalredFieldsHint(PropertyValuesBean.class);
+		assertHasDeclaredFieldsHint(PropertyValuesBean.class);
 	}
 
 	@Test
@@ -300,8 +300,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("spring")).isEqualTo("framework");
 		});
 		assertHasMethodInvokeHints(PropertyValuesBean.class, "setTest", "setSpring");
-		assertHasDecalredFieldsHint(ExtendedPropertyValuesBean.class);
-		assertHasDecalredFieldsHint(PropertyValuesBean.class);
+		assertHasDeclaredFieldsHint(ExtendedPropertyValuesBean.class);
+		assertHasDeclaredFieldsHint(PropertyValuesBean.class);
 	}
 
 	@Test
@@ -362,7 +362,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("name")).isEqualTo("World");
 		});
 		assertHasMethodInvokeHints(PropertyValuesFactoryBean.class, "setPrefix", "setName" );
-		assertHasDecalredFieldsHint(PropertyValuesFactoryBean.class);
+		assertHasDeclaredFieldsHint(PropertyValuesFactoryBean.class);
 	}
 
 	@Test
@@ -516,7 +516,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			.test(this.generationContext.getRuntimeHints()));
 	}
 
-	private void assertHasDecalredFieldsHint(Class<?> beanType) {
+	private void assertHasDeclaredFieldsHint(Class<?> beanType) {
 		assertThat(RuntimeHintsPredicates.reflection()
 				.onType(beanType).withMemberCategory(MemberCategory.DECLARED_FIELDS))
 				.accepts(this.generationContext.getRuntimeHints());

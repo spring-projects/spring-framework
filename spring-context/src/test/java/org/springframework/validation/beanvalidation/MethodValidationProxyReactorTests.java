@@ -36,9 +36,11 @@ import org.springframework.validation.method.ParameterErrors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for method validation proxy with reactor.
  *
+ * @author Rossen Stoyanchev
  */
-public class MethodValidationProxyReactorTests {
+class MethodValidationProxyReactorTests {
 
 	@Test
 	void validMonoArgument() {

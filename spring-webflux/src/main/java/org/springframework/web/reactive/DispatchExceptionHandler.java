@@ -30,7 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
  * from asynchronous return values, and to response rendering.
  * <li>Implemented by a {@link HandlerAdapter} in order to handle exceptions that
  * occur before a request is mapped to a handler, or for unhandled errors from a
- * handler..
+ * handler.
  * </ul>
  *
  * @author Rossen Stoyanchev

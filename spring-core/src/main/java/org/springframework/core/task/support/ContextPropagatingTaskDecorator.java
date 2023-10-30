@@ -22,7 +22,7 @@ import io.micrometer.context.ContextSnapshotFactory;
 import org.springframework.core.task.TaskDecorator;
 
 /**
- * {@link TaskDecorator} that {@link ContextSnapshot#wrap(Runnable) wrap the execution} of
+ * {@link TaskDecorator} that {@link ContextSnapshot#wrap(Runnable) wraps the execution} of
  * tasks, assisting with context propagation.
  * <p>This operation is only useful when the task execution is scheduled on a different
  * thread than the original call stack; this depends on the choice of

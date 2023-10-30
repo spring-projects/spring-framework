@@ -628,7 +628,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun context(provider: suspend (ServerRequest) -> CoroutineContext) {
 		if (this.contextProvider != null) {
-			throw IllegalStateException("The Coroutine context provider should be defined not more than once")
+			throw IllegalStateException("The Coroutine context provider should not be defined more than once")
 		}
 		this.contextProvider = provider
 	}

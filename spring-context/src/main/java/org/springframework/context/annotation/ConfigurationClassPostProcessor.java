@@ -511,7 +511,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
 							"' since its singleton instance has been created too early. The typical cause " +
 							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
-							"return type: Consider declaring such methods as 'static' and/or mark the " +
+							"return type: Consider declaring such methods as 'static' and/or marking the " +
 							"containing configuration class as 'proxyBeanMethods=false'.");
 				}
 				configBeanDefs.put(beanName, abd);

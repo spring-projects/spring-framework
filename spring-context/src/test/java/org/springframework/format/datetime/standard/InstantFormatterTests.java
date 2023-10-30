@@ -82,7 +82,7 @@ class InstantFormatterTests {
 
 	@ParameterizedTest
 	@ArgumentsSource(RandomEpochMillisProvider.class)
-	void should_parse_into_an_Instant_from_epoch_mili(Instant input) throws ParseException {
+	void should_parse_into_an_Instant_from_epoch_milli(Instant input) throws ParseException {
 		Instant expected = input;
 
 		Instant actual = instantFormatter.parse(Long.toString(input.toEpochMilli()), null);

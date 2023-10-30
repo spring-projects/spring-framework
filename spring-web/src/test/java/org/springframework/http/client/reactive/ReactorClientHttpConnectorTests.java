@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class ReactorClientHttpConnectorTests {
+class ReactorClientHttpConnectorTests {
 
 	@Test
 	void restartWithDefaultConstructor() {
