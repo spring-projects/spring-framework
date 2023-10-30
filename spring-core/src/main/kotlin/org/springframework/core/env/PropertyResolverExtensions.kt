@@ -43,6 +43,16 @@ inline fun <reified T> PropertyResolver.getProperty(key: String) : T? =
 		getProperty(key, T::class.java)
 
 /**
+ * Extension for [PropertyResolver.getProperty] providing a `getProperty<Foo>(...)`
+ * variant returning a non-nullable `Foo` with a default value.
+ *
+ * @author John Burns
+ * @since 6.1
+ */
+inline fun <reified T : Any> PropertyResolver.getProperty(key: String, default: T) : T =
+	getProperty(key, T::class.java, default)
+
+/**
  * Extension for [PropertyResolver.getRequiredProperty] providing a
  * `getRequiredProperty<Foo>(...)` variant.
  *

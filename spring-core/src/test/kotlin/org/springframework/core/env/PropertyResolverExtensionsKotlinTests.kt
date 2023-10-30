@@ -19,7 +19,7 @@ package org.springframework.core.env
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Disabled
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
  *
  * @author Sebastien Deleuze
  */
-@Disabled
 class PropertyResolverExtensionsKotlinTests {
 
 	val propertyResolver = mockk<PropertyResolver>()
@@ -44,6 +43,13 @@ class PropertyResolverExtensionsKotlinTests {
 		every { propertyResolver.getProperty("name", String::class.java) } returns "foo"
 		propertyResolver.getProperty<String>("name")
 		verify { propertyResolver.getProperty("name", String::class.java) }
+	}
+
+	@Test
+	fun `getProperty with default extension`() {
+		every { propertyResolver.getProperty("name", String::class.java, "default") } returns "default"
+		assertThat(propertyResolver.getProperty<String>("name", "default")).isEqualTo("default")
+		verify { propertyResolver.getProperty("name", String::class.java, "default") }
 	}
 
 	@Test
