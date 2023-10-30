@@ -199,7 +199,7 @@ include-code::./UserController[]
 
 NOTE: Because the instrumentation is done at the Servlet Filter level, the observation scope only covers the filters ordered after this one as well as the handling of the request.
 Typically, Servlet container error handling is performed at a lower level and won't have any active observation or span.
-For this use case, a container-specific implementation is required, such as a `org.apache.catalina.Valve` for Tomcat; this is outside of the scope of this project.
+For this use case, a container-specific implementation is required, such as a `org.apache.catalina.Valve` for Tomcat; this is outside the scope of this project.
 
 By default, the following `KeyValues` are created:
 
@@ -354,18 +354,18 @@ Instrumentation uses the `org.springframework.web.reactive.function.client.Clien
 
 Spring Framework does not contribute Observations for xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[`@EventListener` calls],
 as they don't have the right semantics for such instrumentation.
-By default, event publication and processing is done synchronously and on the same Thread.
+By default, event publication and processing are done synchronously and on the same thread.
 This means that during the execution of that task, the ThreadLocals and logging context will be the same as the event publisher.
 
-If the application configures globally a custom `ApplicationEventMulticaster` with a strategy that schedules event processing on different threads, this is no longer true.
-All `@EventListener` methods will be processed on a different thread, outside of the main event publication thread.
-In these cases, the https://micrometer.io/docs/contextPropagation[Micrometer Context Propagation library] can help propagating such values and better correlate the processing of the events.
+If the application globally configures a custom `ApplicationEventMulticaster` with a strategy that schedules event processing on different threads, this is no longer true.
+All `@EventListener` methods will be processed on a different thread, outside the main event publication thread.
+In these cases, the https://micrometer.io/docs/contextPropagation[Micrometer Context Propagation library] can help propagate such values and better correlate the processing of the events.
 The application can configure the chosen `TaskExecutor` to use a `ContextPropagatingTaskDecorator` that decorates tasks and propagates context.
 For this to work, the `io.micrometer:context-propagation` library must be present on the classpath:
 
 include-code::./ApplicationEventsConfiguration[]
 
-Similarly, if that asynchronous choice is made locally for each `@EventListener` annotated method, by adding an `@Async` to it,
+Similarly, if that asynchronous choice is made locally for each `@EventListener` annotated method, by adding `@Async` to it,
 you can choose a `TaskExecutor` that propagates context by referring to it by its qualifier.
 Given the following `TaskExecutor` bean definition, configured with the dedicated task decorator:
 
