@@ -1049,7 +1049,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		private static boolean taskExecutorWarning = true;
 
-		public MvcSimpleAsyncTaskExecutor() {
+		MvcSimpleAsyncTaskExecutor() {
 			super("MvcAsync");
 		}
 

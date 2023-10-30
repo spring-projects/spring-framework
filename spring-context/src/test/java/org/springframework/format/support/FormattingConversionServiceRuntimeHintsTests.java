@@ -44,7 +44,7 @@ class FormattingConversionServiceRuntimeHintsTests {
 	}
 
 	@Test
-	void montearyAmountHasHints() {
+	void monetaryAmountHasHints() {
 		assertThat(RuntimeHintsPredicates.reflection().onType(javax.money.MonetaryAmount.class)).accepts(this.hints);
 	}
 

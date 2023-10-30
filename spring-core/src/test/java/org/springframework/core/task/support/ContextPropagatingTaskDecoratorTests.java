@@ -52,15 +52,15 @@ class ContextPropagatingTaskDecoratorTests {
 
 		private static final ThreadLocal<String> holder = new ThreadLocal<>();
 
-		public static void setValue(String value) {
+		static void setValue(String value) {
 			holder.set(value);
 		}
 
-		public static String getValue() {
+		static String getValue() {
 			return holder.get();
 		}
 
-		public static void reset() {
+		static void reset() {
 			holder.remove();
 		}
 
@@ -68,7 +68,7 @@ class ContextPropagatingTaskDecoratorTests {
 
 	static class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
-		public static final String KEY = "test.threadlocal";
+		static final String KEY = "test.threadlocal";
 
 		@Override
 		public Object key() {

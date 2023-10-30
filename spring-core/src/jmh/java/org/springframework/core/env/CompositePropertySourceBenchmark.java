@@ -62,7 +62,7 @@ public class CompositePropertySourceBenchmark {
 		CompositePropertySource composite;
 
 		@Param({ "2", "5", "10" })
-		int numberOfPropertySource;
+		int numberOfPropertySources;
 
 		@Param({ "10", "100", "1000" })
 		int numberOfPropertyNamesPerSource;
@@ -70,7 +70,7 @@ public class CompositePropertySourceBenchmark {
 		@Setup(Level.Trial)
 		public void setUp() {
 			this.composite = new CompositePropertySource("benchmark");
-			for (int i = 0; i < this.numberOfPropertySource; i++) {
+			for (int i = 0; i < this.numberOfPropertySources; i++) {
 				Map<String, Object> map = new HashMap<>(this.numberOfPropertyNamesPerSource);
 				for (int j = 0; j < this.numberOfPropertyNamesPerSource; j++) {
 					map.put(ID_GENERATOR.generateId().toString(), VALUE);

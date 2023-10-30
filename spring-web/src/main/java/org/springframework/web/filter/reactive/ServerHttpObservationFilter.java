@@ -115,7 +115,7 @@ public class ServerHttpObservationFilter implements WebFilter {
 
 		private final AtomicBoolean observationRecorded = new AtomicBoolean();
 
-		public ObservationSignalListener(ServerRequestObservationContext observationContext) {
+		ObservationSignalListener(ServerRequestObservationContext observationContext) {
 			this.observationContext = observationContext;
 			this.observation = ServerHttpObservationDocumentation.HTTP_REACTIVE_SERVER_REQUESTS.observation(observationConvention,
 					DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);

@@ -248,7 +248,7 @@ For example, declaring `List<Foo>` in Kotlin is conceptually equivalent to `java
 `kotlin.collections.List` is declared as
 https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/[`interface List<out E> : kotlin.collections.Collection<E>`].
 
-This needs to be taken in account by using the `out` Kotlin keyword on generic types when using Java classes,
+This needs to be taken into account by using the `out` Kotlin keyword on generic types when using Java classes,
 for example when writing a `org.springframework.core.convert.converter.Converter` from a Kotlin type to a Java type.
 
 [source,kotlin,indent=0]

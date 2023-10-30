@@ -716,7 +716,7 @@ public class DefaultPersistenceUnitManager
 	 */
 	private static class BeanValidationDelegate {
 
-		public static boolean isValidationProviderPresent() {
+		static boolean isValidationProviderPresent() {
 			try {
 				Validation.byDefaultProvider().configure();
 				return true;
