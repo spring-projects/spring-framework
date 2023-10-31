@@ -829,7 +829,7 @@ public abstract class DataBufferUtils {
 	 */
 	private static class SingleByteMatcher implements NestedMatcher {
 
-		static SingleByteMatcher NEWLINE_MATCHER = new SingleByteMatcher(new byte[] {10});
+		static final SingleByteMatcher NEWLINE_MATCHER = new SingleByteMatcher(new byte[] {10});
 
 		private final byte[] delimiter;
 

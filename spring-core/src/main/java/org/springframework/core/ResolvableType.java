@@ -758,7 +758,7 @@ public class ResolvableType implements Serializable {
 	 * Convenience method that will {@link #getGenerics() get} and
 	 * {@link #resolve() resolve} generic parameters.
 	 * @return an array of resolved generic parameters (the resulting array
-	 * will never be {@code null}, but it may contain {@code null} elements})
+	 * will never be {@code null}, but it may contain {@code null} elements)
 	 * @see #getGenerics()
 	 * @see #resolve()
 	 */

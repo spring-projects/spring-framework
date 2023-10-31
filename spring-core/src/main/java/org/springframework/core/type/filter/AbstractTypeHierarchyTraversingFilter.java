@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				// Optimization to avoid creating ClassReader for superclass.
 				Boolean superClassMatch = matchSuperClass(superClassName);
 				if (superClassMatch != null) {
-					if (superClassMatch.booleanValue()) {
+					if (superClassMatch) {
 						return true;
 					}
 				}
@@ -99,7 +99,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				// Optimization to avoid creating ClassReader for superclass
 				Boolean interfaceMatch = matchInterface(ifc);
 				if (interfaceMatch != null) {
-					if (interfaceMatch.booleanValue()) {
+					if (interfaceMatch) {
 						return true;
 					}
 				}

@@ -130,7 +130,7 @@ public final class ReactiveTypeDescriptor {
 
 
 	/**
-	 * Descriptor for a reactive type that can produce 0..N values.
+	 * Descriptor for a reactive type that can produce {@code 0..N} values.
 	 * @param type the reactive type
 	 * @param emptySupplier a supplier of an empty-value instance of the reactive type
 	 */

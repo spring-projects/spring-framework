@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  *
  * <p><b>NOTE:</b> This ExecutorService adapter does <em>not</em> support the
  * lifecycle methods in the {@code java.util.concurrent.ExecutorService} API
- * ("shutdown()" etc), similar to a server-wide {@code ManagedExecutorService}
+ * ("shutdown()" etc.), similar to a server-wide {@code ManagedExecutorService}
  * in a Jakarta EE environment. The lifecycle is always up to the backend pool,
  * with this adapter acting as an access-only proxy for that target pool.
  *

@@ -25,9 +25,8 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract base class for {@link PropertySource} implementations backed by command line
  * arguments. The parameterized type {@code T} represents the underlying source of command
- * line options. This may be as simple as a String array in the case of
- * {@link SimpleCommandLinePropertySource}, or specific to a particular API such as JOpt's
- * {@code OptionSet} in the case of {@link JOptCommandLinePropertySource}.
+ * line options. For instance, {@link SimpleCommandLinePropertySource} uses  a String
+ * array.
  *
  * <h3>Purpose and General Usage</h3>
  *
@@ -203,7 +202,6 @@ import org.springframework.util.StringUtils;
  * @param <T> the source type
  * @see PropertySource
  * @see SimpleCommandLinePropertySource
- * @see JOptCommandLinePropertySource
  */
 public abstract class CommandLinePropertySource<T> extends EnumerablePropertySource<T> {
 
