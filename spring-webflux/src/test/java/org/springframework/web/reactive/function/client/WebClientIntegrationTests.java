@@ -644,14 +644,14 @@ class WebClientIntegrationTests {
 
 		int errorStatus = 555;
 		assertThat(HttpStatus.resolve(errorStatus)).isNull();
-		String errorMessage = "Something went wrong";
-		prepareResponse(response -> response.setResponseCode(errorStatus)
-				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
 
-		Mono<String> result = this.webClient.get()
-				.uri("/unknownPage")
-				.retrieve()
-				.bodyToMono(String.class);
+		String errorMessage = "Something went wrong";
+		prepareResponse(response ->
+				response.setResponseCode(errorStatus)
+						.setHeader("Content-Type", "text/plain")
+						.setBody(errorMessage));
+
+		Mono<String> result = this.webClient.get().uri("/unknownPage").retrieve().bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectErrorSatisfies(throwable -> {
@@ -672,20 +672,20 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
-	void retrieve929CustomUnknownStatus(ClientHttpConnector connector) {
+	@ParameterizedWebClientTest // gh-31202
+	void retrieve929UnknownStatusCode(ClientHttpConnector connector) {
 		startServer(connector);
 
 		int errorStatus = 929;
 		assertThat(HttpStatus.resolve(errorStatus)).isNull();
-		String errorMessage = "Something went wrong";
-		prepareResponse(response -> response.setResponseCode(errorStatus)
-				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
 
-		Mono<String> result = this.webClient.get()
-				.uri("/unknownPage")
-				.retrieve()
-				.bodyToMono(String.class);
+		String errorMessage = "Something went wrong";
+		prepareResponse(response ->
+				response.setResponseCode(errorStatus)
+						.setHeader("Content-Type", "text/plain")
+						.setBody(errorMessage));
+
+		Mono<String> result = this.webClient.get().uri("/unknownPage").retrieve().bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectErrorSatisfies(throwable -> {

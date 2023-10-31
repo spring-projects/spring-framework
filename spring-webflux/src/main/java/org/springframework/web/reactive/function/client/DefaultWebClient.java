@@ -515,12 +515,9 @@ final class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private static final Predicate<HttpStatusCode> STATUS_CODE_ERROR = HttpStatusCode::isError;
-		private static final Predicate<HttpStatusCode> STATUS_CODE_UNKNOWN = status -> !status.isWellKnown();
-		private static final StatusHandler DEFAULT_ERROR_STATUS_HANDLER =
-				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
-		private static final StatusHandler DEFAULT_UNKNOWN_STATUS_HANDLER =
-				new StatusHandler(STATUS_CODE_UNKNOWN, ClientResponse::createException);
+		private static final StatusHandler DEFAULT_STATUS_HANDLER =
+				new StatusHandler(code -> code.value() >= 400, ClientResponse::createException);
+
 
 		private final HttpMethod httpMethod;
 
@@ -539,8 +536,7 @@ final class DefaultWebClient implements WebClient {
 			this.uri = uri;
 			this.responseMono = responseMono;
 			this.statusHandlers.addAll(defaultStatusHandlers);
-			this.statusHandlers.add(DEFAULT_ERROR_STATUS_HANDLER);
-			this.statusHandlers.add(DEFAULT_UNKNOWN_STATUS_HANDLER);
+			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 			this.defaultStatusHandlerCount = this.statusHandlers.size();
 		}
 
