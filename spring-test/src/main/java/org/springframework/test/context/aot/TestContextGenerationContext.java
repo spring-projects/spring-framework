@@ -63,7 +63,7 @@ class TestContextGenerationContext extends DefaultGenerationContext {
 	 * Create a new {@link TestContextGenerationContext} instance using the specified
 	 * feature name to qualify generated assets for a dedicated round of code generation.
 	 * <p>If <em>this</em> {@code TestContextGenerationContext} has a configured feature
-	 * name, the existing feature name will prepended to the supplied feature name in
+	 * name, the existing feature name will be prepended to the supplied feature name in
 	 * order to avoid naming collisions.
 	 * @param featureName the feature name to use
 	 * @return a specialized {@link TestContextGenerationContext} for the specified

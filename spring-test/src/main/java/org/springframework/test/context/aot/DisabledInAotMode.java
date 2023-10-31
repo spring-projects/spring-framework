@@ -32,7 +32,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
  * <p>If a test class is annotated with {@code @DisabledInAotMode}, all other test
  * classes which specify configuration to load the same {@code ApplicationContext}
  * must also be annotated with {@code @DisabledInAotMode}. Failure to annotate
- * all such test classes will result in a exception, either at build time or
+ * all such test classes will result in an exception, either at build time or
  * run time.
  *
  * <p>When used with JUnit Jupiter based tests, {@code @DisabledInAotMode} also

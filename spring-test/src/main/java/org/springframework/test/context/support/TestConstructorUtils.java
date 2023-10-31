@@ -163,7 +163,7 @@ public abstract class TestConstructorUtils {
 			return true;
 		}
 
-		AutowireMode autowireMode = null;
+		AutowireMode autowireMode;
 
 		// Is the test class annotated with @TestConstructor?
 		TestConstructor testConstructor = TestContextAnnotationUtils.findMergedAnnotation(testClass, TestConstructor.class);

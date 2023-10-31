@@ -64,7 +64,6 @@ class MergedContextConfigurationRuntimeHints {
 	private final Log logger = LogFactory.getLog(getClass());
 
 
-	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig, ClassLoader classLoader) {
 		// @ContextConfiguration(loader = ...)
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
@@ -92,7 +91,7 @@ class MergedContextConfigurationRuntimeHints {
 
 		// @WebAppConfiguration(value = ...)
 		if (webMergedContextConfigurationClass.isInstance(mergedConfig)) {
-			String resourceBasePath = null;
+			String resourceBasePath;
 			try {
 				resourceBasePath = (String) getResourceBasePathMethod.invoke(mergedConfig);
 			}
@@ -150,7 +149,6 @@ class MergedContextConfigurationRuntimeHints {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Class<?> loadWebMergedContextConfigurationClass() {
 		try {
 			return ClassUtils.forName(WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME,

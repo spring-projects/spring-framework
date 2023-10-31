@@ -79,7 +79,7 @@ public @interface TestConstructor {
 
 	/**
 	 * JVM system property used to change the default <em>test constructor
-	 * autowire mode</em>: {@value #TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME}.
+	 * autowire mode</em>: {@value}.
 	 * <p>Acceptable values include enum constants defined in {@link AutowireMode},
 	 * ignoring case. For example, the default may be changed to {@link AutowireMode#ALL}
 	 * by supplying the following JVM system property via the command line.

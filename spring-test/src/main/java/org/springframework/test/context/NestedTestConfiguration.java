@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public @interface NestedTestConfiguration {
 
 	/**
 	 * JVM system property used to change the default <em>enclosing configuration
-	 * inheritance mode</em>: {@value #ENCLOSING_CONFIGURATION_PROPERTY_NAME}.
+	 * inheritance mode</em>: {@value}.
 	 * <p>Supported values include enum constants defined in
 	 * {@link EnclosingConfiguration}, ignoring case. For example, the default
 	 * may be changed to {@link EnclosingConfiguration#OVERRIDE} by supplying

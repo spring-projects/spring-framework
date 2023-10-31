@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class DefaultActiveProfilesResolver implements ActiveProfilesResolver {
 	 * {@link ActiveProfiles#profiles} or {@link ActiveProfiles#value}.
 	 * @param testClass the test class for which the profiles should be resolved;
 	 * never {@code null}
-	 * @return the list of bean definition profiles to use when loading the
+	 * @return the bean definition profiles to use when loading the
 	 * {@code ApplicationContext}; never {@code null}
 	 */
 	@Override

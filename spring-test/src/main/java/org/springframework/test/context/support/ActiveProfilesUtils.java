@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ abstract class ActiveProfilesUtils {
 	 * and enclosing classes.
 	 * @param testClass the class for which to resolve the active profiles (must not be
 	 * {@code null})
-	 * @return the set of active profiles for the specified class, including active
+	 * @return the active profiles for the specified class, including active
 	 * profiles from superclasses and enclosing classes if appropriate (never {@code null})
 	 * @see ActiveProfiles
 	 * @see ActiveProfilesResolver

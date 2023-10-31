@@ -47,7 +47,7 @@ public interface MethodInvoker {
 	 * Shared instance of the default {@link MethodInvoker}.
 	 * <p>This invoker never provides arguments to a {@link Method}.
 	 */
-	static final MethodInvoker DEFAULT_INVOKER = new DefaultMethodInvoker();
+	MethodInvoker DEFAULT_INVOKER = new DefaultMethodInvoker();
 
 
 	/**

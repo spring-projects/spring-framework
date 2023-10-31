@@ -75,7 +75,7 @@ public class ContextConfigurationAttributes {
 	 * either explicitly or implicitly
 	 * @since 4.3
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ContextConfigurationAttributes(Class<?> declaringClass) {
 		this(declaringClass, EMPTY_LOCATIONS, EMPTY_CLASSES, false, (Class[]) EMPTY_CLASSES, true, ContextLoader.class);
 	}

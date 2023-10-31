@@ -79,7 +79,7 @@ public abstract class TestPropertySourceUtils {
 
 	private static final PropertySourceFactory defaultPropertySourceFactory = new DefaultPropertySourceFactory();
 
-	private static Comparator<MergedAnnotation<? extends Annotation>> reversedMetaDistance =
+	private static final Comparator<MergedAnnotation<? extends Annotation>> reversedMetaDistance =
 			Comparator.<MergedAnnotation<? extends Annotation>> comparingInt(MergedAnnotation::getDistance).reversed();
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);

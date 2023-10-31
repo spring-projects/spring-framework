@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,10 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 	 * @param loadContextExtractor a function that extracts the {@code loadContext}
 	 * flag from the annotation
 	 * @param enabledOnTrue indicates whether the returned {@code ConditionEvaluationResult}
-	 * should be {@link ConditionEvaluationResult#enabled enabled} if the expression
+	 * should be {@link ConditionEvaluationResult#enabled(String)}  enabled} if the expression
 	 * evaluates to {@code true}
 	 * @param context the {@code ExtensionContext}
-	 * @return {@link ConditionEvaluationResult#enabled enabled} if the container
+	 * @return {@link ConditionEvaluationResult#enabled(String)}  enabled} if the container
 	 * or test should be enabled; otherwise {@link ConditionEvaluationResult#disabled disabled}
 	 */
 	protected <A extends Annotation> ConditionEvaluationResult evaluateAnnotation(Class<A> annotationType,

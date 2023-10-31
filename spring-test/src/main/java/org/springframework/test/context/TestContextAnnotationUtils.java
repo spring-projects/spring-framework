@@ -248,7 +248,7 @@ public abstract class TestContextAnnotationUtils {
 			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
-		AnnotationDescriptor<T> descriptor = null;
+		AnnotationDescriptor<T> descriptor;
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {

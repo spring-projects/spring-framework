@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public abstract class BootstrapUtils {
 	static BootstrapContext createBootstrapContext(Class<?> testClass) {
 		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = createCacheAwareContextLoaderDelegate();
 		String className = DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME;
-		Class<? extends BootstrapContext> clazz = null;
+		Class<? extends BootstrapContext> clazz;
 		try {
 			clazz = (Class<? extends BootstrapContext>)
 					ClassUtils.forName(className, BootstrapUtils.class.getClassLoader());
@@ -93,7 +93,7 @@ public abstract class BootstrapUtils {
 	@SuppressWarnings("unchecked")
 	private static CacheAwareContextLoaderDelegate createCacheAwareContextLoaderDelegate() {
 		String className = DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME;
-		Class<? extends CacheAwareContextLoaderDelegate> clazz = null;
+		Class<? extends CacheAwareContextLoaderDelegate> clazz;
 		try {
 			clazz = (Class<? extends CacheAwareContextLoaderDelegate>)
 					ClassUtils.forName(className, BootstrapUtils.class.getClassLoader());

@@ -73,7 +73,6 @@ class TestPropertySourceAttributes {
 	private final boolean inheritProperties;
 
 
-	@SuppressWarnings("unchecked")
 	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> mergedAnnotation) {
 		this.declaringClass = declaringClass(mergedAnnotation);
 		this.rootAnnotation = mergedAnnotation.getRoot();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
 	 * @see org.springframework.test.context.aot.AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
 	 */
-	private final GenericWebApplicationContext loadContext(
+	private GenericWebApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean forAotProcessing) throws Exception {
 
 		if (!(mergedConfig instanceof WebMergedContextConfiguration webMergedConfig)) {
