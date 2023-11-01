@@ -153,13 +153,11 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		if (messageType != null) {
-			switch (messageType) {
-				case SUBSCRIBE:
-				case UNSUBSCRIBE:
-					return parseSubscriptionMessage(message, sourceDestination);
-				case MESSAGE:
-					return parseMessage(headers, sourceDestination);
-			}
+			return switch (messageType) {
+				case SUBSCRIBE, UNSUBSCRIBE -> parseSubscriptionMessage(message, sourceDestination);
+				case MESSAGE -> parseMessage(headers, sourceDestination);
+				default -> null;
+			};
 		}
 		return null;
 	}

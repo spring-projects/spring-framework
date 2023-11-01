@@ -257,12 +257,14 @@ public class TransactionAwareConnectionFactoryProxy
 			// Invocation on ConnectionProxy interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of Connection proxy.
 					return System.identityHashCode(proxy);
+				}
 			}
 
 			if (Session.class == method.getReturnType()) {
@@ -329,32 +331,29 @@ public class TransactionAwareConnectionFactoryProxy
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on SessionProxy interface coming in...
 
-			switch (method.getName()) {
-				case "equals":
+			return switch (method.getName()) {
+				case "equals" -> (proxy == args[0]);
 					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
-				case "hashCode":
+				case "hashCode" -> System.identityHashCode(proxy);
 					// Use hashCode of Connection proxy.
-					return System.identityHashCode(proxy);
-				case "commit":
+				case "commit" ->
 					throw new TransactionInProgressException("Commit call not allowed within a managed transaction");
-				case "rollback":
+				case "rollback" ->
 					throw new TransactionInProgressException("Rollback call not allowed within a managed transaction");
-				case "close":
+				case "close" -> null;
 					// Handle close method: not to be closed within a transaction.
-					return null;
-				case "getTargetSession":
+				case "getTargetSession" -> this.target;
 					// Handle getTargetSession method: return underlying Session.
-					return this.target;
-			}
-
-			// Invoke method on target Session.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+				default -> {
+					// Invoke method on target Session.
+					try {
+						yield method.invoke(this.target, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 	}
 

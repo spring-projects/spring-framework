@@ -302,28 +302,31 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 			// Invocation on ConnectionProxy interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// We must avoid fetching a target Connection for "equals".
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// We must avoid fetching a target Connection for "hashCode",
 					// and we must return the same hash code even when the target
 					// Connection has been fetched: use hashCode of Connection proxy.
 					return System.identityHashCode(proxy);
-				case "getTargetConnection":
+				}
+				case "getTargetConnection" -> {
 					// Handle getTargetConnection method: return underlying connection.
 					return getTargetConnection(method);
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					if (((Class<?>) args[0]).isInstance(proxy)) {
 						return proxy;
 					}
-					break;
-				case "isWrapperFor":
+				}
+				case "isWrapperFor" -> {
 					if (((Class<?>) args[0]).isInstance(proxy)) {
 						return true;
 					}
-					break;
+				}
 			}
 
 			if (!hasTargetConnection()) {
@@ -332,58 +335,68 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// a physical JDBC Connection until absolutely necessary.
 
 				switch (method.getName()) {
-					case "toString":
+					case "toString" -> {
 						return "Lazy Connection proxy for target DataSource [" + getTargetDataSource() + "]";
-					case "getAutoCommit":
+					}
+					case "getAutoCommit" -> {
 						if (this.autoCommit != null) {
 							return this.autoCommit;
 						}
 						// Else fetch actual Connection and check there,
 						// because we didn't have a default specified.
-						break;
-					case "setAutoCommit":
+					}
+					case "setAutoCommit" -> {
 						this.autoCommit = (Boolean) args[0];
 						return null;
-					case "getTransactionIsolation":
+					}
+					case "getTransactionIsolation" -> {
 						if (this.transactionIsolation != null) {
 							return this.transactionIsolation;
 						}
 						// Else fetch actual Connection and check there,
 						// because we didn't have a default specified.
-						break;
-					case "setTransactionIsolation":
+					}
+					case "setTransactionIsolation" -> {
 						this.transactionIsolation = (Integer) args[0];
 						return null;
-					case "isReadOnly":
+					}
+					case "isReadOnly" -> {
 						return this.readOnly;
-					case "setReadOnly":
+					}
+					case "setReadOnly" -> {
 						this.readOnly = (Boolean) args[0];
 						return null;
-					case "getHoldability":
+					}
+					case "getHoldability" -> {
 						return this.holdability;
-					case "setHoldability":
+					}
+					case "setHoldability" -> {
 						this.holdability = (Integer) args[0];
 						return null;
-					case "commit":
-					case "rollback":
+					}
+					case "commit", "rollback" -> {
 						// Ignore: no statements created yet.
 						return null;
-					case "getWarnings":
-					case "clearWarnings":
+					}
+					case "getWarnings", "clearWarnings" -> {
 						// Ignore: no warnings to expose yet.
 						return null;
-					case "close":
+					}
+					case "close" -> {
 						// Ignore: no target connection yet.
 						this.closed = true;
 						return null;
-					case "isClosed":
+					}
+					case "isClosed" -> {
 						return this.closed;
-					default:
+					}
+					default -> {
 						if (this.closed) {
 							// Connection proxy closed, without ever having fetched a
 							// physical JDBC Connection: throw corresponding SQLException.
 							throw new SQLException("Illegal operation: connection is closed");
 						}
+					}
 				}
 			}
 

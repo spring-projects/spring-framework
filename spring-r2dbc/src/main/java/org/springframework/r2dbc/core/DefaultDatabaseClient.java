@@ -519,27 +519,24 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			switch (method.getName()) {
-				case "equals":
+			return switch (method.getName()) {
+				case "equals" -> proxy == args[0];
 					// Only consider equal when proxies are identical.
-					return proxy == args[0];
-				case "hashCode":
+				case "hashCode" -> System.identityHashCode(proxy);
 					// Use hashCode of PersistenceManager proxy.
-					return System.identityHashCode(proxy);
-				case "unwrap":
-					return this.target;
-				case "close":
+				case "unwrap" -> this.target;
+				case "close" -> Mono.error(new UnsupportedOperationException("Close is not supported!"));
 					// Handle close method: suppress, not valid.
-					return Mono.error(new UnsupportedOperationException("Close is not supported!"));
-			}
-
-			// Invoke method on target Connection.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+				default -> {
+					// Invoke method on target Connection.
+					try {
+						yield method.invoke(this.target, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 	}
 

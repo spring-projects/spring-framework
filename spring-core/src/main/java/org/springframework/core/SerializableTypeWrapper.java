@@ -186,17 +186,20 @@ final class SerializableTypeWrapper {
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					Object other = args[0];
 					// Unwrap proxies for speed
 					if (other instanceof Type otherType) {
 						other = unwrap(otherType);
 					}
 					return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					return ObjectUtils.nullSafeHashCode(this.provider.getType());
-				case "getTypeProvider":
+				}
+				case "getTypeProvider" -> {
 					return this.provider;
+				}
 			}
 
 			if (Type.class == method.getReturnType() && ObjectUtils.isEmpty(args)) {

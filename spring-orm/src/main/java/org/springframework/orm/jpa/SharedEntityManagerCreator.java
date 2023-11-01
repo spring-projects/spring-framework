@@ -220,20 +220,23 @@ public abstract class SharedEntityManagerCreator {
 			// Invocation on EntityManager interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of EntityManager proxy.
 					return hashCode();
-				case "toString":
+				}
+				case "toString" -> {
 					// Deliver toString without touching a target EntityManager.
 					return "Shared EntityManager proxy for target factory [" + this.targetFactory + "]";
-				case "getEntityManagerFactory":
+				}
+				case "getEntityManagerFactory" -> {
 					// JPA 2.0: return EntityManagerFactory without creating an EntityManager.
 					return this.targetFactory;
-				case "getCriteriaBuilder":
-				case "getMetamodel":
+				}
+				case "getCriteriaBuilder", "getMetamodel" -> {
 					// JPA 2.0: return EntityManagerFactory's CriteriaBuilder/Metamodel (avoid creation of EntityManager)
 					try {
 						return EntityManagerFactory.class.getMethod(method.getName()).invoke(this.targetFactory);
@@ -241,23 +244,27 @@ public abstract class SharedEntityManagerCreator {
 					catch (InvocationTargetException ex) {
 						throw ex.getTargetException();
 					}
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					// JPA 2.0: handle unwrap method - could be a proxy match.
 					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass != null && targetClass.isInstance(proxy)) {
 						return proxy;
 					}
-					break;
-				case "isOpen":
+				}
+				case "isOpen" -> {
 					// Handle isOpen method: always return true.
 					return true;
-				case "close":
+				}
+				case "close" -> {
 					// Handle close method: suppress, not valid.
 					return null;
-				case "getTransaction":
+				}
+				case "getTransaction" -> {
 					throw new IllegalStateException(
 							"Not allowed to create transaction on shared EntityManager - " +
-							"use Spring transactions or EJB CMT instead");
+									"use Spring transactions or EJB CMT instead");
+				}
 			}
 
 			// Determine current EntityManager: either the transactional one
@@ -369,13 +376,15 @@ public abstract class SharedEntityManagerCreator {
 			// Invocation on Query interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of EntityManager proxy.
 					return hashCode();
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					// Handle JPA 2.0 unwrap method - could be a proxy match.
 					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass == null) {
@@ -384,8 +393,8 @@ public abstract class SharedEntityManagerCreator {
 					else if (targetClass.isInstance(proxy)) {
 						return proxy;
 					}
-					break;
-				case "getOutputParameterValue":
+				}
+				case "getOutputParameterValue" -> {
 					if (this.entityManager == null) {
 						Object key = args[0];
 						if (this.outputParameters == null || !this.outputParameters.containsKey(key)) {
@@ -397,7 +406,7 @@ public abstract class SharedEntityManagerCreator {
 						}
 						return value;
 					}
-					break;
+				}
 			}
 
 			// Invoke method on actual Query object.

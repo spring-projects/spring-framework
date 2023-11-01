@@ -176,13 +176,15 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 			// Invocation on ConnectionProxy interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only considered as equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of Connection proxy.
 					return System.identityHashCode(proxy);
-				case "toString":
+				}
+				case "toString" -> {
 					// Allow for differentiating between the proxy and the raw Connection.
 					StringBuilder sb = new StringBuilder("Transaction-aware proxy for target Connection ");
 					if (this.target != null) {
@@ -192,23 +194,26 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 						sb.append(" from DataSource [").append(this.targetDataSource).append(']');
 					}
 					return sb.toString();
-				case "close":
+				}
+				case "close" -> {
 					// Handle close method: only close if not within a transaction.
 					DataSourceUtils.doReleaseConnection(this.target, this.targetDataSource);
 					this.closed = true;
 					return null;
-				case "isClosed":
+				}
+				case "isClosed" -> {
 					return this.closed;
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					if (((Class<?>) args[0]).isInstance(proxy)) {
 						return proxy;
 					}
-					break;
-				case "isWrapperFor":
+				}
+				case "isWrapperFor" -> {
 					if (((Class<?>) args[0]).isInstance(proxy)) {
 						return true;
 					}
-					break;
+				}
 			}
 
 			if (this.target == null) {
