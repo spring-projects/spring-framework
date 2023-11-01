@@ -97,11 +97,7 @@ preparation and response extraction through callback interfaces.
 
 The default constructor uses `java.net.HttpURLConnection` to perform requests. You can
 switch to a different HTTP library with an implementation of `ClientHttpRequestFactory`.
-There is built-in support for the following:
-
-* Apache HttpComponents
-* Netty
-* OkHttp
+Currently, there is also built-in support for Apache HttpComponents and OkHttp.
 
 For example, to switch to Apache HttpComponents, you can use the following:
 
