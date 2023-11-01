@@ -32,11 +32,10 @@ import org.springframework.validation.ObjectError;
  * {@link Errors#getAllErrors()}, but this subclass provides access to the same
  * as {@link FieldError}s.
  *
- * <p>When the method parameter is a {@link List} or {@link java.util.Map},
- * a separate {@link ParameterErrors} is created for each list or map value for
- * which there are validation errors. In such cases, the {@link #getContainer()}
- * method returns the list or map, while {@link #getContainerIndex()}
- * and {@link #getContainerKey()} return the value index or key.
+ * <p>When the method parameter is a multi-element container like {@link List} or
+ * {@link java.util.Map}, a separate {@link ParameterErrors} is created for each
+ * value for which there are validation errors. Otherwise, only a single
+ * {@link ParameterErrors} will be created.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -71,11 +70,12 @@ public class ParameterErrors extends ParameterValidationResult implements Errors
 
 
 	/**
-	 * When {@code @Valid} is declared on a {@link List} or {@link java.util.Map}
-	 * method parameter, this method returns the list or map that contained the
-	 * validated object {@link #getArgument() argument}, while
-	 * {@link #getContainerIndex()} and {@link #getContainerKey()} returns the
-	 * respective index or key.
+	 * When {@code @Valid} is declared on a container type method parameter such as
+	 * {@link java.util.Collection}, {@link java.util.Optional} or {@link java.util.Map},
+	 * this method returns the parent that contained the validated object
+	 * {@link #getArgument() argument}, while {@link #getContainerIndex()} and
+	 * {@link #getContainerKey()} returns the respective index or key if the parameter's
+	 * datatype supports such access.
 	 */
 	@Nullable
 	public Object getContainer() {
@@ -83,9 +83,10 @@ public class ParameterErrors extends ParameterValidationResult implements Errors
 	}
 
 	/**
-	 * When {@code @Valid} is declared on a {@link List}, this method returns
-	 * the index under which the validated object {@link #getArgument() argument}
-	 * is stored in the list {@link #getContainer() container}.
+	 * When {@code @Valid} is declared on an indexed type, such as {@link List},
+	 * this method returns the index under which the validated object
+	 * {@link #getArgument() argument} is stored in the list
+	 * {@link #getContainer() container}.
 	 */
 	@Nullable
 	public Integer getContainerIndex() {
@@ -93,8 +94,8 @@ public class ParameterErrors extends ParameterValidationResult implements Errors
 	}
 
 	/**
-	 * When {@code @Valid} is declared on a {@link java.util.Map}, this method
-	 * returns the key under which the validated object {@link #getArgument()
+	 * When {@code @Valid} is declared on a keyed typed, such as {@link java.util.Map},
+	 * this method returns the key under which the validated object {@link #getArgument()
 	 * argument} is stored in the map {@link #getContainer()}.
 	 */
 	@Nullable
