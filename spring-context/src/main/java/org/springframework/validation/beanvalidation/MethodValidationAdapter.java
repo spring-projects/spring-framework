@@ -302,7 +302,7 @@ public class MethodValidationAdapter implements MethodValidator {
 			Function<Integer, Object> argumentFunction) {
 
 		Map<MethodParameter, ValueResultBuilder> parameterViolations = new LinkedHashMap<>();
-		Map<Path.Node, BeanResultBuilder> cascadedViolations = new LinkedHashMap<>();
+		Map<CascadedViolationsKey, BeanResultBuilder> cascadedViolations = new LinkedHashMap<>();
 
 		for (ConstraintViolation<Object> violation : violations) {
 			Iterator<Path.Node> itr = violation.getPropertyPath().iterator();
@@ -329,7 +329,8 @@ public class MethodValidationAdapter implements MethodValidator {
 				}
 				else {
 					cascadedViolations
-							.computeIfAbsent(node, n -> new BeanResultBuilder(parameter, argument, itr.next()))
+							.computeIfAbsent(new CascadedViolationsKey(node, violation.getLeafBean()),
+											n -> new BeanResultBuilder(parameter, argument, itr.next(), violation.getLeafBean()))
 							.addViolation(violation);
 				}
 				break;
@@ -338,7 +339,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		List<ParameterValidationResult> validatonResultList = new ArrayList<>();
 		parameterViolations.forEach((parameter, builder) -> validatonResultList.add(builder.build()));
-		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
+		cascadedViolations.forEach((violationsKey, builder) -> validatonResultList.add(builder.build()));
 		validatonResultList.sort(resultComparator);
 
 		return MethodValidationResult.create(target, method, validatonResultList);
@@ -372,6 +373,14 @@ public class MethodValidationAdapter implements MethodValidator {
 		return result;
 	}
 
+	/**
+	 * A unique key for the cascaded violations map. Individually, the node and leaf bean may not be unique for all
+	 * collection types ({@link Set} will have the same node and {@link List} may have the same leaf), but together
+	 * they should represent a distinct pairing.
+	 * @param node the path of the violation
+	 * @param leafBean the validated object
+	 */
+	record CascadedViolationsKey(Path.Node node, Object leafBean) { }
 
 	/**
 	 * Strategy to resolve the name of an {@code @Valid} method parameter to
@@ -446,25 +455,20 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		private final Set<ConstraintViolation<Object>> violations = new LinkedHashSet<>();
 
-		public BeanResultBuilder(MethodParameter parameter, @Nullable Object argument, Path.Node node) {
+		public BeanResultBuilder(MethodParameter parameter, @Nullable Object argument, Path.Node node, @Nullable Object leafBean) {
 			this.parameter = parameter;
 
 			this.containerIndex = node.getIndex();
 			this.containerKey = node.getKey();
-			if (argument instanceof List<?> list && this.containerIndex != null) {
-				this.container = list;
-				argument = list.get(this.containerIndex);
-			}
-			else if (argument instanceof Map<?, ?> map && this.containerKey != null) {
-				this.container = map;
-				argument = map.get(this.containerKey);
+			if (argument != null && !argument.equals(leafBean)) {
+				this.container = argument;
 			}
 			else {
 				this.container = null;
 			}
 
-			this.argument = argument;
-			this.errors = createBindingResult(parameter, argument);
+			this.argument = leafBean;
+			this.errors = createBindingResult(parameter, leafBean);
 		}
 
 		public void addViolation(ConstraintViolation<Object> violation) {
