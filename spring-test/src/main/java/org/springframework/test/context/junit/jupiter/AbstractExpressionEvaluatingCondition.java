@@ -79,11 +79,11 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 	 * @param loadContextExtractor a function that extracts the {@code loadContext}
 	 * flag from the annotation
 	 * @param enabledOnTrue indicates whether the returned {@code ConditionEvaluationResult}
-	 * should be {@link ConditionEvaluationResult#enabled(String)}  enabled} if the expression
+	 * should be {@link ConditionEvaluationResult#enabled(String) enabled} if the expression
 	 * evaluates to {@code true}
 	 * @param context the {@code ExtensionContext}
-	 * @return {@link ConditionEvaluationResult#enabled(String)}  enabled} if the container
-	 * or test should be enabled; otherwise {@link ConditionEvaluationResult#disabled disabled}
+	 * @return {@link ConditionEvaluationResult#enabled(String) enabled} if the container
+	 * or test should be enabled; otherwise {@link ConditionEvaluationResult#disabled(String) disabled}
 	 */
 	protected <A extends Annotation> ConditionEvaluationResult evaluateAnnotation(Class<A> annotationType,
 			Function<A, String> expressionExtractor, Function<A, String> reasonExtractor,
