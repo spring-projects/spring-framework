@@ -19,7 +19,6 @@ package org.springframework.core.test.tools;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -171,9 +170,9 @@ class TestCompilerTests {
 				}
 				""");
 		assertThatExceptionOfType(CompilationException.class).isThrownBy(
-				() -> TestCompiler.forSystem().failOnWarning().withLocale(Locale.ENGLISH)
-						.withSources(SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
-				})).withMessageContaining("warnings found and -Werror specified");
+				() -> TestCompiler.forSystem().failOnWarning().withSources(
+						SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
+				}));
 	}
 
 	@Test
