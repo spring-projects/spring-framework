@@ -43,6 +43,7 @@ import org.springframework.lang.Nullable;
  * @author Phillip Webb
  * @author Scott Frederick
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  * @since 6.0
  * @see #forSystem()
  */
@@ -336,7 +337,7 @@ public final class TestCompiler {
 			}
 			boolean result = task.call();
 			if (!result || errors.hasReportedErrors()) {
-				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);
+				throw new CompilationException(errors.getDiagnosticCode(), errors.toString(), this.sourceFiles, this.resourceFiles);
 			}
 		}
 		return new DynamicClassLoader(classLoaderToUse, this.classFiles, this.resourceFiles,
@@ -373,6 +374,9 @@ public final class TestCompiler {
 
 		private final StringBuilder message = new StringBuilder();
 
+		@Nullable
+		private String diagnosticCode;
+
 		Errors(Locale locale) {
 			this.locale = locale;
 		}
@@ -380,6 +384,7 @@ public final class TestCompiler {
 		@Override
 		public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
 			if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+				this.diagnosticCode = diagnostic.getCode();
 				this.message.append('\n');
 				this.message.append(diagnostic.getMessage(this.locale));
 				if (diagnostic.getSource() != null) {
@@ -394,6 +399,11 @@ public final class TestCompiler {
 
 		boolean hasReportedErrors() {
 			return !this.message.isEmpty();
+		}
+
+		@Nullable
+		public String getDiagnosticCode() {
+			return this.diagnosticCode;
 		}
 
 		@Override

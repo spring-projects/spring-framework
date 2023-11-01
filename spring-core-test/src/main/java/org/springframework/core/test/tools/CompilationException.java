@@ -16,20 +16,42 @@
 
 package org.springframework.core.test.tools;
 
+import javax.tools.Diagnostic;
+
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown when code cannot compile.
  *
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  */
 @SuppressWarnings("serial")
 public class CompilationException extends RuntimeException {
 
+	@Nullable
+	private final String diagnosticCode;
 
-	CompilationException(String errors, SourceFiles sourceFiles, ResourceFiles resourceFiles) {
+	CompilationException(@Nullable String diagnosticCode, String errors, SourceFiles sourceFiles, ResourceFiles resourceFiles) {
 		super(buildMessage(errors, sourceFiles, resourceFiles));
+		this.diagnosticCode = diagnosticCode;
 	}
 
+	CompilationException(String errors, SourceFiles sourceFiles, ResourceFiles resourceFiles) {
+		this(null, errors, sourceFiles, resourceFiles);
+	}
+
+	/**
+	 * Return the diagnostic code reported by compiler.
+	 * @return diagnostic code reported by compiler, might be null.
+	 * @since 6.1
+	 * @see Diagnostic#getCode()
+	 */
+	@Nullable
+	public String getDiagnosticCode() {
+		return this.diagnosticCode;
+	}
 
 	private static String buildMessage(String errors, SourceFiles sourceFiles,
 			ResourceFiles resourceFiles) {

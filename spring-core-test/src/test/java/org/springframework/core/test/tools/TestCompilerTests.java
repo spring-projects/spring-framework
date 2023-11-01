@@ -45,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Andy Wilkinson
  * @author Scott Frederick
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 class TestCompilerTests {
 
@@ -173,7 +174,7 @@ class TestCompilerTests {
 		assertThatExceptionOfType(CompilationException.class).isThrownBy(
 				() -> TestCompiler.forSystem().failOnWarning().withLocale(Locale.ENGLISH)
 						.withSources(SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
-				})).withMessageContaining("warnings found and -Werror specified");
+				})).extracting(CompilationException::getDiagnosticCode).isEqualTo("compiler.err.warnings.and.werror");
 	}
 
 	@Test
