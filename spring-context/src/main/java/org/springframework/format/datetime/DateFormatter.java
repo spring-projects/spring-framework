@@ -277,13 +277,15 @@ public class DateFormatter implements Formatter<Date> {
 
 	private int getStylePatternForChar(int index) {
 		if (this.stylePattern != null && this.stylePattern.length() > index) {
-			switch (this.stylePattern.charAt(index)) {
-				case 'S': return DateFormat.SHORT;
-				case 'M': return DateFormat.MEDIUM;
-				case 'L': return DateFormat.LONG;
-				case 'F': return DateFormat.FULL;
-				case '-': return -1;
-			}
+			char ch = this.stylePattern.charAt(index);
+			return switch (ch) {
+				case 'S' -> DateFormat.SHORT;
+				case 'M' -> DateFormat.MEDIUM;
+				case 'L' -> DateFormat.LONG;
+				case 'F' -> DateFormat.FULL;
+				case '-' -> -1;
+				default -> throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
+			};
 		}
 		throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 	}

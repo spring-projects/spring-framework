@@ -720,26 +720,28 @@ public class MvcUriComponentsBuilder {
 		@Override
 		@Nullable
 		public Object intercept(@Nullable Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
-			switch (method.getName()) {
-				case "getControllerType": return this.controllerType;
-				case "getControllerMethod": return this.controllerMethod;
-				case "getArgumentValues": return this.argumentValues;
-			}
-			if (ReflectionUtils.isObjectMethod(method)) {
-				return ReflectionUtils.invokeMethod(method, obj, args);
-			}
-			else {
-				this.controllerMethod = method;
-				this.argumentValues = args;
-				Class<?> returnType = method.getReturnType();
-				try {
-					return (returnType == void.class ? null : returnType.cast(initProxy(returnType, this)));
+			return switch (method.getName()) {
+				case "getControllerType" -> this.controllerType;
+				case "getControllerMethod" -> this.controllerMethod;
+				case "getArgumentValues" -> this.argumentValues;
+				default -> {
+					if (ReflectionUtils.isObjectMethod(method)) {
+						yield ReflectionUtils.invokeMethod(method, obj, args);
+					}
+					else {
+						this.controllerMethod = method;
+						this.argumentValues = args;
+						Class<?> returnType = method.getReturnType();
+						try {
+							yield (returnType == void.class ? null : returnType.cast(initProxy(returnType, this)));
+						}
+						catch (Throwable ex) {
+							throw new IllegalStateException(
+									"Failed to create proxy for controller method return type: " + method, ex);
+						}
+					}
 				}
-				catch (Throwable ex) {
-					throw new IllegalStateException(
-							"Failed to create proxy for controller method return type: " + method, ex);
-				}
-			}
+			};
 		}
 
 		@Override

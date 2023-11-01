@@ -1655,42 +1655,36 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			switch (method.getName()) {
-				case "equals":
+			return switch (method.getName()) {
+				case "equals" -> (proxy == args[0]);
 					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
-				case "hashCode":
+				case "hashCode" -> System.identityHashCode(proxy);
 					// Use hashCode of PersistenceManager proxy.
-					return System.identityHashCode(proxy);
-				case "close":
+				case "close" -> null;
 					// Handle close method: suppress, not valid.
-					return null;
-				case "isClosed":
-					return false;
-				case "getTargetConnection":
+				case "isClosed" -> false;
+				case "getTargetConnection" -> this.target;
 					// Handle getTargetConnection method: return underlying Connection.
-					return this.target;
-				case "unwrap":
-					return (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
-				case "isWrapperFor":
-					return (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
-			}
+				case "unwrap" -> (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
+				case "isWrapperFor" -> (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
+				default -> {
+					// Invoke method on target Connection.
+					try {
+						Object retVal = method.invoke(this.target, args);
 
-			// Invoke method on target Connection.
-			try {
-				Object retVal = method.invoke(this.target, args);
+						// If return value is a JDBC Statement, apply statement settings
+						// (fetch size, max rows, transaction timeout).
+						if (retVal instanceof Statement statement) {
+							applyStatementSettings(statement);
+						}
 
-				// If return value is a JDBC Statement, apply statement settings
-				// (fetch size, max rows, transaction timeout).
-				if (retVal instanceof Statement statement) {
-					applyStatementSettings(statement);
+						yield retVal;
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
 				}
-
-				return retVal;
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			};
 		}
 	}
 

@@ -600,35 +600,35 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 		@Override
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			switch (method.getName()) {
-				case "equals":
+			return switch (method.getName()) {
+				case "equals" -> {
 					Object other = args[0];
 					if (proxy == other) {
-						return true;
+						yield true;
 					}
 					if (other == null || !Proxy.isProxyClass(other.getClass())) {
-						return false;
+						yield false;
 					}
 					InvocationHandler otherHandler = Proxy.getInvocationHandler(other);
-					return (otherHandler instanceof SharedConnectionInvocationHandler sharedHandler &&
+					yield (otherHandler instanceof SharedConnectionInvocationHandler sharedHandler &&
 							factory() == sharedHandler.factory());
-				case "hashCode":
+				}
+				case "hashCode" -> System.identityHashCode(factory());
 					// Use hashCode of containing SingleConnectionFactory.
-					return System.identityHashCode(factory());
-				case "toString":
-					return "Shared JMS Connection: " + getConnection();
-				case "setClientID":
+				case "toString" -> "Shared JMS Connection: " + getConnection();
+				case "setClientID" -> {
 					// Handle setClientID method: throw exception if not compatible.
 					String currentClientId = getConnection().getClientID();
 					if (currentClientId != null && currentClientId.equals(args[0])) {
-						return null;
+						yield null;
 					}
 					else {
 						throw new jakarta.jms.IllegalStateException(
 								"setClientID call not supported on proxy for shared Connection. " +
-								"Set the 'clientId' property on the SingleConnectionFactory instead.");
+										"Set the 'clientId' property on the SingleConnectionFactory instead.");
 					}
-				case "setExceptionListener":
+				}
+				case "setExceptionListener" -> {
 					// Handle setExceptionListener method: add to the chain.
 					synchronized (connectionMonitor) {
 						if (aggregatedExceptionListener != null) {
@@ -642,32 +642,36 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 								}
 								this.localExceptionListener = listener;
 							}
-							return null;
+							yield null;
 						}
 						else {
 							throw new jakarta.jms.IllegalStateException(
 									"setExceptionListener call not supported on proxy for shared Connection. " +
-									"Set the 'exceptionListener' property on the SingleConnectionFactory instead. " +
-									"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
-									"which will allow for registering further ExceptionListeners to the recovery chain.");
+											"Set the 'exceptionListener' property on the SingleConnectionFactory instead. " +
+											"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
+											"which will allow for registering further ExceptionListeners to the recovery chain.");
 						}
 					}
-				case "getExceptionListener":
+				}
+				case "getExceptionListener" -> {
 					synchronized (connectionMonitor) {
 						if (this.localExceptionListener != null) {
-							return this.localExceptionListener;
+							yield this.localExceptionListener;
 						}
 						else {
-							return getExceptionListener();
+							yield getExceptionListener();
 						}
 					}
-				case "start":
+				}
+				case "start" -> {
 					localStart();
-					return null;
-				case "stop":
+					yield null;
+				}
+				case "stop" -> {
 					localStop();
-					return null;
-				case "close":
+					yield null;
+				}
+				case "close" -> {
 					localStop();
 					synchronized (connectionMonitor) {
 						if (this.localExceptionListener != null) {
@@ -677,10 +681,9 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 							this.localExceptionListener = null;
 						}
 					}
-					return null;
-				case "createSession":
-				case "createQueueSession":
-				case "createTopicSession":
+					yield null;
+				}
+				case "createSession", "createQueueSession", "createTopicSession" -> {
 					// Default: JMS 2.0 createSession() method
 					Integer mode = Session.AUTO_ACKNOWLEDGE;
 					if (!ObjectUtils.isEmpty(args)) {
@@ -707,16 +710,24 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 							}
 							throw new jakarta.jms.IllegalStateException(msg);
 						}
-						return session;
+						yield session;
 					}
-			}
-
-			try {
-				return method.invoke(getConnection(), args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+					try {
+						yield method.invoke(getConnection(), args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+				default -> {
+					try {
+						yield method.invoke(getConnection(), args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 
 		private void localStart() throws JMSException {

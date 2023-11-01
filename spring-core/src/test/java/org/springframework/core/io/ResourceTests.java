@@ -438,16 +438,15 @@ class ResourceTests {
 			@Override
 			public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
 				if (request.getPath().equals("/resource")) {
-					switch (request.getMethod()) {
-						case "HEAD":
-							return new MockResponse()
+					return switch (request.getMethod()) {
+						case "HEAD" -> new MockResponse()
 									.addHeader("Content-Length", "6");
-						case "GET":
-							return new MockResponse()
+						case "GET" -> new MockResponse()
 									.addHeader("Content-Length", "6")
 									.addHeader("Content-Type", "text/plain")
 									.setBody("Spring");
-					}
+						default -> new MockResponse().setResponseCode(404);
+					};
 				}
 				return new MockResponse().setResponseCode(404);
 			}

@@ -976,11 +976,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		int length = propertyName.length();
 		for (int i = startIndex; i < length; i++) {
 			switch (propertyName.charAt(i)) {
-				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR:
+				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> {
 					// The property name contains opening prefix(es)...
 					unclosedPrefixes++;
-					break;
-				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR:
+				}
+				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
 					if (unclosedPrefixes == 0) {
 						// No unclosed prefix(es) in the property name (left) ->
 						// this is the suffix we are looking for.
@@ -991,12 +991,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						// just one that occurred within the property name.
 						unclosedPrefixes--;
 					}
-					break;
+				}
 			}
 		}
 		return -1;
 	}
-
 
 	@Override
 	public String toString() {

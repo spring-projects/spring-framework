@@ -1150,36 +1150,34 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Session interface coming in...
 
-			switch (method.getName()) {
-				case "equals":
+			return switch (method.getName()) {
+				case "equals" -> (proxy == args[0]);
 					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
-				case "hashCode":
+				case "hashCode" -> System.identityHashCode(proxy);
 					// Use hashCode of Session proxy.
-					return System.identityHashCode(proxy);
-				case "close":
+				case "close" -> null;
 					// Handle close method: suppress, not valid.
-					return null;
-			}
+				default -> {
+					// Invoke method on target Session.
+					try {
+						Object retVal = method.invoke(this.target, args);
 
-			// Invoke method on target Session.
-			try {
-				Object retVal = method.invoke(this.target, args);
+						// If return value is a Query or Criteria, apply transaction timeout.
+						// Applies to createQuery, getNamedQuery, createCriteria.
+						if (retVal instanceof Criteria criteria) {
+							prepareCriteria(criteria);
+						}
+						else if (retVal instanceof Query<?> query) {
+							prepareQuery(query);
+						}
 
-				// If return value is a Query or Criteria, apply transaction timeout.
-				// Applies to createQuery, getNamedQuery, createCriteria.
-				if (retVal instanceof Criteria criteria) {
-					prepareCriteria(criteria);
+						yield retVal;
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
 				}
-				else if (retVal instanceof Query<?> query) {
-					prepareQuery(query);
-				}
-
-				return retVal;
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			};
 		}
 	}
 

@@ -349,34 +349,28 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			switch (method.getName()) {
-				case "equals":
+			return switch (method.getName()) {
+				case "equals" -> (proxy == args[0]);
 					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
-				case "hashCode":
+				case "hashCode" -> System.identityHashCode(proxy);
 					// Use hashCode of Connection proxy.
-					return System.identityHashCode(proxy);
-				case "close":
+				case "close" -> null;
 					// Handle close method: don't pass the call on.
-					return null;
-				case "isClosed":
-					return this.target.isClosed();
-				case "getTargetConnection":
+				case "isClosed" -> this.target.isClosed();
+				case "getTargetConnection" -> this.target;
 					// Handle getTargetConnection method: return underlying Connection.
-					return this.target;
-				case "unwrap":
-					return (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
-				case "isWrapperFor":
-					return (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
-			}
-
-			// Invoke method on target Connection.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+				case "unwrap" -> (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
+				case "isWrapperFor" -> (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
+				default -> {
+					// Invoke method on target Connection.
+					try {
+						yield method.invoke(this.target, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 	}
 

@@ -711,13 +711,15 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of EntityManagerFactory proxy.
 					return System.identityHashCode(proxy);
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					// Handle JPA 2.1 unwrap method - could be a proxy match.
 					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass == null) {
@@ -726,7 +728,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					else if (targetClass.isInstance(proxy)) {
 						return proxy;
 					}
-					break;
+				}
 			}
 
 			try {

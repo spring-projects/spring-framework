@@ -143,28 +143,26 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 				}
 			}
 
-			switch (method.getName()) {
-				case "unwrap":
-					return this.connection;
-				case "close":
-					// Handle close method: only close if not within a transaction.
-					return ConnectionFactoryUtils.doReleaseConnection(this.connection, this.targetConnectionFactory)
+			return switch (method.getName()) {
+				case "unwrap" -> this.connection;
+				case "close" -> ConnectionFactoryUtils.doReleaseConnection(this.connection, this.targetConnectionFactory)
 							.doOnSubscribe(n -> this.closed = true);
-				case "isClosed":
-					return this.closed;
-			}
+				// Handle close method: only close if not within a transaction.
+				case "isClosed" -> this.closed;
+				default -> {
+					if (this.closed) {
+						throw new IllegalStateException("Connection handle already closed");
+					}
 
-			if (this.closed) {
-				throw new IllegalStateException("Connection handle already closed");
-			}
-
-			// Invoke method on target Connection.
-			try {
-				return method.invoke(this.connection, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+					// Invoke method on target Connection.
+					try {
+						yield method.invoke(this.connection, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 
 		private String proxyToString(@Nullable Object proxy) {
