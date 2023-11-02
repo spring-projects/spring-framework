@@ -290,6 +290,7 @@ public class SourceHttpMessageConverterTests {
 		DOMSource domSource = new DOMSource(document);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		assertThat(converter.supportsRepeatableWrites(domSource)).isTrue();
 		converter.write(domSource, null, outputMessage);
 		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
 				.isSimilarTo("<root>Hello World</root>");
@@ -305,6 +306,7 @@ public class SourceHttpMessageConverterTests {
 		SAXSource saxSource = new SAXSource(new InputSource(new StringReader(xml)));
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		assertThat(converter.supportsRepeatableWrites(saxSource)).isFalse();
 		converter.write(saxSource, null, outputMessage);
 		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
 				.isSimilarTo("<root>Hello World</root>");
@@ -318,6 +320,7 @@ public class SourceHttpMessageConverterTests {
 		StreamSource streamSource = new StreamSource(new StringReader(xml));
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		assertThat(converter.supportsRepeatableWrites(streamSource)).isFalse();
 		converter.write(streamSource, null, outputMessage);
 		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
 				.isSimilarTo("<root>Hello World</root>");

@@ -210,16 +210,27 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 		addDefaultHeaders(headers, t, contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
-			streamingOutputMessage.setBody(outputStream -> writeInternal(t, new HttpOutputMessage() {
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
-				public OutputStream getBody() {
-					return outputStream;
+				public void writeTo(OutputStream outputStream) throws IOException {
+					writeInternal(t, new HttpOutputMessage() {
+						@Override
+						public OutputStream getBody() {
+							return outputStream;
+						}
+
+						@Override
+						public HttpHeaders getHeaders() {
+							return headers;
+						}
+					});
 				}
+
 				@Override
-				public HttpHeaders getHeaders() {
-					return headers;
+				public boolean repeatable() {
+					return supportsRepeatableWrites(t);
 				}
-			}));
+			});
 		}
 		else {
 			writeInternal(t, outputMessage);
@@ -287,6 +298,21 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	@Nullable
 	protected Long getContentLength(T t, @Nullable MediaType contentType) throws IOException {
 		return null;
+	}
+
+	/**
+	 * Indicates whether this message converter can
+	 * {@linkplain #write(Object, MediaType, HttpOutputMessage) write} the
+	 * given object multiple times.
+	 *
+	 * <p>Default implementation returns {@code false}.
+	 * @param t the object t
+	 * @return {@code true} if {@code t} can be written repeatedly;
+	 * {@code false} otherwise
+	 * @since 6.1
+	 */
+	protected boolean supportsRepeatableWrites(T t) {
+		return false;
 	}
 
 

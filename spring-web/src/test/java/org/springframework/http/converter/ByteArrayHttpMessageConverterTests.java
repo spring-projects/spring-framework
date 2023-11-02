@@ -79,4 +79,18 @@ public class ByteArrayHttpMessageConverterTests {
 		assertThat(outputMessage.getHeaders().getContentLength()).isEqualTo(2);
 	}
 
+	@Test
+	public void repeatableWrites() throws IOException {
+		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
+		byte[] body = new byte[]{0x1, 0x2};
+		assertThat(converter.supportsRepeatableWrites(body)).isTrue();
+
+		converter.write(body, null, outputMessage1);
+		assertThat(outputMessage1.getBodyAsBytes()).isEqualTo(body);
+
+		MockHttpOutputMessage outputMessage2 = new MockHttpOutputMessage();
+		converter.write(body, null, outputMessage2);
+		assertThat(outputMessage2.getBodyAsBytes()).isEqualTo(body);
+	}
+
 }

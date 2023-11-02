@@ -247,6 +247,10 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		response.getHeaders().set(X_PROTOBUF_MESSAGE_HEADER, message.getDescriptorForType().getFullName());
 	}
 
+	@Override
+	protected boolean supportsRepeatableWrites(Message message) {
+		return true;
+	}
 
 	/**
 	 * Protobuf format support.

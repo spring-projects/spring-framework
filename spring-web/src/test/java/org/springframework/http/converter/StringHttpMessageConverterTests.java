@@ -171,4 +171,19 @@ class StringHttpMessageConverterTests {
 		assertThat(headers.getAcceptCharset()).isEmpty();
 	}
 
+	@Test
+	public void repeatableWrites() throws IOException {
+		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
+		String body = "Hello World";
+		assertThat(converter.supportsRepeatableWrites(body)).isTrue();
+
+		converter.write(body, TEXT_PLAIN_UTF_8, outputMessage1);
+		assertThat(outputMessage1.getBodyAsString()).isEqualTo(body);
+
+		MockHttpOutputMessage outputMessage2 = new MockHttpOutputMessage();
+		converter.write(body, TEXT_PLAIN_UTF_8, outputMessage2);
+		assertThat(outputMessage2.getBodyAsString()).isEqualTo(body);
+	}
+
+
 }

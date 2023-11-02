@@ -580,6 +580,22 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result2).contains("\"property\":\"Value2\"");
 	}
 
+	@Test
+	public void repeatableWrites() throws IOException {
+		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
+		MyBean body = new MyBean();
+		body.setString("Foo");
+		converter.write(body, null, outputMessage1);
+		String result = outputMessage1.getBodyAsString(StandardCharsets.UTF_8);
+		assertThat(result).contains("\"string\":\"Foo\"");
+
+		MockHttpOutputMessage outputMessage2 = new MockHttpOutputMessage();
+		converter.write(body, null, outputMessage2);
+		result = outputMessage2.getBodyAsString(StandardCharsets.UTF_8);
+		assertThat(result).contains("\"string\":\"Foo\"");
+	}
+
+
 
 	interface MyInterface {
 

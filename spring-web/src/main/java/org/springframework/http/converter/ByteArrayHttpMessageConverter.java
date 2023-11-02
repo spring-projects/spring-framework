@@ -67,4 +67,8 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 		StreamUtils.copy(bytes, outputMessage.getBody());
 	}
 
+	@Override
+	protected boolean supportsRepeatableWrites(byte[] bytes) {
+		return true;
+	}
 }

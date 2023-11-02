@@ -568,4 +568,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return super.getContentLength(object, contentType);
 	}
 
+	@Override
+	protected boolean supportsRepeatableWrites(Object o) {
+		return true;
+	}
 }

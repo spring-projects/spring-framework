@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -238,4 +239,24 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		os.write(buf.getBytes(StandardCharsets.US_ASCII));
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	protected boolean supportsRepeatableWrites(Object object) {
+		if (object instanceof ResourceRegion resourceRegion) {
+			return supportsRepeatableWrites(resourceRegion);
+		}
+		else {
+			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
+			for (ResourceRegion region : regions) {
+				if (!supportsRepeatableWrites(region)) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	private boolean supportsRepeatableWrites(ResourceRegion region) {
+		return !(region.getResource() instanceof InputStreamResource);
+	}
 }
