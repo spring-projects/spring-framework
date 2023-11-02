@@ -302,44 +302,30 @@ public class WebClientResponseException extends WebClientException {
 			HttpStatusCode statusCode, String statusText, HttpHeaders headers,
 			byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
 
-		if (statusCode instanceof HttpStatus httpStatus) {
-			switch (httpStatus) {
-				case BAD_REQUEST:
-					return new WebClientResponseException.BadRequest(statusText, headers, body, charset, request);
-				case UNAUTHORIZED:
-					return new WebClientResponseException.Unauthorized(statusText, headers, body, charset, request);
-				case FORBIDDEN:
-					return new WebClientResponseException.Forbidden(statusText, headers, body, charset, request);
-				case NOT_FOUND:
-					return new WebClientResponseException.NotFound(statusText, headers, body, charset, request);
-				case METHOD_NOT_ALLOWED:
-					return new WebClientResponseException.MethodNotAllowed(statusText, headers, body, charset, request);
-				case NOT_ACCEPTABLE:
-					return new WebClientResponseException.NotAcceptable(statusText, headers, body, charset, request);
-				case CONFLICT:
-					return new WebClientResponseException.Conflict(statusText, headers, body, charset, request);
-				case GONE:
-					return new WebClientResponseException.Gone(statusText, headers, body, charset, request);
-				case UNSUPPORTED_MEDIA_TYPE:
-					return new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
-				case TOO_MANY_REQUESTS:
-					return new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
-				case UNPROCESSABLE_ENTITY:
-					return new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);
-				case INTERNAL_SERVER_ERROR:
-					return new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);
-				case NOT_IMPLEMENTED:
-					return new WebClientResponseException.NotImplemented(statusText, headers, body, charset, request);
-				case BAD_GATEWAY:
-					return new WebClientResponseException.BadGateway(statusText, headers, body, charset, request);
-				case SERVICE_UNAVAILABLE:
-					return new WebClientResponseException.ServiceUnavailable(statusText, headers, body, charset, request);
-				case GATEWAY_TIMEOUT:
-					return new WebClientResponseException.GatewayTimeout(statusText, headers, body, charset, request);
-			}
-		}
-		return new WebClientResponseException(statusCode, statusText, headers, body, charset, request);
-	}
+		return switch (statusCode) {
+			case HttpStatus httpStatus -> {
+	            yield switch (httpStatus) {
+	                case BAD_REQUEST -> new WebClientResponseException.BadRequest(statusText, headers, body, charset, request);
+	                case UNAUTHORIZED -> new WebClientResponseException.Unauthorized(statusText, headers, body, charset, request);
+	                case FORBIDDEN -> new WebClientResponseException.Forbidden(statusText, headers, body, charset, request);
+	                case NOT_FOUND -> new WebClientResponseException.NotFound(statusText, headers, body, charset, request);
+	                case METHOD_NOT_ALLOWED -> new WebClientResponseException.MethodNotAllowed(statusText, headers, body, charset, request);
+	                case NOT_ACCEPTABLE -> new WebClientResponseException.NotAcceptable(statusText, headers, body, charset, request);
+	                case CONFLICT -> new WebClientResponseException.Conflict(statusText, headers, body, charset, request);
+	                case GONE -> new WebClientResponseException.Gone(statusText, headers, body, charset, request);
+	                case UNSUPPORTED_MEDIA_TYPE -> new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
+	                case TOO_MANY_REQUESTS -> new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
+	                case UNPROCESSABLE_ENTITY -> new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);
+	                case INTERNAL_SERVER_ERROR -> new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);
+	                case NOT_IMPLEMENTED -> new WebClientResponseException.NotImplemented(statusText, headers, body, charset, request);
+	                case BAD_GATEWAY -> new WebClientResponseException.BadGateway(statusText, headers, body, charset, request);
+	                case SERVICE_UNAVAILABLE -> new WebClientResponseException.ServiceUnavailable(statusText, headers, body, charset, request);
+	                case GATEWAY_TIMEOUT -> new WebClientResponseException.GatewayTimeout(statusText, headers, body, charset, request);
+	                default -> new WebClientResponseException(statusCode, statusText, headers, body, charset, request);
+	            };
+	        }
+        default -> new WebClientResponseException(statusCode, statusText, headers, body, charset, request);
+    };
 
 
 	// Subclasses for specific, client-side, HTTP status codes
