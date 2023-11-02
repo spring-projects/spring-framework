@@ -6,8 +6,8 @@ it until later.
 
 By default, there is a single instance of each aspect within the application
 context. AspectJ calls this the singleton instantiation model. It is possible to define
-aspects with alternate lifecycles. Spring supports AspectJ's `perthis` and `pertarget`
-instantiation models; `percflow`, `percflowbelow`, and `pertypewithin` are not currently
+aspects with alternate lifecycles. Spring supports AspectJ's `perthis`, `pertarget`, and
+`pertypewithin` instantiation models; `percflow` and `percflowbelow` are not currently
 supported.
 
 You can declare a `perthis` aspect by specifying a `perthis` clause in the `@Aspect`
