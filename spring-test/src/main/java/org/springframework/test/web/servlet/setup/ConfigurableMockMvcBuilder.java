@@ -44,7 +44,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Add filters mapped to all requests. Filters are invoked in the same order.
 	 * <p>Note: if you need the filter to be initialized with {@link Filter#init(FilterConfig)},
-	 * please use {@link #addFilter(Filter, Map, EnumSet, String...)} instead.
+	 * please use {@link #addFilter(Filter, String, Map, EnumSet, String...)} instead.
 	 * @param filters the filters to add
 	 */
 	<T extends B> T addFilters(Filter... filters);
