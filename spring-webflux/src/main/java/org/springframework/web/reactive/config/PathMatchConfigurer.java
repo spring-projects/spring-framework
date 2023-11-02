@@ -35,12 +35,10 @@ public class PathMatchConfigurer {
 	@Nullable
 	private Boolean trailingSlashMatch;
 
-
 	@Nullable
 	private Boolean caseSensitiveMatch;
 
-	@Nullable
-	private Map<String, Predicate<Class<?>>> pathPrefixes;
+	private Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();;
 
 
 	/**
@@ -79,9 +77,6 @@ public class PathMatchConfigurer {
 	 * @since 5.1
 	 */
 	public PathMatchConfigurer addPathPrefix(String prefix, Predicate<Class<?>> predicate) {
-		if (this.pathPrefixes == null) {
-			this.pathPrefixes = new LinkedHashMap<>();
-		}
 		this.pathPrefixes.put(prefix, predicate);
 		return this;
 	}
