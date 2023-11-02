@@ -317,7 +317,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public boolean remove(@Nullable Object key, final @Nullable Object value) {
+	public boolean remove(@Nullable Object key, @Nullable final Object value) {
 		Boolean result = doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			protected Boolean execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry) {
@@ -334,7 +334,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public boolean replace(@Nullable K key, final @Nullable V oldValue, final @Nullable V newValue) {
+	public boolean replace(@Nullable K key, @Nullable final V oldValue, @Nullable final V newValue) {
 		Boolean result = doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			protected Boolean execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry) {
@@ -350,7 +350,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	@Nullable
-	public V replace(@Nullable K key, final @Nullable V value) {
+	public V replace(@Nullable K key, @Nullable final V value) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			@Nullable

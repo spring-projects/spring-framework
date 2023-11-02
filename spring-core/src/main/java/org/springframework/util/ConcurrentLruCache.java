@@ -396,7 +396,6 @@ public final class ConcurrentLruCache<K, V> {
 
 		private final EvictionQueue<K, V> evictionQueue;
 
-		@SuppressWarnings("rawtypes")
 		ReadOperations(EvictionQueue<K, V> evictionQueue) {
 			this.evictionQueue = evictionQueue;
 			for (int i = 0; i < BUFFER_COUNT; i++) {

@@ -98,7 +98,7 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Base64-decode the given byte array from an UTF-8 String.
+	 * Base64-decode the given byte array from a UTF-8 String.
 	 * @param src the encoded UTF-8 String
 	 * @return the original byte array
 	 */
@@ -120,7 +120,7 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Base64-decode the given byte array from an UTF-8 String using the RFC 4648
+	 * Base64-decode the given byte array from a UTF-8 String using the RFC 4648
 	 * "URL and Filename Safe Alphabet".
 	 * @param src the encoded UTF-8 String
 	 * @return the original byte array

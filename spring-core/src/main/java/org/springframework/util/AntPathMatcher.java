@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -402,7 +402,7 @@ public class AntPathMatcher implements PathMatcher {
 	protected String[] tokenizePattern(String pattern) {
 		String[] tokenized = null;
 		Boolean cachePatterns = this.cachePatterns;
-		if (cachePatterns == null || cachePatterns.booleanValue()) {
+		if (cachePatterns == null || cachePatterns) {
 			tokenized = this.tokenizedPatternCache.get(pattern);
 		}
 		if (tokenized == null) {
@@ -414,7 +414,7 @@ public class AntPathMatcher implements PathMatcher {
 				deactivatePatternCache();
 				return tokenized;
 			}
-			if (cachePatterns == null || cachePatterns.booleanValue()) {
+			if (cachePatterns == null || cachePatterns) {
 				this.tokenizedPatternCache.put(pattern, tokenized);
 			}
 		}
@@ -458,7 +458,7 @@ public class AntPathMatcher implements PathMatcher {
 	protected AntPathStringMatcher getStringMatcher(String pattern) {
 		AntPathStringMatcher matcher = null;
 		Boolean cachePatterns = this.cachePatterns;
-		if (cachePatterns == null || cachePatterns.booleanValue()) {
+		if (cachePatterns == null || cachePatterns) {
 			matcher = this.stringMatcherCache.get(pattern);
 		}
 		if (matcher == null) {
@@ -470,7 +470,7 @@ public class AntPathMatcher implements PathMatcher {
 				deactivatePatternCache();
 				return matcher;
 			}
-			if (cachePatterns == null || cachePatterns.booleanValue()) {
+			if (cachePatterns == null || cachePatterns) {
 				this.stringMatcherCache.put(pattern, matcher);
 			}
 		}

@@ -144,7 +144,7 @@ public abstract class ObjectUtils {
 			return optional.isEmpty();
 		}
 		if (obj instanceof CharSequence charSequence) {
-			return charSequence.length() == 0;
+			return charSequence.isEmpty();
 		}
 		if (obj.getClass().isArray()) {
 			return Array.getLength(obj) == 0;
