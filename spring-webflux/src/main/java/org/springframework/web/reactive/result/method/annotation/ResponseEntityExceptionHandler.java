@@ -353,8 +353,9 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param status the status to associate with the exception
 	 * @param defaultDetail default value for the "detail" field
 	 * @param detailMessageCode the code to use to look up the "detail" field
-	 * through a {@code MessageSource}, falling back on
-	 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)}
+	 * through a {@code MessageSource}; if {@code null} then
+	 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)} is used
+	 * to determine the default message code to use
 	 * @param detailMessageArguments the arguments to go with the detailMessageCode
 	 * @return the created {@code ProblemDetail} instance
 	 */
