@@ -216,51 +216,38 @@ public class ClassReader {
     while (currentCpInfoIndex < constantPoolCount) {
       cpInfoOffsets[currentCpInfoIndex++] = currentCpInfoOffset + 1;
       int cpInfoSize;
-      switch (classFileBuffer[currentCpInfoOffset]) {
-        case Symbol.CONSTANT_FIELDREF_TAG:
-        case Symbol.CONSTANT_METHODREF_TAG:
-        case Symbol.CONSTANT_INTERFACE_METHODREF_TAG:
-        case Symbol.CONSTANT_INTEGER_TAG:
-        case Symbol.CONSTANT_FLOAT_TAG:
-        case Symbol.CONSTANT_NAME_AND_TYPE_TAG:
-          cpInfoSize = 5;
-          break;
-        case Symbol.CONSTANT_DYNAMIC_TAG:
-          cpInfoSize = 5;
-          hasBootstrapMethods = true;
-          hasConstantDynamic = true;
-          break;
-        case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG:
-          cpInfoSize = 5;
-          hasBootstrapMethods = true;
-          break;
-        case Symbol.CONSTANT_LONG_TAG:
-        case Symbol.CONSTANT_DOUBLE_TAG:
-          cpInfoSize = 9;
-          currentCpInfoIndex++;
-          break;
-        case Symbol.CONSTANT_UTF8_TAG:
-          cpInfoSize = 3 + readUnsignedShort(currentCpInfoOffset + 1);
-          if (cpInfoSize > currentMaxStringLength) {
-            // The size in bytes of this CONSTANT_Utf8 structure provides a conservative estimate
-            // of the length in characters of the corresponding string, and is much cheaper to
-            // compute than this exact length.
-            currentMaxStringLength = cpInfoSize;
-          }
-          break;
-        case Symbol.CONSTANT_METHOD_HANDLE_TAG:
-          cpInfoSize = 4;
-          break;
-        case Symbol.CONSTANT_CLASS_TAG:
-        case Symbol.CONSTANT_STRING_TAG:
-        case Symbol.CONSTANT_METHOD_TYPE_TAG:
-        case Symbol.CONSTANT_PACKAGE_TAG:
-        case Symbol.CONSTANT_MODULE_TAG:
-          cpInfoSize = 3;
-          break;
-        default:
-          throw new IllegalArgumentException();
-      }
+        switch (classFileBuffer[currentCpInfoOffset]) {
+            case Symbol.CONSTANT_FIELDREF_TAG, Symbol.CONSTANT_METHODREF_TAG,
+					Symbol.CONSTANT_INTERFACE_METHODREF_TAG, Symbol.CONSTANT_INTEGER_TAG,
+					Symbol.CONSTANT_FLOAT_TAG, Symbol.CONSTANT_NAME_AND_TYPE_TAG -> cpInfoSize = 5;
+            case Symbol.CONSTANT_DYNAMIC_TAG -> {
+                cpInfoSize = 5;
+                hasBootstrapMethods = true;
+                hasConstantDynamic = true;
+            }
+            case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG -> {
+                cpInfoSize = 5;
+                hasBootstrapMethods = true;
+            }
+            case Symbol.CONSTANT_LONG_TAG, Symbol.CONSTANT_DOUBLE_TAG -> {
+                cpInfoSize = 9;
+                currentCpInfoIndex++;
+            }
+            case Symbol.CONSTANT_UTF8_TAG -> {
+                cpInfoSize = 3 + readUnsignedShort(currentCpInfoOffset + 1);
+                if (cpInfoSize > currentMaxStringLength) {
+                    // The size in bytes of this CONSTANT_Utf8 structure provides a conservative estimate
+                    // of the length in characters of the corresponding string, and is much cheaper to
+                    // compute than this exact length.
+                    currentMaxStringLength = cpInfoSize;
+                }
+            }
+            case Symbol.CONSTANT_METHOD_HANDLE_TAG -> cpInfoSize = 4;
+            case Symbol.CONSTANT_CLASS_TAG, Symbol.CONSTANT_STRING_TAG,
+					Symbol.CONSTANT_METHOD_TYPE_TAG, Symbol.CONSTANT_PACKAGE_TAG,
+					Symbol.CONSTANT_MODULE_TAG -> cpInfoSize = 3;
+            default -> throw new IllegalArgumentException();
+        }
       currentCpInfoOffset += cpInfoSize;
     }
     maxStringLength = currentMaxStringLength;
