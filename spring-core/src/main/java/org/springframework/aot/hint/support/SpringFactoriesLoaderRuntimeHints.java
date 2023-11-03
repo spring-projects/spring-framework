@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,11 @@ class SpringFactoriesLoaderRuntimeHints implements RuntimeHintsRegistrar {
 
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+		ClassLoader classLoaderToUse = (classLoader != null ? classLoader
+				: SpringFactoriesLoaderRuntimeHints.class.getClassLoader());
 		for (String resourceLocation : RESOURCE_LOCATIONS) {
-			registerHints(hints, classLoader, resourceLocation);
+			registerHints(hints, classLoaderToUse, resourceLocation);
 		}
 	}
 

@@ -20,6 +20,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} for {@link PathMatchingResourcePatternResolver}.
@@ -28,7 +29,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 class PathMatchingResourcePatternResolverRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection().registerType(TypeReference.of("org.eclipse.core.runtime.FileLocator"));
 	}
 }

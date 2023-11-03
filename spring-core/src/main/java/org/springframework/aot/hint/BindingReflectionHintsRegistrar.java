@@ -187,7 +187,7 @@ public class BindingReflectionHintsRegistrar {
 				.from(element, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
 				.stream(JACKSON_ANNOTATION)
 				.filter(MergedAnnotation::isMetaPresent)
-				.forEach(action::accept);
+				.forEach(action);
 	}
 
 	private void registerHintsForClassAttributes(ReflectionHints hints, MergedAnnotation<Annotation> annotation) {

@@ -124,6 +124,6 @@ public enum MemberCategory {
 	 * reflection for inner classes but rather makes sure they are available
 	 * via a call to {@link Class#getDeclaredClasses}.
 	 */
-	DECLARED_CLASSES;
+	DECLARED_CLASSES
 
 }

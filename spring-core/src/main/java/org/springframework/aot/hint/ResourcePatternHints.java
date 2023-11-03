@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public final class ResourcePatternHints {
 		 * @param excludes the exclude patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
-		public Builder excludes(TypeReference reachableType, String... excludes) {
+		public Builder excludes(@Nullable TypeReference reachableType, String... excludes) {
 			List<ResourcePatternHint> newExcludes = Arrays.stream(excludes)
 					.map(include -> new ResourcePatternHint(include, reachableType)).toList();
 			this.excludes.addAll(newExcludes);

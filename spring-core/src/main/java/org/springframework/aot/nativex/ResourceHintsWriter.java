@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ class ResourceHintsWriter {
 		return attributes;
 	}
 
-	private void handleResourceBundles(Map<String, Object> attributes, Stream<ResourceBundleHint> ressourceBundles) {
-		addIfNotEmpty(attributes, "bundles", ressourceBundles.map(this::toAttributes).toList());
+	private void handleResourceBundles(Map<String, Object> attributes, Stream<ResourceBundleHint> resourceBundles) {
+		addIfNotEmpty(attributes, "bundles", resourceBundles.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(ResourceBundleHint hint) {
