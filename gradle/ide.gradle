@@ -7,6 +7,7 @@ apply plugin: 'eclipse'
 eclipse.jdt {
 	sourceCompatibility = 17
 	targetCompatibility = 17
+	javaRuntimeName = "JavaSE-17"
 }
 
 // Replace classpath entries with project dependencies (GRADLE-1116)
