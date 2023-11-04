@@ -37,6 +37,7 @@ import org.springframework.util.comparator.Comparators;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link ConcurrentReferenceHashMap}.
@@ -95,26 +96,23 @@ class ConcurrentReferenceHashMapTests {
 
 	@Test
 	void shouldNeedNonNegativeInitialCapacity() {
-		new ConcurrentReferenceHashMap<Integer, String>(0, 1);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new TestWeakConcurrentCache<Integer, String>(-1, 1))
-			.withMessageContaining("Initial capacity must not be negative");
+		assertThatNoException().isThrownBy(() -> new ConcurrentReferenceHashMap<Integer, String>(0, 1));
+		assertThatIllegalArgumentException().isThrownBy(() -> new ConcurrentReferenceHashMap<Integer, String>(-1, 1))
+				.withMessageContaining("Initial capacity must not be negative");
 	}
 
 	@Test
 	void shouldNeedPositiveLoadFactor() {
-		new ConcurrentReferenceHashMap<Integer, String>(0, 0.1f, 1);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new TestWeakConcurrentCache<Integer, String>(0, 0.0f, 1))
-			.withMessageContaining("Load factor must be positive");
+		assertThatNoException().isThrownBy(() -> new ConcurrentReferenceHashMap<Integer, String>(0, 0.1f, 1));
+		assertThatIllegalArgumentException().isThrownBy(() -> new ConcurrentReferenceHashMap<Integer, String>(0, 0.0f, 1))
+				.withMessageContaining("Load factor must be positive");
 	}
 
 	@Test
 	void shouldNeedPositiveConcurrencyLevel() {
-		new ConcurrentReferenceHashMap<Integer, String>(1, 1);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new TestWeakConcurrentCache<Integer, String>(1, 0))
-			.withMessageContaining("Concurrency level must be positive");
+		assertThatNoException().isThrownBy(() -> new ConcurrentReferenceHashMap<Integer, String>(1, 1));
+		assertThatIllegalArgumentException().isThrownBy(() -> new ConcurrentReferenceHashMap<Integer, String>(1, 0))
+				.withMessageContaining("Concurrency level must be positive");
 	}
 
 	@Test
