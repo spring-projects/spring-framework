@@ -72,6 +72,8 @@ configure([rootProject] + javaProjects) { project ->
 		testImplementation("org.mockito:mockito-junit-jupiter")
 		testImplementation("io.mockk:mockk")
 		testImplementation("org.assertj:assertj-core")
+		implementation 'org.aspectj:aspectjweaver:1.9.6' // Use the latest version available
+		implementation 'org.aspectj:aspectjrt:1.9.6'     // Use the latest version available
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
