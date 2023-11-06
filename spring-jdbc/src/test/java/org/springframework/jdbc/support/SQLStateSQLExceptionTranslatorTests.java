@@ -84,7 +84,7 @@ class SQLStateSQLExceptionTranslatorTests {
 		assertTranslation("23000", 2627, DuplicateKeyException.class);
 	}
 
-	@Test
+	@Test  // gh-31554
 	void translateDuplicateKeySapHana() {
 		assertTranslation("23000", 301, DuplicateKeyException.class);
 	}
