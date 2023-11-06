@@ -19,7 +19,6 @@ package org.springframework.core.env
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 /**
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test
  *
  * @author Sebastien Deleuze
  */
-@Disabled
 class PropertyResolverExtensionsKotlinTests {
 
 	val propertyResolver = mockk<PropertyResolver>()
