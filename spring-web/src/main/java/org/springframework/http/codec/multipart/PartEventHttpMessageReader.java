@@ -191,7 +191,14 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 	private Publisher<? extends PartEvent> createEvents(HttpHeaders headers, Flux<MultipartParser.BodyToken> bodyTokens) {
 		if (MultipartUtils.isFormField(headers)) {
 			Flux<DataBuffer> contents = bodyTokens.map(MultipartParser.BodyToken::buffer);
-			int maxSize = (int) Math.min(this.maxInMemorySize, this.maxPartSize);
+			int maxSize;
+			if (this.maxPartSize == -1) {
+				maxSize = this.maxInMemorySize;
+			}
+			else {
+				// maxInMemorySize is an int, so we can safely cast the long result of Math.min
+				maxSize = (int) Math.min(this.maxInMemorySize, this.maxPartSize);
+			}
 			return DataBufferUtils.join(contents, maxSize)
 					.map(content -> {
 						String value = content.toString(MultipartUtils.charset(headers));
@@ -222,8 +229,13 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 	}
 
 	private boolean tooLarge(AtomicLong partSize, DataBuffer buffer) {
-		long size = partSize.addAndGet(buffer.readableByteCount());
-		return this.maxPartSize > 0 && size > this.maxPartSize;
+		if (this.maxPartSize != -1) {
+			long size = partSize.addAndGet(buffer.readableByteCount());
+			return size > this.maxPartSize;
+		}
+		else {
+			return false;
+		}
 	}
 
 }

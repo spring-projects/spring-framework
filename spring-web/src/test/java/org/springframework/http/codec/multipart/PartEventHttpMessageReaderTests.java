@@ -257,7 +257,21 @@ class PartEventHttpMessageReaderTests {
 				.assertNext(data(headersFormField("text2"), bodyText("b"), true))
 				.expectError(DataBufferLimitException.class)
 				.verify();
+	}
 
+	@Test
+	void formPartTooLarge() {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+
+		PartEventHttpMessageReader reader = new PartEventHttpMessageReader();
+		reader.setMaxInMemorySize(40);
+
+		Flux<PartEvent> result = reader.read(forClass(PartEvent.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.expectError(DataBufferLimitException.class)
+				.verify();
 	}
 
 	@Test
