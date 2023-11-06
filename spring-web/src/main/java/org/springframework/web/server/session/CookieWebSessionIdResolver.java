@@ -105,20 +105,20 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Assert.notNull(id, "'id' is required");
-		ResponseCookie cookie = initSessionCookie(exchange, id, getCookieMaxAge());
+		ResponseCookie cookie = initCookie(exchange, id).build();
 		exchange.getResponse().getCookies().set(this.cookieName, cookie);
 	}
 
 	@Override
 	public void expireSession(ServerWebExchange exchange) {
-		ResponseCookie cookie = initSessionCookie(exchange, "", Duration.ZERO);
+		ResponseCookie cookie = initCookie(exchange, "").maxAge(0).build();
 		exchange.getResponse().getCookies().set(this.cookieName, cookie);
 	}
 
-	private ResponseCookie initSessionCookie(ServerWebExchange exchange, String id, Duration maxAge) {
+	private ResponseCookie.ResponseCookieBuilder initCookie(ServerWebExchange exchange, String id) {
 		ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(this.cookieName, id)
 				.path(exchange.getRequest().getPath().contextPath().value() + "/")
-				.maxAge(maxAge)
+				.maxAge(getCookieMaxAge())
 				.httpOnly(true)
 				.secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
 				.sameSite("Lax");
@@ -127,7 +127,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 			this.initializer.accept(builder);
 		}
 
-		return builder.build();
+		return builder;
 	}
 
 }

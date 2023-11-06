@@ -54,6 +54,15 @@ public class CookieWebSessionIdResolverTests {
 		assertCookieValue("SESSION=123; Path=/; Domain=example.org; HttpOnly; SameSite=Strict");
 	}
 
+	@Test
+	public void expireSessionWhenMaxAgeSetViaInitializer() {
+		this.resolver.addCookieInitializer(builder -> builder.maxAge(600));
+		this.resolver.expireSession(this.exchange);
+
+		assertCookieValue("SESSION=; Path=/; Max-Age=0; " +
+				"Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax");
+	}
+
 	private void assertCookieValue(String expected) {
 		MultiValueMap<String, ResponseCookie> cookies = this.exchange.getResponse().getCookies();
 		assertThat(cookies).hasSize(1);
