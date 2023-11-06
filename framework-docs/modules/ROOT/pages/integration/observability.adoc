@@ -109,7 +109,8 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`code.function` _(required)_|Name of Java `Method` that is scheduled for execution.
 |`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method.
-|`exception` _(required)_|Name of the exception thrown during the execution, or `"none"` if no exception happened.
+|`error` _(required)_|Class name of the exception thrown during the execution, or `"none"` if no exception happened.
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution).
 |===
 
@@ -134,7 +135,8 @@ By default, both observations share the same set of possible `KeyValues`:
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` |Class name of the exception thrown during the messaging operation (or "none").
+|`error` |Class name of the exception thrown during the messaging operation (or "none").
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |`messaging.destination.temporary` _(required)_|Whether the destination is a `TemporaryQueue` or `TemporaryTopic` (values: `"true"` or `"false"`).
 |`messaging.operation` _(required)_|Name of JMS operation being performed (values: `"publish"` or `"process"`).
 |===
@@ -207,7 +209,8 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
@@ -244,7 +247,8 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
@@ -283,7 +287,8 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
 |`outcome` _(required)_|Outcome of the HTTP client exchange.
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |===
 
 .High cardinality Keys
@@ -310,7 +315,8 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
 |`outcome` _(required)_|Outcome of the HTTP client exchange.
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |===
 
 .High cardinality Keys
@@ -338,7 +344,8 @@ Instrumentation uses the `org.springframework.web.reactive.function.client.Clien
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
 |`outcome` _(required)_|Outcome of the HTTP client exchange.
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |===
 
 .High cardinality Keys
