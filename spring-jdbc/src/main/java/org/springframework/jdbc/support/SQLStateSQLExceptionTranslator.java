@@ -89,6 +89,14 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 			"61"   // Oracle: deadlock
 		);
 
+	private static final Set<Integer> DUPLICATE_KEY_ERROR_CODES = Set.of(
+			1,	   // Oracle
+			301,   // Sap Hana
+			1062,  // MySQL/MariaDB
+			2601,  // MS SQL Server
+			2627   // MS SQL Server
+		);
+
 
 	@Override
 	@Nullable
@@ -158,15 +166,13 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 	 * Check whether the given SQL state (and the associated error code in case
 	 * of a generic SQL state value) indicate a {@link DuplicateKeyException}:
 	 * either SQL state 23505 as a specific indication, or the generic SQL state
-	 * 23000 with well-known vendor codes (1 for Oracle, 1062 for MySQL/MariaDB,
-	 * 2601/2627 for MS SQL Server).
+	 * 23000 with well-known vendor codes.
 	 * @param sqlState the SQL state value
 	 * @param errorCode the error code value
 	 */
 	static boolean indicatesDuplicateKey(@Nullable String sqlState, int errorCode) {
 		return ("23505".equals(sqlState) ||
-				("23000".equals(sqlState) &&
-						(errorCode == 1 || errorCode == 1062 || errorCode == 2601 || errorCode == 2627)));
+				("23000".equals(sqlState) && DUPLICATE_KEY_ERROR_CODES.contains(errorCode)));
 	}
 
 	/**
