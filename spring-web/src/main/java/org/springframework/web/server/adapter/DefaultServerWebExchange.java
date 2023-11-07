@@ -247,18 +247,20 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	@Override
 	public Mono<Void> cleanupMultipart() {
-		if (this.multipartRead) {
-			return getMultipartData()
-					.onErrorComplete() // ignore errors reading multipart data
-					.flatMapIterable(Map::values)
-					.flatMapIterable(Function.identity())
-					.flatMap(part -> part.delete()
+		return Mono.defer(() -> {
+			if (this.multipartRead) {
+				return getMultipartData()
+						.onErrorComplete()
+						.flatMapIterable(Map::values)
+						.flatMapIterable(Function.identity())
+						.flatMap(part -> part.delete()
 									.onErrorComplete())
-					.then();
-		}
-		else {
-			return Mono.empty();
-		}
+						.then();
+			}
+			else {
+				return Mono.empty();
+			}
+		});
 	}
 
 	@Override
