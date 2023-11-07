@@ -224,6 +224,7 @@ public class ProblemDetail {
 	 * are rendered as top level key-value pairs in the output JSON. Otherwise,
 	 * they are rendered as a {@code "properties"} sub-map.
 	 * @param properties the properties map
+	 * @since 6.0.14
 	 */
 	public void setProperties(@Nullable Map<String, Object> properties) {
 		this.properties = properties;
