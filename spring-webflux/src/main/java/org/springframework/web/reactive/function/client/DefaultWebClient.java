@@ -698,7 +698,7 @@ final class DefaultWebClient implements WebClient {
 		private static URI getUriToLog(URI uri) {
 			if (StringUtils.hasText(uri.getQuery())) {
 				try {
-					uri = new URI(uri.getScheme(), uri.getHost(), uri.getPath(), null);
+					uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
 				}
 				catch (URISyntaxException ex) {
 					// ignore
