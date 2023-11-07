@@ -102,7 +102,7 @@ class ConnectionFactoryUtilsUnitTests {
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 301));
-		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+		assertThat(exception).as("SAP HANA").isExactlyInstanceOf(DuplicateKeyException.class);
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 1062));
