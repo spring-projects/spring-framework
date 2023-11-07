@@ -16,6 +16,7 @@
 
 package org.springframework.jms.listener;
 
+import io.micrometer.observation.Observation;
 import jakarta.jms.Connection;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
@@ -314,6 +315,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			}
 			Message message = receiveMessage(consumerToUse);
 			if (message != null) {
+				Observation observation = createObservation(message).start();
+				Observation.Scope scope = observation.openScope();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Received message of type [" + message.getClass() + "] from consumer [" +
 							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
@@ -347,6 +350,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 					if (exposeResource) {
 						TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
 					}
+					observation.stop();
+					scope.close();
 				}
 				// Indicate that a message has been received.
 				return true;

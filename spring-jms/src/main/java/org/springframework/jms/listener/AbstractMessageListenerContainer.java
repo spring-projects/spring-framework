@@ -675,11 +675,22 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #handleListenerException
 	 */
 	protected void executeListener(Session session, Message message) {
-		try {
-			doExecuteListener(session, message);
+		createObservation(message).observe(() -> {
+			try {
+				doExecuteListener(session, message);
+			}
+			catch (Throwable ex) {
+				handleListenerException(ex);
+			}
+		});
+	}
+
+	protected Observation createObservation(Message message) {
+		if (micrometerJakartaPresent && this.observationRegistry != null) {
+			return ObservationFactory.create(this.observationRegistry, message);
 		}
-		catch (Throwable ex) {
-			handleListenerException(ex);
+		else {
+			return Observation.NOOP;
 		}
 	}
 
@@ -705,23 +716,13 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		}
 
 		try {
-			Observation observation = createObservation(message);
-			observation.observeChecked(() -> invokeListener(session, message));
+			invokeListener(session, message);
 		}
 		catch (JMSException | RuntimeException | Error ex) {
 			rollbackOnExceptionIfNecessary(session, ex);
 			throw ex;
 		}
 		commitIfNecessary(session, message);
-	}
-
-	private Observation createObservation(Message message) {
-		if (micrometerJakartaPresent && this.observationRegistry != null) {
-			return ObservationFactory.create(this.observationRegistry, message);
-		}
-		else {
-			return Observation.NOOP;
-		}
 	}
 
 	/**

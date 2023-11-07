@@ -18,12 +18,15 @@ package org.springframework.jms.listener;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import io.micrometer.observation.Observation;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import jakarta.jms.MessageListener;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -69,6 +72,34 @@ class MessageListenerContainerObservationTests {
 		listenerContainer.afterPropertiesSet();
 		listenerContainer.start();
 		latch.await(2, TimeUnit.SECONDS);
+		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
+				.that()
+				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
+		listenerContainer.shutdown();
+		listenerContainer.stop();
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("listenerContainers")
+	void shouldHaveObservationScopeInErrorHandler(AbstractMessageListenerContainer listenerContainer) throws Exception {
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		jmsTemplate.convertAndSend("spring.test.observation", "message content");
+		CountDownLatch latch = new CountDownLatch(1);
+		AtomicReference<Observation> observationInErrorHandler = new AtomicReference<>();
+		listenerContainer.setConnectionFactory(connectionFactory);
+		listenerContainer.setObservationRegistry(registry);
+		listenerContainer.setDestinationName("spring.test.observation");
+		listenerContainer.setMessageListener((MessageListener) message -> {
+			throw new IllegalStateException("error");
+		});
+		listenerContainer.setErrorHandler(error -> {
+			observationInErrorHandler.set(registry.getCurrentObservation());
+			latch.countDown();
+		});
+		listenerContainer.afterPropertiesSet();
+		listenerContainer.start();
+		latch.await(2, TimeUnit.SECONDS);
+		Assertions.assertThat(observationInErrorHandler.get()).isNotNull();
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 				.that()
 				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
