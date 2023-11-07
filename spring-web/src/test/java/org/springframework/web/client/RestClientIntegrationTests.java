@@ -50,6 +50,8 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorNettyClientRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -483,6 +485,50 @@ class RestClientIntegrationTests {
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});
 	}
+
+	@ParameterizedRestClientTest // gh-31361
+	public void postForm(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setResponseCode(200));
+
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("foo", "bar");
+		formData.add("baz", "qux");
+
+		ResponseEntity<Void> result = this.restClient.post()
+				.uri("/form")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.body(formData)
+				.retrieve()
+				.toBodilessEntity();
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/form");
+			String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
+			assertThat(contentType).startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
+			String[] lines = request.getBody().readUtf8().split("\r\n");
+			assertThat(lines).hasSize(13);
+			assertThat(lines[0]).startsWith("--"); // boundary
+			assertThat(lines[1]).isEqualTo("Content-Disposition: form-data; name=\"foo\"");
+			assertThat(lines[2]).isEqualTo("Content-Type: text/plain;charset=UTF-8");
+			assertThat(lines[3]).isEqualTo("Content-Length: 3");
+			assertThat(lines[4]).isEmpty();
+			assertThat(lines[5]).isEqualTo("bar");
+			assertThat(lines[6]).startsWith("--"); // boundary
+			assertThat(lines[7]).isEqualTo("Content-Disposition: form-data; name=\"baz\"");
+			assertThat(lines[8]).isEqualTo("Content-Type: text/plain;charset=UTF-8");
+			assertThat(lines[9]).isEqualTo("Content-Length: 3");
+			assertThat(lines[10]).isEmpty();
+			assertThat(lines[11]).isEqualTo("qux");
+			assertThat(lines[12]).startsWith("--"); // boundary
+			assertThat(lines[12]).endsWith("--"); // boundary
+		});
+	}
+
 
 	@ParameterizedRestClientTest
 	void statusHandler(ClientHttpRequestFactory requestFactory) {
