@@ -82,6 +82,11 @@ public class SQLStateSQLExceptionTranslatorTests {
 	}
 
 	@Test
+	public void translateDuplicateKeySapHana() {
+		doTest("23000", 301, DuplicateKeyException.class);
+	}
+
+	@Test
 	public void translateDataAccessResourceFailure() {
 		doTest("53", DataAccessResourceFailureException.class);
 	}
