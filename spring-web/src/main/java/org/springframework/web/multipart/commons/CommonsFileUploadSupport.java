@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,16 +255,21 @@ public abstract class CommonsFileUploadSupport {
 		for (FileItem fileItem : fileItems) {
 			if (fileItem.isFormField()) {
 				String value;
-				String partEncoding = determineEncoding(fileItem.getContentType(), encoding);
-				try {
-					value = fileItem.getString(partEncoding);
-				}
-				catch (UnsupportedEncodingException ex) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
-								"' with encoding '" + partEncoding + "': using platform default");
+				if (fileItem.getSize() > 0) {
+					String partEncoding = determineEncoding(fileItem.getContentType(), encoding);
+					try {
+						value = fileItem.getString(partEncoding);
 					}
-					value = fileItem.getString();
+					catch (UnsupportedEncodingException ex) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
+									"' with encoding '" + partEncoding + "': using platform default");
+						}
+						value = fileItem.getString();
+					}
+				}
+				else {
+					value = "";
 				}
 				String[] curParam = multipartParameters.get(fileItem.getFieldName());
 				if (curParam == null) {
