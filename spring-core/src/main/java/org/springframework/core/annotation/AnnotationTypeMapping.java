@@ -103,8 +103,8 @@ final class AnnotationTypeMapping {
 	private final Set<Method> claimedAliases = new HashSet<>();
 
 
-	AnnotationTypeMapping(@Nullable AnnotationTypeMapping source,
-			Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
+	AnnotationTypeMapping(@Nullable AnnotationTypeMapping source, Class<? extends Annotation> annotationType,
+			@Nullable Annotation annotation, Set<Class<? extends Annotation>> visitedAnnotationTypes) {
 
 		this.source = source;
 		this.root = (source != null ? source.getRoot() : this);
@@ -124,7 +124,7 @@ final class AnnotationTypeMapping {
 		processAliases();
 		addConventionMappings();
 		addConventionAnnotationValues();
-		this.synthesizable = computeSynthesizableFlag();
+		this.synthesizable = computeSynthesizableFlag(visitedAnnotationTypes);
 	}
 
 
@@ -374,7 +374,10 @@ final class AnnotationTypeMapping {
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean computeSynthesizableFlag() {
+	private boolean computeSynthesizableFlag(Set<Class<? extends Annotation>> visitedAnnotationTypes) {
+		// Track that we have visited the current annotation type.
+		visitedAnnotationTypes.add(this.annotationType);
+
 		// Uses @AliasFor for local aliases?
 		for (int index : this.aliasMappings) {
 			if (index != -1) {
@@ -403,8 +406,12 @@ final class AnnotationTypeMapping {
 				if (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation())) {
 					Class<? extends Annotation> annotationType =
 							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.componentType());
-					if (annotationType != this.annotationType) {
-						AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
+					// Ensure we have not yet visited the current nested annotation type, in order
+					// to avoid infinite recursion for JVM languages other than Java that support
+					// recursive annotation definitions.
+					if (visitedAnnotationTypes.add(annotationType)) {
+						AnnotationTypeMapping mapping =
+								AnnotationTypeMappings.forAnnotationType(annotationType, visitedAnnotationTypes).get(0);
 						if (mapping.isSynthesizable()) {
 							return true;
 						}
