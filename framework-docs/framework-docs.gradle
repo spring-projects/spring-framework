@@ -6,6 +6,7 @@ plugins {
 
 description = "Spring Framework Docs"
 
+apply from: "${rootDir}/gradle/ide.gradle"
 apply from: "${rootDir}/gradle/publications.gradle"
 
 antora {
