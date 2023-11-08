@@ -144,7 +144,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * changing it to an externally managed scheduler.
 	 * <p>Note that this property is ignored when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
-	 * @see Schedulers#newBoundedElastic
+	 * @see Schedulers#boundedElastic
 	 */
 	public void setBlockingOperationScheduler(Scheduler blockingOperationScheduler) {
 		Assert.notNull(blockingOperationScheduler, "'blockingOperationScheduler' must not be null");
