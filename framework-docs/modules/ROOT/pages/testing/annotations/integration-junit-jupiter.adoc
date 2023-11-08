@@ -11,6 +11,7 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupite
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[`@NestedTestConfiguration`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-enabledif[`@EnabledIf`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-disabledif[`@DisabledIf`]
+* xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`]
 
 [[integration-testing-annotations-junit-jupiter-springjunitconfig]]
 == `@SpringJUnitConfig`

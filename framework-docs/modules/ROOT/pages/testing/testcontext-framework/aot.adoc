@@ -19,6 +19,15 @@ following features.
   use an AOT-optimized `ApplicationContext` that participates transparently with the
   xref:testing/testcontext-framework/ctx-management/caching.adoc[context cache].
 
+All tests are enabled in AOT mode by default. However, you can selectively disable an
+entire test class or individual test method in AOT mode by annotating it with
+xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`].
+When using JUnit Jupiter, you may selectively enable or disable tests in a GraalVM native
+image via Jupiter's `@EnabledInNativeImage` and `@DisabledInNativeImage` annotations.
+Note that `@DisabledInAotMode` also disables the annotated test class or test method when
+running within a GraalVM native image, analogous to JUnit Jupiter's
+`@DisabledInNativeImage` annotation.
+
 [TIP]
 ====
 By default, if an error is encountered during build-time AOT processing, an exception
