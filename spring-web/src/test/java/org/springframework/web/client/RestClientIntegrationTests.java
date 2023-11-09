@@ -63,6 +63,7 @@ import static org.junit.jupiter.api.Named.named;
  * Integration tests for {@link RestClient}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 class RestClientIntegrationTests {
 
@@ -171,6 +172,29 @@ class RestClientIntegrationTests {
 		Pojo pojo = result.getContainerValue();
 		assertThat(pojo.getFoo()).isEqualTo("foofoo");
 		assertThat(pojo.getBar()).isEqualTo("barbar");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	void retrieveJsonWithListParameterizedTypeReference(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		String content = "{\"containerValue\":[{\"bar\":\"barbar\",\"foo\":\"foofoo\"}]}";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		ValueContainer<List<Pojo>> result = this.restClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.body(new ParameterizedTypeReference<ValueContainer<List<Pojo>>>() {});
+
+		assertThat(result.containerValue).isNotNull();
+		assertThat(result.containerValue).containsExactly(new Pojo("foofoo", "barbar"));
 
 		expectRequestCount(1);
 		expectRequest(request -> {

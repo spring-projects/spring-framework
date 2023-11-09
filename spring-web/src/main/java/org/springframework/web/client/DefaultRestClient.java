@@ -69,6 +69,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * as created by the static factory methods.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 6.1
  * @see RestClient#create()
  * @see RestClient#create(String)
@@ -609,11 +610,11 @@ final class DefaultRestClient implements RestClient {
 
 				for (HttpMessageConverter<?> messageConverter : DefaultRestClient.this.messageConverters) {
 					if (messageConverter instanceof GenericHttpMessageConverter genericHttpMessageConverter) {
-						if (genericHttpMessageConverter.canRead(bodyType, bodyClass, contentType)) {
+						if (genericHttpMessageConverter.canRead(bodyType, null, contentType)) {
 							if (logger.isDebugEnabled()) {
 								logger.debug("Reading to [" + ResolvableType.forType(bodyType) + "]");
 							}
-							return (T) genericHttpMessageConverter.read(bodyType, bodyClass, this.clientResponse);
+							return (T) genericHttpMessageConverter.read(bodyType, null, this.clientResponse);
 						}
 					}
 					if (messageConverter.canRead(bodyClass, contentType)) {
