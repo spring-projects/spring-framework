@@ -179,12 +179,11 @@ script, depending on where `@Sql` is declared. If a default cannot be detected, 
 
 If you need to configure multiple sets of SQL scripts for a given test class or test
 method but with different syntax configuration, different error handling rules, or
-different execution phases per set, you can declare multiple instances of `@Sql`. With
-Java 8, you can use `@Sql` as a repeatable annotation. Otherwise, you can use the
-`@SqlGroup` annotation as an explicit container for declaring multiple instances of
-`@Sql`.
+different execution phases per set, you can declare multiple instances of `@Sql`. You can
+either use `@Sql` as a repeatable annotation, or you can use the `@SqlGroup` annotation
+as an explicit container for declaring multiple instances of `@Sql`.
 
-The following example shows how to use `@Sql` as a repeatable annotation with Java 8:
+The following example shows how to use `@Sql` as a repeatable annotation:
 
 [tabs]
 ======
@@ -204,7 +203,12 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// Repeatable annotations with non-SOURCE retention are not yet supported by Kotlin
+	@Test
+	@Sql("/test-schema.sql", config = SqlConfig(commentPrefix = "`"))
+	@Sql("/test-user-data.sql")
+	fun userTest() {
+		// run code that uses the test schema and test data
+	}
 ----
 ======
 
@@ -212,9 +216,8 @@ In the scenario presented in the preceding example, the `test-schema.sql` script
 different syntax for single-line comments.
 
 The following example is identical to the preceding example, except that the `@Sql`
-declarations are grouped together within `@SqlGroup`. With Java 8 and above, the use of
-`@SqlGroup` is optional, but you may need to use `@SqlGroup` for compatibility with
-other JVM languages such as Kotlin.
+declarations are grouped together within `@SqlGroup`. The use of `@SqlGroup` is optional,
+but you may need to use `@SqlGroup` for compatibility with other JVM languages.
 
 [tabs]
 ======
@@ -239,7 +242,8 @@ Kotlin::
 	@Test
 	@SqlGroup(
 		Sql("/test-schema.sql", config = SqlConfig(commentPrefix = "`")),
-		Sql("/test-user-data.sql"))
+		Sql("/test-user-data.sql")
+	)
 	fun userTest() {
 		// Run code that uses the test schema and test data
 	}
@@ -249,10 +253,10 @@ Kotlin::
 [[testcontext-executing-sql-declaratively-script-execution-phases]]
 === Script Execution Phases
 
-By default, SQL scripts are run before the corresponding test method. However, if
-you need to run a particular set of scripts after the test method (for example, to clean
-up database state), you can use the `executionPhase` attribute in `@Sql`, as the
-following example shows:
+By default, SQL scripts are run before the corresponding test method. However, if you
+need to run a particular set of scripts after the test method (for example, to clean up
+database state), you can set the `executionPhase` attribute in `@Sql` to
+`AFTER_TEST_METHOD`, as the following example shows:
 
 [tabs]
 ======
@@ -281,12 +285,11 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Test
-	@SqlGroup(
-		Sql("create-test-data.sql",
-			config = SqlConfig(transactionMode = ISOLATED)),
-		Sql("delete-test-data.sql",
-			config = SqlConfig(transactionMode = ISOLATED),
-			executionPhase = AFTER_TEST_METHOD))
+	@Sql("create-test-data.sql",
+		config = SqlConfig(transactionMode = ISOLATED))
+	@Sql("delete-test-data.sql",
+		config = SqlConfig(transactionMode = ISOLATED),
+		executionPhase = AFTER_TEST_METHOD)
 	fun userTest() {
 		// run code that needs the test data to be committed
 		// to the database outside of the test's transaction
@@ -294,7 +297,7 @@ Kotlin::
 ----
 ======
 
-Note that `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
+NOTE: `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
 `Sql.TransactionMode` and `Sql.ExecutionPhase`, respectively.
 
 [[testcontext-executing-sql-declaratively-script-configuration]]
