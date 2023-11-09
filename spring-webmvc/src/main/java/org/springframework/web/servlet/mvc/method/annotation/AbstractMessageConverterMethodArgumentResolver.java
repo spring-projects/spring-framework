@@ -23,6 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,7 @@ import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
@@ -170,7 +172,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		EmptyBodyCheckingHttpInputMessage message = null;
 		try {
 			message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
-
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
 				Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
 				GenericHttpMessageConverter<?> genericConverter =
@@ -190,6 +191,10 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 					break;
 				}
 			}
+			if (body == NO_VALUE && noContentType && !message.hasBody()) {
+				body = getAdvice().handleEmptyBody(
+						null, message, parameter, targetType, NoContentTypeHttpMessageConverter.class);
+			}
 		}
 		catch (IOException ex) {
 			throw new HttpMessageNotReadableException("I/O error while reading input message", ex, inputMessage);
@@ -201,8 +206,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		if (body == NO_VALUE) {
-			if (httpMethod == null || !SUPPORTED_METHODS.contains(httpMethod) ||
-					(noContentType && !message.hasBody())) {
+			if (httpMethod == null || !SUPPORTED_METHODS.contains(httpMethod) || (noContentType && !message.hasBody())) {
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType,
@@ -351,6 +355,40 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		public boolean hasBody() {
 			return (this.body != null);
+		}
+	}
+
+
+	/**
+	 * Placeholder HttpMessageConverter type to pass to RequestBodyAdvice if there
+	 * is no content-type and no content. In that case, we may not find a converter,
+	 * but RequestBodyAdvice have a chance to provide it via handleEmptyBody.
+	 */
+	private static class NoContentTypeHttpMessageConverter implements HttpMessageConverter<String> {
+
+		@Override
+		public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
+			return false;
+		}
+
+		@Override
+		public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
+			return false;
+		}
+
+		@Override
+		public List<MediaType> getSupportedMediaTypes() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public String read(Class<? extends String> clazz, HttpInputMessage inputMessage) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void write(String s, @Nullable MediaType contentType, HttpOutputMessage outputMessage) {
+			throw new UnsupportedOperationException();
 		}
 	}
 
