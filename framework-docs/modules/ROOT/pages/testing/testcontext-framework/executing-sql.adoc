@@ -95,13 +95,22 @@ In addition to the aforementioned mechanisms for running SQL scripts programmati
 you can declaratively configure SQL scripts in the Spring TestContext Framework.
 Specifically, you can declare the `@Sql` annotation on a test class or test method to
 configure individual SQL statements or the resource paths to SQL scripts that should be
-run against a given database before or after an integration test method. Support for
-`@Sql` is provided by the `SqlScriptsTestExecutionListener`, which is enabled by default.
+run against a given database before or after an integration test class or test method.
+Support for `@Sql` is provided by the `SqlScriptsTestExecutionListener`, which is enabled
+by default.
 
-NOTE: Method-level `@Sql` declarations override class-level declarations by default. As
-of Spring Framework 5.2, however, this behavior may be configured per test class or per
-test method via `@SqlMergeMode`. See
-xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively-script-merging[Merging and Overriding Configuration with `@SqlMergeMode`] for further details.
+[NOTE]
+====
+Method-level `@Sql` declarations override class-level declarations by default, but this
+behavior may be configured per test class or per test method via `@SqlMergeMode`. See
+xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively-script-merging[Merging and Overriding Configuration with `@SqlMergeMode`]
+for further details.
+
+However, this does not apply to class-level declarations configured for the
+`BEFORE_TEST_CLASS` or `AFTER_TEST_CLASS` execution phases. Such declarations cannot be
+overridden, and the corresponding scripts and statements will be executed once per class
+in addition to any method-level scripts and statements.
+====
 
 [[testcontext-executing-sql-declaratively-script-resources]]
 === Path Resource Semantics
@@ -299,6 +308,57 @@ Kotlin::
 
 NOTE: `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
 `Sql.TransactionMode` and `Sql.ExecutionPhase`, respectively.
+
+As of Spring Framework 6.1, it is possible to run a particular set of scripts before or
+after the test class by setting the `executionPhase` attribute in a class-level `@Sql`
+declaration to `BEFORE_TEST_CLASS` or `AFTER_TEST_CLASS`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitConfig
+	@Sql(scripts = "/test-schema.sql", executionPhase = BEFORE_TEST_CLASS)
+	class DatabaseTests {
+
+		@Test
+		void emptySchemaTest() {
+			// run code that uses the test schema without any test data
+		}
+
+		@Test
+		@Sql("/test-user-data.sql")
+		void userTest() {
+			// run code that uses the test schema and test data
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitConfig
+	@Sql("/test-schema.sql", executionPhase = BEFORE_TEST_CLASS)
+	class DatabaseTests {
+
+		@Test
+		fun emptySchemaTest() {
+			// run code that uses the test schema without any test data
+		}
+
+		@Test
+		@Sql("/test-user-data.sql")
+		fun userTest() {
+			// run code that uses the test schema and test data
+		}
+	}
+----
+======
+
+NOTE: `BEFORE_TEST_CLASS` is statically imported from `Sql.ExecutionPhase`.
 
 [[testcontext-executing-sql-declaratively-script-configuration]]
 === Script Configuration with `@SqlConfig`
