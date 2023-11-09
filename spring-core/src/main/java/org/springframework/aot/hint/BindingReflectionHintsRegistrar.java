@@ -159,6 +159,10 @@ public class BindingReflectionHintsRegistrar {
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {
 				collectReferencedTypes(types, genericResolvableType);
 			}
+			Class<?> superClass = clazz.getSuperclass();
+			if (superClass != null && superClass != Object.class && superClass != Record.class && superClass != Enum.class) {
+				types.add(superClass);
+			}
 		}
 	}
 
