@@ -28,7 +28,8 @@ import java.lang.annotation.Target;
  * instruct the <em>Spring TestContext Framework</em> to record all
  * {@linkplain org.springframework.context.ApplicationEvent application events}
  * that are published in the {@link org.springframework.context.ApplicationContext
- * ApplicationContext} during the execution of a single test.
+ * ApplicationContext} during the execution of a single test, either from the
+ * test thread or its descendants.
  *
  * <p>The recorded events can be accessed via the {@link ApplicationEvents} API
  * within your tests.
