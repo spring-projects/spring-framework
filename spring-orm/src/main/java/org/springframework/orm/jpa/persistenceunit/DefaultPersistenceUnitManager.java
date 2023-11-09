@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,9 @@ public class DefaultPersistenceUnitManager
 	private String[] packagesToScan;
 
 	@Nullable
+	private ManagedClassNameFilter managedClassNameFilter;
+
+	@Nullable
 	private String[] mappingResources;
 
 	@Nullable
@@ -223,12 +226,23 @@ public class DefaultPersistenceUnitManager
 	 * resource for the default unit if the mapping file is not co-located with a
 	 * {@code persistence.xml} file (in which case we assume it is only meant to be
 	 * used with the persistence units defined there, like in standard JPA).
+	 * @see #setManagedClassNameFilter(ManagedClassNameFilter)
 	 * @see #setManagedTypes(PersistenceManagedTypes)
 	 * @see #setDefaultPersistenceUnitName
 	 * @see #setMappingResources
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
+	}
+
+	/**
+	 * Set the {@link ManagedClassNameFilter} to apply on entity classes discovered
+	 * using {@linkplain #setPackagesToScan(String...) classpath scanning}.
+	 * @param managedClassNameFilter the predicate to filter entity classes
+	 * @since 6.1.4
+	 */
+	public void setManagedClassNameFilter(ManagedClassNameFilter managedClassNameFilter) {
+		this.managedClassNameFilter = managedClassNameFilter;
 	}
 
 	/**
@@ -535,8 +549,9 @@ public class DefaultPersistenceUnitManager
 			applyManagedTypes(scannedUnit, this.managedTypes);
 		}
 		else if (this.packagesToScan != null) {
-			applyManagedTypes(scannedUnit, new PersistenceManagedTypesScanner(
-					this.resourcePatternResolver).scan(this.packagesToScan));
+			PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(
+					this.resourcePatternResolver, this.managedClassNameFilter);
+			applyManagedTypes(scannedUnit, scanner.scan(this.packagesToScan));
 		}
 
 		if (this.mappingResources != null) {

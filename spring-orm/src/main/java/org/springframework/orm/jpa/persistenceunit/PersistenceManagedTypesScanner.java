@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,10 +80,20 @@ public final class PersistenceManagedTypesScanner {
 	@Nullable
 	private final CandidateComponentsIndex componentsIndex;
 
+	private final ManagedClassNameFilter managedClassNameFilter;
 
-	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
+
+	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader,
+			@Nullable ManagedClassNameFilter managedClassNameFilter) {
+
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
+		this.managedClassNameFilter = (managedClassNameFilter != null ? managedClassNameFilter
+				: className -> true);
+	}
+
+	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
+		this(resourceLoader, null);
 	}
 
 
@@ -107,7 +117,7 @@ public final class PersistenceManagedTypesScanner {
 			for (AnnotationTypeFilter filter : entityTypeFilters) {
 				candidates.addAll(this.componentsIndex.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
 			}
-			scanResult.managedClassNames.addAll(candidates);
+			scanResult.managedClassNames.addAll(candidates.stream().filter(this.managedClassNameFilter::matches).toList());
 			scanResult.managedPackages.addAll(this.componentsIndex.getCandidateTypes(pkg, "package-info"));
 			return;
 		}
@@ -121,7 +131,8 @@ public final class PersistenceManagedTypesScanner {
 				try {
 					MetadataReader reader = readerFactory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
-					if (matchesFilter(reader, readerFactory)) {
+					if (matchesEntityTypeFilter(reader, readerFactory)
+							&& this.managedClassNameFilter.matches(className)) {
 						scanResult.managedClassNames.add(className);
 						if (scanResult.persistenceUnitRootUrl == null) {
 							URL url = resource.getURL();
@@ -157,7 +168,7 @@ public final class PersistenceManagedTypesScanner {
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
 	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
+	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
 		for (TypeFilter filter : entityTypeFilters) {
 			if (filter.match(reader, readerFactory)) {
 				return true;
