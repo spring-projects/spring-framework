@@ -344,9 +344,10 @@ public class EnableSchedulingTests {
 		@Override
 		public TaskScheduler myTaskScheduler() {
 			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-			scheduler.setThreadNamePrefix("explicitScheduler-");
-			scheduler.setAwaitTerminationMillis(1000);
 			scheduler.setPoolSize(2);
+			scheduler.setThreadNamePrefix("explicitScheduler-");
+			scheduler.setAcceptTasksAfterContextClose(true);
+			scheduler.setAwaitTerminationMillis(1000);
 			return scheduler;
 		}
 	}

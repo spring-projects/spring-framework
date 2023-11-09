@@ -86,6 +86,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	@Nullable
 	private ExecutorLifecycleDelegate lifecycleDelegate;
 
+	private volatile boolean lateShutdown;
+
 
 	/**
 	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
@@ -127,8 +129,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * <p>Default is {@code false} as of 6.1, triggering an early soft shutdown of
 	 * the executor and therefore rejecting any further task submissions. Switch this
 	 * to {@code true} in order to let other components submit tasks even during their
-	 * own destruction callbacks, at the expense of a longer shutdown phase.
-	 * This will usually go along with
+	 * own stop and destruction callbacks, at the expense of a longer shutdown phase.
+	 * The executor will not go through a coordinated lifecycle stop phase then
+	 * but rather only stop tasks on its own shutdown. This usually goes along with
 	 * {@link #setWaitForTasksToCompleteOnShutdown "waitForTasksToCompleteOnShutdown"}.
 	 * <p>This flag will only have effect when the executor is running in a Spring
 	 * application context and able to receive the {@link ContextClosedEvent}.
@@ -144,9 +147,13 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Set whether to wait for scheduled tasks to complete on shutdown,
 	 * not interrupting running tasks and executing all tasks in the queue.
-	 * <p>Default is {@code false}, shutting down immediately through interrupting
-	 * ongoing tasks and clearing the queue. Switch this flag to {@code true} if
-	 * you prefer fully completed tasks at the expense of a longer shutdown phase.
+	 * <p>Default is {@code false}, with a coordinated lifecycle stop first (unless
+	 * {@link #setAcceptTasksAfterContextClose "acceptTasksAfterContextClose"}
+	 * has been set) and then an immediate shutdown through interrupting ongoing
+	 * tasks and clearing the queue. Switch this flag to {@code true} if you
+	 * prefer fully completed tasks at the expense of a longer shutdown phase.
+	 * The executor will not go through a coordinated lifecycle stop phase then
+	 * but rather only stop and wait for task completion on its own shutdown.
 	 * <p>Note that Spring's container shutdown continues while ongoing tasks
 	 * are being completed. If you want this executor to block and wait for the
 	 * termination of tasks before the rest of the container continues to shut
@@ -374,7 +381,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public void stop() {
-		if (this.lifecycleDelegate != null) {
+		if (this.lifecycleDelegate != null && !this.lateShutdown) {
 			this.lifecycleDelegate.stop();
 		}
 	}
@@ -386,8 +393,11 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public void stop(Runnable callback) {
-		if (this.lifecycleDelegate != null) {
+		if (this.lifecycleDelegate != null && !this.lateShutdown) {
 			this.lifecycleDelegate.stop(callback);
+		}
+		else {
+			callback.run();
 		}
 	}
 
@@ -439,10 +449,16 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	@Override
 	public void onApplicationEvent(ContextClosedEvent event) {
-		if (event.getApplicationContext() == this.applicationContext && !this.acceptTasksAfterContextClose) {
-			// Early shutdown signal: accept no further tasks, let existing tasks complete
-			// before hitting the actual destruction step in the shutdown() method above.
-			initiateShutdown();
+		if (event.getApplicationContext() == this.applicationContext) {
+			if (this.acceptTasksAfterContextClose || this.waitForTasksToCompleteOnShutdown) {
+				// Late shutdown without early stop lifecycle.
+				this.lateShutdown = true;
+			}
+			else {
+				// Early shutdown signal: accept no further tasks, let existing tasks complete
+				// before hitting the actual destruction step in the shutdown() method above.
+				initiateShutdown();
+			}
 		}
 	}
 

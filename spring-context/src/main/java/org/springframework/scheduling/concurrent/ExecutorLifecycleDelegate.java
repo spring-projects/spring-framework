@@ -97,7 +97,7 @@ final class ExecutorLifecycleDelegate implements SmartLifecycle {
 
 	@Override
 	public boolean isRunning() {
-		return (!this.executor.isShutdown() & !this.paused);
+		return (!this.paused && !this.executor.isTerminated());
 	}
 
 	void beforeExecute(Thread thread) {
