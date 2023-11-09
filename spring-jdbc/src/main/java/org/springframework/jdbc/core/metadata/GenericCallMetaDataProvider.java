@@ -273,6 +273,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 
+	@Nullable
 	private String identifierNameToUse(@Nullable String identifierName) {
 		if (identifierName == null) {
 			return null;

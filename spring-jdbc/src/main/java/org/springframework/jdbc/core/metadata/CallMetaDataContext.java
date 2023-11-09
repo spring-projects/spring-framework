@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.core.metadata;
 
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -434,14 +433,14 @@ public class CallMetaDataContext {
 					if (paramNameToUse == null) {
 						paramNameToUse = "";
 					}
-					if (meta.getParameterType() == DatabaseMetaData.procedureColumnOut) {
+					if (meta.isOutParameter()) {
 						workParams.add(provider.createDefaultOutParameter(paramNameToUse, meta));
 						outParamNames.add(paramNameToUse);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Added meta-data out parameter for '" + paramNameToUse + "'");
 						}
 					}
-					else if (meta.getParameterType() == DatabaseMetaData.procedureColumnInOut) {
+					else if (meta.isInOutParameter()) {
 						workParams.add(provider.createDefaultInOutParameter(paramNameToUse, meta));
 						outParamNames.add(paramNameToUse);
 						if (logger.isDebugEnabled()) {
