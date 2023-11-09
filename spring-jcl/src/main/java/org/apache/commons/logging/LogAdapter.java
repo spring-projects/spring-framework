@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,9 +154,12 @@ final class LogAdapter {
 		private static final LoggerContext loggerContext =
 				LogManager.getContext(Log4jLog.class.getClassLoader(), false);
 
-		private final ExtendedLogger logger;
+		private final String name;
+
+		private final transient ExtendedLogger logger;
 
 		public Log4jLog(String name) {
+			this.name = name;
 			LoggerContext context = loggerContext;
 			if (context == null) {
 				// Circular call in early-init scenario -> static field not initialized yet
@@ -269,6 +272,10 @@ final class LogAdapter {
 			else {
 				this.logger.logIfEnabled(FQCN, level, null, message, exception);
 			}
+		}
+
+		protected Object readResolve() {
+			return new Log4jLog(this.name);
 		}
 	}
 
