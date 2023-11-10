@@ -164,17 +164,16 @@ public class HandlerMappingIntrospector
 	 */
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
-		HttpServletRequest wrappedRequest = new AttributesPreservingRequest(request);
-
-		return doWithHandlerMapping(wrappedRequest, false, (mapping, executionChain) -> {
+		HttpServletRequest requestToUse = new AttributesPreservingRequest(request);
+		return doWithHandlerMapping(requestToUse, false, (mapping, executionChain) -> {
 			if (mapping instanceof MatchableHandlerMapping) {
 				PathPatternMatchableHandlerMapping pathPatternMapping = this.pathPatternMappings.get(mapping);
 				if (pathPatternMapping != null) {
-					RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(wrappedRequest);
+					RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(requestToUse);
 					return new LookupPathMatchableHandlerMapping(pathPatternMapping, requestPath);
 				}
 				else {
-					String lookupPath = (String) wrappedRequest.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
+					String lookupPath = (String) requestToUse.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
 					return new LookupPathMatchableHandlerMapping((MatchableHandlerMapping) mapping, lookupPath);
 				}
 			}
@@ -185,18 +184,25 @@ public class HandlerMappingIntrospector
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		AttributesPreservingRequest wrappedRequest = new AttributesPreservingRequest(request);
-		return doWithHandlerMappingIgnoringException(wrappedRequest, (handlerMapping, executionChain) -> {
-			for (HandlerInterceptor interceptor : executionChain.getInterceptorList()) {
-				if (interceptor instanceof CorsConfigurationSource ccs) {
-					return ccs.getCorsConfiguration(wrappedRequest);
+		try {
+			boolean ignoreException = true;
+			AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
+			return doWithHandlerMapping(requestToUse, ignoreException, (handlerMapping, executionChain) -> {
+				for (HandlerInterceptor interceptor : executionChain.getInterceptorList()) {
+					if (interceptor instanceof CorsConfigurationSource source) {
+						return source.getCorsConfiguration(requestToUse);
+					}
 				}
-			}
-			if (executionChain.getHandler() instanceof CorsConfigurationSource ccs) {
-				return ccs.getCorsConfiguration(wrappedRequest);
-			}
-			return null;
-		});
+				if (executionChain.getHandler() instanceof CorsConfigurationSource source) {
+					return source.getCorsConfiguration(requestToUse);
+				}
+				return null;
+			});
+		}
+		catch (Exception ex) {
+			// HandlerMapping exceptions have been ignored. Some more basic error perhaps like request parsing
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	@Nullable
@@ -235,18 +241,6 @@ public class HandlerMappingIntrospector
 			}
 		}
 		return null;
-	}
-
-	@Nullable
-	private <T> T doWithHandlerMappingIgnoringException(
-			HttpServletRequest request, BiFunction<HandlerMapping, HandlerExecutionChain, T> matchHandler) {
-
-		try {
-			return doWithHandlerMapping(request, true, matchHandler);
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("HandlerMapping exception not suppressed", ex);
-		}
 	}
 
 
