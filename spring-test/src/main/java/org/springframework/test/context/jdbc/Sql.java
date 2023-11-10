@@ -60,6 +60,11 @@ import org.springframework.core.annotation.AliasFor;
  * for details. This annotation may also be used as a <em>meta-annotation</em> to
  * create custom <em>composed annotations</em> with attribute overrides.
  *
+ * <p>If you want to see which SQL scripts are being executed, set the
+ * {@code org.springframework.test.context.jdbc} logging category to {@code DEBUG}.
+ * If you want to see which SQL statements are being executed, set the
+ * {@code org.springframework.jdbc.datasource.init} logging category to {@code DEBUG}.
+ *
  * <p>Use of this annotation requires the {@code spring-jdbc} and {@code spring-tx}
  * modules as well as their transitive dependencies to be present on the classpath.
  *

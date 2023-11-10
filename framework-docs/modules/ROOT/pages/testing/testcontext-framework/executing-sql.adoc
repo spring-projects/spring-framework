@@ -183,6 +183,15 @@ script, depending on where `@Sql` is declared. If a default cannot be detected, 
   defined in the class `com.example.MyTest`, the corresponding default script is
   `classpath:com/example/MyTest.testMethod.sql`.
 
+[[testcontext-executing-sql-declaratively-logging]]
+=== Logging SQL Scripts and Statements
+
+If you want to see which SQL scripts are being executed, set the
+`org.springframework.test.context.jdbc` logging category to `DEBUG`.
+
+If you want to see which SQL statements are being executed, set the
+`org.springframework.jdbc.datasource.init` logging category to `DEBUG`.
+
 [[testcontext-executing-sql-declaratively-multiple-annotations]]
 === Declaring Multiple `@Sql` Sets
 
