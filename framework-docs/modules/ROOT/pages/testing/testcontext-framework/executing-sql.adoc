@@ -387,7 +387,7 @@ individual attributes in {api-spring-framework}/test/context/jdbc/Sql.html[`@Sql
 {api-spring-framework}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] for details.
 
 [[testcontext-executing-sql-declaratively-tx]]
-*Transaction management for `@Sql`*
+==== Transaction management for `@Sql`
 
 By default, the `SqlScriptsTestExecutionListener` infers the desired transaction
 semantics for scripts configured by using `@Sql`. Specifically, SQL scripts are run
