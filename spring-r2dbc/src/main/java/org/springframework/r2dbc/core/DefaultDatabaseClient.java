@@ -364,7 +364,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		public <R> FetchSpec<R> mapProperties(Class<R> mappedClass) {
 			Assert.notNull(mappedClass, "Mapped class must not be null");
-			return execute(this.sqlSupplier, result -> result.map(new DataClassRowMapper<R>(mappedClass)));
+			return execute(this.sqlSupplier, result -> result.map(new DataClassRowMapper<>(mappedClass)));
 		}
 
 		@Override

@@ -99,7 +99,7 @@ public class CodeFlow implements Opcodes {
 		this.className = className;
 		this.classWriter = classWriter;
 		this.compilationScopes = new ArrayDeque<>();
-		this.compilationScopes.add(new ArrayList<String>());
+		this.compilationScopes.add(new ArrayList<>());
 	}
 
 

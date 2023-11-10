@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 		return new ClientCallback<>() {
 			@Override
 			public void completed(final ClientExchange exchange) {
-				exchange.setResponseListener(new ClientCallback<ClientExchange>() {
+				exchange.setResponseListener(new ClientCallback<>() {
 					@Override
 					public void completed(ClientExchange result) {
 						ClientResponse response = result.getResponse();
@@ -312,7 +312,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 		return new ClientCallback<>() {
 			@Override
 			public void completed(ClientExchange result) {
-				result.setResponseListener(new ClientCallback<ClientExchange>() {
+				result.setResponseListener(new ClientCallback<>() {
 					@Override
 					public void completed(final ClientExchange result) {
 						responses.add(result.getResponse());
