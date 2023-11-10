@@ -73,22 +73,32 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Property name for a common context checkpoint: {@value}.
 	 * @since 6.1
-	 * @see #CHECKPOINT_ON_REFRESH_VALUE
+	 * @see #ON_REFRESH_VALUE
 	 * @see org.crac.Core#checkpointRestore()
 	 */
 	public static final String CHECKPOINT_PROPERTY_NAME = "spring.context.checkpoint";
 
 	/**
-	 * Recognized value for the context checkpoint property: {@value}.
+	 * Property name for terminating the JVM when the context reaches a specific phase: {@value}.
+	 * @since 6.1
+	 * @see #ON_REFRESH_VALUE
+	 */
+	public static final String EXIT_PROPERTY_NAME = "spring.context.exit";
+
+	/**
+	 * Recognized value for the context checkpoint and exit properties: {@value}.
 	 * @since 6.1
 	 * @see #CHECKPOINT_PROPERTY_NAME
-	 * @see org.crac.Core#checkpointRestore()
+	 * @see #EXIT_PROPERTY_NAME
 	 */
-	public static final String CHECKPOINT_ON_REFRESH_VALUE = "onRefresh";
+	public static final String ON_REFRESH_VALUE = "onRefresh";
 
 
 	private static final boolean checkpointOnRefresh =
-			CHECKPOINT_ON_REFRESH_VALUE.equalsIgnoreCase(SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
+			ON_REFRESH_VALUE.equalsIgnoreCase(SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
+
+	private static final boolean exitOnRefresh =
+			ON_REFRESH_VALUE.equalsIgnoreCase(SpringProperties.getProperty(EXIT_PROPERTY_NAME));
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -181,6 +191,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	public void onRefresh() {
 		if (checkpointOnRefresh) {
 			new CracDelegate().checkpointRestore();
+		}
+		if (exitOnRefresh) {
+			Runtime.getRuntime().halt(0);
 		}
 
 		this.stoppedBeans = null;
