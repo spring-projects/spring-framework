@@ -16,12 +16,17 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -44,7 +49,9 @@ import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -137,7 +144,7 @@ public class HandlerMappingIntrospectorTests {
 	@Test
 	void getMatchableWhereHandlerMappingDoesNotImplementMatchableInterface() {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("mapping", TestHandlerMapping.class);
+		cxt.registerBean("mapping", HandlerMapping.class, () -> request -> new HandlerExecutionChain(new Object()));
 		cxt.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -193,20 +200,74 @@ public class HandlerMappingIntrospectorTests {
 		assertThat(corsConfig.getAllowedMethods()).isEqualTo(Collections.singletonList("POST"));
 	}
 
+	@Test
+	void cacheFilter() throws Exception {
+		testCacheFilter(new MockHttpServletRequest());
+	}
+
+	@Test
+	void cacheFilterRestoresPreviousValues() throws Exception {
+		TestMatchableHandlerMapping previousMapping = new TestMatchableHandlerMapping();
+		CorsConfiguration previousCorsConfig = new CorsConfiguration();
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(HandlerMappingIntrospector.MAPPING_ATTRIBUTE, previousMapping);
+		request.setAttribute(HandlerMappingIntrospector.CORS_CONFIG_ATTRIBUTE, previousCorsConfig);
+
+		testCacheFilter(request);
+
+		assertThat(previousMapping.getInvocationCount()).isEqualTo(0);
+		assertThat(request.getAttribute(HandlerMappingIntrospector.MAPPING_ATTRIBUTE)).isSameAs(previousMapping);
+		assertThat(request.getAttribute(HandlerMappingIntrospector.CORS_CONFIG_ATTRIBUTE)).isSameAs(previousCorsConfig);
+	}
+
+	private void testCacheFilter(MockHttpServletRequest request) throws IOException, ServletException {
+		TestMatchableHandlerMapping mapping = new TestMatchableHandlerMapping();
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.registerBean(TestMatchableHandlerMapping.class, () -> mapping);
+		context.refresh();
+
+		HandlerMappingIntrospector introspector = initIntrospector(context);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		Filter filter = (req, res, chain) -> {
+			try {
+				for (int i = 0; i < 10; i++) {
+					introspector.getMatchableHandlerMapping((HttpServletRequest) req);
+					introspector.getCorsConfiguration((HttpServletRequest) req);
+				}
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+			chain.doFilter(req, res);
+		};
+
+		HttpServlet servlet = new HttpServlet() {
+
+			@Override
+			protected void service(HttpServletRequest req, HttpServletResponse res) {
+				try {
+					res.getWriter().print("Success");
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException(ex);
+				}
+			}
+		};
+
+		new MockFilterChain(servlet, introspector.createCacheFilter(), filter)
+				.doFilter(request, response);
+
+		assertThat(response.getContentAsString()).isEqualTo("Success");
+		assertThat(mapping.getInvocationCount()).isEqualTo(1);
+	}
+
 	private HandlerMappingIntrospector initIntrospector(WebApplicationContext context) {
 		HandlerMappingIntrospector introspector = new HandlerMappingIntrospector();
 		introspector.setApplicationContext(context);
 		introspector.afterPropertiesSet();
 		return introspector;
-	}
-
-
-	private static class TestHandlerMapping implements HandlerMapping {
-
-		@Override
-		public HandlerExecutionChain getHandler(HttpServletRequest request) {
-			return new HandlerExecutionChain(new Object());
-		}
 	}
 
 
@@ -248,6 +309,7 @@ public class HandlerMappingIntrospectorTests {
 		}
 	}
 
+
 	private static class TestPathPatternParser extends PathPatternParser {
 
 		private final List<String> parsedPatterns = new ArrayList<>();
@@ -261,6 +323,27 @@ public class HandlerMappingIntrospectorTests {
 		public PathPattern parse(String pathPattern) throws PatternParseException {
 			this.parsedPatterns.add(pathPattern);
 			return super.parse(pathPattern);
+		}
+	}
+
+
+	private static class TestMatchableHandlerMapping implements MatchableHandlerMapping {
+
+		private int invocationCount;
+
+		public int getInvocationCount() {
+			return this.invocationCount;
+		}
+
+		@Override
+		public HandlerExecutionChain getHandler(HttpServletRequest request) {
+			this.invocationCount++;
+			return new HandlerExecutionChain(new Object());
+		}
+
+		@Override
+		public RequestMatchResult match(HttpServletRequest request, String pattern) {
+			throw new UnsupportedOperationException();
 		}
 	}
 

@@ -27,6 +27,9 @@ import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
@@ -76,6 +79,15 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class HandlerMappingIntrospector
 		implements CorsConfigurationSource, ApplicationContextAware, InitializingBean {
+
+	static final String MAPPING_ATTRIBUTE =
+			HandlerMappingIntrospector.class.getName() + ".HandlerMapping";
+
+	static final String CORS_CONFIG_ATTRIBUTE =
+			HandlerMappingIntrospector.class.getName() + ".CorsConfig";
+
+	private static final CorsConfiguration NO_CORS_CONFIG = new CorsConfiguration();
+
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -154,6 +166,58 @@ public class HandlerMappingIntrospector
 
 
 	/**
+	 * Return Filter that performs lookups, caches the results in request attributes,
+	 * and clears the attributes after the filter chain returns.
+	 * @since 6.0.14
+	 */
+	public Filter createCacheFilter() {
+		return (request, response, chain) -> {
+			MatchableHandlerMapping previousMapping = getCachedMapping(request);
+			CorsConfiguration previousCorsConfig = getCachedCorsConfiguration(request);
+			try {
+				HttpServletRequest wrappedRequest = new AttributesPreservingRequest((HttpServletRequest) request);
+				doWithHandlerMapping(wrappedRequest, false, (mapping, executionChain) -> {
+					MatchableHandlerMapping matchableMapping = createMatchableHandlerMapping(mapping, wrappedRequest);
+					CorsConfiguration corsConfig = getCorsConfiguration(wrappedRequest, executionChain);
+					setCache(request, matchableMapping, corsConfig);
+					return null;
+				});
+				chain.doFilter(request, response);
+			}
+			catch (Exception ex) {
+				throw new ServletException("HandlerMapping introspection failed", ex);
+			}
+			finally {
+				setCache(request, previousMapping, previousCorsConfig);
+			}
+		};
+	}
+
+	@Nullable
+	private static MatchableHandlerMapping getCachedMapping(ServletRequest request) {
+		return (MatchableHandlerMapping) request.getAttribute(MAPPING_ATTRIBUTE);
+	}
+
+	@Nullable
+	private static CorsConfiguration getCachedCorsConfiguration(ServletRequest request) {
+		return (CorsConfiguration) request.getAttribute(CORS_CONFIG_ATTRIBUTE);
+	}
+
+	private static void setCache(
+			ServletRequest request, @Nullable MatchableHandlerMapping mapping,
+			@Nullable CorsConfiguration corsConfig) {
+
+		if (mapping != null) {
+			request.setAttribute(MAPPING_ATTRIBUTE, mapping);
+			request.setAttribute(CORS_CONFIG_ATTRIBUTE, (corsConfig != null ? corsConfig : NO_CORS_CONFIG));
+		}
+		else {
+			request.removeAttribute(MAPPING_ATTRIBUTE);
+			request.removeAttribute(CORS_CONFIG_ATTRIBUTE);
+		}
+	}
+
+	/**
 	 * Find the {@link HandlerMapping} that would handle the given request and
 	 * return a {@link MatchableHandlerMapping} to use for path matching.
 	 * @param request the current request
@@ -164,6 +228,10 @@ public class HandlerMappingIntrospector
 	 */
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
+		MatchableHandlerMapping cachedMapping = getCachedMapping(request);
+		if (cachedMapping != null) {
+			return cachedMapping;
+		}
 		HttpServletRequest requestToUse = new AttributesPreservingRequest(request);
 		return doWithHandlerMapping(requestToUse, false,
 				(mapping, executionChain) -> createMatchableHandlerMapping(mapping, requestToUse));
@@ -187,6 +255,10 @@ public class HandlerMappingIntrospector
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		CorsConfiguration cachedCorsConfiguration = getCachedCorsConfiguration(request);
+		if (cachedCorsConfiguration != null) {
+			return (cachedCorsConfiguration != NO_CORS_CONFIG ? cachedCorsConfiguration : null);
+		}
 		try {
 			boolean ignoreException = true;
 			AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
