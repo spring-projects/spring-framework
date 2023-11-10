@@ -165,20 +165,23 @@ public class HandlerMappingIntrospector
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
 		HttpServletRequest requestToUse = new AttributesPreservingRequest(request);
-		return doWithHandlerMapping(requestToUse, false, (mapping, executionChain) -> {
-			if (mapping instanceof MatchableHandlerMapping) {
-				PathPatternMatchableHandlerMapping pathPatternMapping = this.pathPatternMappings.get(mapping);
-				if (pathPatternMapping != null) {
-					RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(requestToUse);
-					return new LookupPathMatchableHandlerMapping(pathPatternMapping, requestPath);
-				}
-				else {
-					String lookupPath = (String) requestToUse.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
-					return new LookupPathMatchableHandlerMapping((MatchableHandlerMapping) mapping, lookupPath);
-				}
+		return doWithHandlerMapping(requestToUse, false,
+				(mapping, executionChain) -> createMatchableHandlerMapping(mapping, requestToUse));
+	}
+
+	private MatchableHandlerMapping createMatchableHandlerMapping(HandlerMapping mapping, HttpServletRequest request) {
+		if (mapping instanceof MatchableHandlerMapping) {
+			PathPatternMatchableHandlerMapping pathPatternMapping = this.pathPatternMappings.get(mapping);
+			if (pathPatternMapping != null) {
+				RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
+				return new LookupPathMatchableHandlerMapping(pathPatternMapping, requestPath);
 			}
-			throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
-		});
+			else {
+				String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
+				return new LookupPathMatchableHandlerMapping((MatchableHandlerMapping) mapping, lookupPath);
+			}
+		}
+		throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
 	}
 
 	@Override
@@ -187,22 +190,26 @@ public class HandlerMappingIntrospector
 		try {
 			boolean ignoreException = true;
 			AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
-			return doWithHandlerMapping(requestToUse, ignoreException, (handlerMapping, executionChain) -> {
-				for (HandlerInterceptor interceptor : executionChain.getInterceptorList()) {
-					if (interceptor instanceof CorsConfigurationSource source) {
-						return source.getCorsConfiguration(requestToUse);
-					}
-				}
-				if (executionChain.getHandler() instanceof CorsConfigurationSource source) {
-					return source.getCorsConfiguration(requestToUse);
-				}
-				return null;
-			});
+			return doWithHandlerMapping(requestToUse, ignoreException,
+					(handlerMapping, executionChain) -> getCorsConfiguration(requestToUse, executionChain));
 		}
 		catch (Exception ex) {
 			// HandlerMapping exceptions have been ignored. Some more basic error perhaps like request parsing
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	@Nullable
+	private static CorsConfiguration getCorsConfiguration(HttpServletRequest request, HandlerExecutionChain chain) {
+		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+			if (interceptor instanceof CorsConfigurationSource source) {
+				return source.getCorsConfiguration(request);
+			}
+		}
+		if (chain.getHandler() instanceof CorsConfigurationSource source) {
+			return source.getCorsConfiguration(request);
+		}
+		return null;
 	}
 
 	@Nullable
