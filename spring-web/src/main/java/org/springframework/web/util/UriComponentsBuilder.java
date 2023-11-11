@@ -333,7 +333,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
 	 * {@code null} if the headers are not present.
 	 * @since 5.3
-	 * @deprecated in favor of {@link ForwardedHeaderUtils#adaptFromForwardedHeaders};
+	 * @deprecated in favor of {@link ForwardedHeaderUtils#parseForwardedFor};
 	 * to be removed in 6.2
 	 */
 	@Deprecated(since = "6.1", forRemoval = true)
