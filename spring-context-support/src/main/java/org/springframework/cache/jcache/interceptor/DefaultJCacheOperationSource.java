@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * Only resolve the default exception cache resolver when an exception needs to be handled.
 	 * <p>A non-JSR-107 setup requires either a {@link CacheManager} or a {@link CacheResolver}.
 	 * If only the latter is specified, it is not possible to extract a default exception
-	 * {@code CacheResolver} from a custom {@code CacheResolver} implementation so we have to
+	 * {@code CacheResolver} from a custom {@code CacheResolver} implementation, so we have to
 	 * fall back on the {@code CacheManager}.
 	 * <p>This gives this weird situation of a perfectly valid configuration that breaks all
 	 * of a sudden because the JCache support is enabled. To avoid this we resolve the default
