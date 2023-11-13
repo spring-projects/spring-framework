@@ -491,7 +491,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					int prefixIndex = filePath.indexOf(':');
 					if (prefixIndex == 1) {
 						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
-						filePath = StringUtils.capitalize(filePath);
+						// to resolve find duplicate jar resource on windows
+						filePath = "/" + StringUtils.capitalize(filePath);
 					}
 					// Since '#' can appear in directories/filenames, java.net.URL should not treat it as a fragment
 					filePath = StringUtils.replace(filePath, "#", "%23");
