@@ -662,6 +662,55 @@ class RestClientIntegrationTests {
 	}
 
 	@ParameterizedRestClientTest
+	void exchangeForJson(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json")
+				.setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
+
+		Pojo result = this.restClient.get()
+				.uri("/pojo")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange((request, response) -> response.bodyTo(Pojo.class));
+
+		assertThat(result.getFoo()).isEqualTo("foofoo");
+		assertThat(result.getBar()).isEqualTo("barbar");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/pojo");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	void exchangeForJsonArray(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json")
+				.setBody("[{\"bar\":\"bar1\",\"foo\":\"foo1\"},{\"bar\":\"bar2\",\"foo\":\"foo2\"}]"));
+
+		List<Pojo> result = this.restClient.get()
+				.uri("/pojo")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange((request, response) -> response.bodyTo(new ParameterizedTypeReference<>() {}));
+
+		assertThat(result).hasSize(2);
+		assertThat(result.get(0).getFoo()).isEqualTo("foo1");
+		assertThat(result.get(0).getBar()).isEqualTo("bar1");
+		assertThat(result.get(1).getFoo()).isEqualTo("foo2");
+		assertThat(result.get(1).getBar()).isEqualTo("bar2");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/pojo");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
 	void exchangeFor404(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
