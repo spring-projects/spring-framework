@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -429,8 +429,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					String filePath = new File(path).getAbsolutePath();
 					int prefixIndex = filePath.indexOf(':');
 					if (prefixIndex == 1) {
-						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
-						// to resolve find duplicate jar resource on windows
+						// Possibly a drive prefix on Windows (for example, "c:"), so we prepend a slash
+						// and convert the drive letter to uppercase for consistent duplicate detection.
 						filePath = "/" + StringUtils.capitalize(filePath);
 					}
 					// # can appear in directories/filenames, java.net.URL should not treat it as a fragment
