@@ -67,7 +67,7 @@ abstract class NamedParameterUtils {
 	 * Set of characters that qualify as parameter separators,
 	 * indicating that a parameter name in an SQL String has ended.
 	 */
-	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^]";
+	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^";
 
 	/**
 	 * An index with separator flags per character code.
@@ -83,12 +83,12 @@ abstract class NamedParameterUtils {
 
 
 	// -------------------------------------------------------------------------
-	// Core methods used by NamedParameterSupport.
+	// Core methods used by NamedParameterExpander
 	// -------------------------------------------------------------------------
 
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
-	 * Named parameters are substituted for a R2DBC placeholder.
+	 * Named parameters are substituted for an R2DBC placeholder.
 	 * @param sql the SQL statement
 	 * @return the parsed statement, represented as {@link ParsedSql} instance
 	 */
@@ -154,16 +154,25 @@ abstract class NamedParameterUtils {
 					j++;
 				}
 				else {
-					while (j < statement.length && !isParameterSeparator(statement[j])) {
+					boolean paramWithSquareBrackets = false;
+					while (j < statement.length) {
+						c = statement[j];
+						if (isParameterSeparator(c)) {
+							break;
+						}
+						if (c == '[') {
+							paramWithSquareBrackets = true;
+						}
+						else if (c == ']') {
+							if (!paramWithSquareBrackets) {
+								break;
+							}
+							paramWithSquareBrackets = false;
+						}
 						j++;
 					}
 					if (j - i > 1) {
 						parameter = sql.substring(i + 1, j);
-						if (j < statement.length && statement[j] == ']' && parameter.contains("[")) {
-							// preserve end bracket for index/key
-							j++;
-							parameter = sql.substring(i + 1, j);
-						}
 						namedParameterCount = addNewNamedParameter(
 								namedParameters, namedParameterCount, parameter);
 						totalParameterCount = addNamedParameter(
@@ -261,7 +270,7 @@ abstract class NamedParameterUtils {
 
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters. Named
-	 * parameters are substituted for a R2DBC placeholder, and any select list is expanded
+	 * parameters are substituted for an R2DBC placeholder, and any select list is expanded
 	 * to the required number of placeholders. Select lists may contain an array of objects,
 	 * and in that case the placeholders will be grouped and enclosed with parentheses.
 	 * This allows for the use of "expression lists" in the SQL statement like:
