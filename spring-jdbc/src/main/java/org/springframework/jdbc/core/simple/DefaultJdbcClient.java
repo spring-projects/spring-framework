@@ -245,6 +245,16 @@ final class DefaultJdbcClient implements JdbcClient {
 					classicOps.update(getPreparedStatementCreatorForIndexedParams(true), generatedKeyHolder));
 		}
 
+		@Override
+		public int update(KeyHolder generatedKeyHolder, String keyColumnName) {
+			return update(keyGenerator, List.of(keyColumnName));
+		}
+
+		@Override
+		public int update(KeyHolder generatedKeyHolder, List<String> keyColumnNames) {
+			return namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder, keyColumnNames.toArray(new String[] {}));
+		}
+
 		private boolean useNamedParams() {
 			boolean hasNamedParams = (this.namedParams.hasValues() || this.namedParamSource != this.namedParams);
 			if (hasNamedParams && !this.indexedParams.isEmpty()) {
