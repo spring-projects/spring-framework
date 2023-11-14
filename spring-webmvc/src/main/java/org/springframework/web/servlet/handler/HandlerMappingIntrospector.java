@@ -332,7 +332,8 @@ public class HandlerMappingIntrospector
 	 * for a given request identified by dispatcher type and requestURI.
 	 * @since 6.0.14
 	 */
-	public final static class CachedResult {
+	@SuppressWarnings("serial")
+	public static final class CachedResult {
 
 		private final DispatcherType dispatcherType;
 
