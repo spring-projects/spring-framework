@@ -52,7 +52,6 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.function.support.RouterFunctionMapping;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector.CachedResult;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -217,7 +216,7 @@ public class HandlerMappingIntrospectorTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		MockFilterChain filterChain = new MockFilterChain(
-				new TestServlet(), new CacheResultFilter(introspector), new AuthFilter(introspector, corsConfig));
+				new TestServlet(), introspector.createCacheFilter(), new AuthFilter(introspector, corsConfig));
 
 		filterChain.doFilter(request, response);
 
@@ -241,10 +240,10 @@ public class HandlerMappingIntrospectorTests {
 
 		MockFilterChain filterChain = new MockFilterChain(
 				new TestServlet(),
-				new CacheResultFilter(introspector),
+				introspector.createCacheFilter(),
 				new AuthFilter(introspector, corsConfig1),
 				(req, res, chain) -> chain.doFilter(new MockHttpServletRequest("GET", "/2"), res),
-				new CacheResultFilter(introspector),
+				introspector.createCacheFilter(),
 				new AuthFilter(introspector, corsConfig2));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -368,32 +367,6 @@ public class HandlerMappingIntrospectorTests {
 		@Override
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			return this.corsConfig;
-		}
-	}
-
-
-	private static class CacheResultFilter implements Filter {
-
-		private final HandlerMappingIntrospector introspector;
-
-		private CacheResultFilter(HandlerMappingIntrospector introspector) {
-			this.introspector = introspector;
-		}
-
-		@Override
-		public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-				throws ServletException {
-
-			CachedResult previousValue = this.introspector.setCache((HttpServletRequest) req);
-			try {
-				chain.doFilter(req, res);
-			}
-			catch (Exception ex) {
-				throw new ServletException("HandlerMapping introspection failed", ex);
-			}
-			finally {
-				this.introspector.resetCache(req, previousValue);
-			}
 		}
 	}
 
