@@ -34,16 +34,18 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
  * Integration tests for {@link JdbcClient} using an embedded H2 database.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 6.1
  * @see JdbcClientIndexedParameterTests
  * @see JdbcClientNamedParameterTests
  */
 class JdbcClientIntegrationTests {
 
+	private static final String INSERT_WITH_JDBC_PARAMS =
+			"INSERT INTO users (first_name, last_name) VALUES(?, ?)";
+
 	private static final String INSERT_WITH_NAMED_PARAMS =
 			"INSERT INTO users (first_name, last_name) VALUES(:firstName, :lastName)";
-	private static final String INSERT_WITH_POSITIONAL_PARAMS =
-			"INSERT INTO users (first_name, last_name) VALUES(?, ?)";
 
 
 	private final EmbeddedDatabase embeddedDatabase =
@@ -66,15 +68,16 @@ class JdbcClientIntegrationTests {
 		this.embeddedDatabase.shutdown();
 	}
 
+
 	@Test
-	void updateWithGeneratedKeysAndPositionalParameters() {
+	void updateWithGeneratedKeys() {
 		int expectedId = 2;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
-		int rowsAffected = this.jdbcClient.sql(INSERT_WITH_POSITIONAL_PARAMS)
+		int rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.params(firstName, lastName)
 				.update(generatedKeyHolder);
 
@@ -85,7 +88,25 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
-	void updateWithGeneratedKeysAndNamedParameters() {
+	void updateWithGeneratedKeysAndKeyColumnNames() {
+		int expectedId = 2;
+		String firstName = "Jane";
+		String lastName = "Smith";
+
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+
+		int rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.params(firstName, lastName)
+				.update(generatedKeyHolder, "id");
+
+		assertThat(rowsAffected).isEqualTo(1);
+		assertThat(generatedKeyHolder.getKey()).isEqualTo(expectedId);
+		assertNumUsers(2);
+		assertUser(expectedId, firstName, lastName);
+	}
+
+	@Test
+	void updateWithGeneratedKeysUsingNamedParameters() {
 		int expectedId = 2;
 		String firstName = "Jane";
 		String lastName = "Smith";
@@ -103,6 +124,26 @@ class JdbcClientIntegrationTests {
 		assertUser(expectedId, firstName, lastName);
 	}
 
+	@Test
+	void updateWithGeneratedKeysAndKeyColumnNamesUsingNamedParameters() {
+		int expectedId = 2;
+		String firstName = "Jane";
+		String lastName = "Smith";
+
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+
+		int rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.param("firstName", firstName)
+				.param("lastName", lastName)
+				.update(generatedKeyHolder, "id");
+
+		assertThat(rowsAffected).isEqualTo(1);
+		assertThat(generatedKeyHolder.getKey()).isEqualTo(expectedId);
+		assertNumUsers(2);
+		assertUser(expectedId, firstName, lastName);
+	}
+
+
 	private void assertNumUsers(long count) {
 		long numUsers = this.jdbcClient.sql("select count(id) from users").query(Long.class).single();
 		assertThat(numUsers).isEqualTo(count);
@@ -112,6 +153,7 @@ class JdbcClientIntegrationTests {
 		User user = this.jdbcClient.sql("select * from users where id = ?").param(id).query(User.class).single();
 		assertThat(user).isEqualTo(new User(id, firstName, lastName));
 	}
+
 
 	record User(long id, String firstName, String lastName) {};
 

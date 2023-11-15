@@ -218,7 +218,7 @@ final class DefaultJdbcClient implements JdbcClient {
 				namedParamOps.query(this.sql, this.namedParamSource, rch);
 			}
 			else {
-				classicOps.query(getPreparedStatementCreatorForIndexedParams(), rch);
+				classicOps.query(statementCreatorForIndexedParams(), rch);
 			}
 		}
 
@@ -226,7 +226,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		public <T> T query(ResultSetExtractor<T> rse) {
 			T result = (useNamedParams() ?
 					namedParamOps.query(this.sql, this.namedParamSource, rse) :
-					classicOps.query(getPreparedStatementCreatorForIndexedParams(), rse));
+					classicOps.query(statementCreatorForIndexedParams(), rse));
 			Assert.state(result != null, "No result from ResultSetExtractor");
 			return result;
 		}
@@ -235,14 +235,21 @@ final class DefaultJdbcClient implements JdbcClient {
 		public int update() {
 			return (useNamedParams() ?
 					namedParamOps.update(this.sql, this.namedParamSource) :
-					classicOps.update(getPreparedStatementCreatorForIndexedParams()));
+					classicOps.update(statementCreatorForIndexedParams()));
 		}
 
 		@Override
 		public int update(KeyHolder generatedKeyHolder) {
 			return (useNamedParams() ?
 					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder) :
-					classicOps.update(getPreparedStatementCreatorForIndexedParams(true), generatedKeyHolder));
+					classicOps.update(statementCreatorForIndexedParamsWithKeys(null), generatedKeyHolder));
+		}
+
+		@Override
+		public int update(KeyHolder generatedKeyHolder, String... keyColumnNames) {
+			return (useNamedParams() ?
+					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder, keyColumnNames) :
+					classicOps.update(statementCreatorForIndexedParamsWithKeys(keyColumnNames), generatedKeyHolder));
 		}
 
 		private boolean useNamedParams() {
@@ -257,14 +264,19 @@ final class DefaultJdbcClient implements JdbcClient {
 			return hasNamedParams;
 		}
 
-		private PreparedStatementCreator getPreparedStatementCreatorForIndexedParams() {
-			return getPreparedStatementCreatorForIndexedParams(false);
+		private PreparedStatementCreator statementCreatorForIndexedParams() {
+			return new PreparedStatementCreatorFactory(this.sql).newPreparedStatementCreator(this.indexedParams);
 		}
 
-		private PreparedStatementCreator getPreparedStatementCreatorForIndexedParams(boolean returnGeneratedKeys) {
-			PreparedStatementCreatorFactory factory = new PreparedStatementCreatorFactory(this.sql);
-			factory.setReturnGeneratedKeys(returnGeneratedKeys);
-			return factory.newPreparedStatementCreator(this.indexedParams);
+		private PreparedStatementCreator statementCreatorForIndexedParamsWithKeys(@Nullable String[] keyColumnNames) {
+			PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(this.sql);
+			if (keyColumnNames != null) {
+				pscf.setGeneratedKeysColumnNames(keyColumnNames);
+			}
+			else {
+				pscf.setReturnGeneratedKeys(true);
+			}
+			return pscf.newPreparedStatementCreator(this.indexedParams);
 		}
 
 
