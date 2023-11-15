@@ -78,7 +78,7 @@ class GeneratedFilesTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> this.generatedFiles
 						.addSourceFile("com/example/HelloWorld.java", "{}"))
-				.withMessage("'className' must be a valid identifier");
+				.withMessage("'className' com/example/HelloWorld.java must be a valid identifier");
 	}
 
 	@Test
