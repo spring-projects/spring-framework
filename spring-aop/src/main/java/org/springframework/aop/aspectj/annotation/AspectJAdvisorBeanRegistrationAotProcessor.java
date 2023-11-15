@@ -22,6 +22,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * An AOT {@link BeanRegistrationAotProcessor} that detects the presence of
@@ -30,13 +31,18 @@ import org.springframework.beans.factory.support.RegisteredBean;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-public class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
+class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
+
+	private static final boolean aspectJPresent = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
+			AspectJAdvisorBeanRegistrationAotProcessor.class.getClassLoader());
 
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		Class<?> beanClass = registeredBean.getBeanClass();
-		if (AbstractAspectJAdvisorFactory.compiledByAjc(beanClass)) {
-			return new AspectJAdvisorContribution(beanClass);
+		if (aspectJPresent) {
+			Class<?> beanClass = registeredBean.getBeanClass();
+			if (AbstractAspectJAdvisorFactory.compiledByAjc(beanClass)) {
+				return new AspectJAdvisorContribution(beanClass);
+			}
 		}
 		return null;
 	}

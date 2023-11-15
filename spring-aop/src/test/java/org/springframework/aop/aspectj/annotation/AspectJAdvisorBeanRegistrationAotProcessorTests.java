@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj;
+package org.springframework.aop.aspectj.annotation;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aop.aspectj.annotation.AspectJAdvisorBeanRegistrationAotProcessor;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -38,7 +37,7 @@ import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.refl
  *
  * @author Sebastien Deleuze
  */
-public class AspectJAdvisorBeanRegistrationAotProcessorTests {
+class AspectJAdvisorBeanRegistrationAotProcessorTests {
 
 	private final GenerationContext generationContext = new TestGenerationContext();
 
