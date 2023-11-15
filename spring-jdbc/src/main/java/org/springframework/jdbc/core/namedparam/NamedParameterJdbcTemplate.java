@@ -366,11 +366,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
-		return batchUpdate(sql, SqlParameterSourceUtils.createBatch(batchValues));
-	}
-
-	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
 		if (batchArgs.length == 0) {
 			return new int[0];
@@ -392,6 +387,11 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 						return batchArgs.length;
 					}
 				});
+	}
+
+	@Override
+	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
+		return batchUpdate(sql, SqlParameterSourceUtils.createBatch(batchValues));
 	}
 
 	@Override
