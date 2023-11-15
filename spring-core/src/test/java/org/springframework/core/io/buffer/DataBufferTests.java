@@ -796,10 +796,6 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		if (!(bufferFactory instanceof Netty5DataBufferFactory)) {
 			assertThat(result).isEqualTo(new byte[]{'b', 'c'});
 		}
-		else {
-			assertThat(result).isEqualTo(new byte[]{'b', 0});
-			release(slice);
-		}
 		release(buffer);
 	}
 
@@ -936,6 +932,17 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.getByte(3));
 
 		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest // gh-31605
+	void shouldHonorSourceBuffersReadPosition(DataBufferFactory bufferFactory) {
+		DataBuffer dataBuffer = bufferFactory.wrap("ab".getBytes(StandardCharsets.UTF_8));
+		dataBuffer.readPosition(1);
+
+		ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+		dataBuffer.toByteBuffer(byteBuffer);
+
+		assertThat(StandardCharsets.UTF_8.decode(byteBuffer).toString()).isEqualTo("b");
 	}
 
 }
