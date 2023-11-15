@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class GeneratedFilesTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> this.generatedFiles
 						.addSourceFile("com/example/HelloWorld.java", "{}"))
-				.withMessage("'className' must be a valid identifier");
+				.withMessage("'className' must be a valid identifier, got 'com/example/HelloWorld.java'");
 	}
 
 	@Test
