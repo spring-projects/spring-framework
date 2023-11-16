@@ -120,8 +120,8 @@ class ClassPathResourceTests {
 			Resource relative = resource.createRelative("subdir");
 			assertThat(relative).isEqualTo(new ClassPathResource("dir/subdir"));
 		}
-
 	}
+
 
 	@Nested
 	class GetInputStream {
@@ -151,8 +151,8 @@ class ClassPathResourceTests {
 				.isThrownBy(resource::getInputStream)
 				.withMessageContaining(ABSOLUTE_PATH_TO_NONEXISTENT_RESOURCE);
 		}
-
 	}
+
 
 	@Nested
 	class GetDescription {
@@ -190,8 +190,8 @@ class ClassPathResourceTests {
 		private static void assertDescription(ClassPathResource resource) {
 			assertThat(resource.getDescription()).isEqualTo("class path resource [%s]", ABSOLUTE_PATH_TO_NONEXISTENT_RESOURCE);
 		}
-
 	}
+
 
 	@Nested
 	class GetPath {
@@ -209,8 +209,8 @@ class ClassPathResourceTests {
 			assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath()).isEqualTo("test.html");
 			assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("test.html")).getPath()).isEqualTo(PACKAGE_PATH + "/test.html");
 		}
-
 	}
+
 
 	@Test
 	void directoryNotReadable() throws Exception {
