@@ -223,7 +223,6 @@ class SpringFactoriesLoaderTests {
 			assertThat(messages).hasSize(1);
 			assertThat(messages.get(0)).startsWith("Unable to instantiate factory class");
 		}
-
 	}
 
 
@@ -292,8 +291,8 @@ class SpringFactoriesLoaderTests {
 			assertThat(resolver.resolve(Integer.class)).isEqualTo(123);
 			assertThat(resolver.resolve(Long.class)).isEqualTo(234L);
 		}
-
 	}
+
 
 	@Nested
 	class FactoryInstantiatorTests {
@@ -350,14 +349,12 @@ class SpringFactoriesLoaderTests {
 		}
 
 		static class DefaultConstructor {
-
 		}
 
 		static class SingleConstructor {
 
 			SingleConstructor(String arg) {
 			}
-
 		}
 
 		static class MultiplePrivateAndSinglePublicConstructor {
@@ -368,7 +365,6 @@ class SpringFactoriesLoaderTests {
 
 			private MultiplePrivateAndSinglePublicConstructor(String arg, boolean extra) {
 			}
-
 		}
 
 		static class MultiplePackagePrivateAndSinglePublicConstructor {
@@ -379,22 +375,18 @@ class SpringFactoriesLoaderTests {
 
 			MultiplePackagePrivateAndSinglePublicConstructor(String arg, boolean extra) {
 			}
-
 		}
-
 
 		static class SinglePackagePrivateConstructor {
 
 			SinglePackagePrivateConstructor(String arg) {
 			}
-
 		}
 
 		static class SinglePrivateConstructor {
 
 			private SinglePrivateConstructor(String arg) {
 			}
-
 		}
 
 		static class MultiplePackagePrivateConstructors {
@@ -405,10 +397,9 @@ class SpringFactoriesLoaderTests {
 
 			MultiplePackagePrivateConstructors(String arg, boolean extra) {
 			}
-
 		}
-
 	}
+
 
 	private static class LimitedClassLoader extends URLClassLoader {
 
@@ -428,7 +419,6 @@ class SpringFactoriesLoaderTests {
 				throw new IllegalStateException(ex);
 			}
 		}
-
 	}
 
 }
