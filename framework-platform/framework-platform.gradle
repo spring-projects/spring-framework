@@ -53,7 +53,7 @@ dependencies {
 		api("io.r2dbc:r2dbc-spi-test:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
 		api("io.reactivex.rxjava3:rxjava:3.1.8")
-		api("io.smallrye.reactive:mutiny:1.9.0")
+		api("io.smallrye.reactive:mutiny:1.10.0")
 		api("io.undertow:undertow-core:2.3.10.Final")
 		api("io.undertow:undertow-servlet:2.3.10.Final")
 		api("io.undertow:undertow-websockets-jsr:2.3.10.Final")
