@@ -54,7 +54,7 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 		/**
 		 * Indicates whether this body is capable of
 		 * {@linkplain #writeTo(OutputStream) writing its data} more than
-		 * once. Default implementation returns {@code false}.
+		 * once. The default implementation returns {@code false}.
 		 * @return {@code true} if this body can be written repeatedly,
 		 * {@code false} otherwise
 		 * @since 6.1

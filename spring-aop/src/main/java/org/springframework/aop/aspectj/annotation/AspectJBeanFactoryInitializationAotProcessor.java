@@ -40,17 +40,19 @@ import org.springframework.util.ClassUtils;
  */
 class AspectJBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-	private static final boolean aspectJPresent = ClassUtils.isPresent(
-			"org.aspectj.lang.annotation.Pointcut", AspectJBeanFactoryInitializationAotProcessor.class.getClassLoader());
+	private static final boolean aspectJPresent = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
+			AspectJBeanFactoryInitializationAotProcessor.class.getClassLoader());
 
-	@Nullable
+
 	@Override
+	@Nullable
 	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		if (aspectJPresent) {
 			return AspectDelegate.processAheadOfTime(beanFactory);
 		}
 		return null;
 	}
+
 
 	/**
 	 * Inner class to avoid a hard dependency on AspectJ at runtime.
@@ -63,7 +65,6 @@ class AspectJBeanFactoryInitializationAotProcessor implements BeanFactoryInitial
 			List<Advisor> advisors = builder.buildAspectJAdvisors();
 			return (advisors.isEmpty() ? null : new AspectContribution(advisors));
 		}
-
 	}
 
 
@@ -84,7 +85,6 @@ class AspectJBeanFactoryInitializationAotProcessor implements BeanFactoryInitial
 				}
 			}
 		}
-
 	}
 
 }

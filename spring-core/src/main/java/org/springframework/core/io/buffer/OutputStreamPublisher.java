@@ -68,8 +68,8 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 	public void subscribe(Subscriber<? super DataBuffer> subscriber) {
 		Objects.requireNonNull(subscriber, "Subscriber must not be null");
 
-		OutputStreamSubscription subscription = new OutputStreamSubscription(subscriber, this.outputStreamConsumer,
-				this.bufferFactory, this.chunkSize);
+		OutputStreamSubscription subscription = new OutputStreamSubscription(
+				subscriber, this.outputStreamConsumer, this.bufferFactory, this.chunkSize);
 
 		subscriber.onSubscribe(subscription);
 		this.executor.execute(subscription::invokeHandler);
@@ -79,7 +79,6 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 	private static final class OutputStreamSubscription extends OutputStream implements Subscription {
 
 		private static final Object READY = new Object();
-
 
 		private final Subscriber<? super DataBuffer> actual;
 
@@ -97,7 +96,6 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 		private volatile Throwable error;
 
 		private long produced;
-
 
 		OutputStreamSubscription(Subscriber<? super DataBuffer> actual,
 				Consumer<OutputStream> outputStreamConsumer, DataBufferFactory bufferFactory, int chunkSize) {
@@ -351,4 +349,5 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 			return res;
 		}
 	}
+
 }

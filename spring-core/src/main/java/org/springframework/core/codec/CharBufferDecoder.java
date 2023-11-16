@@ -42,14 +42,14 @@ import org.springframework.util.MimeTypeUtils;
  */
 public final class CharBufferDecoder extends AbstractCharSequenceDecoder<CharBuffer> {
 
-
 	public CharBufferDecoder(List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
 		super(delimiters, stripDelimiter, mimeTypes);
 	}
 
+
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return elementType.resolve() == CharBuffer.class && super.canDecode(elementType, mimeType);
+		return (elementType.resolve() == CharBuffer.class) && super.canDecode(elementType, mimeType);
 	}
 
 	@Override
@@ -69,9 +69,8 @@ public final class CharBufferDecoder extends AbstractCharSequenceDecoder<CharBuf
 
 	/**
 	 * Create a {@code CharBufferDecoder} for {@code "text/plain"}.
-	 * @param delimiters     delimiter strings to use to split the input stream
-	 * @param stripDelimiter whether to remove delimiters from the resulting
-	 *                       input strings
+	 * @param delimiters delimiter strings to use to split the input stream
+	 * @param stripDelimiter whether to remove delimiters from the resulting input strings
 	 */
 	public static CharBufferDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
 		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
@@ -87,9 +86,8 @@ public final class CharBufferDecoder extends AbstractCharSequenceDecoder<CharBuf
 
 	/**
 	 * Create a {@code CharBufferDecoder} that supports all MIME types.
-	 * @param delimiters     delimiter strings to use to split the input stream
-	 * @param stripDelimiter whether to remove delimiters from the resulting
-	 *                       input strings
+	 * @param delimiters delimiter strings to use to split the input stream
+	 * @param stripDelimiter whether to remove delimiters from the resulting input strings
 	 */
 	public static CharBufferDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
 		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
