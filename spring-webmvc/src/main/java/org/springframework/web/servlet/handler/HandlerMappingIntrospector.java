@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
@@ -75,15 +74,14 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * <p>Note that this is primarily an SPI to allow Spring Security
  * to align its pattern matching with the same pattern matching that would be
  * used in Spring MVC for a given request, in order to avoid security issues.
- * Use of this introspector should be avoided for other purposes because it
- * incurs the overhead of resolving the handler for a request.
  *
- * <p>Alternative security filter solutions that also rely on
- * {@link HandlerMappingIntrospector} should consider adding an additional
- * {@link jakarta.servlet.Filter} that invokes
- * {@link #setCache(HttpServletRequest)} and {@link #resetCache(ServletRequest, CachedResult)}
- * before and after delegating to the rest of the chain. Such a Filter should
- * process all dispatcher types and should be ordered ahead of security filters.
+ * <p>Use of this component incurs the performance overhead of mapping the
+ * request, and should not be repeated multiple times per request.
+ * {@link #createCacheFilter()} exposes a Filter to cache the results.
+ * Applications that rely on Spring Security don't need to deploy this Filter
+ * since Spring Security doe that. However, other custom security layers, used
+ * in place of Spring Security that use this component should deploy the cache
+ * Filter with requirements described in the Javadoc for the method.
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
@@ -192,16 +190,9 @@ public class HandlerMappingIntrospector
 	 */
 	public Filter createCacheFilter() {
 		return (request, response, chain) -> {
-				HandlerMappingIntrospector.CachedResult previous = setCache((HttpServletRequest) request);
-				try {
-					chain.doFilter(request, response);
-				}
-				catch (Exception ex) {
-					throw new ServletException("HandlerMapping introspection failed", ex);
-				}
-				finally {
-					resetCache(request, previous);
-				}
+			CachedResult previous = setCache((HttpServletRequest) request);
+			chain.doFilter(request, response);
+			resetCache(request, previous);
 		};
 	}
 
@@ -212,26 +203,39 @@ public class HandlerMappingIntrospector
 	 * {@link #getCorsConfiguration(HttpServletRequest)} to avoid repeated lookups.
 	 * @param request the current request
 	 * @return the previous {@link CachedResult}, if there is one from a parent dispatch
-	 * @throws ServletException thrown the lookup fails for any reason
 	 * @since 6.0.14
 	 */
 	@Nullable
-	private CachedResult setCache(HttpServletRequest request) throws ServletException {
+	private CachedResult setCache(HttpServletRequest request) {
 		CachedResult previous = (CachedResult) request.getAttribute(CACHED_RESULT_ATTRIBUTE);
 		if (previous == null || !previous.matches(request)) {
+			HttpServletRequest wrapped = new AttributesPreservingRequest(request);
+			CachedResult result;
 			try {
-				HttpServletRequest wrapped = new AttributesPreservingRequest(request);
-				CachedResult result = doWithHandlerMapping(wrapped, false, (mapping, executionChain) -> {
+				// Try to get both in one lookup (with ignoringException=false)
+				result = doWithHandlerMapping(wrapped, false, (mapping, executionChain) -> {
 					MatchableHandlerMapping matchableMapping = createMatchableHandlerMapping(mapping, wrapped);
-					CorsConfiguration corsConfig = getCorsConfiguration(wrapped, executionChain);
-					return new CachedResult(request, matchableMapping, corsConfig);
+					CorsConfiguration corsConfig = getCorsConfiguration(executionChain, wrapped);
+					return new CachedResult(request, matchableMapping, corsConfig, null, null);
 				});
-				request.setAttribute(CACHED_RESULT_ATTRIBUTE,
-						(result != null ? result : new CachedResult(request, null, null)));
 			}
-			catch (Throwable ex) {
-				throw new ServletException("HandlerMapping introspection failed", ex);
+			catch (Exception ex) {
+				try {
+					// Try CorsConfiguration at least with ignoreException=true
+					AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
+					result = doWithHandlerMapping(requestToUse, true, (mapping, executionChain) -> {
+						CorsConfiguration corsConfig = getCorsConfiguration(executionChain, wrapped);
+						return new CachedResult(request, null, corsConfig, ex, null);
+					});
+				}
+				catch (Exception ex2) {
+					result = new CachedResult(request, null, null, ex, new IllegalStateException(ex2));
+				}
 			}
+			if (result == null) {
+				result = new CachedResult(request, null, null, null, null);
+			}
+			request.setAttribute(CACHED_RESULT_ATTRIBUTE, result);
 		}
 		return previous;
 	}
@@ -256,7 +260,7 @@ public class HandlerMappingIntrospector
 	 */
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
-		CachedResult result = CachedResult.forRequest(request);
+		CachedResult result = CachedResult.getResultFor(request);
 		if (result != null) {
 			return result.getHandlerMapping();
 		}
@@ -284,7 +288,7 @@ public class HandlerMappingIntrospector
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		CachedResult result = CachedResult.forRequest(request);
+		CachedResult result = CachedResult.getResultFor(request);
 		if (result != null) {
 			return result.getCorsConfig();
 		}
@@ -293,16 +297,16 @@ public class HandlerMappingIntrospector
 			boolean ignoreException = true;
 			AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
 			return doWithHandlerMapping(requestToUse, ignoreException,
-					(handlerMapping, executionChain) -> getCorsConfiguration(requestToUse, executionChain));
+					(handlerMapping, executionChain) -> getCorsConfiguration(executionChain, requestToUse));
 		}
 		catch (Exception ex) {
-			// HandlerMapping exceptions have been ignored. Some more basic error perhaps like request parsing
+			// HandlerMapping exceptions are ignored. More basic error like parsing the request path.
 			throw new IllegalStateException(ex);
 		}
 	}
 
 	@Nullable
-	private static CorsConfiguration getCorsConfiguration(HttpServletRequest request, HandlerExecutionChain chain) {
+	private static CorsConfiguration getCorsConfiguration(HandlerExecutionChain chain, HttpServletRequest request) {
 		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
 			if (interceptor instanceof CorsConfigurationSource source) {
 				return source.getCorsConfiguration(request);
@@ -371,13 +375,22 @@ public class HandlerMappingIntrospector
 		@Nullable
 		private final CorsConfiguration corsConfig;
 
+		@Nullable
+		private final Exception failure;
+
+		@Nullable
+		private final IllegalStateException corsConfigFailure;
+
 		private CachedResult(HttpServletRequest request,
-				@Nullable MatchableHandlerMapping mapping, @Nullable CorsConfiguration config) {
+				@Nullable MatchableHandlerMapping mapping, @Nullable CorsConfiguration config,
+				@Nullable Exception failure, @Nullable IllegalStateException corsConfigFailure) {
 
 			this.dispatcherType = request.getDispatcherType();
 			this.requestURI = request.getRequestURI();
 			this.handlerMapping = mapping;
 			this.corsConfig = config;
+			this.failure = failure;
+			this.corsConfigFailure = corsConfigFailure;
 		}
 
 		public boolean matches(HttpServletRequest request) {
@@ -386,12 +399,18 @@ public class HandlerMappingIntrospector
 		}
 
 		@Nullable
-		public MatchableHandlerMapping getHandlerMapping() {
+		public MatchableHandlerMapping getHandlerMapping() throws Exception {
+			if (this.failure != null) {
+				throw this.failure;
+			}
 			return this.handlerMapping;
 		}
 
 		@Nullable
 		public CorsConfiguration getCorsConfig() {
+			if (this.corsConfigFailure != null) {
+				throw this.corsConfigFailure;
+			}
 			return this.corsConfig;
 		}
 
@@ -405,11 +424,10 @@ public class HandlerMappingIntrospector
 		 * Return a {@link CachedResult} that matches the given request.
 		 */
 		@Nullable
-		public static CachedResult forRequest(HttpServletRequest request) {
+		public static CachedResult getResultFor(HttpServletRequest request) {
 			CachedResult result = (CachedResult) request.getAttribute(CACHED_RESULT_ATTRIBUTE);
 			return (result != null && result.matches(request) ? result : null);
 		}
-
 	}
 
 
