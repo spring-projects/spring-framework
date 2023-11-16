@@ -139,7 +139,7 @@ Kotlin::
 ======
 
 The Spring team welcomes community-driven `Formatter` contributions. See
-https://github.com/spring-projects/spring-framework/issues[GitHub Issues] to contribute.
+{spring-framework-issues}[GitHub Issues] to contribute.
 
 
 

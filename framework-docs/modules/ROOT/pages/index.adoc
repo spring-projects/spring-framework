@@ -19,7 +19,7 @@ xref:integration.adoc[Integration] :: REST Clients, JMS, JCA, JMX,
 Email, Tasks, Scheduling, Caching, Observability, JVM Checkpoint Restore.
 xref:languages.adoc[Languages] :: Kotlin, Groovy, Dynamic Languages.
 xref:testing/appendix.adoc[Appendix] :: Spring properties.
-https://github.com/spring-projects/spring-framework/wiki[Wiki] :: What's New,
+{spring-framework-wiki}[Wiki] :: What's New,
 Upgrade Notes, Supported Versions, additional cross-version information.
 
 Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Thomas Risberg,

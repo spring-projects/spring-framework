@@ -58,8 +58,8 @@ The benefits of using the Spring Framework to create your ORM DAOs include:
 
 TIP: For more comprehensive ORM support, including support for alternative database
 technologies such as MongoDB, you might want to check out the
-https://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
-a JPA user, the https://spring.io/guides/gs/accessing-data-jpa/[Getting Started Accessing
+{spring-site-projects}/spring-data/[Spring Data] suite of projects. If you are
+a JPA user, the {spring-site-guides}/gs/accessing-data-jpa/[Getting Started Accessing
 Data with JPA] guide from https://spring.io provides a great introduction.
 
 

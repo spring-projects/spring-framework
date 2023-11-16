@@ -51,7 +51,7 @@ XML configuration:
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
 design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the https://spring.io/tools[Spring Tools for Eclipse])
+IDEA] or the {spring-site-tools}[Spring Tools for Eclipse])
 that supports automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 

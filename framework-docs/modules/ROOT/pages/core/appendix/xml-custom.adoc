@@ -765,7 +765,7 @@ want to add an additional attribute to the existing bean definition element.
 
 By way of another example, suppose that you define a bean definition for a
 service object that (unknown to it) accesses a clustered
-https://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the
+{JSR}107[JCache], and you want to ensure that the
 named JCache instance is eagerly started within the surrounding cluster.
 The following listing shows such a definition:
 

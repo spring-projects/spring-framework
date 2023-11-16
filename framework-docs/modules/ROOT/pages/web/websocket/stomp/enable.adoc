@@ -91,7 +91,7 @@ and xref:web/websocket/stomp/authentication.adoc[Authentication] for more inform
 
 For more example code see:
 
-* https://spring.io/guides/gs/messaging-stomp-websocket/[Using WebSocket to build an
+* {spring-site-guides}/gs/messaging-stomp-websocket/[Using WebSocket to build an
 interactive web application] -- a getting started guide.
 * https://github.com/rstoyanchev/spring-websocket-portfolio[Stock Portfolio] -- a sample
 application.

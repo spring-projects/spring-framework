@@ -56,7 +56,7 @@ alternate between read and write.
 == `PooledDataBuffer`
 
 As explained in the Javadoc for
-https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[ByteBuffer],
+{java-api}/java.base/java/nio/ByteBuffer.html[ByteBuffer],
 byte buffers can be direct or non-direct. Direct buffers may reside outside the Java heap
 which eliminates the need for copying for native I/O operations. That makes direct buffers
 particularly useful for receiving and sending data over a socket, but they're also more

@@ -99,7 +99,7 @@ container, lets you handle this use case cleanly.
 
 ****
 You can read more about the motivation for Method Injection in
-https://spring.io/blog/2004/08/06/method-injection/[this blog entry].
+{spring-site-blog}/2004/08/06/method-injection/[this blog entry].
 ****
 
 

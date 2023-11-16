@@ -246,7 +246,7 @@ instance. The `NotificationPublisherAware` interface supplies an instance of a
 which the bean can then use to publish `Notifications`.
 
 As stated in the javadoc of the
-{api-spring-framework}/jmx/export/notification/NotificationPublisher.html[`NotificationPublisher`]
+{spring-framework-api}/jmx/export/notification/NotificationPublisher.html[`NotificationPublisher`]
 interface, managed beans that publish events through the `NotificationPublisher`
 mechanism are not responsible for the state management of notification listeners.
 Spring's JMX support takes care of handling all the JMX infrastructure issues.

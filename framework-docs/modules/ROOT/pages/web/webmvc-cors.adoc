@@ -76,7 +76,7 @@ rejected. No CORS headers are added to the responses of simple and actual CORS r
 and, consequently, browsers reject them.
 
 Each `HandlerMapping` can be
-{api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
+{spring-framework-api}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
 individually with URL pattern-based `CorsConfiguration` mappings. In most cases, applications
 use the MVC Java configuration or the XML namespace to declare such mappings, which results
 in a single global map being passed to all `HandlerMapping` instances.
@@ -89,7 +89,7 @@ class- or method-level `@CrossOrigin` annotations (other handlers can implement
 The rules for combining global and local configuration are generally additive -- for example,
 all global and all local origins. For those attributes where only a single value can be
 accepted, e.g. `allowCredentials` and `maxAge`, the local overrides the global value. See
-{api-spring-framework}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
+{spring-framework-api}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
 for more details.
 
 [TIP]
@@ -108,7 +108,7 @@ To learn more from the source or make advanced customizations, check the code be
 == `@CrossOrigin`
 [.small]#xref:web/webflux-cors.adoc#webflux-cors-controller[See equivalent in the Reactive stack]#
 
-The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
+The {spring-framework-api}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods,
 as the following example shows:
 
@@ -385,7 +385,7 @@ as the following example shows:
 [.small]#xref:web/webflux-cors.adoc#webflux-cors-webfilter[See equivalent in the Reactive stack]#
 
 You can apply CORS support through the built-in
-{api-spring-framework}/web/filter/CorsFilter.html[`CorsFilter`].
+{spring-framework-api}/web/filter/CorsFilter.html[`CorsFilter`].
 
 NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring
 Security has {docs-spring-security}/servlet/integrations/cors.html[built-in support] for

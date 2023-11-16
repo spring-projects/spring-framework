@@ -225,7 +225,7 @@ Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProce
 through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
 instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` may not
 work on the configuration class itself, since it is possible to create it as a bean instance earlier than
-{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`].
+{spring-framework-api}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`].
 ====
 
 The following example shows how one bean can be autowired to another bean:
@@ -338,7 +338,7 @@ modularity, but determining exactly where the autowired bean definitions are dec
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It is not
 explicit in the code, and this may be just fine. Remember that the
-https://spring.io/tools[Spring Tools for Eclipse] provides tooling that
+{spring-site-tools}[Spring Tools for Eclipse] provides tooling that
 can render graphs showing how everything is wired, which may be all you need. Also,
 your Java IDE can easily find all declarations and uses of the `AccountRepository` type
 and quickly show you the location of `@Bean` methods that return that type.
@@ -519,7 +519,7 @@ profile has been enabled in the Spring `Environment` (see xref:core/beans/enviro
 for details).
 
 The `@Profile` annotation is actually implemented by using a much more flexible annotation
-called {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`].
+called {spring-framework-api}/context/annotation/Conditional.html[`@Conditional`].
 The `@Conditional` annotation indicates specific
 `org.springframework.context.annotation.Condition` implementations that should be
 consulted before a `@Bean` is registered.
@@ -570,7 +570,7 @@ Kotlin::
 ----
 ======
 
-See the {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`]
+See the {spring-framework-api}/context/annotation/Conditional.html[`@Conditional`]
 javadoc for more detail.
 
 

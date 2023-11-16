@@ -7,7 +7,7 @@ the JTA `UserTransaction` and `TransactionManager` objects) autodetects the loca
 the latter object, which varies by application server. Having access to the JTA
 `TransactionManager` allows for enhanced transaction semantics -- in particular,
 supporting transaction suspension. See the
-{api-spring-framework}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager`]
+{spring-framework-api}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager`]
 javadoc for details.
 
 Spring's `JtaTransactionManager` is the standard choice to run on Jakarta EE application

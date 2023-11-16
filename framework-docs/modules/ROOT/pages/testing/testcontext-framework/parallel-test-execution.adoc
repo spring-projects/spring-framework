@@ -40,7 +40,7 @@ for details.
 
 WARNING: Parallel test execution in the Spring TestContext Framework is only possible if
 the underlying `TestContext` implementation provides a copy constructor, as explained in
-the javadoc for {api-spring-framework}/test/context/TestContext.html[`TestContext`]. The
+the javadoc for {spring-framework-api}/test/context/TestContext.html[`TestContext`]. The
 `DefaultTestContext` used in Spring provides such a constructor. However, if you use a
 third-party library that provides a custom `TestContext` implementation, you need to
 verify that it is suitable for parallel test execution.

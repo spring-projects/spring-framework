@@ -12,8 +12,8 @@ decode request and response content on the server side.
 `WebClient` needs an HTTP client library to perform requests with. There is built-in
 support for the following:
 
-* https://github.com/reactor/reactor-netty[Reactor Netty]
-* https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HttpClient]
+* {reactor-github-org}/reactor-netty[Reactor Netty]
+* {java-api}/java.net.http/java/net/http/HttpClient.html[JDK HttpClient]
 * https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
 * https://hc.apache.org/index.html[Apache HttpComponents]
 * Others can be plugged via `ClientHttpConnector`.

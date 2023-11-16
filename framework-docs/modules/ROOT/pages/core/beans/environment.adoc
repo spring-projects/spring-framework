@@ -1,7 +1,7 @@
 [[beans-environment]]
 = Environment Abstraction
 
-The {api-spring-framework}/core/env/Environment.html[`Environment`] interface
+The {spring-framework-api}/core/env/Environment.html[`Environment`] interface
 is an abstraction integrated in the container that models two key
 aspects of the application environment: xref:core/beans/environment.adoc#beans-definition-profiles[profiles]
 and xref:core/beans/environment.adoc#beans-property-source-abstraction[properties].
@@ -118,7 +118,7 @@ situation B. We start by updating our configuration to reflect this need.
 [[beans-definition-profiles-java]]
 === Using `@Profile`
 
-The {api-spring-framework}/context/annotation/Profile.html[`@Profile`]
+The {spring-framework-api}/context/annotation/Profile.html[`@Profile`]
 annotation lets you indicate that a component is eligible for registration
 when one or more specified profiles are active. Using our preceding example, we
 can rewrite the `dataSource` configuration as follows:
@@ -599,17 +599,17 @@ Kotlin::
 
 In the preceding snippet, we see a high-level way of asking Spring whether the `my-property` property is
 defined for the current environment. To answer this question, the `Environment` object performs
-a search over a set of {api-spring-framework}/core/env/PropertySource.html[`PropertySource`]
+a search over a set of {spring-framework-api}/core/env/PropertySource.html[`PropertySource`]
 objects. A `PropertySource` is a simple abstraction over any source of key-value pairs, and
-Spring's {api-spring-framework}/core/env/StandardEnvironment.html[`StandardEnvironment`]
+Spring's {spring-framework-api}/core/env/StandardEnvironment.html[`StandardEnvironment`]
 is configured with two PropertySource objects -- one representing the set of JVM system properties
 (`System.getProperties()`) and one representing the set of system environment variables
 (`System.getenv()`).
 
 NOTE: These default property sources are present for `StandardEnvironment`, for use in standalone
-applications. {api-spring-framework}/web/context/support/StandardServletEnvironment.html[`StandardServletEnvironment`]
+applications. {spring-framework-api}/web/context/support/StandardServletEnvironment.html[`StandardServletEnvironment`]
 is populated with additional default property sources including servlet config, servlet
-context parameters, and a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`]
+context parameters, and a {spring-framework-api}/jndi/JndiPropertySource.html[`JndiPropertySource`]
 if JNDI is available.
 
 Concretely, when you use the `StandardEnvironment`, the call to `env.containsProperty("my-property")`
@@ -663,7 +663,7 @@ Kotlin::
 In the preceding code, `MyPropertySource` has been added with highest precedence in the
 search. If it contains a  `my-property` property, the property is detected and returned, in favor of
 any `my-property` property in any other `PropertySource`. The
-{api-spring-framework}/core/env/MutablePropertySources.html[`MutablePropertySources`]
+{spring-framework-api}/core/env/MutablePropertySources.html[`MutablePropertySources`]
 API exposes a number of methods that allow for precise manipulation of the set of
 property sources.
 
@@ -672,7 +672,7 @@ property sources.
 [[beans-using-propertysource]]
 == Using `@PropertySource`
 
-The {api-spring-framework}/context/annotation/PropertySource.html[`@PropertySource`]
+The {spring-framework-api}/context/annotation/PropertySource.html[`@PropertySource`]
 annotation provides a convenient and declarative mechanism for adding a `PropertySource`
 to Spring's `Environment`.
 

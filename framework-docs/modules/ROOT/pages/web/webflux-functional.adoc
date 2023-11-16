@@ -122,7 +122,7 @@ Most applications can run through the WebFlux Java configuration, see xref:web/w
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response.
-Both request and response provide https://www.reactive-streams.org[Reactive Streams] back pressure
+Both request and response provide {reactive-streams-site}[Reactive Streams] back pressure
 against the body streams.
 The request body is represented with a Reactor `Flux` or `Mono`.
 The response body is represented with any Reactive Streams `Publisher`, including `Flux` and `Mono`.
@@ -350,7 +350,7 @@ ServerResponse.created(location).build()
 ======
 
 Depending on the codec used, it is possible to pass hint parameters to customize how the
-body is serialized or deserialized. For example, to specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON view]:
+body is serialized or deserialized. For example, to specify a {baeldung-blog}/jackson-json-view-annotation[Jackson JSON view]:
 
 [tabs]
 ======

@@ -13,7 +13,7 @@ request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
 * For the client side, there is a basic `ClientHttpConnector` contract to perform HTTP
 requests with non-blocking I/O and Reactive Streams back pressure, along with adapters for
-https://github.com/reactor/reactor-netty[Reactor Netty], reactive
+{reactor-github-org}/reactor-netty[Reactor Netty], reactive
 https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient]
 and https://hc.apache.org/[Apache HttpComponents].
 The higher level xref:web/webflux-webclient.adoc[WebClient] used in applications
@@ -26,7 +26,7 @@ deserialization of HTTP request and response content.
 [[webflux-httphandler]]
 == `HttpHandler`
 
-{api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler]
+{spring-framework-api}/http/server/reactive/HttpHandler.html[HttpHandler]
 is a simple contract with a single method to handle a request and a response. It is
 intentionally minimal, and its main and only purpose is to be a minimal abstraction
 over different HTTP server APIs.
@@ -39,7 +39,7 @@ The following table describes the supported server APIs:
 
 | Netty
 | Netty API
-| https://github.com/reactor/reactor-netty[Reactor Netty]
+| {reactor-github-org}/reactor-netty[Reactor Netty]
 
 | Undertow
 | Undertow API
@@ -59,7 +59,7 @@ The following table describes the supported server APIs:
 |===
 
 The following table describes server dependencies (also see
-https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions]):
+{spring-framework-wiki}/What%27s-New-in-the-Spring-Framework[supported versions]):
 
 |===
 |Server name|Group id|Artifact name
@@ -213,7 +213,7 @@ Kotlin::
 *Servlet Container*
 
 To deploy as a WAR to any Servlet container, you can extend and include
-{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`]
+{spring-framework-api}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`]
 in the WAR. That class wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
 that as a `Servlet`.
 
@@ -224,9 +224,9 @@ that as a `Servlet`.
 
 The `org.springframework.web.server` package builds on the xref:web/webflux/reactive-spring.adoc#webflux-httphandler[`HttpHandler`] contract
 to provide a general-purpose web API for processing requests through a chain of multiple
-{api-spring-framework}/web/server/WebExceptionHandler.html[`WebExceptionHandler`], multiple
-{api-spring-framework}/web/server/WebFilter.html[`WebFilter`], and a single
-{api-spring-framework}/web/server/WebHandler.html[`WebHandler`] component. The chain can
+{spring-framework-api}/web/server/WebExceptionHandler.html[`WebExceptionHandler`], multiple
+{spring-framework-api}/web/server/WebFilter.html[`WebFilter`], and a single
+{spring-framework-api}/web/server/WebHandler.html[`WebHandler`] component. The chain can
 be put together with `WebHttpHandlerBuilder` by simply pointing to a Spring
 `ApplicationContext` where components are
 xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[auto-detected], and/or by registering components
@@ -438,7 +438,7 @@ The following table describes the available `WebExceptionHandler` implementation
 
 | `ResponseStatusExceptionHandler`
 | Provides handling for exceptions of type
-  {api-spring-framework}/web/server/ResponseStatusException.html[`ResponseStatusException`]
+  {spring-framework-api}/web/server/ResponseStatusException.html[`ResponseStatusException`]
   by setting the response to the HTTP status code of the exception.
 
 | `WebFluxResponseStatusExceptionHandler`
@@ -459,15 +459,15 @@ The `spring-web` and `spring-core` modules provide support for serializing and
 deserializing byte content to and from higher level objects through non-blocking I/O with
 Reactive Streams back pressure. The following describes this support:
 
-* {api-spring-framework}/core/codec/Encoder.html[`Encoder`] and
-{api-spring-framework}/core/codec/Decoder.html[`Decoder`] are low level contracts to
+* {spring-framework-api}/core/codec/Encoder.html[`Encoder`] and
+{spring-framework-api}/core/codec/Decoder.html[`Decoder`] are low level contracts to
 encode and decode content independent of HTTP.
-* {api-spring-framework}/http/codec/HttpMessageReader.html[`HttpMessageReader`] and
-{api-spring-framework}/http/codec/HttpMessageWriter.html[`HttpMessageWriter`] are contracts
+* {spring-framework-api}/http/codec/HttpMessageReader.html[`HttpMessageReader`] and
+{spring-framework-api}/http/codec/HttpMessageWriter.html[`HttpMessageWriter`] are contracts
 to encode and decode HTTP message content.
 * An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to adapt it for use in a web
 application, while a `Decoder` can be wrapped with `DecoderHttpMessageReader`.
-* {api-spring-framework}/core/io/buffer/DataBuffer.html[`DataBuffer`] abstracts different
+* {spring-framework-api}/core/io/buffer/DataBuffer.html[`DataBuffer`] abstracts different
 byte buffer representations (e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`, etc.) and is
 what all codecs work on. See xref:core/databuffer-codec.adoc[Data Buffers and Codecs] in the
 "Spring Core" section for more on this topic.
@@ -485,7 +485,7 @@ xref:web/webflux/config.adoc#webflux-config-message-codecs[HTTP message codecs].
 [[webflux-codecs-jackson]]
 === Jackson JSON
 
-JSON and binary JSON (https://github.com/FasterXML/smile-format-specification[Smile]) are
+JSON and binary JSON ({jackson-github-org}/smile-format-specification[Smile]) are
 both supported when the Jackson library is present.
 
 The `Jackson2Decoder` works as follows:
@@ -549,7 +549,7 @@ for the actual parsing to a `Flux<Part>` and then simply collects the parts into
 By default, the `DefaultPartHttpMessageReader` is used, but this can be changed through the
 `ServerCodecConfigurer`.
 For more information about the `DefaultPartHttpMessageReader`, refer to the
-{api-spring-framework}/http/codec/multipart/DefaultPartHttpMessageReader.html[javadoc of `DefaultPartHttpMessageReader`].
+{spring-framework-api}/http/codec/multipart/DefaultPartHttpMessageReader.html[javadoc of `DefaultPartHttpMessageReader`].
 
 On the server side where multipart form content may need to be accessed from multiple
 places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
@@ -643,11 +643,11 @@ is not useful for correlating log messages that belong to a specific request. Th
 WebFlux log messages are prefixed with a request-specific ID by default.
 
 On the server side, the log ID is stored in the `ServerWebExchange` attribute
-({api-spring-framework}/web/server/ServerWebExchange.html#LOG_ID_ATTRIBUTE[`LOG_ID_ATTRIBUTE`]),
+({spring-framework-api}/web/server/ServerWebExchange.html#LOG_ID_ATTRIBUTE[`LOG_ID_ATTRIBUTE`]),
 while a fully formatted prefix based on that ID is available from
 `ServerWebExchange#getLogPrefix()`. On the `WebClient` side, the log ID is stored in the
 `ClientRequest` attribute
-({api-spring-framework}/web/reactive/function/client/ClientRequest.html#LOG_ID_ATTRIBUTE[`LOG_ID_ATTRIBUTE`])
+({spring-framework-api}/web/reactive/function/client/ClientRequest.html#LOG_ID_ATTRIBUTE[`LOG_ID_ATTRIBUTE`])
 ,while a fully formatted prefix is available from `ClientRequest#logPrefix()`.
 
 

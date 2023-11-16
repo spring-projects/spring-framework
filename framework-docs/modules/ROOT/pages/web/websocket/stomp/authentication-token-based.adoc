@@ -1,7 +1,7 @@
 [[websocket-stomp-authentication-token-based]]
 = Token Authentication
 
-https://github.com/spring-projects/spring-security-oauth[Spring Security OAuth]
+{spring-github-org}/spring-security-oauth[Spring Security OAuth]
 provides support for token based security, including JSON Web Token (JWT).
 You can use this as the authentication mechanism in Web applications,
 including STOMP over WebSocket interactions, as described in the previous
@@ -11,13 +11,13 @@ At the same time, cookie-based sessions are not always the best fit (for example
 in applications that do not maintain a server-side session or in
 mobile applications where it is common to use headers for authentication).
 
-The https://tools.ietf.org/html/rfc6455#section-10.5[WebSocket protocol, RFC 6455]
+The {rfc-site}/rfc6455#section-10.5[WebSocket protocol, RFC 6455]
 "doesn't prescribe any particular way that servers can authenticate clients during
 the WebSocket handshake." In practice, however, browser clients can use only standard
 authentication headers (that is, basic HTTP authentication) or cookies and cannot (for example)
 provide custom headers. Likewise, the SockJS JavaScript client does not provide
 a way to send HTTP headers with SockJS transport requests. See
-https://github.com/sockjs/sockjs-client/issues/196[sockjs-client issue 196].
+{sockjs-client}/issues/196[sockjs-client issue 196].
 Instead, it does allow sending query parameters that you can use to send a token,
 but that has its own drawbacks (for example, the token may be inadvertently
 logged with the URL in server logs).

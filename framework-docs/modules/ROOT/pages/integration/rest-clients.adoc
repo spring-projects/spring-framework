@@ -344,7 +344,7 @@ The `spring-web` module contains the `HttpMessageConverter` interface for readin
 Concrete implementations for the main media (MIME) types are provided in the framework and are, by default, registered with the `RestClient` and `RestTemplate` on the client side and with `RequestMappingHandlerAdapter` on the server side (see xref:web/webmvc/mvc-config/message-converters.adoc[Configuring Message Converters]).
 
 Several implementations of `HttpMessageConverter` are described below.
-Refer to the {api-spring-framework}/http/converter/HttpMessageConverter.html[`HttpMessageConverter` Javadoc] for the complete list.
+Refer to the {spring-framework-api}/http/converter/HttpMessageConverter.html[`HttpMessageConverter` Javadoc] for the complete list.
 For all converters, a default media type is used, but you can override it by setting the `supportedMediaTypes`  property.
 
 [[rest-message-converters-tbl]]
@@ -384,7 +384,7 @@ When you need further control (for cases where custom JSON serializers/deseriali
 By default, this converter supports `application/json`.
 
 | `MappingJackson2XmlHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write XML by using https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's `XmlMapper`.
+| An `HttpMessageConverter` implementation that can read and write XML by using {jackson-github-org}/jackson-dataformat-xml[Jackson XML] extension's `XmlMapper`.
 You can customize XML mapping as needed through the use of JAXB or Jackson's provided annotations.
 When you need further control (for cases where custom XML serializers/deserializers need to be provided for specific types), you can inject a custom `XmlMapper` through the `ObjectMapper` property.
 By default, this converter supports `application/xml`.
@@ -401,7 +401,7 @@ You can also set the message converters to use explicitly, by using `messageConv
 
 ==== Jackson JSON Views
 
-To serialize only a subset of the object properties, you can specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON View], as the following example shows:
+To serialize only a subset of the object properties, you can specify a {baeldung-blog}/jackson-json-view-annotation[Jackson JSON View], as the following example shows:
 
 [source,java,indent=0,subs="verbatim"]
 ----

@@ -85,7 +85,7 @@ subclass-level annotation.
 When a POJO class such as the one above is defined as a bean in a Spring context,
 you can make the bean instance transactional through an `@EnableTransactionManagement`
 annotation in a `@Configuration` class. See the
-{api-spring-framework}/transaction/annotation/EnableTransactionManagement.html[javadoc]
+{spring-framework-api}/transaction/annotation/EnableTransactionManagement.html[javadoc]
 for full details.
 
 In XML configuration, the `<tx:annotation-driven/>` tag provides similar convenience:
@@ -262,7 +262,7 @@ is modified) to support `@Transactional` runtime behavior on any kind of method.
 | XML Attribute| Annotation Attribute| Default| Description
 
 | `transaction-manager`
-| N/A (see {api-spring-framework}/transaction/annotation/TransactionManagementConfigurer.html[`TransactionManagementConfigurer`] javadoc)
+| N/A (see {spring-framework-api}/transaction/annotation/TransactionManagementConfigurer.html[`TransactionManagementConfigurer`] javadoc)
 | `transactionManager`
 | Name of the transaction manager to use. Required only if the name of the transaction
   manager is not `transactionManager`, as in the preceding example.

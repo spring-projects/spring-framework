@@ -8,7 +8,7 @@ Applications can declare the infrastructure beans listed in xref:web/webmvc/mvc-
 that are required to process requests. The `DispatcherServlet` checks the
 `WebApplicationContext` for each special bean. If there are no matching bean types,
 it falls back on the default types listed in
-{spring-framework-main-code}/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
+{spring-framework-code}/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
 
 In most cases, the xref:web/webmvc/mvc-config.adoc[MVC Config] is the best starting point. It declares the required
 beans in either Java or XML and provides a higher-level configuration callback API to

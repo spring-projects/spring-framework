@@ -51,8 +51,8 @@ The term "`component class`" can refer to any of the following:
   of a single constructor without the use of Spring annotations.
 
 See the javadoc of
-{api-spring-framework}/context/annotation/Configuration.html[`@Configuration`] and
-{api-spring-framework}/context/annotation/Bean.html[`@Bean`] for further information
+{spring-framework-api}/context/annotation/Configuration.html[`@Configuration`] and
+{spring-framework-api}/context/annotation/Bean.html[`@Bean`] for further information
 regarding the configuration and semantics of component classes, paying special attention
 to the discussion of `@Bean` Lite Mode.
 ====
@@ -62,7 +62,7 @@ TestContext framework tries to detect the presence of default configuration clas
 Specifically, `AnnotationConfigContextLoader` and `AnnotationConfigWebContextLoader`
 detect all `static` nested classes of the test class that meet the requirements for
 configuration class implementations, as specified in the
-{api-spring-framework}/context/annotation/Configuration.html[`@Configuration`] javadoc.
+{spring-framework-api}/context/annotation/Configuration.html[`@Configuration`] javadoc.
 Note that the name of the configuration class is arbitrary. In addition, a test class can
 contain more than one `static` nested configuration class if desired. In the following
 example, the `OrderServiceTest` class declares a `static` nested configuration class

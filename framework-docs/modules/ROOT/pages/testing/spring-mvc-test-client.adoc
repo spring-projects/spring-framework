@@ -211,5 +211,5 @@ configuration. Check for the support for code completion on static members.
 == Further Examples of Client-side REST Tests
 
 Spring MVC Test's own tests include
-{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/client/samples[example
+{spring-framework-code}/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.

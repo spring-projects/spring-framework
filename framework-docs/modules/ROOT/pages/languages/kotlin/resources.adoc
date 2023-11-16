@@ -4,9 +4,9 @@
 We recommend the following resources for people learning how to build applications with
 Kotlin and the Spring Framework:
 
-* https://kotlinlang.org/docs/reference/[Kotlin language reference]
+* {kotlin-docs}[Kotlin language reference]
 * https://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
-* https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow, with `spring` and `kotlin` tags]
+* {stackoverflow-spring-kotlin-tags}[Stackoverflow, with `spring` and `kotlin` tags]
 * https://play.kotlinlang.org/[Try Kotlin in your browser]
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
@@ -34,12 +34,12 @@ The following Github projects offer examples that you can learn from and possibl
 The following list categorizes the pending issues related to Spring and Kotlin support:
 
 * Spring Framework
-** https://github.com/spring-projects/spring-framework/issues/20606[Unable to use WebTestClient with mock server in Kotlin]
-** https://github.com/spring-projects/spring-framework/issues/20496[Support null-safety at generics, varargs and array elements level]
+** {spring-framework-issues}/20606[Unable to use WebTestClient with mock server in Kotlin]
+** {spring-framework-issues}/20496[Support null-safety at generics, varargs and array elements level]
 * Kotlin
-** https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
-** https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
-** https://youtrack.jetbrains.com/issue/KT-20283[Smart cast regression with open classes]
-** https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
-** https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]
-** https://youtrack.jetbrains.com/issue/KT-6653[Kotlin properties do not override Java-style getters and setters]
+** {kotlin-issues}/KT-6380[Parent issue for Spring Framework support]
+** {kotlin-issues}/KT-5464[Kotlin requires type inference where Java doesn't]
+** {kotlin-issues}/KT-20283[Smart cast regression with open classes]
+** {kotlin-issues}/KT-14984[Impossible to pass not all SAM argument as function]
+** {kotlin-issues}/KT-15125[Support JSR 223 bindings directly via script variables]
+** {kotlin-issues}/KT-6653[Kotlin properties do not override Java-style getters and setters]

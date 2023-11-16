@@ -23,7 +23,7 @@ while the above interactions are called "request streams" or simply "requests".
 
 These are the key features and benefits of the RSocket protocol:
 
-* https://www.reactive-streams.org/[Reactive Streams] semantics across network boundary --
+* {reactive-streams-site}/[Reactive Streams] semantics across network boundary --
 for streaming requests such as `Request-Stream` and `Channel`, back pressure signals
 travel between requester and responder, allowing a requester to slow down a responder at
 the source, hence reducing reliance on network layer congestion control, and the need
@@ -38,9 +38,9 @@ the amount of state required.
 * Fragmentation and re-assembly of large messages.
 * Keepalive (heartbeats).
 
-RSocket has {gh-rsocket}[implementations] in multiple languages. The
-{gh-rsocket-java}[Java library] is built on https://projectreactor.io/[Project Reactor],
-and https://github.com/reactor/reactor-netty[Reactor Netty] for the transport. That means
+RSocket has {rsocket-github-org}[implementations] in multiple languages. The
+{rsocket-java}[Java library] is built on {reactor-site}/[Project Reactor],
+and {reactor-github-org}/reactor-netty[Reactor Netty] for the transport. That means
 signals from Reactive Streams Publishers in your application propagate transparently
 through RSocket across the network.
 
@@ -50,8 +50,8 @@ through RSocket across the network.
 === The Protocol
 
 One of the benefits of RSocket is that it has well defined behavior on the wire and an
-easy to read https://rsocket.io/about/protocol[specification] along with some protocol
-{gh-rsocket}/rsocket/tree/master/Extensions[extensions]. Therefore it is
+easy to read {rsocket-site}/about/protocol[specification] along with some protocol
+{rsocket-protocol-extensions}[extensions]. Therefore it is
 a good idea to read the spec, independent of language implementations and higher level
 framework APIs. This section provides a succinct overview to establish some context.
 
@@ -96,18 +96,18 @@ and therefore only included in the first message on a request, i.e. with one of 
 
 Protocol extensions define common metadata formats for use in applications:
 
-* {gh-rsocket-extensions}/CompositeMetadata.md[Composite Metadata]-- multiple,
+* {rsocket-protocol-extensions}/CompositeMetadata.md[Composite Metadata]-- multiple,
   independently formatted metadata entries.
-* {gh-rsocket-extensions}/Routing.md[Routing] -- the route for a request.
+* {rsocket-protocol-extensions}/Routing.md[Routing] -- the route for a request.
 
 
 
 [[rsocket-java]]
 === Java Implementation
 
-The {gh-rsocket-java}[Java implementation] for RSocket is built on
-https://projectreactor.io/[Project Reactor]. The transports for  TCP and WebSocket are
-built on https://github.com/reactor/reactor-netty[Reactor Netty]. As a Reactive Streams
+The {rsocket-java}[Java implementation] for RSocket is built on
+{reactor-site}/[Project Reactor]. The transports for  TCP and WebSocket are
+built on {reactor-github-org}/reactor-netty[Reactor Netty]. As a Reactive Streams
 library, Reactor simplifies the job of implementing the protocol. For applications it is
 a natural fit to use `Flux` and `Mono` with declarative operators and transparent back
 pressure support.
@@ -117,7 +117,7 @@ features and leaves the application programming model (e.g. RPC codegen vs other
 higher level, independent concern.
 
 The main contract
-{gh-rsocket-java}/blob/master/rsocket-core/src/main/java/io/rsocket/RSocket.java[io.rsocket.RSocket]
+{rsocket-java-code}/rsocket-core/src/main/java/io/rsocket/RSocket.java[io.rsocket.RSocket]
 models the four request interaction types with `Mono` representing a promise for a
 single message, `Flux` a stream of messages, and `io.rsocket.Payload` the actual
 message with access to data and metadata as byte buffers. The `RSocket` contract is used
@@ -127,7 +127,7 @@ requests with. For responding, the application implements `RSocket` to handle re
 This is not meant to be a thorough introduction. For the most part, Spring applications
 will not have to use its API directly. However it may be important to see or experiment
 with RSocket independent of Spring. The RSocket Java repository contains a number of
-{gh-rsocket-java}/tree/master/rsocket-examples[sample apps] that
+{rsocket-java-code}/rsocket-examples[sample apps] that
 demonstrate its API and protocol features.
 
 
@@ -152,7 +152,7 @@ Spring Boot 2.2 supports standing up an RSocket server over TCP or WebSocket, in
 the option to expose RSocket over WebSocket in a WebFlux server. There is also client
 support and auto-configuration for an `RSocketRequester.Builder` and `RSocketStrategies`.
 See the
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-rsocket[RSocket section]
+{spring-boot-docs}/messaging.html#messaging.rsocket[RSocket section]
 in the Spring Boot reference for more details.
 
 Spring Security 5.2 provides RSocket support.
@@ -222,7 +222,7 @@ established transparently and used.
 
 For data, the default mime type is derived from the first configured `Decoder`. For
 metadata, the default mime type is
-{gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] which allows multiple
+{rsocket-protocol-extensions}/CompositeMetadata.md[composite metadata] which allows multiple
 metadata value and mime type pairs per request. Typically both don't need to be changed.
 
 Data and metadata in the `SETUP` frame is optional. On the server side,
@@ -534,7 +534,7 @@ Kotlin::
 ======
 
 Extra metadata values can be added if using
-{gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] (the default) and if the
+{rsocket-protocol-extensions}/CompositeMetadata.md[composite metadata] (the default) and if the
 values are supported by a registered `Encoder`. For example:
 
 [tabs]
@@ -663,8 +663,8 @@ Kotlin::
 ======
 
 `RSocketMessageHandler` supports
-{gh-rsocket-extensions}/CompositeMetadata.md[composite] and
-{gh-rsocket-extensions}/Routing.md[routing] metadata by default. You can set its
+{rsocket-protocol-extensions}/CompositeMetadata.md[composite] and
+{rsocket-protocol-extensions}/Routing.md[routing] metadata by default. You can set its
 xref:rsocket.adoc#rsocket-metadata-extractor[MetadataExtractor] if you need to switch to a
 different mime type or register additional metadata mime types.
 
@@ -954,7 +954,7 @@ xref:rsocket.adoc#rsocket-requester-server[Server Requester] for details.
 == MetadataExtractor
 
 Responders must interpret metadata.
-{gh-rsocket-extensions}/CompositeMetadata.md[Composite metadata] allows independently
+{rsocket-protocol-extensions}/CompositeMetadata.md[Composite metadata] allows independently
 formatted metadata values (e.g. for routing, security, tracing) each with its own mime
 type. Applications need a way to configure metadata mime types to support, and a way
 to access extracted values.
@@ -965,7 +965,7 @@ in annotated handler methods.
 
 `DefaultMetadataExtractor` can be given `Decoder` instances to decode metadata. Out of
 the box it has built-in support for
-{gh-rsocket-extensions}/Routing.md["message/x.rsocket.routing.v0"] which it decodes to
+{rsocket-protocol-extensions}/Routing.md["message/x.rsocket.routing.v0"] which it decodes to
 `String` and saves under the "route" key. For any other mime type you'll need to provide
 a `Decoder` and register the mime type as follows:
 

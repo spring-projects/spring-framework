@@ -8,7 +8,7 @@ Servlet 4 containers are required to support HTTP/2, and Spring Framework 5 is c
 with Servlet API 4. From a programming model perspective, there is nothing specific that
 applications need to do. However, there are considerations related to server configuration.
 For more details, see the
-https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
+{spring-framework-wiki}/HTTP-2-support[HTTP/2 wiki page].
 
 The Servlet API does expose one construct related to HTTP/2. You can use the
 `jakarta.servlet.http.PushBuilder` to proactively push resources to clients, and it

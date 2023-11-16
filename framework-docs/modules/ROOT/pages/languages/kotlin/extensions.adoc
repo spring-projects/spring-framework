@@ -1,11 +1,11 @@
 [[kotlin-extensions]]
 = Extensions
 
-Kotlin https://kotlinlang.org/docs/reference/extensions.html[extensions] provide the ability
+Kotlin {kotlin-docs}/extensions.html[extensions] provide the ability
 to extend existing classes with additional functionality. The Spring Framework Kotlin APIs
 use these extensions to add new Kotlin-specific conveniences to existing Spring APIs.
 
-The {docs-spring-framework}/kdoc-api/[Spring Framework KDoc API] lists
+The {spring-framework-api-kdoc}/[Spring Framework KDoc API] lists
 and documents all available Kotlin extensions and DSLs.
 
 NOTE: Keep in mind that Kotlin extensions need to be imported to be used. This means,
@@ -13,8 +13,8 @@ for example, that the `GenericApplicationContext.registerBean` Kotlin extension
 is available only if `org.springframework.context.support.registerBean` is imported.
 That said, similar to static imports, an IDE should automatically suggest the import in most cases.
 
-For example, https://kotlinlang.org/docs/reference/inline-functions.html#reified-type-parameters[Kotlin reified type parameters]
-provide a workaround for JVM https://docs.oracle.com/javase/tutorial/java/generics/erasure.html[generics type erasure],
+For example, {kotlin-docs}/inline-functions.html#reified-type-parameters[Kotlin reified type parameters]
+provide a workaround for JVM {java-tutorial}/java/generics/erasure.html[generics type erasure],
 and the Spring Framework provides some extensions to take advantage of this feature.
 This allows for a better Kotlin API `RestTemplate`, for the new `WebClient` from Spring
 WebFlux, and for various other APIs.

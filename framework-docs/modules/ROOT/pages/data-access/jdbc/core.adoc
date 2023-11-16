@@ -51,7 +51,7 @@ corresponding to the fully qualified class name of the template instance (typica
 
 The following sections provide some examples of `JdbcTemplate` usage. These examples
 are not an exhaustive list of all of the functionality exposed by the `JdbcTemplate`.
-See the attendant {api-spring-framework}/jdbc/core/JdbcTemplate.html[javadoc] for that.
+See the attendant {spring-framework-api}/jdbc/core/JdbcTemplate.html[javadoc] for that.
 
 [[jdbc-JdbcTemplate-examples-query]]
 === Querying (`SELECT`)

@@ -1,20 +1,20 @@
 [[kotlin-null-safety]]
 = Null-safety
 
-One of Kotlin's key features is https://kotlinlang.org/docs/reference/null-safety.html[null-safety],
+One of Kotlin's key features is {kotlin-docs}/null-safety.html[null-safety],
 which cleanly deals with `null` values at compile time rather than bumping into the famous
 `NullPointerException` at runtime. This makes applications safer through nullability
 declarations and expressing "`value or no value`" semantics without paying the cost of wrappers, such as `Optional`.
 (Kotlin allows using functional constructs with nullable values. See this
-https://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
+{baeldung-blog}/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
 
 Although Java does not let you express null-safety in its type-system, the Spring Framework
 provides xref:languages/kotlin/null-safety.adoc[null-safety of the whole Spring Framework API]
 via tooling-friendly annotations declared in the `org.springframework.lang` package.
 By default, types from Java APIs used in Kotlin are recognized as
-https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types],
+{kotlin-docs}/java-interop.html#null-safety-and-platform-types[platform types],
 for which null-checks are relaxed.
-https://kotlinlang.org/docs/reference/java-interop.html#jsr-305-support[Kotlin support for JSR-305 annotations]
+{kotlin-docs}/java-interop.html#jsr-305-support[Kotlin support for JSR-305 annotations]
 and Spring nullability annotations provide null-safety for the whole Spring Framework API to Kotlin developers,
 with the advantage of dealing with `null`-related issues at compile time.
 
@@ -30,7 +30,7 @@ API nullability declaration could evolve even between minor releases and that mo
 be added in the future.
 
 NOTE: Generic type arguments, varargs, and array elements nullability are not supported yet,
-but should be in an upcoming release. See https://github.com/Kotlin/KEEP/issues/79[this discussion]
+but should be in an upcoming release. See {kotlin-github-org}/KEEP/issues/79[this discussion]
 for up-to-date information.
 
 

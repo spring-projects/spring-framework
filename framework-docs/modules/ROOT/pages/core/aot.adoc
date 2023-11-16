@@ -17,7 +17,7 @@ Applying such optimizations early implies the following restrictions:
 * The beans defined in your application cannot change at runtime, meaning:
 ** `@Profile`, in particular profile-specific configuration needs to be chosen at build time.
 ** `Environment` properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
-* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time (see related https://github.com/spring-projects/spring-framework/issues/29555[spring-framework#29555] issue).
+* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time (see related {spring-framework-issues}/29555[spring-framework#29555] issue).
 * Make sure that the bean type is as precise as possible.
 
 TIP: See also the xref:core/aot.adoc#aot.bestpractices[] section.
@@ -27,7 +27,7 @@ A Spring AOT processed application typically generates:
 
 * Java source code
 * Bytecode (usually for dynamic proxies)
-* {api-spring-framework}/aot/hint/RuntimeHints.html[`RuntimeHints`] for the use of reflection, resource loading, serialization, and JDK proxies.
+* {spring-framework-api}/aot/hint/RuntimeHints.html[`RuntimeHints`] for the use of reflection, resource loading, serialization, and JDK proxies.
 
 NOTE: At the moment, AOT is focused on allowing Spring applications to be deployed as native images using GraalVM.
 We intend to support more JVM-based use cases in future generations.
@@ -35,7 +35,7 @@ We intend to support more JVM-based use cases in future generations.
 [[aot.basics]]
 == AOT engine overview
 
-The entry point of the AOT engine for processing an `ApplicationContext` arrangement is `ApplicationContextAotGenerator`. It takes care of the following steps, based on a `GenericApplicationContext` that represents the application to optimize and a {api-spring-framework}/aot/generate/GenerationContext.html[`GenerationContext`]:
+The entry point of the AOT engine for processing an `ApplicationContext` arrangement is `ApplicationContextAotGenerator`. It takes care of the following steps, based on a `GenericApplicationContext` that represents the application to optimize and a {spring-framework-api}/aot/generate/GenerationContext.html[`GenerationContext`]:
 
 * Refresh an `ApplicationContext` for AOT processing. Contrary to a traditional refresh, this version only creates bean definitions, not bean instances.
 * Invoke the available `BeanFactoryInitializationAotProcessor` implementations and apply their contributions against the `GenerationContext`.
@@ -81,7 +81,7 @@ Once this part completes, the `BeanFactory` contains the bean definitions that a
 [[aot.bean-factory-initialization-contributions]]
 == Bean Factory Initialization AOT Contributions
 
-Components that want to participate in this step can implement the {api-spring-framework}/beans/factory/aot/BeanFactoryInitializationAotProcessor.html[`BeanFactoryInitializationAotProcessor`] interface.
+Components that want to participate in this step can implement the {spring-framework-api}/beans/factory/aot/BeanFactoryInitializationAotProcessor.html[`BeanFactoryInitializationAotProcessor`] interface.
 Each implementation can return an AOT contribution, based on the state of the bean factory.
 
 An AOT contribution is a component that contributes generated code that reproduces a particular behavior.
@@ -261,7 +261,7 @@ If you are registering bean definitions programmatically, consider using `RootBe
 The container is able to choose the most appropriate constructor to use based on several candidates.
 However, this is not a best practice and flagging the preferred constructor with `@Autowired` if necessary is preferred.
 
-In case you are working on a code base that you can't modify, you can set the {api-spring-framework}/beans/factory/support/AbstractBeanDefinition.html#PREFERRED_CONSTRUCTORS_ATTRIBUTE[`preferredConstructors` attribute] on the related bean definition to indicate which constructor should be used.
+In case you are working on a code base that you can't modify, you can set the {spring-framework-api}/beans/factory/support/AbstractBeanDefinition.html#PREFERRED_CONSTRUCTORS_ATTRIBUTE[`preferredConstructors` attribute] on the related bean definition to indicate which constructor should be used.
 
 [[aot.bestpractices.factory-bean]]
 === FactoryBean
@@ -379,7 +379,7 @@ For instance, GraalVM needs to know ahead of time if a component uses reflection
 Similarly, classpath resources are not shipped in a native image unless specified explicitly.
 Consequently, if the application needs to load a resource, it must be referenced from the corresponding GraalVM native image configuration file.
 
-The {api-spring-framework}/aot/hint/RuntimeHints.html[`RuntimeHints`] API collects the need for reflection, resource loading, serialization, and JDK proxies at runtime.
+The {spring-framework-api}/aot/hint/RuntimeHints.html[`RuntimeHints`] API collects the need for reflection, resource loading, serialization, and JDK proxies at runtime.
 The following example makes sure that `config/app.properties` can be loaded from the classpath at runtime within a native image:
 
 [tabs]
@@ -417,7 +417,7 @@ It is also possible to register an implementation statically by adding an entry 
 [[aot.hints.reflective]]
 === `@Reflective`
 
-{api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
+{spring-framework-api}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
 For instance, `@EventListener` is meta-annotated with `@Reflective` since the underlying implementation invokes the annotated method using reflection.
 
 By default, only Spring beans are considered and an invocation hint is registered for the annotated element.
@@ -431,7 +431,7 @@ If components other than Spring beans need to be processed, a `BeanFactoryInitia
 [[aot.hints.register-reflection-for-binding]]
 === `@RegisterReflectionForBinding`
 
-{api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a specialization of `@Reflective` that registers the need for serializing arbitrary types.
+{spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a specialization of `@Reflective` that registers the need for serializing arbitrary types.
 A typical use case is the use of DTOs that the container cannot infer, such as using a web client within a method body.
 
 `@RegisterReflectionForBinding` can be applied to any Spring bean at the class level, but it can also be applied directly to a method, field, or constructor to better indicate where the hints are actually required.
@@ -467,7 +467,7 @@ include-code::./SpellCheckServiceTests[tag=hintspredicates]
 With `RuntimeHintsPredicates`, we can check for reflection, resource, serialization, or proxy generation hints.
 This approach works well for unit tests but implies that the runtime behavior of a component is well known.
 
-You can learn more about the global runtime behavior of an application by running its test suite (or the app itself) with the {docs-graalvm}/native-image/metadata/AutomaticMetadataCollection/[GraalVM tracing agent].
+You can learn more about the global runtime behavior of an application by running its test suite (or the app itself) with the {graalvm-docs}/native-image/metadata/AutomaticMetadataCollection/[GraalVM tracing agent].
 This agent will record all relevant calls requiring GraalVM hints at runtime and write them out as JSON configuration files.
 
 For more targeted discovery and testing, Spring Framework ships a dedicated module with core AOT testing utilities, `"org.springframework:spring-core-test"`.
@@ -499,4 +499,4 @@ io.spring.runtimehintstesting.SampleReflectionRuntimeHintsTests#lambda$shouldReg
 
 There are various ways to configure this Java agent in your build, so please refer to the documentation of your build tool and test execution plugin.
 The agent itself can be configured to instrument specific packages (by default, only `org.springframework` is instrumented).
-You'll find more details in the {spring-framework-main-code}/buildSrc/README.md[Spring Framework `buildSrc` README] file.
+You'll find more details in the {spring-framework-code}/buildSrc/README.md[Spring Framework `buildSrc` README] file.

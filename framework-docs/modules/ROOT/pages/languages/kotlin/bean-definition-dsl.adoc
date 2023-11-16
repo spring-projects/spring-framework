@@ -51,7 +51,7 @@ the constructor parameters will be autowired by type:
 ----
 
 In order to allow a more declarative approach and cleaner syntax, Spring Framework provides
-a {docs-spring-framework}/kdoc-api/spring-context/org.springframework.context.support/-bean-definition-dsl/index.html[Kotlin bean definition DSL]
+a {spring-framework-api-kdoc}/spring-context/org.springframework.context.support/-bean-definition-dsl/index.html[Kotlin bean definition DSL]
 It declares an `ApplicationContextInitializer` through a clean declarative API,
 which lets you deal with profiles and `Environment` for customizing
 how beans are registered.
@@ -104,10 +104,10 @@ as the following example shows:
 ----
 
 NOTE: Spring Boot is based on JavaConfig and
-https://github.com/spring-projects/spring-boot/issues/8115[does not yet provide specific support for functional bean definition],
+{spring-boot-issues}/8115[does not yet provide specific support for functional bean definition],
 but you can experimentally use functional bean definitions through Spring Boot's `ApplicationContextInitializer` support.
-See https://stackoverflow.com/questions/45935931/how-to-use-functional-bean-definition-kotlin-dsl-with-spring-boot-and-spring-w/46033685#46033685[this Stack Overflow answer]
-for more details and up-to-date information. See also the experimental Kofu DSL developed in https://github.com/spring-projects/spring-fu[Spring Fu incubator].
+See {stackoverflow-questions}/45935931/how-to-use-functional-bean-definition-kotlin-dsl-with-spring-boot-and-spring-w/46033685#46033685[this Stack Overflow answer]
+for more details and up-to-date information. See also the experimental Kofu DSL developed in {spring-github-org}/spring-fu[Spring Fu incubator].
 
 
 

@@ -29,7 +29,7 @@ integration test methods.
 scripts and is mainly intended for internal use within the framework. However, if you
 require full control over how SQL scripts are parsed and run, `ScriptUtils` may suit
 your needs better than some of the other alternatives described later. See the
-{api-spring-framework}/jdbc/datasource/init/ScriptUtils.html[javadoc] for individual
+{spring-framework-api}/jdbc/datasource/init/ScriptUtils.html[javadoc] for individual
 methods in `ScriptUtils` for further details.
 
 `ResourceDatabasePopulator` provides an object-based API for programmatically populating,
@@ -38,7 +38,7 @@ resources. `ResourceDatabasePopulator` provides options for configuring the char
 encoding, statement separator, comment delimiters, and error handling flags used when
 parsing and running the scripts. Each of the configuration options has a reasonable
 default value. See the
-{api-spring-framework}/jdbc/datasource/init/ResourceDatabasePopulator.html[javadoc] for
+{spring-framework-api}/jdbc/datasource/init/ResourceDatabasePopulator.html[javadoc] for
 details on default values. To run the scripts configured in a
 `ResourceDatabasePopulator`, you can invoke either the `populate(Connection)` method to
 run the populator against a `java.sql.Connection` or the `execute(DataSource)` method
@@ -392,8 +392,8 @@ local `@SqlConfig` attributes do not supply an explicit value other than `""`, `
 The configuration options provided by `@Sql` and `@SqlConfig` are equivalent to those
 supported by `ScriptUtils` and `ResourceDatabasePopulator` but are a superset of those
 provided by the `<jdbc:initialize-database/>` XML namespace element. See the javadoc of
-individual attributes in {api-spring-framework}/test/context/jdbc/Sql.html[`@Sql`] and
-{api-spring-framework}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] for details.
+individual attributes in {spring-framework-api}/test/context/jdbc/Sql.html[`@Sql`] and
+{spring-framework-api}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] for details.
 
 [[testcontext-executing-sql-declaratively-tx]]
 ==== Transaction management for `@Sql`
@@ -415,8 +415,8 @@ behavior by setting the `transactionMode` attribute of `@SqlConfig` (for example
 scripts should be run in an isolated transaction). Although a thorough discussion of all
 supported options for transaction management with `@Sql` is beyond the scope of this
 reference manual, the javadoc for
-{api-spring-framework}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] and
-{api-spring-framework}/test/context/jdbc/SqlScriptsTestExecutionListener.html[`SqlScriptsTestExecutionListener`]
+{spring-framework-api}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] and
+{spring-framework-api}/test/context/jdbc/SqlScriptsTestExecutionListener.html[`SqlScriptsTestExecutionListener`]
 provide detailed information, and the following example shows a typical testing scenario
 that uses JUnit Jupiter and transactional tests with `@Sql`:
 

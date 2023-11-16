@@ -12,8 +12,8 @@ between those objects.
 Several implementations of the `ApplicationContext` interface are supplied
 with Spring. In stand-alone applications, it is common to create an
 instance of
-{api-spring-framework}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
-or {api-spring-framework}/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
+{spring-framework-api}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
+or {spring-framework-api}/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
 While XML has been the traditional format for defining configuration metadata, you can
 instruct the container to use Java annotations or code as the metadata format by
 providing a small amount of XML configuration to declaratively enable support for these
@@ -24,7 +24,7 @@ more instances of a Spring IoC container. For example, in a web application scen
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application typically suffices (see
 xref:core/beans/context-introduction.adoc#context-create[Convenient ApplicationContext Instantiation for Web Applications]).
-If you use the https://spring.io/tools[Spring Tools for Eclipse] (an Eclipse-powered
+If you use the {spring-site-tools}[Spring Tools for Eclipse] (an Eclipse-powered
 development environment), you can easily create this boilerplate configuration with a
 few mouse clicks or keystrokes.
 
@@ -61,10 +61,10 @@ For information about using other forms of metadata with the Spring container, s
   annotation-based configuration metadata.
 * xref:core/beans/java.adoc[Java-based configuration]: define beans external to your application
   classes by using Java rather than XML files. To use these features, see the
-  {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`],
-  {api-spring-framework}/context/annotation/Bean.html[`@Bean`],
-  {api-spring-framework}/context/annotation/Import.html[`@Import`],
-  and {api-spring-framework}/context/annotation/DependsOn.html[`@DependsOn`] annotations.
+  {spring-framework-api}/context/annotation/Configuration.html[`@Configuration`],
+  {spring-framework-api}/context/annotation/Bean.html[`@Bean`],
+  {spring-framework-api}/context/annotation/Import.html[`@Import`],
+  and {spring-framework-api}/context/annotation/DependsOn.html[`@DependsOn`] annotations.
 
 Spring configuration consists of at least one and typically more than one bean
 definition that the container must manage. XML-based configuration metadata configures these

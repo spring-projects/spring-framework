@@ -10,7 +10,7 @@ in turn, manages a `TestContext` that holds the context of the current test. The
 and delegates to `TestExecutionListener` implementations, which instrument the actual
 test execution by providing dependency injection, managing transactions, and so on. A
 `SmartContextLoader` is responsible for loading an `ApplicationContext` for a given test
-class. See the {api-spring-framework}/test/context/package-summary.html[javadoc] and the
+class. See the {spring-framework-api}/test/context/package-summary.html[javadoc] and the
 Spring test suite for further information and examples of various implementations.
 
 [[testcontext]]

@@ -80,6 +80,6 @@ Kotlin::
 Note that `@WebAppConfiguration` must be used in conjunction with
 `@ContextConfiguration`, either within a single test class or within a test class
 hierarchy. See the
-{api-spring-framework}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
+{spring-framework-api}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
 javadoc for further details.
 

@@ -9,6 +9,6 @@ _Spring TestContext Framework_ to record all application events that are publish
 The recorded events can be accessed via the `ApplicationEvents` API within tests.
 
 See xref:testing/testcontext-framework/application-events.adoc[Application Events] and the 
-{api-spring-framework}/test/context/event/RecordApplicationEvents.html[`@RecordApplicationEvents`
+{spring-framework-api}/test/context/event/RecordApplicationEvents.html[`@RecordApplicationEvents`
 javadoc] for an example and further details.
 

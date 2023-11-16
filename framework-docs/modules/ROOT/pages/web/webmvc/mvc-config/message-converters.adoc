@@ -5,14 +5,13 @@
 
 You can set the `HttpMessageConverter` instances to use in Java configuration,
 replacing the ones used by default, by overriding
-{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`].
+{spring-framework-api}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`].
 You can also customize the list of configured message converters at the end by overriding
-{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`].
+{spring-framework-api}/web/servlet/config/annotation/WebMvcConfigurer.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`].
 
 TIP: In a Spring Boot application, the `WebMvcAutoConfiguration` adds any
 `HttpMessageConverter` beans it detects, in addition to default converters. Hence, in a
-Boot application, prefer to use the
-https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-config/message-converters.html[HttpMessageConverters]
+Boot application, prefer to use the {spring-boot-docs}/web.html#web.servlet.spring-mvc.message-converters[HttpMessageConverters]
 mechanism. Or alternatively, use `extendMessageConverters` to modify message converters
 at the end.
 
@@ -60,24 +59,24 @@ Kotlin::
 ======
 
 In the preceding example,
-{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]
+{spring-framework-api}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]
 is used to create a common configuration for both `MappingJackson2HttpMessageConverter` and
 `MappingJackson2XmlHttpMessageConverter` with indentation enabled, a customized date format,
 and the registration of
-https://github.com/FasterXML/jackson-module-parameter-names[`jackson-module-parameter-names`],
+{jackson-github-org}/jackson-module-parameter-names[`jackson-module-parameter-names`],
 Which adds support for accessing parameter names (a feature added in Java 8).
 
 This builder customizes Jackson's default properties as follows:
 
-* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+* {jackson-docs}/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+* {jackson-docs}/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* https://github.com/FasterXML/jackson-datatype-joda[jackson-datatype-joda]: Support for Joda-Time types.
-* https://github.com/FasterXML/jackson-datatype-jsr310[jackson-datatype-jsr310]: Support for Java 8 Date and Time API types.
-* https://github.com/FasterXML/jackson-datatype-jdk8[jackson-datatype-jdk8]: Support for other Java 8 types, such as `Optional`.
-* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
+* {jackson-github-org}/jackson-datatype-joda[jackson-datatype-joda]: Support for Joda-Time types.
+* {jackson-github-org}/jackson-datatype-jsr310[jackson-datatype-jsr310]: Support for Java 8 Date and Time API types.
+* {jackson-github-org}/jackson-datatype-jdk8[jackson-datatype-jdk8]: Support for other Java 8 types, such as `Optional`.
+* {jackson-github-org}/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
 
 NOTE: Enabling indentation with Jackson XML support requires
 https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.codehaus.woodstox%22%20AND%20a%3A%22woodstox-core-asl%22[`woodstox-core-asl`]
@@ -86,7 +85,7 @@ dependency in addition to https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jac
 Other interesting Jackson modules are available:
 
 * https://github.com/zalando/jackson-datatype-money[jackson-datatype-money]: Support for `javax.money` types (unofficial module).
-* https://github.com/FasterXML/jackson-datatype-hibernate[jackson-datatype-hibernate]: Support for Hibernate-specific types and properties (including lazy-loading aspects).
+* {jackson-github-org}/jackson-datatype-hibernate[jackson-datatype-hibernate]: Support for Hibernate-specific types and properties (including lazy-loading aspects).
 
 The following example shows how to achieve the same configuration in XML:
 

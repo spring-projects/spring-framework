@@ -64,6 +64,6 @@ Kotlin::
 
 The selectors in the preceding example are evaluated at runtime and may negatively impact
 performance if used extensively. See the
-{api-spring-framework}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
+{spring-framework-api}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
 javadoc for more details.
 

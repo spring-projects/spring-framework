@@ -282,8 +282,8 @@ You can pick and choose the relevant annotations for your application. For examp
 if you need only support for `@Scheduled`, you can omit `@EnableAsync`. For more
 fine-grained control, you can additionally implement the `SchedulingConfigurer`
 interface, the `AsyncConfigurer` interface, or both. See the
-{api-spring-framework}/scheduling/annotation/SchedulingConfigurer.html[`SchedulingConfigurer`]
-and {api-spring-framework}/scheduling/annotation/AsyncConfigurer.html[`AsyncConfigurer`]
+{spring-framework-api}/scheduling/annotation/SchedulingConfigurer.html[`SchedulingConfigurer`]
+and {spring-framework-api}/scheduling/annotation/AsyncConfigurer.html[`AsyncConfigurer`]
 javadoc for full details.
 
 If you prefer XML configuration, you can use the `<task:annotation-driven>` element,
@@ -722,7 +722,7 @@ In the preceding configuration, a `queue-capacity` value has also been provided.
 The configuration of the thread pool should also be considered in light of the
 executor's queue capacity. For the full description of the relationship between pool
 size and queue capacity, see the documentation for
-https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html[`ThreadPoolExecutor`].
+{java-api}/java.base/java/util/concurrent/ThreadPoolExecutor.html[`ThreadPoolExecutor`].
 The main idea is that, when a task is submitted, the executor first tries to use a
 free thread if the number of active threads is currently less than the core size.
 If the core size has been reached, the task is added to the queue, as long as its
@@ -1093,7 +1093,7 @@ we need to set up the `SchedulerFactoryBean`, as the following example shows:
 
 More properties are available for the `SchedulerFactoryBean`, such as the calendars used by the
 job details, properties to customize Quartz with, and a Spring-provided JDBC DataSource. See
-the {api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
+the {spring-framework-api}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
 javadoc for more information.
 
 NOTE: `SchedulerFactoryBean` also recognizes a `quartz.properties` file in the classpath,

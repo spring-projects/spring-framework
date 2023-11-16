@@ -47,7 +47,7 @@ Kotlin::
 In the preceding example, the method accepts a `Model` and returns a view name as a `String`,
 but many other options exist and are explained later in this chapter.
 
-TIP: Guides and tutorials on https://spring.io/guides[spring.io] use the annotation-based
+TIP: Guides and tutorials on {spring-site-guides}[spring.io] use the annotation-based
 programming model described in this section.
 
 

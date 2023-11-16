@@ -137,7 +137,7 @@ Here is a very concise overview of Servlet asynchronous request processing:
   asynchronously produced return value from the `Callable`.
 
 For further background and context, you can also read
-https://spring.io/blog/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[the
+{spring-site-blog}/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[the
 blog posts] that introduced asynchronous request processing support in Spring MVC 3.2.
 
 
@@ -165,11 +165,11 @@ processing (instead of `postHandle` and `afterCompletion`).
 `HandlerInterceptor` implementations can also register a `CallableProcessingInterceptor`
 or a `DeferredResultProcessingInterceptor`, to integrate more deeply with the
 lifecycle of an asynchronous request (for example, to handle a timeout event). See
-{api-spring-framework}/web/servlet/AsyncHandlerInterceptor.html[`AsyncHandlerInterceptor`]
+{spring-framework-api}/web/servlet/AsyncHandlerInterceptor.html[`AsyncHandlerInterceptor`]
 for more details.
 
 `DeferredResult` provides `onTimeout(Runnable)` and `onCompletion(Runnable)` callbacks.
-See the {api-spring-framework}/web/context/request/async/DeferredResult.html[javadoc of `DeferredResult`]
+See the {spring-framework-api}/web/context/request/async/DeferredResult.html[javadoc of `DeferredResult`]
 for more details. `Callable` can be substituted for `WebAsyncTask` that exposes additional
 methods for timeout and completion callbacks.
 
@@ -399,7 +399,7 @@ Applications can also return `Flux<ServerSentEvent>` or `Observable<ServerSentEv
 to, similar to using `DeferredResult<List<?>>`.
 
 TIP: Spring MVC supports Reactor and RxJava through the
-{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`] from
+{spring-framework-api}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`] from
 `spring-core`, which lets it adapt from multiple reactive libraries.
 
 For streaming to the response, reactive back pressure is supported, but writes to the
@@ -420,7 +420,7 @@ across multiple threads. The Micrometer
 https://github.com/micrometer-metrics/context-propagation#context-propagation-library[Context Propagation]
 library simplifies context propagation across threads, and across context mechanisms such
 as `ThreadLocal` values,
-Reactor https://projectreactor.io/docs/core/release/reference/#context[context],
+Reactor {reactor-site}/docs/core/release/reference/#context[context],
 GraphQL Java https://www.graphql-java.com/documentation/concerns/#context-objects[context],
 and others.
 

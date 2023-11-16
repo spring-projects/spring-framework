@@ -278,7 +278,7 @@ init-param):
 
 NOTE: For programmatic use cases, a `GenericWebApplicationContext` can be used as an
 alternative to `AnnotationConfigWebApplicationContext`. See the
-{api-spring-framework}/web/context/support/GenericWebApplicationContext.html[`GenericWebApplicationContext`]
+{spring-framework-api}/web/context/support/GenericWebApplicationContext.html[`GenericWebApplicationContext`]
 javadoc for details.
 
 

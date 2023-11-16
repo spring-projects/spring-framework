@@ -51,7 +51,7 @@ Kotlin::
 ======
 
 For Spring MVC, use the following which delegates to the
-{api-spring-framework}/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
+{spring-framework-api}/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
 to load infrastructure equivalent to the xref:web/webmvc/mvc-config.adoc[WebMvc Java config],
 registers the given controller(s), and creates an instance of
 xref:testing/spring-mvc-test-framework.adoc[MockMvc] to handle requests:
@@ -84,7 +84,7 @@ infrastructure and controller declarations and use it to handle requests via moc
 and response objects, without a running server.
 
 For WebFlux, use the following where the Spring `ApplicationContext` is passed to
-{api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html#applicationContext-org.springframework.context.ApplicationContext-[WebHttpHandlerBuilder]
+{spring-framework-api}/web/server/adapter/WebHttpHandlerBuilder.html#applicationContext-org.springframework.context.ApplicationContext-[WebHttpHandlerBuilder]
 to create the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[WebHandler chain] to handle
 requests:
 
@@ -130,7 +130,7 @@ Kotlin::
 ======
 
 For Spring MVC, use the following where the Spring `ApplicationContext` is passed to
-{api-spring-framework}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
+{spring-framework-api}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
 to create a xref:testing/spring-mvc-test-framework.adoc[MockMvc] instance to handle
 requests:
 
@@ -442,7 +442,7 @@ Kotlin::
 
 TIP: When you need to decode to a target type with generics, look for the overloaded methods
 that accept
-{api-spring-framework}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
+{spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
 instead of `Class<T>`.
 
 

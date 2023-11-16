@@ -95,7 +95,7 @@ parameter to database bind marker translation.
  run.
 * `….namedParameters(false)`: Disable named parameter expansion. Enabled by default.
 
-TIP: Dialects are resolved by {api-spring-framework}/r2dbc/core/binding/BindMarkersFactoryResolver.html[`BindMarkersFactoryResolver`]
+TIP: Dialects are resolved by {spring-framework-api}/r2dbc/core/binding/BindMarkersFactoryResolver.html[`BindMarkersFactoryResolver`]
  from a `ConnectionFactory`, typically by inspecting `ConnectionFactoryMetadata`.
  +
 You can let Spring auto-discover your `BindMarkersFactory` by registering a
@@ -120,7 +120,7 @@ the reactive sequence to aid debugging.
 
 The following sections provide some examples of `DatabaseClient` usage. These examples
 are not an exhaustive list of all of the functionality exposed by the `DatabaseClient`.
-See the attendant {api-spring-framework}/r2dbc/core/DatabaseClient.html[javadoc] for that.
+See the attendant {spring-framework-api}/r2dbc/core/DatabaseClient.html[javadoc] for that.
 
 [[r2dbc-DatabaseClient-examples-statement]]
 ==== Executing Statements
@@ -752,7 +752,7 @@ the same time, have this client participating in Spring managed transactions. It
 preferable to integrate a R2DBC client with proper access to `ConnectionFactoryUtils`
 for resource management.
 
-See the {api-spring-framework}/r2dbc/connection/TransactionAwareConnectionFactoryProxy.html[`TransactionAwareConnectionFactoryProxy`]
+See the {spring-framework-api}/r2dbc/connection/TransactionAwareConnectionFactoryProxy.html[`TransactionAwareConnectionFactoryProxy`]
 javadoc for more details.
 
 

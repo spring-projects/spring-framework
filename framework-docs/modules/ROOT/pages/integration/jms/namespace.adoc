@@ -113,7 +113,7 @@ as the following example shows:
 ----
 
 The following table describes all available attributes. See the class-level javadoc
-of the {api-spring-framework}/jms/listener/AbstractMessageListenerContainer.html[`AbstractMessageListenerContainer`]
+of the {spring-framework-api}/jms/listener/AbstractMessageListenerContainer.html[`AbstractMessageListenerContainer`]
 and its concrete subclasses for more details on the individual properties. The javadoc
 also provides a discussion of transaction choices and message redelivery scenarios.
 
@@ -254,7 +254,7 @@ The following table describes the available configuration options for the JCA va
 
 | `activation-spec-factory`
 | A reference to the `JmsActivationSpecFactory`. The default is to autodetect the JMS
-  provider and its `ActivationSpec` class (see {api-spring-framework}/jms/listener/endpoint/DefaultJmsActivationSpecFactory.html[`DefaultJmsActivationSpecFactory`]).
+  provider and its `ActivationSpec` class (see {spring-framework-api}/jms/listener/endpoint/DefaultJmsActivationSpecFactory.html[`DefaultJmsActivationSpecFactory`]).
 
 | `destination-resolver`
 | A reference to the `DestinationResolver` strategy for resolving JMS `Destinations`.

@@ -96,7 +96,7 @@ Kotlin::
 
 The `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class is used to
 reject the `name` property if it is `null` or the empty string. Have a look at the
-{api-spring-framework}/validation/ValidationUtils.html[`ValidationUtils`] javadoc
+{spring-framework-api}/validation/ValidationUtils.html[`ValidationUtils`] javadoc
 to see what functionality it provides besides the example shown previously.
 
 While it is certainly possible to implement a single `Validator` class to validate each
@@ -193,7 +193,7 @@ Kotlin::
 Validation errors are reported to the `Errors` object passed to the validator. In the case
 of Spring Web MVC, you can use the `<spring:bind/>` tag to inspect the error messages, but
 you can also inspect the `Errors` object yourself. More information about the
-methods it offers can be found in the {api-spring-framework}/validation/Errors.html[javadoc].
+methods it offers can be found in the {spring-framework-api}/validation/Errors.html[javadoc].
 
 Validators may also get locally invoked for the immediate validation of a given object,
 not involving a binding process. As of 6.1, this has been simplified through a new

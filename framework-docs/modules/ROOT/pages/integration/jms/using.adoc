@@ -234,7 +234,7 @@ use a proper cache level in such a case.
 This container also has recoverable capabilities when the broker goes down. By default,
 a simple `BackOff` implementation retries every five seconds. You can specify
 a custom `BackOff` implementation for more fine-grained recovery options. See
-{api-spring-framework}/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
+{spring-framework-api}/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
 
 NOTE: Like its sibling (xref:integration/jms/using.adoc#jms-mdp-simple[`SimpleMessageListenerContainer`]),
 `DefaultMessageListenerContainer` supports native JMS transactions and allows for

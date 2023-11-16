@@ -199,7 +199,7 @@ participating in Spring managed transactions. It is generally preferable to writ
 own new code by using the higher level abstractions for resource management, such as
 `JdbcTemplate` or `DataSourceUtils`.
 
-See the {api-spring-framework}/jdbc/datasource/TransactionAwareDataSourceProxy.html[`TransactionAwareDataSourceProxy`]
+See the {spring-framework-api}/jdbc/datasource/TransactionAwareDataSourceProxy.html[`TransactionAwareDataSourceProxy`]
 javadoc for more details.
 
 

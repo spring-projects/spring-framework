@@ -4,7 +4,7 @@
 [.small]#xref:web/webflux/config.adoc#webflux-config-static-resources[See equivalent in the Reactive stack]#
 
 This option provides a convenient way to serve static resources from a list of
-{api-spring-framework}/core/io/Resource.html[`Resource`]-based locations.
+{spring-framework-api}/core/io/Resource.html[`Resource`]-based locations.
 
 In the next example, given a request that starts with `/resources`, the relative path is
 used to find and serve static resources relative to `/public` under the web application
@@ -64,8 +64,8 @@ See also
 xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[HTTP caching support for static resources].
 
 The resource handler also supports a chain of
-{api-spring-framework}/web/servlet/resource/ResourceResolver.html[`ResourceResolver`] implementations and
-{api-spring-framework}/web/servlet/resource/ResourceTransformer.html[`ResourceTransformer`] implementations,
+{spring-framework-api}/web/servlet/resource/ResourceResolver.html[`ResourceResolver`] implementations and
+{spring-framework-api}/web/servlet/resource/ResourceTransformer.html[`ResourceTransformer`] implementations,
 which you can use to create a toolchain for working with optimized resources.
 
 You can use the `VersionResourceResolver` for versioned resource URLs based on an MD5 hash

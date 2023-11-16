@@ -136,7 +136,7 @@ using Spring in accordance with the properties of the annotation". In this conte
 "initialization" refers to newly instantiated objects (for example, objects instantiated
 with the `new` operator) as well as to `Serializable` objects that are undergoing
 deserialization (for example, through
-https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
+{java-api}/java.base/java/io/Serializable.html[readResolve()]).
 
 [NOTE]
 =====
@@ -168,14 +168,13 @@ Kotlin::
 
 You can find more information about the language semantics of the various pointcut
 types in AspectJ
-https://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
-appendix] of the https://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
-Programming Guide].
+{aspectj-docs-progguide}/semantics-joinPoints.html[in this appendix] of the
+{aspectj-docs-progguide}/index.html[AspectJ Programming Guide].
 =====
 
 For this to work, the annotated types must be woven with the AspectJ weaver. You can
 either use a build-time Ant or Maven task to do this (see, for example, the
-https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
+{aspectj-docs-devguide}/antTasks.html[AspectJ Development
 Environment Guide]) or load-time weaving (see xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework]). The
 `AnnotationBeanConfigurerAspect` itself needs to be configured by Spring (in order to obtain
 a reference to the bean factory that is to be used to configure new objects). If you
@@ -399,7 +398,7 @@ The focus of this section is on configuring and using LTW in the specific contex
 Spring Framework. This section is not a general introduction to LTW. For full details on
 the specifics of LTW and configuring LTW with only AspectJ (with Spring not being
 involved at all), see the
-https://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
+{aspectj-docs-devguide}/ltw.html[LTW section of the AspectJ
 Development Environment Guide].
 
 The value that the Spring Framework brings to AspectJ LTW is in enabling much
@@ -421,7 +420,7 @@ who typically are in charge of the deployment configuration, such as the launch 
 Now that the sales pitch is over, let us first walk through a quick example of AspectJ
 LTW that uses Spring, followed by detailed specifics about elements introduced in the
 example. For a complete example, see the
-https://github.com/spring-projects/spring-petclinic[Petclinic sample application].
+{spring-github-org}/spring-petclinic[Petclinic sample application].
 
 
 [[aop-aj-ltw-first-example]]
@@ -621,7 +620,7 @@ java -javaagent:C:/projects/xyz/lib/spring-instrument.jar com.xyz.Main
 ----
 
 The `-javaagent` is a flag for specifying and enabling
-https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
+{java-api}/java.instrument/java/lang/instrument/package-summary.html[agents
 to instrument programs that run on the JVM]. The Spring Framework ships with such an
 agent, the `InstrumentationSavingAgent`, which is packaged in the
 `spring-instrument.jar` that was supplied as the value of the `-javaagent` argument in
@@ -721,7 +720,7 @@ The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.
 files that are on the Java classpath (either directly or, more typically, in jar files).
 
 The structure and contents of this file is detailed in the LTW part of the
-https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
+{aspectj-docs-devguide}/ltw-configuration.html[AspectJ reference
 documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
 
 

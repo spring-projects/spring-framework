@@ -112,16 +112,16 @@ categories:
 The `org.springframework.test.util` package contains several general purpose utilities
 for use in unit and integration testing.
 
-{api-spring-framework}/test/util/AopTestUtils.html[`AopTestUtils`] is a collection of
+{spring-framework-api}/test/util/AopTestUtils.html[`AopTestUtils`] is a collection of
 AOP-related utility methods. You can use these methods to obtain a reference to the
 underlying target object hidden behind one or more Spring proxies. For example, if you
 have configured a bean as a dynamic mock by using a library such as EasyMock or Mockito,
 and the mock is wrapped in a Spring proxy, you may need direct access to the underlying
 mock to configure expectations on it and perform verifications. For Spring's core AOP
-utilities, see {api-spring-framework}/aop/support/AopUtils.html[`AopUtils`] and
-{api-spring-framework}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
+utilities, see {spring-framework-api}/aop/support/AopUtils.html[`AopUtils`] and
+{spring-framework-api}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
 
-{api-spring-framework}/test/util/ReflectionTestUtils.html[`ReflectionTestUtils`] is a
+{spring-framework-api}/test/util/ReflectionTestUtils.html[`ReflectionTestUtils`] is a
 collection of reflection-based utility methods. You can use these methods in testing
 scenarios where you need to change the value of a constant, set a non-`public` field,
 invoke a non-`public` setter method, or invoke a non-`public` configuration or lifecycle
@@ -135,7 +135,7 @@ callback method when testing application code for use cases such as the followin
 * Use of annotations such as `@PostConstruct` and `@PreDestroy` for lifecycle callback
   methods.
 
-{api-spring-framework}/test/util/TestSocketUtils.html[`TestSocketUtils`] is a simple
+{spring-framework-api}/test/util/TestSocketUtils.html[`TestSocketUtils`] is a simple
 utility for finding available TCP ports on `localhost` for use in integration testing
 scenarios.
 
@@ -155,7 +155,7 @@ server for the port it is currently using.
 === Spring MVC Testing Utilities
 
 The `org.springframework.test.web` package contains
-{api-spring-framework}/test/web/ModelAndViewAssert.html[`ModelAndViewAssert`], which you
+{spring-framework-api}/test/web/ModelAndViewAssert.html[`ModelAndViewAssert`], which you
 can use in combination with JUnit, TestNG, or any other testing framework for unit tests
 that deal with Spring MVC `ModelAndView` objects.
 

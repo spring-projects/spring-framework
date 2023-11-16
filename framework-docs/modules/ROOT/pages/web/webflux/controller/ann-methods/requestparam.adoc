@@ -74,7 +74,7 @@ When a `@RequestParam` annotation is declared on a `Map<String, String>` or
 
 Note that use of `@RequestParam` is optional -- for example, to set its attributes. By
 default, any argument that is a simple value type (as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
+{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
 and is not resolved by any other argument resolver is treated as if it were annotated
 with `@RequestParam`.
 

@@ -64,7 +64,7 @@ You can customize the listener container factory to use for each annotation or y
 configure an explicit default by implementing the `JmsListenerConfigurer` interface.
 The default is required only if at least one endpoint is registered without a specific
 container factory. See the javadoc of classes that implement
-{api-spring-framework}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`]
+{spring-framework-api}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`]
 for details and examples.
 
 If you prefer xref:integration/jms/namespace.adoc[XML configuration], you can use the `<jms:annotation-driven>`
