@@ -20,6 +20,7 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -170,6 +171,19 @@ class DefaultServerRequestObservationConventionTests {
 		assertThat(this.convention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("status", "UNKNOWN"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
+	}
+
+	@Test
+	void addsKeyValuesForUnknownHttpMethodExchange() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.valueOf("SPRING"), "/test"));
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
+		exchange.getResponse().setRawStatusCode(404);
+
+		assertThat(this.convention.getLowCardinalityKeyValues(context)).hasSize(5)
+				.contains(KeyValue.of("method", "UNKNOWN"), KeyValue.of("uri", "NOT_FOUND"), KeyValue.of("status", "404"),
+						KeyValue.of("exception", "none"), KeyValue.of("outcome", "CLIENT_ERROR"));
+		assertThat(this.convention.getHighCardinalityKeyValues(context)).hasSize(1)
+				.contains(KeyValue.of("http.url", "/test"));
 	}
 
 }
