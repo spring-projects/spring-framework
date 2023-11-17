@@ -262,7 +262,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (StringUtils.hasText(condition)) {
 			Assert.notNull(this.evaluator, "EventExpressionEvaluator must not be null");
 			return this.evaluator.condition(
-					condition, event, this.targetMethod, this.methodKey, args, this.applicationContext);
+					condition, event, this.targetMethod, this.methodKey, args);
 		}
 		return true;
 	}

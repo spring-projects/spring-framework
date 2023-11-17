@@ -39,10 +39,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -75,6 +77,8 @@ public class EventListenerMethodProcessor
 	@Nullable
 	private List<EventListenerFactory> eventListenerFactories;
 
+	private final StandardEvaluationContext originalEvaluationContext;
+
 	@Nullable
 	private final EventExpressionEvaluator evaluator;
 
@@ -82,7 +86,8 @@ public class EventListenerMethodProcessor
 
 
 	public EventListenerMethodProcessor() {
-		this.evaluator = new EventExpressionEvaluator();
+		this.originalEvaluationContext = new StandardEvaluationContext();
+		this.evaluator = new EventExpressionEvaluator(this.originalEvaluationContext);
 	}
 
 	@Override
@@ -95,6 +100,7 @@ public class EventListenerMethodProcessor
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		this.originalEvaluationContext.setBeanResolver(new BeanFactoryResolver(this.beanFactory));
 
 		Map<String, EventListenerFactory> beans = beanFactory.getBeansOfType(EventListenerFactory.class, false, false);
 		List<EventListenerFactory> factories = new ArrayList<>(beans.values());

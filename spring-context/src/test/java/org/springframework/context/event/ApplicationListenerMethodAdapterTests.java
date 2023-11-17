@@ -31,6 +31,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.annotation.Order;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -322,7 +323,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		given(this.context.getBean("testBean")).willReturn(this.sampleEvents);
 		ApplicationListenerMethodAdapter listener = new ApplicationListenerMethodAdapter(
 				"testBean", GenericTestEvent.class, method);
-		listener.init(this.context, new EventExpressionEvaluator());
+		listener.init(this.context, new EventExpressionEvaluator(new StandardEvaluationContext()));
 		GenericTestEvent<String> event = createGenericTestEvent("test");
 
 

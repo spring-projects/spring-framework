@@ -55,6 +55,7 @@ import org.springframework.util.Assert;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.0
  * @see SimpleEvaluationContext
  * @see ReflectivePropertyAccessor
@@ -90,9 +91,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 	@Nullable
 	private TypeConverter typeConverter;
 
-	private TypeComparator typeComparator = new StandardTypeComparator();
+	private TypeComparator typeComparator = StandardTypeComparator.INSTANCE;
 
-	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
+	private OperatorOverloader operatorOverloader = StandardOperatorOverloader.INSTANCE;
 
 	private final Map<String, Object> variables = new ConcurrentHashMap<>();
 
@@ -327,6 +328,29 @@ public class StandardEvaluationContext implements EvaluationContext {
 					"Method filter cannot be set as the reflective method resolver is not in use");
 		}
 		resolver.registerMethodFilter(type, filter);
+	}
+
+	/**
+	 * Apply the internal delegates of this instance to the specified
+	 * {@code evaluationContext}. Typically invoked right after the new context
+	 * instance has been created to reuse the delegates. Do not modify the
+	 * {@linkplain #setRootObject(Object) root object} or any registered
+	 * {@linkplain #setVariables(Map) variables}.
+	 * @param evaluationContext the evaluation context to update
+	 * @since 6.1.1
+	 */
+	public void applyDelegatesTo(StandardEvaluationContext evaluationContext) {
+		// Triggers initialization for default delegates
+		evaluationContext.setConstructorResolvers(new ArrayList<>(this.getConstructorResolvers()));
+		evaluationContext.setMethodResolvers(new ArrayList<>(this.getMethodResolvers()));
+		evaluationContext.setPropertyAccessors(new ArrayList<>(this.getPropertyAccessors()));
+		evaluationContext.setTypeLocator(this.getTypeLocator());
+		evaluationContext.setTypeConverter(this.getTypeConverter());
+
+		evaluationContext.beanResolver = this.beanResolver;
+		evaluationContext.operatorOverloader = this.operatorOverloader;
+		evaluationContext.reflectiveMethodResolver = this.reflectiveMethodResolver;
+		evaluationContext.typeComparator = this.typeComparator;
 	}
 
 
