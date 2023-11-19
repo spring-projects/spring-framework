@@ -151,7 +151,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * is under one of the {@link #setAllowedLocations allowed locations}.
 	 * @param resource the resource to check
 	 * @param location the location relative to which the resource was found
-	 * @return "true" if resource is in a valid location, "false" otherwise.
+	 * @return "true" if resource is in a valid location, "false" otherwise
 	 */
 	protected boolean checkResource(Resource resource, Resource location) throws IOException {
 		if (isResourceUnderLocation(resource, location)) {

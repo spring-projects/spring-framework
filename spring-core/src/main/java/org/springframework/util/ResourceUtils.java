@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
  * <p>Consider using Spring's Resource abstraction in the core package
  * for handling all kinds of file resources in a uniform manner.
  * {@link org.springframework.core.io.ResourceLoader}'s {@code getResource()}
- * method can resolve any location to a {@link org.springframework.core.io.Resource}
+ * method can resolve any location to an {@link org.springframework.core.io.Resource}
  * object, which in turn allows one to obtain a {@code java.io.File} in the
  * file system through its {@code getFile()} method.
  *
@@ -275,8 +275,9 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Determine whether the given URL points to a resource in a jar file.
-	 * i.e. has protocol "jar", "war, ""zip", "vfszip" or "wsjar".
+	 * Determine whether the given URL points to a resource in a jar file
+	 * &mdash; for example, whether the URL has protocol "jar", "war, "zip",
+	 * "vfszip", or "wsjar".
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a JAR URL
 	 */
