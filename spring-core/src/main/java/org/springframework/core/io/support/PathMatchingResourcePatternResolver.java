@@ -364,7 +364,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String path = stripLeadingSlash(location);
 		Set<Resource> result = doFindAllClassPathResources(path);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved classpath location [" + path + "] to resources " + result);
+			logger.trace("Resolved class path location [" + path + "] to resources " + result);
 		}
 		return result.toArray(new Resource[0]);
 	}
@@ -386,7 +386,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		if (!StringUtils.hasLength(path)) {
 			// The above result is likely to be incomplete, i.e. only containing file system references.
-			// We need to have pointers to each of the jar files on the classpath as well...
+			// We need to have pointers to each of the jar files on the class path as well...
 			addAllClassLoaderJarRoots(cl, result);
 		}
 		return result;
@@ -457,7 +457,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		if (classLoader == ClassLoader.getSystemClassLoader()) {
-			// "java.class.path" manifest evaluation...
+			// JAR "Class-Path" manifest header evaluation...
 			addClassPathManifestEntries(result);
 		}
 
@@ -484,8 +484,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected void addClassPathManifestEntries(Set<Resource> result) {
 		try {
 			String javaClassPathProperty = System.getProperty("java.class.path");
-			for (String path : StringUtils.delimitedListToStringArray(
-					javaClassPathProperty, System.getProperty("path.separator"))) {
+			for (String path : StringUtils.delimitedListToStringArray(javaClassPathProperty, File.pathSeparator)) {
 				try {
 					String filePath = new File(path).getAbsolutePath();
 					int prefixIndex = filePath.indexOf(':');
@@ -499,7 +498,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					// Build URL that points to the root of the jar file
 					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
 							ResourceUtils.FILE_URL_PREFIX + filePath + ResourceUtils.JAR_URL_SEPARATOR);
-					// Potentially overlapping with URLClassLoader.getURLs() result above!
+					// Potentially overlapping with URLClassLoader.getURLs() result in addAllClassLoaderJarRoots().
 					if (!result.contains(jarResource) && !hasDuplicate(filePath, result) && jarResource.exists()) {
 						result.add(jarResource);
 					}
@@ -691,7 +690,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			catch (ZipException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Skipping invalid jar classpath entry [" + urlFile + "]");
+					logger.debug("Skipping invalid jar class path entry [" + urlFile + "]");
 				}
 				return Collections.emptySet();
 			}
@@ -979,26 +978,23 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class == method.getDeclaringClass()) {
-				if (methodName.equals("equals")) {
-					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
+				switch(methodName) {
+					case "equals":
+						// Only consider equal when proxies are identical.
+						return (proxy == args[0]);
+					case "hashCode":
+						return System.identityHashCode(proxy);
 				}
-				else if (methodName.equals("hashCode")) {
-					return System.identityHashCode(proxy);
+			}
+			return switch(methodName) {
+				case "getAttributes" -> getAttributes();
+				case "visit" -> {
+					visit(args[0]);
+					yield null;
 				}
-			}
-			else if ("getAttributes".equals(methodName)) {
-				return getAttributes();
-			}
-			else if ("visit".equals(methodName)) {
-				visit(args[0]);
-				return null;
-			}
-			else if ("toString".equals(methodName)) {
-				return toString();
-			}
-
-			throw new IllegalStateException("Unexpected method invocation: " + method);
+				case "toString" -> toString();
+				default -> throw new IllegalStateException("Unexpected method invocation: " + method);
+			};
 		}
 
 		public void visit(Object vfsResource) {
