@@ -13,7 +13,7 @@ but it is more commonly known as "Spring MVC".
 Parallel to Spring Web MVC, Spring Framework 5.0 introduced a reactive-stack web framework
 whose name, "Spring WebFlux," is also based on its source module
 ({spring-framework-main-code}/spring-webflux[`spring-webflux`]).
-This chapter covers Spring Web MVC. The xref:testing/unit.adoc#mock-objects-web-reactive[next chapter]
+This chapter covers Spring Web MVC. The xref:web/webflux.adoc[next chapter]
 covers Spring WebFlux.
 
 For baseline information and compatibility with Servlet container and Jakarta EE version
