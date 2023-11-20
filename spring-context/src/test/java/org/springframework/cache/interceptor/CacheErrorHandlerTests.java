@@ -60,6 +60,7 @@ class CacheErrorHandlerTests {
 
 	private SimpleService simpleService;
 
+
 	@BeforeEach
 	void setup() {
 		this.context = new AnnotationConfigApplicationContext(Config.class);
@@ -69,10 +70,12 @@ class CacheErrorHandlerTests {
 		this.simpleService = context.getBean(SimpleService.class);
 	}
 
+
 	@AfterEach
-	void tearDown() {
+	void closeContext() {
 		this.context.close();
 	}
+
 
 	@Test
 	void getFail() {
@@ -107,9 +110,9 @@ class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				this.simpleService.get(0L))
-			.withMessage("Test exception on get");
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> this.simpleService.get(0L))
+				.withMessage("Test exception on get");
 	}
 
 	@Test
@@ -128,9 +131,9 @@ class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				this.simpleService.put(0L))
-			.withMessage("Test exception on put");
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> this.simpleService.put(0L))
+				.withMessage("Test exception on put");
 	}
 
 	@Test
@@ -149,9 +152,9 @@ class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				this.simpleService.evict(0L))
-			.withMessage("Test exception on evict");
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> this.simpleService.evict(0L))
+				.withMessage("Test exception on evict");
 	}
 
 	@Test
@@ -170,9 +173,9 @@ class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				this.simpleService.clear())
-			.withMessage("Test exception on clear");
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> this.simpleService.clear())
+				.withMessage("Test exception on clear");
 	}
 
 
