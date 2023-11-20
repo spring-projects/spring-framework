@@ -195,8 +195,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				Resource[] allowed = getAllowedLocations();
 				logger.warn(LogFormatUtils.formatValue(
 						"Resource path \"" + resourcePath + "\" was successfully resolved " +
-								"but resource \"" + resource.getURL() + "\" is neither under " +
-								"the current location \"" + location.getURL() + "\" nor under any of " +
+								"but resource \"" + resource + "\" is neither under " +
+								"the current location \"" + location + "\" nor under any of " +
 								"the allowed locations " + (allowed != null ? Arrays.asList(allowed) : "[]"), -1, true));
 			}
 		}
