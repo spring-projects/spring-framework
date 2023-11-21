@@ -59,4 +59,6 @@ a "shared objects file" source, as shown in the following example:
 
 TIP: If you have a large number of classes that are not loaded from the cache, make sure that
 the JDK and classpath used by the commands that create the archive and start the application
-are identical.
+are identical. Note also that to effectively cache classes, the classpath should be specified
+as a list of JARs containing those classes, and avoid the usage of directories and `*`
+wildcard characters.
