@@ -17,6 +17,7 @@ asciidoc:
     # FIXME: the copyright is not removed
     # FIXME: The package is not renamed
     chomp: 'all'
+    fold: 'all'
     include-java: 'example$docs-src/main/java/org/springframework/docs'
     spring-site: 'https://spring.io'
     spring-site-blog: '{spring-site}/blog'
@@ -25,9 +26,8 @@ asciidoc:
     spring-site-projects: '{spring-site}/projects'
     spring-site-tools: "{spring-site}/tools"
     spring-org: 'spring-projects'
-    spring-repo: "{spring-org}/spring-framework"
     spring-github-org: "https://github.com/{spring-org}"
-    spring-framework-github: "https://github.com/{spring-repo}"
+    spring-framework-github: "https://github.com/{spring-org}/spring-framework"
     spring-framework-code: '{spring-framework-github}/tree/main'
     spring-framework-issues: '{spring-framework-github}/issues'
     issues-old: 'https://jira.spring.io/browse'
