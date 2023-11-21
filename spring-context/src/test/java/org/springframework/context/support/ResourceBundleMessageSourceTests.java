@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -327,6 +328,27 @@ class ResourceBundleMessageSourceTests {
 		// Late enough for a re-cache attempt
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceThatAllowsSubclassesToGetAllMessagesWithRefresh() throws InterruptedException {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setCacheMillis(20);
+		// Initial cache attempt
+		Properties properties = ms.getMergedProperties(Locale.GERMAN).getProperties();
+		assertThat(properties).isNotNull();
+		Set<String> keys = properties.stringPropertyNames();
+		assertThat(keys.contains("code2")).isTrue();
+		assertThat(keys.contains("code3")).isFalse();
+		Thread.sleep(50);
+		// while we were sleeping, the file was changed (here emulated by adding new basename)
+		ms.addBasenames("org/springframework/context/support/messages2");
+		properties = ms.getMergedProperties(Locale.GERMAN).getProperties();
+		assertThat(properties).isNotNull();
+		keys = properties.stringPropertyNames();
+		assertThat(keys).containsAll(Set.of("code2", "code3"));
+		assertThat(ms.getMessage("code3", null, Locale.GERMAN)).isEqualTo("nachricht3");
 	}
 
 	@Test

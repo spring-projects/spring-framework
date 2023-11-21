@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -248,39 +249,92 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * Get a PropertiesHolder that contains the actually visible properties
 	 * for a Locale, after merging all specified resource bundles.
 	 * Either fetches the holder from the cache or freshly loads it.
-	 * <p>Only used when caching resource bundle contents forever, i.e.
-	 * with cacheSeconds &lt; 0. Therefore, merged properties are always
-	 * cached forever.
+	 * <p>Only used by this class when caching resource bundle contents forever,
+	 * i.e. with cacheSeconds &lt; 0.
+	 * <p>However subclasses may use getMergedProperties when cacheSeconds &gt; 0,
+	 * and get updated merged properties whenever contents change.
 	 */
 	protected PropertiesHolder getMergedProperties(Locale locale) {
 		PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
 		if (mergedHolder != null) {
+			if (!isUpToDate(mergedHolder)) {
+				doRefresh(locale, mergedHolder);
+				mergedHolder = this.cachedMergedProperties.get(locale);
+			}
 			return mergedHolder;
 		}
 
-		Properties mergedProps = newProperties();
-		long latestTimestamp = -1;
+		List<PropertiesHolder> holders = collectPropertiesToMerge(locale);
+		mergedHolder = merge(holders);
+		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
+		if (existing != null) {
+			mergedHolder = existing;
+		}
+		mergedHolder.setRefreshTimestamp(System.currentTimeMillis());
+		return mergedHolder;
+	}
+
+	private boolean isUpToDate(PropertiesHolder mergedHolder) {
+		if (getCacheMillis() < 0) {
+			return true;
+		}
+		return mergedHolder.getRefreshTimestamp() > System.currentTimeMillis() - getCacheMillis();
+	}
+
+	protected void doRefresh(Locale locale, PropertiesHolder mergedHolder) {
+		if (mergedHolder.refreshLock.tryLock()) {
+			try {
+				List<PropertiesHolder> holders = collectPropertiesToMerge(locale);
+				// avoid merge if there is no change (mainly to minimize allocations/gc)
+				int contentHash = holders.stream().map(PropertiesHolder::getProperties).toList().hashCode();
+				if (contentHash != mergedHolder.getContentHash()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Refreshing cachedMergedProperties for locale " + locale);
+					}
+					PropertiesHolder freshHolder = merge(holders);
+					freshHolder.setContentHash(contentHash);
+					freshHolder.setRefreshTimestamp(System.currentTimeMillis());
+					this.cachedMergedProperties.put(locale, freshHolder);
+				} else {
+					mergedHolder.setRefreshTimestamp(System.currentTimeMillis());
+				}
+
+			} finally {
+				mergedHolder.refreshLock.unlock();
+			}
+		}
+
+	}
+
+	/**
+	 *	Returns PropertiesHolders where properties != null
+	 */
+	protected List<PropertiesHolder> collectPropertiesToMerge(Locale locale) {
 		String[] basenames = StringUtils.toStringArray(getBasenameSet());
+		List<PropertiesHolder> holders = new ArrayList<>(basenames.length);
 		for (int i = basenames.length - 1; i >= 0; i--) {
 			List<String> filenames = calculateAllFilenames(basenames[i], locale);
 			for (int j = filenames.size() - 1; j >= 0; j--) {
 				String filename = filenames.get(j);
 				PropertiesHolder propHolder = getProperties(filename);
 				if (propHolder.getProperties() != null) {
-					mergedProps.putAll(propHolder.getProperties());
-					if (propHolder.getFileTimestamp() > latestTimestamp) {
-						latestTimestamp = propHolder.getFileTimestamp();
-					}
+					holders.add(propHolder);
 				}
 			}
 		}
+		return holders;
+	}
 
-		mergedHolder = new PropertiesHolder(mergedProps, latestTimestamp);
-		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
-		if (existing != null) {
-			mergedHolder = existing;
+	protected PropertiesHolder merge(List<PropertiesHolder> holders) {
+		Properties mergedProps = newProperties();
+		long latestTimestamp = -1;
+		for (PropertiesHolder holder : holders) {
+			mergedProps.putAll(holder.getProperties());
+			if (holder.getFileTimestamp() > latestTimestamp) {
+				latestTimestamp = holder.getFileTimestamp();
+			}
 		}
-		return mergedHolder;
+		return new PropertiesHolder(mergedProps, latestTimestamp);
 	}
 
 	/**
@@ -627,6 +681,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =
 				new ConcurrentHashMap<>();
 
+		private int contentHash;
+
 		public PropertiesHolder() {
 			this.properties = null;
 			this.fileTimestamp = -1;
@@ -648,6 +704,14 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 		public void setRefreshTimestamp(long refreshTimestamp) {
 			this.refreshTimestamp = refreshTimestamp;
+		}
+
+		public long getContentHash() {
+			return contentHash;
+		}
+
+		public void setContentHash(int contentHash) {
+			this.contentHash = contentHash;
 		}
 
 		public long getRefreshTimestamp() {
