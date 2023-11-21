@@ -24,7 +24,10 @@ NOTE: If the checkpoint is created on a warmed-up JVM, the restored JVM will be 
 
 == Automatic checkpoint/restore at startup
 
-When the `-Dspring.context.checkpoint=onRefresh` Java system property is set, a checkpoint is created automatically during the startup at `LifecycleProcessor.onRefresh` level. At this phase, all non-lazy initialized singletons are instantiated, `InitializingBean.afterPropertiesSet` callbacks have been invoked, but not `Lifecycle.start` ones and `ContextRefreshedEvent` has not yet been published.
+When the `-Dspring.context.checkpoint=onRefresh` Java system property is set, a checkpoint is created automatically during
+the startup at `LifecycleProcessor.onRefresh` level. At this phase, all non-lazy initialized singletons are instantiated,
+`InitializingBean#afterPropertiesSet` callbacks have been invoked, but the lifecycle has not started and
+`ContextRefreshedEvent` has not yet been published.
 
 WARNING: As mentioned above, and especially in use cases where the CRaC files are shipped as part of a deployable artifact (a container image for example), operate with the assumption that any sensitive data "seen" by the JVM ends up in the CRaC files, and assess carefully the related security implications.
 
