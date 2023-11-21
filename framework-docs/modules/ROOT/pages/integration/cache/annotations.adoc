@@ -67,7 +67,7 @@ To provide a different default key generator, you need to implement the
 The default key generation strategy changed with the release of Spring 4.0. Earlier
 versions of Spring used a key generation strategy that, for multiple key parameters,
 considered only the `hashCode()` of parameters and not `equals()`. This could cause
-unexpected key collisions (see {issues-old}/SPR-10237[SPR-10237]
+unexpected key collisions (see https://jira.spring.io/browse/SPR-10237[SPR-10237]
 for background). The new `SimpleKeyGenerator` uses a compound key for such scenarios.
 
 If you want to keep using the previous key strategy, you can configure the deprecated
