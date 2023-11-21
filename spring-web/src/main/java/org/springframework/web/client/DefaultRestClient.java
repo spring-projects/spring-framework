@@ -26,7 +26,6 @@ import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -82,8 +81,6 @@ final class DefaultRestClient implements RestClient {
 	private static final Log logger = LogFactory.getLog(DefaultRestClient.class);
 
 	private static final ClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
-
-	private static final String URI_TEMPLATE_ATTRIBUTE = RestClient.class.getName() + ".uriTemplate";
 
 
 	private final ClientHttpRequestFactory clientRequestFactory;
@@ -256,7 +253,8 @@ final class DefaultRestClient implements RestClient {
 		@Nullable
 		private InternalBody body;
 
-		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
+		@Nullable
+		private String uriTemplate;
 
 		@Nullable
 		private Consumer<ClientHttpRequest> httpRequestConsumer;
@@ -267,19 +265,19 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			this.uriTemplate = uriTemplate;
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			this.uriTemplate = uriTemplate;
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Function<UriBuilder, URI> uriFunction) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			this.uriTemplate = uriTemplate;
 			return uri(uriFunction.apply(DefaultRestClient.this.uriBuilderFactory.uriString(uriTemplate)));
 		}
 
@@ -348,18 +346,6 @@ final class DefaultRestClient implements RestClient {
 		@Override
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
-			return this;
-		}
-
-		@Override
-		public RequestBodySpec attribute(String name, Object value) {
-			this.attributes.put(name, value);
-			return this;
-		}
-
-		@Override
-		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
-			attributesConsumer.accept(this.attributes);
 			return this;
 		}
 
@@ -455,7 +441,7 @@ final class DefaultRestClient implements RestClient {
 				ClientHttpRequest clientRequest = createRequest(uri);
 				clientRequest.getHeaders().addAll(headers);
 				ClientRequestObservationContext observationContext = new ClientRequestObservationContext(clientRequest);
-				observationContext.setUriTemplate((String) this.attributes.get(URI_TEMPLATE_ATTRIBUTE));
+				observationContext.setUriTemplate(this.uriTemplate);
 				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
 				if (this.body != null) {
