@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -910,6 +911,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	@Override
 	public <T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
+	}
+
+	/**
+	 * Query with the specified SQL statement, RowMapper, and optional arguments,
+	 * returning the result as an Optional object. This method serves as a convenient substitution
+	 * for the boilerplate code typically required when using queryForObject, especially
+	 * to handle cases where the query result is empty.
+	 *
+	 * @param <T>       The type of the result objects.
+	 * @param sql       The SQL statement to be executed.
+	 * @param rowMapper The RowMapper implementation to map the query results to objects of type T.
+	 * @param args      Optional arguments to be bound to the SQL statement.
+	 * @return An Optional containing the first result of the query, or an empty Optional if the
+	 *         query produced no results.
+	 * @throws DataAccessException If an error occurs while accessing the data source.
+	 *
+	 * @see RowMapper
+	 * @see Optional
+	 */
+	public <T> Optional<T> queryForOptional(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException {
+		return query(sql, rowMapper, args).stream().findFirst();
 	}
 
 	@Override

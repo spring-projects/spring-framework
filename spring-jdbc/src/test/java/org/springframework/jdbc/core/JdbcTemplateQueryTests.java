@@ -25,6 +25,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -431,6 +432,38 @@ public class JdbcTemplateQueryTests {
 		long l = this.template.queryForObject(sql, Long.class, 3);
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(this.preparedStatement).setObject(1, 3);
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
+	}
+
+	@Test
+	public void testQueryForOptionalWithArgsAndRowMapper() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getLong(1)).willReturn(87L);
+
+		Optional<Long> optionalResult = this.template.queryForOptional(sql, (rs, rowNum) -> rs.getLong(1), 1);
+
+		assertThat(optionalResult).as("Optional result").isPresent();
+		assertThat(optionalResult.get()).as("Correct result value").isEqualTo(87L);
+
+		verify(this.preparedStatement).setObject(1, 1);
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
+	}
+
+	@Test
+	public void testQueryForOptionalWithArgsAndRowMapperEmptyResult() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
+		given(this.resultSet.next()).willReturn(false);
+
+		Optional<Long> optionalResult = this.template.queryForOptional(sql, (rs, rowNum) -> rs.getLong(1), 2);
+
+		assertThat(optionalResult).as("Optional result").isEmpty();
+
+		verify(this.preparedStatement).setObject(1, 2);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
