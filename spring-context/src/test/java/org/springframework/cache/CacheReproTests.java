@@ -197,6 +197,11 @@ class CacheReproTests {
 		assertThat(bean.findById("tb1").join()).isSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
 
+		tb = bean.findById("tb2").join();
+		assertThat(tb).isNotNull();
+		assertThat(bean.findById("tb2").join()).isNotSameAs(tb);
+		assertThat(cache.get("tb2")).isNull();
+
 		context.close();
 	}
 
@@ -247,6 +252,11 @@ class CacheReproTests {
 		assertThat(bean.findById("tb1").block()).isSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
 
+		tb = bean.findById("tb2").block();
+		assertThat(tb).isNotNull();
+		assertThat(bean.findById("tb2").block()).isNotSameAs(tb);
+		assertThat(cache.get("tb2")).isNull();
+
 		context.close();
 	}
 
@@ -296,6 +306,11 @@ class CacheReproTests {
 		bean.insertItem("tb1", tb).blockLast();
 		assertThat(bean.findById("tb1").collectList().block()).isEqualTo(tb);
 		assertThat(cache.get("tb1").get()).isEqualTo(tb);
+
+		tb = bean.findById("tb2").collectList().block();
+		assertThat(tb).isNotEmpty();
+		assertThat(bean.findById("tb2").collectList().block()).isNotEqualTo(tb);
+		assertThat(cache.get("tb2")).isNull();
 
 		context.close();
 	}
@@ -548,7 +563,7 @@ class CacheReproTests {
 
 	public static class Spr14235FutureService {
 
-		@Cacheable(value = "itemCache")
+		@Cacheable(value = "itemCache", unless = "#result.name == 'tb2'")
 		public CompletableFuture<TestBean> findById(String id) {
 			return CompletableFuture.completedFuture(new TestBean(id));
 		}
@@ -581,7 +596,7 @@ class CacheReproTests {
 
 	public static class Spr14235MonoService {
 
-		@Cacheable(value = "itemCache")
+		@Cacheable(value = "itemCache", unless = "#result.name == 'tb2'")
 		public Mono<TestBean> findById(String id) {
 			return Mono.just(new TestBean(id));
 		}
@@ -616,7 +631,7 @@ class CacheReproTests {
 
 		private int counter = 0;
 
-		@Cacheable(value = "itemCache")
+		@Cacheable(value = "itemCache", unless = "#result[0].name == 'tb2'")
 		public Flux<TestBean> findById(String id) {
 			return Flux.just(new TestBean(id), new TestBean(id + (counter++)));
 		}
