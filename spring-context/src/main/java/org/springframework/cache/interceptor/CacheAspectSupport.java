@@ -47,11 +47,13 @@ import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.expression.AnnotatedElementKey;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -99,7 +101,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private final Map<CacheOperationCacheKey, CacheOperationMetadata> metadataCache = new ConcurrentHashMap<>(1024);
 
-	private final CacheOperationExpressionEvaluator evaluator = new CacheOperationExpressionEvaluator();
+	private final StandardEvaluationContext originalEvaluationContext = new StandardEvaluationContext();
+
+	private final CacheOperationExpressionEvaluator evaluator = new CacheOperationExpressionEvaluator(
+			new CacheEvaluationContextFactory(this.originalEvaluationContext));
 
 	@Nullable
 	private final ReactiveCachingHandler reactiveCachingHandler;
@@ -222,6 +227,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		this.originalEvaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
 	}
 
 
@@ -852,7 +858,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private EvaluationContext createEvaluationContext(@Nullable Object result) {
 			return evaluator.createEvaluationContext(this.caches, this.metadata.method, this.args,
-					this.target, this.metadata.targetClass, this.metadata.targetMethod, result, beanFactory);
+					this.target, this.metadata.targetClass, this.metadata.targetMethod, result);
 		}
 
 		protected Collection<? extends Cache> getCaches() {

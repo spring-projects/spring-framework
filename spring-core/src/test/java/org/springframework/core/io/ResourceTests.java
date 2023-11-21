@@ -174,8 +174,8 @@ class ResourceTests {
 			Resource resource = new ByteArrayResource("testString".getBytes(), "my description");
 			assertThat(resource.getDescription().contains("my description")).isTrue();
 		}
-
 	}
+
 
 	@Nested
 	class InputStreamResourceTests {
@@ -215,6 +215,7 @@ class ResourceTests {
 			assertThat(resource.getDescription().contains("my description")).isTrue();
 		}
 	}
+
 
 	@Nested
 	class FileSystemResourceTests {
@@ -286,6 +287,7 @@ class ResourceTests {
 			assertThat(resource.getURI().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
 		}
 	}
+
 
 	@Nested
 	class UrlResourceTests {
@@ -435,6 +437,7 @@ class ResourceTests {
 		}
 	}
 
+
 	@Nested
 	class AbstractResourceTests {
 
@@ -479,7 +482,6 @@ class ResourceTests {
 			};
 			assertThat(resource.contentLength()).isEqualTo(3L);
 		}
-
 	}
 
 }

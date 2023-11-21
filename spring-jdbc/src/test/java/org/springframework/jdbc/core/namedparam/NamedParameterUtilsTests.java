@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,6 +328,18 @@ public class NamedParameterUtilsTests {
 
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(psql, null);
 		assertThat(sqlToUse).isEqualTo("SELECT ARRAY[?]");
+	}
+
+	@Test  // gh-31596
+	void paramNameWithNestedSquareBrackets() {
+		String sql = "insert into GeneratedAlways (id, first_name, last_name) values " +
+				"(:records[0].id, :records[0].firstName, :records[0].lastName), " +
+				"(:records[1].id, :records[1].firstName, :records[1].lastName)";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(parsedSql.getParameterNames()).containsOnly(
+				"records[0].id", "records[0].firstName", "records[0].lastName",
+				"records[1].id", "records[1].firstName", "records[1].lastName");
 	}
 
 	@Test  // gh-27925

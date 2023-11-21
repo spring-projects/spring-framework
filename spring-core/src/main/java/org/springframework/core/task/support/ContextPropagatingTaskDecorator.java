@@ -22,8 +22,9 @@ import io.micrometer.context.ContextSnapshotFactory;
 import org.springframework.core.task.TaskDecorator;
 
 /**
- * {@link TaskDecorator} that {@link ContextSnapshot#wrap(Runnable) wraps the execution} of
- * tasks, assisting with context propagation.
+ * {@link TaskDecorator} that {@link ContextSnapshot#wrap(Runnable) wraps the execution}
+ * of tasks, assisting with context propagation.
+ *
  * <p>This operation is only useful when the task execution is scheduled on a different
  * thread than the original call stack; this depends on the choice of
  * {@link org.springframework.core.task.TaskExecutor}. This is particularly useful for
@@ -39,6 +40,7 @@ public class ContextPropagatingTaskDecorator implements TaskDecorator {
 
 	private final ContextSnapshotFactory factory;
 
+
 	/**
 	 * Create a new decorator that uses a default instance of the {@link ContextSnapshotFactory}.
 	 */
@@ -53,6 +55,7 @@ public class ContextPropagatingTaskDecorator implements TaskDecorator {
 	public ContextPropagatingTaskDecorator(ContextSnapshotFactory factory) {
 		this.factory = factory;
 	}
+
 
 	@Override
 	public Runnable decorate(Runnable runnable) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,15 @@ class GeneratedFilesTests {
 	}
 
 	@Test
+	void addSourceFileWithJavaFileInTheDefaultPackageThrowsException() {
+		TypeSpec helloWorld = TypeSpec.classBuilder("HelloWorld").build();
+		JavaFile javaFile = JavaFile.builder("", helloWorld).build();
+		assertThatIllegalArgumentException().isThrownBy(() -> this.generatedFiles.addSourceFile(javaFile))
+				.withMessage("Could not add 'HelloWorld', processing classes in the "
+						+ "default package is not supported. Did you forget to add a package statement?");
+	}
+
+	@Test
 	void addSourceFileWithCharSequenceAddsFile() throws Exception {
 		this.generatedFiles.addSourceFile("com.example.HelloWorld", "{}");
 		assertThatFileAdded(Kind.SOURCE, "com/example/HelloWorld.java").isEqualTo("{}");
@@ -74,11 +83,19 @@ class GeneratedFilesTests {
 	}
 
 	@Test
+	void addSourceFileWithCharSequenceWhenClassNameIsInTheDefaultPackageThrowsException() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.generatedFiles.addSourceFile("HelloWorld", "{}"))
+				.withMessage("Could not add 'HelloWorld', processing classes in the "
+						+ "default package is not supported. Did you forget to add a package statement?");
+	}
+
+	@Test
 	void addSourceFileWithCharSequenceWhenClassNameIsInvalidThrowsException() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> this.generatedFiles
 						.addSourceFile("com/example/HelloWorld.java", "{}"))
-				.withMessage("'className' must be a valid identifier");
+				.withMessage("'className' must be a valid identifier, got 'com/example/HelloWorld.java'");
 	}
 
 	@Test

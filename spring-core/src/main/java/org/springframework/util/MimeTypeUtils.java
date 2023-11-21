@@ -362,7 +362,9 @@ public abstract class MimeTypeUtils {
 	 */
 	public static <T extends MimeType> void sortBySpecificity(List<T> mimeTypes) {
 		Assert.notNull(mimeTypes, "'mimeTypes' must not be null");
-		Assert.isTrue(mimeTypes.size() <= 50, "Too many elements");
+		if (mimeTypes.size() >= 50) {
+			throw new InvalidMimeTypeException(mimeTypes.toString(), "Too many elements");
+		}
 
 		bubbleSort(mimeTypes, MimeType::isLessSpecific);
 	}

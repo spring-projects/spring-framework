@@ -48,7 +48,9 @@ class PropertySourceProcessorTests {
 	private static final String PROPS_FILE = ClassUtils.classPackageAsResourcePath(PropertySourceProcessorTests.class) + "/test.properties";
 
 	private final StandardEnvironment environment = new StandardEnvironment();
+
 	private final ResourceLoader resourceLoader = new DefaultResourceLoader();
+
 	private final PropertySourceProcessor processor = new PropertySourceProcessor(environment, resourceLoader);
 
 
@@ -59,11 +61,13 @@ class PropertySourceProcessorTests {
 
 	@Test
 	void processorRegistersPropertySource() throws Exception {
-		PropertySourceDescriptor descriptor = new PropertySourceDescriptor(List.of(PROPS_FILE), false, null, DefaultPropertySourceFactory.class, null);
+		PropertySourceDescriptor descriptor = new PropertySourceDescriptor(
+				List.of(PROPS_FILE), false, null, DefaultPropertySourceFactory.class, null);
 		processor.processPropertySource(descriptor);
 		assertThat(environment.getPropertySources()).hasSize(3);
 		assertThat(environment.getProperty("enigma")).isEqualTo("42");
 	}
+
 
 	@Nested
 	class FailOnErrorTests {
@@ -86,8 +90,8 @@ class PropertySourceProcessorTests {
 			assertThatExceptionOfType(exceptionType).isThrownBy(() -> processor.processPropertySource(descriptor));
 			assertThat(environment.getPropertySources()).hasSize(2);
 		}
-
 	}
+
 
 	@Nested
 	class IgnoreResourceNotFoundTests {
@@ -127,7 +131,6 @@ class PropertySourceProcessorTests {
 			assertThatNoException().isThrownBy(() -> processor.processPropertySource(descriptor));
 			assertThat(environment.getPropertySources()).hasSize(2);
 		}
-
 	}
 
 

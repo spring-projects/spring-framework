@@ -288,6 +288,16 @@ public interface JdbcClient {
 		 * @see java.sql.PreparedStatement#executeUpdate()
 		 */
 		int update(KeyHolder generatedKeyHolder);
+
+		/**
+		 * Execute the provided SQL statement as an update.
+		 * @param generatedKeyHolder a KeyHolder that will hold the generated keys
+		 * (typically a {@link org.springframework.jdbc.support.GeneratedKeyHolder})
+		 * @param keyColumnNames names of the columns that will have keys generated for them
+		 * @return the number of rows affected
+		 * @see java.sql.PreparedStatement#executeUpdate()
+		 */
+		int update(KeyHolder generatedKeyHolder, String... keyColumnNames);
 	}
 
 

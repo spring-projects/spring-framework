@@ -623,7 +623,33 @@ public interface RestClient {
 			 * @return the exchanged type
 			 * @throws IOException in case of I/O errors
 			 */
-			T exchange(HttpRequest clientRequest, ClientHttpResponse clientResponse) throws IOException;
+			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+		}
+
+
+		/**
+		 * Extension of {@link ClientHttpResponse} that can convert the body.
+		 */
+		interface ConvertibleClientHttpResponse extends ClientHttpResponse {
+
+			/**
+			 * Extract the response body as an object of the given type.
+			 * @param bodyType the type of return value
+			 * @param <T> the body type
+			 * @return the body, or {@code null} if no response body was available
+			 */
+			@Nullable
+			<T> T bodyTo(Class<T> bodyType);
+
+			/**
+			 * Extract the response body as an object of the given type.
+			 * @param bodyType the type of return value
+			 * @param <T> the body type
+			 * @return the body, or {@code null} if no response body was available
+			 */
+			@Nullable
+			<T> T bodyTo(ParameterizedTypeReference<T> bodyType);
+
 		}
 	}
 

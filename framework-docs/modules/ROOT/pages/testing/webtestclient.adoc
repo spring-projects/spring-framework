@@ -7,9 +7,6 @@ but exposes a testing facade for verifying responses. `WebTestClient` can be use
 perform end-to-end HTTP tests. It can also be used to test Spring MVC and Spring WebFlux
 applications without a running server via mock server request and response objects.
 
-TIP: Kotlin users: See xref:languages/kotlin/spring-projects-in.adoc#kotlin-webtestclient-issue[this section]
-related to use of the `WebTestClient`.
-
 
 
 

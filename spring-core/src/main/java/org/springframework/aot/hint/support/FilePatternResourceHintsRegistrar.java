@@ -156,11 +156,9 @@ public class FilePatternResourceHintsRegistrar {
 
 		private final List<String> fileExtensions = new ArrayList<>();
 
-
 		private Builder() {
 			// no-op
 		}
-
 
 		/**
 		 * Consider the specified classpath locations.
@@ -254,7 +252,6 @@ public class FilePatternResourceHintsRegistrar {
 		public void registerHints(ResourceHints hints, @Nullable ClassLoader classLoader) {
 			build().registerHints(hints, classLoader);
 		}
-
 	}
 
 }

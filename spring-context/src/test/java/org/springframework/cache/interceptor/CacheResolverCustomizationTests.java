@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ class CacheResolverCustomizationTests {
 	}
 
 	@AfterEach
-	void tearDown() {
+	void closeContext() {
 		this.context.close();
 	}
 
@@ -142,16 +142,17 @@ class CacheResolverCustomizationTests {
 	@Test
 	void noCacheResolved() {
 		Method method = ReflectionUtils.findMethod(SimpleService.class, "noCacheResolved", Object.class);
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.simpleService.noCacheResolved(new Object()))
-			.withMessageContaining(method.toString());
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.simpleService.noCacheResolved(new Object()))
+				.withMessageContaining(method.toString());
 	}
 
 	@Test
 	void unknownCacheResolver() {
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				this.simpleService.unknownCacheResolver(new Object()))
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("unknownCacheResolver"));
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> this.simpleService.unknownCacheResolver(new Object()))
+				.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("unknownCacheResolver"));
 	}
 
 

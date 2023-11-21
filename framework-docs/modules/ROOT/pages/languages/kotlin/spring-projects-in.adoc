@@ -383,15 +383,3 @@ class SpecificationLikeTests {
 ----
 
 
-[[kotlin-webtestclient-issue]]
-=== `WebTestClient` Type Inference Issue in Kotlin
-
-Due to a {kotlin-issues}/KT-5464[type inference issue], you must
-use the Kotlin `expectBody` extension (such as `.expectBody<String>().isEqualTo("toys")`),
-since it provides a workaround for the Kotlin issue with the Java API.
-
-See also the related https://jira.spring.io/browse/SPR-16057[SPR-16057] issue.
-
-
-
-

@@ -211,7 +211,7 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
-|`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
+|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
 |`uri` _(required)_|URI pattern for the matching handler if available, falling back to `REDIRECTION` for 3xx responses, `NOT_FOUND` for 404 responses, `root` for requests with no path info, and `UNKNOWN` for all other requests.
@@ -249,7 +249,7 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
-|`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
+|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
 |`uri` _(required)_|URI pattern for the matching handler if available, falling back to `REDIRECTION` for 3xx responses, `NOT_FOUND` for 404 responses, `root` for requests with no path info, and `UNKNOWN` for all other requests.
@@ -282,7 +282,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 [cols="a,a"]
 |===
 |Name | Description
-|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
+|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
@@ -339,7 +339,7 @@ Instrumentation uses the `org.springframework.web.reactive.function.client.Clien
 [cols="a,a"]
 |===
 |Name | Description
-|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
+|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.

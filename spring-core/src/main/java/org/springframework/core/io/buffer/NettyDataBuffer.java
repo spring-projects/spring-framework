@@ -313,7 +313,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 		Assert.notNull(dest, "Dest must not be null");
 
 		dest = dest.duplicate().clear();
-		dest.put(destPos, this.byteBuf.nioBuffer(), srcPos, length);
+		dest.put(destPos, this.byteBuf.nioBuffer(srcPos, length), 0, length);
 	}
 
 	@Override

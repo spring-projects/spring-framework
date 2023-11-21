@@ -87,7 +87,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * We need to detect this as "code-style" AspectJ aspects should not be
 	 * interpreted by Spring AOP.
 	 */
-	private boolean compiledByAjc(Class<?> clazz) {
+	static boolean compiledByAjc(Class<?> clazz) {
 		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
 		// annotation-style aspects. Therefore there is no 'clean' way to tell them apart. Here we rely on
 		// an implementation detail of the AspectJ compiler.

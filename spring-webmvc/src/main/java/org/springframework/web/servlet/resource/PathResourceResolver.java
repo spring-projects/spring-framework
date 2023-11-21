@@ -195,8 +195,8 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				Resource[] allowed = getAllowedLocations();
 				logger.warn(LogFormatUtils.formatValue(
 						"Resource path \"" + resourcePath + "\" was successfully resolved " +
-								"but resource \"" + resource.getURL() + "\" is neither under " +
-								"the current location \"" + location.getURL() + "\" nor under any of " +
+								"but resource \"" + resource + "\" is neither under " +
+								"the current location \"" + location + "\" nor under any of " +
 								"the allowed locations " + (allowed != null ? Arrays.asList(allowed) : "[]"), -1, true));
 			}
 		}
@@ -210,7 +210,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * is under one of the {@linkplain #setAllowedLocations allowed locations}.
 	 * @param resource the resource to check
 	 * @param location the location relative to which the resource was found
-	 * @return "true" if resource is in a valid location, "false" otherwise.
+	 * @return "true" if resource is in a valid location, "false" otherwise
 	 * @since 4.1.2
 	 */
 	protected boolean checkResource(Resource resource, Resource location) throws IOException {
