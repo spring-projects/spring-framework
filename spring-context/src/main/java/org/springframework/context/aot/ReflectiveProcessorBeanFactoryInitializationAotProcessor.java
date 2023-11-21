@@ -49,13 +49,8 @@ class ReflectiveProcessorBeanFactoryInitializationAotProcessor implements BeanFa
 		return new ReflectiveProcessorBeanFactoryInitializationAotContribution(beanTypes);
 	}
 
-	private static class ReflectiveProcessorBeanFactoryInitializationAotContribution implements BeanFactoryInitializationAotContribution {
-
-		private final Class<?>[] types;
-
-		public ReflectiveProcessorBeanFactoryInitializationAotContribution(Class<?>[] types) {
-			this.types = types;
-		}
+	private record ReflectiveProcessorBeanFactoryInitializationAotContribution(
+			Class<?>[] types) implements BeanFactoryInitializationAotContribution {
 
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
