@@ -45,13 +45,7 @@ class KotlinReflectionBeanRegistrationAotProcessor implements BeanRegistrationAo
 		return null;
 	}
 
-	private static class AotContribution implements BeanRegistrationAotContribution {
-
-		private final Class<?> beanClass;
-
-		public AotContribution(Class<?> beanClass) {
-			this.beanClass = beanClass;
-		}
+	private record AotContribution(Class<?> beanClass) implements BeanRegistrationAotContribution {
 
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
