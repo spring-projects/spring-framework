@@ -25,9 +25,9 @@ import org.springframework.lang.Nullable;
 /**
  * Interface that defines common cache operations.
  *
- * <p>Serves as an SPI for Spring's annotation-based caching model
- * ({@link org.springframework.cache.annotation.Cacheable} and co)
- * as well as an API for direct usage in applications.
+ * <p>Serves primarily as an SPI for Spring's annotation-based caching
+ * model ({@link org.springframework.cache.annotation.Cacheable} and co)
+ * and secondarily as an API for direct usage in applications.
  *
  * <p><b>Note:</b> Due to the generic use of caching, it is recommended
  * that implementations allow storage of {@code null} values
@@ -113,16 +113,26 @@ public interface Cache {
 	 * wrapped in a {@link CompletableFuture}. This operation must not block
 	 * but is allowed to return a completed {@link CompletableFuture} if the
 	 * corresponding value is immediately available.
-	 * <p>Returns {@code null} if the cache contains no mapping for this key;
-	 * otherwise, the cached value (which may be {@code null} itself) will
-	 * be returned in the {@link CompletableFuture}.
+	 * <p>Can return {@code null} if the cache can immediately determine that
+	 * it contains no mapping for this key (e.g. through an in-memory key map).
+	 * Otherwise, the cached value will be returned in the {@link CompletableFuture},
+	 * with {@code null} indicating a late-determined cache miss (and a nested
+	 * {@link ValueWrapper} potentially indicating a nullable cached value).
 	 * @param key the key whose associated value is to be returned
-	 * @return the value to which this cache maps the specified key,
-	 * contained within a {@link CompletableFuture} which may also hold
-	 * a cached {@code null} value. A straight {@code null} being
-	 * returned means that the cache contains no mapping for this key.
+	 * @return the value to which this cache maps the specified key, contained
+	 * within a {@link CompletableFuture} which may also be empty when a cache
+	 * miss has been late-determined. A straight {@code null} being returned
+	 * means that the cache immediately determined that it contains no mapping
+	 * for this key. A {@link ValueWrapper} contained within the
+	 * {@code CompletableFuture} can indicate a cached value that is potentially
+	 * {@code null}; this is sensible in a late-determined scenario where a regular
+	 * CompletableFuture-contained {@code null} indicates a cache miss. However,
+	 * an early-determined cache will usually return the plain cached value here,
+	 * and a late-determined cache may also return a plain value if it does not
+	 * support the actual caching of {@code null} values. Spring's common cache
+	 * processing can deal with all variants of these implementation strategies.
 	 * @since 6.1
-	 * @see #get(Object)
+	 * @see #retrieve(Object, Supplier)
 	 */
 	@Nullable
 	default CompletableFuture<?> retrieve(Object key) {

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.annotation;
+package org.springframework.cache.caffeine;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.cache.support.SimpleValueWrapper;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -40,18 +38,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for annotation-based caching methods that use reactive operators.
  *
- * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 6.1
  */
-public class ReactiveCachingTests {
+public class CaffeineReactiveCachingTests {
 
-	@ParameterizedTest
-	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
-			LateCacheHitDeterminationConfig.class,
-			LateCacheHitDeterminationWithValueWrapperConfig.class})
-	void cacheHitDetermination(Class<?> configClass) {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+	@Test
+	void withCaffeineAsyncCache() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
 		Object key = new Object();
@@ -134,59 +128,13 @@ public class ReactiveCachingTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableCaching
-	static class EarlyCacheHitDeterminationConfig {
+	static class Config {
 
 		@Bean
 		CacheManager cacheManager() {
-			return new ConcurrentMapCacheManager("first");
-		}
-	}
-
-
-	@Configuration(proxyBeanMethods = false)
-	@EnableCaching
-	static class LateCacheHitDeterminationConfig {
-
-		@Bean
-		CacheManager cacheManager() {
-			return new ConcurrentMapCacheManager("first") {
-				@Override
-				protected Cache createConcurrentMapCache(String name) {
-					return new ConcurrentMapCache(name, isAllowNullValues()) {
-						@Override
-						public CompletableFuture<?> retrieve(Object key) {
-							return CompletableFuture.completedFuture(lookup(key));
-						}
-					};
-				}
-			};
-		}
-	}
-
-
-	@Configuration(proxyBeanMethods = false)
-	@EnableCaching
-	static class LateCacheHitDeterminationWithValueWrapperConfig {
-
-		@Bean
-		CacheManager cacheManager() {
-			return new ConcurrentMapCacheManager("first") {
-				@Override
-				protected Cache createConcurrentMapCache(String name) {
-					return new ConcurrentMapCache(name, isAllowNullValues()) {
-						@Override
-						public CompletableFuture<?> retrieve(Object key) {
-							Object value = lookup(key);
-							if (value != null) {
-								return CompletableFuture.completedFuture(new SimpleValueWrapper(fromStoreValue(value)));
-							}
-							else {
-								return CompletableFuture.completedFuture(null);
-							}
-						}
-					};
-				}
-			};
+			CaffeineCacheManager ccm = new CaffeineCacheManager("first");
+			ccm.setAsyncCacheMode(true);
+			return ccm;
 		}
 	}
 

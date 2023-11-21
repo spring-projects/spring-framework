@@ -182,11 +182,13 @@ class CacheReproTests {
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
 
 		TestBean tb = bean.findById("tb1").join();
+		assertThat(tb).isNotNull();
 		assertThat(bean.findById("tb1").join()).isSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
 
 		bean.clear().join();
 		TestBean tb2 = bean.findById("tb1").join();
+		assertThat(tb2).isNotNull();
 		assertThat(tb2).isNotSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb2);
 
@@ -230,11 +232,13 @@ class CacheReproTests {
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
 
 		TestBean tb = bean.findById("tb1").block();
+		assertThat(tb).isNotNull();
 		assertThat(bean.findById("tb1").block()).isSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
 
 		bean.clear().block();
 		TestBean tb2 = bean.findById("tb1").block();
+		assertThat(tb2).isNotNull();
 		assertThat(tb2).isNotSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb2);
 
@@ -278,11 +282,13 @@ class CacheReproTests {
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
 
 		List<TestBean> tb = bean.findById("tb1").collectList().block();
+		assertThat(tb).isNotEmpty();
 		assertThat(bean.findById("tb1").collectList().block()).isEqualTo(tb);
 		assertThat(cache.get("tb1").get()).isEqualTo(tb);
 
 		bean.clear().blockLast();
 		List<TestBean> tb2 = bean.findById("tb1").collectList().block();
+		assertThat(tb2).isNotEmpty();
 		assertThat(tb2).isNotEqualTo(tb);
 		assertThat(cache.get("tb1").get()).isEqualTo(tb2);
 
