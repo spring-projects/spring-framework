@@ -30,7 +30,6 @@ asciidoc:
     spring-framework-github: "https://github.com/{spring-org}/spring-framework"
     spring-framework-code: '{spring-framework-github}/tree/main'
     spring-framework-issues: '{spring-framework-github}/issues'
-    issues-old: 'https://jira.spring.io/browse'
     spring-framework-wiki: '{spring-framework-github}/wiki'
     # Docs
     docs-site: 'https://docs.spring.io'
