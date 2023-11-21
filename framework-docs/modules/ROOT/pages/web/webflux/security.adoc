@@ -4,7 +4,7 @@
 
 [.small]#xref:web/webmvc/mvc-security.adoc[See equivalent in the Servlet stack]#
 
-The https://spring.io/projects/spring-security[Spring Security] project provides support
+The {spring-site-projects}/spring-security[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 

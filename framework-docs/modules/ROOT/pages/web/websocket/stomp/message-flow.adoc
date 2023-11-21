@@ -7,18 +7,18 @@ connected clients. This section describes the flow of messages on the server sid
 The `spring-messaging` module contains foundational support for messaging applications
 that originated in https://spring.io/spring-integration[Spring Integration] and was
 later extracted and incorporated into the Spring Framework for broader use across many
-https://spring.io/projects[Spring projects] and application scenarios.
+{spring-site-projects}[Spring projects] and application scenarios.
 The following list briefly describes a few of the available messaging abstractions:
 
-* {api-spring-framework}/messaging/Message.html[Message]:
+* {spring-framework-api}/messaging/Message.html[Message]:
 Simple representation for a message, including headers and payload.
-* {api-spring-framework}/messaging/MessageHandler.html[MessageHandler]:
+* {spring-framework-api}/messaging/MessageHandler.html[MessageHandler]:
 Contract for handling a message.
-* {api-spring-framework}/messaging/MessageChannel.html[MessageChannel]:
+* {spring-framework-api}/messaging/MessageChannel.html[MessageChannel]:
 Contract for sending a message that enables loose coupling between producers and consumers.
-* {api-spring-framework}/messaging/SubscribableChannel.html[SubscribableChannel]:
+* {spring-framework-api}/messaging/SubscribableChannel.html[SubscribableChannel]:
 `MessageChannel` with `MessageHandler` subscribers.
-* {api-spring-framework}/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel]:
+* {spring-framework-api}/messaging/support/ExecutorSubscribableChannel.html[ExecutorSubscribableChannel]:
 `SubscribableChannel` that uses an `Executor` for delivering messages.
 
 Both the Java configuration (that is, `@EnableWebSocketMessageBroker`) and the XML namespace configuration

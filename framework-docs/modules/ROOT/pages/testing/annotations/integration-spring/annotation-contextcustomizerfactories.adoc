@@ -40,6 +40,6 @@ Kotlin::
 By default, `@ContextCustomizerFactories` provides support for inheriting factories from
 superclasses or enclosing classes. See
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] and the
-{api-spring-framework}/test/context/ContextCustomizerFactories.html[`@ContextCustomizerFactories`
+{spring-framework-api}/test/context/ContextCustomizerFactories.html[`@ContextCustomizerFactories`
 javadoc] for an example and further details.
 

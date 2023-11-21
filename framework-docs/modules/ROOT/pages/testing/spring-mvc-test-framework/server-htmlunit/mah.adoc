@@ -113,7 +113,7 @@ Kotlin::
 ======
 
 Finally, we can verify that a new message was created successfully. The following
-assertions use the https://assertj.github.io/doc/[AssertJ] library:
+assertions use the {assertj-docs}[AssertJ] library:
 
 [tabs]
 ======
@@ -268,7 +268,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----
 ======
 

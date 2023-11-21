@@ -2,7 +2,7 @@
 = Java Bean Validation
 
 The Spring Framework provides support for the
-https://beanvalidation.org/[Java Bean Validation] API.
+{bean-validation-site}[Java Bean Validation] API.
 
 
 
@@ -72,7 +72,7 @@ Kotlin::
 ======
 
 A Bean Validation validator then validates instances of this class based on the declared
-constraints. See https://beanvalidation.org/[Bean Validation] for general information about
+constraints. See {bean-validation-site}[Bean Validation] for general information about
 the API. See the https://hibernate.org/validator/[Hibernate Validator] documentation for
 specific constraints. To learn how to set up a bean validation provider as a Spring
 bean, keep reading.
@@ -317,7 +317,7 @@ XML::
 To be eligible for Spring-driven method validation, target classes need to be annotated
 with Spring's `@Validated` annotation, which can optionally also declare the validation
 groups to use. See
-{api-spring-framework}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
+{spring-framework-api}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
 for setup details with the Hibernate Validator and Bean Validation providers.
 
 [TIP]
@@ -472,7 +472,7 @@ Max.degrees=You cannot provide more than {1} {0}
 The default `LocalValidatorFactoryBean` configuration suffices for most
 cases. There are a number of configuration options for various Bean Validation
 constructs, from message interpolation to traversal resolution. See the
-{api-spring-framework}/validation/beanvalidation/LocalValidatorFactoryBean.html[`LocalValidatorFactoryBean`]
+{spring-framework-api}/validation/beanvalidation/LocalValidatorFactoryBean.html[`LocalValidatorFactoryBean`]
 javadoc for more information on these options.
 
 

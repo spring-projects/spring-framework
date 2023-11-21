@@ -21,10 +21,10 @@ member function of Spring beans that are proxied by CGLIB, which can
 quickly become painful and is against the Kotlin principle of keeping code concise and predictable.
 
 NOTE: It is also possible to avoid CGLIB proxies for configuration classes by using `@Configuration(proxyBeanMethods = false)`.
-See {api-spring-framework}/context/annotation/Configuration.html#proxyBeanMethods--[`proxyBeanMethods` Javadoc] for more details.
+See {spring-framework-api}/context/annotation/Configuration.html#proxyBeanMethods--[`proxyBeanMethods` Javadoc] for more details.
 
 Fortunately, Kotlin provides a
-https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
+{kotlin-docs}/compiler-plugins.html#kotlin-spring-compiler-plugin[`kotlin-spring`]
 plugin (a preconfigured version of the `kotlin-allopen` plugin) that automatically opens classes
 and their member functions for types that are annotated or meta-annotated with one of the following
 annotations:
@@ -59,7 +59,7 @@ within the primary constructor, as in the following example:
 	class Person(val name: String, val age: Int)
 ----
 
-You can optionally add https://kotlinlang.org/docs/reference/data-classes.html[the `data` keyword]
+You can optionally add {kotlin-docs}/data-classes.html[the `data` keyword]
 to make the compiler automatically derive the following members from all properties declared
 in the primary constructor:
 
@@ -80,12 +80,12 @@ As the following example shows, this allows for easy changes to individual prope
 
 Common persistence technologies (such as JPA) require a default constructor, preventing this
 kind of design. Fortunately, there is a workaround for this
-https://stackoverflow.com/questions/32038177/kotlin-with-jpa-default-constructor-hell["`default constructor hell`"],
-since Kotlin provides a https://kotlinlang.org/docs/reference/compiler-plugins.html#kotlin-jpa-compiler-plugin[`kotlin-jpa`]
+{stackoverflow-questions}/32038177/kotlin-with-jpa-default-constructor-hell["`default constructor hell`"],
+since Kotlin provides a {kotlin-docs}/compiler-plugins.html#kotlin-jpa-compiler-plugin[`kotlin-jpa`]
 plugin that generates synthetic no-arg constructor for classes annotated with JPA annotations.
 
 If you need to leverage this kind of mechanism for other persistence technologies, you can configure
-the https://kotlinlang.org/docs/reference/compiler-plugins.html#how-to-use-no-arg-plugin[`kotlin-noarg`]
+the {kotlin-docs}/compiler-plugins.html#how-to-use-no-arg-plugin[`kotlin-noarg`]
 plugin.
 
 NOTE: As of the Kay release train, Spring Data supports Kotlin immutable class instances and
@@ -98,7 +98,7 @@ does not require the `kotlin-noarg` plugin if the module uses Spring Data object
 == Injecting Dependencies
 
 Our recommendation is to try to favor constructor injection with `val` read-only (and
-non-nullable when possible) https://kotlinlang.org/docs/reference/properties.html[properties],
+non-nullable when possible) {kotlin-docs}/properties.html[properties],
 as the following example shows:
 
 [source,kotlin,indent=0]
@@ -137,13 +137,13 @@ as the following example shows:
 
 In Java, you can inject configuration properties by using annotations (such as pass:q[`@Value("${property}")`)].
 However, in Kotlin, `$` is a reserved character that is used for
-https://kotlinlang.org/docs/reference/idioms.html#string-interpolation[string interpolation].
+{kotlin-docs}/idioms.html#string-interpolation[string interpolation].
 
 Therefore, if you wish to use the `@Value` annotation in Kotlin, you need to escape the `$`
 character by writing pass:q[`@Value("\${property}")`].
 
 NOTE: If you use Spring Boot, you should probably use
-https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
+{spring-boot-docs}/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
 instead of `@Value` annotations.
 
 As an alternative, you can customize the property placeholder prefix by declaring the
@@ -177,14 +177,14 @@ that uses the `${...}` syntax, with configuration beans, as the following exampl
 [[checked-exceptions]]
 == Checked Exceptions
 
-Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling]
+Java and {kotlin-docs}/exceptions.html[Kotlin exception handling]
 are pretty close, with the main difference being that Kotlin treats all exceptions as
 unchecked exceptions. However, when using proxied objects (for example classes or methods
 annotated with `@Transactional`), checked exceptions thrown will be wrapped by default in
 an `UndeclaredThrowableException`.
 
 To get the original exception thrown like in Java, methods should be annotated with
-https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
+{kotlin-api}/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
 to specify explicitly the checked exceptions thrown (for example `@Throws(IOException::class)`).
 
 
@@ -194,7 +194,7 @@ to specify explicitly the checked exceptions thrown (for example `@Throws(IOExce
 
 Kotlin annotations are mostly similar to Java annotations, but array attributes (which are
 extensively used in Spring) behave differently. As explained in the
-https://kotlinlang.org/docs/reference/annotations.html[Kotlin documentation] you can omit
+{kotlin-docs}/annotations.html[Kotlin documentation] you can omit
 the `value` attribute name, unlike other attributes, and specify it as a `vararg` parameter.
 
 To understand what that means, consider `@RequestMapping` (which is one of the most widely
@@ -240,13 +240,13 @@ be matched, not only the `GET` method.
 == Declaration-site variance
 
 Dealing with generic types in Spring applications written in Kotlin may require, for some use cases, to understand
-Kotlin https://kotlinlang.org/docs/generics.html#declaration-site-variance[declaration-site variance]
+Kotlin {kotlin-docs}/generics.html#declaration-site-variance[declaration-site variance]
 which allows to define the variance when declaring a type, which is not possible in Java which supports only use-site
 variance.
 
 For example, declaring `List<Foo>` in Kotlin is conceptually equivalent to `java.util.List<? extends Foo>` because
 `kotlin.collections.List` is declared as
-https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/[`interface List<out E> : kotlin.collections.Collection<E>`].
+{kotlin-api}/jvm/stdlib/kotlin.collections/-list/[`interface List<out E> : kotlin.collections.Collection<E>`].
 
 This needs to be taken into account by using the `out` Kotlin keyword on generic types when using Java classes,
 for example when writing a `org.springframework.core.convert.converter.Converter` from a Kotlin type to a Java type.
@@ -267,7 +267,7 @@ class ListOfAnyConverter : Converter<List<*>, CustomJavaList<*>> {
 ----
 
 NOTE: Spring Framework does not leverage yet declaration-site variance type information for injecting beans,
-subscribe to https://github.com/spring-projects/spring-framework/issues/22313[spring-framework#22313] to track related
+subscribe to {spring-framework-issues}/22313[spring-framework#22313] to track related
 progresses.
 
 
@@ -280,7 +280,7 @@ The recommended testing framework is https://junit.org/junit5/[JUnit 5] along wi
 https://mockk.io/[Mockk] for mocking.
 
 NOTE: If you are using Spring Boot, see
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-kotlin-testing[this related documentation].
+{spring-boot-docs}/features.html#features.kotlin.testing[this related documentation].
 
 
 [[constructor-injection]]
@@ -289,7 +289,7 @@ https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-featu
 As described in the xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[dedicated section],
 JUnit Jupiter (JUnit 5) allows constructor injection of beans which is pretty useful with Kotlin
 in order to use `val` instead of `lateinit var`. You can use
-{api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]
+{spring-framework-api}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]
 to enable autowiring for all parameters.
 
 NOTE: You can also change the default behavior to `ALL` in a `junit-platform.properties`

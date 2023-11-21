@@ -5,7 +5,7 @@
 
 The Spring Framework has a built-in integration for using Spring MVC with any
 templating library that can run on top of the
-https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. We have tested the following
+{JSR}223[JSR-223] Java scripting engine. We have tested the following
 templating libraries on different script engines:
 
 [%header]
@@ -17,7 +17,7 @@ templating libraries on different script engines:
 |https://www.embeddedjs.com/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
 |https://www.stuartellis.name/articles/erb/[ERB] |https://www.jruby.org[JRuby]
 |https://docs.python.org/2/library/string.html#template-strings[String templates] |https://www.jython.org/[Jython]
-|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |https://kotlinlang.org/[Kotlin]
+|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |{kotlin-site}[Kotlin]
 |===
 
 TIP: The basic rule for integrating any other script engine is that it must implement the
@@ -174,7 +174,7 @@ The render function is called with the following parameters:
 * `String template`: The template content
 * `Map model`: The view model
 * `RenderingContext renderingContext`: The
-  {api-spring-framework}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
+  {spring-framework-api}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
   that gives access to the application context, the locale, the template loader, and the
   URL (since 5.0)
 
@@ -265,8 +265,8 @@ template engine configuration, for example). The following example shows how to 
 ----
 
 Check out the Spring Framework unit tests,
-{spring-framework-main-code}/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[Java], and
-{spring-framework-main-code}/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources],
+{spring-framework-code}/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[Java], and
+{spring-framework-code}/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources],
 for more configuration examples.
 
 

@@ -75,7 +75,7 @@ This resolver variant uses your Servlet container's multipart parser as-is,
 potentially exposing the application to container implementation differences.
 By default, it will try to parse any `multipart/` content type with any HTTP
 method but this may not be supported across all Servlet containers. See the
-{api-spring-framework}/web/multipart/support/StandardServletMultipartResolver.html[`StandardServletMultipartResolver`]
+{spring-framework-api}/web/multipart/support/StandardServletMultipartResolver.html[`StandardServletMultipartResolver`]
 javadoc for details and configuration options.
 ====
 

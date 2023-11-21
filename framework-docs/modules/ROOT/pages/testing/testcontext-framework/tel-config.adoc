@@ -29,7 +29,7 @@ by default, exactly in the following order:
 You can register `TestExecutionListener` implementations explicitly for a test class, its
 subclasses, and its nested classes by using the `@TestExecutionListeners` annotation. See
 xref:testing/annotations.adoc[annotation support] and the javadoc for
-{api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`]
+{spring-framework-api}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`]
 for details and examples.
 
 .Switching to default `TestExecutionListener` implementations

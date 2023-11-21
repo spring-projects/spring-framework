@@ -12,5 +12,5 @@ support for new custom advice types be added without changing the core framework
 The only constraint on a custom `Advice` type is that it must implement the
 `org.aopalliance.aop.Advice` marker interface.
 
-See the {api-spring-framework}/aop/framework/adapter/package-summary.html[`org.springframework.aop.framework.adapter`]
+See the {spring-framework-api}/aop/framework/adapter/package-summary.html[`org.springframework.aop.framework.adapter`]
 javadoc for further information.

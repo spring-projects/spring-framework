@@ -348,18 +348,18 @@ Kotlin::
 more readers and writers, customize the default ones, or replace the default ones completely.
 
 For Jackson JSON and XML, consider using
-{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`],
+{spring-framework-api}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`],
 which customizes Jackson's default properties with the following ones:
 
-* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+* {jackson-docs}/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+* {jackson-docs}/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* https://github.com/FasterXML/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
-* https://github.com/FasterXML/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
-* https://github.com/FasterXML/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
-* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
+* {jackson-github-org}/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
+* {jackson-github-org}/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
+* {jackson-github-org}/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
+* {jackson-github-org}/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
 
 
 
@@ -549,7 +549,7 @@ See xref:web/webflux-view.adoc[View Technologies] for more on the view technolog
 [.small]#xref:web/webmvc/mvc-config/static-resources.adoc[See equivalent in the Servlet stack]#
 
 This option provides a convenient way to serve static resources from a list of
-{api-spring-framework}/core/io/Resource.html[`Resource`]-based locations.
+{spring-framework-api}/core/io/Resource.html[`Resource`]-based locations.
 
 In the next example, given a request that starts with `/resources`, the relative path is
 used to find and serve static resources relative to `/static` on the classpath. Resources
@@ -598,8 +598,8 @@ Kotlin::
 See also xref:web/webflux/caching.adoc#webflux-caching-static-resources[HTTP caching support for static resources].
 
 The resource handler also supports a chain of
-{api-spring-framework}/web/reactive/resource/ResourceResolver.html[`ResourceResolver`] implementations and
-{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[`ResourceTransformer`] implementations,
+{spring-framework-api}/web/reactive/resource/ResourceResolver.html[`ResourceResolver`] implementations and
+{spring-framework-api}/web/reactive/resource/ResourceTransformer.html[`ResourceTransformer`] implementations,
 which can be used to create a toolchain for working with optimized resources.
 
 You can use the `VersionResourceResolver` for versioned resource URLs based on an MD5 hash
@@ -685,7 +685,7 @@ for fine-grained control, e.g. last-modified behavior and optimized resource res
 [.small]#xref:web/webmvc/mvc-config/path-matching.adoc[See equivalent in the Servlet stack]#
 
 You can customize options related to path matching. For details on the individual options, see the
-{api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
+{spring-framework-api}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
 The following example shows how to use `PathMatchConfigurer`:
 
 [tabs]
@@ -746,7 +746,7 @@ The WebFlux Java config allows you to customize blocking execution in WebFlux.
 
 You can have blocking controller methods called on a separate thread by providing
 an `AsyncTaskExecutor` such as the
-{api-spring-framework}/core/task/VirtualThreadTaskExecutor.html[`VirtualThreadTaskExecutor`]
+{spring-framework-api}/core/task/VirtualThreadTaskExecutor.html[`VirtualThreadTaskExecutor`]
 as follows:
 
 [tabs]

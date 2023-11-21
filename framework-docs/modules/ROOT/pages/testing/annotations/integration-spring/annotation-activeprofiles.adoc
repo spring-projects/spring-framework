@@ -74,6 +74,6 @@ and registering it by using the `resolver` attribute of `@ActiveProfiles`.
 
 See xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles],
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the
-{api-spring-framework}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
+{spring-framework-api}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
 examples and further details.
 

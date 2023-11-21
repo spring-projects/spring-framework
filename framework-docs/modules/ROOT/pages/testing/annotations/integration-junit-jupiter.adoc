@@ -82,7 +82,7 @@ Kotlin::
 
 
 See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] as well as the javadoc for
-{api-spring-framework}/test/context/junit/jupiter/SpringJUnitConfig.html[`@SpringJUnitConfig`]
+{spring-framework-api}/test/context/junit/jupiter/SpringJUnitConfig.html[`@SpringJUnitConfig`]
 and `@ContextConfiguration` for further details.
 
 [[integration-testing-annotations-junit-jupiter-springjunitwebconfig]]
@@ -157,9 +157,9 @@ Kotlin::
 
 
 See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] as well as the javadoc for
-{api-spring-framework}/test/context/junit/jupiter/web/SpringJUnitWebConfig.html[`@SpringJUnitWebConfig`],
-{api-spring-framework}/test/context/ContextConfiguration.html[`@ContextConfiguration`], and
-{api-spring-framework}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
+{spring-framework-api}/test/context/junit/jupiter/web/SpringJUnitWebConfig.html[`@SpringJUnitWebConfig`],
+{spring-framework-api}/test/context/ContextConfiguration.html[`@ContextConfiguration`], and
+{spring-framework-api}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
 for further details.
 
 [[integration-testing-annotations-testconstructor]]

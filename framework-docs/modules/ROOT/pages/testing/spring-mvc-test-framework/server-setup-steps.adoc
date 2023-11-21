@@ -25,7 +25,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----
 ======
 
@@ -53,11 +53,11 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----
 ======
 
 See the javadoc for
-{api-spring-framework}/test/web/servlet/setup/ConfigurableMockMvcBuilder.html[`ConfigurableMockMvcBuilder`]
+{spring-framework-api}/test/web/servlet/setup/ConfigurableMockMvcBuilder.html[`ConfigurableMockMvcBuilder`]
 for a list of all MockMvc builder features or use the IDE to explore the available options.
 

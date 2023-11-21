@@ -2,7 +2,7 @@ As a request goes through proxies such as load balancers the host, port, and
 scheme may change, and that makes it a challenge to create links that point to the correct
 host, port, and scheme from a client perspective.
 
-https://tools.ietf.org/html/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
+{rfc-site}/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
 that proxies can use to provide information about the original request.
 
 

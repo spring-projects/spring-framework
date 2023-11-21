@@ -23,20 +23,20 @@ change application code.
 
 SockJS consists of:
 
-* The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
+* The {sockjs-protocol}[SockJS protocol]
 defined in the form of executable
-https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
-* The https://github.com/sockjs/sockjs-client/[SockJS JavaScript client] -- a client library for use in browsers.
+{sockjs-protocol-site}/sockjs-protocol-0.3.3.html[narrated tests].
+* The {sockjs-client}[SockJS JavaScript client] -- a client library for use in browsers.
 * SockJS server implementations, including one in the Spring Framework `spring-websocket` module.
 * A SockJS Java client in the `spring-websocket` module (since version 4.1).
 
 SockJS is designed for use in browsers. It uses a variety of techniques
 to support a wide range of browser versions.
 For the full list of SockJS transport types and browsers, see the
-https://github.com/sockjs/sockjs-client/[SockJS client] page. Transports
+{sockjs-client}[SockJS client] page. Transports
 fall in three general categories: WebSocket, HTTP Streaming, and HTTP Long Polling.
 For an overview of these categories, see
-https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
+{spring-site-blog}/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
 
 The SockJS client begins by sending `GET /info` to
 obtain basic information from the server. After that, it must decide what transport
@@ -130,13 +130,13 @@ The preceding example is for use in Spring MVC applications and should be includ
 configuration of a xref:web/webmvc/mvc-servlet.adoc[`DispatcherServlet`]. However, Spring's WebSocket
 and SockJS support does not depend on Spring MVC. It is relatively simple to
 integrate into other HTTP serving environments with the help of
-{api-spring-framework}/web/socket/sockjs/support/SockJsHttpRequestHandler.html[`SockJsHttpRequestHandler`].
+{spring-framework-api}/web/socket/sockjs/support/SockJsHttpRequestHandler.html[`SockJsHttpRequestHandler`].
 
 On the browser side, applications can use the
-https://github.com/sockjs/sockjs-client/[`sockjs-client`] (version 1.0.x). It
+{sockjs-client}[`sockjs-client`] (version 1.0.x). It
 emulates the W3C WebSocket API and communicates with the server to select the best
 transport option, depending on the browser in which it runs. See the
-https://github.com/sockjs/sockjs-client/[sockjs-client] page and the list of
+{sockjs-client}[sockjs-client] page and the list of
 transport types supported by browser. The client also provides several
 configuration options -- for example, to specify which transports to include.
 
@@ -183,7 +183,7 @@ but can be configured to do so. In the future, it may set it by default.
 See {docs-spring-security}/features/exploits/headers.html#headers-default[Default Security Headers]
 of the Spring Security documentation for details on how to configure the
 setting of the `X-Frame-Options` header. You can also see
-https://github.com/spring-projects/spring-security/issues/2718[gh-2718]
+{spring-github-org}/spring-security/issues/2718[gh-2718]
 for additional background.
 ====
 
@@ -219,7 +219,7 @@ The XML namespace provides a similar option through the `<websocket:sockjs>` ele
 NOTE: During initial development, do enable the SockJS client `devel` mode that prevents
 the browser from caching SockJS requests (like the iframe) that would otherwise
 be cached. For details on how to enable it see the
-https://github.com/sockjs/sockjs-client/[SockJS client] page.
+{sockjs-client}[SockJS client] page.
 
 
 
@@ -231,7 +231,7 @@ from concluding that a connection is hung. The Spring SockJS configuration has a
 called `heartbeatTime` that you can use to customize the frequency. By default, a
 heartbeat is sent after 25 seconds, assuming no other messages were sent on that
 connection. This 25-second value is in line with the following
-https://tools.ietf.org/html/rfc6202[IETF recommendation] for public Internet applications.
+{rfc-site}/rfc6202[IETF recommendation] for public Internet applications.
 
 NOTE: When using STOMP over WebSocket and SockJS, if the STOMP client and server negotiate
 heartbeats to be exchanged, the SockJS heartbeats are disabled.
@@ -248,7 +248,7 @@ should consider customizing the settings according to your specific needs.
 
 HTTP streaming and HTTP long polling SockJS transports require a connection to remain
 open longer than usual. For an overview of these techniques, see
-https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
+{spring-site-blog}/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
 
 In Servlet containers, this is done through Servlet 3 asynchronous support that
 allows exiting the Servlet container thread, processing a request, and continuing

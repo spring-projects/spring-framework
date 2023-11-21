@@ -6,7 +6,7 @@ _dynamic_ properties to be added to the set of `PropertySources` in the `Environ
 an `ApplicationContext` loaded for an integration test. Dynamic properties are useful
 when you do not know the value of the properties upfront – for example, if the properties
 are managed by an external resource such as for a container managed by the
-https://www.testcontainers.org/[Testcontainers] project.
+{testcontainers-site}[Testcontainers] project.
 
 The following example demonstrates how to register a dynamic property:
 

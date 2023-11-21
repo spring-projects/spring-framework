@@ -11,7 +11,7 @@ integration test.
 ====
 The `@DynamicPropertySource` annotation and its supporting infrastructure were
 originally designed to allow properties from
-https://www.testcontainers.org/[Testcontainers] based tests to be exposed easily to
+{testcontainers-site}[Testcontainers] based tests to be exposed easily to
 Spring integration tests. However, this feature may also be used with any form of
 external resource whose lifecycle is maintained outside the test's `ApplicationContext`.
 ====

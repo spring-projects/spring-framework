@@ -19,7 +19,7 @@ The following table lists the available `HandlerExceptionResolver` implementatio
 | A mapping between exception class names and error view names. Useful for rendering
   error pages in a browser application.
 
-| {api-spring-framework}/web/servlet/mvc/support/DefaultHandlerExceptionResolver.html[`DefaultHandlerExceptionResolver`]
+| {spring-framework-api}/web/servlet/mvc/support/DefaultHandlerExceptionResolver.html[`DefaultHandlerExceptionResolver`]
 | Resolves exceptions raised by Spring MVC and maps them to HTTP status codes.
   See also alternative `ResponseEntityExceptionHandler` and xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses].
 

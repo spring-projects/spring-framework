@@ -17,7 +17,7 @@ raise `MethodArgumentNotValidException` in case of validation errors. If you wan
 the errors in the controller method instead, you can declare an `Errors` or `BindingResult`
 method parameter immediately after the validated parameter.
 
-Second, if https://beanvalidation.org/[Java Bean Validation] is present _AND_ other method
+Second, if {bean-validation-site}[Java Bean Validation] is present _AND_ other method
 parameters, e.g. `@RequestHeader`, `@RequestParam`, `@PathVariable` have `@Constraint`
 annotations, then method validation is applied to all method arguments, raising
 `HandlerMethodValidationException` in case of validation errors. You can still declare an

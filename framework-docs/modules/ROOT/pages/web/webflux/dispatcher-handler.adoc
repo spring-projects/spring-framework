@@ -12,7 +12,7 @@ This model is flexible and supports diverse workflows.
 It is also designed to be a Spring bean itself and implements `ApplicationContextAware`
 for access to the context in which it runs. If `DispatcherHandler` is declared with a bean
 name of `webHandler`, it is, in turn, discovered by
-{api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html[`WebHttpHandlerBuilder`],
+{spring-framework-api}/web/server/adapter/WebHttpHandlerBuilder.html[`WebHttpHandlerBuilder`],
 which puts together a request-processing chain, as described in xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API].
 
 Spring configuration in a WebFlux application typically contains:
@@ -144,9 +144,9 @@ as a `HandlerResult`, along with some additional context, and passed to the firs
 | 100
 
 | `ViewResolutionResultHandler`
-| `CharSequence`, {api-spring-framework}/web/reactive/result/view/View.html[`View`],
-  {api-spring-framework}/ui/Model.html[Model], `Map`,
-  {api-spring-framework}/web/reactive/result/view/Rendering.html[Rendering],
+| `CharSequence`, {spring-framework-api}/web/reactive/result/view/View.html[`View`],
+  {spring-framework-api}/ui/Model.html[Model], `Map`,
+  {spring-framework-api}/web/reactive/result/view/Rendering.html[Rendering],
   or any other `Object` is treated as a model attribute.
 
   See also xref:web/webflux/dispatcher-handler.adoc#webflux-viewresolution[View Resolution].
@@ -202,13 +202,13 @@ the list of configured `ViewResolver` implementations.
 trailing slash, and resolve it to a `View`. The same also happens when a view name
 was not provided (for example, model attribute was returned) or an async return value
 (for example, `Mono` completed empty).
-* {api-spring-framework}/web/reactive/result/view/Rendering.html[Rendering]: API for
+* {spring-framework-api}/web/reactive/result/view/Rendering.html[Rendering]: API for
 view resolution scenarios. Explore the options in your IDE with code completion.
 * `Model`, `Map`: Extra model attributes to be added to the model for the request.
 * Any other: Any other return value (except for simple types, as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
+{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
 is treated as a model attribute to be added to the model. The attribute name is derived
-from the class name by using {api-spring-framework}/core/Conventions.html[conventions],
+from the class name by using {spring-framework-api}/core/Conventions.html[conventions],
 unless a handler method `@ModelAttribute` annotation is present.
 
 The model can contain asynchronous, reactive types (for example, from Reactor or RxJava). Prior

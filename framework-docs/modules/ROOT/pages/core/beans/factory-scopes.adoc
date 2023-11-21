@@ -51,7 +51,7 @@ The following table describes the supported scopes:
 
 NOTE: A thread scope is available but is not registered by default. For more information,
 see the documentation for
-{api-spring-framework}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
+{spring-framework-api}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
 For instructions on how to register this or any other custom scope, see
 xref:core/beans/factory-scopes.adoc#beans-factory-scopes-custom-using[Using a Custom Scope].
 
@@ -559,7 +559,7 @@ To integrate your custom scopes into the Spring container, you need to implement
 `org.springframework.beans.factory.config.Scope` interface, which is described in this
 section. For an idea of how to implement your own scopes, see the `Scope`
 implementations that are supplied with the Spring Framework itself and the
-{api-spring-framework}/beans/factory/config/Scope.html[`Scope`] javadoc,
+{spring-framework-api}/beans/factory/config/Scope.html[`Scope`] javadoc,
 which explains the methods you need to implement in more detail.
 
 The `Scope` interface has four methods to get objects from the scope, remove them from
@@ -629,7 +629,7 @@ Kotlin::
 ----
 ======
 
-See the {api-spring-framework}/beans/factory/config/Scope.html#registerDestructionCallback[javadoc]
+See the {spring-framework-api}/beans/factory/config/Scope.html#registerDestructionCallback[javadoc]
 or a Spring scope implementation for more information on destruction callbacks.
 
 The following method obtains the conversation identifier for the underlying scope:

@@ -29,7 +29,7 @@ You can register `ContextCustomizerFactory` implementations explicitly for a tes
 subclasses, and its nested classes by using the `@ContextCustomizerFactories` annotation. See
 xref:testing/annotations/integration-spring/annotation-contextcustomizerfactories.adoc[annotation support]
 and the javadoc for
-{api-spring-framework}/test/context/ContextCustomizerFactories.html[`@ContextCustomizerFactories`]
+{spring-framework-api}/test/context/ContextCustomizerFactories.html[`@ContextCustomizerFactories`]
 for details and examples.
 
 

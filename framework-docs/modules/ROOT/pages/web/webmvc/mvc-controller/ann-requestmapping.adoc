@@ -104,8 +104,8 @@ at the end of a path. `PathPattern` also restricts the use of `+**+` for matchin
 path segments such that it's only allowed at the end of a pattern. This eliminates many
 cases of ambiguity when choosing the best matching pattern for a given request.
 For full pattern syntax please refer to
-{api-spring-framework}/web/util/pattern/PathPattern.html[PathPattern] and
-{api-spring-framework}/util/AntPathMatcher.html[AntPathMatcher].
+{spring-framework-api}/web/util/pattern/PathPattern.html[PathPattern] and
+{spring-framework-api}/util/AntPathMatcher.html[AntPathMatcher].
 
 Some example patterns:
 
@@ -226,8 +226,8 @@ some external configuration.
 When multiple patterns match a URL, the best match must be selected. This is done with
 one of the following depending on whether use of parsed `PathPattern` is enabled for use or not:
 
-* {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
-* {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
+* {spring-framework-api}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
+* {spring-framework-api}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
 
 Both help to sort patterns with more specific ones on top. A pattern is more specific if
 it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),
@@ -296,7 +296,7 @@ Many common path extensions are allowed as safe by default. Applications with cu
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
 See xref:web/webmvc/mvc-config/content-negotiation.adoc[Content Types].
 
-See https://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
+See {spring-site-cve}/cve-2015-5211[CVE-2015-5211] for additional
 recommendations related to RFD.
 
 

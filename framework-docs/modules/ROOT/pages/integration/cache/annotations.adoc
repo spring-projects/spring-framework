@@ -67,7 +67,7 @@ To provide a different default key generator, you need to implement the
 The default key generation strategy changed with the release of Spring 4.0. Earlier
 versions of Spring used a key generation strategy that, for multiple key parameters,
 considered only the `hashCode()` of parameters and not `equals()`. This could cause
-unexpected key collisions (see https://jira.spring.io/browse/SPR-10237[SPR-10237]
+unexpected key collisions (see {spring-framework-issues}/14870[spring-framework#14870]
 for background). The new `SimpleKeyGenerator` uses a compound key for such scenarios.
 
 If you want to keep using the previous key strategy, you can configure the deprecated
@@ -566,7 +566,7 @@ switching to `aspectj` mode in combination with compile-time or load-time weavin
 
 NOTE: For more detail about advanced customizations (using Java configuration) that are
 required to implement `CachingConfigurer`, see the
-{api-spring-framework}/cache/annotation/CachingConfigurer.html[javadoc].
+{spring-framework-api}/cache/annotation/CachingConfigurer.html[javadoc].
 
 [[cache-annotation-driven-settings]]
 .Cache annotation settings
@@ -575,7 +575,7 @@ required to implement `CachingConfigurer`, see the
 | XML Attribute | Annotation Attribute | Default | Description
 
 | `cache-manager`
-| N/A (see the {api-spring-framework}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
+| N/A (see the {spring-framework-api}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
 | `cacheManager`
 | The name of the cache manager to use. A default `CacheResolver` is initialized behind
   the scenes with this cache manager (or `cacheManager` if not set). For more
@@ -583,19 +583,19 @@ required to implement `CachingConfigurer`, see the
   attribute.
 
 | `cache-resolver`
-| N/A (see the {api-spring-framework}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
+| N/A (see the {spring-framework-api}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
 | A `SimpleCacheResolver` using the configured `cacheManager`.
 | The bean name of the CacheResolver that is to be used to resolve the backing caches.
   This attribute is not required and needs to be specified only as an alternative to
   the 'cache-manager' attribute.
 
 | `key-generator`
-| N/A (see the {api-spring-framework}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
+| N/A (see the {spring-framework-api}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
 | `SimpleKeyGenerator`
 | Name of the custom key generator to use.
 
 | `error-handler`
-| N/A (see the {api-spring-framework}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
+| N/A (see the {spring-framework-api}/cache/annotation/CachingConfigurer.html[`CachingConfigurer`] javadoc)
 | `SimpleCacheErrorHandler`
 | The name of the custom cache error handler to use. By default, any exception thrown during
   a cache related operation is thrown back at the client.

@@ -135,7 +135,7 @@ and others) and is equivalent to `required=false`.
 | Any other argument
 | If a method argument is not matched to any of the earlier values in this table and it is
   a simple type (as determined by
-	{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
+	{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
   it is resolved as a `@RequestParam`. Otherwise, it is resolved as a `@ModelAttribute`.
 |===
 

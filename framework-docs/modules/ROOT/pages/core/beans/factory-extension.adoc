@@ -22,8 +22,8 @@ in which these `BeanPostProcessor` instances run by setting the `order` property
 You can set this property only if the `BeanPostProcessor` implements the `Ordered`
 interface. If you write your own `BeanPostProcessor`, you should consider implementing
 the `Ordered` interface, too. For further details, see the javadoc of the
-{api-spring-framework}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`]
-and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces. See also the note on
+{spring-framework-api}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`]
+and {spring-framework-api}/core/Ordered.html[`Ordered`] interfaces. See also the note on
 xref:core/beans/factory-extension.adoc#beans-factory-programmatically-registering-beanpostprocessors[programmatic registration of `BeanPostProcessor` instances].
 
 [NOTE]
@@ -272,8 +272,8 @@ which these `BeanFactoryPostProcessor` instances run by setting the `order` prop
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
 consider implementing the `Ordered` interface, too. See the javadoc of the
-{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
-and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
+{spring-framework-api}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
+and {spring-framework-api}/core/Ordered.html[`Ordered`] interfaces for more details.
 
 [NOTE]
 ====

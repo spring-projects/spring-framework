@@ -191,7 +191,7 @@ Kotlin::
 ======
 
 For further details, see the
-https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
+{spring-framework-wiki}/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
 wiki page.
 
 
@@ -315,7 +315,7 @@ entries in the classpath. When you build JARs with Ant, make sure that you do no
 activate the files-only switch of the JAR task. Also, classpath directories may not be
 exposed based on security policies in some environments -- for example, standalone apps on
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests -- see
-https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+{stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 However, make sure that your component classes are exported in your `module-info`
@@ -743,7 +743,7 @@ Kotlin::
 
 If you do not want to rely on the default bean-naming strategy, you can provide a custom
 bean-naming strategy. First, implement the
-{api-spring-framework}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
+{spring-framework-api}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
 interface, and be sure to include a default no-arg constructor. Then, provide the fully
 qualified class name when configuring the scanner, as the following example annotation
 and bean definition show.
@@ -840,7 +840,7 @@ possibly also declaring a custom scoped-proxy mode.
 
 NOTE: To provide a custom strategy for scope resolution rather than relying on the
 annotation-based approach, you can implement the
-{api-spring-framework}/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`]
+{spring-framework-api}/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`]
 interface. Be sure to include a default no-arg constructor. Then you can provide the
 fully qualified class name when configuring the scanner, as the following example of both
 an annotation and a bean definition shows:

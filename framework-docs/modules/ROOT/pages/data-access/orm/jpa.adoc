@@ -157,7 +157,7 @@ The `LoadTimeWeaver` interface is a Spring-provided class that lets JPA
 `ClassTransformer` instances be plugged in a specific manner, depending on whether the
 environment is a web container or application server. Hooking `ClassTransformers`
 through an
-https://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agent]
+{java-api}/java.instrument/java/lang/instrument/package-summary.html[agent]
 is typically not efficient. The agents work against the entire virtual machine and
 inspect every class that is loaded, which is usually undesirable in a production
 server environment.
@@ -541,8 +541,8 @@ way of auto-configuring an `EntityManagerFactory` setup for Hibernate or Eclipse
 respectively. Note that those provider adapters are primarily designed for use with
 Spring-driven transaction management (that is, for use with `JpaTransactionManager`).
 
-See the {api-spring-framework}/orm/jpa/JpaDialect.html[`JpaDialect`] and
-{api-spring-framework}/orm/jpa/JpaVendorAdapter.html[`JpaVendorAdapter`] javadoc for
+See the {spring-framework-api}/orm/jpa/JpaDialect.html[`JpaDialect`] and
+{spring-framework-api}/orm/jpa/JpaVendorAdapter.html[`JpaVendorAdapter`] javadoc for
 more details of its operations and how they are used within Spring's JPA support.
 
 

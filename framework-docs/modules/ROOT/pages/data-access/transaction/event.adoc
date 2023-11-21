@@ -63,7 +63,7 @@ For the former, listeners are guaranteed to see the current thread-bound transac
 Since the latter uses the Reactor context instead of thread-local variables, the transaction
 context needs to be included in the published event instance as the event source.
 See the
-{api-spring-framework}/transaction/reactive/TransactionalEventPublisher.html[`TransactionalEventPublisher`]
+{spring-framework-api}/transaction/reactive/TransactionalEventPublisher.html[`TransactionalEventPublisher`]
 javadoc for details.
 ====
 

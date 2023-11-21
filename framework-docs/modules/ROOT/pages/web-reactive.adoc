@@ -2,7 +2,7 @@
 = Web on Reactive Stack
 
 This part of the documentation covers support for reactive-stack web applications built
-on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
+on a {reactive-streams-site}/[Reactive Streams] API to run on non-blocking
 servers, such as Netty, Undertow, and Servlet containers. Individual chapters cover
 the xref:web/webflux.adoc#webflux[Spring WebFlux] framework,
 the reactive xref:web/webflux-webclient.adoc[`WebClient`],

@@ -59,7 +59,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 ----
 
 The STOMP broker relay in the preceding configuration is a Spring
-{api-spring-framework}/messaging/MessageHandler.html[`MessageHandler`]
+{spring-framework-api}/messaging/MessageHandler.html[`MessageHandler`]
 that handles messages by forwarding them to an external message broker.
 To do so, it establishes TCP connections to the broker, forwards all messages to it,
 and then forwards all messages received from the broker to clients through their

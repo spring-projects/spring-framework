@@ -19,8 +19,8 @@ of the field). This is done as a convenience to aid developers when targeting er
 
 More information on the `MessageCodesResolver` and the default strategy can be found
 in the javadoc of
-{api-spring-framework}/validation/MessageCodesResolver.html[`MessageCodesResolver`] and
-{api-spring-framework}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
+{spring-framework-api}/validation/MessageCodesResolver.html[`MessageCodesResolver`] and
+{spring-framework-api}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
 
 

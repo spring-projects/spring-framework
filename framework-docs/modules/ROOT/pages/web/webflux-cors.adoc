@@ -47,7 +47,7 @@ rejected. No CORS headers are added to the responses of simple and actual CORS r
 and, consequently, browsers reject them.
 
 Each `HandlerMapping` can be
-{api-spring-framework}/web/reactive/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
+{spring-framework-api}/web/reactive/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
 individually with URL pattern-based `CorsConfiguration` mappings. In most cases, applications
 use the WebFlux Java configuration to declare such mappings, which results in a single,
 global map passed to all `HandlerMapping` implementations.
@@ -60,7 +60,7 @@ class- or method-level `@CrossOrigin` annotations (other handlers can implement
 The rules for combining global and local configuration are generally additive -- for example,
 all global and all local origins. For those attributes where only a single value can be
 accepted, such as `allowCredentials` and `maxAge`, the local overrides the global value. See
-{api-spring-framework}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
+{spring-framework-api}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
 for more details.
 
 [TIP]
@@ -108,7 +108,7 @@ a finite set of values instead to provide a higher level of security.
 == `@CrossOrigin`
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-controller[See equivalent in the Servlet stack]#
 
-The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
+The {spring-framework-api}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods, as the
 following example shows:
 
@@ -363,7 +363,7 @@ Kotlin::
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-filter[See equivalent in the Servlet stack]#
 
 You can apply CORS support through the built-in
-{api-spring-framework}/web/cors/reactive/CorsWebFilter.html[`CorsWebFilter`], which is a
+{spring-framework-api}/web/cors/reactive/CorsWebFilter.html[`CorsWebFilter`], which is a
 good fit with <<webflux-fn, functional endpoints>>.
 
 NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring

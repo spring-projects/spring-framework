@@ -57,8 +57,7 @@ transaction semantics given by the class annotation (if present). You can annota
 regardless of visibility.
 
 To weave your applications with the `AnnotationTransactionAspect`, you must either build
-your application with AspectJ (see the
-https://www.eclipse.org/aspectj/doc/released/devguide/index.html[AspectJ Development
+your application with AspectJ (see the {aspectj-docs-devguide}/index.html[AspectJ Development
 Guide]) or use load-time weaving. See xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time weaving with AspectJ in the Spring Framework]
  for a discussion of load-time weaving with AspectJ.
 

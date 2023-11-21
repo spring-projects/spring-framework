@@ -36,9 +36,9 @@ Kotlin::
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
 AspectJ pointcut expression. For a full discussion of AspectJ's pointcut language, see
-the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
+the {aspectj-docs-progguide}/index.html[AspectJ
 Programming Guide] (and, for extensions, the
-https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
+{aspectj-docs}/adk15notebook/index.html[AspectJ 5
 Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
 et al., or _AspectJ in Action_, by Ramnivas Laddad).
 
@@ -392,7 +392,7 @@ method that takes no parameters, whereas `(..)` matches any number (zero or more
 The `({asterisk})` pattern matches a method that takes one parameter of any type.
 `(*,String)` matches a method that takes two parameters. The first can be of any type, while the
 second must be a `String`. Consult the
-https://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
+{aspectj-docs-progguide}/semantics-pointcuts.html[Language
 Semantics] section of the AspectJ Programming Guide for more information.
 
 The following examples show some common pointcut expressions:

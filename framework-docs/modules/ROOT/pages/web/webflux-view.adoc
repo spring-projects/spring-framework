@@ -209,7 +209,7 @@ sections of the Spring MVC documentation.
 
 The Spring Framework has a built-in integration for using Spring WebFlux with any
 templating library that can run on top of the
-https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine.
+{JSR}223[JSR-223] Java scripting engine.
 The following table shows the templating libraries that we have tested on different script engines:
 
 [%header]
@@ -221,7 +221,7 @@ The following table shows the templating libraries that we have tested on differ
 |https://www.embeddedjs.com/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
 |https://www.stuartellis.name/articles/erb/[ERB] |https://www.jruby.org[JRuby]
 |https://docs.python.org/2/library/string.html#template-strings[String templates] |https://www.jython.org/[Jython]
-|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |https://kotlinlang.org/[Kotlin]
+|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |{kotlin-site}[Kotlin]
 |===
 
 TIP: The basic rule for integrating any other script engine is that it must implement the
@@ -312,7 +312,7 @@ The `render` function is called with the following parameters:
 * `String template`: The template content
 * `Map model`: The view model
 * `RenderingContext renderingContext`: The
-  {api-spring-framework}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
+  {spring-framework-api}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
   that gives access to the application context, the locale, the template loader, and the
   URL (since 5.0)
 
@@ -404,8 +404,8 @@ The following example shows how compile a template:
 ----
 
 Check out the Spring Framework unit tests,
-{spring-framework-main-code}/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
-{spring-framework-main-code}/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
+{spring-framework-code}/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
+{spring-framework-code}/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
 for more configuration examples.
 
 

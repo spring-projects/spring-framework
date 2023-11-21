@@ -2,7 +2,7 @@
 = Further Resources
 :page-section-summary-toc: 1
 
-More information on AspectJ can be found on the https://www.eclipse.org/aspectj[AspectJ website].
+More information on AspectJ can be found on the {aspectj-site}[AspectJ website].
 
 _Eclipse AspectJ_ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
 comprehensive introduction and reference for the AspectJ language.

@@ -11,7 +11,7 @@ encoding or decoding HTTP messages).
 
 For annotated controllers, WebFlux transparently adapts to the reactive library chosen by
 the application. This is done with the help of the
-{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
+{spring-framework-api}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
 provides pluggable support for reactive library and other asynchronous types. The registry
 has built-in support for RxJava 3, Kotlin coroutines and SmallRye Mutiny, but you can
 register others, too.

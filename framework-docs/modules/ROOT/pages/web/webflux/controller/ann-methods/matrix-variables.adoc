@@ -3,7 +3,7 @@
 
 [.small]#xref:web/webmvc/mvc-controller/ann-methods/matrix-variables.adoc[See equivalent in the Servlet stack]#
 
-https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+{rfc-site}/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring WebFlux, we refer to those as "`matrix variables`" based on an
 https://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
 can be also be referred to as URI path parameters.

@@ -8,7 +8,7 @@ within the core Spring Framework.
 [[appendix-spring-properties]]
 == Spring Properties
 
-{api-spring-framework}/core/SpringProperties.html[`SpringProperties`] is a static holder
+{spring-framework-api}/core/SpringProperties.html[`SpringProperties`] is a static holder
 for properties that control certain low-level aspects of the Spring Framework. Users can
 configure these properties via JVM system properties or programmatically via the
 `SpringProperties.setProperty(String key, String value)` method. The latter may be
@@ -25,7 +25,7 @@ The following table lists all currently supported Spring properties.
 | `spring.beaninfo.ignore`
 | Instructs Spring to use the `Introspector.IGNORE_ALL_BEANINFO` mode when calling the
 JavaBeans `Introspector`. See
-{api-spring-framework}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
+{spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
 for details.
 
 | `spring.expression.compiler.mode`
@@ -36,7 +36,7 @@ xref:core/expressions/evaluation.adoc#expressions-compiler-configuration[Spring 
 | Instructs Spring to ignore operating system environment variables if a Spring
 `Environment` property -- for example, a placeholder in a configuration String -- isn't
 resolvable otherwise. See
-{api-spring-framework}++/core/env/AbstractEnvironment.html#IGNORE_GETENV_PROPERTY_NAME++[`AbstractEnvironment`]
+{spring-framework-api}++/core/env/AbstractEnvironment.html#IGNORE_GETENV_PROPERTY_NAME++[`AbstractEnvironment`]
 for details.
 
 | `spring.jdbc.getParameterType.ignore`
@@ -47,12 +47,12 @@ See the note in xref:data-access/jdbc/advanced.adoc#jdbc-batch-list[Batch Operat
 | Instructs Spring to ignore a default JNDI environment, as an optimization for scenarios
 where nothing is ever to be found for such JNDI fallback searches to begin with, avoiding
 the repeated JNDI lookup overhead. See
-{api-spring-framework}++/jndi/JndiLocatorDelegate.html#IGNORE_JNDI_PROPERTY_NAME++[`JndiLocatorDelegate`]
+{spring-framework-api}++/jndi/JndiLocatorDelegate.html#IGNORE_JNDI_PROPERTY_NAME++[`JndiLocatorDelegate`]
 for details.
 
 | `spring.objenesis.ignore`
 | Instructs Spring to ignore Objenesis, not even attempting to use it. See
-{api-spring-framework}++/objenesis/SpringObjenesis.html#IGNORE_OBJENESIS_PROPERTY_NAME++[`SpringObjenesis`]
+{spring-framework-api}++/objenesis/SpringObjenesis.html#IGNORE_OBJENESIS_PROPERTY_NAME++[`SpringObjenesis`]
 for details.
 
 | `spring.test.aot.processing.failOnError`

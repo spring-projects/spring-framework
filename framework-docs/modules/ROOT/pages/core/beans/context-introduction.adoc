@@ -4,7 +4,7 @@
 As discussed in the xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[chapter introduction], the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
 programmatic way. The `org.springframework.context` package adds the
-{api-spring-framework}/context/ApplicationContext.html[`ApplicationContext`]
+{spring-framework-api}/context/ApplicationContext.html[`ApplicationContext`]
 interface, which extends the `BeanFactory` interface, in addition to extending other
 interfaces to provide additional functionality in a more application
 framework-oriented style. Many people use the `ApplicationContext` in a completely
@@ -269,7 +269,7 @@ file format but is more flexible than the standard JDK based
 `ResourceBundleMessageSource` implementation. In particular, it allows for reading
 files from any Spring resource location (not only from the classpath) and supports hot
 reloading of bundle property files (while efficiently caching them in between).
-See the {api-spring-framework}/context/support/ReloadableResourceBundleMessageSource.html[`ReloadableResourceBundleMessageSource`]
+See the {spring-framework-api}/context/support/ReloadableResourceBundleMessageSource.html[`ReloadableResourceBundleMessageSource`]
 javadoc for details.
 
 
@@ -485,8 +485,8 @@ This means that the `publishEvent()` method blocks until all listeners have fini
 One advantage of this synchronous and single-threaded approach is that, when a listener receives an event,
 it operates inside the transaction context of the publisher if a transaction context is available.
 If another strategy for event publication becomes necessary, e.g. asynchronous event processing by default,
-see the javadoc for Spring's {api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
-and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`] implementation
+see the javadoc for Spring's {spring-framework-api}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
+and {spring-framework-api}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`] implementation
 for configuration options which can be applied to a custom "applicationEventMulticaster" bean definition.
 In these cases, ThreadLocals and logging context are not propagated for the event processing.
 See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
@@ -529,7 +529,7 @@ notify appropriate parties.
 NOTE: Spring's eventing mechanism is designed for simple communication between Spring beans
 within the same application context. However, for more sophisticated enterprise
 integration needs, the separately maintained
-https://projects.spring.io/spring-integration/[Spring Integration] project provides
+{spring-site-projects}/spring-integration/[Spring Integration] project provides
 complete support for building lightweight,
 https://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
@@ -742,11 +742,11 @@ Be aware of the following limitations when using asynchronous events:
 
 * If an asynchronous event listener throws an `Exception`, it is not propagated to the
   caller. See
-  {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`AsyncUncaughtExceptionHandler`]
+  {spring-framework-api}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`AsyncUncaughtExceptionHandler`]
   for more details.
 * Asynchronous event listener methods cannot publish a subsequent event by returning a
   value. If you need to publish another event as the result of the processing, inject an
-  {api-spring-framework}/context/ApplicationEventPublisher.html[`ApplicationEventPublisher`]
+  {spring-framework-api}/context/ApplicationEventPublisher.html[`ApplicationEventPublisher`]
   to publish the event manually.
 * ThreadLocals and logging context are not propagated by default for the event processing.
   See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
@@ -1040,7 +1040,7 @@ and JMX support facilities. Application components can also interact with the ap
 server's JCA `WorkManager` through Spring's `TaskExecutor` abstraction.
 
 See the javadoc of the
-{api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
+{spring-framework-api}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
 For a simple deployment of a Spring ApplicationContext as a Jakarta EE RAR file:
@@ -1050,7 +1050,7 @@ all application classes into a RAR file (which is a standard JAR file with a dif
 file extension).
 . Add all required library JARs into the root of the RAR archive.
 . Add a
-`META-INF/ra.xml` deployment descriptor (as shown in the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
+`META-INF/ra.xml` deployment descriptor (as shown in the {spring-framework-api}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
 `META-INF/applicationContext.xml`).
 . Drop the resulting RAR file into your

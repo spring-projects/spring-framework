@@ -552,7 +552,7 @@ Sometimes, it is helpful to provide a more detailed textual description of a bea
 be particularly useful when beans are exposed (perhaps through JMX) for monitoring purposes.
 
 To add a description to a `@Bean`, you can use the
-{api-spring-framework}/context/annotation/Description.html[`@Description`]
+{spring-framework-api}/context/annotation/Description.html[`@Description`]
 annotation, as the following example shows:
 
 [tabs]

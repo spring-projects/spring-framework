@@ -17,7 +17,7 @@ No matter the choice, Spring can accommodate both styles and even mix them toget
 It is worth pointing out that through its xref:core/beans/java.adoc[JavaConfig] option, Spring lets
 annotations be used in a non-invasive way, without touching the target components'
 source code and that, in terms of tooling, all configuration styles are supported by
-https://spring.io/tools[Spring Tools] for Eclipse, Visual Studio Code, and Theia.
+{spring-site-tools}[Spring Tools] for Eclipse, Visual Studio Code, and Theia.
 ****
 
 An alternative to XML setup is provided by annotation-based configuration, which relies
@@ -62,11 +62,11 @@ configuration (notice the inclusion of the `context` namespace):
 
 The `<context:annotation-config/>` element implicitly registers the following post-processors:
 
-* {api-spring-framework}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
-* {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`]
-* {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`]
-* {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`]
-* {api-spring-framework}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor`]
+* {spring-framework-api}/context/annotation/ConfigurationClassPostProcessor.html[`ConfigurationClassPostProcessor`]
+* {spring-framework-api}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`]
+* {spring-framework-api}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`]
+* {spring-framework-api}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`]
+* {spring-framework-api}/context/event/EventListenerMethodProcessor.html[`EventListenerMethodProcessor`]
 
 [NOTE]
 ====

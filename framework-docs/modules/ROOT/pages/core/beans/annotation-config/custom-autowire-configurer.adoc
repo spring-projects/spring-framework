@@ -1,7 +1,7 @@
 [[beans-custom-autowire-configurer]]
 = Using `CustomAutowireConfigurer`
 
-{api-spring-framework}/beans/factory/annotation/CustomAutowireConfigurer.html[`CustomAutowireConfigurer`]
+{spring-framework-api}/beans/factory/annotation/CustomAutowireConfigurer.html[`CustomAutowireConfigurer`]
 is a `BeanFactoryPostProcessor` that lets you register your own custom qualifier
 annotation types, even if they are not annotated with Spring's `@Qualifier` annotation.
 The following example shows how to use `CustomAutowireConfigurer`:

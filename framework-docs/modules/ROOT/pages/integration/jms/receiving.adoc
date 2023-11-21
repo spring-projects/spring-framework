@@ -76,7 +76,7 @@ containers that ships with Spring (in this case, `DefaultMessageListenerContaine
 ----
 
 See the Spring javadoc of the various message listener containers (all of which implement
-{api-spring-framework}/jms/listener/MessageListenerContainer.html[MessageListenerContainer])
+{spring-framework-api}/jms/listener/MessageListenerContainer.html[MessageListenerContainer])
 for a full description of the features supported by each implementation.
 
 

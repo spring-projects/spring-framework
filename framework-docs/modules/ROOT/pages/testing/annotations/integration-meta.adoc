@@ -305,5 +305,5 @@ Kotlin::
 ======
 
 For further details, see the
-https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
+{spring-framework-wiki}/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
 wiki page.

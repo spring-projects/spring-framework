@@ -37,7 +37,7 @@ such as a method to check for the existence of the resource being pointed to.
 Spring's `Resource` interface located in the `org.springframework.core.io.` package is
 meant to be a more capable interface for abstracting access to low-level resources. The
 following listing provides an overview of the `Resource` interface. See the
-{api-spring-framework}/core/io/Resource.html[`Resource`] javadoc for further details.
+{spring-framework-api}/core/io/Resource.html[`Resource`] javadoc for further details.
 
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -104,7 +104,7 @@ resource (if the underlying implementation is compatible and supports that
 functionality).
 
 Some implementations of the `Resource` interface also implement the extended
-{api-spring-framework}/core/io/WritableResource.html[`WritableResource`] interface
+{spring-framework-api}/core/io/WritableResource.html[`WritableResource`] interface
 for a resource that supports writing to it.
 
 Spring itself uses the `Resource` abstraction extensively, as an argument type in
@@ -143,7 +143,7 @@ Spring includes several built-in `Resource` implementations:
 
 For a complete list of `Resource` implementations available in Spring, consult the
 "All Known Implementing Classes" section of the
-{api-spring-framework}/core/io/Resource.html[`Resource`] javadoc.
+{spring-framework-api}/core/io/Resource.html[`Resource`] javadoc.
 
 
 
@@ -763,7 +763,7 @@ Kotlin::
 ----
 ======
 
-See the {api-spring-framework}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
+See the {spring-framework-api}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
 javadoc for details on the various constructors.
 
 
@@ -903,7 +903,7 @@ entries in the classpath. When you build JARs with Ant, do not activate the `fil
 switch of the JAR task. Also, classpath directories may not get exposed based on security
 policies in some environments -- for example, stand-alone applications on JDK 1.7.0_45
 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
-https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+{stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 Putting resources into a dedicated directory is highly recommendable here as well,

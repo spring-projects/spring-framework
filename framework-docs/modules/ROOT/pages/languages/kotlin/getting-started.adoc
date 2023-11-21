@@ -2,7 +2,7 @@
 = Getting Started
 
 The easiest way to learn how to build a Spring application with Kotlin is to follow
-https://spring.io/guides/tutorials/spring-boot-kotlin/[the dedicated tutorial].
+{spring-site-guides}/tutorials/spring-boot-kotlin/[the dedicated tutorial].
 
 
 

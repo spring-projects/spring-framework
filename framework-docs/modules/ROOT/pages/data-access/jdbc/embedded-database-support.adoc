@@ -83,7 +83,7 @@ Kotlin::
 ----
 ======
 
-See the {api-spring-framework}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[javadoc for `EmbeddedDatabaseBuilder`]
+See the {spring-framework-api}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[javadoc for `EmbeddedDatabaseBuilder`]
 for further details on all supported options.
 
 You can also use the `EmbeddedDatabaseBuilder` to create an embedded database by using Java
@@ -288,7 +288,7 @@ You can extend Spring JDBC embedded database support in two ways:
   connection pool to manage embedded database connections.
 
 We encourage you to contribute extensions to the Spring community at
-https://github.com/spring-projects/spring-framework/issues[GitHub Issues].
+{spring-framework-issues}[GitHub Issues].
 
 
 

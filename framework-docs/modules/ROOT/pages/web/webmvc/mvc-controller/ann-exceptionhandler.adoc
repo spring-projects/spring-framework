@@ -271,7 +271,7 @@ see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | Any other return value
 | If a return value is not matched to any of the above and is not a simple type (as determined by
-  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
+  {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
   by default, it is treated as a model attribute to be added to the model. If it is a simple type,
   it remains unresolved.
 |===

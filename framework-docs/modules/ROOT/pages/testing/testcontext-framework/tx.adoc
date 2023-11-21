@@ -216,7 +216,7 @@ Support for `TestTransaction` is automatically available whenever the
 `TransactionalTestExecutionListener` is enabled.
 
 The following example demonstrates some of the features of `TestTransaction`. See the
-javadoc for {api-spring-framework}/test/context/transaction/TestTransaction.html[`TestTransaction`]
+javadoc for {spring-framework-api}/test/context/transaction/TestTransaction.html[`TestTransaction`]
 for further details.
 
 [tabs]
@@ -355,7 +355,7 @@ of `PlatformTransactionManager` within the test's `ApplicationContext`, you can 
 qualifier by using `@Transactional("myTxMgr")` or `@Transactional(transactionManager =
 "myTxMgr")`, or `TransactionManagementConfigurer` can be implemented by an
 `@Configuration` class. Consult the
-{api-spring-framework}/test/context/transaction/TestContextTransactionUtils.html#retrieveTransactionManager-org.springframework.test.context.TestContext-java.lang.String-[javadoc
+{spring-framework-api}/test/context/transaction/TestContextTransactionUtils.html#retrieveTransactionManager-org.springframework.test.context.TestContext-java.lang.String-[javadoc
 for `TestContextTransactionUtils.retrieveTransactionManager()`] for details on the
 algorithm used to look up a transaction manager in the test's `ApplicationContext`.
 
@@ -668,7 +668,7 @@ Kotlin::
 ======
 
 See
-https://github.com/spring-projects/spring-framework/blob/main/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
+{spring-framework-code}/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
 in the Spring Framework test suite for working examples using all JPA lifecycle callbacks.
 =====
 

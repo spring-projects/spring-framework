@@ -12,7 +12,7 @@ compiler flag to be enabled during compilation. (For completeness, we neverthele
 running the Kotlin compiler with its `-java-parameters` flag for standard Java parameter exposure.)
 
 You can declare configuration classes as
-https://kotlinlang.org/docs/reference/nested-classes.html[top level or nested but not inner],
+{kotlin-docs}/nested-classes.html[top level or nested but not inner],
 since the later requires a reference to the outer class.
 
 

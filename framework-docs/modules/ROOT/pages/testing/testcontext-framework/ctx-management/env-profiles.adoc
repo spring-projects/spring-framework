@@ -478,7 +478,7 @@ programmatically instead of declaratively -- for example, based on:
 To resolve active bean definition profiles programmatically, you can implement
 a custom `ActiveProfilesResolver` and register it by using the `resolver`
 attribute of `@ActiveProfiles`. For further information, see the corresponding
-{api-spring-framework}/test/context/ActiveProfilesResolver.html[javadoc].
+{spring-framework-api}/test/context/ActiveProfilesResolver.html[javadoc].
 The following example demonstrates how to implement and register a custom
 `OperatingSystemActiveProfilesResolver`:
 

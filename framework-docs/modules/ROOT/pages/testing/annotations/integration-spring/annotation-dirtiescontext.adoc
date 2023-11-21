@@ -257,6 +257,6 @@ Kotlin::
 
 
 For further details regarding the `EXHAUSTIVE` and `CURRENT_LEVEL` algorithms, see the
-{api-spring-framework}/test/annotation/DirtiesContext.HierarchyMode.html[`DirtiesContext.HierarchyMode`]
+{spring-framework-api}/test/annotation/DirtiesContext.HierarchyMode.html[`DirtiesContext.HierarchyMode`]
 javadoc.
 

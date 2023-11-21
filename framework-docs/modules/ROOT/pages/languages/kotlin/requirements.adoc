@@ -9,9 +9,9 @@ and https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotli
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on
 https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 
-WARNING: Kotlin https://kotlinlang.org/docs/inline-classes.html[inline classes] are not yet supported.
+WARNING: Kotlin {kotlin-docs}/inline-classes.html[inline classes] are not yet supported.
 
-NOTE: The https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin module] is required
+NOTE: The {jackson-github-org}/jackson-module-kotlin[Jackson Kotlin module] is required
 for serializing or deserializing JSON data for Kotlin classes with Jackson, so make sure to add the
 `com.fasterxml.jackson.module:jackson-module-kotlin` dependency to your project if you have such need.
 It is automatically registered when found in the classpath.

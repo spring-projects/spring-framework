@@ -235,6 +235,6 @@ NOTE: If you use `@DirtiesContext` in a test whose context is configured as part
 context hierarchy, you can use the `hierarchyMode` flag to control how the context cache
 is cleared. For further details, see the discussion of `@DirtiesContext` in
 xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations] and the
-{api-spring-framework}/test/annotation/DirtiesContext.html[`@DirtiesContext`] javadoc.
+{spring-framework-api}/test/annotation/DirtiesContext.html[`@DirtiesContext`] javadoc.
 --
 

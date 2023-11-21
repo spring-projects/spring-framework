@@ -439,4 +439,4 @@
 ** xref:languages/groovy.adoc[]
 ** xref:languages/dynamic.adoc[]
 * xref:appendix.adoc[]
-* https://github.com/spring-projects/spring-framework/wiki[Wiki]
+* {spring-framework-wiki}[Wiki]

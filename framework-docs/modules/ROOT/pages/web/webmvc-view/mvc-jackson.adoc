@@ -31,7 +31,7 @@ serializers and deserializers for specific types.
 [.small]#xref:web/webflux-view.adoc#webflux-view-httpmessagewriter[See equivalent in the Reactive stack]#
 
 `MappingJackson2XmlView` uses the
-https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`
+{jackson-github-org}/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`
 to render the response content as XML. If the model contains multiple entries, you should
 explicitly set the object to be serialized by using the `modelKey` bean property. If the
 model contains a single entry, it is serialized automatically.

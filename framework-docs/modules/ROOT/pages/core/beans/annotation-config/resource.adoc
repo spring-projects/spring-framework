@@ -84,7 +84,7 @@ Kotlin::
 NOTE: The name provided with the annotation is resolved as a bean name by the
 `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware.
 The names can be resolved through JNDI if you configure Spring's
-{api-spring-framework}/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`]
+{spring-framework-api}/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`]
 explicitly. However, we recommend that you rely on the default behavior and
 use Spring's JNDI lookup capabilities to preserve the level of indirection.
 

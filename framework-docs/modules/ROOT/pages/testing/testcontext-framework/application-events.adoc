@@ -24,7 +24,7 @@ To use `ApplicationEvents` in your tests, do the following.
    to an `@Autowired` field in the test class.
 
 The following test class uses the `SpringExtension` for JUnit Jupiter and
-https://assertj.github.io/doc/[AssertJ] to assert the types of application events
+{assertj-docs}[AssertJ] to assert the types of application events
 published while invoking a method in a Spring-managed component:
 
 // Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
@@ -88,6 +88,6 @@ Kotlin::
 ======
 
 See the
-{api-spring-framework}/test/context/event/ApplicationEvents.html[`ApplicationEvents`
+{spring-framework-api}/test/context/event/ApplicationEvents.html[`ApplicationEvents`
 javadoc] for further details regarding the `ApplicationEvents` API.
 

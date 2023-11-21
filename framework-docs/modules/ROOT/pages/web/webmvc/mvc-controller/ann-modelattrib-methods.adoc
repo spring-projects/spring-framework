@@ -76,7 +76,7 @@ Kotlin::
 
 
 NOTE: When a name is not explicitly specified, a default name is chosen based on the `Object`
-type, as explained in the javadoc for {api-spring-framework}/core/Conventions.html[`Conventions`].
+type, as explained in the javadoc for {spring-framework-api}/core/Conventions.html[`Conventions`].
 You can always assign an explicit name by using the overloaded `addAttribute` method or
 through the `name` attribute on `@ModelAttribute` (for a return value).
 

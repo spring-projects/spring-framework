@@ -8,9 +8,9 @@
 
 Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
-* WebMvc.fn DSL with {docs-spring-framework}/kdoc-api/spring-webmvc/org.springframework.web.servlet.function/router.html[router { }]
-* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {docs-spring-framework}/kdoc-api/spring-webflux/org.springframework.web.reactive.function.server/router.html[router { }]
-* WebFlux.fn <<Coroutines>> DSL with {docs-spring-framework}/kdoc-api/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
+* WebMvc.fn DSL with {spring-framework-api-kdoc}/spring-webmvc/org.springframework.web.servlet.function/router.html[router { }]
+* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/router.html[router { }]
+* WebFlux.fn <<Coroutines>> DSL with {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
 These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
@@ -79,12 +79,12 @@ mockMvc.get("/person/{name}", "Lee") {
 == Kotlin Script Templates
 
 Spring Framework provides a
-https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
-which supports https://www.jcp.org/en/jsr/detail?id=223[JSR-223] to render templates by using script engines.
+{spring-framework-api}/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
+which supports {JSR}223[JSR-223] to render templates by using script engines.
 
 By leveraging `scripting-jsr223` dependencies, it
 is possible to use such feature to render Kotlin-based templates with
-https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
+{kotlin-github-org}/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
 
 `build.gradle.kts`
 [source,kotlin,indent=0]
@@ -126,10 +126,10 @@ project for more details.
 [[kotlin-multiplatform-serialization]]
 == Kotlin multiplatform serialization
 
-As of Spring Framework 5.3, https://github.com/Kotlin/kotlinx.serialization[Kotlin multiplatform serialization] is
+As of Spring Framework 5.3, {kotlin-github-org}/kotlinx.serialization[Kotlin multiplatform serialization] is
 supported in Spring MVC, Spring WebFlux and Spring Messaging (RSocket). The builtin support currently targets CBOR, JSON, and ProtoBuf formats.
 
-To enable it, follow https://github.com/Kotlin/kotlinx.serialization#setup[those instructions] to add the related dependency and plugin.
+To enable it, follow {kotlin-github-org}/kotlinx.serialization#setup[those instructions] to add the related dependency and plugin.
 With Spring MVC and WebFlux, both Kotlin serialization and Jackson will be configured by default if they are in the classpath since
 Kotlin serialization is designed to serialize only Kotlin classes annotated with `@Serializable`.
 With Spring Messaging (RSocket), make sure that neither Jackson, GSON or JSONB are in the classpath if you want automatic configuration,

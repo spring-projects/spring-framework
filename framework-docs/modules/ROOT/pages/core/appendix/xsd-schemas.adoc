@@ -66,13 +66,13 @@ developer's intent ("`inject this constant value`"), and it reads better:
 [[xsd-schemas-util-frfb]]
 ==== Setting a Bean Property or Constructor Argument from a Field Value
 
-{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
+{spring-framework-api}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
 is a `FactoryBean` that retrieves a `static` or non-static field value. It is typically
 used for retrieving `public` `static` `final` constants, which may then be used to set a
 property value or constructor argument for another bean.
 
 The following example shows how a `static` field is exposed, by using the
-{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`]
+{spring-framework-api}/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`]
 property:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -109,7 +109,7 @@ to be specified for the bean reference, as the following example shows:
 
 You can also access a non-static (instance) field of another bean, as
 described in the API documentation for the
-{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
+{spring-framework-api}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
 class.
 
 Injecting enumeration values into beans as either property or constructor arguments is

@@ -36,8 +36,8 @@ simpler.
 [[oxm-consistent-interfaces]]
 === Consistent Interfaces
 
-Spring's O-X mapping operates through two global interfaces: {api-spring-framework}/oxm/Marshaller.html[`Marshaller`] and
-{api-spring-framework}/oxm/Unmarshaller.html[`Unmarshaller`]. These abstractions let you switch O-X mapping frameworks
+Spring's O-X mapping operates through two global interfaces: {spring-framework-api}/oxm/Marshaller.html[`Marshaller`] and
+{spring-framework-api}/oxm/Unmarshaller.html[`Unmarshaller`]. These abstractions let you switch O-X mapping frameworks
 with relative ease, with little or no change required on the classes that do the
 marshalling. This approach has the additional benefit of making it possible to do XML
 marshalling with a mix-and-match approach (for example, some marshalling performed using JAXB
@@ -557,7 +557,7 @@ set the `supportedClasses` property on the `XStreamMarshaller`, as the following
 Doing so ensures that only the registered classes are eligible for unmarshalling.
 
 Additionally, you can register
-{api-spring-framework}/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
+{spring-framework-api}/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
 converters] to make sure that only your supported classes can be unmarshalled. You might
 want to add a `CatchAllConverter` as the last converter in the list, in addition to
 converters that explicitly support the domain classes that should be supported. As a

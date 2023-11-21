@@ -242,5 +242,5 @@ xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
 
 TIP: Using `@ModelAttribute` is optional. By default, any parameter that is not a simple
 value type as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
 _AND_ that is not resolved by any other argument resolver is treated as an `@ModelAttribute`.

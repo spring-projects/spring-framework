@@ -5,7 +5,7 @@
 
 A common requirement for REST services is to include details in the body of error
 responses. The Spring Framework supports the "Problem Details for HTTP APIs"
-specification, https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807].
+specification, {rfc-site}/rfc7807[RFC 7807].
 
 The following are the main abstractions for this support:
 

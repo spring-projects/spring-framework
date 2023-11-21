@@ -19,16 +19,16 @@ This section describes the HTTP caching-related options that are available in Sp
 == `CacheControl`
 [.small]#xref:web/webflux/caching.adoc#webflux-caching-cachecontrol[See equivalent in the Reactive stack]#
 
-{api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
+{spring-framework-api}/http/CacheControl.html[`CacheControl`] provides support for
 configuring settings related to the `Cache-Control` header and is accepted as an argument
 in a number of places:
 
-* {api-spring-framework}/web/servlet/mvc/WebContentInterceptor.html[`WebContentInterceptor`]
-* {api-spring-framework}/web/servlet/support/WebContentGenerator.html[`WebContentGenerator`]
+* {spring-framework-api}/web/servlet/mvc/WebContentInterceptor.html[`WebContentInterceptor`]
+* {spring-framework-api}/web/servlet/support/WebContentGenerator.html[`WebContentGenerator`]
 * xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[Controllers]
 * xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[Static Resources]
 
-While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all possible
+While {rfc-site}/rfc7234#section-5.2.2[RFC 7234] describes all possible
 directives for the `Cache-Control` response header, the `CacheControl` type takes a
 use case-oriented approach that focuses on the common scenarios:
 

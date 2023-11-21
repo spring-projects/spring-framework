@@ -184,7 +184,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----
 ======
 
@@ -192,7 +192,7 @@ Note that common expectations are always applied and cannot be overridden withou
 creating a separate `MockMvc` instance.
 
 When a JSON response content contains hypermedia links created with
-https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
+{spring-github-org}/spring-hateoas[Spring HATEOAS], you can verify the
 resulting links by using JsonPath expressions, as the following example shows:
 
 [tabs]
@@ -220,7 +220,7 @@ Kotlin::
 ======
 
 When XML response content contains hypermedia links created with
-https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
+{spring-github-org}/spring-hateoas[Spring HATEOAS], you can verify the
 resulting links by using XPath expressions:
 
 [tabs]

@@ -482,7 +482,7 @@ The `JoinPoint` interface provides a number of useful methods:
 * `getSignature()`: Returns a description of the method that is being advised.
 * `toString()`: Prints a useful description of the method being advised.
 
-See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lang/JoinPoint.html[javadoc] for more detail.
+See the {aspectj-api}/org/aspectj/lang/JoinPoint.html[javadoc] for more detail.
 
 [[aop-ataspectj-advice-params-passing]]
 === Passing Parameters to Advice
@@ -730,7 +730,7 @@ of determining parameter names, an exception will be thrown.
   flag for `javac`. Recommended approach on Java 8+.
 `AspectJAdviceParameterNameDiscoverer` :: Deduces parameter names from the pointcut
   expression, `returning`, and `throwing` clauses. See the
-  {api-spring-framework}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]
+  {spring-framework-api}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]
   for details on the algorithm used.
 
 [[aop-ataspectj-advice-params-names-explicit]]

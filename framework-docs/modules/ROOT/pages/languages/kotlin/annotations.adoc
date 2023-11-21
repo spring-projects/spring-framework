@@ -1,7 +1,7 @@
 [[kotlin-annotations]]
 = Annotations
 
-The Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
+The Spring Framework also takes advantage of {kotlin-docs}/null-safety.html[Kotlin null-safety]
 to determine if an HTTP parameter is required without having to explicitly
 define the `required` attribute. That means `@RequestParam name: String?` is treated
 as not required and, conversely, `@RequestParam name: String` is treated as being required.
@@ -20,9 +20,9 @@ type `Car` may or may not exist. The same behavior applies to autowired construc
 
 NOTE: If you use bean validation on classes with properties or a primary constructor
 parameters, you may need to use
-https://kotlinlang.org/docs/reference/annotations.html#annotation-use-site-targets[annotation use-site targets],
+{kotlin-docs}/annotations.html#annotation-use-site-targets[annotation use-site targets],
 such as `@field:NotNull` or `@get:Size(min=5, max=15)`, as described in
-https://stackoverflow.com/a/35853200/1092077[this Stack Overflow response].
+{stackoverflow-site}/a/35853200/1092077[this Stack Overflow response].
 
 
 

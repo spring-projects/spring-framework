@@ -26,7 +26,7 @@ interface. A simple value object that encapsulates the properties of a simple ma
 as `from` and `to` (plus many others) is the `SimpleMailMessage` class. This package
 also contains a hierarchy of checked exceptions that provide a higher level of
 abstraction over the lower level mail system exceptions, with the root exception being
-`MailException`. See the {api-spring-framework}/mail/MailException.html[javadoc]
+`MailException`. See the {spring-framework-api}/mail/MailException.html[javadoc]
 for more information on the rich mail exception hierarchy.
 
 The `org.springframework.mail.javamail.JavaMailSender` interface adds specialized

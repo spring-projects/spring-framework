@@ -84,13 +84,13 @@ The preceding example is for use in Spring MVC applications and should be includ
 in the configuration of a xref:web/webmvc/mvc-servlet.adoc[`DispatcherServlet`]. However, Spring's
 WebSocket support does not depend on Spring MVC. It is relatively simple to
 integrate a `WebSocketHandler` into other HTTP-serving environments with the help of
-{api-spring-framework}/web/socket/server/support/WebSocketHttpRequestHandler.html[`WebSocketHttpRequestHandler`].
+{spring-framework-api}/web/socket/server/support/WebSocketHttpRequestHandler.html[`WebSocketHttpRequestHandler`].
 
 When using the `WebSocketHandler` API directly vs indirectly, e.g. through the
 xref:web/websocket/stomp.adoc[STOMP] messaging, the application must synchronize the sending of messages
 since the underlying standard WebSocket session (JSR-356) does not allow concurrent
 sending. One option is to wrap the `WebSocketSession` with
-{api-spring-framework}/web/socket/handler/ConcurrentWebSocketSessionDecorator.html[`ConcurrentWebSocketSessionDecorator`].
+{spring-framework-api}/web/socket/handler/ConcurrentWebSocketSessionDecorator.html[`ConcurrentWebSocketSessionDecorator`].
 
 
 
@@ -315,7 +315,7 @@ As of Spring Framework 4.1.5, the default behavior for WebSocket and SockJS is t
 only same-origin requests. It is also possible to allow all or a specified list of origins.
 This check is mostly designed for browser clients. Nothing prevents other types
 of clients from modifying the `Origin` header value (see
-https://tools.ietf.org/html/rfc6454[RFC 6454: The Web Origin Concept] for more details).
+{rfc-site}/rfc6454[RFC 6454: The Web Origin Concept] for more details).
 
 The three possible behaviors are:
 
