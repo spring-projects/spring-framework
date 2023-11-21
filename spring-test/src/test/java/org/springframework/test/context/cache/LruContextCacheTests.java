@@ -16,19 +16,19 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.Arrays;
 import java.util.List;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -157,16 +157,14 @@ class LruContextCacheTests {
 
 	@SuppressWarnings("unchecked")
 	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
-
-		assertThat(cache).extracting("contextMap", as(InstanceOfAssertFactories.map(MergedContextConfiguration.class, ApplicationContext.class)))
-				.satisfies((contextMap) -> {
-					// @formatter:off
+		assertThat(cache).extracting("contextMap", as(map(MergedContextConfiguration.class, ApplicationContext.class)))
+				.satisfies(contextMap -> {
 					List<String> actualNames = contextMap.keySet().stream()
-							.map(cfg -> cfg.getClasses()[0])
+							.map(MergedContextConfiguration::getClasses)
+							.flatMap(Arrays::stream)
 							.map(Class::getSimpleName)
 							.toList();
-					// @formatter:on
-					assertThat(actualNames).isEqualTo(asList(expectedNames));
+					assertThat(actualNames).containsExactly(expectedNames);
 				});
 	}
 
