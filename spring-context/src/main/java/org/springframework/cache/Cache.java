@@ -151,10 +151,10 @@ public interface Cache {
 	 * <p>If possible, implementations should ensure that the loading operation
 	 * is synchronized so that the specified {@code valueLoader} is only called
 	 * once in case of concurrent access on the same key.
-	 * <p>Null values are generally not supported by this method. The provided
-	 * {@link CompletableFuture} handle produces a value or raises an exception.
-	 * If the {@code valueLoader} raises an exception, it will be propagated
-	 * to the {@code CompletableFuture} handle returned from here.
+	 * <p>Null values always indicate a user-level {@code null} value with this
+	 * method. The provided {@link CompletableFuture} handle produces a value
+	 * or raises an exception. If the {@code valueLoader} raises an exception,
+	 * it will be propagated to the returned {@code CompletableFuture} handle.
 	 * @param key the key whose associated value is to be returned
 	 * @return the value to which this cache maps the specified key, contained
 	 * within a {@link CompletableFuture} which will never be {@code null}.
