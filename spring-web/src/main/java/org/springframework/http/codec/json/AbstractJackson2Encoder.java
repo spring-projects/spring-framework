@@ -169,8 +169,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 									separator))
 							.doAfterTerminate(() -> {
 								try {
-									byteBuilder.release();
 									generator.close();
+									byteBuilder.release();
 								}
 								catch (IOException ex) {
 									logger.error("Could not close Encoder resources", ex);
