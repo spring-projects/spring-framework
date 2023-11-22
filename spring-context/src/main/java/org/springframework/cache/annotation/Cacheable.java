@@ -70,8 +70,17 @@ public @interface Cacheable {
 
 	/**
 	 * Names of the caches in which method invocation results are stored.
-	 * <p>Names may be used to determine the target cache (or caches), matching
-	 * the qualifier value or bean name of a specific bean definition.
+	 * <p>Names may be used to determine the target cache(s), to be resolved via the
+	 * configured {@link #cacheResolver()} which typically delegates to
+	 * {@link org.springframework.cache.CacheManager#getCache}.
+	 * <p>This will usually be a single cache name. If multiple names are specified,
+	 * they will be consulted for a cache hit in the order of definition, and they
+	 * will all receive a put/evict request for the same newly cached value.
+	 * <p>Note that asynchronous/reactive cache access may not fully consult all
+	 * specified caches, depending on the target cache. In the case of late-determined
+	 * cache misses (e.g. with Redis), further caches will not get consulted anymore.
+	 * As a consequence, specifying multiple cache names in an async cache mode setup
+	 * only makes sense with early-determined cache misses (e.g. with Caffeine).
 	 * @since 4.2
 	 * @see #value
 	 * @see CacheConfig#cacheNames

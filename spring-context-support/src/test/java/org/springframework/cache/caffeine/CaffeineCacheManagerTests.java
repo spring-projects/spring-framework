@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.SimpleValueWrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -170,9 +171,9 @@ class CaffeineCacheManagerTests {
 		assertThat(cache1.get("key3", () -> (String) null)).isNull();
 		assertThat(cache1.get("key3", () -> (String) null)).isNull();
 
-		assertThat(cache1.retrieve("key1").join()).isEqualTo("value1");
-		assertThat(cache1.retrieve("key2").join()).isEqualTo(2);
-		assertThat(cache1.retrieve("key3").join()).isNull();
+		assertThat(cache1.retrieve("key1").join()).isEqualTo(new SimpleValueWrapper("value1"));
+		assertThat(cache1.retrieve("key2").join()).isEqualTo(new SimpleValueWrapper(2));
+		assertThat(cache1.retrieve("key3").join()).isEqualTo(new SimpleValueWrapper(null));
 		cache1.evict("key3");
 		assertThat(cache1.retrieve("key3")).isNull();
 		assertThat(cache1.retrieve("key3", () -> CompletableFuture.completedFuture("value3")).join())
@@ -182,6 +183,44 @@ class CaffeineCacheManagerTests {
 		cache1.evict("key3");
 		assertThat(cache1.retrieve("key3", () -> CompletableFuture.completedFuture(null)).join()).isNull();
 		assertThat(cache1.retrieve("key3", () -> CompletableFuture.completedFuture(null)).join()).isNull();
+	}
+
+	@Test
+	void asyncModeWithoutNullValues() {
+		CaffeineCacheManager cm = new CaffeineCacheManager();
+		cm.setAsyncCacheMode(true);
+		cm.setAllowNullValues(false);
+
+		Cache cache1 = cm.getCache("c1");
+		assertThat(cache1).isInstanceOf(CaffeineCache.class);
+		Cache cache1again = cm.getCache("c1");
+		assertThat(cache1).isSameAs(cache1again);
+		Cache cache2 = cm.getCache("c2");
+		assertThat(cache2).isInstanceOf(CaffeineCache.class);
+		Cache cache2again = cm.getCache("c2");
+		assertThat(cache2).isSameAs(cache2again);
+		Cache cache3 = cm.getCache("c3");
+		assertThat(cache3).isInstanceOf(CaffeineCache.class);
+		Cache cache3again = cm.getCache("c3");
+		assertThat(cache3).isSameAs(cache3again);
+
+		cache1.put("key1", "value1");
+		assertThat(cache1.get("key1").get()).isEqualTo("value1");
+		cache1.put("key2", 2);
+		assertThat(cache1.get("key2").get()).isEqualTo(2);
+		cache1.evict("key3");
+		assertThat(cache1.get("key3")).isNull();
+		assertThat(cache1.get("key3", () -> "value3")).isEqualTo("value3");
+		assertThat(cache1.get("key3", () -> "value3")).isEqualTo("value3");
+		cache1.evict("key3");
+
+		assertThat(cache1.retrieve("key1").join()).isEqualTo("value1");
+		assertThat(cache1.retrieve("key2").join()).isEqualTo(2);
+		assertThat(cache1.retrieve("key3")).isNull();
+		assertThat(cache1.retrieve("key3", () -> CompletableFuture.completedFuture("value3")).join())
+				.isEqualTo("value3");
+		assertThat(cache1.retrieve("key3", () -> CompletableFuture.completedFuture("value3")).join())
+				.isEqualTo("value3");
 	}
 
 	@Test

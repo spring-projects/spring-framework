@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -43,9 +44,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class CaffeineReactiveCachingTests {
 
-	@Test
-	void withCaffeineAsyncCache() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, ReactiveCacheableService.class);
+	@ParameterizedTest
+	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
+	void cacheHitDetermination(Class<?> configClass) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
 		Object key = new Object();
@@ -128,12 +130,26 @@ public class CaffeineReactiveCachingTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableCaching
-	static class Config {
+	static class AsyncCacheModeConfig {
+
+		@Bean
+		CacheManager cacheManager() {
+			CaffeineCacheManager cm = new CaffeineCacheManager("first");
+			cm.setAsyncCacheMode(true);
+			return cm;
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	@EnableCaching
+	static class AsyncCacheModeWithoutNullValuesConfig {
 
 		@Bean
 		CacheManager cacheManager() {
 			CaffeineCacheManager ccm = new CaffeineCacheManager("first");
 			ccm.setAsyncCacheMode(true);
+			ccm.setAllowNullValues(false);
 			return ccm;
 		}
 	}

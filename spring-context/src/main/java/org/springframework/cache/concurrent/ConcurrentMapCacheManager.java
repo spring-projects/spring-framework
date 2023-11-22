@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.cache.Cache;
@@ -35,11 +36,15 @@ import org.springframework.lang.Nullable;
  * the set of cache names is pre-defined through {@link #setCacheNames}, with no
  * dynamic creation of further cache regions at runtime.
  *
+ * <p>Supports the asynchronous {@link Cache#retrieve(Object)} and
+ * {@link Cache#retrieve(Object, Supplier)} operations through basic
+ * {@code CompletableFuture} adaptation, with early-determined cache misses.
+ *
  * <p>Note: This is by no means a sophisticated CacheManager; it comes with no
  * cache configuration options. However, it may be useful for testing or simple
  * caching scenarios. For advanced local caching needs, consider
- * {@link org.springframework.cache.jcache.JCacheCacheManager} or
- * {@link org.springframework.cache.caffeine.CaffeineCacheManager}.
+ * {@link org.springframework.cache.caffeine.CaffeineCacheManager} or
+ * {@link org.springframework.cache.jcache.JCacheCacheManager}.
  *
  * @author Juergen Hoeller
  * @since 3.1

@@ -29,7 +29,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -48,6 +47,7 @@ public class ReactiveCachingTests {
 
 	@ParameterizedTest
 	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
+			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
 			LateCacheHitDeterminationConfig.class,
 			LateCacheHitDeterminationWithValueWrapperConfig.class})
 	void cacheHitDetermination(Class<?> configClass) {
@@ -145,6 +145,19 @@ public class ReactiveCachingTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableCaching
+	static class EarlyCacheHitDeterminationWithoutNullValuesConfig {
+
+		@Bean
+		CacheManager cacheManager() {
+			ConcurrentMapCacheManager cm = new ConcurrentMapCacheManager("first");
+			cm.setAllowNullValues(false);
+			return cm;
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	@EnableCaching
 	static class LateCacheHitDeterminationConfig {
 
 		@Bean
@@ -177,12 +190,7 @@ public class ReactiveCachingTests {
 						@Override
 						public CompletableFuture<?> retrieve(Object key) {
 							Object value = lookup(key);
-							if (value != null) {
-								return CompletableFuture.completedFuture(new SimpleValueWrapper(fromStoreValue(value)));
-							}
-							else {
-								return CompletableFuture.completedFuture(null);
-							}
+							return CompletableFuture.completedFuture(value != null ? toValueWrapper(value) : null);
 						}
 					};
 				}

@@ -508,7 +508,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		if (cacheHit != null && !hasCachePut(contexts)) {
 			// If there are no put requests, just use the cache hit
-			cacheValue = (cacheHit instanceof Cache.ValueWrapper wrapper ? wrapper.get() : cacheHit);
+			cacheValue = unwrapCacheValue(cacheHit);
 			returnValue = wrapCacheValue(method, cacheValue);
 		}
 		else {

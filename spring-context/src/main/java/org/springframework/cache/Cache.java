@@ -116,21 +116,23 @@ public interface Cache {
 	 * <p>Can return {@code null} if the cache can immediately determine that
 	 * it contains no mapping for this key (e.g. through an in-memory key map).
 	 * Otherwise, the cached value will be returned in the {@link CompletableFuture},
-	 * with {@code null} indicating a late-determined cache miss (and a nested
-	 * {@link ValueWrapper} potentially indicating a nullable cached value).
+	 * with {@code null} indicating a late-determined cache miss. A nested
+	 * {@link ValueWrapper} potentially indicates a nullable cached value;
+	 * the cached value may also be represented as a plain element if null
+	 * values are not supported. Calling code needs to be prepared to handle
+	 * all those variants of the result returned by this method.
 	 * @param key the key whose associated value is to be returned
 	 * @return the value to which this cache maps the specified key, contained
 	 * within a {@link CompletableFuture} which may also be empty when a cache
 	 * miss has been late-determined. A straight {@code null} being returned
 	 * means that the cache immediately determined that it contains no mapping
 	 * for this key. A {@link ValueWrapper} contained within the
-	 * {@code CompletableFuture} can indicate a cached value that is potentially
+	 * {@code CompletableFuture} indicates a cached value that is potentially
 	 * {@code null}; this is sensible in a late-determined scenario where a regular
 	 * CompletableFuture-contained {@code null} indicates a cache miss. However,
-	 * an early-determined cache will usually return the plain cached value here,
-	 * and a late-determined cache may also return a plain value if it does not
-	 * support the actual caching of {@code null} values. Spring's common cache
-	 * processing can deal with all variants of these implementation strategies.
+	 * a cache may also return a plain value if it does not support the actual
+	 * caching of {@code null} values, avoiding the extra level of value wrapping.
+	 * Spring's cache processing can deal with all such implementation strategies.
 	 * @since 6.1
 	 * @see #retrieve(Object, Supplier)
 	 */
@@ -149,11 +151,14 @@ public interface Cache {
 	 * <p>If possible, implementations should ensure that the loading operation
 	 * is synchronized so that the specified {@code valueLoader} is only called
 	 * once in case of concurrent access on the same key.
-	 * <p>If the {@code valueLoader} throws an exception, it will be propagated
+	 * <p>Null values are generally not supported by this method. The provided
+	 * {@link CompletableFuture} handle produces a value or raises an exception.
+	 * If the {@code valueLoader} raises an exception, it will be propagated
 	 * to the {@code CompletableFuture} handle returned from here.
 	 * @param key the key whose associated value is to be returned
-	 * @return the value to which this cache maps the specified key,
-	 * contained within a {@link CompletableFuture}
+	 * @return the value to which this cache maps the specified key, contained
+	 * within a {@link CompletableFuture} which will never be {@code null}.
+	 * The provided future is expected to produce a value or raise an exception.
 	 * @since 6.1
 	 * @see #retrieve(Object)
 	 * @see #get(Object, Callable)
