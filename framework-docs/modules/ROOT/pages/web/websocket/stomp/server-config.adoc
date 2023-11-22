@@ -1,9 +1,14 @@
 [[websocket-stomp-server-config]]
-= WebSocket Server
+= WebSocket Transport
 
-To configure the underlying WebSocket server, the information in
-xref:web/websocket/server.adoc#websocket-server-runtime-configuration[Server Configuration] applies. For Jetty, however you need to set
-the `HandshakeHandler` and `WebSocketPolicy` through the `StompEndpointRegistry`:
+This section explains how to configure the underlying WebSocket server transport.
+
+For Jakarta WebSocket servers, add a `ServletServerContainerFactoryBean` to your
+configuration. For examples, see
+xref:web/websocket/server.adoc#websocket-server-runtime-configuration[Configuring the Server]
+under the WebSocket section.
+
+For Jetty WebSocket servers, customize the `JettyRequestUpgradeStrategy` as follows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -18,16 +23,30 @@ the `HandshakeHandler` and `WebSocketPolicy` through the `StompEndpointRegistry`
 
 		@Bean
 		public DefaultHandshakeHandler handshakeHandler() {
-
-			WebSocketPolicy policy = new WebSocketPolicy(WebSocketBehavior.SERVER);
-			policy.setInputBufferSize(8192);
-			policy.setIdleTimeout(600000);
-
-			return new DefaultHandshakeHandler(
-					new JettyRequestUpgradeStrategy(new WebSocketServerFactory(policy)));
+			JettyRequestUpgradeStrategy strategy = new JettyRequestUpgradeStrategy();
+			strategy.addWebSocketConfigurer(configurable -> {
+					policy.setInputBufferSize(4 * 8192);
+					policy.setIdleTimeout(600000);
+			});
+			return new DefaultHandshakeHandler(strategy);
 		}
 	}
 ----
 
+In addition to WebSocket server properties, there are also STOMP WebSocket transport properties
+to customize as follows:
 
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+		@Override
+		public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+			registry.setMessageSizeLimit(4 * 8192);
+			registry.setTimeToFirstMessage(30000);
+		}
+
+	}
+----

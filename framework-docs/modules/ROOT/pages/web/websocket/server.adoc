@@ -229,34 +229,27 @@ Java initialization API. The following example shows how to do so:
 
 
 [[websocket-server-runtime-configuration]]
-== Server Configuration
+== Configuring the Server
 [.small]#xref:web/webflux-websocket.adoc#webflux-websocket-server-config[See equivalent in the Reactive stack]#
 
-Each underlying WebSocket engine exposes configuration properties that control
-runtime characteristics, such as the size of message buffer sizes, idle timeout,
-and others.
+You can configure of the underlying WebSocket server such as input message buffer size,
+idle timeout, and more.
 
-For Tomcat, WildFly, and GlassFish, you can add a `ServletServerContainerFactoryBean` to your
-WebSocket Java config, as the following example shows:
+For Jakarta WebSocket servers, you can add a `ServletServerContainerFactoryBean` to your
+Java configuration. For example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Configuration
-	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
-
-		@Bean
-		public ServletServerContainerFactoryBean createWebSocketContainer() {
-			ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-			container.setMaxTextMessageBufferSize(8192);
-			container.setMaxBinaryMessageBufferSize(8192);
-			return container;
-		}
-
-	}
+     @Bean
+     public ServletServerContainerFactoryBean createWebSocketContainer() {
+         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+         container.setMaxTextMessageBufferSize(8192);
+         container.setMaxBinaryMessageBufferSize(8192);
+         return container;
+     }
 ----
 
-The following example shows the XML configuration equivalent of the preceding example:
+Or to your XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
@@ -277,10 +270,11 @@ The following example shows the XML configuration equivalent of the preceding ex
 	</beans>
 ----
 
-NOTE: For client-side WebSocket configuration, you should use `WebSocketContainerFactoryBean`
-(XML) or `ContainerProvider.getWebSocketContainer()` (Java configuration).
+NOTE: For client Jakarta WebSocket configuration, use
+ContainerProvider.getWebSocketContainer() in Java configuration, or
+`WebSocketContainerFactoryBean` in XML.
 
-For Jetty, you need to supply a `Consumer` callback to configure the WebSocket server. For example:
+For Jetty, you can supply a `Consumer` callback to configure the WebSocket server:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -290,20 +284,25 @@ For Jetty, you need to supply a `Consumer` callback to configure the WebSocket s
 
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+			registry.addHandler(echoWebSocketHandler(), "/echo").setHandshakeHandler(handshakeHandler());
+		}
 
-			JettyRequestUpgradeStrategy upgradeStrategy = new JettyRequestUpgradeStrategy();
-			upgradeStrategy.addWebSocketConfigurer(configurable -> {
+		@Bean
+		public DefaultHandshakeHandler handshakeHandler() {
+			JettyRequestUpgradeStrategy strategy = new JettyRequestUpgradeStrategy();
+			strategy.addWebSocketConfigurer(configurable -> {
 					policy.setInputBufferSize(8192);
 					policy.setIdleTimeout(600000);
 			});
-
-			registry.addHandler(echoWebSocketHandler(),
-				"/echo").setHandshakeHandler(new DefaultHandshakeHandler(upgradeStrategy));
+			return new DefaultHandshakeHandler(strategy);
 		}
 
 	}
 ----
 
+TIP: When using STOMP over WebSocket, you will also need to configure
+xref:web/websocket/stomp/server-config.adoc[STOMP WebSocket transport]
+properties.
 
 
 
