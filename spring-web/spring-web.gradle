@@ -78,6 +78,7 @@ dependencies {
 	testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	testImplementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
+	testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
 	testImplementation("com.squareup.okhttp3:mockwebserver")
 	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("io.projectreactor:reactor-test")
