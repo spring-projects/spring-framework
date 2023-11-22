@@ -2154,7 +2154,7 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	void beanProviderWithParentBeanFactoryReuseOrder() {
+	void beanProviderWithParentBeanFactoryDetectsOrder() {
 		DefaultListableBeanFactory parentBf = new DefaultListableBeanFactory();
 		parentBf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		parentBf.registerBeanDefinition("regular", new RootBeanDefinition(TestBean.class));
@@ -2162,8 +2162,34 @@ class DefaultListableBeanFactoryTests {
 		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		lbf.setParentBeanFactory(parentBf);
 		lbf.registerBeanDefinition("low", new RootBeanDefinition(LowPriorityTestBean.class));
+
 		Stream<Class<?>> orderedTypes = lbf.getBeanProvider(TestBean.class).orderedStream().map(Object::getClass);
 		assertThat(orderedTypes).containsExactly(HighPriorityTestBean.class, LowPriorityTestBean.class, TestBean.class);
+	}
+
+	@Test  // gh-28374
+	void beanProviderWithParentBeanFactoryAndMixedOrder() {
+		DefaultListableBeanFactory parentBf = new DefaultListableBeanFactory();
+		parentBf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		lbf.setParentBeanFactory(parentBf);
+
+		lbf.registerSingleton("plainTestBean", new TestBean());
+
+		RootBeanDefinition bd1 = new RootBeanDefinition(PriorityTestBeanFactory.class);
+		bd1.setFactoryMethodName("lowPriorityTestBean");
+		lbf.registerBeanDefinition("lowPriorityTestBean", bd1);
+
+		RootBeanDefinition bd2 = new RootBeanDefinition(PriorityTestBeanFactory.class);
+		bd2.setFactoryMethodName("highPriorityTestBean");
+		parentBf.registerBeanDefinition("highPriorityTestBean", bd2);
+
+		ObjectProvider<TestBean> testBeanProvider = lbf.getBeanProvider(ResolvableType.forClass(TestBean.class));
+		List<TestBean> resolved = testBeanProvider.orderedStream().toList();
+		assertThat(resolved.size()).isEqualTo(3);
+		assertThat(resolved.get(0)).isSameAs(lbf.getBean("highPriorityTestBean"));
+		assertThat(resolved.get(1)).isSameAs(lbf.getBean("lowPriorityTestBean"));
+		assertThat(resolved.get(2)).isSameAs(lbf.getBean("plainTestBean"));
 	}
 
 	@Test
@@ -3336,6 +3362,18 @@ class DefaultListableBeanFactoryTests {
 
 	@Priority(500)
 	private static class LowPriorityTestBean extends TestBean {
+	}
+
+
+	private static class PriorityTestBeanFactory {
+
+		public static LowPriorityTestBean lowPriorityTestBean() {
+			return new LowPriorityTestBean();
+		}
+
+		public static HighPriorityTestBean highPriorityTestBean() {
+			return new HighPriorityTestBean();
+		}
 	}
 
 
