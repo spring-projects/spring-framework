@@ -209,30 +209,30 @@ class BeanDefinitionPropertiesCodeGenerator {
 	private void addPropertyValues(CodeBlock.Builder code, RootBeanDefinition beanDefinition) {
 		MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
 		if (!propertyValues.isEmpty()) {
+			Class<?> infrastructureType = getInfrastructureType(beanDefinition);
+			Map<String, Method> writeMethods = (infrastructureType != Object.class) ? getWriteMethods(infrastructureType) : Collections.emptyMap();
 			for (PropertyValue propertyValue : propertyValues) {
 				String name = propertyValue.getName();
 				CodeBlock valueCode = generateValue(name, propertyValue.getValue());
 				code.addStatement("$L.getPropertyValues().addPropertyValue($S, $L)",
-						BEAN_DEFINITION_VARIABLE, propertyValue.getName(), valueCode);
-			}
-			Class<?> infrastructureType = getInfrastructureType(beanDefinition);
-			if (infrastructureType != Object.class) {
-				Map<String, Method> writeMethods = getWriteMethods(infrastructureType);
-				for (PropertyValue propertyValue : propertyValues) {
-					Method writeMethod = writeMethods.get(propertyValue.getName());
-					if (writeMethod != null) {
-						this.hints.reflection().registerMethod(writeMethod, ExecutableMode.INVOKE);
-						// ReflectionUtils#findField searches recursively in the type hierarchy
-						Class<?> searchType = beanDefinition.getTargetType();
-						while (searchType != null && searchType != writeMethod.getDeclaringClass()) {
-							this.hints.reflection().registerType(searchType, MemberCategory.DECLARED_FIELDS);
-							searchType = searchType.getSuperclass();
-						}
-						this.hints.reflection().registerType(writeMethod.getDeclaringClass(), MemberCategory.DECLARED_FIELDS);
-					}
+						BEAN_DEFINITION_VARIABLE, name, valueCode);
+				Method writeMethod = writeMethods.get(name);
+				if (writeMethod != null) {
+					registerReflectionHints(beanDefinition, writeMethod);
 				}
 			}
 		}
+	}
+
+	private void registerReflectionHints(RootBeanDefinition beanDefinition, Method writeMethod) {
+		this.hints.reflection().registerMethod(writeMethod, ExecutableMode.INVOKE);
+		// ReflectionUtils#findField searches recursively in the type hierarchy
+		Class<?> searchType = beanDefinition.getTargetType();
+		while (searchType != null && searchType != writeMethod.getDeclaringClass()) {
+			this.hints.reflection().registerType(searchType, MemberCategory.DECLARED_FIELDS);
+			searchType = searchType.getSuperclass();
+		}
+		this.hints.reflection().registerType(writeMethod.getDeclaringClass(), MemberCategory.DECLARED_FIELDS);
 	}
 
 	private void addQualifiers(CodeBlock.Builder code, RootBeanDefinition beanDefinition) {
