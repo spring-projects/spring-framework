@@ -28,6 +28,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse
  * Kotlin unit tests for {@link InvocableHandlerMethod}.
  *
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  */
 class InvocableHandlerMethodKotlinTests {
 
@@ -71,6 +72,11 @@ class InvocableHandlerMethodKotlinTests {
 		Assertions.assertThat(value).isEqualTo("true")
 	}
 
+	@Test
+	fun shouldTreatUnitAsVoid() {
+		Assertions.assertThat(getInvocable().invokeForRequest(request, null)).isNull()
+	}
+
 	private fun getInvocable(vararg argTypes: Class<*>): InvocableHandlerMethod {
 		val method = ResolvableMethod.on(Handler::class.java).argTypes(*argTypes).resolveMethod()
 		val handlerMethod = InvocableHandlerMethod(Handler(), method)
@@ -95,6 +101,8 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun nullableBooleanDefaultValue(status: Boolean? = true) =
 			status.toString()
+
+		fun returnUnit() {}
 	}
 
 }

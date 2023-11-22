@@ -51,6 +51,7 @@ import org.springframework.web.method.HandlerMethod;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -315,7 +316,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					}
 				}
 			}
-			return function.callBy(argMap);
+			Object returnValue = function.callBy(argMap);
+			if (KotlinDetector.isKotlinUnit(returnValue)) {
+				returnValue = null;
+			}
+			return returnValue;
 		}
 	}
 

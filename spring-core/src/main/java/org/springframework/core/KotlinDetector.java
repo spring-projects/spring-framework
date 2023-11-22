@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 5.0
  */
 @SuppressWarnings("unchecked")
@@ -93,4 +94,19 @@ public abstract class KotlinDetector {
 		return false;
 	}
 
+	/**
+	 * Return {@code true} if the class is {@code kotlin.Unit}.
+	 * @since 6.1.1
+	 */
+	public static boolean isKotlinUnit(Class<?> clazz) {
+		return "kotlin.Unit".equals(clazz.getName());
+	}
+
+	/**
+	 * Return {@code true} if the object is a {@code kotlin.Unit}.
+	 * @since 6.1.1
+	 */
+	public static boolean isKotlinUnit(@Nullable Object object) {
+		return (object != null && isKotlinUnit(object.getClass()));
+	}
 }
