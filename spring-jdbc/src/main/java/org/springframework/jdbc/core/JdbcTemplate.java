@@ -60,8 +60,12 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 /**
- * <b>This is the central class in the JDBC core package.</b>
- * It simplifies the use of JDBC and helps to avoid common errors.
+ * <b>This is the central delegate in the JDBC core package.</b>
+ * It can be used directly for many data access purposes, supporting any kind
+ * of JDBC operation. For a more focused and convenient facade on top of this,
+ * consider {@link org.springframework.jdbc.core.simple.JdbcClient} as of 6.1.
+ *
+ * <p>This class simplifies the use of JDBC and helps to avoid common errors.
  * It executes core JDBC workflow, leaving application code to provide SQL
  * and extract results. This class executes SQL queries or updates, initiating
  * iteration over ResultSets and catching JDBC exceptions and translating
