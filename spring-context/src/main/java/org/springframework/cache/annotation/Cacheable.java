@@ -70,8 +70,12 @@ public @interface Cacheable {
 
 	/**
 	 * Names of the caches in which method invocation results are stored.
-	 * <p>Names may be used to determine the target cache (or caches), matching
-	 * the qualifier value or bean name of a specific bean definition.
+	 * <p>Names may be used to determine the target cache(s), to be resolved via the
+	 * configured {@link #cacheResolver()} which typically delegates to
+	 * {@link org.springframework.cache.CacheManager#getCache}.
+	 * <p>This will usually be a single cache name. If multiple names are specified,
+	 * they will be consulted for a cache hit in the order of definition, and they
+	 * will all receive a put/evict request for the same newly cached value.
 	 * @since 4.2
 	 * @see #value
 	 * @see CacheConfig#cacheNames
