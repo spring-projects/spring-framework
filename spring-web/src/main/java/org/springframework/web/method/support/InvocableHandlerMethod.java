@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
+import kotlin.Unit;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.KCallablesJvm;
@@ -315,7 +316,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					}
 				}
 			}
-			return function.callBy(argMap);
+			Object result = function.callBy(argMap);
+			return (result == Unit.INSTANCE ? null : result);
 		}
 	}
 

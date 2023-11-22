@@ -71,6 +71,19 @@ class InvocableHandlerMethodKotlinTests {
 		Assertions.assertThat(value).isEqualTo("true")
 	}
 
+	@Test
+	fun unitReturnValue() {
+		val value = getInvocable().invokeForRequest(request, null)
+		Assertions.assertThat(value).isNull()
+	}
+
+	@Test
+	fun nullReturnValue() {
+		composite.addResolver(StubArgumentResolver(String::class.java, null))
+		val value = getInvocable(String::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isNull()
+	}
+
 	private fun getInvocable(vararg argTypes: Class<*>): InvocableHandlerMethod {
 		val method = ResolvableMethod.on(Handler::class.java).argTypes(*argTypes).resolveMethod()
 		val handlerMethod = InvocableHandlerMethod(Handler(), method)
@@ -95,6 +108,14 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun nullableBooleanDefaultValue(status: Boolean? = true) =
 			status.toString()
+
+		fun unit(): Unit {
+		}
+
+		@Suppress("UNUSED_PARAMETER")
+		fun nullable(arg: String?): String? {
+			return null
+		}
 	}
 
 }

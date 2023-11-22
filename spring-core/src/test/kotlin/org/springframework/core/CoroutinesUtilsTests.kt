@@ -20,6 +20,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
@@ -126,6 +127,24 @@ class CoroutinesUtilsTests {
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo") }
 	}
 
+	@Test
+	fun invokeSuspendingFunctionReturningUnit() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingUnit", Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
+	@Test
+	fun invokeSuspendingFunctionReturningNull() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingNullable", Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
@@ -144,6 +163,13 @@ class CoroutinesUtilsTests {
 		delay(1)
 		Assertions.assertThat(coroutineContext[CoroutineName]?.name).isEqualTo("name")
 		return value
+	}
+
+	suspend fun suspendingUnit() {
+	}
+
+	suspend fun suspendingNullable(): String? {
+		return null
 	}
 
 }

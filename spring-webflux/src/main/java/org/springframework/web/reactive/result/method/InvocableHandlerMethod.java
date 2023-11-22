@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
@@ -326,7 +327,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						}
 					}
 				}
-				return function.callBy(argMap);
+				Object result = function.callBy(argMap);
+				return (result == Unit.INSTANCE ? null : result);
 			}
 		}
 	}

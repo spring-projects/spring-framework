@@ -123,7 +123,7 @@ public abstract class CoroutinesUtils {
 					}
 					return KCallables.callSuspendBy(function, argMap, continuation);
 				})
-				.filter(result -> !Objects.equals(result, Unit.INSTANCE))
+				.filter(result -> result != Unit.INSTANCE)
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
 
 		KClassifier returnType = function.getReturnType().getClassifier();
