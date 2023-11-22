@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,11 +30,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -100,16 +99,14 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	private void detectResourceHandlers(ApplicationContext context) {
-		Map<String, SimpleUrlHandlerMapping> beans = context.getBeansOfType(SimpleUrlHandlerMapping.class);
-		List<SimpleUrlHandlerMapping> mappings = new ArrayList<>(beans.values());
-		AnnotationAwareOrderComparator.sort(mappings);
-
-		mappings.forEach(mapping ->
-			mapping.getHandlerMap().forEach((pattern, handler) -> {
-				if (handler instanceof ResourceWebHandler resourceHandler) {
-					this.handlerMap.put(pattern, resourceHandler);
-				}
-			}));
+		context.getBeanProvider(HandlerMapping.class).orderedStream()
+				.filter(AbstractUrlHandlerMapping.class::isInstance)
+				.map(AbstractUrlHandlerMapping.class::cast)
+				.forEach(mapping -> mapping.getHandlerMap().forEach((pattern, handler) -> {
+					if (handler instanceof ResourceWebHandler resourceHandler) {
+						this.handlerMap.put(pattern, resourceHandler);
+					}
+				}));
 
 		if (this.handlerMap.isEmpty()) {
 			logger.trace("No resource handling mappings found");

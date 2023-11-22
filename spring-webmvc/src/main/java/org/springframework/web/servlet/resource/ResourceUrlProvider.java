@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -147,18 +147,14 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	protected void detectResourceHandlers(ApplicationContext appContext) {
-		Map<String, SimpleUrlHandlerMapping> beans = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
-		List<SimpleUrlHandlerMapping> mappings = new ArrayList<>(beans.values());
-		AnnotationAwareOrderComparator.sort(mappings);
-
-		for (SimpleUrlHandlerMapping mapping : mappings) {
-			for (String pattern : mapping.getHandlerMap().keySet()) {
-				Object handler = mapping.getHandlerMap().get(pattern);
-				if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
-					this.handlerMap.put(pattern, resourceHandler);
-				}
-			}
-		}
+		appContext.getBeanProvider(HandlerMapping.class).orderedStream()
+				.filter(AbstractUrlHandlerMapping.class::isInstance)
+				.map(AbstractUrlHandlerMapping.class::cast)
+				.forEach(mapping -> mapping.getHandlerMap().forEach((pattern, handler) -> {
+						if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
+							this.handlerMap.put(pattern, resourceHandler);
+						}
+					}));
 
 		if (this.handlerMap.isEmpty()) {
 			logger.trace("No resource handling mappings found");
