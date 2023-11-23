@@ -16,6 +16,8 @@ ext {
 	javaProjects = subprojects.findAll { !it.name.startsWith("framework-") }
 }
 
+description = "Spring Framework"
+
 configure(allprojects) { project ->
 	apply plugin: "org.springframework.build.localdev"
 	group = "org.springframework"
@@ -115,9 +117,4 @@ configure([rootProject] + javaProjects) { project ->
 
 configure(moduleProjects) { project ->
 	apply from: "${rootDir}/gradle/spring-module.gradle"
-}
-
-configure(rootProject) {
-	description = "Spring Framework"
-	apply plugin: 'org.springframework.build.api-diff'
 }
