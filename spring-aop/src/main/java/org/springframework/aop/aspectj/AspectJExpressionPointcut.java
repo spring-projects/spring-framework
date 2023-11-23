@@ -471,10 +471,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 								fallbackExpression = null;
 							}
 						}
-						if (targetMethod != originalMethod && (shadowMatch == null || shouldFallback(targetMethod))) {
+						if (targetMethod != originalMethod && (shadowMatch == null ||
+								(Proxy.isProxyClass(targetMethod.getDeclaringClass()) &&
+										(shadowMatch.neverMatches() || containsAnnotationPointcut())))) {
 							// Fall back to the plain original method in case of no resolvable match or a
 							// negative match on a proxy class (which doesn't carry any annotations on its
-							// redeclared methods).
+							// redeclared methods), as well as for annotation pointcuts.
 							methodToMatch = originalMethod;
 							try {
 								shadowMatch = obtainPointcutExpression().matchesMethodExecution(methodToMatch);
@@ -513,12 +515,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return shadowMatch;
 	}
 
-	private boolean shouldFallback(Method targetMethod) {
-		if (!Proxy.isProxyClass(targetMethod.getDeclaringClass())) {
-			return false;
-		}
-		return this.resolveExpression().contains("@annotation");
+	private boolean containsAnnotationPointcut() {
+		return resolveExpression().contains("@annotation");
 	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {
