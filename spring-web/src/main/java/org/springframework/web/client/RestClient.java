@@ -128,7 +128,7 @@ public interface RestClient {
 
 	/**
 	 * Return a builder to create a new {@code RestClient} whose settings are
-	 * replicated from the current {@code RestClient}.
+	 * replicated from this {@code RestClient}.
 	 */
 	Builder mutate();
 
@@ -468,8 +468,6 @@ public interface RestClient {
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
-		 * <p>The date should be specified as the number of milliseconds since
-		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
 		 * @return this builder
 		 */
