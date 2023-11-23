@@ -146,7 +146,6 @@ configure(rootProject) {
 	description = "Spring Framework"
 
 	apply plugin: "io.spring.nohttp"
-	apply plugin: 'org.springframework.build.api-diff'
 
 	nohttp {
 		source.exclude "**/test-output/**"

@@ -19,16 +19,11 @@ ext {
 dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
 	implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}")
-	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.3.0"
-	implementation "org.gradle:test-retry-gradle-plugin:1.4.1"
+	implementation "org.gradle:test-retry-gradle-plugin:1.5.6"
 }
 
 gradlePlugin {
 	plugins {
-		apiDiffPlugin {
-			id = "org.springframework.build.api-diff"
-			implementationClass = "org.springframework.build.api.ApiDiffPlugin"
-		}
 		conventionsPlugin {
 			id = "org.springframework.build.conventions"
 			implementationClass = "org.springframework.build.ConventionsPlugin"
