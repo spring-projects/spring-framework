@@ -128,7 +128,7 @@ public interface RestClient {
 
 	/**
 	 * Return a builder to create a new {@code RestClient} whose settings are
-	 * replicated from the current {@code RestClient}.
+	 * replicated from this {@code RestClient}.
 	 */
 	Builder mutate();
 
@@ -468,8 +468,6 @@ public interface RestClient {
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
-		 * <p>The date should be specified as the number of milliseconds since
-		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
 		 * @return this builder
 		 */
@@ -673,26 +671,26 @@ public interface RestClient {
 		 *     .retrieve()
 		 *     .toBodilessEntity();
 		 * </pre>
-		 * @param body the body of the response
-		 * @return the built response
+		 * @param body the body of the request
+		 * @return this builder
 		 */
 		RequestBodySpec body(Object body);
 
 		/**
-		 * Set the body of the response to the given {@code Object}.
+		 * Set the body of the request to the given {@code Object}.
 		 * The parameter {@code bodyType} is used to capture the generic type.
-		 * @param body the body of the response
+		 * @param body the body of the request
 		 * @param bodyType the type of the body, used to capture the generic type
-		 * @return the built response
+		 * @return this builder
 		 */
 		<T> RequestBodySpec body(T body, ParameterizedTypeReference<T> bodyType);
 
 		/**
-		 * Set the body of the response to the given function that writes to
+		 * Set the body of the request to the given function that writes to
 		 * an {@link OutputStream}.
 		 * @param body a function that takes an {@code OutputStream} and can
 		 * throw an {@code IOException}
-		 * @return the built response
+		 * @return this builder
 		 */
 		RequestBodySpec body(StreamingHttpOutputMessage.Body body);
 	}
