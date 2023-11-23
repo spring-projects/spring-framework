@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<>(16);
-
 	private SingletonSupplier<Executor> defaultExecutor;
 
 	private SingletonSupplier<AsyncUncaughtExceptionHandler> exceptionHandler;
@@ -84,6 +82,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	@Nullable
 	private StringValueResolver embeddedValueResolver;
+
+	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<>(16);
+
 
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
@@ -157,6 +158,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
 			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
 		}
+		this.executors.clear();
 	}
 
 
