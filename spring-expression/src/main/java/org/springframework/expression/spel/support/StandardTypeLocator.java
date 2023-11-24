@@ -120,9 +120,10 @@ public class StandardTypeLocator implements TypeLocator {
 			return cachedType;
 		}
 		Class<?> loadedType = loadType(typeName);
-		if (loadedType != null &&
-				!(this.classLoader instanceof SmartClassLoader scl && scl.isClassReloadable(loadedType))) {
-			this.typeCache.put(typeName, loadedType);
+		if (loadedType != null) {
+			if (!(this.classLoader instanceof SmartClassLoader scl && scl.isClassReloadable(loadedType))) {
+				this.typeCache.put(typeName, loadedType);
+			}
 			return loadedType;
 		}
 		throw new SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typeName);
