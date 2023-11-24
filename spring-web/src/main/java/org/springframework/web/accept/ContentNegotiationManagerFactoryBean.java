@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -110,7 +110,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean favorPathExtension = false;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<>();
+	private final Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
 

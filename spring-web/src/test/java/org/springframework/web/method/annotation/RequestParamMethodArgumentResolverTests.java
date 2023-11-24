@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.http.Part;
-
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -226,7 +225,7 @@ public class RequestParamMethodArgumentResolverTests {
 		boolean condition = result instanceof MultipartFile[];
 		assertThat(condition).isTrue();
 		MultipartFile[] parts = (MultipartFile[]) result;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(expected1).isEqualTo(parts[0]);
 		assertThat(expected2).isEqualTo(parts[1]);
 	}
@@ -310,7 +309,7 @@ public class RequestParamMethodArgumentResolverTests {
 		boolean condition = result instanceof Part[];
 		assertThat(condition).isTrue();
 		Part[] parts = (Part[]) result;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(expected1).isEqualTo(parts[0]);
 		assertThat(expected2).isEqualTo(parts[1]);
 	}
@@ -438,7 +437,7 @@ public class RequestParamMethodArgumentResolverTests {
 		WebDataBinder binder = new WebRequestDataBinder(null);
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(webRequest, null, "stringNotAnnot")).willReturn(binder);
 
 		request.addParameter("stringNotAnnot", "");
@@ -448,12 +447,26 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(arg).isNull();
 	}
 
+	@Test  // gh-31336
+	public void missingRequestParamAfterConversionWithDefaultValue() throws Exception {
+		WebDataBinder binder = new WebRequestDataBinder(null);
+
+		WebDataBinderFactory binderFactory = mock();
+		given(binderFactory.createBinder(webRequest, null, "booleanParam")).willReturn(binder);
+
+		request.addParameter("booleanParam", " ");
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Boolean.class);
+		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertThat(arg).isEqualTo(Boolean.FALSE);
+	}
+
 	@Test
 	public void missingRequestParamEmptyValueNotRequired() throws Exception {
 		WebDataBinder binder = new WebRequestDataBinder(null);
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
 
 		request.addParameter("name", "");
@@ -461,6 +474,21 @@ public class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(arg).isNull();
+	}
+
+	@Test // gh-29550
+	public void missingRequestParamEmptyValueNotRequiredWithDefaultValue() throws Exception {
+		WebDataBinder binder = new WebRequestDataBinder(null);
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		WebDataBinderFactory binderFactory = mock();
+		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
+
+		request.addParameter("name", "    ");
+
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
+		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertThat(arg).isEqualTo("bar");
 	}
 
 	@Test
@@ -506,7 +534,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void resolveOptionalParamValue() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -519,11 +547,11 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addParameter("name", "123");
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).get()).isEqualTo(123);
+		assertThat(((Optional) result)).contains(123);
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void missingOptionalParamValue() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -535,7 +563,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).isPresent()).isFalse();
+		assertThat(((Optional) result)).isNotPresent();
 	}
 
 	@Test
@@ -556,7 +584,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void missingOptionalParamArray() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -568,11 +596,11 @@ public class RequestParamMethodArgumentResolverTests {
 
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).isPresent()).isFalse();
+		assertThat(((Optional) result)).isNotPresent();
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void resolveOptionalParamList() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -585,11 +613,11 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addParameter("name", "123", "456");
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).get()).isEqualTo(Arrays.asList("123", "456"));
+		assertThat(((Optional) result)).contains(Arrays.asList("123", "456"));
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void missingOptionalParamList() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -601,7 +629,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).isPresent()).isFalse();
+		assertThat(((Optional) result)).isNotPresent();
 	}
 
 	@Test
@@ -673,7 +701,8 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") Optional<Integer> paramOptional,
 			@RequestParam("name") Optional<Integer[]> paramOptionalArray,
 			@RequestParam("name") Optional<List<?>> paramOptionalList,
-			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional) {
+			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional,
+			@RequestParam(defaultValue = "false") Boolean booleanParam) {
 	}
 
 }

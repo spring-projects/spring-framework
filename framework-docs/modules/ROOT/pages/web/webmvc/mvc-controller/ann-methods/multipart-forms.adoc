@@ -1,0 +1,211 @@
+[[mvc-multipart-forms]]
+= Multipart
+
+[.small]#xref:web/webflux/controller/ann-methods/multipart-forms.adoc[See equivalent in the Reactive stack]#
+
+After a `MultipartResolver` has been xref:web/webmvc/mvc-servlet/multipart.adoc[enabled], the content of POST
+requests with `multipart/form-data` is parsed and accessible as regular request
+parameters. The following example accesses one regular form field and one uploaded
+file:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class FileUploadController {
+
+		@PostMapping("/form")
+		public String handleFormUpload(@RequestParam("name") String name,
+				@RequestParam("file") MultipartFile file) {
+
+			if (!file.isEmpty()) {
+				byte[] bytes = file.getBytes();
+				// store the bytes somewhere
+				return "redirect:uploadSuccess";
+			}
+			return "redirect:uploadFailure";
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Controller
+	class FileUploadController {
+
+		@PostMapping("/form")
+		fun handleFormUpload(@RequestParam("name") name: String,
+							@RequestParam("file") file: MultipartFile): String {
+
+			if (!file.isEmpty) {
+				val bytes = file.bytes
+				// store the bytes somewhere
+				return "redirect:uploadSuccess"
+			}
+			return "redirect:uploadFailure"
+		}
+	}
+----
+======
+
+Declaring the argument type as a `List<MultipartFile>` allows for resolving multiple
+files for the same parameter name.
+
+When the `@RequestParam` annotation is declared as a `Map<String, MultipartFile>` or
+`MultiValueMap<String, MultipartFile>`, without a parameter name specified in the annotation,
+then the map is populated with the multipart files for each given parameter name.
+
+NOTE: With Servlet multipart parsing, you may also declare `jakarta.servlet.http.Part`
+instead of Spring's `MultipartFile`, as a method argument or collection value type.
+
+You can also use multipart content as part of data binding to a
+xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[command object]. For example, the form field
+and file from the preceding example could be fields on a form object,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class MyForm {
+
+		private String name;
+
+		private MultipartFile file;
+
+		// ...
+	}
+
+	@Controller
+	public class FileUploadController {
+
+		@PostMapping("/form")
+		public String handleFormUpload(MyForm form, BindingResult errors) {
+			if (!form.getFile().isEmpty()) {
+				byte[] bytes = form.getFile().getBytes();
+				// store the bytes somewhere
+				return "redirect:uploadSuccess";
+			}
+			return "redirect:uploadFailure";
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyForm(val name: String, val file: MultipartFile, ...)
+
+	@Controller
+	class FileUploadController {
+
+		@PostMapping("/form")
+		fun handleFormUpload(form: MyForm, errors: BindingResult): String {
+			if (!form.file.isEmpty) {
+				val bytes = form.file.bytes
+				// store the bytes somewhere
+				return "redirect:uploadSuccess"
+			}
+			return "redirect:uploadFailure"
+		}
+	}
+----
+======
+
+
+Multipart requests can also be submitted from non-browser clients in a RESTful service
+scenario. The following example shows a file with JSON:
+
+[literal,subs="verbatim,quotes"]
+----
+POST /someUrl
+Content-Type: multipart/mixed
+
+--edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
+Content-Disposition: form-data; name="meta-data"
+Content-Type: application/json; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+{
+	"name": "value"
+}
+--edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
+Content-Disposition: form-data; name="file-data"; filename="file.properties"
+Content-Type: text/xml
+Content-Transfer-Encoding: 8bit
+... File Data ...
+----
+
+You can access the "meta-data" part with `@RequestParam` as a `String` but you'll
+probably want it deserialized from JSON (similar to `@RequestBody`). Use the
+`@RequestPart` annotation to access a multipart after converting it with an
+xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter]:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/")
+	public String handle(@RequestPart("meta-data") MetaData metadata,
+			@RequestPart("file-data") MultipartFile file) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/")
+	fun handle(@RequestPart("meta-data") metadata: MetaData,
+			@RequestPart("file-data") file: MultipartFile): String {
+		// ...
+	}
+----
+======
+
+You can use `@RequestPart` in combination with `jakarta.validation.Valid` or use Spring's
+`@Validated` annotation, both of which cause Standard Bean Validation to be applied.
+By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
+into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
+within the controller through an `Errors` or `BindingResult` argument,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/")
+	public String handle(@Valid @RequestPart("meta-data") MetaData metadata, Errors errors) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/")
+	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData, errors: Errors): String {
+		// ...
+	}
+----
+======
+
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. For more details, see the
+section on xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
+
+

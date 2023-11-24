@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 		if (requestResponseBodyAdvice != null) {
 			List<T> result = new ArrayList<>();
 			for (Object advice : requestResponseBodyAdvice) {
-				Class<?> beanType = (advice instanceof ControllerAdviceBean ?
-						((ControllerAdviceBean) advice).getBeanType() : advice.getClass());
+				Class<?> beanType = (advice instanceof ControllerAdviceBean adviceBean ?
+						adviceBean.getBeanType() : advice.getClass());
 				if (beanType != null && adviceType.isAssignableFrom(beanType)) {
 					result.add((T) advice);
 				}
@@ -153,8 +153,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 		}
 		List<A> result = new ArrayList<>(availableAdvice.size());
 		for (Object advice : availableAdvice) {
-			if (advice instanceof ControllerAdviceBean) {
-				ControllerAdviceBean adviceBean = (ControllerAdviceBean) advice;
+			if (advice instanceof ControllerAdviceBean adviceBean) {
 				if (!adviceBean.isApplicableToBeanType(parameter.getContainingClass())) {
 					continue;
 				}

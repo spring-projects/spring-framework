@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ package org.springframework.core.task;
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see AsyncTaskExecutor#execute(Runnable, long)
- * @see TaskRejectedException
+ * @deprecated as of 5.3.16 since the common executors do not support start timeouts
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class TaskTimeoutException extends TaskRejectedException {
 

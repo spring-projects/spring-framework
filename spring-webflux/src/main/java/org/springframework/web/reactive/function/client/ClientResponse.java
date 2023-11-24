@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -52,22 +52,10 @@ import org.springframework.web.reactive.function.BodyExtractor;
 public interface ClientResponse {
 
 	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
-	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
+	 * Return the HTTP status code as an {@link HttpStatusCode} value.
+	 * @return the HTTP status as an HttpStatusCode value (never {@code null})
 	 */
-	HttpStatus statusCode();
-
-	/**
-	 * Return the (potentially non-standard) status code of this response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.1
-	 * @see #statusCode()
-	 * @see HttpStatus#resolve(int)
-	 */
-	int rawStatusCode();
+	HttpStatusCode statusCode();
 
 	/**
 	 * Return the headers of this response.
@@ -83,6 +71,12 @@ public interface ClientResponse {
 	 * Return the strategies used to convert the body of this response.
 	 */
 	ExchangeStrategies strategies();
+
+	/**
+	 * Return the request associated with the response.
+	 * @since 6.1
+	 */
+	HttpRequest request();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}.
@@ -182,6 +176,18 @@ public interface ClientResponse {
 	Mono<WebClientResponseException> createException();
 
 	/**
+	 * Create a {@code Mono} that terminates with a
+	 * {@link WebClientResponseException}, containing the response status,
+	 * headers, body, and the originating request.
+	 * @param <T> the reified type
+	 * @return a {@code Mono} that fails with a
+	 * {@link WebClientResponseException}.
+	 * @see #createException()
+	 * @since 6.0
+	 */
+	<T> Mono<T> createError();
+
+	/**
 	 * Return a log message prefix to use to correlate messages for this exchange.
 	 * <p>The prefix is based on {@linkplain ClientRequest#logPrefix()}, which
 	 * itself is based on the value of the {@link ClientRequest#LOG_ID_ATTRIBUTE
@@ -193,9 +199,9 @@ public interface ClientResponse {
 	String logPrefix();
 
 	/**
-	 * Return a builder to mutate the this response, for example to change
+	 * Return a builder to mutate this response, for example to change
 	 * the status, headers, cookies, and replace or transform the body.
-	 * @return a builder to mutate the request with
+	 * @return a builder to mutate the response with
 	 * @since 5.3
 	 */
 	default Builder mutate() {
@@ -226,7 +232,7 @@ public interface ClientResponse {
 	 * @param statusCode the status code
 	 * @return the created builder
 	 */
-	static Builder create(HttpStatus statusCode) {
+	static Builder create(HttpStatusCode statusCode) {
 		return create(statusCode, ExchangeStrategies.withDefaults());
 	}
 
@@ -236,7 +242,7 @@ public interface ClientResponse {
 	 * @param strategies the strategies
 	 * @return the created builder
 	 */
-	static Builder create(HttpStatus statusCode, ExchangeStrategies strategies) {
+	static Builder create(HttpStatusCode statusCode, ExchangeStrategies strategies) {
 		return new DefaultClientResponseBuilder(strategies).statusCode(statusCode);
 	}
 
@@ -257,7 +263,7 @@ public interface ClientResponse {
 	 * @param messageReaders the message readers
 	 * @return the created builder
 	 */
-	static Builder create(HttpStatus statusCode, List<HttpMessageReader<?>> messageReaders) {
+	static Builder create(HttpStatusCode statusCode, List<HttpMessageReader<?>> messageReaders) {
 		return create(statusCode, new ExchangeStrategies() {
 			@Override
 			public List<HttpMessageReader<?>> messageReaders() {
@@ -314,7 +320,7 @@ public interface ClientResponse {
 		 * @param statusCode the new status code
 		 * @return this builder
 		 */
-		Builder statusCode(HttpStatus statusCode);
+		Builder statusCode(HttpStatusCode statusCode);
 
 		/**
 		 * Set the raw status code of the response.

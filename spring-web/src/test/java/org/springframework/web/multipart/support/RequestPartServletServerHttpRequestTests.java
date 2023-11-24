@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.web.multipart.support;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -59,7 +58,7 @@ public class RequestPartServletServerHttpRequestTests {
 		this.mockRequest.addFile(new MockMultipartFile("part", "", "application/json", "content".getBytes("UTF-8")));
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
 
-		URI uri = new URI("https://example.com/path?query");
+		URI uri = URI.create("https://example.com/path?query");
 		this.mockRequest.setScheme(uri.getScheme());
 		this.mockRequest.setServerName(uri.getHost());
 		this.mockRequest.setServerPort(uri.getPort());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,29 +34,30 @@ package org.springframework.core.env;
  * <p><em>Properties</em> play an important role in almost all applications, and may
  * originate from a variety of sources: properties files, JVM system properties, system
  * environment variables, JNDI, servlet context parameters, ad-hoc Properties objects,
- * Maps, and so on. The role of the environment object with relation to properties is to
- * provide the user with a convenient service interface for configuring property sources
- * and resolving properties from them.
+ * Maps, and so on. The role of the {@code Environment} object with relation to properties
+ * is to provide the user with a convenient service interface for configuring property
+ * sources and resolving properties from them.
  *
  * <p>Beans managed within an {@code ApplicationContext} may register to be {@link
  * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
  * {@code Environment} in order to query profile state or resolve properties directly.
  *
  * <p>In most cases, however, application-level beans should not need to interact with the
- * {@code Environment} directly but instead may have to have {@code ${...}} property
+ * {@code Environment} directly but instead may request to have {@code ${...}} property
  * values replaced by a property placeholder configurer such as
  * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  * PropertySourcesPlaceholderConfigurer}, which itself is {@code EnvironmentAware} and
- * as of Spring 3.1 is registered by default when using
- * {@code <context:property-placeholder/>}.
+ * registered by default when using {@code <context:property-placeholder/>}.
  *
- * <p>Configuration of the environment object must be done through the
+ * <p>Configuration of the {@code Environment} object must be done through the
  * {@code ConfigurableEnvironment} interface, returned from all
  * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
  * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating manipulation
  * of property sources prior to application context {@code refresh()}.
  *
  * @author Chris Beams
+ * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1
  * @see PropertyResolver
  * @see EnvironmentCapable
@@ -95,25 +96,56 @@ public interface Environment extends PropertyResolver {
 	String[] getDefaultProfiles();
 
 	/**
-	 * Return whether one or more of the given profiles is active or, in the case of no
-	 * explicit active profiles, whether one or more of the given profiles is included in
-	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
-	 * i.e. the method will return {@code true} if the given profile is <em>not</em> active.
-	 * For example, {@code env.acceptsProfiles("p1", "!p2")} will return {@code true} if
-	 * profile 'p1' is active or 'p2' is not active.
-	 * @throws IllegalArgumentException if called with zero arguments
-	 * or if any profile is {@code null}, empty, or whitespace only
+	 * Determine whether one of the given profile expressions matches the
+	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
+	 * of no explicit active profiles, whether one of the given profile expressions
+	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
+	 * <p>Profile expressions allow for complex, boolean profile logic to be
+	 * expressed &mdash; for example {@code "p1 & p2"}, {@code "(p1 & p2) | p3"},
+	 * etc. See {@link Profiles#of(String...)} for details on the supported
+	 * expression syntax.
+	 * <p>This method is a convenient shortcut for
+	 * {@code env.acceptsProfiles(Profiles.of(profileExpressions))}.
+	 * @since 5.3.28
+	 * @see Profiles#of(String...)
+	 * @see #acceptsProfiles(Profiles)
+	 */
+	default boolean matchesProfiles(String... profileExpressions) {
+		return acceptsProfiles(Profiles.of(profileExpressions));
+	}
+
+	/**
+	 * Determine whether one or more of the given profiles is active &mdash; or
+	 * in the case of no explicit {@linkplain #getActiveProfiles() active profiles},
+	 * whether one or more of the given profiles is included in the set of
+	 * {@linkplain #getDefaultProfiles() default profiles}.
+	 * <p>If a profile begins with '!' the logic is inverted, meaning this method
+	 * will return {@code true} if the given profile is <em>not</em> active. For
+	 * example, {@code env.acceptsProfiles("p1", "!p2")} will return {@code true}
+	 * if profile 'p1' is active or 'p2' is not active.
+	 * @throws IllegalArgumentException if called with a {@code null} array, an
+	 * empty array, zero arguments or if any profile is {@code null}, empty, or
+	 * whitespace only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
+	 * @see #matchesProfiles(String...)
 	 * @see #acceptsProfiles(Profiles)
-	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)}
+	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)} or
+	 * {@link #matchesProfiles(String...)}
 	 */
 	@Deprecated
 	boolean acceptsProfiles(String... profiles);
 
 	/**
-	 * Return whether the {@linkplain #getActiveProfiles() active profiles}
-	 * match the given {@link Profiles} predicate.
+	 * Determine whether the given {@link Profiles} predicate matches the
+	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
+	 * of no explicit active profiles, whether the given {@code Profiles} predicate
+	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
+	 * <p>If you wish provide profile expressions directly as strings, use
+	 * {@link #matchesProfiles(String...)} instead.
+	 * @since 5.1
+	 * @see #matchesProfiles(String...)
+	 * @see Profiles#of(String...)
 	 */
 	boolean acceptsProfiles(Profiles profiles);
 

@@ -37,7 +37,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * <p>If Role is present on a {@link Configuration @Configuration} class,
  * this indicates the role of the configuration class bean definition and
  * does not cascade to all @{@code Bean} methods defined within. This behavior
- * is different than that of the @{@link Lazy} annotation, for example.
+ * is different from the behavior of the @{@link Lazy} annotation, for example.
  *
  * @author Chris Beams
  * @since 3.1

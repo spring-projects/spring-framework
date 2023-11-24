@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ import java.lang.annotation.Target;
  * the one for the child context (i.e., the lowest context in the hierarchy).
  *
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;ExtendWith(SpringExtension.class)
  * &#064;WebAppConfiguration
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(classes = TestAppConfig.class),
  *     &#064;ContextConfiguration(classes = WebConfig.class)
  * })
- * public class ControllerIntegrationTests {
+ * class ControllerIntegrationTests {
  *
  *     &#064;Autowired
- *     private WebApplicationContext wac;
+ *     WebApplicationContext wac;
  *
  *     // ...
  * }</pre>
@@ -66,12 +66,12 @@ import java.lang.annotation.Target;
  * {@code SoapWebServiceTests} and {@code RestWebServiceTests} both extend
  * {@code AbstractWebTests} and define a context hierarchy via {@code @ContextHierarchy}.
  * The result is that three application contexts will be loaded (one for each
- * declaration of {@code @ContextConfiguration}, and the application context
+ * declaration of {@code @ContextConfiguration}), and the application context
  * loaded based on the configuration in {@code AbstractWebTests} will be set as
  * the parent context for each of the contexts loaded for the concrete subclasses.
  *
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;ExtendWith(SpringExtension.class)
  * &#064;WebAppConfiguration
  * &#064;ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
  * public abstract class AbstractWebTests {}
@@ -98,7 +98,7 @@ import java.lang.annotation.Target;
  * "/order-config.xml"}</code>.
  *
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;ExtendWith(SpringExtension.class)
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(name = "parent", locations = "/app-config.xml"),
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
@@ -119,7 +119,7 @@ import java.lang.annotation.Target;
  * context loaded from {@code "/app-config.xml"}.
  *
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;ExtendWith(SpringExtension.class)
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(name = "parent", locations = "/app-config.xml"),
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")

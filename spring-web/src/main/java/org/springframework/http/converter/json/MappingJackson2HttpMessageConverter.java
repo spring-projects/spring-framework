@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,8 +38,6 @@ import org.springframework.lang.Nullable;
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
- *
  * @author Arjen Poutsma
  * @author Keith Donald
  * @author Rossen Stoyanchev
@@ -46,6 +46,10 @@ import org.springframework.lang.Nullable;
  * @since 3.1.2
  */
 public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMessageConverter {
+
+	private static final List<MediaType> problemDetailMediaTypes =
+			Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
+
 
 	@Nullable
 	private String jsonPrefix;
@@ -79,7 +83,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 	}
 
 	/**
-	 * Indicate whether the JSON output by this view should be prefixed with ")]}', ". Default is false.
+	 * Indicate whether the JSON output by this view should be prefixed with ")]}', ". Default is {@code false}.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix should be stripped before parsing the string as JSON.
@@ -89,6 +93,11 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 		this.jsonPrefix = (prefixJson ? ")]}', " : null);
 	}
 
+
+	@Override
+	protected List<MediaType> getMediaTypesForProblemDetail() {
+		return problemDetailMediaTypes;
+	}
 
 	@Override
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive.socket.client;
 
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 import org.apache.tomcat.websocket.WsWebSocketContainer;
 import reactor.core.publisher.Sinks;
 
@@ -27,13 +26,14 @@ import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.reactive.socket.adapter.TomcatWebSocketSession;
 
 /**
- * {@link WebSocketClient} implementation for use with the Java WebSocket API.
+ * {@link WebSocketClient} implementation for use with Tomcat,
+ * based on the Jakarta WebSocket API.
  *
  * @author Violeta Georgieva
  * @since 5.0
+ * @see StandardWebSocketClient
  */
 public class TomcatWebSocketClient extends StandardWebSocketClient {
-
 
 	public TomcatWebSocketClient() {
 		this(new WsWebSocketContainer());

@@ -45,7 +45,7 @@ public abstract class RecordComponentVisitor {
   /**
    * The record visitor to which this visitor must delegate method calls. May be {@literal null}.
    */
-  /*package-private*/ RecordComponentVisitor delegate;
+  protected RecordComponentVisitor delegate;
 
   /**
    * Constructs a new {@link RecordComponentVisitor}.
@@ -53,7 +53,7 @@ public abstract class RecordComponentVisitor {
    * @param api the ASM API version implemented by this visitor. Must be one of {@link Opcodes#ASM8}
    *     or {@link Opcodes#ASM9}.
    */
-  public RecordComponentVisitor(final int api) {
+  protected RecordComponentVisitor(final int api) {
     this(api, null);
   }
 
@@ -64,7 +64,7 @@ public abstract class RecordComponentVisitor {
    * @param recordComponentVisitor the record component visitor to which this visitor must delegate
    *     method calls. May be null.
    */
-  public RecordComponentVisitor(
+  protected RecordComponentVisitor(
       final int api, final RecordComponentVisitor recordComponentVisitor) {
     if (api != Opcodes.ASM9
         && api != Opcodes.ASM8
@@ -83,7 +83,8 @@ public abstract class RecordComponentVisitor {
   /**
    * The record visitor to which this visitor must delegate method calls. May be {@literal null}.
    *
-   * @return the record visitor to which this visitor must delegate method calls or {@literal null}.
+   * @return the record visitor to which this visitor must delegate method calls, or {@literal
+   *     null}.
    */
   public RecordComponentVisitor getDelegate() {
     return delegate;

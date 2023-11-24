@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * System tests covering use of AspectJ {@link Aspect}s in conjunction with {@link Configuration} classes.
@@ -51,15 +50,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class ConfigurationClassAspectIntegrationTests {
+class ConfigurationClassAspectIntegrationTests {
 
 	@Test
-	public void aspectAnnotatedConfiguration() {
+	void aspectAnnotatedConfiguration() {
 		assertAdviceWasApplied(AspectConfig.class);
 	}
 
 	@Test
-	public void configurationIncludesAspect() {
+	void configurationIncludesAspect() {
 		assertAdviceWasApplied(ConfigurationWithAspect.class);
 	}
 
@@ -76,15 +75,17 @@ public class ConfigurationClassAspectIntegrationTests {
 		assertThat(testBean.getName()).isEqualTo("name");
 		testBean.absquatulate();
 		assertThat(testBean.getName()).isEqualTo("advisedName");
+		ctx.close();
 	}
 
 	@Test
-	public void withInnerClassAndLambdaExpression() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(Application.class, CountingAspect.class);
+	void withInnerClassAndLambdaExpression() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Application.class, CountingAspect.class);
 		ctx.getBeansOfType(Runnable.class).forEach((k, v) -> v.run());
 
 		// TODO: returns just 1 as of AspectJ 1.9 beta 3, not detecting the applicable lambda expression anymore
 		// assertEquals(2, ctx.getBean(CountingAspect.class).count);
+		ctx.close();
 	}
 
 
@@ -136,10 +137,7 @@ public class ConfigurationClassAspectIntegrationTests {
 
 		@Bean
 		Runnable fromInnerClass() {
-			return new Runnable() {
-				@Override
-				public void run() {
-				}
+			return () -> {
 			};
 		}
 

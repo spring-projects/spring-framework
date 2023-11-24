@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * An expression parser that understands templates. It can be subclassed by expression
@@ -34,6 +35,7 @@ import org.springframework.lang.Nullable;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
  */
 public abstract class TemplateAwareExpressionParser implements ExpressionParser {
@@ -46,9 +48,11 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	@Override
 	public Expression parseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
 		if (context != null && context.isTemplate()) {
+			Assert.notNull(expressionString, "'expressionString' must not be null");
 			return parseTemplate(expressionString, context);
 		}
 		else {
+			Assert.hasText(expressionString, "'expressionString' must not be null or blank");
 			return doParseExpression(expressionString, context);
 		}
 	}

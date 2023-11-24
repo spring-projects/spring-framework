@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,18 +38,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Mock object based tests for {@link SimpleJdbcInsert}.
+ * Mock-based tests for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
  * @author Sam Brannen
+ * @see SimpleJdbcInsertIntegrationTests
  */
 class SimpleJdbcInsertTests {
 
-	private final Connection connection = mock(Connection.class);
+	private final Connection connection = mock();
 
-	private final DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+	private final DatabaseMetaData databaseMetaData = mock();
 
-	private final DataSource dataSource = mock(DataSource.class);
+	private final DataSource dataSource = mock();
 
 
 	@BeforeEach
@@ -65,8 +66,56 @@ class SimpleJdbcInsertTests {
 
 
 	@Test
+	void missingTableName() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource);
+
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+				.isThrownBy(insert::compile)
+				.withMessage("Table name is required");
+
+		// Appease the @AfterEach checks.
+		connection.close();
+	}
+
+	@Test  // gh-24013 and gh-31208
+	void usingQuotedIdentifiersWithoutSupplyingColumnNames() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingQuotedIdentifiers();
+
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+				.isThrownBy(insert::compile)
+				.withMessage("Explicit column names must be provided when using quoted identifiers");
+
+		// Appease the @AfterEach checks.
+		connection.close();
+	}
+
+	/**
+	 * This method does not test any functionality but rather only that
+	 * configuration methods can be chained without compiler errors.
+	 */
+	@Test  // gh-31177
+	void methodChaining() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withCatalogName("my_catalog")
+				.withSchemaName("my_schema")
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingGeneratedKeyColumns("id")
+				.usingQuotedIdentifiers()
+				.withoutTableColumnMetaDataAccess()
+				.includeSynonymsForTableColumnMetaData();
+
+		assertThat(insert).isNotNull();
+
+		// Satisfy the @AfterEach mock verification.
+		connection.close();
+	}
+
+	@Test
 	void noSuchTable() throws Exception {
-		ResultSet resultSet = mock(ResultSet.class);
+		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(false);
 
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
@@ -78,21 +127,21 @@ class SimpleJdbcInsertTests {
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("x");
 		// Shouldn't succeed in inserting into table which doesn't exist
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-			.isThrownBy(() -> insert.execute(Collections.emptyMap()))
-			.withMessageStartingWith("Unable to locate columns for table 'x' so an insert statement can't be generated");
+				.isThrownBy(() -> insert.execute(Collections.emptyMap()))
+				.withMessageStartingWith("Unable to locate columns for table 'x' so an insert statement can't be generated");
 
 		verify(resultSet).close();
 	}
 
 	@Test  // gh-26486
 	void retrieveColumnNamesFromMetadata() throws Exception {
-		ResultSet tableResultSet = mock(ResultSet.class);
+		ResultSet tableResultSet = mock();
 		given(tableResultSet.next()).willReturn(true, false);
 
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.getTables(null, null, "me", null)).willReturn(tableResultSet);
 
-		ResultSet columnResultSet = mock(ResultSet.class);
+		ResultSet columnResultSet = mock();
 		given(databaseMetaData.getColumns(null, "me", null, null)).willReturn(columnResultSet);
 		given(columnResultSet.next()).willReturn(true, true, false);
 		given(columnResultSet.getString("COLUMN_NAME")).willReturn("col1", "col2");
@@ -109,13 +158,13 @@ class SimpleJdbcInsertTests {
 
 	@Test  // gh-26486
 	void exceptionThrownWhileRetrievingColumnNamesFromMetadata() throws Exception {
-		ResultSet tableResultSet = mock(ResultSet.class);
+		ResultSet tableResultSet = mock();
 		given(tableResultSet.next()).willReturn(true, false);
 
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.getTables(null, null, "me", null)).willReturn(tableResultSet);
 
-		ResultSet columnResultSet = mock(ResultSet.class);
+		ResultSet columnResultSet = mock();
 		given(databaseMetaData.getColumns(null, "me", null, null)).willReturn(columnResultSet);
 		// true, true, false --> simulates processing of two columns
 		given(columnResultSet.next()).willReturn(true, true, false);
@@ -130,12 +179,50 @@ class SimpleJdbcInsertTests {
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("me");
 
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-			.isThrownBy(insert::compile)
-			.withMessage("Unable to locate columns for table 'me' so an insert statement can't be generated. " +
-						"Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().");
+				.isThrownBy(insert::compile)
+				.withMessage("Unable to locate columns for table 'me' so an insert statement can't be generated. " +
+							"Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().");
 
 		verify(columnResultSet).close();
 		verify(tableResultSet).close();
+	}
+
+	@Test
+	void usingColumns() {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("col1", "col2");
+
+		insert.compile();
+
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_table (col1, col2) VALUES(?, ?)");
+	}
+
+	@Test  //  gh-24013
+	void usingColumnsAndQuotedIdentifiers() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingQuotedIdentifiers();
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_table` (`col1`, `col2`) VALUES(?, ?)");
+	}
+
+	@Test  //  gh-24013
+	void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withSchemaName("my_schema")
+				.withTableName("my_table")
+				.usingColumns("col1", "col2")
+				.usingQuotedIdentifiers();
+
+		given(databaseMetaData.getIdentifierQuoteString()).willReturn("`");
+
+		insert.compile();
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_schema`.`my_table` (`col1`, `col2`) VALUES(?, ?)");
 	}
 
 }

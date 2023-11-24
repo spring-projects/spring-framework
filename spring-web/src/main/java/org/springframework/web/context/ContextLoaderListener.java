@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 /**
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
  * Simply delegates to {@link ContextLoader} as well as to {@link ContextCleanupListener}.
  *
- * <p>As of Spring 3.1, {@code ContextLoaderListener} supports injecting the root web
- * application context via the {@link #ContextLoaderListener(WebApplicationContext)}
- * constructor, allowing for programmatic configuration in Servlet 3.0+ environments.
+ * <p>{@code ContextLoaderListener} supports injecting the root web application
+ * context via the {@link #ContextLoaderListener(WebApplicationContext)}
+ * constructor, allowing for programmatic configuration in Servlet initializers.
  * See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
  *
  * @author Juergen Hoeller
@@ -58,9 +58,8 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 
 	/**
 	 * Create a new {@code ContextLoaderListener} with the given application context. This
-	 * constructor is useful in Servlet 3.0+ environments where instance-based
-	 * registration of listeners is possible through the {@link javax.servlet.ServletContext#addListener}
-	 * API.
+	 * constructor is useful in Servlet initializers where instance-based registration of
+	 * listeners is possible through the {@link jakarta.servlet.ServletContext#addListener} API.
 	 * <p>The context may or may not yet be {@linkplain
 	 * org.springframework.context.ConfigurableApplicationContext#refresh() refreshed}. If it
 	 * (a) is an implementation of {@link ConfigurableWebApplicationContext} and

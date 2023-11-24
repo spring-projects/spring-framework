@@ -73,7 +73,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 	/** The max id to serve. */
 	private long maxId = 0;
 
-	/** Whether or not to use a new connection for the incrementer. */
+	/** Whether to use a new connection for the incrementer. */
 	private boolean useNewConnection = true;
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
@@ -28,8 +28,8 @@ import org.springframework.web.context.ServletContextAware;
  * Exposes that ServletContext init parameter when used as bean reference,
  * effectively making it available as named Spring bean instance.
  *
- * <p><b>NOTE:</b> As of Spring 3.0, you may also use the "contextParameters" default
- * bean which is of type Map, and dereference it using an "#{contextParameters.myKey}"
+ * <p><b>NOTE:</b> You may also use the "contextParameters" default bean, which
+ * is of type Map, and dereference it using a "#{contextParameters.myKey}"
  * expression to access a specific parameter by name.
  *
  * @author Juergen Hoeller

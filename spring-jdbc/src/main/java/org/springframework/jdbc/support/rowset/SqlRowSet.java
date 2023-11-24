@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,7 +246,7 @@ public interface SqlRowSet extends Serializable {
 	/**
 	 * Retrieve the value of the indicated column in the current row as an Object.
 	 * @param columnIndex the column index
-	 * @return a Object representing the column value
+	 * @return an Object representing the column value
 	 * @see java.sql.ResultSet#getObject(int)
 	 */
 	@Nullable
@@ -255,7 +255,7 @@ public interface SqlRowSet extends Serializable {
 	/**
 	 * Retrieve the value of the indicated column in the current row as an Object.
 	 * @param columnLabel the column label
-	 * @return a Object representing the column value
+	 * @return an Object representing the column value
 	 * @see java.sql.ResultSet#getObject(String)
 	 */
 	@Nullable
@@ -265,27 +265,27 @@ public interface SqlRowSet extends Serializable {
 	 * Retrieve the value of the indicated column in the current row as an Object.
 	 * @param columnIndex the column index
 	 * @param map a Map object containing the mapping from SQL types to Java types
-	 * @return a Object representing the column value
+	 * @return an Object representing the column value
 	 * @see java.sql.ResultSet#getObject(int, Map)
 	 */
 	@Nullable
-	Object getObject(int columnIndex,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(int columnIndex, Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row as an Object.
 	 * @param columnLabel the column label
 	 * @param map a Map object containing the mapping from SQL types to Java types
-	 * @return a Object representing the column value
+	 * @return an Object representing the column value
 	 * @see java.sql.ResultSet#getObject(String, Map)
 	 */
 	@Nullable
-	Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(String columnLabel, Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row as an Object.
 	 * @param columnIndex the column index
 	 * @param type the Java type to convert the designated column to
-	 * @return a Object representing the column value
+	 * @return an Object representing the column value
 	 * @since 4.1.3
 	 * @see java.sql.ResultSet#getObject(int, Class)
 	 */
@@ -296,7 +296,7 @@ public interface SqlRowSet extends Serializable {
 	 * Retrieve the value of the indicated column in the current row as an Object.
 	 * @param columnLabel the column label
 	 * @param type the Java type to convert the designated column to
-	 * @return a Object representing the column value
+	 * @return an Object representing the column value
 	 * @since 4.1.3
 	 * @see java.sql.ResultSet#getObject(String, Class)
 	 */

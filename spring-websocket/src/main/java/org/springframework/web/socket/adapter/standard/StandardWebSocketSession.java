@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.Extension;
-import javax.websocket.Session;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.Extension;
+import jakarta.websocket.Session;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -95,7 +95,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 * @param user the user associated with the session; if {@code null} we'll
-	 * fallback on the user available in the underlying WebSocket session
+	 * fall back on the user available in the underlying WebSocket session
 	 */
 	public StandardWebSocketSession(@Nullable HttpHeaders headers, @Nullable Map<String, Object> attributes,
 			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,

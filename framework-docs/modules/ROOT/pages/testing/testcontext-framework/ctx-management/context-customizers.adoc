@@ -1,0 +1,69 @@
+[[testcontext-context-customizers]]
+= Configuration Configuration with Context Customizers
+
+A `ContextCustomizer` is responsible for customizing the supplied
+`ConfigurableApplicationContext` after bean definitions have been loaded into the context
+but before the context has been refreshed.
+
+A `ContextCustomizerFactory` is responsible for creating a `ContextCustomizer`, based on
+some custom logic which determines if the `ContextCustomizer` is necessary for a given
+test class -- for example, based on the presence of a certain annotation. Factories are
+invoked after `ContextLoaders` have processed context configuration attributes for a test
+class but before the `MergedContextConfiguration` is created.
+
+For example, Spring Framework provides the following `ContextCustomizerFactory`
+implementation which is registered by default:
+
+`MockServerContainerContextCustomizerFactory`:: Creates a
+  `MockServerContainerContextCustomizer` if WebSocket support is present in the classpath
+  and the test class or one of its enclosing classes is annotated or meta-annotated with
+  `@WebAppConfiguration`. `MockServerContainerContextCustomizer` instantiates a new
+  `MockServerContainer` and stores it in the `ServletContext` under the attribute named
+  `jakarta.websocket.server.ServerContainer`.
+
+
+[[testcontext-context-customizers-registration]]
+== Registering `ContextCustomizerFactory` Implementations
+
+You can register `ContextCustomizerFactory` implementations explicitly for a test class, its
+subclasses, and its nested classes by using the `@ContextCustomizerFactories` annotation. See
+xref:testing/annotations/integration-spring/annotation-contextcustomizerfactories.adoc[annotation support]
+and the javadoc for
+{spring-framework-api}/test/context/ContextCustomizerFactories.html[`@ContextCustomizerFactories`]
+for details and examples.
+
+
+[[testcontext-context-customizers-automatic-discovery]]
+== Automatic Discovery of Default `ContextCustomizerFactory` Implementations
+
+Registering `ContextCustomizerFactory` implementations by using `@ContextCustomizerFactories` is
+suitable for custom factories that are used in limited testing scenarios. However, it can
+become cumbersome if a custom factory needs to be used across an entire test suite. This
+issue is addressed through support for automatic discovery of default
+`ContextCustomizerFactory` implementations through the `SpringFactoriesLoader` mechanism.
+
+Specifically, the modules that make up the testing support in Spring Framework and Spring
+Boot declare all core default `ContextCustomizerFactory` implementations under the
+`org.springframework.test.context.ContextCustomizerFactory` key in their
+`META-INF/spring.factories` properties files. Third-party frameworks and developers can
+contribute their own `ContextCustomizerFactory` implementations to the list of default
+factories in the same manner through their own `META-INF/spring.factories` properties
+files.
+
+
+[[testcontext-context-customizers-merging]]
+== Merging `ContextCustomizerFactory` Implementations
+
+If a custom `ContextCustomizerFactory` is registered via `@ContextCustomizerFactories`, it
+will be _merged_ with the default factories that have been registered using the aforementioned
+xref:testing/testcontext-framework/ctx-management/context-customizers.adoc#testcontext-context-customizers-automatic-discovery[automatic discovery mechanism].
+
+The merging algorithm ensures that duplicates are removed from the list and that locally
+declared factories are appended to the list of default factories when merged.
+
+[TIP]
+====
+To replace the default factories for a test class, its subclasses, and its nested
+classes, you can set the `mergeMode` attribute of `@ContextCustomizerFactories` to
+`MergeMode.REPLACE_DEFAULTS`.
+====

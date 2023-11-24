@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.util;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
@@ -37,12 +38,18 @@ import org.springframework.lang.Nullable;
  * work and in development, rather than as part of production applications.
  *
  * <p>As of Spring Framework 5.2, running time is tracked and reported in
- * nanoseconds.
+ * nanoseconds. As of 6.1, the default time unit for String renderings is
+ * seconds with decimal points in nanosecond precision. Custom renderings with
+ * specific time units can be requested through {@link #prettyPrint(TimeUnit)}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since May 2, 2001
+ * @see #start()
+ * @see #stop()
+ * @see #shortSummary()
+ * @see #prettyPrint()
  */
 public class StopWatch {
 
@@ -53,9 +60,8 @@ public class StopWatch {
 	 */
 	private final String id;
 
-	private boolean keepTaskList = true;
-
-	private final List<TaskInfo> taskList = new ArrayList<>(1);
+	@Nullable
+	private List<TaskInfo> taskList = new ArrayList<>(1);
 
 	/** Start time of the current task. */
 	private long startTimeNanos;
@@ -82,8 +88,8 @@ public class StopWatch {
 	}
 
 	/**
-	 * Construct a new {@code StopWatch} with the given ID.
-	 * <p>The ID is handy when we have output from multiple stop watches and need
+	 * Construct a new {@code StopWatch} with the given id.
+	 * <p>The id is handy when we have output from multiple stop watches and need
 	 * to distinguish between them.
 	 * <p>Does not start any task.
 	 * @param id identifier for this stop watch
@@ -94,8 +100,8 @@ public class StopWatch {
 
 
 	/**
-	 * Get the ID of this {@code StopWatch}, as specified on construction.
-	 * @return the ID (empty String by default)
+	 * Get the id of this {@code StopWatch}, as specified on construction.
+	 * @return the id (empty String by default)
 	 * @since 4.2.2
 	 * @see #StopWatch(String)
 	 */
@@ -105,13 +111,12 @@ public class StopWatch {
 
 	/**
 	 * Configure whether the {@link TaskInfo} array is built over time.
-	 * <p>Set this to {@code false} when using a {@code StopWatch} for millions
-	 * of intervals; otherwise, the {@code TaskInfo} structure will consume
-	 * excessive memory.
+	 * <p>Set this to {@code false} when using a {@code StopWatch} for millions of
+	 * tasks; otherwise, the {@code TaskInfo} structure will consume excessive memory.
 	 * <p>Default is {@code true}.
 	 */
 	public void setKeepTaskList(boolean keepTaskList) {
-		this.keepTaskList = keepTaskList;
+		this.taskList = (keepTaskList ? new ArrayList<>() : null);
 	}
 
 
@@ -156,7 +161,7 @@ public class StopWatch {
 		long lastTime = System.nanoTime() - this.startTimeNanos;
 		this.totalTimeNanos += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
-		if (this.keepTaskList) {
+		if (this.taskList != null) {
 			this.taskList.add(this.lastTaskInfo);
 		}
 		++this.taskCount;
@@ -182,75 +187,64 @@ public class StopWatch {
 	}
 
 	/**
-	 * Get the time taken by the last task in nanoseconds.
-	 * @since 5.2
-	 * @see #getLastTaskTimeMillis()
+	 * Get the last task as a {@link TaskInfo} object.
+	 * @throws IllegalStateException if no tasks have run yet
+	 * @since 6.1
 	 */
-	public long getLastTaskTimeNanos() throws IllegalStateException {
-		if (this.lastTaskInfo == null) {
-			throw new IllegalStateException("No tasks run: can't get last task interval");
-		}
-		return this.lastTaskInfo.getTimeNanos();
-	}
-
-	/**
-	 * Get the time taken by the last task in milliseconds.
-	 * @see #getLastTaskTimeNanos()
-	 */
-	public long getLastTaskTimeMillis() throws IllegalStateException {
-		if (this.lastTaskInfo == null) {
-			throw new IllegalStateException("No tasks run: can't get last task interval");
-		}
-		return this.lastTaskInfo.getTimeMillis();
-	}
-
-	/**
-	 * Get the name of the last task.
-	 */
-	public String getLastTaskName() throws IllegalStateException {
-		if (this.lastTaskInfo == null) {
-			throw new IllegalStateException("No tasks run: can't get last task name");
-		}
-		return this.lastTaskInfo.getTaskName();
+	public TaskInfo lastTaskInfo() throws IllegalStateException {
+		Assert.state(this.lastTaskInfo != null, "No tasks run");
+		return this.lastTaskInfo;
 	}
 
 	/**
 	 * Get the last task as a {@link TaskInfo} object.
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
 	 */
+	@Deprecated(since = "6.1")
 	public TaskInfo getLastTaskInfo() throws IllegalStateException {
-		if (this.lastTaskInfo == null) {
-			throw new IllegalStateException("No tasks run: can't get last task info");
-		}
-		return this.lastTaskInfo;
+		return lastTaskInfo();
 	}
 
+	/**
+	 * Get the name of the last task.
+	 * @see TaskInfo#getTaskName()
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
+	 */
+	@Deprecated(since = "6.1")
+	public String getLastTaskName() throws IllegalStateException {
+		return lastTaskInfo().getTaskName();
+	}
 
 	/**
-	 * Get the total time in nanoseconds for all tasks.
+	 * Get the time taken by the last task in nanoseconds.
 	 * @since 5.2
-	 * @see #getTotalTimeMillis()
-	 * @see #getTotalTimeSeconds()
+	 * @see TaskInfo#getTimeNanos()
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
 	 */
-	public long getTotalTimeNanos() {
-		return this.totalTimeNanos;
+	@Deprecated(since = "6.1")
+	public long getLastTaskTimeNanos() throws IllegalStateException {
+		return lastTaskInfo().getTimeNanos();
 	}
 
 	/**
-	 * Get the total time in milliseconds for all tasks.
-	 * @see #getTotalTimeNanos()
-	 * @see #getTotalTimeSeconds()
+	 * Get the time taken by the last task in milliseconds.
+	 * @see TaskInfo#getTimeMillis()
+	 * @deprecated as of 6.1, in favor of {@link #lastTaskInfo()}
 	 */
-	public long getTotalTimeMillis() {
-		return nanosToMillis(this.totalTimeNanos);
+	@Deprecated(since = "6.1")
+	public long getLastTaskTimeMillis() throws IllegalStateException {
+		return lastTaskInfo().getTimeMillis();
 	}
 
 	/**
-	 * Get the total time in seconds for all tasks.
-	 * @see #getTotalTimeNanos()
-	 * @see #getTotalTimeMillis()
+	 * Get an array of the data for tasks performed.
+	 * @see #setKeepTaskList
 	 */
-	public double getTotalTimeSeconds() {
-		return nanosToSeconds(this.totalTimeNanos);
+	public TaskInfo[] getTaskInfo() {
+		if (this.taskList == null) {
+			throw new UnsupportedOperationException("Task info is not being kept!");
+		}
+		return this.taskList.toArray(new TaskInfo[0]);
 	}
 
 	/**
@@ -261,81 +255,142 @@ public class StopWatch {
 	}
 
 	/**
-	 * Get an array of the data for tasks performed.
+	 * Get the total time for all tasks in nanoseconds.
+	 * @since 5.2
+	 * @see #getTotalTime(TimeUnit)
 	 */
-	public TaskInfo[] getTaskInfo() {
-		if (!this.keepTaskList) {
-			throw new UnsupportedOperationException("Task info is not being kept!");
-		}
-		return this.taskList.toArray(new TaskInfo[0]);
+	public long getTotalTimeNanos() {
+		return this.totalTimeNanos;
+	}
+
+	/**
+	 * Get the total time for all tasks in milliseconds.
+	 * @see #getTotalTime(TimeUnit)
+	 */
+	public long getTotalTimeMillis() {
+		return TimeUnit.NANOSECONDS.toMillis(this.totalTimeNanos);
+	}
+
+	/**
+	 * Get the total time for all tasks in seconds.
+	 * @see #getTotalTime(TimeUnit)
+	 */
+	public double getTotalTimeSeconds() {
+		return getTotalTime(TimeUnit.SECONDS);
+	}
+
+	/**
+	 * Get the total time for all tasks in the requested time unit
+	 * (with decimal points in nanosecond precision).
+	 * @param timeUnit the unit to use
+	 * @since 6.1
+	 * @see #getTotalTimeNanos()
+	 * @see #getTotalTimeMillis()
+	 * @see #getTotalTimeSeconds()
+	 */
+	public double getTotalTime(TimeUnit timeUnit) {
+		return (double) this.totalTimeNanos / TimeUnit.NANOSECONDS.convert(1, timeUnit);
 	}
 
 
 	/**
-	 * Get a short description of the total running time.
-	 */
-	public String shortSummary() {
-		return "StopWatch '" + getId() + "': running time = " + getTotalTimeNanos() + " ns";
-	}
-
-	/**
-	 * Generate a string with a table describing all tasks performed.
-	 * <p>For custom reporting, call {@link #getTaskInfo()} and use the task info
-	 * directly.
+	 * Generate a table describing all tasks performed in seconds
+	 * (with decimal points in nanosecond precision).
+	 * <p>For custom reporting, call {@link #getTaskInfo()} and use the data directly.
+	 * @see #prettyPrint(TimeUnit)
+	 * @see #getTotalTimeSeconds()
+	 * @see TaskInfo#getTimeSeconds()
 	 */
 	public String prettyPrint() {
-		StringBuilder sb = new StringBuilder(shortSummary());
-		sb.append('\n');
-		if (!this.keepTaskList) {
-			sb.append("No task info kept");
-		}
-		else {
-			sb.append("---------------------------------------------\n");
-			sb.append("ns         %     Task name\n");
-			sb.append("---------------------------------------------\n");
-			NumberFormat nf = NumberFormat.getNumberInstance();
-			nf.setMinimumIntegerDigits(9);
-			nf.setGroupingUsed(false);
-			NumberFormat pf = NumberFormat.getPercentInstance();
-			pf.setMinimumIntegerDigits(3);
-			pf.setGroupingUsed(false);
-			for (TaskInfo task : getTaskInfo()) {
-				sb.append(nf.format(task.getTimeNanos())).append("  ");
-				sb.append(pf.format((double) task.getTimeNanos() / getTotalTimeNanos())).append("  ");
-				sb.append(task.getTaskName()).append("\n");
+		return prettyPrint(TimeUnit.SECONDS);
+	}
+
+	/**
+	 * Generate a table describing all tasks performed in the requested time unit
+	 * (with decimal points in nanosecond precision).
+	 * <p>For custom reporting, call {@link #getTaskInfo()} and use the data directly.
+	 * @param timeUnit the unit to use for rendering total time and task time
+	 * @since 6.1
+	 * @see #prettyPrint()
+	 * @see #getTotalTime(TimeUnit)
+	 * @see TaskInfo#getTime(TimeUnit)
+	 */
+	public String prettyPrint(TimeUnit timeUnit) {
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.ENGLISH);
+		nf.setMaximumFractionDigits(9);
+		nf.setGroupingUsed(false);
+
+		NumberFormat pf = NumberFormat.getPercentInstance(Locale.ENGLISH);
+		pf.setMinimumIntegerDigits(2);
+		pf.setGroupingUsed(false);
+
+		StringBuilder sb = new StringBuilder(128);
+		sb.append("StopWatch '").append(getId()).append("': ");
+		String total = (timeUnit == TimeUnit.NANOSECONDS ?
+				nf.format(getTotalTimeNanos()) : nf.format(getTotalTime(timeUnit)));
+		sb.append(total).append(" ").append(timeUnit.name().toLowerCase(Locale.ENGLISH));
+		int width = Math.max(sb.length(), 40);
+		sb.append("\n");
+
+		if (this.taskList != null) {
+			String line = "-".repeat(width) + "\n";
+			String unitName = timeUnit.name();
+			unitName = unitName.charAt(0) + unitName.substring(1).toLowerCase(Locale.ENGLISH);
+			unitName = String.format("%-12s", unitName);
+			sb.append(line);
+			sb.append(unitName).append("  %       Task name\n");
+			sb.append(line);
+
+			int digits = total.indexOf('.');
+			if (digits < 0) {
+				digits = total.length();
+			}
+			nf.setMinimumIntegerDigits(digits);
+			nf.setMaximumFractionDigits(10 - digits);
+
+			for (TaskInfo task : this.taskList) {
+				sb.append(String.format("%-14s", (timeUnit == TimeUnit.NANOSECONDS ?
+						nf.format(task.getTimeNanos()) : nf.format(task.getTime(timeUnit)))));
+				sb.append(String.format("%-8s",
+						pf.format(task.getTimeSeconds() / getTotalTimeSeconds())));
+				sb.append(task.getTaskName()).append('\n');
 			}
 		}
+		else {
+			sb.append("No task info kept");
+		}
+
 		return sb.toString();
 	}
 
 	/**
-	 * Generate an informative string describing all tasks performed
-	 * <p>For custom reporting, call {@link #getTaskInfo()} and use the task info
-	 * directly.
+	 * Get a short description of the total running time in seconds.
+	 * @see #prettyPrint()
+	 * @see #prettyPrint(TimeUnit)
+	 */
+	public String shortSummary() {
+		return "StopWatch '" + getId() + "': " + getTotalTimeSeconds() + " seconds";
+	}
+
+	/**
+	 * Generate an informative string describing all tasks performed in seconds.
+	 * @see #prettyPrint()
+	 * @see #prettyPrint(TimeUnit)
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(shortSummary());
-		if (this.keepTaskList) {
-			for (TaskInfo task : getTaskInfo()) {
-				sb.append("; [").append(task.getTaskName()).append("] took ").append(task.getTimeNanos()).append(" ns");
-				long percent = Math.round(100.0 * task.getTimeNanos() / getTotalTimeNanos());
-				sb.append(" = ").append(percent).append("%");
+		if (this.taskList != null) {
+			for (TaskInfo task : this.taskList) {
+				sb.append("; [").append(task.getTaskName()).append("] took ").append(task.getTimeSeconds()).append(" seconds");
+				long percent = Math.round(100.0 * task.getTimeSeconds() / getTotalTimeSeconds());
+				sb.append(" = ").append(percent).append('%');
 			}
 		}
 		else {
 			sb.append("; no task info kept");
 		}
 		return sb.toString();
-	}
-
-
-	private static long nanosToMillis(long duration) {
-		return TimeUnit.NANOSECONDS.toMillis(duration);
-	}
-
-	private static double nanosToSeconds(long duration) {
-		return duration / 1_000_000_000.0;
 	}
 
 
@@ -361,33 +416,42 @@ public class StopWatch {
 		}
 
 		/**
-		 * Get the time in nanoseconds this task took.
+		 * Get the time this task took in nanoseconds.
 		 * @since 5.2
-		 * @see #getTimeMillis()
-		 * @see #getTimeSeconds()
+		 * @see #getTime(TimeUnit)
 		 */
 		public long getTimeNanos() {
 			return this.timeNanos;
 		}
 
 		/**
-		 * Get the time in milliseconds this task took.
-		 * @see #getTimeNanos()
-		 * @see #getTimeSeconds()
+		 * Get the time this task took in milliseconds.
+		 * @see #getTime(TimeUnit)
 		 */
 		public long getTimeMillis() {
-			return nanosToMillis(this.timeNanos);
+			return TimeUnit.NANOSECONDS.toMillis(this.timeNanos);
 		}
 
 		/**
-		 * Get the time in seconds this task took.
-		 * @see #getTimeMillis()
-		 * @see #getTimeNanos()
+		 * Get the time this task took in seconds.
+		 * @see #getTime(TimeUnit)
 		 */
 		public double getTimeSeconds() {
-			return nanosToSeconds(this.timeNanos);
+			return getTime(TimeUnit.SECONDS);
 		}
 
+		/**
+		 * Get the time this task took in the requested time unit
+		 * (with decimal points in nanosecond precision).
+		 * @param timeUnit the unit to use
+		 * @since 6.1
+		 * @see #getTimeNanos()
+		 * @see #getTimeMillis()
+		 * @see #getTimeSeconds()
+		 */
+		public double getTime(TimeUnit timeUnit) {
+			return (double) this.timeNanos / TimeUnit.NANOSECONDS.convert(1, timeUnit);
+		}
 	}
 
 }

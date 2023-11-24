@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
  *
  * <p><b>The container is only responsible for managing the lifecycle of the FactoryBean
  * instance, not the lifecycle of the objects created by the FactoryBean.</b> Therefore,
- * a destroy method on an exposed bean object (such as {@link java.io.Closeable#close()}
+ * a destroy method on an exposed bean object (such as {@link java.io.Closeable#close()})
  * will <i>not</i> be called automatically. Instead, a FactoryBean should implement
  * {@link DisposableBean} and delegate any such close call to the underlying object.
  *
@@ -108,7 +108,7 @@ public interface FactoryBean<T> {
 	 * been fully initialized. It must not rely on state created during
 	 * initialization; of course, it can still use such state if available.
 	 * <p><b>NOTE:</b> Autowiring will simply ignore FactoryBeans that return
-	 * {@code null} here. Therefore it is highly recommended to implement
+	 * {@code null} here. Therefore, it is highly recommended to implement
 	 * this method properly, using the current state of the FactoryBean.
 	 * @return the type of object that this FactoryBean creates,
 	 * or {@code null} if not known at the time of the call

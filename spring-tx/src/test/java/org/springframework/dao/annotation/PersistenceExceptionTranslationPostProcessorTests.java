@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.dao.annotation;
 
-import javax.persistence.PersistenceException;
-
+import jakarta.persistence.PersistenceException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -132,7 +131,7 @@ public class PersistenceExceptionTranslationPostProcessorTests {
 
 		@Before("execution(void *.additionalMethod(*))")
 		public void log(JoinPoint jp) {
-			System.out.println("Before " + jp.getSignature().getName());
+			// System.out.println("Before " + jp.getSignature().getName());
 		}
 	}
 

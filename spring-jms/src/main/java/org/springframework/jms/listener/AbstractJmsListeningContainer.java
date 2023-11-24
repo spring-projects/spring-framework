@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -94,7 +94,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * <p>Note that client IDs need to be unique among all active Connections
 	 * of the underlying JMS provider. Furthermore, a client ID can only be
 	 * assigned if the original ConnectionFactory hasn't already assigned one.
-	 * @see javax.jms.Connection#setClientID
+	 * @see jakarta.jms.Connection#setClientID
 	 * @see #setConnectionFactory
 	 */
 	public void setClientId(@Nullable String clientId) {
@@ -125,18 +125,19 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	/**
-	 * Specify the phase in which this container should be started and
-	 * stopped. The startup order proceeds from lowest to highest, and
-	 * the shutdown order is the reverse of that. By default this value
-	 * is Integer.MAX_VALUE meaning that this container starts as late
-	 * as possible and stops as soon as possible.
+	 * Specify the lifecycle phase in which this container should be started and stopped.
+	 * <p>The startup order proceeds from lowest to highest, and the shutdown order
+	 * is the reverse of that. The default is {@link #DEFAULT_PHASE} meaning that
+	 * this container starts as late as possible and stops as soon as possible.
+	 * @see SmartLifecycle#getPhase()
 	 */
 	public void setPhase(int phase) {
 		this.phase = phase;
 	}
 
 	/**
-	 * Return the phase in which this container will be started and stopped.
+	 * Return the lifecycle phase in which this container will be started and stopped.
+	 * @see #setPhase
 	 */
 	@Override
 	public int getPhase() {
@@ -191,7 +192,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Initialize this container.
-	 * <p>Creates a JMS Connection, starts the {@link javax.jms.Connection}
+	 * <p>Creates a JMS Connection, starts the {@link jakarta.jms.Connection}
 	 * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off),
 	 * and calls {@link #doInitialize()}.
 	 * @throws org.springframework.jms.JmsException if startup failed
@@ -205,10 +206,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			doInitialize();
 		}
 		catch (JMSException ex) {
-			synchronized (this.sharedConnectionMonitor) {
-				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), this.autoStartup);
-				this.sharedConnection = null;
-			}
+			releaseSharedConnection();
 			throw convertJmsAccessException(ex);
 		}
 	}
@@ -248,10 +246,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 		finally {
 			if (sharedConnectionEnabled()) {
-				synchronized (this.sharedConnectionMonitor) {
-					ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), false);
-					this.sharedConnection = null;
-				}
+				releaseSharedConnection();
 			}
 		}
 	}
@@ -391,9 +386,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	protected final void refreshSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
-			ConnectionFactoryUtils.releaseConnection(
-					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
-			this.sharedConnection = null;
+			releaseSharedConnection();
 			this.sharedConnection = createSharedConnection();
 			if (this.sharedConnectionStarted) {
 				this.sharedConnection.start();
@@ -439,7 +432,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Start the shared Connection.
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
+	 * @see jakarta.jms.Connection#start()
 	 */
 	protected void startSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
@@ -448,7 +441,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				try {
 					this.sharedConnection.start();
 				}
-				catch (javax.jms.IllegalStateException ex) {
+				catch (jakarta.jms.IllegalStateException ex) {
 					logger.debug("Ignoring Connection start exception - assuming already started: " + ex);
 				}
 			}
@@ -458,7 +451,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Stop the shared Connection.
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
+	 * @see jakarta.jms.Connection#start()
 	 */
 	protected void stopSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
@@ -467,10 +460,23 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				try {
 					this.sharedConnection.stop();
 				}
-				catch (javax.jms.IllegalStateException ex) {
+				catch (jakarta.jms.IllegalStateException ex) {
 					logger.debug("Ignoring Connection stop exception - assuming already stopped: " + ex);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Release the shared Connection, if any.
+	 * @since 6.1
+	 * @see ConnectionFactoryUtils#releaseConnection
+	 */
+	protected final void releaseSharedConnection() {
+		synchronized (this.sharedConnectionMonitor) {
+			ConnectionFactoryUtils.releaseConnection(
+					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
+			this.sharedConnection = null;
 		}
 	}
 
@@ -582,13 +588,13 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Log a task that has been rejected by {@link #doRescheduleTask}.
 	 * <p>The default implementation simply logs a corresponding message
-	 * at debug level.
+	 * at warn level.
 	 * @param task the rejected task object
 	 * @param ex the exception thrown from {@link #doRescheduleTask}
 	 */
 	protected void logRejectedTask(Object task, RuntimeException ex) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Listener container task [" + task + "] has been rejected and paused: " + ex);
+		if (logger.isWarnEnabled()) {
+			logger.warn("Listener container task [" + task + "] has been rejected and paused: " + ex);
 		}
 	}
 

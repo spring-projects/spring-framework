@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
  * Tests for the {@link SpelCompiler}.
@@ -69,10 +70,25 @@ class SpelCompilerTests {
 		context.setVariable("user", new User());
 		expression = parser.parseExpression("#root.isEditable(#user)");
 		assertThat(SpelCompiler.compile(expression)).isFalse();
-		assertThat(expression.getValue(context)).isEqualTo(true);
+		assertThat(expression.getValue(context)).asInstanceOf(BOOLEAN).isTrue();
 		assertThat(SpelCompiler.compile(expression)).isTrue();
 		SpelCompilationCoverageTests.assertIsCompiled(expression);
-		assertThat(expression.getValue(context)).isEqualTo(true);
+		assertThat(expression.getValue(context)).asInstanceOf(BOOLEAN).isTrue();
+	}
+
+	@Test  // gh-28043
+	void changingRegisteredVariableTypeDoesNotResultInFailureInMixedMode() {
+		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.MIXED, null);
+		SpelExpressionParser parser = new SpelExpressionParser(config);
+		Expression sharedExpression = parser.parseExpression("#bean.value");
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		Object[] beans = new Object[] {new Bean1(), new Bean2(), new Bean3(), new Bean4()};
+
+		IntStream.rangeClosed(1, 1_000_000).parallel().forEach(count -> {
+			context.setVariable("bean", beans[count % 4]);
+			assertThat(sharedExpression.getValue(context)).asString().startsWith("1");
+		});
 	}
 
 
@@ -118,6 +134,30 @@ class SpelCompilerTests {
 		}
 
 		boolean hasSomeProperty();
+	}
+
+	public static class Bean1 {
+		public String getValue() {
+			return "11";
+		}
+	}
+
+	public static class Bean2 {
+		public Integer getValue() {
+			return 111;
+		}
+	}
+
+	public static class Bean3 {
+		public Float getValue() {
+			return 1.23f;
+		}
+	}
+
+	public static class Bean4 {
+		public Character getValue() {
+			return '1';
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,12 @@ class WriteOnlyHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	void writeOnly(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 
 		this.body = randomBytes();
-		RequestEntity<byte[]> request = RequestEntity.post(
-				new URI("http://localhost:" + port)).body(
-						"".getBytes(StandardCharsets.UTF_8));
+		RequestEntity<byte[]> request = RequestEntity.post(URI.create("http://localhost:" + port))
+				.body("".getBytes(StandardCharsets.UTF_8));
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
 		assertThat(response.getBody()).isEqualTo(body);

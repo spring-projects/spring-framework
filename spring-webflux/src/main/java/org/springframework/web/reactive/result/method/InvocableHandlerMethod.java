@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,16 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
+import kotlin.Unit;
+import kotlin.coroutines.CoroutineContext;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.jvm.KCallablesJvm;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.CoroutinesUtils;
@@ -33,11 +41,12 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -57,6 +66,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Mono<Object[]> EMPTY_ARGS = Mono.just(new Object[0]);
 
+	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
+
 	private static final Object NO_ARG_VALUE = new Object();
 
 
@@ -65,6 +76,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
+	@Nullable
+	private MethodValidator methodValidator;
 
 
 	/**
@@ -83,7 +97,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Configure the argument resolvers to use to use for resolving method
+	 * Configure the argument resolvers to use for resolving method
 	 * argument values against a {@code ServerWebExchange}.
 	 */
 	public void setArgumentResolvers(List<? extends HandlerMethodArgumentResolver> resolvers) {
@@ -122,6 +136,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		this.reactiveAdapterRegistry = registry;
 	}
 
+	/**
+	 * Set the {@link MethodValidator} to perform method validation with if the
+	 * controller method {@link #shouldValidateArguments()} or
+	 * {@link #shouldValidateReturnValue()}.
+	 * @since 6.1
+	 */
+	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
+		this.methodValidator = methodValidator;
+	}
+
 
 	/**
 	 * Invoke the method for the given exchange.
@@ -130,17 +154,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with a {@link HandlerResult}
 	 */
-	@SuppressWarnings("KotlinInternalInJava")
+	@SuppressWarnings("unchecked")
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
+			Class<?>[] groups = getValidationGroups();
+			if (shouldValidateArguments() && this.methodValidator != null) {
+				this.methodValidator.applyArgumentValidation(
+						getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
+			}
 			Object value;
+			Method method = getBridgedMethod();
+			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
-				ReflectionUtils.makeAccessible(getBridgedMethod());
-				Method method = getBridgedMethod();
-				if (KotlinDetector.isSuspendingFunction(method)) {
-					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					value = KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange);
 				}
 				else {
 					value = method.invoke(getBean(), args);
@@ -159,16 +188,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return Mono.error(new IllegalStateException(formatInvokeError("Invocation failure", args), ex));
 			}
 
-			HttpStatus status = getResponseStatus();
+			HttpStatusCode status = getResponseStatus();
 			if (status != null) {
 				exchange.getResponse().setStatusCode(status);
 			}
 
 			MethodParameter returnType = getReturnType();
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
-			boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
-			if ((value == null || asyncVoid) && isResponseHandled(args, exchange)) {
-				return (asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty());
+			if (isResponseHandled(args, exchange)) {
+				Class<?> parameterType = returnType.getParameterType();
+				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(parameterType);
+				boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
+				if (value == null || asyncVoid) {
+					return (asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty());
+				}
+				if (isSuspendingFunction && parameterType == void.class) {
+					return (Mono<HandlerResult>) value;
+				}
 			}
 
 			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
@@ -220,14 +255,18 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
+	private Class<?>[] getValidationGroups() {
+		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
+				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
+	}
+
 	private static boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter adapter) {
 		if (adapter != null && adapter.supportsEmpty()) {
 			if (adapter.isNoValue()) {
 				return true;
 			}
 			Type parameterType = returnType.getGenericParameterType();
-			if (parameterType instanceof ParameterizedType) {
-				ParameterizedType type = (ParameterizedType) parameterType;
+			if (parameterType instanceof ParameterizedType type) {
 				if (type.getActualTypeArguments().length == 1) {
 					return Void.class.equals(type.getActualTypeArguments()[0]);
 				}
@@ -246,6 +285,52 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		// Copy of CoWebFilter.COROUTINE_CONTEXT_ATTRIBUTE value to avoid compilation errors in Eclipse
+		private static final String COROUTINE_CONTEXT_ATTRIBUTE = "org.springframework.web.server.CoWebFilter.context";
+
+		@Nullable
+		@SuppressWarnings("deprecation")
+		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
+				ServerWebExchange exchange) {
+
+			if (isSuspendingFunction) {
+				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
+				if (coroutineContext == null) {
+					return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
+				}
+				else {
+					return CoroutinesUtils.invokeSuspendingFunction((CoroutineContext) coroutineContext, method, target, args);
+				}
+			}
+			else {
+				KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+				if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+					KCallablesJvm.setAccessible(function, true);
+				}
+				Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
+				int index = 0;
+				for (KParameter parameter : function.getParameters()) {
+					switch (parameter.getKind()) {
+						case INSTANCE -> argMap.put(parameter, target);
+						case VALUE -> {
+							if (!parameter.isOptional() || args[index] != null) {
+								argMap.put(parameter, args[index]);
+							}
+							index++;
+						}
+					}
+				}
+				Object result = function.callBy(argMap);
+				return (result == Unit.INSTANCE ? null : result);
+			}
+		}
 	}
 
 }

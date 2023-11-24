@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 
 
 	/** Keys are method names; values are TransactionAttributes. */
-	private Map<String, Collection<CacheOperation>> nameMap = new LinkedHashMap<>();
+	private final Map<String, Collection<CacheOperation>> nameMap = new LinkedHashMap<>();
 
 
 	/**
@@ -111,14 +111,8 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof NameMatchCacheOperationSource)) {
-			return false;
-		}
-		NameMatchCacheOperationSource otherTas = (NameMatchCacheOperationSource) other;
-		return ObjectUtils.nullSafeEquals(this.nameMap, otherTas.nameMap);
+		return (this == other || (other instanceof NameMatchCacheOperationSource otherCos &&
+				ObjectUtils.nullSafeEquals(this.nameMap, otherCos.nameMap)));
 	}
 
 	@Override
@@ -130,4 +124,5 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	public String toString() {
 		return getClass().getName() + ": " + this.nameMap;
 	}
+
 }

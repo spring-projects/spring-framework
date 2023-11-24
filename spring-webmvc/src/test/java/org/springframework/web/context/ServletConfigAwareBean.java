@@ -16,7 +16,7 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletConfig;
+import jakarta.servlet.ServletConfig;
 
 /**
  * @author Juergen Hoeller

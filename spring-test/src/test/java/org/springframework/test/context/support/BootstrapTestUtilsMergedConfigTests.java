@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.BootstrapTestUtilsMergedConfigTests.EmptyConfigTestCase.Nested;
@@ -73,7 +73,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		assertMergedConfig(
 			mergedConfig,
 			testClass,
-			array("classpath:org/springframework/test/context/support/AbstractContextConfigurationUtilsTests$BareAnnotations-context.xml"),
+			array("classpath:/org/springframework/test/context/support/AbstractContextConfigurationUtilsTests$BareAnnotations-context.xml"),
 			EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
 	}
 
@@ -140,28 +140,6 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndLocations() {
-		Class<?> testClass = PropertiesLocationsFoo.class;
-		Class<? extends ContextLoader> expectedContextLoaderClass = org.springframework.test.context.support.GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
-
-		assertMergedConfig(mergedConfig, testClass, array("classpath:/foo.properties"), EMPTY_CLASS_ARRAY,
-			expectedContextLoaderClass);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndClasses() {
-		Class<?> testClass = PropertiesClassesFoo.class;
-		Class<? extends ContextLoader> expectedContextLoaderClass = org.springframework.test.context.support.GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
-
-		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, array(FooConfig.class),
-			expectedContextLoaderClass);
-	}
-
-	@Test
 	void buildMergedConfigWithLocalAndInheritedAnnotationsAndLocations() {
 		Class<?> testClass = LocationsBar.class;
 		String[] expectedLocations = array("/foo.xml", "/bar.xml");
@@ -209,6 +187,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		assertMergedConfigForLocationPaths(RelativeFooXmlLocation.class);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void assertMergedConfigForLocationPaths(Class<?> testClass) {
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -290,7 +269,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		MergedContextConfiguration parent = mergedConfig.getParent();
 		assertThat(parent).as("parent config").isNotNull();
 		// The following does not work -- at least not in Eclipse.
-		// asssertThat(parent.getClasses())...
+		// assertThat(parent.getClasses())...
 		// So we use AssertionsForClassTypes directly.
 		AssertionsForClassTypes.assertThat(parent.getClasses()).containsExactly(FooConfig.class);
 
@@ -464,16 +443,17 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	@ContextConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface SpringAppConfig {
+	public @interface SpringAppConfig {
 
+		@AliasFor(annotation = ContextConfiguration.class)
 		Class<?>[] classes() default {};
 	}
 
 	@SpringAppConfig(classes = { FooConfig.class, BarConfig.class })
-	public static abstract class Dog {
+	public abstract static class Dog {
 	}
 
-	public static abstract class WorkingDog extends Dog {
+	public abstract static class WorkingDog extends Dog {
 	}
 
 	public static class GermanShepherd extends WorkingDog {

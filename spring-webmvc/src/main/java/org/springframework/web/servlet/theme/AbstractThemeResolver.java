@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ import org.springframework.web.servlet.ThemeResolver;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 17.06.2003
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
+@Deprecated(since = "6.0")
 public abstract class AbstractThemeResolver implements ThemeResolver {
 
 	/**

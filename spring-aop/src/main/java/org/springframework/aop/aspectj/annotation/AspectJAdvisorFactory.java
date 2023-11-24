@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
 public interface AspectJAdvisorFactory {
 
 	/**
-	 * Determine whether or not the given class is an aspect, as reported
+	 * Determine whether the given class is an aspect, as reported
 	 * by AspectJ's {@link org.aspectj.lang.reflect.AjTypeSystem}.
 	 * <p>Will simply return {@code false} if the supposed aspect is
 	 * invalid (such as an extension of a concrete aspect class).
@@ -47,7 +47,7 @@ public interface AspectJAdvisorFactory {
 	 * such as those with unsupported instantiation models.
 	 * Use the {@link #validate} method to handle these cases if necessary.
 	 * @param clazz the supposed annotation-style AspectJ class
-	 * @return whether or not this class is recognized by AspectJ as an aspect class
+	 * @return whether this class is recognized by AspectJ as an aspect class
 	 */
 	boolean isAspect(Class<?> clazz);
 

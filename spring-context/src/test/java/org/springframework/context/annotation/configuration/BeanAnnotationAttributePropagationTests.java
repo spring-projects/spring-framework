@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -45,15 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  */
 public class BeanAnnotationAttributePropagationTests {
-
-	@Test
-	public void autowireMetadataIsPropagated() {
-		@Configuration class Config {
-			@Bean(autowire=Autowire.BY_TYPE) Object foo() { return null; }
-		}
-
-		assertThat(beanDef(Config.class).getAutowireMode()).as("autowire mode was not propagated").isEqualTo(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-	}
 
 	@Test
 	public void autowireCandidateMetadataIsPropagated() {

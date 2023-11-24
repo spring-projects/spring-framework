@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.tags;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * The {@code <htmlEscape>} tag sets default HTML escape value for the current
- * page. The actual value  can be overridden by escaping-aware tags.
+ * page. The actual value can be overridden by escaping-aware tags.
  * The default is "false".
  *
  * <p>Note: You can also set a "defaultHtmlEscape" web.xml context-param.

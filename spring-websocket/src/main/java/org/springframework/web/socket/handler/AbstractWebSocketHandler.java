@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,14 @@ public abstract class AbstractWebSocketHandler implements WebSocketHandler {
 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-		if (message instanceof TextMessage) {
-			handleTextMessage(session, (TextMessage) message);
+		if (message instanceof TextMessage textMessage) {
+			handleTextMessage(session, textMessage);
 		}
-		else if (message instanceof BinaryMessage) {
-			handleBinaryMessage(session, (BinaryMessage) message);
+		else if (message instanceof BinaryMessage binaryMessage) {
+			handleBinaryMessage(session, binaryMessage);
 		}
-		else if (message instanceof PongMessage) {
-			handlePongMessage(session, (PongMessage) message);
+		else if (message instanceof PongMessage pongMessage) {
+			handlePongMessage(session, pongMessage);
 		}
 		else {
 			throw new IllegalStateException("Unexpected WebSocket message type: " + message);

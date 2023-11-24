@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,12 +110,12 @@ public class InitializeDatabaseIntegrationTests {
 		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-cache-config.xml");
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
 		CacheData cache = context.getBean(CacheData.class);
-		assertThat(cache.getCachedData().size()).isEqualTo(1);
+		assertThat(cache.getCachedData()).hasSize(1);
 	}
 
 	private void assertCorrectSetup(DataSource dataSource) {
 		JdbcTemplate jt = new JdbcTemplate(dataSource);
-		assertThat(jt.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(1);
+		assertThat(jt.queryForObject("select count(*) from T_TEST", Integer.class)).isEqualTo(1);
 	}
 
 

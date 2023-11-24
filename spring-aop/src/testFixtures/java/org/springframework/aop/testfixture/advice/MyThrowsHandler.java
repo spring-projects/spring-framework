@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,6 @@ public class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
 
 	public void afterThrowing(RemoteException ex) throws Throwable {
 		count("remoteException");
-	}
-
-	/** Not valid, wrong number of arguments */
-	public void afterThrowing(Method m, Exception ex) throws Throwable {
-		throw new UnsupportedOperationException("Shouldn't be called");
 	}
 
 }

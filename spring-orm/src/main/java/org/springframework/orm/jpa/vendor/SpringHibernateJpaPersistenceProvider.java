@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceUnitInfo;
-
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import org.hibernate.bytecode.enhance.spi.EnhancementContext;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 
+import org.springframework.core.NativeDetector;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 
 /**
@@ -37,23 +39,38 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  *
  * @author Juergen Hoeller
  * @author Joris Kuipers
+ * @author Sebastien Deleuze
  * @since 4.1
  * @see Configuration#addPackage
  */
+@SuppressWarnings("removal")  // for Environment properties on Hibernate 6.2
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
 
+	static {
+		if (NativeDetector.inNativeImage()) {
+			System.setProperty(Environment.BYTECODE_PROVIDER, Environment.BYTECODE_PROVIDER_NAME_NONE);
+			System.setProperty(Environment.USE_REFLECTION_OPTIMIZER, Boolean.FALSE.toString());
+		}
+	}
+
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({"rawtypes", "unchecked"})  // on Hibernate 6
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
 		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
-		if (info instanceof SmartPersistenceUnitInfo) {
-			mergedClassesAndPackages.addAll(((SmartPersistenceUnitInfo) info).getManagedPackages());
+		if (info instanceof SmartPersistenceUnitInfo smartInfo) {
+			mergedClassesAndPackages.addAll(smartInfo.getManagedPackages());
 		}
 		return new EntityManagerFactoryBuilderImpl(
 				new PersistenceUnitInfoDescriptor(info) {
 					@Override
 					public List<String> getManagedClassNames() {
 						return mergedClassesAndPackages;
+					}
+					@Override
+					public void pushClassTransformer(EnhancementContext enhancementContext) {
+						if (!NativeDetector.inNativeImage()) {
+							super.pushClassTransformer(enhancementContext);
+						}
 					}
 				}, properties).build();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.MultiValueMap;
  * others registered in the
  * {@link org.springframework.core.ReactiveAdapterRegistry ReactiveAdapterRegistry}.
  *
- * <p>This builder is intended for use with the reactive
+ * <p>This builder is intended to POST {@code multipart/form-data} using the reactive
  * {@link org.springframework.web.reactive.function.client.WebClient WebClient}.
  * For multipart requests with the {@code RestTemplate}, simply create and
  * populate a {@code MultiValueMap<String, HttpEntity>} as shown in the Javadoc for
@@ -76,13 +76,14 @@ import org.springframework.util.MultiValueMap;
  *
  * Mono&lt;Void&gt; result = webClient.post()
  *     .uri("...")
- *     .body(multipartBody)
+ *     .bodyValue(multipartBody)
  *     .retrieve()
  *     .bodyToMono(Void.class)
  * </pre>
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0.2
  * @see <a href="https://tools.ietf.org/html/rfc7578">RFC 7578</a>
  */
@@ -127,11 +128,15 @@ public final class MultipartBodyBuilder {
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(part, "'part' must not be null");
 
-		if (part instanceof Part) {
-			Part partObject = (Part) part;
+		if (part instanceof Part partObject) {
 			PartBuilder builder = asyncPart(name, partObject.content(), DataBuffer.class);
 			if (!partObject.headers().isEmpty()) {
-				builder.headers(headers -> headers.putAll(partObject.headers()));
+				builder.headers(headers -> {
+					headers.putAll(partObject.headers());
+					String filename = headers.getContentDisposition().getFilename();
+					// reset to parameter name
+					headers.setContentDispositionFormData(name, filename);
+				});
 			}
 			if (contentType != null) {
 				builder.contentType(contentType);
@@ -139,8 +144,8 @@ public final class MultipartBodyBuilder {
 			return builder;
 		}
 
-		if (part instanceof PublisherEntity<?,?>) {
-			PublisherPartBuilder<?, ?> builder = new PublisherPartBuilder<>(name, (PublisherEntity<?, ?>) part);
+		if (part instanceof PublisherEntity<?,?> publisherEntity) {
+			PublisherPartBuilder<?, ?> builder = new PublisherPartBuilder<>(name, publisherEntity);
 			if (contentType != null) {
 				builder.contentType(contentType);
 			}
@@ -150,20 +155,20 @@ public final class MultipartBodyBuilder {
 
 		Object partBody;
 		HttpHeaders partHeaders = null;
-		if (part instanceof HttpEntity) {
-			partBody = ((HttpEntity<?>) part).getBody();
+		if (part instanceof HttpEntity<?> httpEntity) {
+			partBody = httpEntity.getBody();
 			partHeaders = new HttpHeaders();
-			partHeaders.putAll(((HttpEntity<?>) part).getHeaders());
+			partHeaders.putAll(httpEntity.getHeaders());
 		}
 		else {
 			partBody = part;
 		}
 
 		if (partBody instanceof Publisher) {
-			throw new IllegalArgumentException(
-					"Use asyncPart(String, Publisher, Class)" +
-							" or asyncPart(String, Publisher, ParameterizedTypeReference) or" +
-							" or MultipartBodyBuilder.PublisherEntity");
+			throw new IllegalArgumentException("""
+					Use asyncPart(String, Publisher, Class) \
+					or asyncPart(String, Publisher, ParameterizedTypeReference) \
+					or MultipartBodyBuilder.PublisherEntity""");
 		}
 
 		DefaultPartBuilder builder = new DefaultPartBuilder(name, partHeaders, partBody);
@@ -359,7 +364,7 @@ public final class MultipartBodyBuilder {
 	 * @param <P> the publisher
 	 */
 	static final class PublisherEntity<T, P extends Publisher<T>> extends HttpEntity<P>
-			implements ResolvableTypeProvider  {
+			implements ResolvableTypeProvider {
 
 		private final ResolvableType resolvableType;
 

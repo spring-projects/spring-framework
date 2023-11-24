@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,6 +241,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	public TestEntity putRefersToResult(TestEntity arg1) {
 		arg1.setId(Long.MIN_VALUE);
 		return arg1;
+	}
+
+	@Override
+	@CachePut(cacheNames = "primary", key = "#result.id", unless = "#result == null")
+	public TestEntity putEvaluatesUnlessBeforeKey(TestEntity arg1) {
+		return (arg1.getId() != Long.MIN_VALUE ? arg1 : null);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,22 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.hamcrest.CoreMatchers.anything;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +48,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 public class CookieAssertionTests {
 
 	private static final String COOKIE_NAME = CookieLocaleResolver.DEFAULT_COOKIE_NAME;
+	private static final String COOKIE_WITH_ATTRIBUTES_NAME = "SecondCookie";
+	private static final String SECOND_COOKIE_ATTRIBUTE = "COOKIE_ATTRIBUTE";
 
 	private MockMvc mockMvc;
 
@@ -50,9 +59,21 @@ public class CookieAssertionTests {
 		CookieLocaleResolver localeResolver = new CookieLocaleResolver();
 		localeResolver.setCookieDomain("domain");
 		localeResolver.setCookieHttpOnly(true);
+		localeResolver.setCookieSameSite("foo");
+
+		Cookie cookie = new Cookie(COOKIE_WITH_ATTRIBUTES_NAME, "value");
+		cookie.setAttribute("sameSite", "Strict"); //intentionally camelCase
+		cookie.setAttribute(SECOND_COOKIE_ATTRIBUTE, "there");
 
 		this.mockMvc = standaloneSetup(new SimpleController())
 				.addInterceptors(new LocaleChangeInterceptor())
+				.addInterceptors(new HandlerInterceptor() {
+					@Override
+					public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+						response.addCookie(cookie);
+						return true;
+					}
+				})
 				.setLocaleResolver(localeResolver)
 				.defaultRequest(get("/").param("locale", "en_US"))
 				.alwaysExpect(status().isOk())
@@ -92,6 +113,26 @@ public class CookieAssertionTests {
 	}
 
 	@Test
+	void testSameSite() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(cookie()
+				.sameSite(COOKIE_NAME, "foo"));
+	}
+
+	@Test
+	void testSameSiteMatcher() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(cookie()
+				.sameSite(COOKIE_WITH_ATTRIBUTES_NAME, startsWith("Str")));
+	}
+
+	@Test
+	void testSameSiteNotEquals() throws Exception {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+						this.mockMvc.perform(get("/")).andExpect(cookie()
+								.sameSite(COOKIE_WITH_ATTRIBUTES_NAME, "Str")))
+				.withMessage("Response cookie 'SecondCookie' attribute 'SameSite' expected:<Str> but was:<Strict>");
+	}
+
+	@Test
 	public void testVersion() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(cookie().version(COOKIE_NAME, 0));
 	}
@@ -109,6 +150,32 @@ public class CookieAssertionTests {
 	@Test
 	public void testHttpOnly() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(cookie().httpOnly(COOKIE_NAME, true));
+	}
+
+	@Test
+	void testAttribute() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(cookie()
+				.attribute(COOKIE_WITH_ATTRIBUTES_NAME, SECOND_COOKIE_ATTRIBUTE, "there"));
+	}
+
+	@Test
+	void testAttributeMatcher() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(cookie()
+				.attribute(COOKIE_WITH_ATTRIBUTES_NAME, SECOND_COOKIE_ATTRIBUTE, is("there")));
+	}
+
+	@Test
+	void testAttributeNotPresent() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> this.mockMvc.perform(get("/"))
+						.andExpect(cookie().attribute(COOKIE_WITH_ATTRIBUTES_NAME, "randomAttribute", anything())))
+				.withMessage("Response cookie 'SecondCookie' doesn't have attribute 'randomAttribute'");
+	}
+
+	@Test
+	void testAttributeNotEquals() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> this.mockMvc.perform(get("/"))
+						.andExpect(cookie().attribute(COOKIE_WITH_ATTRIBUTES_NAME, SECOND_COOKIE_ATTRIBUTE, "foo")))
+				.withMessage("Response cookie 'SecondCookie' attribute 'COOKIE_ATTRIBUTE' expected:<foo> but was:<there>");
 	}
 
 

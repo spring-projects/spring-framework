@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +134,20 @@ class RouterFunctionDslTests {
 		assertThat(sampleRouter().route(request).get().handle(request).headers().getFirst("foo")).isEqualTo("bar")
 	}
 
+	@Test
+	fun attributes() {
+		val visitor = AttributesTestVisitor()
+		attributesRouter.accept(visitor)
+		assertThat(visitor.routerFunctionsAttributes()).containsExactly(
+			listOf(mapOf("foo" to "bar", "baz" to "qux")),
+			listOf(mapOf("foo" to "bar", "baz" to "qux")),
+			listOf(mapOf("foo" to "bar"), mapOf("foo" to "n1")),
+			listOf(mapOf("baz" to "qux"), mapOf("foo" to "n1")),
+			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
+		);
+		assertThat(visitor.visitCount()).isEqualTo(7);
+	}
+
 	private fun sampleRouter() = router {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
@@ -200,6 +214,39 @@ class RouterFunctionDslTests {
 		onError<IllegalStateException> { _, _ ->
 			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
 		}
+	}
+
+	private val attributesRouter = router {
+		GET("/atts/1") {
+			ok().build()
+		}
+		withAttribute("foo", "bar")
+		withAttribute("baz", "qux")
+		GET("/atts/2") {
+			ok().build()
+		}
+		withAttributes { atts ->
+			atts["foo"] = "bar"
+			atts["baz"] = "qux"
+		}
+		"/atts".nest {
+			GET("/3") {
+				ok().build()
+			}
+			withAttribute("foo", "bar")
+			GET("/4") {
+				ok().build()
+			}
+			withAttribute("baz", "qux")
+			"/5".nest {
+				GET {
+					ok().build()
+				}
+				withAttribute("foo", "n3")
+			}
+			withAttribute("foo", "n2")
+		}
+		withAttribute("foo", "n1")
 	}
 
 	@Suppress("UNUSED_PARAMETER")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2.2
  */
 public class DefaultValueStyler implements ValueStyler {
@@ -53,87 +54,164 @@ public class DefaultValueStyler implements ValueStyler {
 	@Override
 	public String style(@Nullable Object value) {
 		if (value == null) {
-			return NULL;
+			return styleNull();
 		}
-		else if (value instanceof String) {
-			return "\'" + value + "\'";
+		else if (value instanceof String str) {
+			return styleString(str);
 		}
-		else if (value instanceof Class) {
-			return ClassUtils.getShortName((Class<?>) value);
+		else if (value instanceof Class<?> clazz) {
+			return styleClass(clazz);
 		}
-		else if (value instanceof Method) {
-			Method method = (Method) value;
-			return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
+		else if (value instanceof Method method) {
+			return styleMethod(method);
 		}
-		else if (value instanceof Map) {
-			return style((Map<?, ?>) value);
+		else if (value instanceof Map<?, ?> map) {
+			return styleMap(map);
 		}
-		else if (value instanceof Map.Entry) {
-			return style((Map.Entry<? ,?>) value);
+		else if (value instanceof Map.Entry<?, ?> entry) {
+			return styleMapEntry(entry);
 		}
-		else if (value instanceof Collection) {
-			return style((Collection<?>) value);
+		else if (value instanceof Collection<?> collection) {
+			return styleCollection(collection);
 		}
 		else if (value.getClass().isArray()) {
 			return styleArray(ObjectUtils.toObjectArray(value));
 		}
 		else {
-			return String.valueOf(value);
+			return styleObject(value);
 		}
 	}
 
-	private <K, V> String style(Map<K, V> value) {
-		if (value.isEmpty()) {
+	/**
+	 * Generate a styled version of {@code null}.
+	 * <p>The default implementation returns {@code "[null]"}.
+	 * @return a styled version of {@code null}
+	 * @since 6.0
+	 */
+	protected String styleNull() {
+		return NULL;
+	}
+
+	/**
+	 * Generate a styled version of the supplied {@link String}.
+	 * <p>The default implementation returns the supplied string wrapped in
+	 * single quotes.
+	 * @return a styled version of the supplied string
+	 * @since 6.0
+	 */
+	protected String styleString(String str) {
+		return "\'" + str + "\'";
+	}
+
+	/**
+	 * Generate a styled version of the supplied {@link Class}.
+	 * <p>The default implementation delegates to {@link ClassUtils#getShortName(Class)}.
+	 * @return a styled version of the supplied class
+	 * @since 6.0
+	 */
+	protected String styleClass(Class<?> clazz) {
+		return ClassUtils.getShortName(clazz);
+	}
+
+	/**
+	 * Generate a styled version of the supplied {@link Method}.
+	 * <p>The default implementation returns the method's {@linkplain Method#getName()
+	 * name} and the {@linkplain ClassUtils#getShortName(Class) short name} of the
+	 * method's {@linkplain Method#getDeclaringClass() declaring class}, separated by
+	 * the {@code "@"} symbol.
+	 * @return a styled version of the supplied method
+	 * @since 6.0
+	 */
+	protected String styleMethod(Method method) {
+		return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
+	}
+
+	/**
+	 * Generate a styled version of the supplied {@link Map}.
+	 * @return a styled version of the supplied map
+	 * @since 6.0
+	 */
+	protected <K, V> String styleMap(Map<K, V> map) {
+		if (map.isEmpty()) {
 			return EMPTY_MAP;
 		}
 
 		StringJoiner result = new StringJoiner(", ", "[", "]");
-		for (Map.Entry<K, V> entry : value.entrySet()) {
-			result.add(style(entry));
+		for (Map.Entry<K, V> entry : map.entrySet()) {
+			result.add(styleMapEntry(entry));
 		}
 		return MAP + result;
 	}
 
-	private String style(Map.Entry<?, ?> value) {
-		return style(value.getKey()) + " -> " + style(value.getValue());
+	/**
+	 * Generate a styled version of the supplied {@link Map.Entry}.
+	 * @return a styled version of the supplied map entry
+	 * @since 6.0
+	 */
+	protected String styleMapEntry(Map.Entry<?, ?> entry) {
+		return style(entry.getKey()) + " -> " + style(entry.getValue());
 	}
 
-	private String style(Collection<?> value) {
-		String collectionType = getCollectionTypeString(value);
+	/**
+	 * Generate a styled version of the supplied {@link Collection}.
+	 * @return a styled version of the supplied collection
+	 * @since 6.0
+	 */
+	protected String styleCollection(Collection<?> collection) {
+		String collectionType = getCollectionTypeString(collection);
 
-		if (value.isEmpty()) {
+		if (collection.isEmpty()) {
 			return collectionType + EMPTY;
 		}
 
 		StringJoiner result = new StringJoiner(", ", "[", "]");
-		for (Object o : value) {
-			result.add(style(o));
+		for (Object element : collection) {
+			result.add(style(element));
 		}
 		return collectionType + result;
 	}
 
-	private String getCollectionTypeString(Collection<?> value) {
-		if (value instanceof List) {
+	/**
+	 * Generate a styled version of the supplied array.
+	 * @return a styled version of the supplied array
+	 * @since 6.0
+	 */
+	protected String styleArray(Object[] array) {
+		if (array.length == 0) {
+			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().componentType()) + '>' + EMPTY;
+		}
+
+		StringJoiner result = new StringJoiner(", ", "[", "]");
+		for (Object element : array) {
+			result.add(style(element));
+		}
+		return ARRAY + '<' + ClassUtils.getShortName(array.getClass().componentType()) + '>' + result;
+	}
+
+	/**
+	 * Generate a styled version of the supplied {@link Object}.
+	 * <p>This method is only invoked by {@link #style(Object)} as a fallback,
+	 * if none of the other {@code style*()} methods is suitable for the object's
+	 * type.
+	 * <p>The default implementation delegates to {@link String#valueOf(Object)}.
+	 * @return a styled version of the supplied object
+	 * @since 6.0
+	 */
+	protected String styleObject(Object obj) {
+		return String.valueOf(obj);
+	}
+
+
+	private static String getCollectionTypeString(Collection<?> collection) {
+		if (collection instanceof List) {
 			return LIST;
 		}
-		else if (value instanceof Set) {
+		else if (collection instanceof Set) {
 			return SET;
 		}
 		else {
 			return COLLECTION;
 		}
-	}
-
-	private String styleArray(Object[] array) {
-		if (array.length == 0) {
-			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + EMPTY;
-		}
-
-		StringJoiner result = new StringJoiner(", ", "[", "]");
-		for (Object o : array) {
-			result.add(style(o));
-		}
-		return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + result;
 	}
 
 }

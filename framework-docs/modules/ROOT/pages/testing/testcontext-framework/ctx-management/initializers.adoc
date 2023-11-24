@@ -1,0 +1,89 @@
+[[testcontext-ctx-management-initializers]]
+= Context Configuration with Context Initializers
+
+To configure an `ApplicationContext` for your tests by using context initializers,
+annotate your test class with `@ContextConfiguration` and configure the `initializers`
+attribute with an array that contains references to classes that implement
+`ApplicationContextInitializer`. The declared context initializers are then used to
+initialize the `ConfigurableApplicationContext` that is loaded for your tests. Note that
+the concrete `ConfigurableApplicationContext` type supported by each declared initializer
+must be compatible with the type of `ApplicationContext` created by the
+`SmartContextLoader` in use (typically a `GenericApplicationContext`). Furthermore, the
+order in which the initializers are invoked depends on whether they implement Spring's
+`Ordered` interface or are annotated with Spring's `@Order` annotation or the standard
+`@Priority` annotation. The following example shows how to use initializers:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// ApplicationContext will be loaded from TestConfig
+	// and initialized by TestAppCtxInitializer
+	@ContextConfiguration(
+		classes = TestConfig.class,
+		initializers = TestAppCtxInitializer.class) // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Specifying configuration by using a configuration class and an initializer.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// ApplicationContext will be loaded from TestConfig
+	// and initialized by TestAppCtxInitializer
+	@ContextConfiguration(
+			classes = [TestConfig::class],
+			initializers = [TestAppCtxInitializer::class]) // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Specifying configuration by using a configuration class and an initializer.
+======
+
+
+You can also omit the declaration of XML configuration files, Groovy scripts, or
+component classes in `@ContextConfiguration` entirely and instead declare only
+`ApplicationContextInitializer` classes, which are then responsible for registering beans
+in the context -- for example, by programmatically loading bean definitions from XML
+files or configuration classes. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// ApplicationContext will be initialized by EntireAppInitializer
+	// which presumably registers beans in the context
+	@ContextConfiguration(initializers = EntireAppInitializer.class) <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Specifying configuration by using only an initializer.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// ApplicationContext will be initialized by EntireAppInitializer
+	// which presumably registers beans in the context
+	@ContextConfiguration(initializers = [EntireAppInitializer::class]) // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Specifying configuration by using only an initializer.
+======
+
+

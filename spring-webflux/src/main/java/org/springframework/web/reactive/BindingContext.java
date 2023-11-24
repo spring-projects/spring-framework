@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,23 @@
 
 package org.springframework.web.reactive;
 
+import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.TreeMap;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.codec.multipart.Part;
+import org.springframework.beans.BeanUtils;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
+import org.springframework.web.bind.support.BindParamNameResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.server.ServerErrorException;
@@ -53,20 +59,32 @@ public class BindingContext {
 
 	private final Model model = new BindingAwareConcurrentModel();
 
+	private boolean methodValidationApplicable;
+
+	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+
 
 	/**
-	 * Create a new {@code BindingContext}.
+	 * Create an instance without an initializer.
 	 */
 	public BindingContext() {
 		this(null);
 	}
 
 	/**
-	 * Create a new {@code BindingContext} with the given initializer.
-	 * @param initializer the binding initializer to apply (may be {@code null})
+	 * Create an instance with the given initializer, which may be {@code null}.
 	 */
 	public BindingContext(@Nullable WebBindingInitializer initializer) {
+		this(initializer, ReactiveAdapterRegistry.getSharedInstance());
+	}
+
+	/**
+	 * Create an instance with the given initializer and {@code ReactiveAdapterRegistry}.
+	 * @since 6.1
+	 */
+	public BindingContext(@Nullable WebBindingInitializer initializer, ReactiveAdapterRegistry registry) {
 		this.initializer = initializer;
+		this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
 	}
 
 
@@ -77,10 +95,19 @@ public class BindingContext {
 		return this.model;
 	}
 
+	/**
+	 * Configure flag to signal whether validation will be applied to handler
+	 * method arguments, which is the case if Bean Validation is enabled in
+	 * Spring MVC, and method parameters have {@code @Constraint} annotations.
+	 * @since 6.1
+	 */
+	public void setMethodValidationApplicable(boolean methodValidationApplicable) {
+		this.methodValidationApplicable = methodValidationApplicable;
+	}
+
 
 	/**
-	 * Create a {@link WebExchangeDataBinder} to apply data binding and
-	 * validation with on the target, command object.
+	 * Create a binder with a target object.
 	 * @param exchange the current exchange
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
@@ -88,11 +115,49 @@ public class BindingContext {
 	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
+		return createDataBinder(exchange, target, name, null);
+	}
+
+	/**
+	 * Shortcut method to create a binder without a target object.
+	 * @param exchange the current exchange
+	 * @param name the name of the target object
+	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
+	 */
+	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
+		return createDataBinder(exchange, null, name, null);
+	}
+
+	/**
+	 * Create a binder with a target object and a {@link ResolvableType targetType}.
+	 * If the target is {@code null}, then
+	 * {@link WebExchangeDataBinder#setTargetType targetType} is set.
+	 * @since 6.1
+	 */
+	public WebExchangeDataBinder createDataBinder(
+			ServerWebExchange exchange, @Nullable Object target, String name, @Nullable ResolvableType targetType) {
+
 		WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(target, name);
+		dataBinder.setNameResolver(new BindParamNameResolver());
+
+		if (target == null && targetType != null) {
+			dataBinder.setTargetType(targetType);
+		}
+
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
-		return initDataBinder(dataBinder, exchange);
+
+		dataBinder = initDataBinder(dataBinder, exchange);
+
+		if (this.methodValidationApplicable && targetType != null) {
+			if (targetType.getSource() instanceof MethodParameter parameter) {
+				MethodValidationInitializer.initBinder(dataBinder, parameter);
+			}
+		}
+
+		return dataBinder;
 	}
 
 	/**
@@ -104,15 +169,31 @@ public class BindingContext {
 	}
 
 	/**
-	 * Create a {@link WebExchangeDataBinder} without a target object for type
-	 * conversion of request values to simple types.
+	 * Invoked before rendering to add {@link BindingResult} attributes where
+	 * necessary, and also to promote model attributes listed as
+	 * {@code @SessionAttributes} to the session.
 	 * @param exchange the current exchange
-	 * @param name the name of the target object
-	 * @return the created data binder
-	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
+	 * @since 6.1
 	 */
-	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
-		return createDataBinder(exchange, null, name);
+	public void updateModel(ServerWebExchange exchange) {
+		Map<String, Object> model = getModel().asMap();
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			String name = entry.getKey();
+			Object value = entry.getValue();
+			if (isBindingCandidate(name, value)) {
+				if (!model.containsKey(BindingResult.MODEL_KEY_PREFIX + name)) {
+					WebExchangeDataBinder binder = createDataBinder(exchange, value, name);
+					model.put(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
+				}
+			}
+		}
+	}
+
+	private boolean isBindingCandidate(String name, @Nullable Object value) {
+		return (!name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
+				!value.getClass().isArray() && !(value instanceof Collection) && !(value instanceof Map) &&
+				this.reactiveAdapterRegistry.getAdapter(null, value) == null &&
+				!BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 
@@ -127,21 +208,26 @@ public class BindingContext {
 
 		@Override
 		public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
-			Map<String, String> vars = exchange.getAttributeOrDefault(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
-			MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
-			Mono<MultiValueMap<String, String>> formData = exchange.getFormData();
-			Mono<MultiValueMap<String, Part>> multipartData = exchange.getMultipartData();
+			return super.getValuesToBind(exchange).doOnNext(map ->
+					map.putAll(exchange.<Map<String, String>>getAttributeOrDefault(
+							HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap())));
+		}
+	}
 
-			return Mono.zip(Mono.just(vars), Mono.just(queryParams), formData, multipartData)
-					.map(tuple -> {
-						Map<String, Object> result = new TreeMap<>();
-						tuple.getT1().forEach(result::put);
-						tuple.getT2().forEach((key, values) -> addBindValue(result, key, values));
-						tuple.getT3().forEach((key, values) -> addBindValue(result, key, values));
-						tuple.getT4().forEach((key, values) -> addBindValue(result, key, values));
-						return result;
-					});
+
+	/**
+	 * Excludes Bean Validation if the method parameter has {@code @Valid}.
+	 */
+	private static class MethodValidationInitializer {
+
+		public static void initBinder(DataBinder binder, MethodParameter parameter) {
+			if (ReactiveAdapterRegistry.getSharedInstance().getAdapter(parameter.getParameterType()) == null) {
+				for (Annotation annotation : parameter.getParameterAnnotations()) {
+					if (annotation.annotationType().getName().equals("jakarta.validation.Valid")) {
+						binder.setExcludedValidators(validator -> validator instanceof jakarta.validation.Validator);
+					}
+				}
+			}
 		}
 	}
 

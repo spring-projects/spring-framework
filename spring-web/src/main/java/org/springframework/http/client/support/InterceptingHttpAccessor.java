@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,10 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 	 * Set the request interceptors that this accessor should use.
 	 * <p>The interceptors will get immediately sorted according to their
 	 * {@linkplain AnnotationAwareOrderComparator#sort(List) order}.
+	 * <p><strong>Note:</strong> This method does not support concurrent changes,
+	 * and in most cases should not be called after initialization on startup.
+	 * See also related note on {@link org.springframework.web.client.RestTemplate}
+	 * regarding concurrent configuration changes.
 	 * @see #getRequestFactory()
 	 * @see AnnotationAwareOrderComparator
 	 */

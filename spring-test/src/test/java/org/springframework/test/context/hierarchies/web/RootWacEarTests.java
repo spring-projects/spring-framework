@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,9 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @WebAppConfiguration
 @ContextHierarchy(@ContextConfiguration)
+@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
 class RootWacEarTests extends EarTests {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class RootWacConfig {
 
 		@Bean
@@ -71,8 +73,7 @@ class RootWacEarTests extends EarTests {
 	void verifyRootWacConfig() {
 		ApplicationContext parent = wac.getParent();
 		assertThat(parent).isNotNull();
-		boolean condition = parent instanceof WebApplicationContext;
-		assertThat(condition).isFalse();
+		assertThat(parent).isNotInstanceOf(WebApplicationContext.class);
 		assertThat(ear).isEqualTo("ear");
 		assertThat(root).isEqualTo("root");
 	}

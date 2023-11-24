@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	 * (just used for optimized collection handling)
 	 */
 	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected) {
-		Assert.notNull(rowMapper, "RowMapper is required");
+		Assert.notNull(rowMapper, "RowMapper must not be null");
 		this.rowMapper = rowMapper;
 		this.rowsExpected = rowsExpected;
 	}

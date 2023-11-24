@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.util.Arrays;
@@ -98,17 +99,17 @@ public class MockServerTests {
 		mutatedBuilder.defaultCookie("baz", "qux");
 		WebTestClient clientFromMutatedBuilder = mutatedBuilder.build();
 
-		client1.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(1));
-		client1.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(1));
-		client1.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(1));
+		client1.mutate().filters(filters -> assertThat(filters).hasSize(1));
+		client1.mutate().defaultHeaders(headers -> assertThat(headers).hasSize(1));
+		client1.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(1));
 
-		client2.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(2));
-		client2.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
-		client2.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
+		client2.mutate().filters(filters -> assertThat(filters).hasSize(2));
+		client2.mutate().defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		client2.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 
-		clientFromMutatedBuilder.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(2));
-		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
-		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
+		clientFromMutatedBuilder.mutate().filters(filters -> assertThat(filters).hasSize(2));
+		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 	}
 
 	@Test // SPR-16124
@@ -151,7 +152,7 @@ public class MockServerTests {
 				.expectStatus().isOk()
 				.returnResult(String.class);
 
-		// Get the raw content without consuming the response body flux..
+		// Get the raw content without consuming the response body flux.
 		byte[] bytes = result.getResponseBodyContent();
 
 		assertThat(bytes).isNotNull();

@@ -1,0 +1,126 @@
+[[testcontext-ctx-management-caching]]
+= Context Caching
+
+Once the TestContext framework loads an `ApplicationContext` (or `WebApplicationContext`)
+for a test, that context is cached and reused for all subsequent tests that declare the
+same unique context configuration within the same test suite. To understand how caching
+works, it is important to understand what is meant by "`unique`" and "`test suite.`"
+
+An `ApplicationContext` can be uniquely identified by the combination of configuration
+parameters that is used to load it. Consequently, the unique combination of configuration
+parameters is used to generate a key under which the context is cached. The TestContext
+framework uses the following configuration parameters to build the context cache key:
+
+* `locations` (from `@ContextConfiguration`)
+* `classes` (from `@ContextConfiguration`)
+* `contextInitializerClasses` (from `@ContextConfiguration`)
+* `contextCustomizers` (from `ContextCustomizerFactory`) – this includes
+  `@DynamicPropertySource` methods as well as various features from Spring Boot's
+  testing support such as `@MockBean` and `@SpyBean`.
+* `contextLoader` (from `@ContextConfiguration`)
+* `parent` (from `@ContextHierarchy`)
+* `activeProfiles` (from `@ActiveProfiles`)
+* `propertySourceDescriptors` (from `@TestPropertySource`)
+* `propertySourceProperties` (from `@TestPropertySource`)
+* `resourceBasePath` (from `@WebAppConfiguration`)
+
+For example, if `TestClassA` specifies `{"app-config.xml", "test-config.xml"}` for the
+`locations` (or `value`) attribute of `@ContextConfiguration`, the TestContext framework
+loads the corresponding `ApplicationContext` and stores it in a `static` context cache
+under a key that is based solely on those locations. So, if `TestClassB` also defines
+`{"app-config.xml", "test-config.xml"}` for its locations (either explicitly or
+implicitly through inheritance) but does not define `@WebAppConfiguration`, a different
+`ContextLoader`, different active profiles, different context initializers, different
+test property sources, or a different parent context, then the same `ApplicationContext`
+is shared by both test classes. This means that the setup cost for loading an application
+context is incurred only once (per test suite), and subsequent test execution is much
+faster.
+
+.Test suites and forked processes
+[NOTE]
+====
+The Spring TestContext framework stores application contexts in a static cache. This
+means that the context is literally stored in a `static` variable. In other words, if
+tests run in separate processes, the static cache is cleared between each test
+execution, which effectively disables the caching mechanism.
+
+To benefit from the caching mechanism, all tests must run within the same process or test
+suite. This can be achieved by executing all tests as a group within an IDE. Similarly,
+when executing tests with a build framework such as Ant, Maven, or Gradle, it is
+important to make sure that the build framework does not fork between tests. For example,
+if the
+https://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode[`forkMode`]
+for the Maven Surefire plug-in is set to `always` or `pertest`, the TestContext framework
+cannot cache application contexts between test classes, and the build process runs
+significantly more slowly as a result.
+====
+
+The size of the context cache is bounded with a default maximum size of 32. Whenever the
+maximum size is reached, a least recently used (LRU) eviction policy is used to evict and
+close stale contexts. You can configure the maximum size from the command line or a build
+script by setting a JVM system property named `spring.test.context.cache.maxSize`. As an
+alternative, you can set the same property via the
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
+
+Since having a large number of application contexts loaded within a given test suite can
+cause the suite to take an unnecessarily long time to run, it is often beneficial to
+know exactly how many contexts have been loaded and cached. To view the statistics for
+the underlying context cache, you can set the log level for the
+`org.springframework.test.context.cache` logging category to `DEBUG`.
+
+In the unlikely case that a test corrupts the application context and requires reloading
+(for example, by modifying a bean definition or the state of an application object), you
+can annotate your test class or test method with `@DirtiesContext` (see the discussion of
+`@DirtiesContext` in xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]
+). This instructs Spring to remove the context from the cache and rebuild
+the application context before running the next test that requires the same application
+context. Note that support for the `@DirtiesContext` annotation is provided by the
+`DirtiesContextBeforeModesTestExecutionListener` and the
+`DirtiesContextTestExecutionListener`, which are enabled by default.
+
+.ApplicationContext lifecycle and console logging
+[NOTE]
+====
+When you need to debug a test executed with the Spring TestContext Framework, it can be
+useful to analyze the console output (that is, output to the `SYSOUT` and `SYSERR`
+streams). Some build tools and IDEs are able to associate console output with a given
+test; however, some console output cannot be easily associated with a given test.
+
+With regard to console logging triggered by the Spring Framework itself or by components
+registered in the `ApplicationContext`, it is important to understand the lifecycle of an
+`ApplicationContext` that has been loaded by the Spring TestContext Framework within a
+test suite.
+
+The `ApplicationContext` for a test is typically loaded when an instance of the test
+class is being prepared -- for example, to perform dependency injection into `@Autowired`
+fields of the test instance. This means that any console logging triggered during the
+initialization of the `ApplicationContext` typically cannot be associated with an
+individual test method. However, if the context is closed immediately before the
+execution of a test method according to xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
+semantics, a new instance of the context will be loaded just prior to execution of the
+test method. In the latter scenario, an IDE or build tool may potentially associate
+console logging with the individual test method.
+
+The `ApplicationContext` for a test can be closed via one of the following scenarios.
+
+* The context is closed according to `@DirtiesContext` semantics.
+* The context is closed because it has been automatically evicted from the cache
+  according to the LRU eviction policy.
+* The context is closed via a JVM shutdown hook when the JVM for the test suite
+  terminates.
+
+If the context is closed according to `@DirtiesContext` semantics after a particular test
+method, an IDE or build tool may potentially associate console logging with the
+individual test method. If the context is closed according to `@DirtiesContext` semantics
+after a test class, any console logging triggered during the shutdown of the
+`ApplicationContext` cannot be associated with an individual test method. Similarly, any
+console logging triggered during the shutdown phase via a JVM shutdown hook cannot be
+associated with an individual test method.
+
+When a Spring `ApplicationContext` is closed via a JVM shutdown hook, callbacks executed
+during the shutdown phase are executed on a thread named `SpringContextShutdownHook`. So,
+if you wish to disable console logging triggered when the `ApplicationContext` is closed
+via a JVM shutdown hook, you may be able to register a custom filter with your logging
+framework that allows you to ignore any logging initiated by that thread.
+====
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.r2dbc.connection;
+
+import java.util.Set;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
@@ -32,11 +34,13 @@ import io.r2dbc.spi.Wrapped;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
-import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.lang.Nullable;
@@ -67,6 +71,14 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static final int CONNECTION_SYNCHRONIZATION_ORDER = 1000;
 
+	private static final Set<Integer> DUPLICATE_KEY_ERROR_CODES = Set.of(
+			1,     // Oracle
+			301,   // SAP HANA
+			1062,  // MySQL/MariaDB
+			2601,  // MS SQL Server
+			2627   // MS SQL Server
+		);
+
 
 	/**
 	 * Obtain a {@link Connection} from the given {@link ConnectionFactory}.
@@ -85,7 +97,7 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Mono<Connection> getConnection(ConnectionFactory connectionFactory) {
 		return doGetConnection(connectionFactory)
-				.onErrorMap(e -> new DataAccessResourceFailureException("Failed to obtain R2DBC Connection", e));
+				.onErrorMap(ex -> new DataAccessResourceFailureException("Failed to obtain R2DBC Connection", ex));
 	}
 
 	/**
@@ -124,17 +136,17 @@ public abstract class ConnectionFactoryUtils {
 						holderToUse.setConnection(conn);
 					}
 					holderToUse.requested();
-					synchronizationManager
-							.registerSynchronization(new ConnectionSynchronization(holderToUse, connectionFactory));
+					synchronizationManager.registerSynchronization(
+							new ConnectionSynchronization(holderToUse, connectionFactory));
 					holderToUse.setSynchronizedWithTransaction(true);
 					if (holderToUse != conHolder) {
 						synchronizationManager.bindResource(connectionFactory, holderToUse);
 					}
 				})      // Unexpected exception from external delegation call -> close Connection and rethrow.
-				.onErrorResume(e -> releaseConnection(connection, connectionFactory).then(Mono.error(e))));
+				.onErrorResume(ex -> releaseConnection(connection, connectionFactory).then(Mono.error(ex))));
 			}
 			return con;
-		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connectionFactory.create()));
+		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connectionFactory.create()));
 	}
 
 	/**
@@ -159,7 +171,7 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Mono<Void> releaseConnection(Connection con, ConnectionFactory connectionFactory) {
 		return doReleaseConnection(con, connectionFactory)
-				.onErrorMap(e -> new DataAccessResourceFailureException("Failed to close R2DBC Connection", e));
+				.onErrorMap(ex -> new DataAccessResourceFailureException("Failed to close R2DBC Connection", ex));
 	}
 
 	/**
@@ -171,15 +183,15 @@ public abstract class ConnectionFactoryUtils {
 	 * @see #doGetConnection
 	 */
 	public static Mono<Void> doReleaseConnection(Connection connection, ConnectionFactory connectionFactory) {
-		return TransactionSynchronizationManager.forCurrentTransaction()
-				.flatMap(synchronizationManager -> {
+		return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 			ConnectionHolder conHolder = (ConnectionHolder) synchronizationManager.getResource(connectionFactory);
 			if (conHolder != null && connectionEquals(conHolder, connection)) {
 				// It's the transactional Connection: Don't close it.
 				conHolder.released();
+				return Mono.empty();
 			}
 			return Mono.from(connection.close());
-		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connection.close()));
+		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connection.close()));
 	}
 
 	/**
@@ -215,17 +227,23 @@ public abstract class ConnectionFactoryUtils {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcRollbackException) {
-				return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
+				if ("40001".equals(ex.getSqlState())) {
+					return new CannotAcquireLockException(buildMessage(task, sql, ex), ex);
+				}
+				return new PessimisticLockingFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcTimeoutException) {
 				return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
 			}
 		}
-		if (ex instanceof R2dbcNonTransientException) {
+		else if (ex instanceof R2dbcNonTransientException) {
 			if (ex instanceof R2dbcNonTransientResourceException) {
 				return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcDataIntegrityViolationException) {
+				if (indicatesDuplicateKey(ex.getSqlState(), ex.getErrorCode())) {
+					return new DuplicateKeyException(buildMessage(task, sql, ex), ex);
+				}
 				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcPermissionDeniedException) {
@@ -236,6 +254,20 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 		return new UncategorizedR2dbcException(buildMessage(task, sql, ex), sql, ex);
+	}
+
+	/**
+	 * Check whether the given SQL state and the associated error code (in case
+	 * of a generic SQL state value) indicate a duplicate key exception:
+	 * either SQL state 23505 as a specific indication, or the generic SQL state
+	 * 23000 with a well-known vendor code.
+	 * @param sqlState the SQL state value
+	 * @param errorCode the error code
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator#indicatesDuplicateKey
+	 */
+	static boolean indicatesDuplicateKey(@Nullable String sqlState, int errorCode) {
+		return ("23505".equals(sqlState) ||
+				("23000".equals(sqlState) && DUPLICATE_KEY_ERROR_CODES.contains(errorCode)));
 	}
 
 	/**
@@ -268,7 +300,8 @@ public abstract class ConnectionFactoryUtils {
 		Connection heldCon = conHolder.getConnection();
 		// Explicitly check for identity too: for Connection handles that do not implement
 		// "equals" properly).
-		return (heldCon == passedInCon || heldCon.equals(passedInCon) || getTargetConnection(heldCon).equals(passedInCon));
+		return (heldCon == passedInCon || heldCon.equals(passedInCon) ||
+				getTargetConnection(heldCon).equals(passedInCon));
 	}
 
 	/**
@@ -300,9 +333,9 @@ public abstract class ConnectionFactoryUtils {
 	private static int getConnectionSynchronizationOrder(ConnectionFactory connectionFactory) {
 		int order = CONNECTION_SYNCHRONIZATION_ORDER;
 		ConnectionFactory current = connectionFactory;
-		while (current instanceof DelegatingConnectionFactory) {
+		while (current instanceof DelegatingConnectionFactory delegatingConnectionFactory) {
 			order--;
-			current = ((DelegatingConnectionFactory) current).getTargetConnectionFactory();
+			current = delegatingConnectionFactory.getTargetConnectionFactory();
 		}
 		return order;
 	}

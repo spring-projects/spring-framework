@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,19 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TemporaryQueue;
-import javax.jms.TextMessage;
 import javax.naming.Context;
 
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.DeliveryMode;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.TemporaryQueue;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -78,15 +77,15 @@ import static org.mockito.Mockito.verify;
  */
 class JmsTemplateTests {
 
-	private Context jndiContext;
+	private Context jndiContext = mock();
 
-	private ConnectionFactory connectionFactory;
+	private ConnectionFactory connectionFactory = mock();
 
-	protected Connection connection;
+	protected Connection connection = mock();
 
-	private Session session;
+	private Session session = mock();
 
-	private Destination queue;
+	private Queue queue = mock();
 
 	private QosSettings qosSettings = new QosSettings(DeliveryMode.PERSISTENT, 9, 10000);
 
@@ -96,12 +95,6 @@ class JmsTemplateTests {
 	 */
 	@BeforeEach
 	void setupMocks() throws Exception {
-		this.jndiContext = mock(Context.class);
-		this.connectionFactory = mock(ConnectionFactory.class);
-		this.connection = mock(Connection.class);
-		this.session = mock(Session.class);
-		this.queue = mock(Queue.class);
-
 		given(this.connectionFactory.createConnection()).willReturn(this.connection);
 		given(this.connection.createSession(useTransactedTemplate(), Session.AUTO_ACKNOWLEDGE)).willReturn(this.session);
 		given(this.session.getTransacted()).willReturn(useTransactedSession());
@@ -145,7 +138,7 @@ class JmsTemplateTests {
 		PrintWriter out = new PrintWriter(sw);
 		springJmsEx.printStackTrace(out);
 		String trace = sw.toString();
-		assertThat(trace.indexOf("host not found") > 0).as("inner jms exception not found").isTrue();
+		assertThat(trace.indexOf("host not found")).as("inner jms exception not found").isGreaterThan(0);
 	}
 
 	@Test
@@ -153,7 +146,7 @@ class JmsTemplateTests {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
+		MessageProducer messageProducer = mock();
 		given(this.session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
@@ -175,7 +168,7 @@ class JmsTemplateTests {
 		template.setMessageIdEnabled(false);
 		template.setMessageTimestampEnabled(false);
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
+		MessageProducer messageProducer = mock();
 		given(this.session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
@@ -200,12 +193,9 @@ class JmsTemplateTests {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
-		template.execute(new SessionCallback<Void>() {
-			@Override
-			public Void doInJms(Session session) throws JMSException {
-				session.getTransacted();
-				return null;
-			}
+		template.execute((SessionCallback<Void>) session -> {
+			session.getTransacted();
+			return null;
 		});
 
 		verify(this.session).close();
@@ -220,19 +210,13 @@ class JmsTemplateTests {
 
 		TransactionSynchronizationManager.initSynchronization();
 		try {
-			template.execute(new SessionCallback<Void>() {
-				@Override
-				public Void doInJms(Session session) throws JMSException {
-					session.getTransacted();
-					return null;
-				}
+			template.execute((SessionCallback<Void>) session -> {
+				session.getTransacted();
+				return null;
 			});
-			template.execute(new SessionCallback<Void>() {
-				@Override
-				public Void doInJms(Session session) throws JMSException {
-					session.getTransacted();
-					return null;
-				}
+			template.execute((SessionCallback<Void>) session -> {
+				session.getTransacted();
+				return null;
 			});
 
 			assertThat(ConnectionFactoryUtils.getTransactionalSession(scf, null, false)).isSameAs(this.session);
@@ -246,7 +230,7 @@ class JmsTemplateTests {
 			tac.close();
 
 			List<TransactionSynchronization> synchs = TransactionSynchronizationManager.getSynchronizations();
-			assertThat(synchs.size()).isEqualTo(1);
+			assertThat(synchs).hasSize(1);
 			TransactionSynchronization synch = synchs.get(0);
 			synch.beforeCommit(false);
 			synch.beforeCompletion();
@@ -279,7 +263,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator)
+	 * {@code send(String d, MessageCreator messageCreator)}
 	 */
 	@Test
 	void testSendDestinationName() throws Exception {
@@ -288,7 +272,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(Destination d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationWithQOS() throws Exception {
@@ -297,7 +281,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(String d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationNameWithQOS() throws Exception {
@@ -363,8 +347,8 @@ class JmsTemplateTests {
 			template.setMessageTimestampEnabled(false);
 		}
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
-		TextMessage textMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
 
 		given(this.session.createProducer(this.queue)).willReturn(messageProducer);
 		given(this.session.createTextMessage("just testing")).willReturn(textMessage);
@@ -374,29 +358,14 @@ class JmsTemplateTests {
 		}
 
 		if (useDefaultDestination) {
-			template.send(new MessageCreator() {
-				@Override
-				public Message createMessage(Session session) throws JMSException {
-					return session.createTextMessage("just testing");
-				}
-			});
+			template.send(session -> session.createTextMessage("just testing"));
 		}
 		else {
 			if (explicitDestination) {
-				template.send(this.queue, new MessageCreator() {
-					@Override
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				});
+				template.send(this.queue, (MessageCreator) session -> session.createTextMessage("just testing"));
 			}
 			else {
-				template.send(destinationName, new MessageCreator() {
-					@Override
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				});
+				template.send(destinationName, (MessageCreator) session -> session.createTextMessage("just testing"));
 			}
 		}
 
@@ -428,8 +397,8 @@ class JmsTemplateTests {
 		template.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
-		TextMessage textMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
 
 		given(this.session.createProducer(this.queue)).willReturn(messageProducer);
 		given(this.session.createTextMessage("Hello world")).willReturn(textMessage);
@@ -553,7 +522,7 @@ class JmsTemplateTests {
 		}
 		template.setReceiveTimeout(timeout);
 
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
+		MessageConsumer messageConsumer = mock();
 
 		String selectorString = "selector";
 		given(this.session.createConsumer(this.queue,
@@ -565,7 +534,7 @@ class JmsTemplateTests {
 							: Session.AUTO_ACKNOWLEDGE);
 		}
 
-		TextMessage textMessage = mock(TextMessage.class);
+		TextMessage textMessage = mock();
 
 		if (testConverter) {
 			given(textMessage.getText()).willReturn("Hello World!");
@@ -674,20 +643,20 @@ class JmsTemplateTests {
 		template.setReceiveTimeout(timeout);
 
 		Session localSession = getLocalSession();
-		TemporaryQueue replyDestination = mock(TemporaryQueue.class);
-		MessageProducer messageProducer = mock(MessageProducer.class);
+		TemporaryQueue replyDestination = mock();
+		MessageProducer messageProducer = mock();
 		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
 		given(localSession.createTemporaryQueue()).willReturn(replyDestination);
 
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
+		MessageConsumer messageConsumer = mock();
 		given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
 
 
-		TextMessage request = mock(TextMessage.class);
-		MessageCreator messageCreator = mock(MessageCreator.class);
+		TextMessage request = mock();
+		MessageCreator messageCreator = mock();
 		given(messageCreator.createMessage(localSession)).willReturn(request);
 
-		TextMessage reply = mock(TextMessage.class);
+		TextMessage reply = mock();
 		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
 			given(messageConsumer.receiveNoWait()).willReturn(reply);
 		}
@@ -721,67 +690,67 @@ class JmsTemplateTests {
 
 	@Test
 	void testIllegalStateException() throws Exception {
-		doTestJmsException(new javax.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
+		doTestJmsException(new jakarta.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
 	}
 
 	@Test
 	void testInvalidClientIDException() throws Exception {
-		doTestJmsException(new javax.jms.InvalidClientIDException(""), InvalidClientIDException.class);
+		doTestJmsException(new jakarta.jms.InvalidClientIDException(""), InvalidClientIDException.class);
 	}
 
 	@Test
 	void testInvalidDestinationException() throws Exception {
-		doTestJmsException(new javax.jms.InvalidDestinationException(""), InvalidDestinationException.class);
+		doTestJmsException(new jakarta.jms.InvalidDestinationException(""), InvalidDestinationException.class);
 	}
 
 	@Test
 	void testInvalidSelectorException() throws Exception {
-		doTestJmsException(new javax.jms.InvalidSelectorException(""), InvalidSelectorException.class);
+		doTestJmsException(new jakarta.jms.InvalidSelectorException(""), InvalidSelectorException.class);
 	}
 
 	@Test
 	void testJmsSecurityException() throws Exception {
-		doTestJmsException(new javax.jms.JMSSecurityException(""), JmsSecurityException.class);
+		doTestJmsException(new jakarta.jms.JMSSecurityException(""), JmsSecurityException.class);
 	}
 
 	@Test
 	void testMessageEOFException() throws Exception {
-		doTestJmsException(new javax.jms.MessageEOFException(""), MessageEOFException.class);
+		doTestJmsException(new jakarta.jms.MessageEOFException(""), MessageEOFException.class);
 	}
 
 	@Test
 	void testMessageFormatException() throws Exception {
-		doTestJmsException(new javax.jms.MessageFormatException(""), MessageFormatException.class);
+		doTestJmsException(new jakarta.jms.MessageFormatException(""), MessageFormatException.class);
 	}
 
 	@Test
 	void testMessageNotReadableException() throws Exception {
-		doTestJmsException(new javax.jms.MessageNotReadableException(""), MessageNotReadableException.class);
+		doTestJmsException(new jakarta.jms.MessageNotReadableException(""), MessageNotReadableException.class);
 	}
 
 	@Test
 	void testMessageNotWriteableException() throws Exception {
-		doTestJmsException(new javax.jms.MessageNotWriteableException(""), MessageNotWriteableException.class);
+		doTestJmsException(new jakarta.jms.MessageNotWriteableException(""), MessageNotWriteableException.class);
 	}
 
 	@Test
 	void testResourceAllocationException() throws Exception {
-		doTestJmsException(new javax.jms.ResourceAllocationException(""), ResourceAllocationException.class);
+		doTestJmsException(new jakarta.jms.ResourceAllocationException(""), ResourceAllocationException.class);
 	}
 
 	@Test
 	void testTransactionInProgressException() throws Exception {
-		doTestJmsException(new javax.jms.TransactionInProgressException(""), TransactionInProgressException.class);
+		doTestJmsException(new jakarta.jms.TransactionInProgressException(""), TransactionInProgressException.class);
 	}
 
 	@Test
 	void testTransactionRolledBackException() throws Exception {
-		doTestJmsException(new javax.jms.TransactionRolledBackException(""), TransactionRolledBackException.class);
+		doTestJmsException(new jakarta.jms.TransactionRolledBackException(""), TransactionRolledBackException.class);
 	}
 
 	@Test
 	void testUncategorizedJmsException() throws Exception {
-		doTestJmsException(new javax.jms.JMSException(""), UncategorizedJmsException.class);
+		doTestJmsException(new jakarta.jms.JMSException(""), UncategorizedJmsException.class);
 	}
 
 	protected void doTestJmsException(JMSException original, Class<? extends JmsException> thrownExceptionClass) throws Exception {
@@ -790,8 +759,8 @@ class JmsTemplateTests {
 		template.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
-		TextMessage textMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
 
 		reset(this.session);
 		given(this.session.createProducer(this.queue)).willReturn(messageProducer);

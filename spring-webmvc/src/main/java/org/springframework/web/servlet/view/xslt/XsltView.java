@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -39,6 +37,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -302,32 +302,31 @@ public class XsltView extends AbstractUrlBasedView {
 	/**
 	 * Convert the supplied {@link Object} into an XSLT {@link Source} if the
 	 * {@link Object} type is {@link #getSourceTypes() supported}.
-	 * @param source the original source object
+	 * @param sourceObject the original source object
 	 * @return the adapted XSLT Source
 	 * @throws IllegalArgumentException if the given Object is not of a supported type
 	 */
-	protected Source convertSource(Object source) throws Exception {
-		if (source instanceof Source) {
-			return (Source) source;
+	protected Source convertSource(Object sourceObject) throws Exception {
+		if (sourceObject instanceof Source source) {
+			return source;
 		}
-		else if (source instanceof Document) {
-			return new DOMSource(((Document) source).getDocumentElement());
+		else if (sourceObject instanceof Document document) {
+			return new DOMSource(document.getDocumentElement());
 		}
-		else if (source instanceof Node) {
-			return new DOMSource((Node) source);
+		else if (sourceObject instanceof Node node) {
+			return new DOMSource(node);
 		}
-		else if (source instanceof Reader) {
-			return new StreamSource((Reader) source);
+		else if (sourceObject instanceof Reader reader) {
+			return new StreamSource(reader);
 		}
-		else if (source instanceof InputStream) {
-			return new StreamSource((InputStream) source);
+		else if (sourceObject instanceof InputStream inputStream) {
+			return new StreamSource(inputStream);
 		}
-		else if (source instanceof Resource) {
-			Resource resource = (Resource) source;
+		else if (sourceObject instanceof Resource resource) {
 			return new StreamSource(resource.getInputStream(), resource.getURI().toASCIIString());
 		}
 		else {
-			throw new IllegalArgumentException("Value '" + source + "' cannot be converted to XSLT Source");
+			throw new IllegalArgumentException("Value '" + sourceObject + "' cannot be converted to XSLT Source");
 		}
 	}
 
@@ -481,8 +480,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @param source the XSLT Source to close (may be {@code null})
 	 */
 	private void closeSourceIfNecessary(@Nullable Source source) {
-		if (source instanceof StreamSource) {
-			StreamSource streamSource = (StreamSource) source;
+		if (source instanceof StreamSource streamSource) {
 			if (streamSource.getReader() != null) {
 				try {
 					streamSource.getReader().close();

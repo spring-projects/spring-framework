@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -166,7 +167,7 @@ class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrati
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (this == o) {
 				return true;
 			}

@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Transparently replaces given {@code null} user values with an internal
  * {@link NullValue#INSTANCE}, if configured to support {@code null} values
- * (as indicated by {@link #isAllowNullValues()}.
+ * (as indicated by {@link #isAllowNullValues()}).
  *
  * @author Juergen Hoeller
  * @since 4.2.2

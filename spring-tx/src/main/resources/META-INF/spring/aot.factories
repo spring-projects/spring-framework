@@ -1,0 +1,2 @@
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
+org.springframework.transaction.annotation.TransactionBeanRegistrationAotProcessor

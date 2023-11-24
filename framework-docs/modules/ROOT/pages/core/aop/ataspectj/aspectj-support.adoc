@@ -1,0 +1,61 @@
+[[aop-aspectj-support]]
+= Enabling @AspectJ Support
+
+To use @AspectJ aspects in a Spring configuration, you need to enable Spring support for
+configuring Spring AOP based on @AspectJ aspects and auto-proxying beans based on
+whether or not they are advised by those aspects. By auto-proxying, we mean that, if Spring
+determines that a bean is advised by one or more aspects, it automatically generates
+a proxy for that bean to intercept method invocations and ensures that advice is run
+as needed.
+
+The @AspectJ support can be enabled with XML- or Java-style configuration. In either
+case, you also need to ensure that AspectJ's `aspectjweaver.jar` library is on the
+classpath of your application (version 1.9 or later). This library is available in the
+`lib` directory of an AspectJ distribution or from the Maven Central repository.
+
+
+[[aop-enable-aspectj-java]]
+== Enabling @AspectJ Support with Java Configuration
+
+To enable @AspectJ support with Java `@Configuration`, add the `@EnableAspectJAutoProxy`
+annotation, as the following example shows:
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configuration
+	@EnableAspectJAutoProxy
+	public class AppConfig {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableAspectJAutoProxy
+	class AppConfig
+----
+======
+
+[[aop-enable-aspectj-xml]]
+== Enabling @AspectJ Support with XML Configuration
+
+To enable @AspectJ support with XML-based configuration, use the `aop:aspectj-autoproxy`
+element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspectj-autoproxy/>
+----
+
+This assumes that you use schema support as described in
+xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration].
+See xref:core/appendix/xsd-schemas.adoc#aop[the AOP schema] for how to
+import the tags in the `aop` namespace.
+
+
+

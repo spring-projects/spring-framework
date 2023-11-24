@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
@@ -46,6 +47,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Clark Duplichien
+ * @author Sam Brannen
  * @since 3.0
  */
 public class PropertyOrFieldReference extends SpelNodeImpl {
@@ -71,10 +73,16 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 
+	/**
+	 * Does this node represent a null-safe property or field reference?
+	 */
 	public boolean isNullSafe() {
 		return this.nullSafe;
 	}
 
+	/**
+	 * Get the name of the referenced property or field.
+	 */
 	public String getName() {
 		return this.name;
 	}
@@ -91,9 +99,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
 				state.getConfiguration().isAutoGrowNullReferences());
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
-		if (accessorToUse instanceof CompilablePropertyAccessor) {
-			CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) accessorToUse;
-			setExitTypeDescriptor(CodeFlow.toDescriptor(accessor.getPropertyType()));
+		if (accessorToUse instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
+			setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 		}
 		return tv;
 	}
@@ -147,8 +154,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public void setValue(ExpressionState state, @Nullable Object newValue) throws EvaluationException {
-		writeProperty(state.getActiveContextObject(), state.getEvaluationContext(), this.name, newValue);
+	public TypedValue setValueInternal(ExpressionState state, Supplier<TypedValue> valueSupplier)
+			throws EvaluationException {
+
+		TypedValue typedValue = valueSupplier.get();
+		writeProperty(state.getActiveContextObject(), state.getEvaluationContext(), this.name, typedValue.getValue());
+		return typedValue;
 	}
 
 	@Override
@@ -164,7 +175,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	/**
 	 * Attempt to read the named property from the current context object.
 	 * @return the value of the property
-	 * @throws EvaluationException if any problem accessing the property or it cannot be found
+	 * @throws EvaluationException if any problem accessing the property, or if it cannot be found
 	 */
 	private TypedValue readProperty(TypedValue contextObject, EvaluationContext evalContext, String name)
 			throws EvaluationException {
@@ -196,8 +207,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
 				if (accessor.canRead(evalContext, contextObject.getValue(), name)) {
-					if (accessor instanceof ReflectivePropertyAccessor) {
-						accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
+					if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
+						accessor = reflectivePropertyAccessor.createOptimalAccessor(
 								evalContext, contextObject.getValue(), name);
 					}
 					this.cachedReadAccessor = accessor;
@@ -330,15 +341,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public boolean isCompilable() {
-		PropertyAccessor accessorToUse = this.cachedReadAccessor;
-		return (accessorToUse instanceof CompilablePropertyAccessor &&
-				((CompilablePropertyAccessor) accessorToUse).isCompilable());
+		return (this.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor &&
+				compilablePropertyAccessor.isCompilable());
 	}
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
-		if (!(accessorToUse instanceof CompilablePropertyAccessor)) {
+		if (!(accessorToUse instanceof CompilablePropertyAccessor compilablePropertyAccessor)) {
 			throw new IllegalStateException("Property accessor is not compilable: " + accessorToUse);
 		}
 
@@ -353,7 +363,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			mv.visitLabel(continueLabel);
 		}
 
-		((CompilablePropertyAccessor) accessorToUse).generateCode(this.name, mv, cf);
+		compilablePropertyAccessor.generateCode(this.name, mv, cf);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 
 		if (this.originalPrimitiveExitTypeDescriptor != null) {
@@ -404,9 +414,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		public TypedValue getValue() {
 			TypedValue value =
 					this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
-			PropertyAccessor accessorToUse = this.ref.cachedReadAccessor;
-			if (accessorToUse instanceof CompilablePropertyAccessor) {
-				this.ref.setExitTypeDescriptor(CodeFlow.toDescriptor(((CompilablePropertyAccessor) accessorToUse).getPropertyType()));
+			if (this.ref.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
+				this.ref.setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 			}
 			return value;
 		}

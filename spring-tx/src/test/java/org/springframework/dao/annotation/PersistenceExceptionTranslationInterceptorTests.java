@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class PersistenceExceptionTranslationInterceptorTests extends Persistence
 		interceptor.setAlwaysTranslate(true);
 
 		RuntimeException exception = new RuntimeException();
-		MethodInvocation invocation = mock(MethodInvocation.class);
+		MethodInvocation invocation = mock();
 		given(invocation.proceed()).willThrow(exception);
 
 		assertThatThrownBy(() -> interceptor.invoke(invocation)).isSameAs(exception);

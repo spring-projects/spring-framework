@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,13 +52,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 	@ContextConfiguration(classes = DirtiesContextWithContextHierarchyTests.ChildConfig.class)
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
 class DirtiesContextWithContextHierarchyTests {
 
 	@Autowired
-	private StringBuffer foo;
+	private StringBuilder foo;
 
 	@Autowired
-	private StringBuffer baz;
+	private StringBuilder baz;
 
 	@Autowired
 	private ApplicationContext context;
@@ -74,7 +76,7 @@ class DirtiesContextWithContextHierarchyTests {
 	@Order(1)
 	void verifyOriginalStateAndDirtyContexts() {
 		assertOriginalState();
-		reverseStringBuffers();
+		reverseStringBuilders();
 	}
 
 	@Test
@@ -90,7 +92,7 @@ class DirtiesContextWithContextHierarchyTests {
 	@DirtiesContext(hierarchyMode = HierarchyMode.CURRENT_LEVEL)
 	void verifyOriginalStateWasReinstatedAndDirtyContextsAndTriggerCurrentLevelCacheClearing() {
 		assertOriginalState();
-		reverseStringBuffers();
+		reverseStringBuilders();
 	}
 
 	@Test
@@ -100,7 +102,7 @@ class DirtiesContextWithContextHierarchyTests {
 		assertCleanChildContext();
 	}
 
-	private void reverseStringBuffers() {
+	private void reverseStringBuilders() {
 		foo.reverse();
 		baz.reverse();
 	}
@@ -131,13 +133,13 @@ class DirtiesContextWithContextHierarchyTests {
 	static class ParentConfig {
 
 		@Bean
-		StringBuffer foo() {
-			return new StringBuffer("foo");
+		StringBuilder foo() {
+			return new StringBuilder("foo");
 		}
 
 		@Bean
-		StringBuffer baz() {
-			return new StringBuffer("baz-parent");
+		StringBuilder baz() {
+			return new StringBuilder("baz-parent");
 		}
 	}
 
@@ -145,8 +147,8 @@ class DirtiesContextWithContextHierarchyTests {
 	static class ChildConfig {
 
 		@Bean
-		StringBuffer baz() {
-			return new StringBuffer("baz-child");
+		StringBuilder baz() {
+			return new StringBuilder("baz-child");
 		}
 	}
 

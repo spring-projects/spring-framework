@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.context.annotation;
 
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -88,6 +87,18 @@ public class CommonAnnotationBeanPostProcessorTests {
 		AnnotatedInitDestroyBean bean = (AnnotatedInitDestroyBean) ctx.getBean("annotatedBean");
 		assertThat(bean.initCalled).isTrue();
 		ctx.close();
+		assertThat(bean.destroyCalled).isTrue();
+	}
+
+	@Test
+	public void testPostConstructAndPreDestroyWithLegacyAnnotations() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LegacyAnnotatedInitDestroyBean.class));
+
+		LegacyAnnotatedInitDestroyBean bean = (LegacyAnnotatedInitDestroyBean) bf.getBean("annotatedBean");
+		assertThat(bean.initCalled).isTrue();
+		bf.destroySingletons();
 		assertThat(bean.destroyCalled).isTrue();
 	}
 
@@ -202,6 +213,30 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testResourceInjectionWithLegacyAnnotations() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setResourceFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LegacyResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+
+		LegacyResourceInjectionBean bean = (LegacyResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.initCalled).isTrue();
+		assertThat(bean.init2Called).isTrue();
+		assertThat(bean.init3Called).isTrue();
+		assertThat(bean.getTestBean()).isSameAs(tb);
+		assertThat(bean.getTestBean2()).isSameAs(tb2);
+		bf.destroySingletons();
+		assertThat(bean.destroyCalled).isTrue();
+		assertThat(bean.destroy2Called).isTrue();
+		assertThat(bean.destroy3Called).isTrue();
+	}
+
+	@Test
 	public void testResourceInjectionWithResolvableDependencyType() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -215,12 +250,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean4", tbd);
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
-		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
-			@Override
-			public Object getObject() throws BeansException {
-				return new NestedTestBean();
-			}
-		});
+		bf.registerResolvableDependency(INestedTestBean.class, (ObjectFactory<Object>) NestedTestBean::new);
 
 		@SuppressWarnings("deprecation")
 		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
@@ -238,7 +268,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertThat(tb).isNotSameAs(anotherBean.getTestBean6());
 
 		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
-		assertThat(depBeans.length).isEqualTo(1);
+		assertThat(depBeans).hasSize(1);
 		assertThat(depBeans[0]).isEqualTo("testBean4");
 	}
 
@@ -513,6 +543,25 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertThat(tb.getName()).isEqualTo("notLazyAnymore");
 	}
 
+	@Test
+	public void testLazyResolutionWithFallbackTypeMatch() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LazyResourceCglibInjectionBean.class));
+		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class));
+
+		LazyResourceCglibInjectionBean bean = (LazyResourceCglibInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bf.containsSingleton("tb")).isFalse();
+		bean.testBean.setName("notLazyAnymore");
+		assertThat(bf.containsSingleton("tb")).isTrue();
+		TestBean tb = (TestBean) bf.getBean("tb");
+		assertThat(tb.getName()).isEqualTo("notLazyAnymore");
+	}
+
 
 	public static class AnnotatedInitDestroyBean {
 
@@ -529,6 +578,30 @@ public class CommonAnnotationBeanPostProcessorTests {
 		}
 
 		@PreDestroy
+		private void destroy() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Already called");
+			}
+			this.destroyCalled = true;
+		}
+	}
+
+
+	public static class LegacyAnnotatedInitDestroyBean {
+
+		public boolean initCalled = false;
+
+		public boolean destroyCalled = false;
+
+		@javax.annotation.PostConstruct
+		private void init() {
+			if (this.initCalled) {
+				throw new IllegalStateException("Already called");
+			}
+			this.initCalled = true;
+		}
+
+		@javax.annotation.PreDestroy
 		private void destroy() {
 			if (this.destroyCalled) {
 				throw new IllegalStateException("Already called");
@@ -630,6 +703,83 @@ public class CommonAnnotationBeanPostProcessorTests {
 		}
 
 		@Resource
+		public void setTestBean2(TestBean testBean2) {
+			if (this.testBean2 != null) {
+				throw new IllegalStateException("Already called");
+			}
+			this.testBean2 = testBean2;
+		}
+
+		public TestBean getTestBean() {
+			return testBean;
+		}
+
+		public TestBean getTestBean2() {
+			return testBean2;
+		}
+	}
+
+
+	public static class LegacyResourceInjectionBean extends LegacyAnnotatedInitDestroyBean {
+
+		public boolean init2Called = false;
+
+		public boolean init3Called = false;
+
+		public boolean destroy2Called = false;
+
+		public boolean destroy3Called = false;
+
+		@javax.annotation.Resource
+		private TestBean testBean;
+
+		private TestBean testBean2;
+
+		@javax.annotation.PostConstruct
+		protected void init2() {
+			if (this.testBean == null || this.testBean2 == null) {
+				throw new IllegalStateException("Resources not injected");
+			}
+			if (!this.initCalled) {
+				throw new IllegalStateException("Superclass init method not called yet");
+			}
+			if (this.init2Called) {
+				throw new IllegalStateException("Already called");
+			}
+			this.init2Called = true;
+		}
+
+		@javax.annotation.PostConstruct
+		private void init() {
+			if (this.init3Called) {
+				throw new IllegalStateException("Already called");
+			}
+			this.init3Called = true;
+		}
+
+		@javax.annotation.PreDestroy
+		protected void destroy2() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Superclass destroy called too soon");
+			}
+			if (this.destroy2Called) {
+				throw new IllegalStateException("Already called");
+			}
+			this.destroy2Called = true;
+		}
+
+		@javax.annotation.PreDestroy
+		private void destroy() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Superclass destroy called too soon");
+			}
+			if (this.destroy3Called) {
+				throw new IllegalStateException("Already called");
+			}
+			this.destroy3Called = true;
+		}
+
+		@javax.annotation.Resource
 		public void setTestBean2(TestBean testBean2) {
 			if (this.testBean2 != null) {
 				throw new IllegalStateException("Already called");

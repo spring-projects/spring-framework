@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,11 +71,11 @@ public class AdaptableJobFactory implements JobFactory {
 	 * @see DelegatingJob
 	 */
 	protected Job adaptJob(Object jobObject) throws Exception {
-		if (jobObject instanceof Job) {
-			return (Job) jobObject;
+		if (jobObject instanceof Job job) {
+			return job;
 		}
-		else if (jobObject instanceof Runnable) {
-			return new DelegatingJob((Runnable) jobObject);
+		else if (jobObject instanceof Runnable runnable) {
+			return new DelegatingJob(runnable);
 		}
 		else {
 			throw new IllegalArgumentException(

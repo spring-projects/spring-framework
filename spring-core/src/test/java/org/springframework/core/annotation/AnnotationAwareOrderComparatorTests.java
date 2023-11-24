@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package org.springframework.core.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Priority;
-
+import jakarta.annotation.Priority;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +41,8 @@ class AnnotationAwareOrderComparatorTests {
 		list.add(new B());
 		list.add(new A());
 		AnnotationAwareOrderComparator.sort(list);
-		assertThat(list.get(0) instanceof A).isTrue();
-		assertThat(list.get(1) instanceof B).isTrue();
+		assertThat(list.get(0)).isInstanceOf(A.class);
+		assertThat(list.get(1)).isInstanceOf(B.class);
 	}
 
 	@Test
@@ -52,8 +51,8 @@ class AnnotationAwareOrderComparatorTests {
 		list.add(new B2());
 		list.add(new A2());
 		AnnotationAwareOrderComparator.sort(list);
-		assertThat(list.get(0) instanceof A2).isTrue();
-		assertThat(list.get(1) instanceof B2).isTrue();
+		assertThat(list.get(0)).isInstanceOf(A2.class);
+		assertThat(list.get(1)).isInstanceOf(B2.class);
 	}
 
 	@Test
@@ -62,8 +61,8 @@ class AnnotationAwareOrderComparatorTests {
 		list.add(new B());
 		list.add(new A2());
 		AnnotationAwareOrderComparator.sort(list);
-		assertThat(list.get(0) instanceof A2).isTrue();
-		assertThat(list.get(1) instanceof B).isTrue();
+		assertThat(list.get(0)).isInstanceOf(A2.class);
+		assertThat(list.get(1)).isInstanceOf(B.class);
 	}
 
 	@Test
@@ -72,8 +71,8 @@ class AnnotationAwareOrderComparatorTests {
 		list.add(new B());
 		list.add(new C());
 		AnnotationAwareOrderComparator.sort(list);
-		assertThat(list.get(0) instanceof C).isTrue();
-		assertThat(list.get(1) instanceof B).isTrue();
+		assertThat(list.get(0)).isInstanceOf(C.class);
+		assertThat(list.get(1)).isInstanceOf(B.class);
 	}
 
 	@Test

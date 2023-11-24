@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,20 @@ import java.lang.annotation.Target;
  *
  * <p>If Lazy is present on a {@link Configuration @Configuration} class, this
  * indicates that all {@code @Bean} methods within that {@code @Configuration}
- * should be lazily initialized. If {@code @Lazy} is present and false on a {@code @Bean}
+ * should be lazily initialized. If {@code @Lazy} is present and {@code false} on a {@code @Bean}
  * method within a {@code @Lazy}-annotated {@code @Configuration} class, this indicates
  * overriding the 'default lazy' behavior and that the bean should be eagerly initialized.
  *
  * <p>In addition to its role for component initialization, this annotation may also be placed
  * on injection points marked with {@link org.springframework.beans.factory.annotation.Autowired}
- * or {@link javax.inject.Inject}: In that context, it leads to the creation of a
+ * or {@link jakarta.inject.Inject}: In that context, it leads to the creation of a
  * lazy-resolution proxy for all affected dependencies, as an alternative to using
- * {@link org.springframework.beans.factory.ObjectFactory} or {@link javax.inject.Provider}.
+ * {@link org.springframework.beans.factory.ObjectFactory} or {@link jakarta.inject.Provider}.
+ * Please note that such a lazy-resolution proxy will always be injected; if the target
+ * dependency does not exist, you will only be able to find out through an exception on
+ * invocation. As a consequence, such an injection point results in unintuitive behavior
+ * for optional dependencies. For a programmatic equivalent, allowing for lazy references
+ * with more sophistication, consider {@link org.springframework.beans.factory.ObjectProvider}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

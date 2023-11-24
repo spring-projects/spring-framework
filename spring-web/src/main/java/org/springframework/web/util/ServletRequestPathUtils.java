@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletMapping;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.MappingMatch;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletMapping;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.MappingMatch;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -53,11 +54,10 @@ public abstract class ServletRequestPathUtils {
 	 * {@link RequestPath} and save it in the request attribute
 	 * {@link #PATH_ATTRIBUTE} for subsequent use with
 	 * {@link org.springframework.web.util.pattern.PathPattern parsed patterns}.
-	 * The returned {@code RequestPath} will have both the contextPath and any
+	 * <p>The returned {@code RequestPath} will have both the contextPath and any
 	 * servletPath prefix omitted from the {@link RequestPath#pathWithinApplication()
 	 * pathWithinApplication} it exposes.
-	 *
-	 * <p>This method is typically called by the {@code DispatcherServlet} to
+	 * <p>This method is typically called by the {@code DispatcherServlet} to determine
 	 * if any {@code HandlerMapping} indicates that it uses parsed patterns.
 	 * After that the pre-parsed and cached {@code RequestPath} can be accessed
 	 * through {@link #getParsedRequestPath(ServletRequest)}.
@@ -74,7 +74,7 @@ public abstract class ServletRequestPathUtils {
 	 */
 	public static RequestPath getParsedRequestPath(ServletRequest request) {
 		RequestPath path = (RequestPath) request.getAttribute(PATH_ATTRIBUTE);
-		Assert.notNull(path, "Expected parsed RequestPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
+		Assert.notNull(path, () -> "Expected parsed RequestPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return path;
 	}
 
@@ -113,25 +113,25 @@ public abstract class ServletRequestPathUtils {
 	// Methods to select either parsed RequestPath or resolved String lookupPath
 
 	/**
-	 * Return the {@link UrlPathHelper#resolveAndCacheLookupPath pre-resolved}
-	 * String lookupPath or the {@link #parseAndCache(HttpServletRequest)
+	 * Return either a {@link UrlPathHelper#resolveAndCacheLookupPath pre-resolved}
+	 * String lookupPath or a {@link #parseAndCache(HttpServletRequest)
 	 * pre-parsed} {@code RequestPath}.
 	 * <p>In Spring MVC, when at least one {@code HandlerMapping} has parsed
-	 * {@code PathPatterns} enabled, the {@code DispatcherServlet} eagerly parses
-	 * and caches the {@code RequestPath} and the same can be also done earlier with
+	 * {@code PathPatterns} enabled, the {@code DispatcherServlet} parses and
+	 * caches the {@code RequestPath} which can be also done even earlier with
 	 * {@link org.springframework.web.filter.ServletRequestPathFilter
 	 * ServletRequestPathFilter}. In other cases where {@code HandlerMapping}s
 	 * use String pattern matching with {@code PathMatcher}, the String
-	 * lookupPath is resolved separately by each {@code HandlerMapping}.
+	 * lookupPath is resolved separately in each {@code HandlerMapping}.
 	 * @param request the current request
 	 * @return a String lookupPath or a {@code RequestPath}
 	 * @throws IllegalArgumentException if neither is available
 	 */
 	public static Object getCachedPath(ServletRequest request) {
 
-		// The RequestPath is pre-parsed if any HandlerMapping uses PathPatterns.
-		// The lookupPath is re-resolved or cleared per HandlerMapping.
-		// So check for lookupPath first.
+		// RequestPath is parsed once and cached in the DispatcherServlet if any HandlerMapping uses PathPatterns.
+		// A String lookupPath is resolved and cached in each HandlerMapping that uses String matching.
+		// So we try lookupPath first, then RequestPath second
 
 		String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
 		if (lookupPath != null) {
@@ -159,8 +159,8 @@ public abstract class ServletRequestPathUtils {
 	 */
 	public static String getCachedPathValue(ServletRequest request) {
 		Object path = getCachedPath(request);
-		if (path instanceof PathContainer) {
-			String value = ((PathContainer) path).value();
+		if (path instanceof PathContainer pathContainer) {
+			String value = pathContainer.value();
 			path = UrlPathHelper.defaultInstance.removeSemicolonContent(value);
 		}
 		return (String) path;
@@ -246,39 +246,24 @@ public abstract class ServletRequestPathUtils {
 
 		public static RequestPath parse(HttpServletRequest request) {
 			String requestUri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-			if (requestUri == null) {
-				requestUri = request.getRequestURI();
-			}
-			if (UrlPathHelper.servlet4Present) {
-				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
-				if (StringUtils.hasText(servletPathPrefix)) {
-					return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
-				}
-			}
-			return RequestPath.parse(requestUri, request.getContextPath());
+			requestUri = (requestUri != null ? requestUri : request.getRequestURI());
+			String servletPathPrefix = getServletPathPrefix(request);
+			return (StringUtils.hasText(servletPathPrefix) ?
+					new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix) :
+					RequestPath.parse(requestUri, request.getContextPath()));
 		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Servlet 4 {@link HttpServletMapping}
-	 * and {@link MappingMatch} at runtime.
-	 */
-	private static class Servlet4Delegate {
 
 		@Nullable
-		public static String getServletPathPrefix(HttpServletRequest request) {
+		private static String getServletPathPrefix(HttpServletRequest request) {
 			HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
-			if (mapping == null) {
-				mapping = request.getHttpServletMapping();
+			mapping = (mapping != null ? mapping : request.getHttpServletMapping());
+			if (ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {
+				String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+				servletPath = (servletPath != null ? servletPath : request.getServletPath());
+				servletPath = (servletPath.endsWith("/") ? servletPath.substring(0, servletPath.length() - 1) : servletPath);
+				return UriUtils.encodePath(servletPath, StandardCharsets.UTF_8);
 			}
-			MappingMatch match = mapping.getMappingMatch();
-			if (!ObjectUtils.nullSafeEquals(match, MappingMatch.PATH)) {
-				return null;
-			}
-			String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
-			servletPath = (servletPath != null ? servletPath : request.getServletPath());
-			return UriUtils.encodePath(servletPath, StandardCharsets.UTF_8);
+			return null;
 		}
 	}
 

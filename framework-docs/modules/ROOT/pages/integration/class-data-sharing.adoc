@@ -1,0 +1,64 @@
+[[class-data-sharing]]
+= Class Data Sharing
+
+Class Data Sharing (CDS) is a https://docs.oracle.com/en/java/javase/17/vm/class-data-sharing.html[JVM feature]
+that can help reduce the startup time and memory footprint of Java applications.
+
+To use this feature, a CDS archive should be created for the particular classpath of the
+application. The Spring Framework provides a hook-point to ease the creation of the
+archive. Once the archive is available, users should opt in to use it via a JVM flag.
+
+== Creating the CDS Archive
+
+A CDS archive for an application can be created when the application exits. The Spring
+Framework provides a mode of operation where the process can exit automatically once the
+`ApplicationContext` has refreshed. In this mode, all non-lazy initialized singletons
+have been instantiated, and `InitializingBean#afterPropertiesSet` callbacks have been
+invoked; but the lifecycle has not started, and the `ContextRefreshedEvent` has not yet
+been published.
+
+To create the archive, two additional JVM flags must be specified:
+
+* `-XX:ArchiveClassesAtExit=app-cds.jsa`: creates the CDS archive on exit
+* `-Dspring.context.exit=onRefresh`: starts and then immediately exits your Spring
+  application as described above
+
+To create a CDS archive, your JDK must have a base image. If you add the flags above to
+your startup script, you may get a warning that looks like this:
+
+[source,shell,indent=0,subs="verbatim"]
+----
+  -XX:ArchiveClassesAtExit is unsupported when base CDS archive is not loaded. Run with -Xlog:cds for more info.
+----
+
+The base CDS archive can be created by issuing the following command:
+
+[source,shell,indent=0,subs="verbatim"]
+----
+  $ java -Xshare:dump
+----
+
+== Using the Archive
+
+Once the archive is available, add `-XX:SharedArchiveFile=app-cds.jsa` to your startup
+script to use it, assuming a `app-cds.jsa` file in the working directory.
+
+To figure out how effective the cache is, you can enable class loading logs by adding
+an extra attribute: `-Xlog:class+load:file=cds.log`. This creates a `cds.log` with every
+attempt to load a class and its source. Classes that are loaded from the cache should have
+a "shared objects file" source, as shown in the following example:
+
+[source,shell,indent=0,subs="verbatim"]
+----
+    [0.064s][info][class,load] org.springframework.core.env.EnvironmentCapable source: shared objects file (top)
+    [0.064s][info][class,load] org.springframework.beans.factory.BeanFactory source: shared objects file (top)
+    [0.064s][info][class,load] org.springframework.beans.factory.ListableBeanFactory source: shared objects file (top)
+    [0.064s][info][class,load] org.springframework.beans.factory.HierarchicalBeanFactory source: shared objects file (top)
+    [0.065s][info][class,load] org.springframework.context.MessageSource source: shared objects file (top)
+----
+
+TIP: If you have a large number of classes that are not loaded from the cache, make sure that
+the JDK and classpath used by the commands that create the archive and start the application
+are identical. Note also that to effectively cache classes, the classpath should be specified
+as a list of JARs containing those classes, and avoid the usage of directories and `*`
+wildcard characters.

@@ -1,0 +1,308 @@
+[[jdbc-advanced-jdbc]]
+= JDBC Batch Operations
+
+Most JDBC drivers provide improved performance if you batch multiple calls to the same
+prepared statement. By grouping updates into batches, you limit the number of round trips
+to the database.
+
+
+[[jdbc-batch-classic]]
+== Basic Batch Operations with `JdbcTemplate`
+
+You accomplish `JdbcTemplate` batch processing by implementing two methods of a special interface,
+`BatchPreparedStatementSetter`, and passing that implementation in as the second parameter
+in your `batchUpdate` method call. You can use the `getBatchSize` method to provide the size of
+the current batch. You can use the `setValues` method to set the values for the parameters of
+the prepared statement. This method is called the number of times that you specified in the
+`getBatchSize` call. The following example updates the `t_actor` table based on entries in a list,
+and the entire list is used as the batch:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		public int[] batchUpdate(final List<Actor> actors) {
+			return this.jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					new BatchPreparedStatementSetter() {
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
+							Actor actor = actors.get(i);
+							ps.setString(1, actor.getFirstName());
+							ps.setString(2, actor.getLastName());
+							ps.setLong(3, actor.getId().longValue());
+						}
+						public int getBatchSize() {
+							return actors.size();
+						}
+					});
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): IntArray {
+			return jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					object: BatchPreparedStatementSetter {
+						override fun setValues(ps: PreparedStatement, i: Int) {
+							ps.setString(1, actors[i].firstName)
+							ps.setString(2, actors[i].lastName)
+							ps.setLong(3, actors[i].id)
+						}
+
+						override fun getBatchSize() = actors.size
+					})
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+If you process a stream of updates or reading from a file, you might have a
+preferred batch size, but the last batch might not have that number of entries. In this
+case, you can use the `InterruptibleBatchPreparedStatementSetter` interface, which lets
+you interrupt a batch once the input source is exhausted. The `isBatchExhausted` method
+lets you signal the end of the batch.
+
+
+[[jdbc-batch-list]]
+== Batch Operations with a List of Objects
+
+Both the `JdbcTemplate` and the `NamedParameterJdbcTemplate` provides an alternate way
+of providing the batch update. Instead of implementing a special batch interface, you
+provide all parameter values in the call as a list. The framework loops over these
+values and uses an internal prepared statement setter. The API varies, depending on
+whether you use named parameters. For the named parameters, you provide an array of
+`SqlParameterSource`, one entry for each member of the batch. You can use the
+`SqlParameterSourceUtils.createBatch` convenience methods to create this array, passing
+in an array of bean-style objects (with getter methods corresponding to parameters),
+`String`-keyed `Map` instances (containing the corresponding parameters as values), or a mix of both.
+
+The following example shows a batch update using named parameters:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private NamedParameterTemplate namedParameterJdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		}
+
+		public int[] batchUpdate(List<Actor> actors) {
+			return this.namedParameterJdbcTemplate.batchUpdate(
+					"update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
+					SqlParameterSourceUtils.createBatch(actors));
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): IntArray {
+			return this.namedParameterJdbcTemplate.batchUpdate(
+					"update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
+					SqlParameterSourceUtils.createBatch(actors));
+		}
+
+			// ... additional methods
+	}
+----
+======
+
+For an SQL statement that uses the classic `?` placeholders, you pass in a list
+containing an object array with the update values. This object array must have one entry
+for each placeholder in the SQL statement, and they must be in the same order as they are
+defined in the SQL statement.
+
+The following example is the same as the preceding example, except that it uses classic
+JDBC `?` placeholders:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		public int[] batchUpdate(final List<Actor> actors) {
+			List<Object[]> batch = new ArrayList<>();
+			for (Actor actor : actors) {
+				Object[] values = new Object[] {
+						actor.getFirstName(), actor.getLastName(), actor.getId()};
+				batch.add(values);
+			}
+			return this.jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					batch);
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): IntArray {
+			val batch = mutableListOf<Array<Any>>()
+			for (actor in actors) {
+				batch.add(arrayOf(actor.firstName, actor.lastName, actor.id))
+			}
+			return jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?", batch)
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+All of the batch update methods that we described earlier return an `int` array
+containing the number of affected rows for each batch entry. This count is reported by
+the JDBC driver. If the count is not available, the JDBC driver returns a value of `-2`.
+
+[NOTE]
+====
+In such a scenario, with automatic setting of values on an underlying `PreparedStatement`,
+the corresponding JDBC type for each value needs to be derived from the given Java type.
+While this usually works well, there is a potential for issues (for example, with Map-contained
+`null` values). Spring, by default, calls `ParameterMetaData.getParameterType` in such a
+case, which can be expensive with your JDBC driver. You should use a recent driver
+version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
+(as a JVM system property or via the
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism) if you encounter
+a performance issue (as reported on Oracle 12c, JBoss, and PostgreSQL).
+
+Alternatively, you might consider specifying the corresponding JDBC types explicitly,
+either through a `BatchPreparedStatementSetter` (as shown earlier), through an explicit type
+array given to a `List<Object[]>` based call, through `registerSqlType` calls on a
+custom `MapSqlParameterSource` instance, or through a `BeanPropertySqlParameterSource`
+that derives the SQL type from the Java-declared property type even for a null value.
+====
+
+
+[[jdbc-batch-multi]]
+== Batch Operations with Multiple Batches
+
+The preceding example of a batch update deals with batches that are so large that you want to
+break them up into several smaller batches. You can do this with the methods
+mentioned earlier by making multiple calls to the `batchUpdate` method, but there is now a
+more convenient method. This method takes, in addition to the SQL statement, a
+`Collection` of objects that contain the parameters, the number of updates to make for each
+batch, and a `ParameterizedPreparedStatementSetter` to set the values for the parameters
+of the prepared statement. The framework loops over the provided values and breaks the
+update calls into batches of the size specified.
+
+The following example shows a batch update that uses a batch size of 100:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		public int[][] batchUpdate(final Collection<Actor> actors) {
+			int[][] updateCounts = jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					actors,
+					100,
+					(PreparedStatement ps, Actor actor) -> {
+						ps.setString(1, actor.getFirstName());
+						ps.setString(2, actor.getLastName());
+						ps.setLong(3, actor.getId().longValue());
+					});
+			return updateCounts;
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): Array<IntArray> {
+			return jdbcTemplate.batchUpdate(
+						"update t_actor set first_name = ?, last_name = ? where id = ?",
+						actors, 100) { ps, argument ->
+				ps.setString(1, argument.firstName)
+				ps.setString(2, argument.lastName)
+				ps.setLong(3, argument.id)
+			}
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+The batch update method for this call returns an array of `int` arrays that contains an
+array entry for each batch with an array of the number of affected rows for each update.
+The top-level array's length indicates the number of batches run, and the second level
+array's length indicates the number of updates in that batch. The number of updates in
+each batch should be the batch size provided for all batches (except that the last one
+that might be less), depending on the total number of update objects provided. The update
+count for each update statement is the one reported by the JDBC driver. If the count is
+not available, the JDBC driver returns a value of `-2`.
+
+
+

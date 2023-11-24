@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.orm.hibernate5;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
+import jakarta.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
@@ -116,8 +116,8 @@ public abstract class SessionFactoryUtils {
 			throw convertHibernateAccessException(ex);
 		}
 		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException) {
-				throw convertHibernateAccessException((HibernateException) ex.getCause());
+			if (ex.getCause() instanceof HibernateException hibernateException) {
+				throw convertHibernateAccessException(hibernateException);
 			}
 			throw ex;
 		}
@@ -133,7 +133,9 @@ public abstract class SessionFactoryUtils {
 	public static void closeSession(@Nullable Session session) {
 		if (session != null) {
 			try {
-				session.close();
+				if (session.isOpen()) {
+					session.close();
+				}
 			}
 			catch (Throwable ex) {
 				logger.error("Failed to release Hibernate Session", ex);
@@ -154,13 +156,12 @@ public abstract class SessionFactoryUtils {
 			Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
 			if (props != null) {
 				Object dataSourceValue = props.get(Environment.DATASOURCE);
-				if (dataSourceValue instanceof DataSource) {
-					return (DataSource) dataSourceValue;
+				if (dataSourceValue instanceof DataSource dataSource) {
+					return dataSource;
 				}
 			}
 		}
-		if (sessionFactory instanceof SessionFactoryImplementor) {
-			SessionFactoryImplementor sfi = (SessionFactoryImplementor) sessionFactory;
+		if (sessionFactory instanceof SessionFactoryImplementor sfi) {
 			try {
 				ConnectionProvider cp = sfi.getServiceRegistry().getService(ConnectionProvider.class);
 				if (cp != null) {
@@ -188,38 +189,32 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof SQLGrammarException) {
-			SQLGrammarException jdbcEx = (SQLGrammarException) ex;
-			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
+		if (ex instanceof SQLGrammarException hibJdbcEx) {
+			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof QueryTimeoutException) {
-			QueryTimeoutException jdbcEx = (QueryTimeoutException) ex;
-			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
+		if (ex instanceof QueryTimeoutException hibJdbcEx) {
+			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof LockAcquisitionException) {
-			LockAcquisitionException jdbcEx = (LockAcquisitionException) ex;
-			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
+		if (ex instanceof LockAcquisitionException hibJdbcEx) {
+			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof PessimisticLockException) {
-			PessimisticLockException jdbcEx = (PessimisticLockException) ex;
-			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
+		if (ex instanceof PessimisticLockException hibJdbcEx) {
+			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof ConstraintViolationException) {
-			ConstraintViolationException jdbcEx = (ConstraintViolationException) ex;
-			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + jdbcEx.getSQL() +
-					"]; constraint [" + jdbcEx.getConstraintName() + "]", ex);
+		if (ex instanceof ConstraintViolationException hibJdbcEx) {
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() +
+					"]; constraint [" + hibJdbcEx.getConstraintName() + "]", ex);
 		}
-		if (ex instanceof DataException) {
-			DataException jdbcEx = (DataException) ex;
-			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
+		if (ex instanceof DataException hibJdbcEx) {
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof JDBCException) {
-			return new HibernateJdbcException((JDBCException) ex);
+		if (ex instanceof JDBCException hibJdbcEx) {
+			return new HibernateJdbcException(hibJdbcEx);
 		}
 		// end of JDBCException (subclass) handling
 
-		if (ex instanceof QueryException) {
-			return new HibernateQueryException((QueryException) ex);
+		if (ex instanceof QueryException queryException) {
+			return new HibernateQueryException(queryException);
 		}
 		if (ex instanceof NonUniqueResultException) {
 			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
@@ -239,20 +234,20 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof ObjectDeletedException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof UnresolvableObjectException) {
-			return new HibernateObjectRetrievalFailureException((UnresolvableObjectException) ex);
+		if (ex instanceof UnresolvableObjectException unresolvableObjectException) {
+			return new HibernateObjectRetrievalFailureException(unresolvableObjectException);
 		}
-		if (ex instanceof WrongClassException) {
-			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
+		if (ex instanceof WrongClassException wrongClassException) {
+			return new HibernateObjectRetrievalFailureException(wrongClassException);
 		}
-		if (ex instanceof StaleObjectStateException) {
-			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
+		if (ex instanceof StaleObjectStateException staleObjectStateException) {
+			return new HibernateOptimisticLockingFailureException(staleObjectStateException);
 		}
-		if (ex instanceof StaleStateException) {
-			return new HibernateOptimisticLockingFailureException((StaleStateException) ex);
+		if (ex instanceof StaleStateException staleStateException) {
+			return new HibernateOptimisticLockingFailureException(staleStateException);
 		}
-		if (ex instanceof OptimisticEntityLockException) {
-			return new HibernateOptimisticLockingFailureException((OptimisticEntityLockException) ex);
+		if (ex instanceof OptimisticEntityLockException optimisticEntityLockException) {
+			return new HibernateOptimisticLockingFailureException(optimisticEntityLockException);
 		}
 		if (ex instanceof PessimisticEntityLockException) {
 			if (ex.getCause() instanceof LockAcquisitionException) {

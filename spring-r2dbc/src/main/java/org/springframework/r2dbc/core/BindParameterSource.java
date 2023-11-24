@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
-import org.springframework.lang.Nullable;
+import io.r2dbc.spi.Parameter;
 
 /**
  * Interface that defines common functionality for objects
@@ -44,24 +44,13 @@ interface BindParameterSource {
 	boolean hasValue(String paramName);
 
 	/**
-	 * Return the parameter value for the requested named parameter.
+	 * Return the parameter for the requested named parameter.
 	 * @param paramName the name of the parameter
-	 * @return the value of the specified parameter (can be {@code null})
+	 * @return the specified parameter
 	 * @throws IllegalArgumentException if there is no value
 	 * for the requested parameter
 	 */
-	@Nullable
-	Object getValue(String paramName) throws IllegalArgumentException;
-
-	/**
-	 * Determine the type for the specified named parameter.
-	 * @param paramName the name of the parameter
-	 * @return the type of the specified parameter, or
-	 * {@link Object#getClass()} if not known.
-	 */
-	default Class<?> getType(String paramName) {
-		return Object.class;
-	}
+	Parameter getValue(String paramName) throws IllegalArgumentException;
 
 	/**
 	 * Return the parameter names of the underlying parameter source.

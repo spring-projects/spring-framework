@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
 <!--
 	- Default SQL error codes for well-known databases.
 	- Can be overridden by definitions in a "sql-error-codes.xml" file
@@ -12,7 +10,10 @@
 	- If this property is present, then it will be used instead of the id for
 	- looking up the error codes based on the current database.
 	-->
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="DB2" name="Db2" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductName">
@@ -172,7 +173,7 @@
 			<value>2601,2627</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>544,8114,8115</value>
+			<value>544,2628,8114,8115</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>4060</value>

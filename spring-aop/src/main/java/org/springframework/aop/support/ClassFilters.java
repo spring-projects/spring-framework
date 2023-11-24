@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.lang.Nullable;
@@ -85,6 +86,18 @@ public abstract class ClassFilters {
 		return new IntersectionClassFilter(classFilters);
 	}
 
+	/**
+	 * Return a class filter that represents the logical negation of the specified
+	 * filter instance.
+	 * @param classFilter the {@link ClassFilter} to negate
+	 * @return a filter that represents the logical negation of the specified filter
+	 * @since 6.1
+	 */
+	public static ClassFilter negate(ClassFilter classFilter) {
+		Assert.notNull(classFilter, "ClassFilter must not be null");
+		return new NegateClassFilter(classFilter);
+	}
+
 
 	/**
 	 * ClassFilter implementation for a union of the given ClassFilters.
@@ -110,20 +123,19 @@ public abstract class ClassFilters {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof UnionClassFilter &&
-					ObjectUtils.nullSafeEquals(this.filters, ((UnionClassFilter) other).filters)));
+			return (this == other || (other instanceof UnionClassFilter that &&
+					ObjectUtils.nullSafeEquals(this.filters, that.filters)));
 		}
 
 		@Override
 		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.filters);
+			return Arrays.hashCode(this.filters);
 		}
 
 		@Override
 		public String toString() {
 			return getClass().getName() + ": " + Arrays.toString(this.filters);
 		}
-
 	}
 
 
@@ -151,20 +163,54 @@ public abstract class ClassFilters {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof IntersectionClassFilter &&
-					ObjectUtils.nullSafeEquals(this.filters, ((IntersectionClassFilter) other).filters)));
+			return (this == other || (other instanceof IntersectionClassFilter that &&
+					ObjectUtils.nullSafeEquals(this.filters, that.filters)));
 		}
 
 		@Override
 		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.filters);
+			return Arrays.hashCode(this.filters);
 		}
 
 		@Override
 		public String toString() {
 			return getClass().getName() + ": " + Arrays.toString(this.filters);
 		}
+	}
 
+
+	/**
+	 * ClassFilter implementation for a logical negation of the given ClassFilter.
+	 */
+	@SuppressWarnings("serial")
+	private static class NegateClassFilter implements ClassFilter, Serializable {
+
+		private final ClassFilter original;
+
+		NegateClassFilter(ClassFilter original) {
+			this.original = original;
+		}
+
+		@Override
+		public boolean matches(Class<?> clazz) {
+			return !this.original.matches(clazz);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof NegateClassFilter that
+					&& this.original.equals(that.original)));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(getClass(), this.original);
+		}
+
+		@Override
+		public String toString() {
+			return "Negate " + this.original;
+		}
 	}
 
 }

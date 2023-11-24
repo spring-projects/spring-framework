@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,29 @@
 package org.springframework.test.context.jdbc;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextAnnotationUtils;
+import org.springframework.test.context.aot.AotTestExecutionListener;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
@@ -52,18 +57,27 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ResourceUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
  * {@code TestExecutionListener} that provides support for executing SQL
  * {@link Sql#scripts scripts} and inlined {@link Sql#statements statements}
  * configured via the {@link Sql @Sql} annotation.
  *
- * <p>Scripts and inlined statements will be executed {@linkplain #beforeTestMethod(TestContext) before}
- * or {@linkplain #afterTestMethod(TestContext) after} execution of the corresponding
- * {@linkplain java.lang.reflect.Method test method}, depending on the configured
- * value of the {@link Sql#executionPhase executionPhase} flag.
+ * <p>Class-level annotations that are constrained to a class-level execution
+ * phase ({@link ExecutionPhase#BEFORE_TEST_CLASS BEFORE_TEST_CLASS} or
+ * {@link ExecutionPhase#AFTER_TEST_CLASS AFTER_TEST_CLASS}) will be run
+ * {@linkplain #beforeTestClass(TestContext) once before all test methods} or
+ * {@linkplain #afterTestMethod(TestContext) once after all test methods},
+ * respectively. All other scripts and inlined statements will be executed
+ * {@linkplain #beforeTestMethod(TestContext) before} or
+ * {@linkplain #afterTestMethod(TestContext) after} execution of the
+ * corresponding {@linkplain java.lang.reflect.Method test method}, depending
+ * on the configured value of the {@link Sql#executionPhase executionPhase}
+ * flag.
  *
  * <p>Scripts and inlined statements will be executed without a transaction,
  * within an existing Spring-managed transaction, or within an isolated transaction,
@@ -85,20 +99,31 @@ import org.springframework.util.StringUtils;
  * on permissible configuration constellations and on the algorithms used to
  * locate these beans.
  *
+ * <h3>Required Dependencies</h3>
+ * <p>Use of this listener requires the {@code spring-jdbc} and {@code spring-tx}
+ * modules as well as their transitive dependencies to be present on the classpath.
+ *
  * @author Sam Brannen
  * @author Dmitry Semukhin
+ * @author Andreas Ahlenstorf
  * @since 4.1
  * @see Sql
  * @see SqlConfig
+ * @see SqlMergeMode
  * @see SqlGroup
  * @see org.springframework.test.context.transaction.TestContextTransactionUtils
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
  * @see org.springframework.jdbc.datasource.init.ScriptUtils
  */
-public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListener {
+public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListener implements AotTestExecutionListener {
+
+	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(SqlScriptsTestExecutionListener.class);
+
+	private static final MethodFilter sqlMethodFilter = ReflectionUtils.USER_DECLARED_METHODS
+			.and(method -> AnnotatedElementUtils.hasAnnotation(method, Sql.class));
 
 
 	/**
@@ -107,6 +132,28 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	@Override
 	public final int getOrder() {
 		return 5000;
+	}
+
+	/**
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} once per test class <em>before</em> any test method
+	 * is run.
+	 * @since 6.1
+	 */
+	@Override
+	public void beforeTestClass(TestContext testContext) throws Exception {
+		executeClassLevelSqlScripts(testContext, ExecutionPhase.BEFORE_TEST_CLASS);
+	}
+
+	/**
+	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * {@link TestContext} once per test class <em>after</em> all test methods
+	 * have been run.
+	 * @since 6.1
+	 */
+	@Override
+	public void afterTestClass(TestContext testContext) throws Exception {
+		executeClassLevelSqlScripts(testContext, ExecutionPhase.AFTER_TEST_CLASS);
 	}
 
 	/**
@@ -125,6 +172,33 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	@Override
 	public void afterTestMethod(TestContext testContext) {
 		executeSqlScripts(testContext, ExecutionPhase.AFTER_TEST_METHOD);
+	}
+
+	/**
+	 * Process the supplied test class and its methods and register run-time
+	 * hints for any SQL scripts configured or detected as classpath resources
+	 * via {@link Sql @Sql}.
+	 * @since 6.0
+	 */
+	@Override
+	public void processAheadOfTime(RuntimeHints runtimeHints, Class<?> testClass, ClassLoader classLoader) {
+		getSqlAnnotationsFor(testClass).forEach(sql ->
+			registerClasspathResources(getScripts(sql, testClass, null, true), runtimeHints, classLoader));
+		getSqlMethods(testClass).forEach(testMethod ->
+			getSqlAnnotationsFor(testMethod).forEach(sql ->
+				registerClasspathResources(getScripts(sql, testClass, testMethod, false), runtimeHints, classLoader)));
+	}
+
+	/**
+	 * Execute class-level SQL scripts configured via {@link Sql @Sql} for the
+	 * supplied {@link TestContext} and the supplied
+	 * {@link ExecutionPhase#BEFORE_TEST_CLASS BEFORE_TEST_CLASS} or
+	 * {@link ExecutionPhase#AFTER_TEST_CLASS AFTER_TEST_CLASS} execution phase.
+	 * @since 6.1
+	 */
+	private void executeClassLevelSqlScripts(TestContext testContext, ExecutionPhase executionPhase) {
+		Class<?> testClass = testContext.getTestClass();
+		executeSqlScripts(getSqlAnnotationsFor(testClass), testContext, executionPhase, true);
 	}
 
 	/**
@@ -214,18 +288,27 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(
 			Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel) {
 
+		Assert.isTrue(classLevel || isValidMethodLevelPhase(sql.executionPhase()),
+				() -> "@SQL execution phase %s cannot be used on methods".formatted(sql.executionPhase()));
+
 		if (executionPhase != sql.executionPhase()) {
 			return;
 		}
 
 		MergedSqlConfig mergedSqlConfig = new MergedSqlConfig(sql.config(), testContext.getTestClass());
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.",
-					mergedSqlConfig, executionPhase, testContext));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Processing %s for execution phase [%s] and test context %s"
+					.formatted(mergedSqlConfig, executionPhase, testContext));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Processing merged @SqlConfig attributes for execution phase [%s] and test class [%s]"
+					.formatted(executionPhase, testContext.getTestClass().getName()));
 		}
 
-		String[] scripts = getScripts(sql, testContext, classLevel);
-		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
+		boolean methodLevel = !classLevel;
+		Method testMethod = (methodLevel ? testContext.getTestMethod() : null);
+
+		String[] scripts = getScripts(sql, testContext.getTestClass(), testMethod, classLevel);
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
 				testContext.getApplicationContext(), scripts);
 		for (String stmt : sql.statements()) {
@@ -238,7 +321,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		ResourceDatabasePopulator populator = createDatabasePopulator(mergedSqlConfig);
 		populator.setScripts(scriptResources.toArray(new Resource[0]));
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
+			logger.debug("Executing SQL scripts: " + scriptResources);
 		}
 
 		String dsName = mergedSqlConfig.getDataSource();
@@ -275,7 +358,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			int propagation = (newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW :
 					TransactionDefinition.PROPAGATION_REQUIRED);
 			TransactionAttribute txAttr = TestContextTransactionUtils.createDelegatingTransactionAttribute(
-					testContext, new DefaultTransactionAttribute(propagation));
+					testContext, new DefaultTransactionAttribute(propagation), methodLevel);
 			new TransactionTemplate(txMgr, txAttr).executeWithoutResult(s -> populator.execute(finalDataSource));
 		}
 	}
@@ -309,8 +392,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		try {
 			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");
 			Object obj = ReflectionUtils.invokeMethod(getDataSourceMethod, transactionManager);
-			if (obj instanceof DataSource) {
-				return (DataSource) obj;
+			if (obj instanceof DataSource dataSource) {
+				return dataSource;
 			}
 		}
 		catch (Exception ex) {
@@ -319,37 +402,37 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		return null;
 	}
 
-	private String[] getScripts(Sql sql, TestContext testContext, boolean classLevel) {
+	private String[] getScripts(Sql sql, Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
 		String[] scripts = sql.scripts();
 		if (ObjectUtils.isEmpty(scripts) && ObjectUtils.isEmpty(sql.statements())) {
-			scripts = new String[] {detectDefaultScript(testContext, classLevel)};
+			scripts = new String[] {detectDefaultScript(testClass, testMethod, classLevel)};
 		}
-		return scripts;
+		return TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts);
 	}
 
 	/**
 	 * Detect a default SQL script by implementing the algorithm defined in
 	 * {@link Sql#scripts}.
 	 */
-	private String detectDefaultScript(TestContext testContext, boolean classLevel) {
-		Class<?> clazz = testContext.getTestClass();
-		Method method = testContext.getTestMethod();
-		String elementType = (classLevel ? "class" : "method");
-		String elementName = (classLevel ? clazz.getName() : method.toString());
+	private String detectDefaultScript(Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
+		Assert.state(classLevel || testMethod != null, "Method-level @Sql requires a testMethod");
 
-		String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName());
+		String elementType = (classLevel ? "class" : "method");
+		String elementName = (classLevel ? testClass.getName() : testMethod.toString());
+
+		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName());
 		if (!classLevel) {
-			resourcePath += "." + method.getName();
+			resourcePath += "." + testMethod.getName();
 		}
 		resourcePath += ".sql";
 
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+		String prefixedResourcePath = CLASSPATH_URL_PREFIX + SLASH + resourcePath;
 		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 
 		if (classPathResource.exists()) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Detected default SQL script \"%s\" for test %s [%s]",
-						prefixedResourcePath, elementType, elementName));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Detected default SQL script \"%s\" for test %s [%s]"
+						.formatted(prefixedResourcePath, elementType, elementName));
 			}
 			return prefixedResourcePath;
 		}
@@ -360,6 +443,24 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
+	}
+
+	private Stream<Method> getSqlMethods(Class<?> testClass) {
+		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(testClass, sqlMethodFilter));
+	}
+
+	private void registerClasspathResources(String[] paths, RuntimeHints runtimeHints, ClassLoader classLoader) {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
+		Arrays.stream(paths)
+				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
+				.map(resourceLoader::getResource)
+				.forEach(runtimeHints.resources()::registerResource);
+	}
+
+	private static boolean isValidMethodLevelPhase(ExecutionPhase executionPhase) {
+		// Class-level phases cannot be used on methods.
+		return (executionPhase == ExecutionPhase.BEFORE_TEST_METHOD ||
+				executionPhase == ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
 }

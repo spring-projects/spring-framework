@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Arjen Poutsma
  * @since 1.2.6
  * @see Resource#getInputStream()
  * @see java.io.Reader
@@ -159,19 +160,34 @@ public class EncodedResource implements InputStreamSource {
 		return this.resource.getInputStream();
 	}
 
+	/**
+	 * Returns the contents of the specified resource as a string, using the specified
+	 * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding} (if any).
+	 * @throws IOException if opening the resource failed
+	 * @since 6.0.5
+	 * @see Resource#getContentAsString(Charset)
+	 */
+	public String getContentAsString() throws IOException {
+		Charset charset;
+		if (this.charset != null) {
+			charset = this.charset;
+		}
+		else if (this.encoding != null) {
+			charset = Charset.forName(this.encoding);
+		}
+		else {
+			charset = Charset.defaultCharset();
+		}
+		return this.resource.getContentAsString(charset);
+	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof EncodedResource)) {
-			return false;
-		}
-		EncodedResource otherResource = (EncodedResource) other;
-		return (this.resource.equals(otherResource.resource) &&
-				ObjectUtils.nullSafeEquals(this.charset, otherResource.charset) &&
-				ObjectUtils.nullSafeEquals(this.encoding, otherResource.encoding));
+		return (this == other || (other instanceof EncodedResource that &&
+				this.resource.equals(that.resource) &&
+				ObjectUtils.nullSafeEquals(this.charset, that.charset) &&
+				ObjectUtils.nullSafeEquals(this.encoding, that.encoding)));
 	}
 
 	@Override

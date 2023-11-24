@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
+import org.hibernate.type.spi.TypeBootstrapContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -34,7 +35,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * Spring's implementation of Hibernate 5.3's {@link BeanContainer} SPI,
+ * Spring's implementation of Hibernate's {@link BeanContainer} SPI,
  * delegating to a Spring {@link ConfigurableListableBeanFactory}.
  *
  * <p>Auto-configured by {@link LocalSessionFactoryBean#setBeanFactory},
@@ -46,7 +47,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
  *   ...
  *   &lt;property name="jpaPropertyMap"&gt;
- * 	   &lt;map>
+ * 	   &lt;map&gt;
  *       &lt;entry key="hibernate.resource.beans.container"&gt;
  * 	       &lt;bean class="org.springframework.orm.hibernate5.SpringBeanContainer"/&gt;
  * 	     &lt;/entry&gt;
@@ -62,10 +63,10 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * </pre>
  *
  * Please note that Spring's {@link LocalSessionFactoryBean} is an immediate alternative
- * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
- * JPA purposes: In particular with Hibernate 5.3/5.4, the Hibernate {@code SessionFactory}
- * will natively expose the JPA {@code EntityManagerFactory} interface as well, and
- * Hibernate {@code BeanContainer} integration will be registered out of the box.
+ * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for
+ * common JPA purposes: The Hibernate {@code SessionFactory} will natively expose the JPA
+ * {@code EntityManagerFactory} interface as well, and Hibernate {@code BeanContainer}
+ * integration will be registered out of the box.
  *
  * @author Juergen Hoeller
  * @since 5.1
@@ -144,7 +145,7 @@ public final class SpringBeanContainer implements BeanContainer {
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
 				return new SpringContainedBean<>(
-						this.beanFactory.createBean(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false),
+						this.beanFactory.createBean(beanType),
 						this.beanFactory::destroyBean);
 			}
 			else {
@@ -180,14 +181,37 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
-				Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
-				this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
-				this.beanFactory.applyBeanPropertyValues(bean, name);
-				bean = this.beanFactory.initializeBean(bean, name);
-				return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
+				Object bean = null;
+				if (fallbackProducer instanceof TypeBootstrapContext) {
+					// Special Hibernate type construction rules, including TypeBootstrapContext resolution.
+					bean = fallbackProducer.produceBeanInstance(name, beanType);
+				}
+				if (this.beanFactory.containsBean(name)) {
+					if (bean == null) {
+						bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+					}
+					this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+					this.beanFactory.applyBeanPropertyValues(bean, name);
+					bean = this.beanFactory.initializeBean(bean, name);
+					return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
+				}
+				else if (bean != null) {
+					// No bean found by name but constructed with TypeBootstrapContext rules
+					this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+					bean = this.beanFactory.initializeBean(bean, name);
+					return new SpringContainedBean<>(bean, this.beanFactory::destroyBean);
+				}
+				else {
+					// No bean found by name -> construct by type using createBean
+					return new SpringContainedBean<>(
+							this.beanFactory.createBean(beanType),
+							this.beanFactory::destroyBean);
+				}
 			}
 			else {
-				return new SpringContainedBean<>(this.beanFactory.getBean(name, beanType));
+				return (this.beanFactory.containsBean(name) ?
+						new SpringContainedBean<>(this.beanFactory.getBean(name, beanType)) :
+						new SpringContainedBean<>(this.beanFactory.getBean(beanType)));
 			}
 		}
 		catch (BeansException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
@@ -36,11 +37,11 @@ public class UnknownContentTypeException extends RestClientException {
 	private static final long serialVersionUID = 2759516676367274084L;
 
 
-	private final Type targetType;
+	private final transient Type targetType;
 
 	private final MediaType contentType;
 
-	private final int rawStatusCode;
+	private final HttpStatusCode statusCode;
 
 	private final String statusText;
 
@@ -61,12 +62,28 @@ public class UnknownContentTypeException extends RestClientException {
 	public UnknownContentTypeException(Type targetType, MediaType contentType,
 			int statusCode, String statusText, HttpHeaders responseHeaders, byte[] responseBody) {
 
+		this(targetType, contentType, HttpStatusCode.valueOf(statusCode), statusText, responseHeaders, responseBody);
+	}
+
+	/**
+	 * Construct a new instance of with the given response data.
+	 * @param targetType the expected target type
+	 * @param contentType the content type of the response
+	 * @param statusCode the raw status code value
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param responseBody the response body content (may be {@code null})
+	 * @since 6.0
+	 */
+	public UnknownContentTypeException(Type targetType, MediaType contentType,
+			HttpStatusCode statusCode, String statusText, HttpHeaders responseHeaders, byte[] responseBody) {
+
 		super("Could not extract response: no suitable HttpMessageConverter found " +
 				"for response type [" + targetType + "] and content type [" + contentType + "]");
 
 		this.targetType = targetType;
 		this.contentType = contentType;
-		this.rawStatusCode = statusCode;
+		this.statusCode = statusCode;
 		this.statusText = statusText;
 		this.responseHeaders = responseHeaders;
 		this.responseBody = responseBody;
@@ -88,10 +105,19 @@ public class UnknownContentTypeException extends RestClientException {
 	}
 
 	/**
-	 * Return the raw HTTP status code value.
+	 * Return the HTTP status code value.
 	 */
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
+	}
+
+	/**
+	 * Return the raw HTTP status code value.
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
+	 */
+	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {
-		return this.rawStatusCode;
+		return this.statusCode.value();
 	}
 
 	/**

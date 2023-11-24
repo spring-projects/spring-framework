@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegratio
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Map<String, String> body = parseBody(result.getBody());
-		assertThat(body.size()).isEqualTo(2);
+		assertThat(body).hasSize(2);
 		assertThat(body.get("name")).isEqualTo("foo");
 		assertThat(body.get("bar")).isEqualTo("baz");
 	}
@@ -95,7 +95,7 @@ class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegratio
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Map<String, String> body = parseBody(result.getBody());
-		assertThat(body.size()).isEqualTo(3);
+		assertThat(body).hasSize(3);
 		assertThat(body.get("name")).isEqualTo("foo");
 		assertThat(body.get("bar")).isEqualTo("baz");
 		assertThat(body.get("qux")).isEqualTo("quux");

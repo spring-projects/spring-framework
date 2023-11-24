@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,93 +37,88 @@ public class ResourceBundleEditorTests {
 
 
 	@Test
-	public void testSetAsTextWithJustBaseName() throws Exception {
+	public void testSetAsTextWithJustBaseName() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME);
 		Object value = editor.getValue();
 		assertThat(value).as("Returned ResourceBundle was null (must not be for valid setAsText(..) call).").isNotNull();
-		boolean condition = value instanceof ResourceBundle;
-		assertThat(condition).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
+		assertThat(value instanceof ResourceBundle).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertThat(string).isEqualTo(MESSAGE_KEY);
 	}
 
 	@Test
-	public void testSetAsTextWithBaseNameThatEndsInDefaultSeparator() throws Exception {
+	public void testSetAsTextWithBaseNameThatEndsInDefaultSeparator() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "_");
 		Object value = editor.getValue();
 		assertThat(value).as("Returned ResourceBundle was null (must not be for valid setAsText(..) call).").isNotNull();
-		boolean condition = value instanceof ResourceBundle;
-		assertThat(condition).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
+		assertThat(value instanceof ResourceBundle).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertThat(string).isEqualTo(MESSAGE_KEY);
 	}
 
 	@Test
-	public void testSetAsTextWithBaseNameAndLanguageCode() throws Exception {
+	public void testSetAsTextWithBaseNameAndLanguageCode() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "Lang" + "_en");
 		Object value = editor.getValue();
 		assertThat(value).as("Returned ResourceBundle was null (must not be for valid setAsText(..) call).").isNotNull();
-		boolean condition = value instanceof ResourceBundle;
-		assertThat(condition).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
+		assertThat(value instanceof ResourceBundle).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertThat(string).isEqualTo("yob");
 	}
 
 	@Test
-	public void testSetAsTextWithBaseNameLanguageAndCountryCode() throws Exception {
+	public void testSetAsTextWithBaseNameLanguageAndCountryCode() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountry" + "_en_GB");
 		Object value = editor.getValue();
 		assertThat(value).as("Returned ResourceBundle was null (must not be for valid setAsText(..) call).").isNotNull();
-		boolean condition = value instanceof ResourceBundle;
-		assertThat(condition).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
+		assertThat(value instanceof ResourceBundle).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertThat(string).isEqualTo("chav");
 	}
 
 	@Test
-	public void testSetAsTextWithTheKitchenSink() throws Exception {
+	public void testSetAsTextWithTheKitchenSink() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountryDialect" + "_en_GB_GLASGOW");
 		Object value = editor.getValue();
 		assertThat(value).as("Returned ResourceBundle was null (must not be for valid setAsText(..) call).").isNotNull();
-		boolean condition = value instanceof ResourceBundle;
-		assertThat(condition).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
+		assertThat(value instanceof ResourceBundle).as("Returned object was not a ResourceBundle (must be for valid setAsText(..) call).").isTrue();
 		ResourceBundle bundle = (ResourceBundle) value;
 		String string = bundle.getString(MESSAGE_KEY);
 		assertThat(string).isEqualTo("ned");
 	}
 
 	@Test
-	public void testSetAsTextWithNull() throws Exception {
+	public void testSetAsTextWithNull() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText(null));
 	}
 
 	@Test
-	public void testSetAsTextWithEmptyString() throws Exception {
+	public void testSetAsTextWithEmptyString() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText(""));
 	}
 
 	@Test
-	public void testSetAsTextWithWhiteSpaceString() throws Exception {
+	public void testSetAsTextWithWhiteSpaceString() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText("   "));
 	}
 
 	@Test
-	public void testSetAsTextWithJustSeparatorString() throws Exception {
+	public void testSetAsTextWithJustSeparatorString() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText("_"));

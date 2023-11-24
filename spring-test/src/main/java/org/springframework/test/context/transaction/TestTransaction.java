@@ -80,7 +80,7 @@ public final class TestTransaction {
 	/**
 	 * Flag the current test-managed transaction for <em>rollback</em>.
 	 * <p>Invoking this method will <em>not</em> end the current transaction.
-	 * Rather, the value of this flag will be used to determine whether or not
+	 * Rather, the value of this flag will be used to determine whether
 	 * the current test-managed transaction should be rolled back or committed
 	 * once it is {@linkplain #end ended}.
 	 * @throws IllegalStateException if no transaction is active for the current test
@@ -96,7 +96,7 @@ public final class TestTransaction {
 	/**
 	 * Flag the current test-managed transaction for <em>commit</em>.
 	 * <p>Invoking this method will <em>not</em> end the current transaction.
-	 * Rather, the value of this flag will be used to determine whether or not
+	 * Rather, the value of this flag will be used to determine whether
 	 * the current test-managed transaction should be rolled back or committed
 	 * once it is {@linkplain #end ended}.
 	 * @throws IllegalStateException if no transaction is active for the current test

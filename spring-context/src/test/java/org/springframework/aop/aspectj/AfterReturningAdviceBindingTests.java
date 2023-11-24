@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class AfterReturningAdviceBindingTests {
+class AfterReturningAdviceBindingTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private AfterReturningAdviceBindingTestAspect afterAdviceAspect;
 
@@ -47,17 +50,15 @@ public class AfterReturningAdviceBindingTests {
 
 	private TestBean testBeanTarget;
 
-	private AfterReturningAdviceBindingCollaborator mockCollaborator;
+	private AfterReturningAdviceBindingCollaborator mockCollaborator = mock();
 
 
 	@BeforeEach
-	public void setup() throws Exception {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	void setup() throws Exception {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
 
-		mockCollaborator = mock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
@@ -67,58 +68,63 @@ public class AfterReturningAdviceBindingTests {
 		this.testBeanTarget = (TestBean) ((Advised)testBeanProxy).getTargetSource().getTarget();
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void testOneIntArg() {
+	void oneIntArg() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntArg(5);
 	}
 
 	@Test
-	public void testOneObjectArg() {
+	void oneObjectArg() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).oneObjectArg(this.testBeanProxy);
 	}
 
 	@Test
-	public void testOneIntAndOneObjectArgs() {
+	void oneIntAndOneObjectArgs() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntAndOneObject(5,this.testBeanProxy);
 	}
 
 	@Test
-	public void testNeedsJoinPoint() {
+	void needsJoinPoint() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).needsJoinPoint("getAge");
 	}
 
 	@Test
-	public void testNeedsJoinPointStaticPart() {
+	void needsJoinPointStaticPart() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).needsJoinPointStaticPart("getAge");
 	}
 
 	@Test
-	public void testReturningString() {
+	void returningString() {
 		testBeanProxy.setName("adrian");
 		testBeanProxy.getName();
 		verify(mockCollaborator).oneString("adrian");
 	}
 
 	@Test
-	public void testReturningObject() {
+	void returningObject() {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);
 	}
 
 	@Test
-	public void testReturningBean() {
+	void returningBean() {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator).oneTestBeanArg(this.testBeanTarget);
 	}
 
 	@Test
-	public void testReturningBeanArray() {
+	void returningBeanArray() {
 		this.testBeanTarget.setSpouse(new TestBean());
 		ITestBean[] spouses = this.testBeanTarget.getSpouses();
 		testBeanProxy.getSpouses();
@@ -126,20 +132,20 @@ public class AfterReturningAdviceBindingTests {
 	}
 
 	@Test
-	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
+	void noInvokeWhenReturningParameterTypeDoesNotMatch() {
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
 		verifyNoInteractions(mockCollaborator);
 	}
 
 	@Test
-	public void testReturningByType() {
+	void returningByType() {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator).objectMatchNoArgs();
 	}
 
 	@Test
-	public void testReturningPrimitive() {
+	void returningPrimitive() {
 		testBeanProxy.setAge(20);
 		testBeanProxy.haveBirthday();
 		verify(mockCollaborator).oneInt(20);

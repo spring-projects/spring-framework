@@ -41,9 +41,9 @@ import static org.mockito.Mockito.verify;
  */
 class DatabaseStartupValidatorTests {
 
-	private final DataSource dataSource = mock(DataSource.class);
+	private final DataSource dataSource = mock();
 
-	private final Connection connection = mock(Connection.class);
+	private final Connection connection = mock();
 
 	private final DatabaseStartupValidator validator = new DatabaseStartupValidator();
 
@@ -80,7 +80,7 @@ class DatabaseStartupValidatorTests {
 	}
 
 	@Test
-	void shouldCallValidatonTwiceWhenNotValid() throws Exception {
+	void shouldCallValidationTwiceWhenNotValid() throws Exception {
 		given(connection.isValid(1)).willReturn(false, true);
 
 		validator.afterPropertiesSet();
@@ -90,7 +90,7 @@ class DatabaseStartupValidatorTests {
 	}
 
 	@Test
-	void shouldCallValidatonTwiceInCaseOfException() throws Exception {
+	void shouldCallValidationTwiceInCaseOfException() throws Exception {
 		given(connection.isValid(1)).willThrow(new SQLException("Test")).willReturn(true);
 
 		validator.afterPropertiesSet();
@@ -103,7 +103,7 @@ class DatabaseStartupValidatorTests {
 	@SuppressWarnings("deprecation")
 	void useValidationQueryInsteadOfIsValid() throws Exception {
 		String validationQuery = "SELECT NOW() FROM DUAL";
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery)).willReturn(true);
 
@@ -118,9 +118,9 @@ class DatabaseStartupValidatorTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void shouldExecuteValidatonTwiceOnError() throws Exception {
+	void shouldExecuteValidationTwiceOnError() throws Exception {
 		String validationQuery = "SELECT NOW() FROM DUAL";
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery))
 				.willThrow(new SQLException("Test"))

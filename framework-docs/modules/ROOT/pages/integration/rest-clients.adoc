@@ -1,0 +1,1099 @@
+[[rest-client-access]]
+= REST Clients
+
+The Spring Framework provides the following choices for making calls to REST endpoints:
+
+* xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] - synchronous client with a fluent API.
+* xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] - non-blocking, reactive client with fluent API.
+* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] - synchronous client with template method API.
+* xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] - annotated interface with generated, dynamic proxy implementation.
+
+
+[[rest-restclient]]
+== `RestClient`
+
+The `RestClient` is a synchronous HTTP client that offers a modern, fluent API.
+It offers an abstraction over HTTP libraries that allows for convenient conversion from Java object to HTTP request, and creation of objects from the HTTP response.
+
+=== Creating a `RestClient`
+
+The `RestClient` is created using one of the static `create` methods.
+You can also use `builder` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, a default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
+
+Once created (or built), the `RestClient` can be used safely by multiple threads.
+
+The following sample shows how to create a default `RestClient`, and how to build a custom one.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+RestClient defaultClient = RestClient.create();
+
+RestClient customClient = RestClient.builder()
+  .requestFactory(new HttpComponentsClientHttpRequestFactory())
+  .messageConverters(converters -> converters.add(new MyCustomMessageConverter()))
+  .baseUrl("https://example.com")
+  .defaultUriVariables(Map.of("variable", "foo"))
+  .defaultHeader("My-Header", "Foo")
+  .requestInterceptor(myCustomInterceptor)
+  .requestInitializer(myCustomInitializer)
+  .build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+val defaultClient = RestClient.create()
+
+val customClient = RestClient.builder()
+  .requestFactory(HttpComponentsClientHttpRequestFactory())
+  .messageConverters(converters -> converters.add(MyCustomMessageConverter()))
+  .baseUrl("https://example.com")
+  .defaultUriVariables(Map.of("variable", "foo"))
+  .defaultHeader("My-Header", "Foo")
+  .requestInterceptor(myCustomInterceptor)
+  .requestInitializer(myCustomInitializer)
+  .build()
+----
+======
+
+=== Using the `RestClient`
+
+When making an HTTP request with the `RestClient`, the first thing to specify is which HTTP method to use.
+This can be done with `method(HttpMethod)`, or with the convenience methods `get()`, `head()`, `post()`, and so on.
+
+==== Request URL
+
+Next, the request URI can be specified with the `uri` methods.
+This step is optional, and can be skipped if the `RestClient` is configured with a default URI.
+The URL is typically specified as `String`, with optional URI template variables.
+String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
+
+The URL can also be provided with a function, or as `java.net.URI`, both of which are not encoded.
+For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-building.adoc[URI Links].
+
+==== Request headers and body
+
+If necessary, the HTTP request can be manipulated, by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
+For HTTP request that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
+
+The request body itself can be set by `body(Object)`, which internally uses <<rest-message-conversion>>.
+Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.
+Finally, the body can be set to a callback function that writes to an `OutputStream`.
+
+==== Retrieving the response
+Once the request has been set up, the HTTP response is accessed by invoking `retrieve()`.
+The response body can be accessed by using `body(Class)`, or `body(ParameterizedTypeReference)` for parameterized types like lists.
+The `body` method converts the response contents into various types, for instance bytes can be converted into a `String`, JSON into objects using Jackson, and so on (see <<rest-message-conversion>>).
+
+The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body.
+
+This sample shows how `RestClient` can be used to perform a simple GET request.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+String result = restClient.get() <1>
+  .uri("https://example.com") <2>
+  .retrieve() <3>
+  .body(String.class); <4>
+
+System.out.println(result); <5>
+----
+<1> Set up a GET request
+<2> Specify the URL to connect to
+<3> Retrieve the response
+<4> Convert the response into a string
+<5> Print the result
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val result= restClient.get() <1>
+  .uri("https://example.com") <2>
+  .retrieve() <3>
+  .body<String>() <4>
+
+println(result) <5>
+----
+<1> Set up a GET request
+<2> Specify the URL to connect to
+<3> Retrieve the response
+<4> Convert the response into a string
+<5> Print the result
+======
+
+Access to the response status code and headers is provided through `ResponseEntity`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+ResponseEntity<String> result = restClient.get() <1>
+  .uri("https://example.com") <1>
+  .retrieve()
+  .toEntity(String.class); <2>
+
+System.out.println("Response status: " + result.getStatusCode()); <3>
+System.out.println("Response headers: " + result.getHeaders()); <3>
+System.out.println("Contents: " + result.getBody()); <3>
+----
+<1> Set up a GET request for the specified URL
+<2> Convert the response into a `ResponseEntity`
+<3> Print the result
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val result = restClient.get() <1>
+  .uri("https://example.com") <1>
+  .retrieve()
+  .toEntity<String>() <2>
+
+println("Response status: " + result.statusCode) <3>
+println("Response headers: " + result.headers) <3>
+println("Contents: " + result.body) <3>
+----
+<1> Set up a GET request for the specified URL
+<2> Convert the response into a `ResponseEntity`
+<3> Print the result
+======
+
+`RestClient` can convert JSON to objects, using the Jackson library.
+Note the usage of uri variables in this sample, and that the `Accept` header is set to JSON.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+int id = ...;
+Pet pet = restClient.get()
+  .uri("https://petclinic.example.com/pets/{id}", id) <1>
+  .accept(APPLICATION_JSON) <2>
+  .retrieve()
+  .body(Pet.class); <3>
+----
+<1> Using URI variables
+<2> Set the `Accept` header to `application/json`
+<3> Convert the JSON response into a `Pet` domain object
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val id = ...
+val pet = restClient.get()
+  .uri("https://petclinic.example.com/pets/{id}", id) <1>
+  .accept(APPLICATION_JSON) <2>
+  .retrieve()
+  .body<Pet>() <3>
+----
+<1> Using URI variables
+<2> Set the `Accept` header to `application/json`
+<3> Convert the JSON response into a `Pet` domain object
+======
+
+In the next sample, `RestClient` is used to perform a POST request that contains JSON, which again is converted using Jackson.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+Pet pet = ... <1>
+ResponseEntity<Void> response = restClient.post() <2>
+  .uri("https://petclinic.example.com/pets/new") <2>
+  .contentType(APPLICATION_JSON) <3>
+  .body(pet) <4>
+  .retrieve()
+  .toBodilessEntity(); <5>
+----
+<1> Create a `Pet` domain object
+<2> Set up a POST request, and the URL to connect to
+<3> Set the `Content-Type` header to `application/json`
+<4> Use `pet` as the request body
+<5> Convert the response into a response entity with no body.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val pet: Pet = ... <1>
+val response = restClient.post() <2>
+  .uri("https://petclinic.example.com/pets/new") <2>
+  .contentType(APPLICATION_JSON) <3>
+  .body(pet) <4>
+  .retrieve()
+  .toBodilessEntity() <5>
+----
+<1> Create a `Pet` domain object
+<2> Set up a POST request, and the URL to connect to
+<3> Set the `Content-Type` header to `application/json`
+<4> Use `pet` as the request body
+<5> Convert the response into a response entity with no body.
+======
+
+==== Error handling
+By default, `RestClient` throws a subclass of `RestClientException` when retrieving a response with a 4xx or 5xx status code.
+This behavior can be overriden using `onStatus`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+String result = restClient.get() <1>
+  .uri("https://example.com/this-url-does-not-exist") <1>
+  .retrieve()
+  .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> { <2>
+      throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()) <3>
+  })
+  .body(String.class);
+----
+<1> Create a GET request for a URL that returns a 404 status code
+<2> Set up a status handler for all 4xx status codes
+<3> Throw a custom exception
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val result = restClient.get() <1>
+  .uri("https://example.com/this-url-does-not-exist") <1>
+  .retrieve()
+  .onStatus(HttpStatusCode::is4xxClientError) { _, response -> <2>
+    throw MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()) } <3>
+  .body<String>()
+----
+<1> Create a GET request for a URL that returns a 404 status code
+<2> Set up a status handler for all 4xx status codes
+<3> Throw a custom exception
+======
+
+==== Exchange
+For more advanced scenarios, the `RestClient` gives access to the underlying HTTP request and response through the `exchange` method, which can be used instead of `retrieve()`.
+Status handlers are not applied when you exchange, because the exchange function already provides access to the full response, allowing you to perform any error handling necessary.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+Pet result = restClient.get()
+  .uri("https://petclinic.example.com/pets/{id}", id)
+  .accept(APPLICATION_JSON)
+  .exchange((request, response) -> { <1>
+    if (response.getStatusCode().is4xxClientError()) { <2>
+      throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()); <2>
+    }
+    else {
+      Pet pet = convertResponse(response); <3>
+      return pet;
+    }
+  });
+----
+<1> `exchange` provides the request and response
+<2> Throw an exception when the response has a 4xx status code
+<3> Convert the response into a Pet domain object
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val result = restClient.get()
+  .uri("https://petclinic.example.com/pets/{id}", id)
+  .accept(MediaType.APPLICATION_JSON)
+  .exchange { request, response -> <1>
+    if (response.getStatusCode().is4xxClientError()) { <2>
+      throw MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()) <2>
+    } else {
+      val pet: Pet = convertResponse(response) <3>
+      pet
+    }
+  }
+----
+<1> `exchange` provides the request and response
+<2> Throw an exception when the response has a 4xx status code
+<3> Convert the response into a Pet domain object
+======
+
+
+[[rest-message-conversion]]
+=== HTTP Message Conversion
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs[See equivalent in the Reactive stack]#
+
+The `spring-web` module contains the `HttpMessageConverter` interface for reading and writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
+`HttpMessageConverter` instances are used on the client side (for example, in the `RestClient`) and on the server side (for example, in Spring MVC REST controllers).
+
+Concrete implementations for the main media (MIME) types are provided in the framework and are, by default, registered with the `RestClient` and `RestTemplate` on the client side and with `RequestMappingHandlerAdapter` on the server side (see xref:web/webmvc/mvc-config/message-converters.adoc[Configuring Message Converters]).
+
+Several implementations of `HttpMessageConverter` are described below.
+Refer to the {spring-framework-api}/http/converter/HttpMessageConverter.html[`HttpMessageConverter` Javadoc] for the complete list.
+For all converters, a default media type is used, but you can override it by setting the `supportedMediaTypes`  property.
+
+[[rest-message-converters-tbl]]
+.HttpMessageConverter Implementations
+[cols="1,3"]
+|===
+| MessageConverter | Description
+
+| `StringHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write `String` instances from the HTTP request and response.
+By default, this converter supports all text media types(`text/{asterisk}`) and writes with a `Content-Type` of `text/plain`.
+
+| `FormHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write form data from the HTTP request and response.
+By default, this converter reads and writes the `application/x-www-form-urlencoded` media type.
+Form data is read from and written into a `MultiValueMap<String, String>`.
+The converter can also write (but not read) multipart data read from a `MultiValueMap<String, Object>`.
+By default, `multipart/form-data` is supported.
+Additional multipart subtypes can be supported for writing form data.
+Consult the javadoc for `FormHttpMessageConverter` for further details.
+
+| `ByteArrayHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write byte arrays from the HTTP request and response.
+By default, this converter supports all media types (`{asterisk}/{asterisk}`) and writes with a `Content-Type` of `application/octet-stream`.
+You can override this by setting the `supportedMediaTypes` property and overriding `getContentType(byte[])`.
+
+| `MarshallingHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write XML by using Spring's `Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
+This converter requires a `Marshaller` and `Unmarshaller` before it can be used.
+You can inject these through constructor or bean properties.
+By default, this converter supports `text/xml` and `application/xml`.
+
+| `MappingJackson2HttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write JSON by using Jackson's `ObjectMapper`.
+You can customize JSON mapping as needed through the use of Jackson's provided annotations.
+When you need further control (for cases where custom JSON serializers/deserializers need to be provided for specific types), you can inject a custom `ObjectMapper` through the `ObjectMapper` property.
+By default, this converter supports `application/json`.
+
+| `MappingJackson2XmlHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write XML by using {jackson-github-org}/jackson-dataformat-xml[Jackson XML] extension's `XmlMapper`.
+You can customize XML mapping as needed through the use of JAXB or Jackson's provided annotations.
+When you need further control (for cases where custom XML serializers/deserializers need to be provided for specific types), you can inject a custom `XmlMapper` through the `ObjectMapper` property.
+By default, this converter supports `application/xml`.
+
+| `SourceHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write `javax.xml.transform.Source` from the HTTP request and response.
+Only `DOMSource`, `SAXSource`, and `StreamSource` are supported.
+By default, this converter supports `text/xml` and `application/xml`.
+
+|===
+
+By default, `RestClient` and `RestTemplate` register all built-in message converters, depending on the availability of underlying libraries on the classpath.
+You can also set the message converters to use explicitly, by using `messageConverters` on the `RestClient` builder, or via the `messageConverters` property of `RestTemplate`.
+
+==== Jackson JSON Views
+
+To serialize only a subset of the object properties, you can specify a {baeldung-blog}/jackson-json-view-annotation[Jackson JSON View], as the following example shows:
+
+[source,java,indent=0,subs="verbatim"]
+----
+MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
+value.setSerializationView(User.WithoutPasswordView.class);
+
+ResponseEntity<Void> response = restClient.post() // or RestTemplate.postForEntity
+  .contentType(APPLICATION_JSON)
+  .body(value)
+  .retrieve()
+  .toBodilessEntity();
+
+----
+
+==== Multipart
+
+To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for part content with headers.
+For example:
+
+[source,java,indent=0,subs="verbatim"]
+----
+MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+
+parts.add("fieldPart", "fieldValue");
+parts.add("filePart", new FileSystemResource("...logo.png"));
+parts.add("jsonPart", new Person("Jason"));
+
+HttpHeaders headers = new HttpHeaders();
+headers.setContentType(MediaType.APPLICATION_XML);
+parts.add("xmlPart", new HttpEntity<>(myBean, headers));
+
+// send using RestClient.post or RestTemplate.postForEntity
+----
+
+In most cases, you do not have to specify the `Content-Type` for each part.
+The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource` based on the file extension.
+If necessary, you can explicitly provide the `MediaType` with an `HttpEntity` wrapper.
+
+Once the `MultiValueMap` is ready, you can use it as the body of a POST request, using  `RestClient.post().body(parts)` (or `RestTemplate.postForObject`).
+
+If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set to `multipart/form-data` by the `FormHttpMessageConverter`.
+If the `MultiValueMap` has `String` values the `Content-Type` defaults to `application/x-www-form-urlencoded`.
+If necessary the `Content-Type` may also be set explicitly.
+
+[[rest-request-factories]]
+=== Client Request Factories
+
+To execute the HTTP request, `RestClient` uses a client HTTP library.
+These libraries are adapted via the `ClientRequestFactory` interface.
+Various implementations are available:
+
+* `JdkClientHttpRequestFactory` for Java's `HttpClient`,
+* `HttpComponentsClientHttpRequestFactory` for use with Apache HTTP Components `HttpClient`,
+* `JettyClientHttpRequestFactory` for Jetty's `HttpClient`,
+* `ReactorNettyClientRequestFactory` for Reactor Netty's `HttpClient`,
+* `SimpleClientHttpRequestFactory` as a simple default.
+
+
+If no request factory is specified when the `RestClient` was built, it will use the Apache or Jetty `HttpClient` if they are available on the classpath.
+Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
+Finally, it will resort to the simple default.
+
+[[rest-webclient]]
+== `WebClient`
+
+`WebClient` is a non-blocking, reactive client to perform HTTP requests. It was
+introduced in 5.0 and offers an alternative to the `RestTemplate`, with support for
+synchronous, asynchronous, and streaming scenarios.
+
+`WebClient` supports the following:
+
+* Non-blocking I/O.
+* Reactive Streams back pressure.
+* High concurrency with fewer hardware resources.
+* Functional-style, fluent API that takes advantage of Java 8 lambdas.
+* Synchronous and asynchronous interactions.
+* Streaming up to or streaming down from a server.
+
+See xref:web/webflux-webclient.adoc[WebClient] for more details.
+
+
+
+
+[[rest-resttemplate]]
+== `RestTemplate`
+
+The `RestTemplate` provides a high-level API over HTTP client libraries in the form of a classic Spring Template class.
+It exposes the following groups of overloaded methods:
+
+NOTE: The xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] offers a more modern API for synchronous HTTP access.
+For asynchronous and streaming scenarios, consider the reactive xref:web/webflux-webclient.adoc[WebClient].
+
+[[rest-overview-of-resttemplate-methods-tbl]]
+.RestTemplate methods
+[cols="1,3"]
+|===
+| Method group | Description
+
+| `getForObject`
+| Retrieves a representation via GET.
+
+| `getForEntity`
+| Retrieves a `ResponseEntity` (that is, status, headers, and body) by using GET.
+
+| `headForHeaders`
+| Retrieves all headers for a resource by using HEAD.
+
+| `postForLocation`
+| Creates a new resource by using POST and returns the `Location` header from the response.
+
+| `postForObject`
+| Creates a new resource by using POST and returns the representation from the response.
+
+| `postForEntity`
+| Creates a new resource by using POST and returns the representation from the response.
+
+| `put`
+| Creates or updates a resource by using PUT.
+
+| `patchForObject`
+| Updates a resource by using PATCH and returns the representation from the response.
+Note that the JDK `HttpURLConnection` does not support `PATCH`, but Apache HttpComponents and others do.
+
+| `delete`
+| Deletes the resources at the specified URI by using DELETE.
+
+| `optionsForAllow`
+| Retrieves allowed HTTP methods for a resource by using ALLOW.
+
+| `exchange`
+| More generalized (and less opinionated) version of the preceding methods that provides extra flexibility when needed.
+It accepts a `RequestEntity` (including HTTP method, URL, headers, and body as input) and returns a `ResponseEntity`.
+
+These methods allow the use of `ParameterizedTypeReference` instead of `Class` to specify
+a response type with generics.
+
+| `execute`
+| The most generalized way to perform a request, with full control over request
+preparation and response extraction through callback interfaces.
+
+|===
+
+=== Initialization
+
+`RestTemplate` uses the same HTTP library abstraction as `RestClient`.
+By default, it uses the `SimpleClientHttpRequestFactory`, but this can be changed via the constructor.
+See <<rest-request-factories>>.
+
+NOTE: `RestTemplate` can be instrumented for observability, in order to produce metrics and traces.
+See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplate Observability support] section.
+
+[[rest-template-body]]
+=== Body
+
+Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
+
+=== Migrating from `RestTemplate` to `RestClient`
+
+The following table shows `RestClient` equivalents for `RestTemplate` methods.
+It can be used to migrate from the latter to the former.
+
+.RestClient equivalents for RestTemplate methods
+[cols="1,1", options="header"]
+|===
+| `RestTemplate` method | `RestClient` equivalent
+
+| `getForObject(String, Class, Object...)`
+| `get()
+.uri(String, Object...)
+.retrieve()
+.body(Class)`
+
+| `getForObject(String, Class, Map)`
+| `get()
+.uri(String, Map)
+.retrieve()
+.body(Class)`
+
+| `getForObject(URI, Class)`
+| `get()
+.uri(URI)
+.retrieve()
+.body(Class)`
+
+
+| `getForEntity(String, Class, Object...)`
+| `get()
+.uri(String, Object...)
+.retrieve()
+.toEntity(Class)`
+
+| `getForEntity(String, Class, Map)`
+| `get()
+.uri(String, Map)
+.retrieve()
+.toEntity(Class)`
+
+| `getForEntity(URI, Class)`
+| `get()
+.uri(URI)
+.retrieve()
+.toEntity(Class)`
+
+
+| `headForHeaders(String, Object...)`
+| `head()
+.uri(String, Object...)
+.retrieve()
+.toBodilessEntity()
+.getHeaders()`
+
+| `headForHeaders(String, Map)`
+| `head()
+.uri(String, Map)
+.retrieve()
+.toBodilessEntity()
+.getHeaders()`
+
+| `headForHeaders(URI)`
+| `head()
+.uri(URI)
+.retrieve()
+.toBodilessEntity()
+.getHeaders()`
+
+
+| `postForLocation(String, Object, Object...)`
+| `post()
+.uri(String, Object...)
+.body(Object).retrieve()
+.toBodilessEntity()
+.getLocation()`
+
+| `postForLocation(String, Object, Map)`
+| `post()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.toBodilessEntity()
+.getLocation()`
+
+| `postForLocation(URI, Object)`
+| `post()
+.uri(URI)
+.body(Object)
+.retrieve()
+.toBodilessEntity()
+.getLocation()`
+
+
+| `postForObject(String, Object, Class, Object...)`
+| `post()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `postForObject(String, Object, Class, Map)`
+| `post()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `postForObject(URI, Object, Class)`
+| `post()
+.uri(URI)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+
+| `postForEntity(String, Object, Class, Object...)`
+| `post()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.toEntity(Class)`
+
+| `postForEntity(String, Object, Class, Map)`
+| `post()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.toEntity(Class)`
+
+| `postForEntity(URI, Object, Class)`
+| `post()
+.uri(URI)
+.body(Object)
+.retrieve()
+.toEntity(Class)`
+
+
+| `put(String, Object, Object...)`
+| `put()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.toBodilessEntity()`
+
+| `put(String, Object, Map)`
+| `put()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.toBodilessEntity()`
+
+| `put(URI, Object)`
+| `put()
+.uri(URI)
+.body(Object)
+.retrieve()
+.toBodilessEntity()`
+
+
+| `patchForObject(String, Object, Class, Object...)`
+| `patch()
+.uri(String, Object...)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `patchForObject(String, Object, Class, Map)`
+| `patch()
+.uri(String, Map)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+| `patchForObject(URI, Object, Class)`
+| `patch()
+.uri(URI)
+.body(Object)
+.retrieve()
+.body(Class)`
+
+
+| `delete(String, Object...)`
+| `delete()
+.uri(String, Object...)
+.retrieve()
+.toBodilessEntity()`
+
+| `delete(String, Map)`
+| `delete()
+.uri(String, Map)
+.retrieve()
+.toBodilessEntity()`
+
+| `delete(URI)`
+| `delete()
+.uri(URI)
+.retrieve()
+.toBodilessEntity()`
+
+
+| `optionsForAllow(String, Object...)`
+| `options()
+.uri(String, Object...)
+.retrieve()
+.toBodilessEntity()
+.getAllow()`
+
+| `optionsForAllow(String, Map)`
+| `options()
+.uri(String, Map)
+.retrieve()
+.toBodilessEntity()
+.getAllow()`
+
+| `optionsForAllow(URI)`
+| `options()
+.uri(URI)
+.retrieve()
+.toBodilessEntity()
+.getAllow()`
+
+
+| `exchange(String, HttpMethod, HttpEntity, Class, Object...)`
+| `method(HttpMethod)
+.uri(String, Object...)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:http-entity[`HttpEntity` headers and body have to be supplied to the `RestClient` via `headers(Consumer<HttpHeaders>)` and `body(Object)`.]
+
+| `exchange(String, HttpMethod, HttpEntity, Class, Map)`
+| `method(HttpMethod)
+.uri(String, Map)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:http-entity[]
+
+| `exchange(URI, HttpMethod, HttpEntity, Class)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:http-entity[]
+
+
+| `exchange(String, HttpMethod, HttpEntity, ParameterizedTypeReference, Object...)`
+| `method(HttpMethod)
+.uri(String, Object...)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:http-entity[]
+
+| `exchange(String, HttpMethod, HttpEntity, ParameterizedTypeReference, Map)`
+| `method(HttpMethod)
+.uri(String, Map)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:http-entity[]
+
+| `exchange(URI, HttpMethod, HttpEntity, ParameterizedTypeReference)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:http-entity[]
+
+
+| `exchange(RequestEntity, Class)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(Class)` footnote:request-entity[`RequestEntity` method, URI, headers and body have to be supplied to the `RestClient` via `method(HttpMethod)`, `uri(URI)`, `headers(Consumer<HttpHeaders>)` and `body(Object)`.]
+
+| `exchange(RequestEntity, ParameterizedTypeReference)`
+| `method(HttpMethod)
+.uri(URI)
+.headers(Consumer<HttpHeaders>)
+.body(Object)
+.retrieve()
+.toEntity(ParameterizedTypeReference)` footnote:request-entity[]
+
+
+| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Object...)`
+| `method(HttpMethod)
+.uri(String, Object...)
+.exchange(ExchangeFunction)`
+
+| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Map)`
+| `method(HttpMethod)
+.uri(String, Map)
+.exchange(ExchangeFunction)`
+
+| `execute(URI, HttpMethod method, RequestCallback, ResponseExtractor)`
+| `method(HttpMethod)
+.uri(URI)
+.exchange(ExchangeFunction)`
+
+|===
+
+
+[[rest-http-interface]]
+== HTTP Interface
+
+The Spring Framework lets you define an HTTP service as a Java interface with
+`@HttpExchange` methods. You can pass such an interface to `HttpServiceProxyFactory`
+to create a proxy which performs requests through an HTTP client such as `RestClient`
+or `WebClient`. You can also implement the interface from an `@Controller` for server
+request handling.
+
+Start by creating the interface with `@HttpExchange` methods:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	interface RepositoryService {
+
+		@GetExchange("/repos/{owner}/{repo}")
+		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
+
+		// more HTTP exchange methods...
+
+	}
+----
+
+Now you can create a proxy that performs requests when methods are called.
+
+For `RestClient`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RestClient restClient = RestClient.builder().baseUrl("https://api.github.com/").build();
+	RestClientAdapter adapter = RestClientAdapter.create(restClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+
+	RepositoryService service = factory.createClient(RepositoryService.class);
+----
+
+For `WebClient`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
+	WebClientAdapter adapter = WebClientAdapter.forClient(webClient)
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+
+	RepositoryService service = factory.createClient(RepositoryService.class);
+----
+
+For `RestTemplate`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RestTemplate restTemplate = new RestTemplate();
+	restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("https://api.github.com/"));
+	RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+
+	RepositoryService service = factory.createClient(RepositoryService.class);
+----
+
+`@HttpExchange` is supported at the type level where it applies to all methods:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@HttpExchange(url = "/repos/{owner}/{repo}", accept = "application/vnd.github.v3+json")
+	interface RepositoryService {
+
+		@GetExchange
+		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
+
+		@PatchExchange(contentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+		void updateRepository(@PathVariable String owner, @PathVariable String repo,
+				@RequestParam String name, @RequestParam String description, @RequestParam String homepage);
+
+	}
+----
+
+
+[[rest-http-interface-method-parameters]]
+=== Method Parameters
+
+Annotated, HTTP exchange methods support flexible method signatures with the following
+method parameters:
+
+[cols="1,2", options="header"]
+|===
+| Method argument | Description
+
+| `URI`
+| Dynamically set the URL for the request, overriding the annotation's `url` attribute.
+
+| `UriBuilderFactory`
+| Provide a `UriBuilderFactory` to expand the URI template and URI variables with.
+  In effect, replaces the `UriBuilderFactory` (and its base URL) of the underlying client.
+
+| `HttpMethod`
+| Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
+
+| `@RequestHeader`
+| Add a request header or multiple headers. The argument may be a `Map<String, ?>` or
+  `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
+  individual value. Type conversion is supported for non-String values.
+
+| `@PathVariable`
+| Add a variable for expand a placeholder in the request URL. The argument may be a
+  `Map<String, ?>` with multiple variables, or an individual value. Type conversion
+  is supported for non-String values.
+
+| `@RequestBody`
+| Provide the body of the request either as an Object to be serialized, or a
+  Reactive Streams `Publisher` such as `Mono`, `Flux`, or any other async type supported
+  through the configured `ReactiveAdapterRegistry`.
+
+| `@RequestParam`
+| Add a request parameter or multiple parameters. The argument may be a `Map<String, ?>`
+  or `MultiValueMap<String, ?>` with multiple parameters, a `Collection<?>` of values, or
+  an individual value. Type conversion is supported for non-String values.
+
+  When `"content-type"` is set to `"application/x-www-form-urlencoded"`, request
+  parameters are encoded in the request body. Otherwise, they are added as URL query
+  parameters.
+
+| `@RequestPart`
+| Add a request part, which may be a String (form field), `Resource` (file part),
+  Object (entity to be encoded, e.g. as JSON), `HttpEntity` (part content and headers),
+  a Spring `Part`, or Reactive Streams `Publisher` of any of the above.
+
+| `MultipartFile`
+| Add a request part from a `MultipartFile`, typically used in a Spring MVC controller
+  where it represents an uploaded file.
+
+| `@CookieValue`
+| Add a cookie or multiple cookies. The argument may be a `Map<String, ?>` or
+  `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
+  individual value. Type conversion is supported for non-String values.
+
+|===
+
+
+[[rest-http-interface-return-values]]
+=== Return Values
+
+The supported return values depend on the underlying client.
+
+Clients adapted to `HttpExchangeAdapter` such as `RestClient` and `RestTemplate`
+support synchronous return values:
+
+[cols="1,2", options="header"]
+|===
+| Method return value | Description
+
+| `void`
+| Perform the given request.
+
+| `HttpHeaders`
+| Perform the given request and return the response headers.
+
+| `<T>`
+| Perform the given request and decode the response content to the declared return type.
+
+| `ResponseEntity<Void>`
+| Perform the given request and return a `ResponseEntity` with the status and headers.
+
+| `ResponseEntity<T>`
+| Perform the given request, decode the response content to the declared return type, and
+  return a `ResponseEntity` with the status, headers, and the decoded body.
+
+|===
+
+Clients adapted to `ReactorHttpExchangeAdapter` such as `WebClient`, support all of above
+as well as reactive variants. The table below shows Reactor types, but you can also use
+other reactive types that are supported through the `ReactiveAdapterRegistry`:
+
+[cols="1,2", options="header"]
+|===
+| Method return value | Description
+
+| `Mono<Void>`
+| Perform the given request, and release the response content, if any.
+
+| `Mono<HttpHeaders>`
+| Perform the given request, release the response content, if any, and return the
+response headers.
+
+| `Mono<T>`
+| Perform the given request and decode the response content to the declared return type.
+
+| `Flux<T>`
+| Perform the given request and decode the response content to a stream of the declared
+element type.
+
+| `Mono<ResponseEntity<Void>>`
+| Perform the given request, and release the response content, if any, and return a
+`ResponseEntity` with the status and headers.
+
+| `Mono<ResponseEntity<T>>`
+| Perform the given request, decode the response content to the declared return type, and
+return a `ResponseEntity` with the status, headers, and the decoded body.
+
+| `Mono<ResponseEntity<Flux<T>>`
+| Perform the given request, decode the response content to a stream of the declared
+element type, and return a `ResponseEntity` with the status, headers, and the decoded
+response body stream.
+
+|===
+
+By default, the timeout for synchronous return values with `ReactorHttpExchangeAdapter`
+depends on how the underlying HTTP client is configured. You can set a `blockTimeout`
+value on the adapter level as well, but we recommend relying on timeout settings of the
+underlying HTTP client, which operates at a lower level and provides more control.
+
+
+[[rest-http-interface-exceptions]]
+=== Exception Handling
+
+By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status
+codes. To customize this, you can register a response status handler that applies to all
+responses performed through the client:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebClient webClient = WebClient.builder()
+			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
+			.build();
+
+	WebClientAdapter clientAdapter = WebClientAdapter.forClient(webClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory
+			.builder(clientAdapter).build();
+----
+
+For more details and options, such as suppressing error status codes, see the Javadoc of
+`defaultStatusHandler` in `WebClient.Builder`.

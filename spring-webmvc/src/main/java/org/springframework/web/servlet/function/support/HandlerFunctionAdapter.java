@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.springframework.web.servlet.function.support;
 
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -76,6 +75,8 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 	 * for further processing of the concurrently produced result.
 	 * <p>If this value is not set, the default timeout of the underlying
 	 * implementation is used.
+	 * <p>A value of 0 or less indicates that the asynchronous operation will never
+	 * time out.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public void setAsyncRequestTimeout(long timeout) {
@@ -139,14 +140,14 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 			String formatted = LogFormatUtils.formatValue(result, !traceOn);
 			return "Resume with async result [" + formatted + "]";
 		});
-		if (result instanceof ServerResponse) {
-			return (ServerResponse) result;
+		if (result instanceof ServerResponse response) {
+			return response;
 		}
-		else if (result instanceof Exception) {
-			throw (Exception) result;
+		else if (result instanceof Exception exception) {
+			throw exception;
 		}
-		else if (result instanceof Throwable) {
-			throw new ServletException("Async processing failed", (Throwable) result);
+		else if (result instanceof Throwable throwable) {
+			throw new ServletException("Async processing failed", throwable);
 		}
 		else if (result == null) {
 			return null;
@@ -157,6 +158,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1L;
 	}

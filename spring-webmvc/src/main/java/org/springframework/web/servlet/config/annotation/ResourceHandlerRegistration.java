@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
@@ -54,6 +56,11 @@ public class ResourceHandlerRegistration {
 	private ResourceChainRegistration resourceChainRegistration;
 
 	private boolean useLastModified = true;
+
+	@Nullable
+	private Function<Resource, String> etagGenerator;
+
+	private boolean optimizeLocations = false;
 
 
 	/**
@@ -130,12 +137,45 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Set whether the {@link Resource#lastModified()} information should be used to drive HTTP responses.
 	 * <p>This configuration is set to {@code true} by default.
-	 * @param useLastModified whether the "last modified" resource information should be used.
+	 * @param useLastModified whether the "last modified" resource information should be used
 	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
 	 * @since 5.3
+	 * @see ResourceHttpRequestHandler#setUseLastModified
 	 */
 	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
 		this.useLastModified = useLastModified;
+		return this;
+	}
+
+	/**
+	 * Configure a generator function that will be used to create the ETag information,
+	 * given a {@link Resource} that is about to be written to the response.
+	 * <p>This function should return a String that will be used as an argument in
+	 * {@link ServerWebExchange#checkNotModified(String)}, or {@code null} if no value
+	 * can be generated for the given resource.
+	 * @param etagGenerator the HTTP ETag generator function to use.
+	 * @since 6.1
+	 * @see ResourceHttpRequestHandler#setEtagGenerator(Function)
+	 */
+	public ResourceHandlerRegistration setEtagGenerator(@Nullable Function<Resource, String> etagGenerator) {
+		this.etagGenerator = etagGenerator;
+		return this;
+	}
+
+	/**
+	 * Set whether to optimize the specified locations through an existence check on startup,
+	 * filtering non-existing directories upfront so that they do not have to be checked
+	 * on every resource access.
+	 * <p>The default is {@code false}, for defensiveness against zip files without directory
+	 * entries which are unable to expose the existence of a directory upfront. Switch this flag to
+	 * {@code true} for optimized access in case of a consistent jar layout with directory entries.
+	 * @param optimizeLocations whether to optimize the locations through an existence check on startup
+	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * @since 5.3.13
+	 * @see ResourceHttpRequestHandler#setOptimizeLocations
+	 */
+	public ResourceHandlerRegistration setOptimizeLocations(boolean optimizeLocations) {
+		this.optimizeLocations = optimizeLocations;
 		return this;
 	}
 
@@ -204,6 +244,8 @@ public class ResourceHandlerRegistration {
 			handler.setCacheSeconds(this.cachePeriod);
 		}
 		handler.setUseLastModified(this.useLastModified);
+		handler.setEtagGenerator(this.etagGenerator);
+		handler.setOptimizeLocations(this.optimizeLocations);
 		return handler;
 	}
 

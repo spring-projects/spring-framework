@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class DefaultSubscriptionRegistryBenchmark {
 
 		@Setup(Level.Trial)
 		public void doSetup() {
-			this.findMessage = MessageBuilder.createMessage("",  SimpMessageHeaderAccessor.create().getMessageHeaders());
+			this.findMessage = MessageBuilder.createMessage("", SimpMessageHeaderAccessor.create().getMessageHeaders());
 			this.uniqueIdGenerator = new AtomicInteger();
 
 			this.registry = new DefaultSubscriptionRegistry();
@@ -145,18 +145,14 @@ public class DefaultSubscriptionRegistryBenchmark {
 		@Setup(Level.Trial)
 		public void doSetup(ServerState serverState) {
 			switch (this.contention) {
-				case "noSubscribers":
+				case "noSubscribers" ->
 					this.destination = "someDestination_withNoSubscribers_" + serverState.uniqueIdGenerator.incrementAndGet();
-					break;
-				case "sameDestination":
-					this.destination = serverState.destinationIds[0];
-					break;
-				case "none":
+				case "sameDestination" -> this.destination = serverState.destinationIds[0];
+				case "none" -> {
 					int uniqueNumber = serverState.uniqueIdGenerator.getAndIncrement();
 					this.destination = serverState.destinationIds[uniqueNumber % serverState.destinationIds.length];
-					break;
-				default:
-					throw new IllegalStateException();
+				}
+				default -> throw new IllegalStateException();
 			}
 		}
 	}

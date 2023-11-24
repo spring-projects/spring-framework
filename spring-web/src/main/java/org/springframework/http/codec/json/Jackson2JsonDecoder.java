@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.json;
 
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.codec.CharBufferDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -35,7 +36,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decode a byte stream into JSON and convert to Object's with Jackson 2.9,
+ * Decode a byte stream into JSON and convert to Object's with Jackson 2.x,
  * leveraging non-blocking parsing.
  *
  * @author Sebastien Deleuze
@@ -45,9 +46,9 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
 
-	private static final StringDecoder STRING_DECODER = StringDecoder.textPlainOnly(Arrays.asList(",", "\n"), false);
+	private static final CharBufferDecoder CHAR_BUFFER_DECODER = CharBufferDecoder.textPlainOnly(Arrays.asList(",", "\n"), false);
 
-	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
+	private static final ResolvableType CHAR_BUFFER_TYPE = ResolvableType.forClass(CharBuffer.class);
 
 
 	public Jackson2JsonDecoder() {
@@ -73,12 +74,10 @@ public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
 			return flux;
 		}
 
-		// Potentially, the memory consumption of this conversion could be improved by using CharBuffers instead
-		// of allocating Strings, but that would require refactoring the buffer tokenization code from StringDecoder
-
+		// Re-encode as UTF-8.
 		MimeType textMimeType = new MimeType(MimeTypeUtils.TEXT_PLAIN, charset);
-		Flux<String> decoded = STRING_DECODER.decode(input, STRING_TYPE, textMimeType, null);
-		return decoded.map(s -> DefaultDataBufferFactory.sharedInstance.wrap(s.getBytes(StandardCharsets.UTF_8)));
+		Flux<CharBuffer> decoded = CHAR_BUFFER_DECODER.decode(input, CHAR_BUFFER_TYPE, textMimeType, null);
+		return decoded.map(charBuffer -> DefaultDataBufferFactory.sharedInstance.wrap(StandardCharsets.UTF_8.encode(charBuffer)));
 	}
 
 }

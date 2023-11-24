@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +102,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
-	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
-			@Nullable String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		if (!StringUtils.hasLength(getNestedPath()) && !StringUtils.hasLength(field)) {
 			// We're at the top of the nested object hierarchy,
@@ -169,8 +169,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public List<FieldError> getFieldErrors() {
 		List<FieldError> result = new ArrayList<>();
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				result.add((FieldError) objectError);
+			if (objectError instanceof FieldError fieldError) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -180,8 +180,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	@Nullable
 	public FieldError getFieldError() {
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				return (FieldError) objectError;
+			if (objectError instanceof FieldError fieldError) {
+				return fieldError;
 			}
 		}
 		return null;
@@ -192,8 +192,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
-				result.add((FieldError) objectError);
+			if (objectError instanceof FieldError fieldError && isMatchingFieldError(fixedField, fieldError)) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -204,11 +204,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public FieldError getFieldError(String field) {
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				FieldError fieldError = (FieldError) objectError;
-				if (isMatchingFieldError(fixedField, fieldError)) {
-					return fieldError;
-				}
+			if (objectError instanceof FieldError fieldError && isMatchingFieldError(fixedField, fieldError)) {
+				return fieldError;
 			}
 		}
 		return null;
@@ -361,16 +358,10 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof BindingResult)) {
-			return false;
-		}
-		BindingResult otherResult = (BindingResult) other;
-		return (getObjectName().equals(otherResult.getObjectName()) &&
-				ObjectUtils.nullSafeEquals(getTarget(), otherResult.getTarget()) &&
-				getAllErrors().equals(otherResult.getAllErrors()));
+		return (this == other || (other instanceof BindingResult that &&
+				getObjectName().equals(that.getObjectName()) &&
+				ObjectUtils.nullSafeEquals(getTarget(), that.getTarget()) &&
+				getAllErrors().equals(that.getAllErrors())));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,16 +44,6 @@ public class CallParameterMetaData {
 
 	private final boolean nullable;
 
-
-	/**
-	 * Constructor taking all the properties except the function marker.
-	 */
-	@Deprecated
-	public CallParameterMetaData(
-			@Nullable String columnName, int columnType, int sqlType, @Nullable String typeName, boolean nullable) {
-
-		this(false, columnName, columnType, sqlType, typeName, nullable);
-	}
 
 	/**
 	 * Constructor taking all the properties including the function marker.
@@ -105,6 +95,28 @@ public class CallParameterMetaData {
 		return (this.function ? this.parameterType == DatabaseMetaData.functionReturn :
 				(this.parameterType == DatabaseMetaData.procedureColumnReturn ||
 						this.parameterType == DatabaseMetaData.procedureColumnResult));
+	}
+
+	/**
+	 * Determine whether the declared parameter qualifies as an 'out' parameter
+	 * for our purposes: type {@link DatabaseMetaData#procedureColumnOut},
+	 * or in case of a function, {@link DatabaseMetaData#functionColumnOut}.
+	 * @since 5.3.31
+	 */
+	public boolean isOutParameter() {
+		return (this.function ? this.parameterType == DatabaseMetaData.functionColumnOut :
+				this.parameterType == DatabaseMetaData.procedureColumnOut);
+	}
+
+	/**
+	 * Determine whether the declared parameter qualifies as an 'in-out' parameter
+	 * for our purposes: type {@link DatabaseMetaData#procedureColumnInOut},
+	 * or in case of a function, {@link DatabaseMetaData#functionColumnInOut}.
+	 * @since 5.3.31
+	 */
+	public boolean isInOutParameter() {
+		return (this.function ? this.parameterType == DatabaseMetaData.functionColumnInOut :
+				this.parameterType == DatabaseMetaData.procedureColumnInOut);
 	}
 
 	/**

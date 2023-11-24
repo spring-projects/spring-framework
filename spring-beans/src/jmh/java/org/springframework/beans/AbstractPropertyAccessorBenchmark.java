@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,20 +61,15 @@ public class AbstractPropertyAccessorBenchmark {
 				this.propertyAccessor = new BeanWrapperImpl(this.target);
 			}
 			switch (this.customEditor) {
-				case "stringTrimmer":
+				case "stringTrimmer" ->
 					this.propertyAccessor.registerCustomEditor(String.class, new StringTrimmerEditor(false));
-					break;
-				case "numberOnPath":
+				case "numberOnPath" ->
 					this.propertyAccessor.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
-					break;
-				case "numberOnNestedPath":
+				case "numberOnNestedPath" ->
 					this.propertyAccessor.registerCustomEditor(int.class, "array[0].somePath", new CustomNumberEditor(Integer.class, false));
-					break;
-				case "numberOnType":
+				case "numberOnType" ->
 					this.propertyAccessor.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, false));
-					break;
 			}
-
 		}
 
 	}
@@ -98,4 +93,5 @@ public class AbstractPropertyAccessorBenchmark {
 			this.array = array;
 		}
 	}
+
 }

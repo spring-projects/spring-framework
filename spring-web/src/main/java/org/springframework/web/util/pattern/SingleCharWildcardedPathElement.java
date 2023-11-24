@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
- * A literal path element that does includes the single character wildcard '?' one
+ * A literal path element that includes the single character wildcard '?' one
  * or more times (to basically many any character at that position).
  *
  * @author Andy Clement
@@ -65,10 +65,10 @@ class SingleCharWildcardedPathElement extends PathElement {
 		}
 
 		Element element = matchingContext.pathElements.get(pathIndex);
-		if (!(element instanceof PathSegment)) {
+		if (!(element instanceof PathSegment pathSegment)) {
 			return false;
 		}
-		String value = ((PathSegment)element).valueToMatch();
+		String value = pathSegment.valueToMatch();
 		if (value.length() != this.len) {
 			// Not enough data to match this path element
 			return false;
@@ -124,15 +124,15 @@ class SingleCharWildcardedPathElement extends PathElement {
 		return this.len;
 	}
 
+	@Override
+	public char[] getChars() {
+		return this.text;
+	}
+
 
 	@Override
 	public String toString() {
 		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
-	}
-
-	@Override
-	public char[] getChars() {
-		return this.text;
 	}
 
 }

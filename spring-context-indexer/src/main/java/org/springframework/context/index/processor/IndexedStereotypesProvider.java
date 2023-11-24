@@ -26,7 +26,7 @@ import javax.lang.model.element.ElementKind;
 
 /**
  * A {@link StereotypesProvider} implementation that extracts the stereotypes
- * flagged by the {@value INDEXED_ANNOTATION} annotation. This implementation
+ * flagged by the {@value #INDEXED_ANNOTATION} annotation. This implementation
  * honors stereotypes defined this way on meta-annotations.
  *
  * @author Stephane Nicoll

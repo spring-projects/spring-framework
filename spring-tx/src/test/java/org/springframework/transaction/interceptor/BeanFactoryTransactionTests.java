@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,16 +142,16 @@ public class BeanFactoryTransactionTests {
 
 	private void doTestGetsAreNotTransactional(final ITestBean testBean) {
 		// Install facade
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 		PlatformTransactionManagerFacade.delegate = ptm;
 
-		assertThat(testBean.getAge() == 666).as("Age should not be " + testBean.getAge()).isTrue();
+		assertThat(testBean.getAge()).as("Age should not be " + testBean.getAge()).isEqualTo(666);
 
 		// Expect no methods
 		verifyNoInteractions(ptm);
 
 		// Install facade expecting a call
-		final TransactionStatus ts = mock(TransactionStatus.class);
+		final TransactionStatus ts = mock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
 			@Override
@@ -168,7 +168,7 @@ public class BeanFactoryTransactionTests {
 			}
 			@Override
 			public void commit(TransactionStatus status) throws TransactionException {
-				assertThat(status == ts).isTrue();
+				assertThat(status).isSameAs(ts);
 			}
 			@Override
 			public void rollback(TransactionStatus status) throws TransactionException {
@@ -180,7 +180,7 @@ public class BeanFactoryTransactionTests {
 		// TODO same as old age to avoid ordering effect for now
 		int age = 666;
 		testBean.setAge(age);
-		assertThat(testBean.getAge() == age).isTrue();
+		assertThat(testBean.getAge()).isEqualTo(age);
 	}
 
 	@Test

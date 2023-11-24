@@ -37,7 +37,7 @@ public class UncategorizedJmsException extends JmsException {
 	 * Constructor that takes a message and a root cause.
 	 * @param msg the detail message
 	 * @param cause the cause of the exception. This argument is generally
-	 * expected to be a proper subclass of {@link javax.jms.JMSException},
+	 * expected to be a proper subclass of {@link jakarta.jms.JMSException},
 	 * but can also be a JNDI NamingException or the like.
 	 */
 	public UncategorizedJmsException(String msg, Throwable cause) {
@@ -47,7 +47,7 @@ public class UncategorizedJmsException extends JmsException {
 	/**
 	 * Constructor that takes a root cause only.
 	 * @param cause the cause of the exception. This argument is generally
-	 * expected to be a proper subclass of {@link javax.jms.JMSException},
+	 * expected to be a proper subclass of {@link jakarta.jms.JMSException},
 	 * but can also be a JNDI NamingException or the like.
 	 */
 	public UncategorizedJmsException(Throwable cause) {

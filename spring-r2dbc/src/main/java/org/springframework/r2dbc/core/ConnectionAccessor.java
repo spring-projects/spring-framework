@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import io.r2dbc.spi.Connection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.dao.DataAccessException;
-
 /**
  * Interface declaring methods that accept callback {@link Function}
  * to operate within the scope of a {@link Connection}.
@@ -31,13 +29,16 @@ import org.springframework.dao.DataAccessException;
  * close the connection as the connections may be pooled or be
  * subject to other kinds of resource management.
  *
- * <p> Callback functions are responsible for creating a
+ * <p>Callback functions are responsible for creating a
  * {@link org.reactivestreams.Publisher} that defines the scope of how
  * long the allocated {@link Connection} is valid. Connections are
  * released after the publisher terminates.
  *
+ * <p>This serves as a base interface for {@link DatabaseClient}.
+ *
  * @author Mark Paluch
  * @since 5.3
+ * @see DatabaseClient
  */
 public interface ConnectionAccessor {
 
@@ -45,22 +46,24 @@ public interface ConnectionAccessor {
 	 * Execute a callback {@link Function} within a {@link Connection} scope.
 	 * The function is responsible for creating a {@link Mono}. The connection
 	 * is released after the {@link Mono} terminates (or the subscription
-	 * is cancelled). Connection resources must not be passed outside of the
+	 * is cancelled). Connection resources must not be passed outside the
 	 * {@link Function} closure, otherwise resources may get defunct.
 	 * @param action the callback object that specifies the connection action
 	 * @return the resulting {@link Mono}
+	 * @throws org.springframework.dao.DataAccessException in case of any errors
 	 */
-	<T> Mono<T> inConnection(Function<Connection, Mono<T>> action) throws DataAccessException;
+	<T> Mono<T> inConnection(Function<Connection, Mono<T>> action);
 
 	/**
 	 * Execute a callback {@link Function} within a {@link Connection} scope.
 	 * The function is responsible for creating a {@link Flux}. The connection
 	 * is released after the {@link Flux} terminates (or the subscription
-	 * is cancelled). Connection resources must not be passed outside of the
+	 * is cancelled). Connection resources must not be passed outside the
 	 * {@link Function} closure, otherwise resources may get defunct.
 	 * @param action the callback object that specifies the connection action
 	 * @return the resulting {@link Flux}
+	 * @throws org.springframework.dao.DataAccessException in case of any errors
 	 */
-	<T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action) throws DataAccessException;
+	<T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action);
 
 }

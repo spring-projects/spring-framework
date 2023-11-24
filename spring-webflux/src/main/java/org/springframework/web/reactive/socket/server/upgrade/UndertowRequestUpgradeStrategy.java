@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestUpgradeStrategy} for use with Undertow.
+ * A WebSocket {@code RequestUpgradeStrategy} for Undertow.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
@@ -82,7 +82,7 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 
-	private class DefaultCallback implements WebSocketConnectionCallback {
+	private static class DefaultCallback implements WebSocketConnectionCallback {
 
 		private final HandshakeInfo handshakeInfo;
 

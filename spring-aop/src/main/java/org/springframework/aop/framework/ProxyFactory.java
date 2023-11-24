@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,17 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 */
 	public Object getProxy(@Nullable ClassLoader classLoader) {
 		return createAopProxy().getProxy(classLoader);
+	}
+
+	/**
+	 * Determine the proxy class according to the settings in this factory.
+	 * @param classLoader the class loader to create the proxy class with
+	 * (or {@code null} for the low-level proxy facility's default)
+	 * @return the proxy class
+	 * @since 6.0
+	 */
+	public Class<?> getProxyClass(@Nullable ClassLoader classLoader) {
+		return createAopProxy().getProxyClass(classLoader);
 	}
 
 

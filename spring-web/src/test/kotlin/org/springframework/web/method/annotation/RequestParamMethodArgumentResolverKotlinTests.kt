@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,6 @@ import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.web.testfixture.servlet.MockHttpServletRequest
-import org.springframework.web.testfixture.servlet.MockHttpServletResponse
-import org.springframework.web.testfixture.servlet.MockMultipartFile
-import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.RequestParam
@@ -39,6 +35,10 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.support.MissingServletRequestPartException
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse
+import org.springframework.web.testfixture.servlet.MockMultipartFile
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest
 
 /**
  * Kotlin test fixture for [RequestParamMethodArgumentResolver].
@@ -58,6 +58,13 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	lateinit var nonNullableParamRequired: MethodParameter
 	lateinit var nonNullableParamNotRequired: MethodParameter
 
+	lateinit var defaultValueBooleanParamRequired: MethodParameter
+	lateinit var defaultValueBooleanParamNotRequired: MethodParameter
+	lateinit var defaultValueIntParamRequired: MethodParameter
+	lateinit var defaultValueIntParamNotRequired: MethodParameter
+	lateinit var defaultValueStringParamRequired: MethodParameter
+	lateinit var defaultValueStringParamNotRequired: MethodParameter
+
 	lateinit var nullableMultipartParamRequired: MethodParameter
 	lateinit var nullableMultipartParamNotRequired: MethodParameter
 	lateinit var nonNullableMultipartParamRequired: MethodParameter
@@ -73,20 +80,27 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		binderFactory = DefaultDataBinderFactory(initializer)
 		webRequest = ServletWebRequest(request, MockHttpServletResponse())
 
-		val method = ReflectionUtils.findMethod(javaClass, "handle", String::class.java,
-				String::class.java, String::class.java, String::class.java,
-				MultipartFile::class.java, MultipartFile::class.java,
-				MultipartFile::class.java, MultipartFile::class.java)!!
+		val method = ReflectionUtils.findMethod(javaClass, "handle",
+			String::class.java, String::class.java, String::class.java, String::class.java,
+			Boolean::class.java, Boolean::class.java, Int::class.java, Int::class.java, String::class.java, String::class.java,
+			MultipartFile::class.java, MultipartFile::class.java, MultipartFile::class.java, MultipartFile::class.java)!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)
 		nonNullableParamRequired = SynthesizingMethodParameter(method, 2)
 		nonNullableParamNotRequired = SynthesizingMethodParameter(method, 3)
 
-		nullableMultipartParamRequired = SynthesizingMethodParameter(method, 4)
-		nullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 5)
-		nonNullableMultipartParamRequired = SynthesizingMethodParameter(method, 6)
-		nonNullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 7)
+		defaultValueBooleanParamRequired = SynthesizingMethodParameter(method, 4)
+		defaultValueBooleanParamNotRequired = SynthesizingMethodParameter(method, 5)
+		defaultValueIntParamRequired = SynthesizingMethodParameter(method, 6)
+		defaultValueIntParamNotRequired = SynthesizingMethodParameter(method, 7)
+		defaultValueStringParamRequired = SynthesizingMethodParameter(method, 8)
+		defaultValueStringParamNotRequired = SynthesizingMethodParameter(method, 9)
+
+		nullableMultipartParamRequired = SynthesizingMethodParameter(method, 10)
+		nullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 11)
+		nonNullableMultipartParamRequired = SynthesizingMethodParameter(method, 12)
+		nonNullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 13)
 	}
 
 	@Test
@@ -144,6 +158,84 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	}
 
 	@Test
+	fun resolveDefaultValueRequiredWithBooleanParameter() {
+		request.addParameter("value", "false")
+		val result = resolver.resolveArgument(defaultValueBooleanParamRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(false)
+	}
+
+	@Test
+	fun resolveDefaultValueRequiredWithoutBooleanParameter() {
+		val result = resolver.resolveArgument(defaultValueBooleanParamRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(null)
+	}
+
+	@Test
+	fun resolveDefaultValueNotRequiredWithBooleanParameter() {
+		request.addParameter("value", "false")
+		val result = resolver.resolveArgument(defaultValueBooleanParamNotRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(false)
+	}
+
+	@Test
+	fun resolveDefaultValueNotRequiredWithoutBooleanParameter() {
+		val result = resolver.resolveArgument(defaultValueBooleanParamNotRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(null)
+	}
+
+	@Test
+	fun resolveDefaultValueRequiredWithIntParameter() {
+		request.addParameter("value", "123")
+		val result = resolver.resolveArgument(defaultValueIntParamRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(123)
+	}
+
+	@Test
+	fun resolveDefaultValueRequiredWithoutIntParameter() {
+		val result = resolver.resolveArgument(defaultValueIntParamRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(null)
+	}
+
+	@Test
+	fun resolveDefaultValueNotRequiredWithIntParameter() {
+		request.addParameter("value", "123")
+		val result = resolver.resolveArgument(defaultValueIntParamNotRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(123)
+	}
+
+	@Test
+	fun resolveDefaultValueNotRequiredWithoutIntParameter() {
+		val result = resolver.resolveArgument(defaultValueIntParamNotRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(null)
+	}
+
+	@Test
+	fun resolveDefaultValueRequiredWithStringParameter() {
+		request.addParameter("value", "123")
+		val result = resolver.resolveArgument(defaultValueStringParamRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo("123")
+	}
+
+	@Test
+	fun resolveDefaultValueRequiredWithoutStringParameter() {
+		val result = resolver.resolveArgument(defaultValueStringParamRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(null)
+	}
+
+	@Test
+	fun resolveDefaultValueNotRequiredWithStringParameter() {
+		request.addParameter("value", "123")
+		val result = resolver.resolveArgument(defaultValueStringParamNotRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo("123")
+	}
+
+	@Test
+	fun resolveDefaultValueNotRequiredWithoutStringParameter() {
+		val result = resolver.resolveArgument(defaultValueStringParamNotRequired, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(null)
+	}
+
+	@Test
 	fun resolveNullableRequiredWithMultipartParameter() {
 		val request = MockMultipartHttpServletRequest()
 		val expected = MockMultipartFile("mfile", "Hello World".toByteArray())
@@ -156,7 +248,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNullableRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		var result = resolver.resolveArgument(nullableMultipartParamRequired, null, webRequest, binderFactory)
@@ -176,7 +268,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNullableNotRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		var result = resolver.resolveArgument(nullableMultipartParamNotRequired, null, webRequest, binderFactory)
@@ -196,7 +288,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNonNullableRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		assertThatExceptionOfType(MissingServletRequestPartException::class.java).isThrownBy {
@@ -217,7 +309,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNonNullableNotRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		assertThatExceptionOfType(NullPointerException::class.java).isThrownBy {
@@ -232,6 +324,13 @@ class RequestParamMethodArgumentResolverKotlinTests {
 			@RequestParam("name", required = false) nullableParamNotRequired: String?,
 			@RequestParam("name") nonNullableParamRequired: String,
 			@RequestParam("name", required = false) nonNullableParamNotRequired: String,
+
+			@RequestParam("value") withDefaultValueBooleanParamRequired: Boolean = true,
+			@RequestParam("value", required = false) withDefaultValueBooleanParamNotRequired: Boolean = true,
+			@RequestParam("value") withDefaultValueIntParamRequired: Int = 20,
+			@RequestParam("value", required = false) withDefaultValueIntParamNotRequired: Int = 20,
+			@RequestParam("value") withDefaultValueStringParamRequired: String = "default",
+			@RequestParam("value", required = false) withDefaultValueStringParamNotRequired: String = "default",
 
 			@RequestParam("mfile") nullableMultipartParamRequired: MultipartFile?,
 			@RequestParam("mfile", required = false) nullableMultipartParamNotRequired: MultipartFile?,

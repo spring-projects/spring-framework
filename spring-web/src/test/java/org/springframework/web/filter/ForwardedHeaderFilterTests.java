@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,18 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -102,10 +103,11 @@ public class ForwardedHeaderFilterTests {
 		assertThat(this.filter.shouldNotFilter(new MockHttpServletRequest())).isTrue();
 	}
 
-	@Test
-	public void forwardedRequest() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {"https", "wss"})
+	public void forwardedRequest(String protocol) throws Exception {
 		this.request.setRequestURI("/mvc-showcase");
-		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_PROTO, protocol);
 		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 		this.request.addHeader("foo", "bar");
@@ -115,8 +117,8 @@ public class ForwardedHeaderFilterTests {
 		HttpServletRequest actual = (HttpServletRequest) this.filterChain.getRequest();
 
 		assertThat(actual).isNotNull();
-		assertThat(actual.getRequestURL().toString()).isEqualTo("https://84.198.58.199/mvc-showcase");
-		assertThat(actual.getScheme()).isEqualTo("https");
+		assertThat(actual.getRequestURL().toString()).isEqualTo(protocol + "://84.198.58.199/mvc-showcase");
+		assertThat(actual.getScheme()).isEqualTo(protocol);
 		assertThat(actual.getServerName()).isEqualTo("84.198.58.199");
 		assertThat(actual.getServerPort()).isEqualTo(443);
 		assertThat(actual.isSecure()).isTrue();
@@ -212,7 +214,7 @@ public class ForwardedHeaderFilterTests {
 		@Test
 		public void contextPathEmpty() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "");
-			assertThat(filterAndGetContextPath()).isEqualTo("");
+			assertThat(filterAndGetContextPath()).isEmpty();
 		}
 
 		@Test
@@ -267,7 +269,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/path");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path");
 		}
 
@@ -278,7 +280,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/path/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path/");
 		}
 
@@ -300,7 +302,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/");
 		}
 
@@ -311,7 +313,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/");
 		}
 
@@ -321,7 +323,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/path;a=b/with/semicolon");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path;a=b/with/semicolon");
 			assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/path;a=b/with/semicolon");
 		}
@@ -632,7 +634,7 @@ public class ForwardedHeaderFilterTests {
 				}
 			};
 			MockHttpServletResponse response = new MockHttpServletResponse();
-			FilterChain filterChain = new MockFilterChain(mock(HttpServlet.class), filter, redirectFilter);
+			FilterChain filterChain = new MockFilterChain(mock(), filter, redirectFilter);
 			filterChain.doFilter(request, response);
 			return response.getRedirectedUrl();
 		}

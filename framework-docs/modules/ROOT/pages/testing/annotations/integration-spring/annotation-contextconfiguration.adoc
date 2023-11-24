@@ -1,0 +1,142 @@
+[[spring-testing-annotation-contextconfiguration]]
+= `@ContextConfiguration`
+
+`@ContextConfiguration` defines class-level metadata that is used to determine how to
+load and configure an `ApplicationContext` for integration tests. Specifically,
+`@ContextConfiguration` declares the application context resource `locations` or the
+component `classes` used to load the context.
+
+Resource locations are typically XML configuration files or Groovy scripts located in the
+classpath, while component classes are typically `@Configuration` classes. However,
+resource locations can also refer to files and scripts in the file system, and component
+classes can be `@Component` classes, `@Service` classes, and so on. See
+xref:testing/testcontext-framework/ctx-management/javaconfig.adoc#testcontext-ctx-management-javaconfig-component-classes[Component Classes] for further details.
+
+The following example shows a `@ContextConfiguration` annotation that refers to an XML
+file:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration("/test-config.xml") // <1>
+	class XmlApplicationContextTests {
+		// class body...
+	}
+----
+<1> Referring to an XML file.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration("/test-config.xml") // <1>
+	class XmlApplicationContextTests {
+		// class body...
+	}
+----
+<1> Referring to an XML file.
+======
+
+
+The following example shows a `@ContextConfiguration` annotation that refers to a class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration(classes = TestConfig.class) // <1>
+	class ConfigClassApplicationContextTests {
+		// class body...
+	}
+----
+<1> Referring to a class.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration(classes = [TestConfig::class]) // <1>
+	class ConfigClassApplicationContextTests {
+		// class body...
+	}
+----
+<1> Referring to a class.
+======
+
+
+As an alternative or in addition to declaring resource locations or component classes,
+you can use `@ContextConfiguration` to declare `ApplicationContextInitializer` classes.
+The following example shows such a case:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration(initializers = CustomContextInitializer.class) // <1>
+	class ContextInitializerTests {
+		// class body...
+	}
+----
+<1> Declaring an initializer class.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration(initializers = [CustomContextInitializer::class]) // <1>
+	class ContextInitializerTests {
+		// class body...
+	}
+----
+<1> Declaring an initializer class.
+======
+
+
+You can optionally use `@ContextConfiguration` to declare the `ContextLoader` strategy as
+well. Note, however, that you typically do not need to explicitly configure the loader,
+since the default loader supports `initializers` and either resource `locations` or
+component `classes`.
+
+The following example uses both a location and a loader:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration(locations = "/test-context.xml", loader = CustomContextLoader.class) // <1>
+	class CustomLoaderXmlApplicationContextTests {
+		// class body...
+	}
+----
+<1> Configuring both a location and a custom loader.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration("/test-context.xml", loader = CustomContextLoader::class) // <1>
+	class CustomLoaderXmlApplicationContextTests {
+		// class body...
+	}
+----
+<1> Configuring both a location and a custom loader.
+======
+
+
+NOTE: `@ContextConfiguration` provides support for inheriting resource locations or
+configuration classes as well as context initializers that are declared by superclasses
+or enclosing classes.
+
+See xref:testing/testcontext-framework/ctx-management.adoc[Context Management],
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the `@ContextConfiguration`
+javadocs for further details.
+

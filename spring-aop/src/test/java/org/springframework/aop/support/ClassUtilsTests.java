@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.support;
 
 import org.junit.jupiter.api.Test;
@@ -29,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Rick Evans
  */
-public class ClassUtilsTests {
+class ClassUtilsTests {
 
 	@Test
-	public void getShortNameForCglibClass() {
+	void getShortNameForCglibClass() {
 		TestBean tb = new TestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);
@@ -41,4 +42,5 @@ public class ClassUtilsTests {
 		String className = ClassUtils.getShortName(proxy.getClass());
 		assertThat(className).as("Class name did not match").isEqualTo("TestBean");
 	}
+
 }

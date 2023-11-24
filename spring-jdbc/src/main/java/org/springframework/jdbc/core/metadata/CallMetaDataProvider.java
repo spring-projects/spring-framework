@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Initialize the database specific management of procedure column meta-data.
-	 * This is only called for databases that are supported. This initialization
+	 * <p>This is only called for databases that are supported. This initialization
 	 * can be turned off by specifying that column meta-data should not be used.
 	 * @param databaseMetaData used to retrieve database specific information
 	 * @param catalogName name of catalog to use (or {@code null} if none)
@@ -57,28 +57,28 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta-data currently used.
-	 * This could include altering the case.
+	 * <p>This could include altering the case.
 	 */
 	@Nullable
 	String procedureNameToUse(@Nullable String procedureName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta-data currently used.
-	 * This could include altering the case.
+	 * <p>This could include altering the case.
 	 */
 	@Nullable
 	String catalogNameToUse(@Nullable String catalogName);
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta-data currently used.
-	 * This could include altering the case.
+	 * <p>This could include altering the case.
 	 */
 	@Nullable
 	String schemaNameToUse(@Nullable String schemaName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta-data currently used.
-	 * The returned value will be used for meta-data lookups. This could include altering the case
+	 * <p>The returned value will be used for meta-data lookups. This could include altering the case
 	 * used or providing a base catalog if none is provided.
 	 */
 	@Nullable
@@ -86,7 +86,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta-data currently used.
-	 * The returned value will be used for meta-data lookups. This could include altering the case
+	 * <p>The returned value will be used for meta-data lookups. This could include altering the case
 	 * used or providing a base schema if none is provided.
 	 */
 	@Nullable
@@ -94,7 +94,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Provide any modification of the column name passed in to match the meta-data currently used.
-	 * This could include altering the case.
+	 * <p>This could include altering the case.
 	 * @param parameterName name of the parameter of column
 	 */
 	@Nullable
@@ -102,7 +102,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Create a default out parameter based on the provided meta-data.
-	 * This is used when no explicit parameter declaration has been made.
+	 * <p>This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta-data used for this call
 	 * @return the configured SqlOutParameter
@@ -111,7 +111,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Create a default in/out parameter based on the provided meta-data.
-	 * This is used when no explicit parameter declaration has been made.
+	 * <p>This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta-data used for this call
 	 * @return the configured SqlInOutParameter
@@ -120,7 +120,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Create a default in parameter based on the provided meta-data.
-	 * This is used when no explicit parameter declaration has been made.
+	 * <p>This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta-data used for this call
 	 * @return the configured SqlParameter
@@ -142,7 +142,7 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Does this database support returning ResultSets as ref cursors to be retrieved with
-	 * {@link java.sql.CallableStatement#getObject(int)} for the specified column.
+	 * {@link java.sql.CallableStatement#getObject(int)} for the specified column?
 	 */
 	boolean isRefCursorSupported();
 
@@ -158,8 +158,8 @@ public interface CallMetaDataProvider {
 	boolean isProcedureColumnMetaDataUsed();
 
 	/**
-	 * Should we bypass the return parameter with the specified name.
-	 * This allows the database specific implementation to skip the processing
+	 * Should we bypass the return parameter with the specified name?
+	 * <p>This allows the database specific implementation to skip the processing
 	 * for specific results returned by the database call.
 	 */
 	boolean byPassReturnParameter(String parameterName);

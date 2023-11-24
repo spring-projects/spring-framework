@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -58,7 +60,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), new MediaType("application", "foo+xml"))).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.APPLICATION_JSON)).isFalse();
 
-		assertThat(this.encoder.canEncode(forClass(Jaxb2XmlDecoderTests.TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(getClass()), MediaType.APPLICATION_XML)).isFalse();
 
 		// SPR-15464
@@ -71,19 +73,28 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		Mono<Pojo> input = Mono.just(new Pojo("foofoo", "barbar"));
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(
-						expectXml("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+				.consumeNextWith(expectXml(
+						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
 								"<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"))
+				.verifyComplete());
+	}
+
+	@Test
+	public void encodeJaxbElement() {
+		Mono<JAXBElement<Pojo>> input = Mono.just(new JAXBElement<>(new QName("baz"), Pojo.class,
+				new Pojo("foofoo", "barbar")));
+
+		testEncode(input, Pojo.class, step -> step
+				.consumeNextWith(expectXml(
+						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+								"<baz><bar>barbar</bar><foo>foofoo</foo></baz>"))
 				.verifyComplete());
 	}
 
 	@Test
 	public void encodeError() {
 		Flux<Pojo> input = Flux.error(RuntimeException::new);
-
-		testEncode(input, Pojo.class, step -> step
-				.expectError(RuntimeException.class)
-				.verify());
+		testEncode(input, Pojo.class, step -> step.expectError(RuntimeException.class).verify());
 	}
 
 	@Test
@@ -91,9 +102,11 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		Mono<Container> input = Mono.just(new Container());
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(
-						expectXml("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
-								"<container><foo><name>name1</name></foo><bar><title>title1</title></bar></container>"))
+				.consumeNextWith(expectXml(
+						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+								"<container>" +
+								"<foo><name>name1</name></foo><bar><title>title1</title></bar>" +
+								"</container>"))
 				.verifyComplete());
 	}
 

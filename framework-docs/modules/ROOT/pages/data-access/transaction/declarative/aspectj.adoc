@@ -1,0 +1,65 @@
+[[transaction-declarative-aspectj]]
+= Using `@Transactional` with AspectJ
+
+You can also use the Spring Framework's `@Transactional` support outside of a Spring
+container by means of an AspectJ aspect. To do so, first annotate your classes
+(and optionally your classes' methods) with the `@Transactional` annotation,
+and then link (weave) your application with the
+`org.springframework.transaction.aspectj.AnnotationTransactionAspect` defined in the
+`spring-aspects.jar` file. You must also configure the aspect with a transaction
+manager. You can use the Spring Framework's IoC container to take care of
+dependency-injecting the aspect. The simplest way to configure the transaction
+management aspect is to use the `<tx:annotation-driven/>` element and specify the `mode`
+attribute to `aspectj` as described in xref:data-access/transaction/declarative/annotations.adoc[Using `@Transactional`]. Because
+we focus here on applications that run outside of a Spring container, we show
+you how to do it programmatically.
+
+NOTE: Prior to continuing, you may want to read xref:data-access/transaction/declarative/annotations.adoc[Using `@Transactional`] and
+xref:core/aop.adoc[AOP] respectively.
+
+The following example shows how to create a transaction manager and configure the
+`AnnotationTransactionAspect` to use it:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// construct an appropriate transaction manager
+	DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
+
+	// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
+	AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// construct an appropriate transaction manager
+	val txManager = DataSourceTransactionManager(getDataSource())
+
+	// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
+	AnnotationTransactionAspect.aspectOf().transactionManager = txManager
+----
+======
+
+NOTE: When you use this aspect, you must annotate the implementation class (or the methods
+within that class or both), not the interface (if any) that the class implements. AspectJ
+follows Java's rule that annotations on interfaces are not inherited.
+
+The `@Transactional` annotation on a class specifies the default transaction semantics
+for the execution of any public method in the class.
+
+The `@Transactional` annotation on a method within the class overrides the default
+transaction semantics given by the class annotation (if present). You can annotate any method,
+regardless of visibility.
+
+To weave your applications with the `AnnotationTransactionAspect`, you must either build
+your application with AspectJ (see the {aspectj-docs-devguide}/index.html[AspectJ Development
+Guide]) or use load-time weaving. See xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time weaving with AspectJ in the Spring Framework]
+ for a discussion of load-time weaving with AspectJ.
+
+
+

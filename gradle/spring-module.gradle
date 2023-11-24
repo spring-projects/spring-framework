@@ -1,5 +1,5 @@
 apply plugin: 'java-library'
-apply plugin: 'org.springframework.build.compile'
+apply plugin: 'org.springframework.build.conventions'
 apply plugin: 'org.springframework.build.optional-dependencies'
 // Uncomment the following for Shadow support in the jmhJar block.
 // Currently commented out due to ZipException: archive is not a ZIP archive
@@ -8,13 +8,22 @@ apply plugin: 'me.champeau.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
 
 dependencies {
-	jmh 'org.openjdk.jmh:jmh-core:1.28'
-	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.28'
-	jmh 'net.sf.jopt-simple:jopt-simple:4.6'
+	jmh 'org.openjdk.jmh:jmh-core:1.36'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+	jmh 'net.sf.jopt-simple:jopt-simple'
+}
+
+pluginManager.withPlugin("kotlin") {
+	apply plugin: "org.jetbrains.dokka"
+	apply from: "${rootDir}/gradle/docs-dokka.gradle"
 }
 
 jmh {
 	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.findByName("processJmhResources").configure {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 jmhJar {
@@ -40,7 +49,7 @@ jar {
 	manifest.attributes["Created-By"] =
 			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
 
-	from("${rootDir}/src/docs/dist") {
+	from("${rootDir}/framework-docs/src/docs/dist") {
 		include "license.txt"
 		include "notice.txt"
 		into "META-INF"
@@ -63,10 +72,13 @@ javadoc {
 	options.header = project.name
 	options.use = true
 	options.links(project.ext.javadocLinks)
-	options.addStringOption("Xdoclint:none", "-quiet")
+	// Check for syntax during linting. 'none' doesn't seem to work in suppressing
+	// all linting warnings all the time (see/link references most notably).
+	options.addStringOption("Xdoclint:syntax", "-quiet")
 
 	// Suppress warnings due to cross-module @see and @link references.
-	// Note that global 'api' task does display all warnings.
+	// Note that global 'api' task does display all warnings, and
+	// checks for 'reference' on top of 'syntax'.
 	logging.captureStandardError LogLevel.INFO
 	logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
 }

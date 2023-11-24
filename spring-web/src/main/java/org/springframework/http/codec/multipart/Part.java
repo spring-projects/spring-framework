@@ -17,6 +17,7 @@
 package org.springframework.http.codec.multipart;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +28,7 @@ import org.springframework.http.HttpHeaders;
  * <p>The origin of a multipart request may be a browser form in which case each
  * part is either a {@link FormFieldPart} or a {@link FilePart}.
  *
- * <p>Multipart requests may also be used outside of a browser for data of any
+ * <p>Multipart requests may also be used outside a browser for data of any
  * content type (e.g. JSON, PDF, etc).
  *
  * @author Sebastien Deleuze
@@ -56,5 +57,14 @@ public interface Part {
 	 * more easily via {@link FormFieldPart#value()}.
 	 */
 	Flux<DataBuffer> content();
+
+	/**
+	 * Return a mono that, when subscribed to, deletes the underlying storage
+	 * for this part.
+	 * @since 5.3.13
+	 */
+	default Mono<Void> delete() {
+		return Mono.empty();
+	}
 
 }

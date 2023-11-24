@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.scheduling;
 
+import org.springframework.lang.Nullable;
+
 /**
- * Extension of the Runnable interface, adding special callbacks
+ * Extension of the {@link Runnable} interface, adding special callbacks
  * for long-running operations.
- *
- * <p>This interface closely corresponds to the CommonJ Work interface,
- * but is kept separate to avoid a required CommonJ dependency.
  *
  * <p>Scheduling-capable TaskExecutors are encouraged to check a submitted
  * Runnable, detecting whether this interface is implemented and reacting
@@ -29,10 +28,8 @@ package org.springframework.scheduling;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see commonj.work.Work
  * @see org.springframework.core.task.TaskExecutor
  * @see SchedulingTaskExecutor
- * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 public interface SchedulingAwareRunnable extends Runnable {
 
@@ -43,7 +40,27 @@ public interface SchedulingAwareRunnable extends Runnable {
 	 * pool (if any) but rather be considered as long-running background thread.
 	 * <p>This should be considered a hint. Of course TaskExecutor implementations
 	 * are free to ignore this flag and the SchedulingAwareRunnable interface overall.
+	 * <p>The default implementation returns {@code false}, as of 6.1.
 	 */
-	boolean isLongLived();
+	default boolean isLongLived() {
+		return false;
+	}
+
+	/**
+	 * Return a qualifier associated with this Runnable.
+	 * <p>The default implementation returns {@code null}.
+	 * <p>May be used for custom purposes depending on the scheduler implementation.
+	 * {@link org.springframework.scheduling.config.TaskSchedulerRouter} introspects
+	 * this qualifier in order to determine the target scheduler to be used
+	 * for a given Runnable, matching the qualifier value (or the bean name)
+	 * of a specific {@link org.springframework.scheduling.TaskScheduler} or
+	 * {@link java.util.concurrent.ScheduledExecutorService} bean definition.
+	 * @since 6.1
+	 * @see org.springframework.scheduling.annotation.Scheduled#scheduler()
+	 */
+	@Nullable
+	default String getQualifier() {
+		return null;
+	}
 
 }

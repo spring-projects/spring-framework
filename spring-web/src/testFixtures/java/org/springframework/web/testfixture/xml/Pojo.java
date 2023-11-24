@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.testfixture.xml;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
+import org.springframework.lang.Nullable;
 
 /**
  * @author Sebastien Deleuze
@@ -53,12 +55,11 @@ public class Pojo {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}
-		if (o instanceof Pojo) {
-			Pojo other = (Pojo) o;
+		if (o instanceof Pojo other) {
 			return this.foo.equals(other.foo) && this.bar.equals(other.bar);
 		}
 		return false;

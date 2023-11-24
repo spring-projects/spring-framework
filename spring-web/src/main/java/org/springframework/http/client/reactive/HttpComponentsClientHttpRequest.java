@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,13 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.support.HttpComponentsHeadersAdapter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-
-import static org.springframework.http.MediaType.ALL_VALUE;
 
 /**
  * {@link ClientHttpRequest} implementation for the Apache HttpComponents HttpClient 5.x.
+ *
  * @author Martin Tarjányi
  * @author Arjen Poutsma
  * @since 5.3
@@ -62,6 +62,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Nullable
 	private Flux<ByteBuffer> byteBufferFlux;
 
+	private transient long contentLength = -1;
+
 
 	public HttpComponentsClientHttpRequest(HttpMethod method, URI uri, HttpClientContext context,
 			DataBufferFactory dataBufferFactory) {
@@ -74,9 +76,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		HttpMethod method = HttpMethod.resolve(this.httpRequest.getMethod());
-		Assert.state(method != null, "Method must not be null");
-		return method;
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
 	}
 
 	@Override
@@ -103,7 +103,11 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> {
-			this.byteBufferFlux = Flux.from(body).map(DataBuffer::asByteBuffer);
+			this.byteBufferFlux = Flux.from(body).map(dataBuffer -> {
+				ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+				dataBuffer.toByteBuffer(byteBuffer);
+				return byteBuffer;
+			});
 			return Mono.empty();
 		});
 	}
@@ -128,8 +132,10 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 				.forEach(entry -> entry.getValue().forEach(v -> this.httpRequest.addHeader(entry.getKey(), v)));
 
 		if (!this.httpRequest.containsHeader(HttpHeaders.ACCEPT)) {
-			this.httpRequest.addHeader(HttpHeaders.ACCEPT, ALL_VALUE);
+			this.httpRequest.addHeader(HttpHeaders.ACCEPT, MediaType.ALL_VALUE);
 		}
+
+		this.contentLength = headers.getContentLength();
 	}
 
 	@Override
@@ -151,6 +157,11 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 				});
 	}
 
+	@Override
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(new HttpComponentsHeadersAdapter(this.httpRequest));
+	}
+
 	public AsyncRequestProducer toRequestProducer() {
 		ReactiveEntityProducer reactiveEntityProducer = null;
 
@@ -160,8 +171,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 			if (getHeaders().getContentType() != null) {
 				contentType = ContentType.parse(getHeaders().getContentType().toString());
 			}
-			reactiveEntityProducer = new ReactiveEntityProducer(this.byteBufferFlux, getHeaders().getContentLength(),
-					contentType, contentEncoding);
+			reactiveEntityProducer = new ReactiveEntityProducer(
+					this.byteBufferFlux, this.contentLength, contentType, contentEncoding);
 		}
 
 		return new BasicRequestProducer(this.httpRequest, reactiveEntityProducer);

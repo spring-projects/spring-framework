@@ -1,0 +1,40 @@
+[[websocket-stomp-application-context-events]]
+= Events
+
+Several `ApplicationContext` events are published and can be
+received by implementing Spring's `ApplicationListener` interface:
+
+* `BrokerAvailabilityEvent`: Indicates when the broker becomes available or unavailable.
+While the "`simple`" broker becomes available immediately on startup and remains so while
+the application is running, the STOMP "`broker relay`" can lose its connection
+to the full featured broker (for example, if the broker is restarted). The broker relay
+has reconnect logic and re-establishes the "`system`" connection to the broker
+when it comes back. As a result, this event is published whenever the state changes from connected
+to disconnected and vice-versa. Components that use the `SimpMessagingTemplate` should
+subscribe to this event and avoid sending messages at times when the broker is not
+available. In any case, they should be prepared to handle `MessageDeliveryException`
+when sending a message.
+* `SessionConnectEvent`: Published when a new STOMP CONNECT is received to
+indicate the start of a new client session. The event contains the message that represents the
+connect, including the session ID, user information (if any), and any custom headers the client
+sent. This is useful for tracking client sessions. Components subscribed
+to this event can wrap the contained message with `SimpMessageHeaderAccessor` or
+`StompMessageHeaderAccessor`.
+* `SessionConnectedEvent`: Published shortly after a `SessionConnectEvent` when the
+broker has sent a STOMP CONNECTED frame in response to the CONNECT. At this point, the
+STOMP session can be considered fully established.
+* `SessionSubscribeEvent`: Published when a new STOMP SUBSCRIBE is received.
+* `SessionUnsubscribeEvent`: Published when a new STOMP UNSUBSCRIBE is received.
+* `SessionDisconnectEvent`: Published when a STOMP session ends. The DISCONNECT may
+have been sent from the client or it may be automatically generated when the
+WebSocket session is closed. In some cases, this event is published more than once
+per session. Components should be idempotent with regard to multiple disconnect events.
+
+NOTE: When you use a full-featured broker, the STOMP "`broker relay`" automatically reconnects the
+"`system`" connection if broker becomes temporarily unavailable. Client connections,
+however, are not automatically reconnected. Assuming heartbeats are enabled, the client
+typically notices the broker is not responding within 10 seconds. Clients need to
+implement their own reconnecting logic.
+
+
+

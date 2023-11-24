@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,15 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * to invoke each listener with.
 	 * <p>Default is equivalent to {@link org.springframework.core.task.SyncTaskExecutor},
 	 * executing all listeners synchronously in the calling thread.
-	 * <p>Consider specifying an asynchronous task executor here to not block the
-	 * caller until all listeners have been executed. However, note that asynchronous
-	 * execution will not participate in the caller's thread context (class loader,
-	 * transaction association) unless the TaskExecutor explicitly supports this.
+	 * <p>Consider specifying an asynchronous task executor here to not block the caller
+	 * until all listeners have been executed. However, note that asynchronous execution
+	 * will not participate in the caller's thread context (class loader, transaction context)
+	 * unless the TaskExecutor explicitly supports this.
+	 * <p>{@link ApplicationListener} instances which declare no support for asynchronous
+	 * execution ({@link ApplicationListener#supportsAsyncExecution()} always run within
+	 * the original thread which published the event, e.g. the transaction-synchronized
+	 * {@link org.springframework.transaction.event.TransactionalApplicationListener}.
+	 * @since 2.0
 	 * @see org.springframework.core.task.SyncTaskExecutor
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 */
@@ -92,6 +97,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	/**
 	 * Return the current task executor for this multicaster.
+	 * @since 2.0
 	 */
 	@Nullable
 	protected Executor getTaskExecutor() {
@@ -128,25 +134,21 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Override
 	public void multicastEvent(ApplicationEvent event) {
-		multicastEvent(event, resolveDefaultEventType(event));
+		multicastEvent(event, null);
 	}
 
 	@Override
-	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
-		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
+	public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
+		ResolvableType type = (eventType != null ? eventType : ResolvableType.forInstance(event));
 		Executor executor = getTaskExecutor();
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
-			if (executor != null) {
+			if (executor != null && listener.supportsAsyncExecution()) {
 				executor.execute(() -> invokeListener(listener, event));
 			}
 			else {
 				invokeListener(listener, event);
 			}
 		}
-	}
-
-	private ResolvableType resolveDefaultEventType(ApplicationEvent event) {
-		return ResolvableType.forInstance(event);
 	}
 
 	/**
@@ -178,8 +180,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		catch (ClassCastException ex) {
 			String msg = ex.getMessage();
 			if (msg == null || matchesClassCastMessage(msg, event.getClass()) ||
-					(event instanceof PayloadApplicationEvent &&
-							matchesClassCastMessage(msg, ((PayloadApplicationEvent) event).getPayload().getClass()))) {
+					(event instanceof PayloadApplicationEvent payloadEvent &&
+							matchesClassCastMessage(msg, payloadEvent.getPayload().getClass()))) {
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
 				// -> let's suppress the exception.
 				Log loggerToUse = this.lazyLogger;

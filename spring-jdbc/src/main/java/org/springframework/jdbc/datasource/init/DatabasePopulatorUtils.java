@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,14 @@ public abstract class DatabasePopulatorUtils {
 
 	/**
 	 * Execute the given {@link DatabasePopulator} against the given {@link DataSource}.
+	 * <p>As of Spring Framework 5.3.11, the {@link Connection} for the supplied
+	 * {@code DataSource} will be {@linkplain Connection#commit() committed} if
+	 * it is not configured for {@link Connection#getAutoCommit() auto-commit} and
+	 * is not {@linkplain DataSourceUtils#isConnectionTransactional transactional}.
 	 * @param populator the {@code DatabasePopulator} to execute
 	 * @param dataSource the {@code DataSource} to execute against
 	 * @throws DataAccessException if an error occurs, specifically a {@link ScriptException}
+	 * @see DataSourceUtils#isConnectionTransactional(Connection, DataSource)
 	 */
 	public static void execute(DatabasePopulator populator, DataSource dataSource) throws DataAccessException {
 		Assert.notNull(populator, "DatabasePopulator must not be null");
@@ -47,6 +52,9 @@ public abstract class DatabasePopulatorUtils {
 			Connection connection = DataSourceUtils.getConnection(dataSource);
 			try {
 				populator.populate(connection);
+				if (!connection.getAutoCommit() && !DataSourceUtils.isConnectionTransactional(connection, dataSource)) {
+					connection.commit();
+				}
 			}
 			finally {
 				DataSourceUtils.releaseConnection(connection, dataSource);

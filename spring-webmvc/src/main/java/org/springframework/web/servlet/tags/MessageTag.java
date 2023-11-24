@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -93,7 +93,7 @@ import org.springframework.web.util.TagUtils;
  * <td>false</td>
  * <td>true</td>
  * <td>Set JavaScript escaping for this tag, as boolean value.
- * Default is false.</td>
+ * Default is {@code false}.</td>
  * </tr>
  * <tr>
  * <td>message</td>
@@ -227,7 +227,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the resolved message.
 	 * @see #setScope
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setVar(String var) {
 		this.var = var;
@@ -238,7 +238,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Default is SCOPE_PAGE ("page").
 	 * @see #setVar
 	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setScope(String scope) {
 		this.scope = scope;
@@ -357,14 +357,14 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 */
 	@Nullable
 	protected Object[] resolveArguments(@Nullable Object arguments) throws JspException {
-		if (arguments instanceof String) {
-			return StringUtils.delimitedListToStringArray((String) arguments, this.argumentSeparator);
+		if (arguments instanceof String string) {
+			return StringUtils.delimitedListToStringArray(string, this.argumentSeparator);
 		}
-		else if (arguments instanceof Object[]) {
-			return (Object[]) arguments;
+		else if (arguments instanceof Object[] array) {
+			return array;
 		}
-		else if (arguments instanceof Collection) {
-			return ((Collection<?>) arguments).toArray();
+		else if (arguments instanceof Collection<?> collection) {
+			return collection.toArray();
 		}
 		else if (arguments != null) {
 			// Assume a single argument object.

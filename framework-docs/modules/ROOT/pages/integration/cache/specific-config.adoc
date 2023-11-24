@@ -1,0 +1,11 @@
+[[cache-specific-config]]
+= How can I Set the TTL/TTI/Eviction policy/XXX feature?
+:page-section-summary-toc: 1
+
+Directly through your cache provider. The cache abstraction is an abstraction,
+not a cache implementation. The solution you use might support various data
+policies and different topologies that other solutions do not support (for example,
+the JDK `ConcurrentHashMap` -- exposing that in the cache abstraction would be useless
+because there would no backing support). Such functionality should be controlled
+directly through the backing cache (when configuring it) or through its native API.
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -57,7 +57,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMe
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
 		throw new ServletRequestBindingException("Missing request attribute '" + name +
-				"' of type " +  parameter.getNestedParameterType().getSimpleName());
+				"' of type " + parameter.getNestedParameterType().getSimpleName());
 	}
 
 }

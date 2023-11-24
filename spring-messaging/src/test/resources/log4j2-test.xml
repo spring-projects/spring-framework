@@ -6,14 +6,12 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.springframework.messaging" level="warn" />
-		<Logger name="org.apache.activemq" level="info" />
+		<Logger name="org.springframework.messaging" level="debug" />
+		<Logger name="org.apache.activemq" level="debug" />
 		<Logger name="reactor" level="info" />
 		<Logger name="io.netty" level="info" />
 		<!-- Enable TRACE level to chase integration test issues on CI servers -->
-<!--
 		<Logger name="org.springframework.messaging.simp.stomp" level="trace" />
--->
 		<Root level="error">
 			<AppenderRef ref="Console" />
 		</Root>

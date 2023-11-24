@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@ public class TransactionAttributeSourceTests {
 		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
 		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode"), null);
 		assertThat(ta).isNotNull();
-		assertThat(TransactionDefinition.PROPAGATION_REQUIRED == ta.getPropagationBehavior()).isTrue();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRED);
 
 		tas.setTransactionAttribute(new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_SUPPORTS));
 		ta = tas.getTransactionAttribute(IOException.class.getMethod("getMessage"), IOException.class);
 		assertThat(ta).isNotNull();
-		assertThat(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior()).isTrue();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
 	}
 
 	@Test

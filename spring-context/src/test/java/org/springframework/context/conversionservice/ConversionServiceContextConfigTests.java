@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Keith Donald
  */
-public class ConversionServiceContextConfigTests {
+class ConversionServiceContextConfigTests {
 
 	@Test
-	public void testConfigOk() {
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/context/conversionservice/conversionService.xml");
-		TestClient client = context.getBean("testClient", TestClient.class);
-		assertThat(client.getBars().size()).isEqualTo(2);
-		assertThat(client.getBars().get(0).getValue()).isEqualTo("value1");
-		assertThat(client.getBars().get(1).getValue()).isEqualTo("value2");
-		assertThat(client.isBool()).isTrue();
+	void testConfigOk() {
+		try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/context/conversionservice/conversionService.xml")) {
+			TestClient client = context.getBean("testClient", TestClient.class);
+			assertThat(client.getBars()).hasSize(2);
+			assertThat(client.getBars().get(0).getValue()).isEqualTo("value1");
+			assertThat(client.getBars().get(1).getValue()).isEqualTo("value2");
+			assertThat(client.isBool()).isTrue();
+		}
 	}
 
 }

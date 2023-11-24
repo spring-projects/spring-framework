@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspException;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.validation.BindingResult;
@@ -105,7 +104,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	}
 
 	protected RequestDataValueProcessor getMockRequestDataValueProcessor() {
-		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
+		RequestDataValueProcessor mockProcessor = mock();
 		HttpServletRequest request = (HttpServletRequest) getPageContext().getRequest();
 		WebApplicationContext wac = RequestContextUtils.findWebApplicationContext(request);
 		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
@@ -125,19 +124,20 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 
 	protected final void assertContainsAttribute(String output, String attributeName, String attributeValue) {
 		String attributeString = attributeName + "=\"" + attributeValue + "\"";
-		assertThat(output.contains(attributeString)).as("Expected to find attribute '" + attributeName +
+		assertThat(output).as("Expected to find attribute '" + attributeName +
 				"' with value '" + attributeValue +
-				"' in output + '" + output + "'").isTrue();
+				"' in output + '" + output + "'").contains(attributeString);
 	}
 
 	protected final void assertAttributeNotPresent(String output, String attributeName) {
-		boolean condition = !output.contains(attributeName + "=\"");
-		assertThat(condition).as("Unexpected attribute '" + attributeName + "' in output '" + output + "'.").isTrue();
+		assertThat(output).as("Unexpected attribute '" + attributeName + "' in output '" + output + "'.")
+				.doesNotContain(attributeName + "=\"");
 	}
 
 	protected final void assertBlockTagContains(String output, String desiredContents) {
-		String contents = output.substring(output.indexOf(">") + 1, output.lastIndexOf("<"));
-		assertThat(contents.contains(desiredContents)).as("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'").isTrue();
+		String contents = output.substring(output.indexOf(">") + 1, output.lastIndexOf('<'));
+		assertThat(contents).as("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'")
+				.contains(desiredContents);
 	}
 
 }

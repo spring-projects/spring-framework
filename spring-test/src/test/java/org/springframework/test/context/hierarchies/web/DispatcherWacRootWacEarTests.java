@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.test.context.hierarchies.web;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.2.2
  */
 @ContextHierarchy(@ContextConfiguration)
+@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
 public class DispatcherWacRootWacEarTests extends RootWacEarTests {
 
 	@Autowired
@@ -67,13 +68,11 @@ public class DispatcherWacRootWacEarTests extends RootWacEarTests {
 	void verifyDispatcherWacConfig() {
 		ApplicationContext parent = wac.getParent();
 		assertThat(parent).isNotNull();
-		boolean condition = parent instanceof WebApplicationContext;
-		assertThat(condition).isTrue();
+		assertThat(parent).isInstanceOf(WebApplicationContext.class);
 
 		ApplicationContext grandParent = parent.getParent();
 		assertThat(grandParent).isNotNull();
-		boolean condition1 = grandParent instanceof WebApplicationContext;
-		assertThat(condition1).isFalse();
+		assertThat(grandParent).isNotInstanceOf(WebApplicationContext.class);
 
 		ServletContext dispatcherServletContext = wac.getServletContext();
 		assertThat(dispatcherServletContext).isNotNull();

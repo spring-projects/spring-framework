@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2019 the original author or authors.
+ * Copyright 2004-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,15 @@ public class JavaScriptUtilsTests {
 	public void escape() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('"');
-		sb.append("'");
-		sb.append("\\");
-		sb.append("/");
-		sb.append("\t");
-		sb.append("\n");
-		sb.append("\r");
-		sb.append("\f");
-		sb.append("\b");
-		sb.append("\013");
+		sb.append('\'');
+		sb.append('\\');
+		sb.append('/');
+		sb.append('\t');
+		sb.append('\n');
+		sb.append('\r');
+		sb.append('\f');
+		sb.append('\b');
+		sb.append('\013');
 		assertThat(JavaScriptUtils.javaScriptEscape(sb.toString())).isEqualTo("\\\"\\'\\\\\\/\\t\\n\\n\\f\\b\\v");
 	}
 

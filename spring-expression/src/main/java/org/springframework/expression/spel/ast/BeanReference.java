@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
- * Represents a bean reference to a type, for example <tt>@foo</tt> or <tt>@'foo.bar'</tt>.
- * For a FactoryBean the syntax <tt>&foo</tt> can be used to access the factory itself.
+ * Represents a bean reference to a type, for example {@code @foo} or {@code @'foo.bar'}.
+ * For a FactoryBean the syntax {@code &foo} can be used to access the factory itself.
  *
  * @author Andy Clement
  */
@@ -64,13 +64,13 @@ public class BeanReference extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		if (!this.beanName.startsWith(FACTORY_BEAN_PREFIX)) {
-			sb.append("@");
+			sb.append('@');
 		}
 		if (!this.beanName.contains(".")) {
 			sb.append(this.beanName);
 		}
 		else {
-			sb.append("'").append(this.beanName).append("'");
+			sb.append('\'').append(this.beanName).append('\'');
 		}
 		return sb.toString();
 	}

@@ -18,10 +18,10 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
@@ -32,7 +32,7 @@ import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * {@link javax.servlet.Filter} to handle CORS pre-flight requests and intercept
+ * {@link jakarta.servlet.Filter} to handle CORS pre-flight requests and intercept
  * CORS simple and actual requests with a {@link CorsProcessor}, and to update
  * the response, e.g. with CORS response headers, based on the policy matched
  * through the provided {@link CorsConfigurationSource}.
@@ -40,7 +40,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * <p>This is an alternative to configuring CORS in the Spring MVC Java config
  * and the Spring MVC XML namespace. It is useful for applications depending
  * only on spring-web (not on spring-webmvc) or for security constraints that
- * require CORS checks to be performed at {@link javax.servlet.Filter} level.
+ * require CORS checks to be performed at {@link jakarta.servlet.Filter} level.
  *
  * <p>This filter could be used in conjunction with {@link DelegatingFilterProxy}
  * in order to help with its initialization.

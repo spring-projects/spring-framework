@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.Callable;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 
 /**
@@ -38,9 +39,11 @@ import org.springframework.core.annotation.AliasFor;
  * replace the default one (see {@link #keyGenerator}).
  *
  * <p>If no value is found in the cache for the computed key, the target method
- * will be invoked and the returned value stored in the associated cache. Note
- * that Java8's {@code Optional} return types are automatically handled and its
- * content is stored in the cache if present.
+ * will be invoked and the returned value will be stored in the associated cache.
+ * Note that {@link java.util.Optional} return types are unwrapped automatically.
+ * If an {@code Optional} value is {@linkplain java.util.Optional#isPresent()
+ * present}, it will be stored in the associated cache. If an {@code Optional}
+ * value is not present, {@code null} will be stored in the associated cache.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -56,6 +59,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Reflective
 public @interface Cacheable {
 
 	/**
@@ -66,8 +70,17 @@ public @interface Cacheable {
 
 	/**
 	 * Names of the caches in which method invocation results are stored.
-	 * <p>Names may be used to determine the target cache (or caches), matching
-	 * the qualifier value or bean name of a specific bean definition.
+	 * <p>Names may be used to determine the target cache(s), to be resolved via the
+	 * configured {@link #cacheResolver()} which typically delegates to
+	 * {@link org.springframework.cache.CacheManager#getCache}.
+	 * <p>This will usually be a single cache name. If multiple names are specified,
+	 * they will be consulted for a cache hit in the order of definition, and they
+	 * will all receive a put/evict request for the same newly cached value.
+	 * <p>Note that asynchronous/reactive cache access may not fully consult all
+	 * specified caches, depending on the target cache. In the case of late-determined
+	 * cache misses (e.g. with Redis), further caches will not get consulted anymore.
+	 * As a consequence, specifying multiple cache names in an async cache mode setup
+	 * only makes sense with early-determined cache misses (e.g. with Caffeine).
 	 * @since 4.2
 	 * @see #value
 	 * @see CacheConfig#cacheNames
@@ -121,7 +134,8 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the method
-	 * caching conditional.
+	 * caching conditional. Cache the result if the condition evaluates to
+	 * {@code true}.
 	 * <p>Default is {@code ""}, meaning the method result is always cached.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
@@ -140,6 +154,7 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used to veto method caching.
+	 * Veto caching the result if the condition evaluates to {@code true}.
 	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
 	 * has been called and can therefore refer to the {@code result}.
 	 * <p>Default is {@code ""}, meaning that caching is never vetoed.
@@ -171,9 +186,9 @@ public @interface Cacheable {
 	 * <li>Only one cache may be specified</li>
 	 * <li>No other cache-related operation can be combined</li>
 	 * </ol>
-	 * This is effectively a hint and the actual cache provider that you are
-	 * using may not support it in a synchronized fashion. Check your provider
-	 * documentation for more details on the actual semantics.
+	 * This is effectively a hint and the chosen cache provider might not actually
+	 * support it in a synchronized fashion. Check your provider documentation for
+	 * more details on the actual semantics.
 	 * @since 4.3
 	 * @see org.springframework.cache.Cache#get(Object, Callable)
 	 */

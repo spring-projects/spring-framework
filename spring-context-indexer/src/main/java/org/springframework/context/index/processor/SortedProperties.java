@@ -88,7 +88,7 @@ class SortedProperties extends Properties {
 	public void store(OutputStream out, String comments) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		super.store(baos, (this.omitComments ? null : comments));
-		String contents = baos.toString(StandardCharsets.ISO_8859_1.name());
+		String contents = baos.toString(StandardCharsets.ISO_8859_1);
 		for (String line : contents.split(EOL)) {
 			if (!(this.omitComments && line.startsWith("#"))) {
 				out.write((line + EOL).getBytes(StandardCharsets.ISO_8859_1));

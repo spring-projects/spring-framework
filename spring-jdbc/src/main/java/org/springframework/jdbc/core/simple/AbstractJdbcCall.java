@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * Abstract class to provide base functionality for easy stored procedure calls
  * based on configuration options and database meta-data.
  *
- * <p>This class provides the base SPI for {@link SimpleJdbcCall}.
+ * <p>This class provides the processing arrangement for {@link SimpleJdbcCall}.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -404,7 +404,7 @@ public abstract class AbstractJdbcCall {
 			logger.debug("The following parameters are used for call " + getCallString() + " with " + args);
 			int i = 1;
 			for (SqlParameter param : getCallParameters()) {
-				logger.debug(i + ": " +  param.getName() + ", SQL type "+ param.getSqlType() + ", type name " +
+				logger.debug(i + ": " + param.getName() + ", SQL type " + param.getSqlType() + ", type name " +
 						param.getTypeName() + ", parameter class [" + param.getClass().getName() + "]");
 				i++;
 			}
@@ -453,7 +453,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Match the provided in parameter values with registered parameters and
 	 * parameters defined via meta-data processing.
-	 * @param args the parameter values provided in a Map
+	 * @param args the parameter values provided as a Map
 	 * @return a Map with parameter names and values
 	 */
 	protected Map<String, ?> matchInParameterValuesWithCallParameters(Map<String, ?> args) {

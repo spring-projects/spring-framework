@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 
 /**
@@ -37,14 +38,14 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	/**
 	 * Constructor with a status code only.
 	 */
-	public HttpServerErrorException(HttpStatus statusCode) {
+	public HttpServerErrorException(HttpStatusCode statusCode) {
 		super(statusCode);
 	}
 
 	/**
 	 * Constructor with a status code and status text.
 	 */
-	public HttpServerErrorException(HttpStatus statusCode, String statusText) {
+	public HttpServerErrorException(HttpStatusCode statusCode, String statusText) {
 		super(statusCode, statusText);
 	}
 
@@ -52,7 +53,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * Constructor with a status code and status text, and content.
 	 */
 	public HttpServerErrorException(
-			HttpStatus statusCode, String statusText, @Nullable byte[] body, @Nullable Charset charset) {
+			HttpStatusCode statusCode, String statusText, @Nullable byte[] body, @Nullable Charset charset) {
 
 		super(statusCode, statusText, body, charset);
 	}
@@ -60,67 +61,70 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	/**
 	 * Constructor with a status code and status text, headers, and content.
 	 */
-	public HttpServerErrorException(HttpStatus statusCode, String statusText,
+	public HttpServerErrorException(HttpStatusCode statusCode, String statusText,
 			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset) {
 
 		super(statusCode, statusText, headers, body, charset);
 	}
 
 	/**
-	 * Constructor with a status code and status text, headers, content, and an
+	 * Constructor with a status code and status text, headers, content, and a
 	 * prepared message.
 	 * @since 5.2.2
 	 */
-	public HttpServerErrorException(String message, HttpStatus statusCode, String statusText,
+	public HttpServerErrorException(String message, HttpStatusCode statusCode, String statusText,
 			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset) {
 
 		super(message, statusCode, statusText, headers, body, charset);
 	}
 
 	/**
-	 * Create an {@code HttpServerErrorException} or an HTTP status specific sub-class.
+	 * Create an {@code HttpServerErrorException} or an HTTP status specific subclass.
 	 * @since 5.1
 	 */
-	public static HttpServerErrorException create(HttpStatus statusCode,
+	public static HttpServerErrorException create(HttpStatusCode statusCode,
 			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
 		return create(null, statusCode, statusText, headers, body, charset);
 	}
 
 	/**
-	 * Variant of {@link #create(String, HttpStatus, String, HttpHeaders, byte[], Charset)}
+	 * Variant of {@link #create(String, HttpStatusCode, String, HttpHeaders, byte[], Charset)}
 	 * with an optional prepared message.
 	 * @since 5.2.2.
 	 */
-	public static HttpServerErrorException create(@Nullable String message, HttpStatus statusCode,
+	public static HttpServerErrorException create(@Nullable String message, HttpStatusCode statusCode,
 			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
-		switch (statusCode) {
-			case INTERNAL_SERVER_ERROR:
-				return message != null ?
-						new HttpServerErrorException.InternalServerError(message, statusText, headers, body, charset) :
-						new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);
-			case NOT_IMPLEMENTED:
-				return message != null ?
-						new HttpServerErrorException.NotImplemented(message, statusText, headers, body, charset) :
-						new HttpServerErrorException.NotImplemented(statusText, headers, body, charset);
-			case BAD_GATEWAY:
-				return message != null ?
-						new HttpServerErrorException.BadGateway(message, statusText, headers, body, charset) :
-						new HttpServerErrorException.BadGateway(statusText, headers, body, charset);
-			case SERVICE_UNAVAILABLE:
-				return message != null ?
-						new HttpServerErrorException.ServiceUnavailable(message, statusText, headers, body, charset) :
-						new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset);
-			case GATEWAY_TIMEOUT:
-				return message != null ?
-						new HttpServerErrorException.GatewayTimeout(message, statusText, headers, body, charset) :
-						new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset);
-			default:
-				return message != null ?
+		if (statusCode instanceof HttpStatus status) {
+			return switch (status) {
+				case INTERNAL_SERVER_ERROR -> message != null ?
+						new InternalServerError(message, statusText, headers, body, charset) :
+						new InternalServerError(statusText, headers, body, charset);
+				case NOT_IMPLEMENTED -> message != null ?
+						new NotImplemented(message, statusText, headers, body, charset) :
+						new NotImplemented(statusText, headers, body, charset);
+				case BAD_GATEWAY -> message != null ?
+						new BadGateway(message, statusText, headers, body, charset) :
+						new BadGateway(statusText, headers, body, charset);
+				case SERVICE_UNAVAILABLE -> message != null ?
+						new ServiceUnavailable(message, statusText, headers, body, charset) :
+						new ServiceUnavailable(statusText, headers, body, charset);
+				case GATEWAY_TIMEOUT -> message != null ?
+						new GatewayTimeout(message, statusText, headers, body, charset) :
+						new GatewayTimeout(statusText, headers, body, charset);
+				default -> message != null ?
 						new HttpServerErrorException(message, statusCode, statusText, headers, body, charset) :
 						new HttpServerErrorException(statusCode, statusText, headers, body, charset);
+			};
 		}
+		if (message != null) {
+			return new HttpServerErrorException(message, statusCode, statusText, headers, body, charset);
+		}
+		else {
+			return new HttpServerErrorException(statusCode, statusText, headers, body, charset);
+		}
+
 	}
 
 
@@ -163,7 +167,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * {@link HttpServerErrorException} for status HTTP HTTP 502 Bad Gateway.
+	 * {@link HttpServerErrorException} for HTTP status 502 Bad Gateway.
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")

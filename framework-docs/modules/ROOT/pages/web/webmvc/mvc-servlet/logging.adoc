@@ -1,0 +1,87 @@
+[[mvc-logging]]
+= Logging
+
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-logging[See equivalent in the Reactive stack]#
+
+DEBUG-level logging in Spring MVC is designed to be compact, minimal, and
+human-friendly. It focuses on high-value bits of information that are useful over and
+over again versus others that are useful only when debugging a specific issue.
+
+TRACE-level logging generally follows the same principles as DEBUG (and, for example, also
+should not be a fire hose) but can be used for debugging any issue. In addition, some log
+messages may show a different level of detail at TRACE versus DEBUG.
+
+Good logging comes from the experience of using the logs. If you spot anything that does
+not meet the stated goals, please let us know.
+
+
+[[mvc-logging-sensitive-data]]
+== Sensitive Data
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-logging-sensitive-data[See equivalent in the Reactive stack]#
+
+DEBUG and TRACE logging may log sensitive information. This is why request parameters and
+headers are masked by default and their logging in full must be enabled explicitly
+through the `enableLoggingRequestDetails` property on `DispatcherServlet`.
+
+The following example shows how to do so by using Java configuration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+public class MyInitializer
+		extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+	@Override
+	protected Class<?>[] getRootConfigClasses() {
+		return ... ;
+	}
+
+	@Override
+	protected Class<?>[] getServletConfigClasses() {
+		return ... ;
+	}
+
+	@Override
+	protected String[] getServletMappings() {
+		return ... ;
+	}
+
+	@Override
+	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+		registration.setInitParameter("enableLoggingRequestDetails", "true");
+	}
+
+}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
+
+		override fun getRootConfigClasses(): Array<Class<*>>? {
+			return ...
+		}
+
+		override fun getServletConfigClasses(): Array<Class<*>>? {
+			return ...
+		}
+
+		override fun getServletMappings(): Array<String> {
+			return ...
+		}
+
+		override fun customizeRegistration(registration: ServletRegistration.Dynamic) {
+			registration.setInitParameter("enableLoggingRequestDetails", "true")
+		}
+	}
+----
+======
+
+
+
+

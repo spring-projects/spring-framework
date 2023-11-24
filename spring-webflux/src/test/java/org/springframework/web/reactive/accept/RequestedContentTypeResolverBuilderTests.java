@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
 import java.util.Collections;
@@ -33,19 +34,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RequestedContentTypeResolverBuilderTests {
 
 	@Test
-	public void defaultSettings() throws Exception {
-
+	void defaultSettings() {
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("/flower").accept(MediaType.IMAGE_GIF));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.IMAGE_GIF));
+		assertThat(mediaTypes).containsExactly(MediaType.IMAGE_GIF);
 	}
 
 	@Test
-	public void parameterResolver() throws Exception {
-
+	void parameterResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.parameterResolver().mediaType("json", MediaType.APPLICATION_JSON);
 		RequestedContentTypeResolver resolver = builder.build();
@@ -53,12 +52,11 @@ public class RequestedContentTypeResolverBuilderTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/flower?format=json"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
-	public void parameterResolverWithCustomParamName() throws Exception {
-
+	void parameterResolverWithCustomParamName() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.parameterResolver().mediaType("json", MediaType.APPLICATION_JSON).parameterName("s");
 		RequestedContentTypeResolver resolver = builder.build();
@@ -70,8 +68,7 @@ public class RequestedContentTypeResolverBuilderTests {
 	}
 
 	@Test // SPR-10513
-	public void fixedResolver() throws Exception {
-
+	void fixedResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.fixedResolver(MediaType.APPLICATION_JSON);
 		RequestedContentTypeResolver resolver = builder.build();
@@ -83,19 +80,31 @@ public class RequestedContentTypeResolverBuilderTests {
 	}
 
 	@Test // SPR-12286
-	public void resolver() throws Exception {
-
+	void resolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.resolver(new FixedContentTypeResolver(MediaType.APPLICATION_JSON));
 		RequestedContentTypeResolver resolver = builder.build();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").accept(MediaType.ALL));
 		mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void removeQualityFactorForMediaTypeAllChecks() {
+		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
+		builder.resolver(new HeaderContentTypeResolver());
+		builder.resolver(new FixedContentTypeResolver(MediaType.APPLICATION_JSON));
+		RequestedContentTypeResolver resolver = builder.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+				.accept(MediaType.valueOf("*/*;q=0.8")));
+		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 }

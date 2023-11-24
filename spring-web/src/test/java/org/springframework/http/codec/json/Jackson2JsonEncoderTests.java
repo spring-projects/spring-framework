@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -65,6 +64,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 	@Override
 	@Test
+	@SuppressWarnings("deprecation")
 	public void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_JSON)).isTrue();
@@ -84,26 +84,25 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 		// SPR-15910
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM)).isFalse();
-
-
 	}
 
 	@Override
 	@Test
+	@SuppressWarnings("deprecation")
 	public void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar"));
 
-		testEncodeAll(input, ResolvableType.forClass(Pojo.class), step -> step
+		testEncodeAll(input, ResolvableType.forClass(Pojo.class), APPLICATION_STREAM_JSON, null, step -> step
 				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
 				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
 				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
-				.verifyComplete(),
-				APPLICATION_STREAM_JSON, null);
+				.verifyComplete()
+		);
 	}
 
-	@Test // SPR-15866
+	@Test  // SPR-15866
 	public void canEncodeWithCustomMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
@@ -138,12 +137,30 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		);
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(expectString("[" +
-						"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
-						"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
-						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
-						.andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
+				.consumeNextWith(expectString("]"))
 				.verifyComplete());
+	}
+
+	@Test
+	public void encodeNonStreamEmpty() {
+		testEncode(Flux.empty(), Pojo.class, step -> step
+				.consumeNextWith(expectString("["))
+				.consumeNextWith(expectString("]"))
+				.verifyComplete());
+	}
+
+	@Test // gh-29038
+	void encodeNonStreamWithErrorAsFirstSignal() {
+		String message = "I'm a teapot";
+		Flux<Object> input = Flux.error(new IllegalStateException(message));
+
+		Flux<DataBuffer> output = this.encoder.encode(
+				input, this.bufferFactory, ResolvableType.forClass(Pojo.class), null, null);
+
+		StepVerifier.create(output).expectErrorMessage(message).verify();
 	}
 
 	@Test
@@ -151,14 +168,15 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		Flux<ParentClass> input = Flux.just(new Foo(), new Bar());
 
 		testEncode(input, ParentClass.class, step -> step
-				.consumeNextWith(expectString("[{\"type\":\"foo\"},{\"type\":\"bar\"}]")
-						.andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString("[{\"type\":\"foo\"}"))
+				.consumeNextWith(expectString(",{\"type\":\"bar\"}"))
+				.consumeNextWith(expectString("]"))
 				.verifyComplete());
 	}
 
 
 	@Test  // SPR-15727
-	public void encodeAsStreamWithCustomStreamingType() {
+	public void encodeStreamWithCustomStreamingType() {
 		MediaType fooMediaType = new MediaType("application", "foo");
 		MediaType barMediaType = new MediaType("application", "bar");
 		this.encoder.setStreamingMediaTypes(Arrays.asList(fooMediaType, barMediaType));
@@ -168,15 +186,12 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				new Pojo("foofoofoo", "barbarbar")
 		);
 
-		testEncode(input, ResolvableType.forClass(Pojo.class), step -> step
-				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n")
-						.andThen(DataBufferUtils::release))
-				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n")
-						.andThen(DataBufferUtils::release))
-				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n")
-						.andThen(DataBufferUtils::release))
-				.verifyComplete(),
-				barMediaType, null);
+		testEncode(input, ResolvableType.forClass(Pojo.class), barMediaType, null, step -> step
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
+				.verifyComplete()
+		);
 	}
 
 	@Test
@@ -190,11 +205,10 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
 		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView1.class);
 
-		testEncode(input, type, step -> step
-						.consumeNextWith(expectString("{\"withView1\":\"with\"}")
-								.andThen(DataBufferUtils::release))
-						.verifyComplete(),
-				null, hints);
+		testEncode(input, type, null, hints, step -> step
+				.consumeNextWith(expectString("{\"withView1\":\"with\"}"))
+				.verifyComplete()
+		);
 	}
 
 	@Test
@@ -208,11 +222,10 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
 		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView3.class);
 
-		testEncode(input, type, step -> step
-						.consumeNextWith(expectString("{\"withoutView\":\"without\"}")
-								.andThen(DataBufferUtils::release))
-						.verifyComplete(),
-				null, hints);
+		testEncode(input, type, null, hints, step -> step
+				.consumeNextWith(expectString("{\"withoutView\":\"without\"}"))
+				.verifyComplete()
+		);
 	}
 
 	@Test
@@ -227,14 +240,37 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 		ResolvableType type = ResolvableType.forClass(MappingJacksonValue.class);
 
-		testEncode(Mono.just(jacksonValue), type, step -> step
-						.consumeNextWith(expectString("{\"withView1\":\"with\"}")
-								.andThen(DataBufferUtils::release))
-						.verifyComplete(),
-				null, Collections.emptyMap());
+		testEncode(Mono.just(jacksonValue), type, null, Collections.emptyMap(), step -> step
+				.consumeNextWith(expectString("{\"withView1\":\"with\"}"))
+				.verifyComplete()
+		);
 	}
 
-	@Test // gh-22771
+	@Test  // gh-28045
+	public void jacksonValueUnwrappedBeforeObjectMapperSelection() {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.setSerializationView(MyJacksonView1.class);
+
+		ResolvableType type = ResolvableType.forClass(MappingJacksonValue.class);
+
+		MediaType halMediaType = MediaType.parseMediaType("application/hal+json");
+		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
+		this.encoder.registerObjectMappersForType(JacksonViewBean.class, map -> map.put(halMediaType, mapper));
+
+		String ls = System.lineSeparator();  // output below is different between Unix and Windows
+		testEncode(Mono.just(jacksonValue), type, halMediaType, Collections.emptyMap(), step -> step
+				.consumeNextWith(expectString("{" + ls + "  \"withView1\" : \"with\"" + ls + "}")
+						)
+				.verifyComplete()
+		);
+	}
+
+	@Test  // gh-22771
 	public void encodeWithFlushAfterWriteOff() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false);
@@ -244,7 +280,8 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				ResolvableType.forClass(Pojo.class), MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap());
 
 		StepVerifier.create(result)
-				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}]"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString("]"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
 	}
@@ -252,12 +289,12 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	@Test
 	public void encodeAscii() {
 		Mono<Object> input = Mono.just(new Pojo("foo", "bar"));
+		MimeType mimeType = new MimeType("application", "json", StandardCharsets.US_ASCII);
 
-		testEncode(input, ResolvableType.forClass(Pojo.class), step -> step
+		testEncode(input, ResolvableType.forClass(Pojo.class), mimeType, null, step -> step
 				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
-				.verifyComplete(),
-				new MimeType("application", "json", StandardCharsets.US_ASCII), null);
-
+				.verifyComplete()
+		);
 	}
 
 

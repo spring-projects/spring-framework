@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.broker;
 
 import java.security.Principal;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -41,10 +42,11 @@ import org.springframework.util.PathMatcher;
 /**
  * A "simple" message broker that recognizes the message types defined in
  * {@link SimpMessageType}, keeps track of subscriptions with the help of a
- * {@link SubscriptionRegistry} and sends messages to subscribers.
+ * {@link SubscriptionRegistry}, and sends messages to subscribers.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
@@ -59,7 +61,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	private Integer cacheLimit;
 
 	@Nullable
-	private String selectorHeaderName = "selector";
+	private String selectorHeaderName;
 
 	@Nullable
 	private TaskScheduler taskScheduler;
@@ -96,11 +98,12 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 
 	/**
-	 * Configure a custom SubscriptionRegistry to use for storing subscriptions.
-	 * <p><strong>Note</strong> that when a custom PathMatcher is configured via
-	 * {@link #setPathMatcher}, if the custom registry is not an instance of
-	 * {@link DefaultSubscriptionRegistry}, the provided PathMatcher is not used
-	 * and must be configured directly on the custom registry.
+	 * Configure a custom {@link SubscriptionRegistry} to use for storing subscriptions.
+	 * <p><strong>NOTE</strong>: If the custom registry is not an instance of
+	 * {@link DefaultSubscriptionRegistry}, the configured {@link #setPathMatcher
+	 * PathMatcher}, {@linkplain #setCacheLimit cache limit}, and
+	 * {@linkplain #setSelectorHeaderName selector header name} are not used and
+	 * must be configured directly on the custom registry.
 	 */
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
 		Assert.notNull(subscriptionRegistry, "SubscriptionRegistry must not be null");
@@ -118,6 +121,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * When configured, the given PathMatcher is passed down to the underlying
 	 * SubscriptionRegistry to use for matching destination to subscriptions.
 	 * <p>Default is a standard {@link org.springframework.util.AntPathMatcher}.
+	 * <p>Setting this property has no effect if the underlying SubscriptionRegistry
+	 * is not an instance of {@link DefaultSubscriptionRegistry}.
 	 * @since 4.1
 	 * @see #setSubscriptionRegistry
 	 * @see DefaultSubscriptionRegistry#setPathMatcher
@@ -129,8 +134,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initPathMatcherToUse() {
-		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
+		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setPathMatcher(this.pathMatcher);
 		}
 	}
 
@@ -139,6 +144,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * underlying SubscriptionRegistry, overriding any default there.
 	 * <p>With a standard {@link DefaultSubscriptionRegistry}, the default
 	 * cache limit is 1024.
+	 * <p>Setting this property has no effect if the underlying SubscriptionRegistry
+	 * is not an instance of {@link DefaultSubscriptionRegistry}.
 	 * @since 4.3.2
 	 * @see #setSubscriptionRegistry
 	 * @see DefaultSubscriptionRegistry#setCacheLimit
@@ -150,23 +157,28 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initCacheLimitToUse() {
-		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setCacheLimit(this.cacheLimit);
+		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setCacheLimit(this.cacheLimit);
 		}
 	}
 
 	/**
 	 * Configure the name of a header that a subscription message can have for
-	 * the purpose of filtering messages matched to the subscription. The header
-	 * value is expected to be a Spring EL boolean expression to be applied to
-	 * the headers of messages matched to the subscription.
+	 * the purpose of filtering messages matched to the subscription.
+	 * <p>The header value is expected to be a Spring Expression Language (SpEL)
+	 * boolean expression to be applied to the headers of messages matched to the
+	 * subscription.
 	 * <p>For example:
-	 * <pre>
+	 * <pre style="code">
 	 * headers.foo == 'bar'
 	 * </pre>
-	 * <p>By default this is set to "selector". You can set it to a different
-	 * name, or to {@code null} to turn off support for a selector header.
-	 * @param selectorHeaderName the name to use for a selector header
+	 * <p>By default the selector header name is set to {@code null} which disables
+	 * this feature. You can set it to {@code "selector"} or a different name to
+	 * enable support for a selector header.
+	 * <p>Setting this property has no effect if the underlying SubscriptionRegistry
+	 * is not an instance of {@link DefaultSubscriptionRegistry}.
+	 * @param selectorHeaderName the name to use for a selector header, or {@code null}
+	 * or blank to disable selector header support
 	 * @since 4.3.17
 	 * @see #setSubscriptionRegistry
 	 * @see DefaultSubscriptionRegistry#setSelectorHeaderName(String)
@@ -177,8 +189,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initSelectorHeaderNameToUse() {
-		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setSelectorHeaderName(this.selectorHeaderName);
+		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setSelectorHeaderName(this.selectorHeaderName);
 		}
 	}
 
@@ -254,8 +266,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	public void startInternal() {
 		publishBrokerAvailableEvent();
 		if (this.taskScheduler != null) {
-			long interval = initHeartbeatTaskDelay();
-			if (interval > 0) {
+			Duration interval = initHeartbeatTaskDelay();
+			if (interval.toMillis() > 0) {
 				this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
 			}
 		}
@@ -266,15 +278,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private long initHeartbeatTaskDelay() {
+	private Duration initHeartbeatTaskDelay() {
 		if (getHeartbeatValue() == null) {
-			return 0;
+			return Duration.ZERO;
 		}
 		else if (getHeartbeatValue()[0] > 0 && getHeartbeatValue()[1] > 0) {
-			return Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]);
+			return Duration.ofMillis(Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]));
 		}
 		else {
-			return (getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
+			return Duration.ofMillis(getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
 		}
 	}
 
@@ -306,6 +318,12 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
 			logMessage(message);
 			if (sessionId != null) {
+				if (this.sessions.get(sessionId) != null) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Ignoring CONNECT in session " + sessionId + ". Already connected.");
+					}
+					return;
+				}
 				long[] heartbeatIn = SimpMessageHeaderAccessor.getHeartbeat(headers);
 				long[] heartbeatOut = getHeartbeatValue();
 				Principal user = SimpMessageHeaderAccessor.getUser(headers);

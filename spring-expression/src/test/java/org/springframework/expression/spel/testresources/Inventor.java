@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,20 @@
 package org.springframework.expression.spel.testresources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.util.ObjectUtils;
 
 ///CLOVER:OFF
 @SuppressWarnings("unused")
 public class Inventor {
+
 	private String name;
 	public String _name;
 	public String _name_;
@@ -190,20 +193,27 @@ public class Inventor {
 		return a + b + c;
 	}
 
-	public int aVarargsMethod(String... strings) {
-		if (strings == null)
-			return 0;
-		return strings.length;
+	public String aVarargsMethod(String... strings) {
+		return Arrays.toString(strings);
 	}
 
-	public int aVarargsMethod2(int i, String... strings) {
-		if (strings == null)
-			return i;
-		return strings.length + i;
+	public String aVarargsMethod2(int i, String... strings) {
+		return String.valueOf(i) + "-" + Arrays.toString(strings);
+	}
+
+	@SuppressWarnings("unchecked")
+	public String optionalVarargsMethod(Optional<String>... values) {
+		return Arrays.toString(values);
+	}
+
+	public String aVarargsMethod3(String str1, String... strings) {
+		if (ObjectUtils.isEmpty(strings)) {
+			return str1;
+		}
+		return str1 + "-" + String.join("-", strings);
 	}
 
 	public Inventor(String... strings) {
-
 	}
 
 	public boolean getSomeProperty() {

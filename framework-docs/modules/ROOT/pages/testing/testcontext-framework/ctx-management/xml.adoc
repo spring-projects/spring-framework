@@ -1,0 +1,118 @@
+[[testcontext-ctx-management-xml]]
+= Context Configuration with XML resources
+
+To load an `ApplicationContext` for your tests by using XML configuration files, annotate
+your test class with `@ContextConfiguration` and configure the `locations` attribute with
+an array that contains the resource locations of XML configuration metadata. A plain or
+relative path (for example, `context.xml`) is treated as a classpath resource that is
+relative to the package in which the test class is defined. A path starting with a slash
+is treated as an absolute classpath location (for example, `/org/example/config.xml`). A
+path that represents a resource URL (i.e., a path prefixed with `classpath:`, `file:`,
+`http:`, etc.) is used _as is_.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// ApplicationContext will be loaded from "/app-config.xml" and
+	// "/test-config.xml" in the root of the classpath
+	@ContextConfiguration(locations = {"/app-config.xml", "/test-config.xml"}) // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Setting the locations attribute to a list of XML files.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// ApplicationContext will be loaded from "/app-config.xml" and
+	// "/test-config.xml" in the root of the classpath
+	@ContextConfiguration(locations = ["/app-config.xml", "/test-config.xml"]) // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Setting the locations attribute to a list of XML files.
+======
+
+
+`@ContextConfiguration` supports an alias for the `locations` attribute through the
+standard Java `value` attribute. Thus, if you do not need to declare additional
+attributes in `@ContextConfiguration`, you can omit the declaration of the `locations`
+attribute name and declare the resource locations by using the shorthand format
+demonstrated in the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	@ContextConfiguration({"/app-config.xml", "/test-config.xml"}) <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Specifying XML files without using the `locations` attribute.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	@ContextConfiguration("/app-config.xml", "/test-config.xml") // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Specifying XML files without using the `locations` attribute.
+======
+
+
+If you omit both the `locations` and the `value` attributes from the
+`@ContextConfiguration` annotation, the TestContext framework tries to detect a default
+XML resource location. Specifically, `GenericXmlContextLoader` and
+`GenericXmlWebContextLoader` detect a default location based on the name of the test
+class. If your class is named `com.example.MyTest`, `GenericXmlContextLoader` loads your
+application context from `"classpath:com/example/MyTest-context.xml"`. The following
+example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// ApplicationContext will be loaded from
+	// "classpath:com/example/MyTest-context.xml"
+	@ContextConfiguration // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Loading configuration from the default location.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// ApplicationContext will be loaded from
+	// "classpath:com/example/MyTest-context.xml"
+	@ContextConfiguration // <1>
+	class MyTest {
+		// class body...
+	}
+----
+<1> Loading configuration from the default location.
+======
+
+

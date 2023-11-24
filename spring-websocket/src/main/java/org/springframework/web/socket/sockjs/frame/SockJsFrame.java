@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,14 +122,8 @@ public class SockJsFrame {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SockJsFrame)) {
-			return false;
-		}
-		SockJsFrame otherFrame = (SockJsFrame) other;
-		return (this.type.equals(otherFrame.type) && this.content.equals(otherFrame.content));
+		return (this == other || (other instanceof SockJsFrame that &&
+				this.type.equals(that.type) && this.content.equals(that.content)));
 	}
 
 	@Override

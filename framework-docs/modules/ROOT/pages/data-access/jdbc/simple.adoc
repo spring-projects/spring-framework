@@ -1,0 +1,773 @@
+[[jdbc-simple-jdbc]]
+= Simplifying JDBC Operations with the `SimpleJdbc` Classes
+
+The `SimpleJdbcInsert` and `SimpleJdbcCall` classes provide a simplified configuration
+by taking advantage of database metadata that can be retrieved through the JDBC driver.
+This means that you have less to configure up front, although you can override or turn off
+the metadata processing if you prefer to provide all the details in your code.
+
+
+[[jdbc-simple-jdbc-insert-1]]
+== Inserting Data by Using `SimpleJdbcInsert`
+
+We start by looking at the `SimpleJdbcInsert` class with the minimal amount of
+configuration options. You should instantiate the `SimpleJdbcInsert` in the data access
+layer's initialization method. For this example, the initializing method is the
+`setDataSource` method. You do not need to subclass the `SimpleJdbcInsert` class. Instead,
+you can create a new instance and set the table name by using the `withTableName` method.
+Configuration methods for this class follow the `fluid` style that returns the instance
+of the `SimpleJdbcInsert`, which lets you chain all configuration methods. The following
+example uses only one configuration method (we show examples of multiple methods later):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcInsert insertActor;
+
+		public void setDataSource(DataSource dataSource) {
+			this.insertActor = new SimpleJdbcInsert(dataSource).withTableName("t_actor");
+		}
+
+		public void add(Actor actor) {
+			Map<String, Object> parameters = new HashMap<>(3);
+			parameters.put("id", actor.getId());
+			parameters.put("first_name", actor.getFirstName());
+			parameters.put("last_name", actor.getLastName());
+			insertActor.execute(parameters);
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource).withTableName("t_actor")
+
+		fun add(actor: Actor) {
+			val parameters = mutableMapOf<String, Any>()
+			parameters["id"] = actor.id
+			parameters["first_name"] = actor.firstName
+			parameters["last_name"] = actor.lastName
+			insertActor.execute(parameters)
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+The `execute` method used here takes a plain `java.util.Map` as its only parameter. The
+important thing to note here is that the keys used for the `Map` must match the column
+names of the table, as defined in the database. This is because we read the metadata
+to construct the actual insert statement.
+
+
+[[jdbc-simple-jdbc-insert-2]]
+== Retrieving Auto-generated Keys by Using `SimpleJdbcInsert`
+
+The next example uses the same insert as the preceding example, but, instead of passing in the `id`, it
+retrieves the auto-generated key and sets it on the new `Actor` object. When it creates
+the `SimpleJdbcInsert`, in addition to specifying the table name, it specifies the name
+of the generated key column with the `usingGeneratedKeyColumns` method. The following
+listing shows how it works:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcInsert insertActor;
+
+		public void setDataSource(DataSource dataSource) {
+			this.insertActor = new SimpleJdbcInsert(dataSource)
+					.withTableName("t_actor")
+					.usingGeneratedKeyColumns("id");
+		}
+
+		public void add(Actor actor) {
+			Map<String, Object> parameters = new HashMap<>(2);
+			parameters.put("first_name", actor.getFirstName());
+			parameters.put("last_name", actor.getLastName());
+			Number newId = insertActor.executeAndReturnKey(parameters);
+			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor").usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = mapOf(
+					"first_name" to actor.firstName,
+					"last_name" to actor.lastName)
+			val newId = insertActor.executeAndReturnKey(parameters);
+			return actor.copy(id = newId.toLong())
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+The main difference when you run the insert by using this second approach is that you do not
+add the `id` to the `Map`, and you call the `executeAndReturnKey` method. This returns a
+`java.lang.Number` object with which you can create an instance of the numerical type that
+is used in your domain class. You cannot rely on all databases to return a specific Java
+class here. `java.lang.Number` is the base class that you can rely on. If you have
+multiple auto-generated columns or the generated values are non-numeric, you can
+use a `KeyHolder` that is returned from the `executeAndReturnKeyHolder` method.
+
+
+[[jdbc-simple-jdbc-insert-3]]
+== Specifying Columns for a `SimpleJdbcInsert`
+
+You can limit the columns for an insert by specifying a list of column names with the
+`usingColumns` method, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcInsert insertActor;
+
+		public void setDataSource(DataSource dataSource) {
+			this.insertActor = new SimpleJdbcInsert(dataSource)
+					.withTableName("t_actor")
+					.usingColumns("first_name", "last_name")
+					.usingGeneratedKeyColumns("id");
+		}
+
+		public void add(Actor actor) {
+			Map<String, Object> parameters = new HashMap<>(2);
+			parameters.put("first_name", actor.getFirstName());
+			parameters.put("last_name", actor.getLastName());
+			Number newId = insertActor.executeAndReturnKey(parameters);
+			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor")
+				.usingColumns("first_name", "last_name")
+				.usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = mapOf(
+					"first_name" to actor.firstName,
+					"last_name" to actor.lastName)
+			val newId = insertActor.executeAndReturnKey(parameters);
+			return actor.copy(id = newId.toLong())
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+The execution of the insert is the same as if you had relied on the metadata to determine
+which columns to use.
+
+
+[[jdbc-simple-jdbc-parameters]]
+== Using `SqlParameterSource` to Provide Parameter Values
+
+Using a `Map` to provide parameter values works fine, but it is not the most convenient
+class to use. Spring provides a couple of implementations of the `SqlParameterSource`
+interface that you can use instead. The first one is `BeanPropertySqlParameterSource`,
+which is a very convenient class if you have a JavaBean-compliant class that contains
+your values. It uses the corresponding getter method to extract the parameter
+values. The following example shows how to use `BeanPropertySqlParameterSource`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcInsert insertActor;
+
+		public void setDataSource(DataSource dataSource) {
+			this.insertActor = new SimpleJdbcInsert(dataSource)
+					.withTableName("t_actor")
+					.usingGeneratedKeyColumns("id");
+		}
+
+		public void add(Actor actor) {
+			SqlParameterSource parameters = new BeanPropertySqlParameterSource(actor);
+			Number newId = insertActor.executeAndReturnKey(parameters);
+			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor")
+				.usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = BeanPropertySqlParameterSource(actor)
+			val newId = insertActor.executeAndReturnKey(parameters)
+			return actor.copy(id = newId.toLong())
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+Another option is the `MapSqlParameterSource` that resembles a `Map` but provides a more
+convenient `addValue` method that can be chained. The following example shows how to use it:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcInsert insertActor;
+
+		public void setDataSource(DataSource dataSource) {
+			this.insertActor = new SimpleJdbcInsert(dataSource)
+					.withTableName("t_actor")
+					.usingGeneratedKeyColumns("id");
+		}
+
+		public void add(Actor actor) {
+			SqlParameterSource parameters = new MapSqlParameterSource()
+					.addValue("first_name", actor.getFirstName())
+					.addValue("last_name", actor.getLastName());
+			Number newId = insertActor.executeAndReturnKey(parameters);
+			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor")
+				.usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = MapSqlParameterSource()
+						.addValue("first_name", actor.firstName)
+						.addValue("last_name", actor.lastName)
+			val newId = insertActor.executeAndReturnKey(parameters)
+			return actor.copy(id = newId.toLong())
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+As you can see, the configuration is the same. Only the executing code has to change to
+use these alternative input classes.
+
+
+[[jdbc-simple-jdbc-call-1]]
+== Calling a Stored Procedure with `SimpleJdbcCall`
+
+The `SimpleJdbcCall` class uses metadata in the database to look up names of `in`
+and `out` parameters so that you do not have to explicitly declare them. You can
+declare parameters if you prefer to do that or if you have parameters (such as `ARRAY`
+or `STRUCT`) that do not have an automatic mapping to a Java class. The first example
+shows a simple procedure that returns only scalar values in `VARCHAR` and `DATE` format
+from a MySQL database. The example procedure reads a specified actor entry and returns
+`first_name`, `last_name`, and `birth_date` columns in the form of `out` parameters.
+The following listing shows the first example:
+
+[source,sql,indent=0,subs="verbatim,quotes"]
+----
+	CREATE PROCEDURE read_actor (
+		IN in_id INTEGER,
+		OUT out_first_name VARCHAR(100),
+		OUT out_last_name VARCHAR(100),
+		OUT out_birth_date DATE)
+	BEGIN
+		SELECT first_name, last_name, birth_date
+		INTO out_first_name, out_last_name, out_birth_date
+		FROM t_actor where id = in_id;
+	END;
+----
+
+The `in_id` parameter contains the `id` of the actor that you are looking up. The `out`
+parameters return the data read from the table.
+
+You can declare `SimpleJdbcCall` in a manner similar to declaring `SimpleJdbcInsert`. You
+should instantiate and configure the class in the initialization method of your data-access
+layer. Compared to the `StoredProcedure` class, you need not create a subclass
+and you need not to declare parameters that can be looked up in the database metadata.
+The following example of a `SimpleJdbcCall` configuration uses the preceding stored
+procedure (the only configuration option, in addition to the `DataSource`, is the name
+of the stored procedure):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcCall procReadActor;
+
+		public void setDataSource(DataSource dataSource) {
+			this.procReadActor = new SimpleJdbcCall(dataSource)
+					.withProcedureName("read_actor");
+		}
+
+		public Actor readActor(Long id) {
+			SqlParameterSource in = new MapSqlParameterSource()
+					.addValue("in_id", id);
+			Map out = procReadActor.execute(in);
+			Actor actor = new Actor();
+			actor.setId(id);
+			actor.setFirstName((String) out.get("out_first_name"));
+			actor.setLastName((String) out.get("out_last_name"));
+			actor.setBirthDate((Date) out.get("out_birth_date"));
+			return actor;
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val procReadActor = SimpleJdbcCall(dataSource)
+				.withProcedureName("read_actor")
+
+
+		fun readActor(id: Long): Actor {
+			val source = MapSqlParameterSource().addValue("in_id", id)
+			val output = procReadActor.execute(source)
+			return Actor(
+					id,
+					output["out_first_name"] as String,
+					output["out_last_name"] as String,
+					output["out_birth_date"] as Date)
+		}
+
+			// ... additional methods
+	}
+----
+======
+
+The code you write for the execution of the call involves creating an `SqlParameterSource`
+containing the IN parameter. You must match the name provided for the input value
+with that of the parameter name declared in the stored procedure. The case does not have
+to match because you use metadata to determine how database objects should be referred to
+in a stored procedure. What is specified in the source for the stored procedure is not
+necessarily the way it is stored in the database. Some databases transform names to all
+upper case, while others use lower case or use the case as specified.
+
+The `execute` method takes the IN parameters and returns a `Map` that contains any `out`
+parameters keyed by the name, as specified in the stored procedure. In this case, they are
+`out_first_name`, `out_last_name`, and `out_birth_date`.
+
+The last part of the `execute` method creates an `Actor` instance to use to return the
+data retrieved. Again, it is important to use the names of the `out` parameters as they
+are declared in the stored procedure. Also, the case in the names of the `out`
+parameters stored in the results map matches that of the `out` parameter names in the
+database, which could vary between databases. To make your code more portable, you should
+do a case-insensitive lookup or instruct Spring to use a `LinkedCaseInsensitiveMap`.
+To do the latter, you can create your own `JdbcTemplate` and set the `setResultsMapCaseInsensitive`
+property to `true`. Then you can pass this customized `JdbcTemplate` instance into
+the constructor of your `SimpleJdbcCall`. The following example shows this configuration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcCall procReadActor;
+
+		public void setDataSource(DataSource dataSource) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			jdbcTemplate.setResultsMapCaseInsensitive(true);
+			this.procReadActor = new SimpleJdbcCall(jdbcTemplate)
+					.withProcedureName("read_actor");
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private var procReadActor = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
+			isResultsMapCaseInsensitive = true
+		}).withProcedureName("read_actor")
+
+		// ... additional methods
+	}
+----
+======
+
+By taking this action, you avoid conflicts in the case used for the names of your
+returned `out` parameters.
+
+
+[[jdbc-simple-jdbc-call-2]]
+== Explicitly Declaring Parameters to Use for a `SimpleJdbcCall`
+
+Earlier in this chapter, we described how parameters are deduced from metadata, but you can declare them
+explicitly if you wish. You can do so by creating and configuring `SimpleJdbcCall` with
+the `declareParameters` method, which takes a variable number of `SqlParameter` objects
+as input. See the xref:data-access/jdbc/simple.adoc#jdbc-params[next section] for details on how to define an `SqlParameter`.
+
+NOTE: Explicit declarations are necessary if the database you use is not a Spring-supported
+database. Currently, Spring supports metadata lookup of stored procedure calls for the
+following databases: Apache Derby, DB2, MySQL, Microsoft SQL Server, Oracle, and Sybase.
+We also support metadata lookup of stored functions for MySQL, Microsoft SQL Server,
+and Oracle.
+
+You can opt to explicitly declare one, some, or all of the parameters. The parameter
+metadata is still used where you do not explicitly declare parameters. To bypass all
+processing of metadata lookups for potential parameters and use only the declared
+parameters, you can call the method `withoutProcedureColumnMetaDataAccess` as part of the
+declaration. Suppose that you have two or more different call signatures declared for a
+database function. In this case, you call `useInParameterNames` to specify the list
+of IN parameter names to include for a given signature.
+
+The following example shows a fully declared procedure call and uses the information from
+the preceding example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcCall procReadActor;
+
+		public void setDataSource(DataSource dataSource) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			jdbcTemplate.setResultsMapCaseInsensitive(true);
+			this.procReadActor = new SimpleJdbcCall(jdbcTemplate)
+					.withProcedureName("read_actor")
+					.withoutProcedureColumnMetaDataAccess()
+					.useInParameterNames("in_id")
+					.declareParameters(
+							new SqlParameter("in_id", Types.NUMERIC),
+							new SqlOutParameter("out_first_name", Types.VARCHAR),
+							new SqlOutParameter("out_last_name", Types.VARCHAR),
+							new SqlOutParameter("out_birth_date", Types.DATE)
+					);
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+			private val procReadActor = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
+				isResultsMapCaseInsensitive = true
+			}).withProcedureName("read_actor")
+					.withoutProcedureColumnMetaDataAccess()
+					.useInParameterNames("in_id")
+					.declareParameters(
+							SqlParameter("in_id", Types.NUMERIC),
+							SqlOutParameter("out_first_name", Types.VARCHAR),
+							SqlOutParameter("out_last_name", Types.VARCHAR),
+							SqlOutParameter("out_birth_date", Types.DATE)
+		)
+
+			// ... additional methods
+	}
+----
+======
+
+The execution and end results of the two examples are the same. The second example specifies all
+details explicitly rather than relying on metadata.
+
+
+[[jdbc-params]]
+== How to Define `SqlParameters`
+
+To define a parameter for the `SimpleJdbc` classes and also for the RDBMS operations
+classes (covered in xref:data-access/jdbc/object.adoc[Modeling JDBC Operations as Java Objects]) you can use `SqlParameter` or one of its subclasses.
+To do so, you typically specify the parameter name and SQL type in the constructor. The SQL type
+is specified by using the `java.sql.Types` constants. Earlier in this chapter, we saw declarations
+similar to the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	new SqlParameter("in_id", Types.NUMERIC),
+	new SqlOutParameter("out_first_name", Types.VARCHAR),
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	SqlParameter("in_id", Types.NUMERIC),
+	SqlOutParameter("out_first_name", Types.VARCHAR),
+----
+======
+
+The first line with the `SqlParameter` declares an IN parameter. You can use IN parameters
+for both stored procedure calls and for queries by using the `SqlQuery` and its
+subclasses (covered in xref:data-access/jdbc/object.adoc#jdbc-SqlQuery[Understanding `SqlQuery`]).
+
+The second line (with the `SqlOutParameter`) declares an `out` parameter to be used in a
+stored procedure call. There is also an `SqlInOutParameter` for `InOut` parameters
+(parameters that provide an IN value to the procedure and that also return a value).
+
+NOTE: Only parameters declared as `SqlParameter` and `SqlInOutParameter` are used to
+provide input values. This is different from the `StoredProcedure` class, which (for
+backwards compatibility reasons) lets input values be provided for parameters
+declared as `SqlOutParameter`.
+
+For IN parameters, in addition to the name and the SQL type, you can specify a scale for
+numeric data or a type name for custom database types. For `out` parameters, you can
+provide a `RowMapper` to handle mapping of rows returned from a `REF` cursor. Another
+option is to specify an `SqlReturnType` that provides an opportunity to define
+customized handling of the return values.
+
+
+[[jdbc-simple-jdbc-call-3]]
+== Calling a Stored Function by Using `SimpleJdbcCall`
+
+You can call a stored function in almost the same way as you call a stored procedure, except
+that you provide a function name rather than a procedure name. You use the
+`withFunctionName` method as part of the configuration to indicate that you want to make
+a call to a function, and the corresponding string for a function call is generated. A
+specialized call (`executeFunction`) is used to run the function, and it
+returns the function return value as an object of a specified type, which means you do
+not have to retrieve the return value from the results map. A similar convenience method
+(named `executeObject`) is also available for stored procedures that have only one `out`
+parameter. The following example (for MySQL) is based on a stored function named `get_actor_name`
+that returns an actor's full name:
+
+[source,sql,indent=0,subs="verbatim,quotes"]
+----
+	CREATE FUNCTION get_actor_name (in_id INTEGER)
+	RETURNS VARCHAR(200) READS SQL DATA
+	BEGIN
+		DECLARE out_name VARCHAR(200);
+		SELECT concat(first_name, ' ', last_name)
+			INTO out_name
+			FROM t_actor where id = in_id;
+		RETURN out_name;
+	END;
+----
+
+To call this function, we again create a `SimpleJdbcCall` in the initialization method,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcCall funcGetActorName;
+
+		public void setDataSource(DataSource dataSource) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			jdbcTemplate.setResultsMapCaseInsensitive(true);
+			this.funcGetActorName = new SimpleJdbcCall(jdbcTemplate)
+					.withFunctionName("get_actor_name");
+		}
+
+		public String getActorName(Long id) {
+			SqlParameterSource in = new MapSqlParameterSource()
+					.addValue("in_id", id);
+			String name = funcGetActorName.executeFunction(String.class, in);
+			return name;
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource).apply {
+			isResultsMapCaseInsensitive = true
+		}
+		private val funcGetActorName = SimpleJdbcCall(jdbcTemplate)
+				.withFunctionName("get_actor_name")
+
+		fun getActorName(id: Long): String {
+			val source = MapSqlParameterSource().addValue("in_id", id)
+			return funcGetActorName.executeFunction(String::class.java, source)
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+The `executeFunction` method used returns a `String` that contains the return value from the
+function call.
+
+
+[[jdbc-simple-jdbc-call-4]]
+== Returning a `ResultSet` or REF Cursor from a `SimpleJdbcCall`
+
+Calling a stored procedure or function that returns a result set is a bit tricky. Some
+databases return result sets during the JDBC results processing, while others require an
+explicitly registered `out` parameter of a specific type. Both approaches need
+additional processing to loop over the result set and process the returned rows. With
+the `SimpleJdbcCall`, you can use the `returningResultSet` method and declare a `RowMapper`
+implementation to be used for a specific parameter. If the result set is
+returned during the results processing, there are no names defined, so the returned
+results must match the order in which you declare the `RowMapper`
+implementations. The name specified is still used to store the processed list of results
+in the results map that is returned from the `execute` statement.
+
+The next example (for MySQL) uses a stored procedure that takes no IN parameters and returns
+all rows from the `t_actor` table:
+
+[source,sql,indent=0,subs="verbatim,quotes"]
+----
+	CREATE PROCEDURE read_all_actors()
+	BEGIN
+	 SELECT a.id, a.first_name, a.last_name, a.birth_date FROM t_actor a;
+	END;
+----
+
+To call this procedure, you can declare the `RowMapper`. Because the class to which you want
+to map follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is created by
+passing in the required class to map to in the `newInstance` method.
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcActorDao implements ActorDao {
+
+		private SimpleJdbcCall procReadAllActors;
+
+		public void setDataSource(DataSource dataSource) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			jdbcTemplate.setResultsMapCaseInsensitive(true);
+			this.procReadAllActors = new SimpleJdbcCall(jdbcTemplate)
+					.withProcedureName("read_all_actors")
+					.returningResultSet("actors",
+					BeanPropertyRowMapper.newInstance(Actor.class));
+		}
+
+		public List getActorsList() {
+			Map m = procReadAllActors.execute(new HashMap<String, Object>(0));
+			return (List) m.get("actors");
+		}
+
+		// ... additional methods
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+			private val procReadAllActors = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
+				isResultsMapCaseInsensitive = true
+			}).withProcedureName("read_all_actors")
+					.returningResultSet("actors",
+							BeanPropertyRowMapper.newInstance(Actor::class.java))
+
+		fun getActorsList(): List<Actor> {
+			val m = procReadAllActors.execute(mapOf<String, Any>())
+			return m["actors"] as List<Actor>
+		}
+
+		// ... additional methods
+	}
+----
+======
+
+The `execute` call passes in an empty `Map`, because this call does not take any parameters.
+The list of actors is then retrieved from the results map and returned to the caller.
+
+
+

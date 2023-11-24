@@ -1,0 +1,246 @@
+[[mvc-ann-modelattrib-method-args]]
+= `@ModelAttribute`
+
+[.small]#xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[See equivalent in the Reactive stack]#
+
+The `@ModelAttribute` method parameter annotation binds request parameters onto a model
+object. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(@ModelAttribute Pet pet) { // <1>
+		// method logic...
+	}
+----
+<1> Bind to an instance of `Pet`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
+	// method logic...
+}
+----
+<1> Bind to an instance of `Pet`.
+======
+
+The `Pet` instance may be:
+
+* Accessed from the model where it could have been added by a
+  xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[@ModelAttribute method].
+* Accessed from the HTTP session if the model attribute was listed in
+  the class-level xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`] annotation.
+* Obtained through a `Converter` if the model attribute name matches the name of a
+  request value such as a path variable or a request parameter (example follows).
+* Instantiated through a default constructor.
+* Instantiated through a "`primary constructor`" with arguments that match to Servlet
+  request parameters. Argument names are determined through runtime-retained parameter
+  names in the bytecode.
+
+As mentioned above, a  `Converter<String, T>` may be used to obtain the model object if
+the model attribute name matches to the name of a request value such as a path variable or a
+request parameter, _and_ there is a compatible `Converter<String, T>`. In the below example,
+the model attribute name `account` matches URI path variable `account`, and there is a
+registered `Converter<String, Account>` that perhaps retrieves it from a persistence store:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PutMapping("/accounts/{account}")
+	public String save(@ModelAttribute("account") Account account) { // <1>
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PutMapping("/accounts/{account}")
+	fun save(@ModelAttribute("account") account: Account): String { // <1>
+		// ...
+	}
+----
+======
+
+By default, both constructor and property
+xref:core/validation/beans-beans.adoc#beans-binding[data binding] are applied. However,
+model object design requires careful consideration, and for security reasons it is
+recommended either to use an object tailored specifically for web binding, or to apply
+constructor binding only. If property binding must still be used, then _allowedFields_
+patterns should be set to limit which properties can be set. For further details on this
+and example configuration, see
+xref:web/webmvc/mvc-controller/ann-initbinder.adoc#mvc-ann-initbinder-model-design[model design].
+
+When using constructor binding, you can customize request parameter names through an
+`@BindParam` annotation. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class Account {
+
+	    private final String firstName;
+
+		public Account(@BindParam("first-name") String firstName) {
+			this.firstName = firstName;
+		}
+	}
+----
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Account(@BindParam("first-name") val firstName: String)
+----
+======
+
+NOTE: The `@BindParam` may also be placed on the fields that correspond to constructor
+parameters. While `@BindParam` is supported out of the box, you can also use a
+different annotation by setting a `DataBinder.NameResolver` on `DataBinder`
+
+In some cases, you may want access to a model attribute without data binding. For such
+cases, you can inject the `Model` into the controller and access it directly or,
+alternatively, set `@ModelAttribute(binding=false)`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ModelAttribute
+	public AccountForm setUpForm() {
+		return new AccountForm();
+	}
+
+	@ModelAttribute
+	public Account findAccount(@PathVariable String accountId) {
+		return accountRepository.findOne(accountId);
+	}
+
+	@PostMapping("update")
+	public String update(AccountForm form, BindingResult result,
+			@ModelAttribute(binding=false) Account account) { // <1>
+		// ...
+	}
+----
+<1> Setting `@ModelAttribute(binding=false)`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ModelAttribute
+	fun setUpForm(): AccountForm {
+		return AccountForm()
+	}
+
+	@ModelAttribute
+	fun findAccount(@PathVariable accountId: String): Account {
+		return accountRepository.findOne(accountId)
+	}
+
+	@PostMapping("update")
+	fun update(form: AccountForm, result: BindingResult,
+			   @ModelAttribute(binding = false) account: Account): String { // <1>
+		// ...
+	}
+----
+<1> Setting `@ModelAt\tribute(binding=false)`.
+======
+
+If data binding results in errors, by default a `MethodArgumentNotValidException` is raised,
+but you can also add a `BindingResult` argument immediately next to the `@ModelAttribute`
+in order to handle such errors in the controller method. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		// ...
+	}
+----
+<1> Adding a `BindingResult` next to the `@ModelAttribute`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
+		if (result.hasErrors()) {
+			return "petForm"
+		}
+		// ...
+	}
+----
+<1> Adding a `BindingResult` next to the `@ModelAttribute`.
+======
+
+You can automatically apply validation after data binding by adding the
+`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation.
+See xref:core/validation/beanvalidation.adoc[Bean Validation] and
+xref:web/webmvc/mvc-config/validation.adoc[Spring validation]. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+		@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+		public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
+			if (result.hasErrors()) {
+				return "petForm";
+			}
+			// ...
+		}
+----
+<1> Validate the `Pet` instance.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@Valid @ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
+		if (result.hasErrors()) {
+			return "petForm"
+		}
+		// ...
+	}
+----
+<1> Validate the `Pet` instance.
+======
+
+If there is no `BindingResult` parameter after the `@ModelAttribute`, then
+`MethodArgumentNotValueException` is raised with the validation errors. However, if method
+validation applies because other parameters have `@jakarta.validation.Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. For more details, see the section
+xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
+
+TIP: Using `@ModelAttribute` is optional. By default, any parameter that is not a simple
+value type as determined by
+{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+_AND_ that is not resolved by any other argument resolver is treated as an `@ModelAttribute`.

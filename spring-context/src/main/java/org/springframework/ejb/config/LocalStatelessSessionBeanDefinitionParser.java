@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.ejb.config;
 
 import org.w3c.dom.Element;
 
-import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
+import org.springframework.beans.BeanUtils;
+import org.springframework.jndi.JndiObjectFactoryBean;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
  * implementation for parsing '{@code local-slsb}' tags and
- * creating {@link LocalStatelessSessionProxyFactoryBean} definitions.
+ * creating plain {@link JndiObjectFactoryBean} definitions on 6.0.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -32,8 +33,14 @@ import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
 class LocalStatelessSessionBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionParser {
 
 	@Override
-	protected String getBeanClassName(Element element) {
-		return "org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean";
+	protected Class<?> getBeanClass(Element element) {
+		return JndiObjectFactoryBean.class;
+	}
+
+	@Override
+	protected boolean isEligibleAttribute(String attributeName) {
+		return (super.isEligibleAttribute(attributeName) &&
+				BeanUtils.getPropertyDescriptor(JndiObjectFactoryBean.class, extractPropertyName(attributeName)) != null);
 	}
 
 }

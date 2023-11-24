@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link ResourceLoader} interface.
- * Used by {@link ResourceEditor}, and serves as base class for
+ *
+ * <p>Used by {@link ResourceEditor}, and serves as base class for
  * {@link org.springframework.context.support.AbstractApplicationContext}.
  * Can also be used standalone.
  *
@@ -114,6 +115,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * Return the collection of currently registered protocol resolvers,
 	 * allowing for introspection as well as modification.
 	 * @since 4.3
+	 * @see #addProtocolResolver(ProtocolResolver)
 	 */
 	public Collection<ProtocolResolver> getProtocolResolvers() {
 		return this.protocolResolvers;
@@ -160,7 +162,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 		else {
 			try {
 				// Try to parse the location as a URL...
-				URL url = new URL(location);
+				URL url = ResourceUtils.toURL(location);
 				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}
 			catch (MalformedURLException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	@Nullable
 	private static volatile IdGenerator idGenerator;
 
-
+	@SuppressWarnings("serial")
 	private final Map<String, Object> headers;
 
 
@@ -334,8 +334,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other ||
-				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
+		return (this == other || (other instanceof MessageHeaders that && this.headers.equals(that.headers)));
 	}
 
 	@Override

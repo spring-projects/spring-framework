@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -118,7 +118,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	/**
 	 * Create a model attribute from a String request value (e.g. URI template
 	 * variable, request parameter) using type conversion.
-	 * <p>The default implementation converts only if there a registered
+	 * <p>The default implementation converts only if there is a registered
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
 	 * @param attributeName the name of the attribute (never {@code null})
@@ -146,9 +146,18 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	}
 
 	/**
-	 * This implementation downcasts {@link WebDataBinder} to
-	 * {@link ServletRequestDataBinder} before binding.
-	 * @see ServletRequestDataBinderFactory
+	 * Downcast to {@link ServletRequestDataBinder} to invoke {@code constructTarget(ServletRequest)}.
+	 */
+	@Override
+	protected void constructAttribute(WebDataBinder binder, NativeWebRequest request) {
+		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		Assert.state(servletRequest != null, "No ServletRequest");
+		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
+		servletBinder.construct(servletRequest);
+	}
+
+	/**
+	 * Downcast to {@link ServletRequestDataBinder} to invoke {@code bind(ServletRequest)}.
 	 */
 	@Override
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
@@ -156,25 +165,6 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
 		servletBinder.bind(servletRequest);
-	}
-
-	@Override
-	@Nullable
-	public Object resolveConstructorArgument(String paramName, Class<?> paramType, NativeWebRequest request)
-			throws Exception {
-
-		Object value = super.resolveConstructorArgument(paramName, paramType, request);
-		if (value != null) {
-			return value;
-		}
-		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
-		if (servletRequest != null) {
-			String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-			@SuppressWarnings("unchecked")
-			Map<String, String> uriVars = (Map<String, String>) servletRequest.getAttribute(attr);
-			return uriVars.get(paramName);
-		}
-		return null;
 	}
 
 }

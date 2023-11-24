@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import org.springframework.lang.Nullable;
  */
 public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
 
-	private BeanDefinition[] innerBeanDefinitions;
+	private final BeanDefinition[] innerBeanDefinitions;
 
-	private BeanReference[] beanReferences;
+	private final BeanReference[] beanReferences;
 
 
 	/**
@@ -73,14 +73,14 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 		PropertyValues propertyValues = beanDefinitionHolder.getBeanDefinition().getPropertyValues();
 		for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 			Object value = propertyValue.getValue();
-			if (value instanceof BeanDefinitionHolder) {
-				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());
+			if (value instanceof BeanDefinitionHolder beanDefHolder) {
+				innerBeans.add(beanDefHolder.getBeanDefinition());
 			}
-			else if (value instanceof BeanDefinition) {
-				innerBeans.add((BeanDefinition) value);
+			else if (value instanceof BeanDefinition beanDef) {
+				innerBeans.add(beanDef);
 			}
-			else if (value instanceof BeanReference) {
-				references.add((BeanReference) value);
+			else if (value instanceof BeanReference beanRef) {
+				references.add(beanRef);
 			}
 		}
 		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
@@ -124,7 +124,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	}
 
 	/**
-	 * This implementations expects the other object to be of type BeanComponentDefinition
+	 * This implementation expects the other object to be of type BeanComponentDefinition
 	 * as well, in addition to the superclass's equality requirements.
 	 */
 	@Override

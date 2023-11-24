@@ -1,0 +1,222 @@
+[[transaction-declarative-applying-more-than-just-tx-advice]]
+= Advising Transactional Operations
+
+Suppose you want to run both transactional operations and some basic profiling advice.
+How do you effect this in the context of `<tx:annotation-driven/>`?
+
+When you invoke the `updateFoo(Foo)` method, you want to see the following actions:
+
+* The configured profiling aspect starts.
+* The transactional advice runs.
+* The method on the advised object runs.
+* The transaction commits.
+* The profiling aspect reports the exact duration of the whole transactional method invocation.
+
+NOTE: This chapter is not concerned with explaining AOP in any great detail (except as it
+applies to transactions). See xref:core/aop.adoc[AOP] for detailed coverage of the AOP
+configuration and AOP in general.
+
+The following code shows the simple profiling aspect discussed earlier:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package x.y;
+
+	import org.aspectj.lang.ProceedingJoinPoint;
+	import org.springframework.util.StopWatch;
+	import org.springframework.core.Ordered;
+
+	public class SimpleProfiler implements Ordered {
+
+		private int order;
+
+		// allows us to control the ordering of advice
+		public int getOrder() {
+			return this.order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		// this method is the around advice
+		public Object profile(ProceedingJoinPoint call) throws Throwable {
+			Object returnValue;
+			StopWatch clock = new StopWatch(getClass().getName());
+			try {
+				clock.start(call.toShortString());
+				returnValue = call.proceed();
+			} finally {
+				clock.stop();
+				System.out.println(clock.prettyPrint());
+			}
+			return returnValue;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package x.y
+
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.springframework.util.StopWatch
+	import org.springframework.core.Ordered
+
+	class SimpleProfiler : Ordered {
+
+		private var order: Int = 0
+
+		// allows us to control the ordering of advice
+		override fun getOrder(): Int {
+			return this.order
+		}
+
+		fun setOrder(order: Int) {
+			this.order = order
+		}
+
+		// this method is the around advice
+		fun profile(call: ProceedingJoinPoint): Any {
+			var returnValue: Any
+			val clock = StopWatch(javaClass.name)
+			try {
+				clock.start(call.toShortString())
+				returnValue = call.proceed()
+			} finally {
+				clock.stop()
+				println(clock.prettyPrint())
+			}
+			return returnValue
+		}
+	}
+----
+======
+
+The ordering of advice
+is controlled through the `Ordered` interface. For full details on advice ordering, see
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice ordering].
+
+The following configuration creates a `fooService` bean that has profiling and
+transactional aspects applied to it in the desired order:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/tx
+			https://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+		<!-- this is the aspect -->
+		<bean id="profiler" class="x.y.SimpleProfiler">
+			<!-- run before the transactional advice (hence the lower order number) -->
+			<property name="order" value="1"/>
+		</bean>
+
+		<tx:annotation-driven transaction-manager="txManager" order="200"/>
+
+		<aop:config>
+				<!-- this advice runs around the transactional advice -->
+				<aop:aspect id="profilingAspect" ref="profiler">
+					<aop:pointcut id="serviceMethodWithReturnValue"
+							expression="execution(!void x.y..*Service.*(..))"/>
+					<aop:around method="profile" pointcut-ref="serviceMethodWithReturnValue"/>
+				</aop:aspect>
+		</aop:config>
+
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+			<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+			<property name="url" value="jdbc:oracle:thin:@rj-t42:1521:elvis"/>
+			<property name="username" value="scott"/>
+			<property name="password" value="tiger"/>
+		</bean>
+
+		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+
+	</beans>
+----
+
+You can configure any number
+of additional aspects in similar fashion.
+
+The following example creates the same setup as the previous two examples but uses the purely XML
+declarative approach:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/tx
+			https://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+		<!-- the profiling advice -->
+		<bean id="profiler" class="x.y.SimpleProfiler">
+			<!-- run before the transactional advice (hence the lower order number) -->
+			<property name="order" value="1"/>
+		</bean>
+
+		<aop:config>
+			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
+			<!-- runs after the profiling advice (cf. the order attribute) -->
+
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
+			<!-- order value is higher than the profiling aspect -->
+
+			<aop:aspect id="profilingAspect" ref="profiler">
+				<aop:pointcut id="serviceMethodWithReturnValue"
+						expression="execution(!void x.y..*Service.*(..))"/>
+				<aop:around method="profile" pointcut-ref="serviceMethodWithReturnValue"/>
+			</aop:aspect>
+
+		</aop:config>
+
+		<tx:advice id="txAdvice" transaction-manager="txManager">
+			<tx:attributes>
+				<tx:method name="get*" read-only="true"/>
+				<tx:method name="*"/>
+			</tx:attributes>
+		</tx:advice>
+
+		<!-- other <bean/> definitions such as a DataSource and a TransactionManager here -->
+
+	</beans>
+----
+
+The result of the preceding configuration is a `fooService` bean that has profiling and
+transactional aspects applied to it in that order. If you want the profiling advice
+to run after the transactional advice on the way in and before the
+transactional advice on the way out, you can swap the value of the profiling
+aspect bean's `order` property so that it is higher than the transactional advice's
+order value.
+
+You can configure additional aspects in similar fashion.
+
+

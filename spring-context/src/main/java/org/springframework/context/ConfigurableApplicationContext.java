@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
+
+	/**
+	 * Remove the given ApplicationListener from this context's set of listeners,
+	 * assuming it got registered via {@link #addApplicationListener} before.
+	 * @param listener the ApplicationListener to deregister
+	 * @since 6.0
+	 */
+	void removeApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Specify the ClassLoader to load class path resources and bean classes with.

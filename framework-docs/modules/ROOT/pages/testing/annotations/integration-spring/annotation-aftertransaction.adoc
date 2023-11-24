@@ -1,0 +1,35 @@
+[[spring-testing-annotation-aftertransaction]]
+= `@AfterTransaction`
+
+`@AfterTransaction` indicates that the annotated `void` method should be run after a
+transaction is ended, for test methods that have been configured to run within a
+transaction by using Spring's `@Transactional` annotation. `@AfterTransaction` methods
+are not required to be `public` and may be declared on Java 8-based interface default
+methods.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@AfterTransaction // <1>
+	void afterTransaction() {
+		// logic to be run after a transaction has ended
+	}
+----
+<1> Run this method after a transaction.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@AfterTransaction // <1>
+	fun afterTransaction() {
+		// logic to be run after a transaction has ended
+	}
+----
+<1> Run this method after a transaction.
+======
+
+

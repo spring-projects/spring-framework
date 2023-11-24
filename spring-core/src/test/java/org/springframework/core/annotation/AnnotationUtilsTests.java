@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -160,9 +159,8 @@ class AnnotationUtilsTests {
 		assertThat(getAnnotation(bridgeMethod, Order.class)).isNull();
 		assertThat(findAnnotation(bridgeMethod, Order.class)).isNotNull();
 
-		boolean runningInEclipse = Arrays.stream(new Exception().getStackTrace())
-				.anyMatch(element -> element.getClassName().startsWith("org.eclipse.jdt"));
-
+		boolean runningInEclipse = StackWalker.getInstance().walk(stream ->
+				stream.anyMatch(stackFrame -> stackFrame.getClassName().startsWith("org.eclipse.jdt")));
 		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
 		// annotation on its 'bridged' method [1]; however, the Eclipse compiler will not
 		// support this until Eclipse 4.9 [2]. Thus, we effectively ignore the following
@@ -417,7 +415,7 @@ class AnnotationUtilsTests {
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertThat(isAnnotationInherited(Transactional.class, InheritedAnnotationInterface.class)).isFalse();
 		// isAnnotationInherited() does not currently traverse interface hierarchies.
-		// Thus the following, though perhaps counter intuitive, must be false:
+		// Thus the following, though perhaps counterintuitive, must be false:
 		assertThat(isAnnotationInherited(Transactional.class, SubInheritedAnnotationInterface.class)).isFalse();
 		assertThat(isAnnotationInherited(Transactional.class, InheritedAnnotationClass.class)).isFalse();
 		assertThat(isAnnotationInherited(Transactional.class, SubInheritedAnnotationClass.class)).isTrue();
@@ -507,7 +505,7 @@ class AnnotationUtilsTests {
 	@Test
 	void getValueFromNonPublicAnnotation() throws Exception {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
-		assertThat(declaredAnnotations.length).isEqualTo(1);
+		assertThat(declaredAnnotations).hasSize(1);
 		Annotation annotation = declaredAnnotations[0];
 		assertThat(annotation).isNotNull();
 		assertThat(annotation.annotationType().getSimpleName()).isEqualTo("NonPublicAnnotation");
@@ -527,7 +525,7 @@ class AnnotationUtilsTests {
 	@Test
 	void getDefaultValueFromNonPublicAnnotation() {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
-		assertThat(declaredAnnotations.length).isEqualTo(1);
+		assertThat(declaredAnnotations).hasSize(1);
 		Annotation annotation = declaredAnnotations[0];
 		assertThat(annotation).isNotNull();
 		assertThat(annotation.annotationType().getSimpleName()).isEqualTo("NonPublicAnnotation");
@@ -563,7 +561,7 @@ class AnnotationUtilsTests {
 
 		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, null);
 		assertThat(annotations).isNotNull();
-		assertThat(annotations.size()).as("size if container type is omitted: ").isEqualTo(0);
+		assertThat(annotations).as("size if container type is omitted: ").isEmpty();
 
 		annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, Hierarchy.class);
 		assertThat(annotations).isNotNull();
@@ -706,17 +704,17 @@ class AnnotationUtilsTests {
 		// Java 8
 		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
-		assertThat(array.length).isEqualTo(0);
+		assertThat(array).isEmpty();
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
-		assertThat(set).hasSize(0);
+		assertThat(set).isEmpty();
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertThat(set).isNotNull();
-		assertThat(set).hasSize(0);
+		assertThat(set).isEmpty();
 	}
 
 	@Test
@@ -855,8 +853,8 @@ class AnnotationUtilsTests {
 	void synthesizeAnnotationFromDefaultsWithAttributeAliases() throws Exception {
 		ContextConfig contextConfig = synthesizeAnnotation(ContextConfig.class);
 		assertThat(contextConfig).isNotNull();
-		assertThat(contextConfig.value()).as("value: ").isEqualTo("");
-		assertThat(contextConfig.location()).as("location: ").isEqualTo("");
+		assertThat(contextConfig.value()).as("value: ").isEmpty();
+		assertThat(contextConfig.location()).as("location: ").isEmpty();
 	}
 
 	@Test
@@ -1135,7 +1133,7 @@ class AnnotationUtilsTests {
 		boolean readOnly() default false;
 	}
 
-	public static abstract class Foo<T> {
+	public abstract static class Foo<T> {
 
 		@Order(1)
 		public abstract void something(T arg);
@@ -1245,7 +1243,7 @@ class AnnotationUtilsTests {
 		}
 	}
 
-	public static abstract class BaseClassWithGenericAnnotatedMethod<T> {
+	public abstract static class BaseClassWithGenericAnnotatedMethod<T> {
 
 		@Order
 		abstract void foo(T t);
@@ -1367,6 +1365,8 @@ class AnnotationUtilsTests {
 	@WebMapping(method = RequestMethod.POST, name = "")
 	@interface Post {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = WebMapping.class)
 		String path() default "";
 	}
 

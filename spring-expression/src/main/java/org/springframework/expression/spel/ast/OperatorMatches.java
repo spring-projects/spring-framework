@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,19 +36,41 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class OperatorMatches extends Operator {
 
 	private static final int PATTERN_ACCESS_THRESHOLD = 1000000;
 
-	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<>();
+	/**
+	 * Maximum number of characters permitted in a regular expression.
+	 * @since 5.2.23
+	 */
+	private static final int MAX_REGEX_LENGTH = 1000;
+
+	private final ConcurrentMap<String, Pattern> patternCache;
 
 
+	/**
+	 * Create a new {@link OperatorMatches} instance.
+	 * @deprecated as of Spring Framework 5.2.23 in favor of invoking
+	 * {@link #OperatorMatches(ConcurrentMap, int, int, SpelNodeImpl...)}
+	 * with a shared pattern cache instead
+	 */
+	@Deprecated(since = "5.2.23")
 	public OperatorMatches(int startPos, int endPos, SpelNodeImpl... operands) {
-		super("matches", startPos, endPos, operands);
+		this(new ConcurrentHashMap<>(), startPos, endPos, operands);
 	}
 
+	/**
+	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.
+	 * @since 5.2.23
+	 */
+	public OperatorMatches(ConcurrentMap<String, Pattern> patternCache, int startPos, int endPos, SpelNodeImpl... operands) {
+		super("matches", startPos, endPos, operands);
+		this.patternCache = patternCache;
+	}
 
 	/**
 	 * Check the first operand matches the regex specified as the second operand.
@@ -62,26 +84,27 @@ public class OperatorMatches extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
-		String left = leftOp.getValue(state, String.class);
-		Object right = getRightOperand().getValue(state);
 
-		if (left == null) {
+		String input = leftOp.getValue(state, String.class);
+		if (input == null) {
 			throw new SpelEvaluationException(leftOp.getStartPosition(),
 					SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, (Object) null);
 		}
-		if (!(right instanceof String)) {
+
+		Object right = rightOp.getValue(state);
+		if (!(right instanceof String regex)) {
 			throw new SpelEvaluationException(rightOp.getStartPosition(),
 					SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 		}
 
 		try {
-			String rightString = (String) right;
-			Pattern pattern = this.patternCache.get(rightString);
+			Pattern pattern = this.patternCache.get(regex);
 			if (pattern == null) {
-				pattern = Pattern.compile(rightString);
-				this.patternCache.putIfAbsent(rightString, pattern);
+				checkRegexLength(regex);
+				pattern = Pattern.compile(regex);
+				this.patternCache.putIfAbsent(regex, pattern);
 			}
-			Matcher matcher = pattern.matcher(new MatcherInput(left, new AccessCount()));
+			Matcher matcher = pattern.matcher(new MatcherInput(input, new AccessCount()));
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException ex) {
@@ -91,6 +114,13 @@ public class OperatorMatches extends Operator {
 		catch (IllegalStateException ex) {
 			throw new SpelEvaluationException(
 					rightOp.getStartPosition(), ex, SpelMessage.FLAWED_PATTERN, right);
+		}
+	}
+
+	private void checkRegexLength(String regex) {
+		if (regex.length() > MAX_REGEX_LENGTH) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, MAX_REGEX_LENGTH);
 		}
 	}
 
@@ -111,7 +141,7 @@ public class OperatorMatches extends Operator {
 
 		private final CharSequence value;
 
-		private AccessCount access;
+		private final AccessCount access;
 
 		public MatcherInput(CharSequence value, AccessCount access) {
 			this.value = value;

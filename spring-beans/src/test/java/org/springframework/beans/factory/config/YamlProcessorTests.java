@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.constructor.ConstructorException;
+import org.yaml.snakeyaml.composer.ComposerException;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -52,7 +52,7 @@ class YamlProcessorTests {
 	void arrayConvertedToIndexedBeanReference() {
 		setYaml("foo: bar\nbar: [1,2,3]");
 		this.processor.process((properties, map) -> {
-			assertThat(properties.size()).isEqualTo(4);
+			assertThat(properties).hasSize(4);
 			assertThat(properties.get("foo")).isEqualTo("bar");
 			assertThat(properties.getProperty("foo")).isEqualTo("bar");
 			assertThat(properties.get("bar[0]")).isEqualTo(1);
@@ -141,6 +141,7 @@ class YamlProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void standardTypesSupportedByDefault() throws Exception {
 		setYaml("value: !!set\n  ? first\n  ? second");
 		this.processor.process((properties, map) -> {
@@ -155,9 +156,9 @@ class YamlProcessorTests {
 	void customTypeNotSupportedByDefault() throws Exception {
 		URL url = new URL("https://localhost:9000/");
 		setYaml("value: !!java.net.URL [\"" + url + "\"]");
-		assertThatExceptionOfType(ConstructorException.class)
+		assertThatExceptionOfType(ComposerException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
-				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+				.withMessageContaining("Global tag is not allowed: tag:yaml.org,2002:java.net.URL");
 	}
 
 	@Test
@@ -179,9 +180,9 @@ class YamlProcessorTests {
 
 		setYaml("value: !!java.net.URL [\"https://localhost:9000/\"]");
 
-		assertThatExceptionOfType(ConstructorException.class)
+		assertThatExceptionOfType(ComposerException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
-				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+				.withMessageContaining("Global tag is not allowed: tag:yaml.org,2002:java.net.URL");
 	}
 
 	private void setYaml(String yaml) {

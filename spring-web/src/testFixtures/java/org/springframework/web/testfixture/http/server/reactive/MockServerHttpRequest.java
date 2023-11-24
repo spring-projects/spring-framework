@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,11 +55,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
-	/**
-	 * String representation of one of {@link HttpMethod} or not empty custom method (e.g. <i>CONNECT</i>).
-	 */
-	private final String httpMethod;
-
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
@@ -73,14 +68,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final Flux<DataBuffer> body;
 
-	private MockServerHttpRequest(String httpMethod,
+	private MockServerHttpRequest(HttpMethod httpMethod,
 			URI uri, @Nullable String contextPath, HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
 			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
 			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
-		super(uri, contextPath, headers);
-		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
-		this.httpMethod = httpMethod;
+		super(httpMethod, uri, contextPath, headers);
 		this.cookies = cookies;
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
@@ -88,17 +81,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		this.body = Flux.from(body);
 	}
 
-
-	@Override
-	@Nullable
-	public HttpMethod getMethod() {
-		return HttpMethod.resolve(this.httpMethod);
-	}
-
-	@Override
-	public String getMethodValue() {
-		return this.httpMethod;
-	}
 
 	@Override
 	@Nullable
@@ -218,7 +200,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	public static BodyBuilder method(HttpMethod method, URI url) {
 		Assert.notNull(method, "HTTP method is required. " +
 				"For a custom HTTP method, please provide a String HTTP method value.");
-		return new DefaultBodyBuilder(method.name(), url);
+		return new DefaultBodyBuilder(method, url);
 	}
 
 	/**
@@ -235,16 +217,19 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create a builder with a raw HTTP method value value that is outside the
+	 * Create a builder with a raw HTTP method value that is outside the
 	 * range of {@link HttpMethod} enum values.
 	 * @param httpMethod the HTTP methodValue value
 	 * @param uri the URI template for target the URL
 	 * @param vars variables to expand into the template
 	 * @return the created builder
 	 * @since 5.2.7
+	 * @deprecated in favor of {@link #method(HttpMethod, String, Object...)}
 	 */
+	@Deprecated
 	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
-		return new DefaultBodyBuilder(httpMethod, toUri(uri, vars));
+		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
+		return new DefaultBodyBuilder(HttpMethod.valueOf(httpMethod), toUri(uri, vars));
 	}
 
 	private static URI toUri(String uri, Object[] vars) {
@@ -254,7 +239,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	/**
 	 * Request builder exposing properties not related to the body.
-	 * @param <B> the builder sub-class
+	 * @param <B> the builder subclass
 	 */
 	public interface BaseBuilder<B extends BaseBuilder<B>> {
 
@@ -362,6 +347,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B ifUnmodifiedSince(long ifUnmodifiedSince);
 
 		/**
+		 * Set the values of the {@code If-Match} header.
+		 * @param ifMatches the new value of the header
+		 */
+		B ifMatch(String... ifMatches);
+
+		/**
 		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
 		 */
@@ -427,7 +418,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static class DefaultBodyBuilder implements BodyBuilder {
 
-		private final String methodValue;
+		private final HttpMethod method;
 
 		private final URI url;
 
@@ -449,8 +440,8 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		private SslInfo sslInfo;
 
-		DefaultBodyBuilder(String method, URI url) {
-			this.methodValue = method;
+		DefaultBodyBuilder(HttpMethod method, URI url) {
+			this.method = method;
 			this.url = url;
 		}
 
@@ -558,6 +549,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public BodyBuilder ifMatch(String... ifMatches) {
+			this.headers.setIfMatch(Arrays.asList(ifMatches));
+			return this;
+		}
+
+		@Override
 		public BodyBuilder ifNoneMatch(String... ifNoneMatches) {
 			this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));
 			return this;
@@ -589,7 +586,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
 			applyCookiesIfNecessary();
-			return new MockServerHttpRequest(this.methodValue, getUrlToUse(), this.contextPath,
+			return new MockServerHttpRequest(this.method, getUrlToUse(), this.contextPath,
 					this.headers, this.cookies, this.localAddress, this.remoteAddress, this.sslInfo, body);
 		}
 

@@ -1,0 +1,37 @@
+[[integration-testing-annotations-standard]]
+= Standard Annotation Support
+
+The following annotations are supported with standard semantics for all configurations of
+the Spring TestContext Framework. Note that these annotations are not specific to tests
+and can be used anywhere in the Spring Framework.
+
+* `@Autowired`
+* `@Qualifier`
+* `@Value`
+* `@Resource` (jakarta.annotation) if JSR-250 is present
+* `@ManagedBean` (jakarta.annotation) if JSR-250 is present
+* `@Inject` (jakarta.inject) if JSR-330 is present
+* `@Named` (jakarta.inject) if JSR-330 is present
+* `@PersistenceContext` (jakarta.persistence) if JPA is present
+* `@PersistenceUnit` (jakarta.persistence) if JPA is present
+* `@Transactional` (org.springframework.transaction.annotation)
+  _with xref:testing/testcontext-framework/tx.adoc#testcontext-tx-attribute-support[limited attribute support]_
+
+.JSR-250 Lifecycle Annotations
+[NOTE]
+====
+In the Spring TestContext Framework, you can use `@PostConstruct` and `@PreDestroy` with
+standard semantics on any application components configured in the `ApplicationContext`.
+However, these lifecycle annotations have limited usage within an actual test class.
+
+If a method within a test class is annotated with `@PostConstruct`, that method runs
+before any before methods of the underlying test framework (for example, methods
+annotated with JUnit Jupiter's `@BeforeEach`), and that applies for every test method in
+the test class. On the other hand, if a method within a test class is annotated with
+`@PreDestroy`, that method never runs. Therefore, within a test class, we recommend that
+you use test lifecycle callbacks from the underlying test framework instead of
+`@PostConstruct` and `@PreDestroy`.
+====
+
+
+

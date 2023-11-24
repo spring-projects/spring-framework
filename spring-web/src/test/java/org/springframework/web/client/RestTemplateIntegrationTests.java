@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -31,6 +30,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,7 +48,9 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.http.client.JettyClientHttpRequestFactory;
+import org.springframework.http.client.ReactorNettyClientRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -58,6 +60,7 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Named.named;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 
@@ -87,13 +90,15 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	@interface ParameterizedRestTemplateTest {
 	}
 
-	@SuppressWarnings("deprecation")
-	static Stream<ClientHttpRequestFactory> clientHttpRequestFactories() {
+	@SuppressWarnings("removal")
+	static Stream<Named<ClientHttpRequestFactory>> clientHttpRequestFactories() {
 		return Stream.of(
-			new SimpleClientHttpRequestFactory(),
-			new HttpComponentsClientHttpRequestFactory(),
-			new org.springframework.http.client.Netty4ClientHttpRequestFactory(),
-			new OkHttp3ClientHttpRequestFactory()
+			named("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),
+			named("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
+			named("OkHttp", new org.springframework.http.client.OkHttp3ClientHttpRequestFactory()),
+			named("Jetty", new JettyClientHttpRequestFactory()),
+			named("JDK HttpClient", new JdkClientHttpRequestFactory()),
+			named("Reactor Netty", new ReactorNettyClientRequestFactory())
 		);
 	}
 
@@ -117,8 +122,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	 */
 	@RegisterExtension
 	TestExecutionExceptionHandler serverErrorToAssertionErrorConverter = (context, throwable) -> {
-		if (throwable instanceof HttpServerErrorException) {
-			HttpServerErrorException ex = (HttpServerErrorException) throwable;
+		if (throwable instanceof HttpServerErrorException ex) {
 			String responseBody = ex.getResponseBodyAsString();
 			String prefix = AssertionError.class.getName() + ": ";
 			if (responseBody.startsWith(prefix)) {
@@ -200,7 +204,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		URI location = template.postForLocation(baseUrl + "/{method}", helloWorld, "post");
-		assertThat(location).as("Invalid location").isEqualTo(new URI(baseUrl + "/post/1"));
+		assertThat(location).as("Invalid location").isEqualTo(URI.create(baseUrl + "/post/1"));
 	}
 
 	@ParameterizedRestTemplateTest
@@ -211,7 +215,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		entityHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		URI location = template.postForLocation(baseUrl + "/{method}", entity, "post");
-		assertThat(location).as("Invalid location").isEqualTo(new URI(baseUrl + "/post/1"));
+		assertThat(location).as("Invalid location").isEqualTo(URI.create(baseUrl + "/post/1"));
 	}
 
 	@ParameterizedRestTemplateTest
@@ -225,7 +229,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	@ParameterizedRestTemplateTest
 	void patchForObject(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
 		assumeFalse(clientHttpRequestFactory instanceof SimpleClientHttpRequestFactory,
-				"JDK client does not support the PATCH method");
+				"HttpURLConnection does not support the PATCH method");
 
 		setUpClient(clientHttpRequestFactory);
 
@@ -254,6 +258,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 				template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
 				assertThat(ex.getMessage()).isEqualTo("400 Client Error: [no body]");
 			});
 	}
@@ -275,8 +280,8 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	void optionsForAllow(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
 		setUpClient(clientHttpRequestFactory);
 
-		Set<HttpMethod> allowed = template.optionsForAllow(new URI(baseUrl + "/get"));
-		assertThat(allowed).as("Invalid response").isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
+		Set<HttpMethod> allowed = template.optionsForAllow(URI.create(baseUrl + "/get"));
+		assertThat(allowed).as("Invalid response").isEqualTo(Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
 	}
 
 	@ParameterizedRestTemplateTest
@@ -372,7 +377,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, requestHeaders);
 		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", POST, entity, Void.class, "post");
-		assertThat(result.getHeaders().getLocation()).as("Invalid location").isEqualTo(new URI(baseUrl + "/post/1"));
+		assertThat(result.getHeaders().getLocation()).as("Invalid location").isEqualTo(URI.create(baseUrl + "/post/1"));
 		assertThat(result.hasBody()).isFalse();
 	}
 
@@ -388,9 +393,9 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		bean.setWithout("without");
 		HttpEntity<MySampleBean> entity = new HttpEntity<>(bean, entityHeaders);
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class);
-		assertThat(s.contains("\"with1\":\"with\"")).isTrue();
-		assertThat(s.contains("\"with2\":\"with\"")).isTrue();
-		assertThat(s.contains("\"without\":\"without\"")).isTrue();
+		assertThat(s).contains("\"with1\":\"with\"");
+		assertThat(s).contains("\"with2\":\"with\"");
+		assertThat(s).contains("\"without\":\"without\"");
 	}
 
 	@ParameterizedRestTemplateTest
@@ -404,9 +409,9 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		jacksonValue.setSerializationView(MyJacksonView1.class);
 		HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, entityHeaders);
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class);
-		assertThat(s.contains("\"with1\":\"with\"")).isTrue();
-		assertThat(s.contains("\"with2\":\"with\"")).isFalse();
-		assertThat(s.contains("\"without\":\"without\"")).isFalse();
+		assertThat(s).contains("\"with1\":\"with\"");
+		assertThat(s).doesNotContain("\"with2\":\"with\"");
+		assertThat(s).doesNotContain("\"without\":\"without\"");
 	}
 
 	@ParameterizedRestTemplateTest  // SPR-12123
@@ -426,12 +431,12 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		list.add(new Bar("bar"));
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<ParentClass>>() {};
 		RequestEntity<List<ParentClass>> entity = RequestEntity
-				.post(new URI(baseUrl + "/jsonpost"))
+				.post(URI.create(baseUrl + "/jsonpost"))
 				.contentType(new MediaType("application", "json", StandardCharsets.UTF_8))
 				.body(list, typeReference.getType());
 		String content = template.exchange(entity, String.class).getBody();
-		assertThat(content.contains("\"type\":\"foo\"")).isTrue();
-		assertThat(content.contains("\"type\":\"bar\"")).isTrue();
+		assertThat(content).contains("\"type\":\"foo\"");
+		assertThat(content).contains("\"type\":\"bar\"");
 	}
 
 	@ParameterizedRestTemplateTest  // SPR-15015

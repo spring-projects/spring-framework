@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,15 @@ import static org.mockito.BDDMockito.when;
  */
 class DelegatingConnectionFactoryUnitTests {
 
-	ConnectionFactory delegate = mock(ConnectionFactory.class);
+	ConnectionFactory delegate = mock();
 
-	Connection connectionMock = mock(Connection.class);
+	Connection connectionMock = mock();
 
 	DelegatingConnectionFactory connectionFactory = new ExampleConnectionFactory(delegate);
 
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void shouldDelegateGetConnection() {
 		Mono<Connection> connectionMono = Mono.just(connectionMock);
 		when(delegate.create()).thenReturn((Mono) connectionMono);
@@ -52,6 +52,7 @@ class DelegatingConnectionFactoryUnitTests {
 	void shouldDelegateUnwrapWithoutImplementing() {
 		assertThat(connectionFactory.unwrap()).isSameAs(delegate);
 	}
+
 
 	static class ExampleConnectionFactory extends DelegatingConnectionFactory {
 

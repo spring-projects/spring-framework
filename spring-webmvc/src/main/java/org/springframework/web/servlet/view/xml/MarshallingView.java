@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.springframework.web.servlet.view.xml;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBElement;
 import javax.xml.transform.stream.StreamResult;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.xml.bind.JAXBElement;
 
 import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
@@ -96,7 +97,7 @@ public class MarshallingView extends AbstractView {
 
 	@Override
 	protected void initApplicationContext() {
-		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
+		Assert.state(this.marshaller != null, "Property 'marshaller' is required");
 	}
 
 
@@ -165,8 +166,8 @@ public class MarshallingView extends AbstractView {
 	protected boolean isEligibleForMarshalling(String modelKey, Object value) {
 		Assert.state(this.marshaller != null, "No Marshaller set");
 		Class<?> classToCheck = value.getClass();
-		if (value instanceof JAXBElement) {
-			classToCheck = ((JAXBElement<?>) value).getDeclaredType();
+		if (value instanceof JAXBElement<?> jaxbElement) {
+			classToCheck = jaxbElement.getDeclaredType();
 		}
 		return this.marshaller.supports(classToCheck);
 	}

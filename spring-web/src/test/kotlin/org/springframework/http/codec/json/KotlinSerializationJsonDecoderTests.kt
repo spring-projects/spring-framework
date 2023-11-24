@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.http.codec.json
 
 import kotlinx.serialization.Serializable
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import reactor.test.StepVerifier.FirstStep
 import java.lang.UnsupportedOperationException
+import java.math.BigDecimal
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
@@ -39,28 +40,29 @@ import java.nio.charset.StandardCharsets
  */
 class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializationJsonDecoder>(KotlinSerializationJsonDecoder()) {
 
-	@Suppress("UsePropertyAccessSyntax", "DEPRECATION")
 	@Test
 	override fun canDecode() {
 		val jsonSubtype = MediaType("application", "vnd.test-micro-type+json")
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), jsonSubtype)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), jsonSubtype)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),
 				MediaType("application", "json", StandardCharsets.UTF_8))).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),
 				MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),
 				MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue()
 
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(BigDecimal::class.java), MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test

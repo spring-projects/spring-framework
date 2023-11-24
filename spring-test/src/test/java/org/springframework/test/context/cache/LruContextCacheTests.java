@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,19 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -50,10 +49,10 @@ class LruContextCacheTests {
 	private static final MergedContextConfiguration bazConfig = config(Baz.class);
 
 
-	private final ConfigurableApplicationContext abcContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext fooContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext barContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
+	private final ConfigurableApplicationContext abcContext = mock();
+	private final ConfigurableApplicationContext fooContext = mock();
+	private final ConfigurableApplicationContext barContext = mock();
+	private final ConfigurableApplicationContext bazContext = mock();
 
 
 	@Test
@@ -158,18 +157,15 @@ class LruContextCacheTests {
 
 	@SuppressWarnings("unchecked")
 	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
-
-		Map<MergedContextConfiguration, ApplicationContext> contextMap =
-				(Map<MergedContextConfiguration, ApplicationContext>) ReflectionTestUtils.getField(cache, "contextMap");
-
-		// @formatter:off
-		List<String> actualNames = contextMap.keySet().stream()
-			.map(cfg -> cfg.getClasses()[0])
-			.map(Class::getSimpleName)
-			.collect(toList());
-		// @formatter:on
-
-		assertThat(actualNames).isEqualTo(asList(expectedNames));
+		assertThat(cache).extracting("contextMap", as(map(MergedContextConfiguration.class, ApplicationContext.class)))
+				.satisfies(contextMap -> {
+					List<String> actualNames = contextMap.keySet().stream()
+							.map(MergedContextConfiguration::getClasses)
+							.flatMap(Arrays::stream)
+							.map(Class::getSimpleName)
+							.toList();
+					assertThat(actualNames).containsExactly(expectedNames);
+				});
 	}
 
 

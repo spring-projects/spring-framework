@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,14 +52,15 @@ import org.springframework.util.MimeType;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
- *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.0
  */
 public class MappingJackson2MessageConverter extends AbstractMessageConverter {
+
+	private static final MimeType[] DEFAULT_MIME_TYPES = new MimeType[] {
+			new MimeType("application", "json"), new MimeType("application", "*+json")};
 
 	private ObjectMapper objectMapper;
 
@@ -68,43 +69,61 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 
 	/**
-	 * Construct a {@code MappingJackson2MessageConverter} supporting
-	 * the {@code application/json} MIME type with {@code UTF-8} character set.
+	 * Construct a {@code MappingJackson2MessageConverter} with a default {@link ObjectMapper},
+	 * supporting the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json"));
-		this.objectMapper = initObjectMapper();
+		this(DEFAULT_MIME_TYPES);
 	}
 
 	/**
-	 * Construct a {@code MappingJackson2MessageConverter} supporting
-	 * one or more custom MIME types.
+	 * Construct a {@code MappingJackson2MessageConverter} with a default {@link ObjectMapper},
+	 * supporting one or more custom MIME types.
 	 * @param supportedMimeTypes the supported MIME types
 	 * @since 4.1.5
 	 */
+	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	public MappingJackson2MessageConverter(MimeType... supportedMimeTypes) {
 		super(supportedMimeTypes);
-		this.objectMapper = initObjectMapper();
-	}
-
-
-	private ObjectMapper initObjectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		return objectMapper;
+		this.objectMapper = new ObjectMapper();
+		this.objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	/**
+	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper},
+	 * supporting the {@code application/json} MIME type with {@code UTF-8} character set.
+	 * @param objectMapper the {@code ObjectMapper} to use
+	 * @since 6.1
+	 */
+	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
+		this(objectMapper, DEFAULT_MIME_TYPES);
+	}
+
+	/**
+	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper},
+	 * supporting one or more custom MIME types.
+	 * @param objectMapper the {@code ObjectMapper} to use
+	 * @param supportedMimeTypes the supported MIME types
+	 * @since 6.1
+	 */
+	public MappingJackson2MessageConverter(ObjectMapper objectMapper, MimeType... supportedMimeTypes) {
+		super(supportedMimeTypes);
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
+		this.objectMapper = objectMapper;
+	}
+
+
+	/**
 	 * Set the {@code ObjectMapper} for this converter.
-	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * <p>If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further
 	 * control of the JSON serialization process. For example, an extended
 	 * {@link com.fasterxml.jackson.databind.ser.SerializerFactory} can be
 	 * configured that provides custom serializers for specific types. The other
 	 * option for refining the serialization process is to use Jackson's provided
 	 * annotations on the types to be serialized, in which case a custom-configured
-	 * ObjectMapper is unnecessary.
+	 * {@code ObjectMapper} is unnecessary.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
@@ -121,7 +140,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	/**
 	 * Whether to use the {@link DefaultPrettyPrinter} when writing JSON.
-	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
+	 * <p>This is a shortcut for setting up an {@code ObjectMapper} as follows:
 	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -214,12 +233,12 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			if (ClassUtils.isAssignableValue(targetClass, payload)) {
 				return payload;
 			}
-			else if (payload instanceof byte[]) {
+			else if (payload instanceof byte[] bytes) {
 				if (view != null) {
-					return this.objectMapper.readerWithView(view).forType(javaType).readValue((byte[]) payload);
+					return this.objectMapper.readerWithView(view).forType(javaType).readValue(bytes);
 				}
 				else {
-					return this.objectMapper.readValue((byte[]) payload, javaType);
+					return this.objectMapper.readValue(bytes, javaType);
 				}
 			}
 			else {
@@ -284,19 +303,18 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 */
 	@Nullable
 	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
-		if (conversionHint instanceof MethodParameter) {
-			MethodParameter param = (MethodParameter) conversionHint;
+		if (conversionHint instanceof MethodParameter param) {
 			JsonView annotation = (param.getParameterIndex() >= 0 ?
 					param.getParameterAnnotation(JsonView.class) : param.getMethodAnnotation(JsonView.class));
 			if (annotation != null) {
 				return extractViewClass(annotation, conversionHint);
 			}
 		}
-		else if (conversionHint instanceof JsonView) {
-			return extractViewClass((JsonView) conversionHint, conversionHint);
+		else if (conversionHint instanceof JsonView jsonView) {
+			return extractViewClass(jsonView, conversionHint);
 		}
-		else if (conversionHint instanceof Class) {
-			return (Class<?>) conversionHint;
+		else if (conversionHint instanceof Class<?> clazz) {
+			return clazz;
 		}
 
 		// No JSON view specified...

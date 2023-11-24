@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:comp/env/foo");
 		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:comp/env/foo");
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:foo");
 		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:foo");
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setExpectedType(String.class);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == s).isTrue();
+		assertThat(jof.getObject()).isSameAs(s);
 	}
 
 	@Test
@@ -372,7 +372,7 @@ public class JndiObjectFactoryBeanTests {
 	public void testLookupWithExposeAccessContext() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		TestBean tb = new TestBean();
-		final Context mockCtx = mock(Context.class);
+		final Context mockCtx = mock();
 		given(mockCtx.lookup("foo")).willReturn(tb);
 		jof.setJndiTemplate(new JndiTemplate() {
 			@Override

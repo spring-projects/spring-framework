@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.core.metadata;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -34,30 +33,42 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public final class CallMetaDataProviderFactory {
 
+	private static final String DB2 = "DB2";
+	private static final String DERBY = "Apache Derby";
+	private static final String HANA = "HDB";
+	private static final String INFORMIX = "Informix Dynamic Server";
+	private static final String MARIA = "MariaDB";
+	private static final String MS_SQL_SERVER = "Microsoft SQL Server";
+	private static final String MYSQL = "MySQL";
+	private static final String ORACLE = "Oracle";
+	private static final String POSTGRES = "PostgreSQL";
+	private static final String SYBASE = "Sybase";
+
 	/** List of supported database products for procedure calls. */
-	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
-			"Apache Derby",
-			"DB2",
-			"Informix Dynamic Server",
-			"MariaDB",
-			"Microsoft SQL Server",
-			"MySQL",
-			"Oracle",
-			"PostgreSQL",
-			"Sybase"
+	public static final List<String> supportedDatabaseProductsForProcedures = List.of(
+			DERBY,
+			DB2,
+			INFORMIX,
+			MARIA,
+			MS_SQL_SERVER,
+			MYSQL,
+			ORACLE,
+			POSTGRES,
+			SYBASE
 		);
 
 	/** List of supported database products for function calls. */
-	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
-			"MariaDB",
-			"Microsoft SQL Server",
-			"MySQL",
-			"Oracle",
-			"PostgreSQL"
+	public static final List<String> supportedDatabaseProductsForFunctions = List.of(
+			MARIA,
+			MS_SQL_SERVER,
+			MYSQL,
+			ORACLE,
+			POSTGRES
 		);
 
 	private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
@@ -103,31 +114,16 @@ public final class CallMetaDataProviderFactory {
 					}
 				}
 
-				CallMetaDataProvider provider;
-				if ("Oracle".equals(databaseProductName)) {
-					provider = new OracleCallMetaDataProvider(databaseMetaData);
-				}
-				else if ("PostgreSQL".equals(databaseProductName)) {
-					provider = new PostgresCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Apache Derby".equals(databaseProductName)) {
-					provider = new DerbyCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("DB2".equals(databaseProductName)) {
-					provider = new Db2CallMetaDataProvider((databaseMetaData));
-				}
-				else if ("HDB".equals(databaseProductName)) {
-					provider = new HanaCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Microsoft SQL Server".equals(databaseProductName)) {
-					provider = new SqlServerCallMetaDataProvider((databaseMetaData));
-				}
-				else if ("Sybase".equals(databaseProductName)) {
-					provider = new SybaseCallMetaDataProvider((databaseMetaData));
-				}
-				else {
-					provider = new GenericCallMetaDataProvider(databaseMetaData);
-				}
+				CallMetaDataProvider provider = switch (databaseProductName) {
+					case ORACLE -> new OracleCallMetaDataProvider(databaseMetaData);
+					case POSTGRES -> new PostgresCallMetaDataProvider(databaseMetaData);
+					case DERBY -> new DerbyCallMetaDataProvider(databaseMetaData);
+					case DB2 -> new Db2CallMetaDataProvider(databaseMetaData);
+					case HANA -> new HanaCallMetaDataProvider(databaseMetaData);
+					case MS_SQL_SERVER -> new SqlServerCallMetaDataProvider(databaseMetaData);
+					case SYBASE -> new SybaseCallMetaDataProvider(databaseMetaData);
+					default -> new GenericCallMetaDataProvider(databaseMetaData);
+				};
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("Using " + provider.getClass().getName());

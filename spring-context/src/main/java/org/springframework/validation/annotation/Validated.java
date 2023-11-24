@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Variant of JSR-303's {@link javax.validation.Valid}, supporting the
+ * Variant of JSR-303's {@link jakarta.validation.Valid}, supporting the
  * specification of validation groups. Designed for convenient use with
  * Spring's JSR-303 support but not JSR-303 specific.
  *
@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  *
  * @author Juergen Hoeller
  * @since 3.1
- * @see javax.validation.Validator#validate(Object, Class[])
+ * @see jakarta.validation.Validator#validate(Object, Class[])
  * @see org.springframework.validation.SmartValidator#validate(Object, org.springframework.validation.Errors, Object...)
  * @see org.springframework.validation.beanvalidation.SpringValidatorAdapter
  * @see org.springframework.validation.beanvalidation.MethodValidationPostProcessor

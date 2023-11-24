@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,24 @@ import org.springframework.context.support.GenericApplicationContext;
  * @author Chris Beams
  * @since 3.1
  */
-public class DuplicateConfigurationClassPostProcessorTests {
+class DuplicateConfigurationClassPostProcessorTests {
 
 	@Test
-	public void repro() {
+	void repro() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.registerBeanDefinition("a", new RootBeanDefinition(ConfigurationClassPostProcessor.class));
 		ctx.registerBeanDefinition("b", new RootBeanDefinition(ConfigurationClassPostProcessor.class));
 		ctx.registerBeanDefinition("myConfig", new RootBeanDefinition(Config.class));
 		ctx.refresh();
+		ctx.close();
 	}
 
 	@Configuration
 	static class Config {
 		@Bean
-		public String string() {
+		String string() {
 			return "bean";
 		}
 	}
+
 }

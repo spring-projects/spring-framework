@@ -19,17 +19,16 @@ package org.springframework.web.servlet.view.feed;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Abstract superclass for Atom Feed views, using the
  * <a href="https://github.com/rometools/rome">ROME</a> package.
  *
- * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * <p><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
  * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * <p>Application-specific view classes will extend this class.

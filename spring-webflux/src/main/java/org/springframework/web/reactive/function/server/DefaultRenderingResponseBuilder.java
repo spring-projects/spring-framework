@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,15 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.result.view.RedirectView;
+import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -53,7 +56,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 
 	private final String name;
 
-	private int status = HttpStatus.OK.value();
+	private HttpStatusCode status = HttpStatus.OK;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -65,8 +68,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	public DefaultRenderingResponseBuilder(RenderingResponse other) {
 		Assert.notNull(other, "RenderingResponse must not be null");
 		this.name = other.name();
-		this.status = (other instanceof DefaultRenderingResponse ?
-				((DefaultRenderingResponse) other).statusCode : other.statusCode().value());
+		this.status = other.statusCode();
 		this.headers.putAll(other.headers());
 		this.model.putAll(other.model());
 	}
@@ -78,16 +80,15 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 
 
 	@Override
-	public RenderingResponse.Builder status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.status = status.value();
+	public RenderingResponse.Builder status(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode must not be null");
+		this.status = status;
 		return this;
 	}
 
 	@Override
 	public RenderingResponse.Builder status(int status) {
-		this.status = status;
-		return this;
+		return status(HttpStatusCode.valueOf(status));
 	}
 
 	@Override
@@ -106,7 +107,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	@Override
 	public RenderingResponse.Builder modelAttribute(Object attribute) {
 		Assert.notNull(attribute, "Attribute must not be null");
-		if (attribute instanceof Collection && ((Collection<?>) attribute).isEmpty()) {
+		if (attribute instanceof Collection<?> collection && collection.isEmpty()) {
 			return this;
 		}
 		return modelAttribute(Conventions.getVariableName(attribute), attribute);
@@ -165,7 +166,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 
 		private final Map<String, Object> model;
 
-		public DefaultRenderingResponse(int statusCode, HttpHeaders headers,
+		public DefaultRenderingResponse(HttpStatusCode statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies, String name, Map<String, Object> model) {
 
 			super(statusCode, headers, cookies, Collections.emptyMap());
@@ -195,11 +196,21 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 					.switchIfEmpty(Mono.error(() ->
 							new IllegalArgumentException("Could not resolve view with name '" + name() + "'")))
 					.flatMap(view -> {
+						setStatus(view);
 						List<MediaType> mediaTypes = view.getSupportedMediaTypes();
 						return view.render(model(),
 								contentType == null && !mediaTypes.isEmpty() ? mediaTypes.get(0) : contentType,
 								exchange);
 					});
+		}
+
+		private void setStatus(View view) {
+			if (view instanceof RedirectView redirectView) {
+				HttpStatusCode statusCode = statusCode();
+				if (statusCode.is3xxRedirection()) {
+					redirectView.setStatusCode(statusCode);
+				}
+			}
 		}
 
 	}

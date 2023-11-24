@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.backoff.BackOffExecution;
@@ -25,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
+ * Tests for {@link ExponentialBackOff}.
+ *
  * @author Stephane Nicoll
  */
 class ExponentialBackOffTests {
@@ -129,6 +135,19 @@ class ExponentialBackOffTests {
 		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=2000ms, multiplier=2.0}");
 		execution.nextBackOff();
 		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=4000ms, multiplier=2.0}");
+	}
+
+	@Test
+	void maxAttempts() {
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setInitialInterval(1000L);
+		backOff.setMultiplier(2.0);
+		backOff.setMaxInterval(10000L);
+		backOff.setMaxAttempts(6);
+		List<Long> delays = new ArrayList<>();
+		BackOffExecution execution = backOff.start();
+		IntStream.range(0, 7).forEach(i -> delays.add(execution.nextBackOff()));
+		assertThat(delays).containsExactly(1000L, 2000L, 4000L, 8000L, 10000L, 10000L, BackOffExecution.STOP);
 	}
 
 }

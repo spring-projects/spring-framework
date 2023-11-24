@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory, Se
 	 */
 	@Override
 	public int getOrder() {
-		if (this.aspectInstance instanceof Ordered) {
-			return ((Ordered) this.aspectInstance).getOrder();
+		if (this.aspectInstance instanceof Ordered ordered) {
+			return ordered.getOrder();
 		}
 		return getOrderForAspectClass(this.aspectInstance.getClass());
 	}

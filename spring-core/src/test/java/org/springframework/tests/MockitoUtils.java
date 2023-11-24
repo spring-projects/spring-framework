@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public abstract class MockitoUtils {
 	private static void verifySameInvocations(List<Invocation> expectedInvocations, List<Invocation> actualInvocations,
 			InvocationArgumentsAdapter... argumentAdapters) {
 
-		assertThat(expectedInvocations.size()).isEqualTo(actualInvocations.size());
+		assertThat(expectedInvocations).hasSameSizeAs(actualInvocations);
 		for (int i = 0; i < expectedInvocations.size(); i++) {
 			verifySameInvocation(expectedInvocations.get(i), actualInvocations.get(i), argumentAdapters);
 		}

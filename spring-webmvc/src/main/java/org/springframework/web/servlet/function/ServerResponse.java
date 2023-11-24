@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,10 +41,12 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -61,18 +61,16 @@ public interface ServerResponse {
 
 	/**
 	 * Return the status code of this response.
-	 * @return the status as an HttpStatus enum value
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @see HttpStatus#valueOf(int)
+	 * @return the status as an HttpStatusCode value
 	 */
-	HttpStatus statusCode();
+	HttpStatusCode statusCode();
 
 	/**
-	 * Return the (potentially non-standard) status code of this response.
+	 * Return the status code of this response as integer.
 	 * @return the status as an integer
-	 * @see #statusCode()
-	 * @see HttpStatus#valueOf(int)
+	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
+	@Deprecated(since = "6.0")
 	int rawStatusCode();
 
 	/**
@@ -109,11 +107,23 @@ public interface ServerResponse {
 	}
 
 	/**
+	 * Create a {@code ServerResponse} from the given {@link ErrorResponse}.
+	 * @param response the {@link ErrorResponse} to initialize from
+	 * @return the built response
+	 * @since 6.0
+	 */
+	static ServerResponse from(ErrorResponse response) {
+		return status(response.getStatusCode())
+				.headers(headers -> headers.putAll(response.getHeaders()))
+				.body(response.getBody());
+	}
+
+	/**
 	 * Create a builder with the given HTTP status.
 	 * @param status the response status
 	 * @return the created builder
 	 */
-	static BodyBuilder status(HttpStatus status) {
+	static BodyBuilder status(HttpStatusCode status) {
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -123,7 +133,7 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder status(int status) {
-		return new DefaultServerResponseBuilder(status);
+		return new DefaultServerResponseBuilder(HttpStatusCode.valueOf(status));
 	}
 
 	/**
@@ -267,14 +277,14 @@ public interface ServerResponse {
 	 * <p>For example:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse.send("Hello World!"));
+	 *     return ServerResponse.sse(sse -&gt; sse.send("Hello World!"));
 	 * }
 	 * </pre>
 	 *
 	 * <p>or, to set both the id and event type:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse
+	 *     return ServerResponse.sse(sse -&gt; sse
 	 *         .id("42)
 	 *         .event("event")
 	 *         .send("Hello World!"));
@@ -296,14 +306,14 @@ public interface ServerResponse {
 	 * <p>For example:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse.send("Hello World!"));
+	 *     return ServerResponse.sse(sse -&gt; sse.send("Hello World!"));
 	 * }
 	 * </pre>
 	 *
 	 * <p>or, to set both the id and event type:
 	 * <pre class="code">
 	 * public ServerResponse handleSse(ServerRequest request) {
-	 *     return ServerResponse.sse(sse -> sse
+	 *     return ServerResponse.sse(sse -&gt; sse
 	 *         .id("42)
 	 *         .event("event")
 	 *         .send("Hello World!"));
@@ -367,7 +377,6 @@ public interface ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -447,8 +456,28 @@ public interface ServerResponse {
 		 * Build the response entity with a custom write function.
 		 * @param writeFunction the function used to write to the {@link HttpServletResponse}
 		 */
-		ServerResponse build(BiFunction<HttpServletRequest, HttpServletResponse,
-				ModelAndView> writeFunction);
+		ServerResponse build(WriteFunction writeFunction);
+
+
+		/**
+		 * Defines the contract for {@link #build(WriteFunction)}.
+		 * @since 6.1
+		 */
+		@FunctionalInterface
+		interface WriteFunction {
+
+			/**
+			 * Write to the given {@code servletResponse}, or return a
+			 * {@code ModelAndView} to be rendered.
+			 * @param servletRequest the HTTP request
+			 * @param servletResponse  the HTTP response to write to
+			 * @return a {@code ModelAndView} to render, or {@code null} if handled directly
+			 * @throws Exception in case of Servlet errors
+			 */
+			@Nullable
+			ModelAndView write(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Exception;
+
+		}
 
 	}
 
@@ -492,7 +521,6 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given {@code Object} and return it. The parameter
 		 * {@code bodyType} is used to capture the generic type.
-		 *
 		 * @param body the body of the response
 		 * @param bodyType the type of the body, used to capture the generic type
 		 * @return the built response
@@ -607,7 +635,7 @@ public interface ServerResponse {
 		/**
 		 * Register a callback to be invoked when an error occurs during SSE
 		 * processing.
-		 * @param onError  the callback to invoke on error
+		 * @param onError the callback to invoke on error
 		 * @return this builder
 		 */
 		SseBuilder onError(Consumer<Throwable> onError);

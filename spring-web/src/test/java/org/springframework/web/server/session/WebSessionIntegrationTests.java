@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.server.session;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
@@ -85,7 +84,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	public void expiredSessionIsRecreated(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-
 		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
@@ -123,7 +121,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	public void expiredSessionEnds(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-
 		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
@@ -137,20 +134,19 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		store.setClock(Clock.offset(store.getClock(), Duration.ofMinutes(31)));
 
 		// Second request: session expires
-		URI uri = new URI("http://localhost:" + this.port + "/?expire");
+		URI uri = URI.create("http://localhost:" + this.port + "/?expire");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String value = response.getHeaders().getFirst("Set-Cookie");
 		assertThat(value).isNotNull();
-		assertThat(value.contains("Max-Age=0")).as("Actual value: " + value).isTrue();
+		assertThat(value).as("Actual value: " + value).contains("Max-Age=0");
 	}
 
 	@ParameterizedHttpServerTest
 	public void changeSessionId(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
-
 
 		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
@@ -162,7 +158,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertThat(this.handler.getSessionRequestCount()).isEqualTo(1);
 
 		// Second request: session id changes
-		URI uri = new URI("http://localhost:" + this.port + "/?changeId");
+		URI uri = URI.create("http://localhost:" + this.port + "/?changeId");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + oldId).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -186,20 +182,20 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertThat(id).isNotNull();
 
 		// Second request: invalidates session
-		URI uri = new URI("http://localhost:" + this.port + "/?invalidate");
+		URI uri = URI.create("http://localhost:" + this.port + "/?invalidate");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String value = response.getHeaders().getFirst("Set-Cookie");
 		assertThat(value).isNotNull();
-		assertThat(value.contains("Max-Age=0")).as("Actual value: " + value).isTrue();
+		assertThat(value).as("Actual value: " + value).contains("Max-Age=0");
 	}
 
 	private String extractSessionId(HttpHeaders headers) {
 		List<String> headerValues = headers.get("Set-Cookie");
 		assertThat(headerValues).isNotNull();
-		assertThat(headerValues.size()).isEqualTo(1);
+		assertThat(headerValues).hasSize(1);
 
 		for (String s : headerValues.get(0).split(";")){
 			if (s.startsWith("SESSION=")) {
@@ -209,8 +205,8 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		return null;
 	}
 
-	private URI createUri() throws URISyntaxException {
-		return new URI("http://localhost:" + this.port + "/");
+	private URI createUri() {
+		return URI.create("http://localhost:" + this.port + "/");
 	}
 
 

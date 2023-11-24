@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
@@ -73,7 +74,7 @@ public class HeaderAssertions {
 		String actual = getHeaders().getFirst(headerName);
 		this.exchangeResult.assertWithDiagnostics(() ->
 				assertTrue("Response does not contain header '" + headerName + "'", actual != null));
-		return assertHeader(headerName, value, Long.parseLong(actual));
+		return assertHeader(headerName, value, Long.parseLong(Objects.requireNonNull(actual)));
 	}
 
 	/**
@@ -115,7 +116,7 @@ public class HeaderAssertions {
 	/**
 	 * Match all values of the response header with the given regex
 	 * patterns which are applied to the values of the header in the
-	 * same order. Note that the number of pattenrs must match the
+	 * same order. Note that the number of patterns must match the
 	 * number of actual values.
 	 * @param name the header name
 	 * @param patterns one or more regex patterns, one per expected value
@@ -203,7 +204,7 @@ public class HeaderAssertions {
 			this.exchangeResult.assertWithDiagnostics(() ->
 					AssertionErrors.fail(getMessage(name) + " not found"));
 		}
-		return values;
+		return Objects.requireNonNull(values);
 	}
 
 	/**

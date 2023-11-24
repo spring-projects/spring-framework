@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.test.web;
 
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 @XmlRootElement
@@ -66,17 +67,11 @@ public class Person {
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof Person)) {
-			return false;
-		}
-		Person otherPerson = (Person) other;
-		return (ObjectUtils.nullSafeEquals(this.name, otherPerson.name) &&
-				ObjectUtils.nullSafeEquals(this.someDouble, otherPerson.someDouble) &&
-				ObjectUtils.nullSafeEquals(this.someBoolean, otherPerson.someBoolean));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof Person that &&
+				ObjectUtils.nullSafeEquals(this.name, that.name) &&
+				ObjectUtils.nullSafeEquals(this.someDouble, that.someDouble) &&
+				ObjectUtils.nullSafeEquals(this.someBoolean, that.someBoolean)));
 	}
 
 	@Override

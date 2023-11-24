@@ -1,0 +1,70 @@
+[[mvc-ann-requestbody]]
+= `@RequestBody`
+
+[.small]#xref:web/webflux/controller/ann-methods/requestbody.adoc[See equivalent in the Reactive stack]#
+
+You can use the `@RequestBody` annotation to have the request body read and deserialized into an
+`Object` through an xref:integration/rest-clients.adoc#rest-message-conversion[`HttpMessageConverter`].
+The following example uses a `@RequestBody` argument:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Account account) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/accounts")
+	fun handle(@RequestBody account: Account) {
+		// ...
+	}
+----
+======
+
+
+You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config] to
+configure or customize message conversion.
+
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
+`@Validated` annotation, both of which cause Standard Bean Validation to be applied.
+By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
+into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
+within the controller through an `Errors` or `BindingResult` argument,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/accounts")
+	public void handle(@Valid @RequestBody Account account, Errors errors) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/accounts")
+	fun handle(@Valid @RequestBody account: Account, errors: Errors) {
+		// ...
+	}
+----
+======
+
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. For more details, see the
+section on xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
+

@@ -1,0 +1,15 @@
+[[cache-plug]]
+= Plugging-in Different Back-end Caches
+:page-section-summary-toc: 1
+
+Clearly, there are plenty of caching products out there that you can use as a backing
+store. For those that do not support JSR-107 you need to provide a `CacheManager` and a
+`Cache` implementation. This may sound harder than it is, since, in practice, the classes
+tend to be simple https://en.wikipedia.org/wiki/Adapter_pattern[adapters] that map the
+caching abstraction framework on top of the storage API, as the _Caffeine_ classes do.
+Most `CacheManager` classes can use the classes in the
+`org.springframework.cache.support` package (such as `AbstractCacheManager` which takes
+care of the boiler-plate code, leaving only the actual mapping to be completed).
+
+
+

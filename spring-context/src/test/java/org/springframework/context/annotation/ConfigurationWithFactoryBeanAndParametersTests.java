@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,12 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class ConfigurationWithFactoryBeanAndParametersTests {
+class ConfigurationWithFactoryBeanAndParametersTests {
 
 	@Test
-	public void test() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, Bar.class);
+	void test() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, Bar.class);
 		assertThat(ctx.getBean(Bar.class).foo).isNotNull();
+		ctx.close();
 	}
 
 
@@ -51,10 +52,8 @@ public class ConfigurationWithFactoryBeanAndParametersTests {
 		}
 	}
 
-
 	static class Foo {
 	}
-
 
 	static class Bar {
 
@@ -65,7 +64,6 @@ public class ConfigurationWithFactoryBeanAndParametersTests {
 			this.foo = foo;
 		}
 	}
-
 
 	static class FooFactoryBean implements FactoryBean<Foo> {
 

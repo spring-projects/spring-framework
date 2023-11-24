@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ public abstract class AbstractPerson {
 
 	private long age;
 
-	private Date birth_date;
+	private Date birthDate;
 
 
 	public String getName() {
@@ -46,12 +46,12 @@ public abstract class AbstractPerson {
 		this.age = age;
 	}
 
-	public Date getBirth_date() {
-		return birth_date;
+	public Date getBirthDate() {
+		return birthDate;
 	}
 
-	public void setBirth_date(Date birth_date) {
-		this.birth_date = birth_date;
+	public void setBirthDate(Date birthDate) {
+		this.birthDate = birthDate;
 	}
 
 }

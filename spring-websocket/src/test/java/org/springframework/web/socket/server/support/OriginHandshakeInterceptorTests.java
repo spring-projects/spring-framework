@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.mock;
 public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	private final Map<String, Object> attributes = new HashMap<>();
-	private final WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+	private final WebSocketHandler wsHandler = mock();
 
 
 	@Test
@@ -120,7 +120,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	public void sameOriginMatchWithAllowedOrigins() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
 		this.servletRequest.setServerName("mydomain2.example");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.example"));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(List.of("http://mydomain1.example"));
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
 		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo(servletResponse.getStatus());
 	}

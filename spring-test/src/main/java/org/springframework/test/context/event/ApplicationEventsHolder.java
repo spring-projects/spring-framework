@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  *
  * @author Sam Brannen
  * @author Oliver Drotbohm
+ * @author Simon Baslé
  * @since 5.3.3
  * @see ApplicationEvents
  * @see RecordApplicationEvents
@@ -44,7 +45,7 @@ import org.springframework.util.Assert;
  */
 public abstract class ApplicationEventsHolder {
 
-	private static final ThreadLocal<DefaultApplicationEvents> applicationEvents = new ThreadLocal<>();
+	private static final ThreadLocal<DefaultApplicationEvents> applicationEvents = new InheritableThreadLocal<>();
 
 
 	private ApplicationEventsHolder() {

@@ -21,7 +21,7 @@ import java.io.Flushable;
 import java.io.IOException;
 
 import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 /**
  * Represents a server-side HTTP response.
@@ -35,7 +35,7 @@ public interface ServerHttpResponse extends HttpOutputMessage, Flushable, Closea
 	 * Set the HTTP status code of the response.
 	 * @param status the HTTP status as an HttpStatus enum value
 	 */
-	void setStatusCode(HttpStatus status);
+	void setStatusCode(HttpStatusCode status);
 
 	/**
 	 * Ensure that the headers and the content of the response are written out.

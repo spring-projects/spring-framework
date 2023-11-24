@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import java.util.concurrent.Executor;
  * <p>Implementations can use all sorts of different execution strategies,
  * such as: synchronous, asynchronous, using a thread pool, and more.
  *
- * <p>Equivalent to JDK 1.5's {@link java.util.concurrent.Executor}
- * interface; extending it now in Spring 3.0, so that clients may declare
- * a dependency on an Executor and receive any TaskExecutor implementation.
- * This interface remains separate from the standard Executor interface
- * mainly for backwards compatibility with JDK 1.4 in Spring 2.x.
+ * <p>Equivalent to Java's {@link java.util.concurrent.Executor} interface,
+ * so that clients may declare a dependency on an {@code Executor} and receive
+ * any {@code TaskExecutor} implementation. This interface remains separate from
+ * the standard {@code Executor} interface primarily for backwards compatibility
+ * with older APIs that depend on the {@code TaskExecutor} interface.
  *
  * @author Juergen Hoeller
  * @since 2.0

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
-
 /**
  * Resource holder wrapping a R2DBC {@link Connection}.
  * {@link R2dbcTransactionManager} binds instances of this class to the subscription,
@@ -42,10 +41,19 @@ import org.springframework.util.Assert;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
+	/**
+	 * Prefix for savepoint names.
+	 * @since 6.0.10
+	 */
+	static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
+
+
 	@Nullable
 	private Connection currentConnection;
 
 	private boolean transactionActive;
+
+	private int savepointCounter = 0;
 
 
 	/**
@@ -109,8 +117,19 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * @see #released()
 	 */
 	public Connection getConnection() {
-		Assert.notNull(this.currentConnection, "Active Connection is required");
+		Assert.state(this.currentConnection != null, "Active Connection is required");
 		return this.currentConnection;
+	}
+
+	/**
+	 * Create a new savepoint for the current {@link Connection},
+	 * using generated savepoint names that are unique for the Connection.
+	 * @return the name of the new savepoint
+	 * @since 6.0.10
+	 */
+	String nextSavepoint() {
+		this.savepointCounter++;
+		return SAVEPOINT_NAME_PREFIX + this.savepointCounter;
 	}
 
 	/**

@@ -16,8 +16,9 @@
 
 package org.springframework.oxm.jaxb;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+
+import jakarta.xml.bind.JAXBElement;
 
 /**
  * Used by {@link org.springframework.oxm.jaxb.Jaxb2MarshallerTests}.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_STAT
  * @author Nicolas Debeissat
  * @author Mark Paluch
  * @since 5.3
- * @see ScriptUtilsIntegrationTests
  */
 public class ScriptUtilsUnitTests {
 
@@ -133,8 +132,8 @@ public class ScriptUtilsUnitTests {
 	}
 
 	private void splitScriptContainingComments(String script, String... commentPrefixes) {
-		List<String> statements = ScriptUtils.splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		List<String> statements = ScriptUtils.splitSqlScript(null, script, ";", commentPrefixes,
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
@@ -180,52 +179,59 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(delimiter = '#', value = {
-		// semicolon
-		"'select 1\n select '';'''                                                          # ;      # false",
-		"'select 1\n select \";\"'                                                          # ;      # false",
-		"'select 1; select 2'                                                               # ;      # true",
-		// newline
-		"'select 1; select ''\n'''                                                          # '\n'   # false",
-		"'select 1; select \"\n\"'                                                          # '\n'   # false",
-		"'select 1\n select 2'                                                              # '\n'   # true",
-		// double newline
-		"'select 1\n select 2'                                                              # '\n\n' # false",
-		"'select 1\n\n select 2'                                                            # '\n\n' # true",
-		// semicolon with MySQL style escapes '\\'
-		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
-		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true",
-		// semicolon inside comments
-		"'-- a;b;c\ninsert into colors(color_num) values(42);'                              # ;      # true",
-		"'/* a;b;c */\ninsert into colors(color_num) values(42);'                           # ;      # true",
-		"'-- a;b;c\ninsert into colors(color_num) values(42)'                               # ;      # false",
-		"'/* a;b;c */\ninsert into colors(color_num) values(42)'                            # ;      # false",
-		// single quotes inside comments
-		"'-- What\\''s your favorite color?\ninsert into colors(color_num) values(42);'     # ;      # true",
-		"'-- What''s your favorite color?\ninsert into colors(color_num) values(42);'       # ;      # true",
-		"'/* What\\''s your favorite color? */\ninsert into colors(color_num) values(42);'  # ;      # true",
-		"'/* What''s your favorite color? */\ninsert into colors(color_num) values(42);'    # ;      # true",
-		// double quotes inside comments
-		"'-- double \" quotes\ninsert into colors(color_num) values(42);'                   # ;      # true",
-		"'-- double \\\" quotes\ninsert into colors(color_num) values(42);'                 # ;      # true",
-		"'/* double \" quotes */\ninsert into colors(color_num) values(42);'                # ;      # true",
-		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
-	})
+	@CsvSource(delimiter = '|', quoteCharacter = '~', textBlock = """
+		# semicolon
+		~select 1\n select ';'~                                                            | ;      | false
+		~select 1\n select ";"~                                                            | ;      | false
+		~select 1; select 2~                                                               | ;      | true
+
+		# newline
+		~select 1; select '\n'~                                                            | ~\n~   | false
+		~select 1; select "\n"~                                                            | ~\n~   | false
+		~select 1\n select 2~                                                              | ~\n~   | true
+
+		# double newline
+		~select 1\n select 2~                                                              | ~\n\n~ | false
+		~select 1\n\n select 2~                                                            | ~\n\n~ | true
+
+		# semicolon with MySQL style escapes '\\'
+		~insert into users(first, last)\n values('a\\\\', 'b;')~                           | ;      | false
+		~insert into users(first, last)\n values('Charles', 'd\\'Artagnan'); select 1~     | ;      | true
+
+		# semicolon inside comments
+		~-- a;b;c\n insert into colors(color_num) values(42);~                             | ;      | true
+		~/* a;b;c */\n insert into colors(color_num) values(42);~                          | ;      | true
+		~-- a;b;c\n insert into colors(color_num) values(42)~                              | ;      | false
+		~/* a;b;c */\n insert into colors(color_num) values(42)~                           | ;      | false
+
+		# single quotes inside comments
+		~-- What\\'s your favorite color?\n insert into colors(color_num) values(42);~     | ;      | true
+		~-- What's your favorite color?\n insert into colors(color_num) values(42);~       | ;      | true
+		~/* What\\'s your favorite color? */\n insert into colors(color_num) values(42);~  | ;      | true
+		~/* What's your favorite color? */\n insert into colors(color_num) values(42);~    | ;      | true
+
+		# double quotes inside comments
+		~-- double " quotes\n insert into colors(color_num) values(42);~                   | ;      | true
+		~-- double \\" quotes\n insert into colors(color_num) values(42);~                 | ;      | true
+		~/* double " quotes */\n insert into colors(color_num) values(42);~                | ;      | true
+		~/* double \\" quotes */\n insert into colors(color_num) values(42);~              | ;      | true
+		""")
 	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
-		boolean contains = ScriptUtils.containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
-				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		boolean contains = ScriptUtils.containsStatementSeparator(null, script, delimiter,
+				DEFAULT_COMMENT_PREFIXES, DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 
 		assertThat(contains).isEqualTo(expected);
 	}
 
-	private String readScript(String path) throws Exception {
+
+	private String readScript(String path) {
 		EncodedResource resource = new EncodedResource(new ClassPathResource(path, getClass()));
 		return ScriptUtils.readScript(resource, DefaultDataBufferFactory.sharedInstance, DEFAULT_STATEMENT_SEPARATOR).block();
 	}
 
 	private static List<String> splitSqlScript(String script, String separator) throws ScriptException {
-		return ScriptUtils.splitSqlScript(null, script, separator, DEFAULT_COMMENT_PREFIXES, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		return ScriptUtils.splitSqlScript(null, script, separator, DEFAULT_COMMENT_PREFIXES,
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 }

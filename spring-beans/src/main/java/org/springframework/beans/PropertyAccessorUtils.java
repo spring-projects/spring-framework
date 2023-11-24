@@ -134,8 +134,8 @@ public abstract class PropertyAccessorUtils {
 	/**
 	 * Determine the canonical name for the given property path.
 	 * Removes surrounding quotes from map keys:<br>
-	 * {@code map['key']} -> {@code map[key]}<br>
-	 * {@code map["key"]} -> {@code map[key]}
+	 * {@code map['key']} &rarr; {@code map[key]}<br>
+	 * {@code map["key"]} &rarr; {@code map[key]}
 	 * @param propertyName the bean property path
 	 * @return the canonical representation of the property path
 	 */

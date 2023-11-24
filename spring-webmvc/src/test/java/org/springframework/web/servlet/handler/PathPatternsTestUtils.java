@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.handler;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Named;
+
 import org.springframework.lang.Nullable;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
+
+import static org.junit.jupiter.api.Named.named;
 
 /**
  * Utility methods to help with parameterized tests for URL pattern matching
@@ -34,22 +39,22 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public abstract class PathPatternsTestUtils {
 
-	public static Stream<Function<String, MockHttpServletRequest>> requestArguments() {
+	public static Stream<Named<Function<String, MockHttpServletRequest>>> requestArguments() {
 		return requestArguments(null);
 	}
 
-	public static Stream<Function<String, MockHttpServletRequest>> requestArguments(@Nullable String contextPath) {
+	public static Stream<Named<Function<String, MockHttpServletRequest>>> requestArguments(@Nullable String contextPath) {
 		return Stream.of(
-				path -> {
+				named("ServletRequestPathUtils", path -> {
 					MockHttpServletRequest request = createRequest("GET", contextPath, path);
 					ServletRequestPathUtils.parseAndCache(request);
 					return request;
-				},
-				path -> {
+				}),
+				named("UrlPathHelper", path -> {
 					MockHttpServletRequest request = createRequest("GET", contextPath, path);
 					UrlPathHelper.defaultInstance.resolveAndCacheLookupPath(request);
 					return request;
-				}
+				})
 		);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class WebSocketExtensionTests {
 		WebSocketExtension extension = extensions.get(0);
 
 		assertThat(extension.getName()).isEqualTo("x-test-extension");
-		assertThat(extension.getParameters().size()).isEqualTo(2);
+		assertThat(extension.getParameters()).hasSize(2);
 		assertThat(extension.getParameters().get("foo")).isEqualTo("bar");
 		assertThat(extension.getParameters().get("bar")).isEqualTo("baz");
 	}

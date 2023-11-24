@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,27 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>Test annotation which indicates that the annotated {@code void} method
+ * Test annotation which indicates that the annotated {@code void} method
  * should be executed <em>after</em> a transaction is ended for a test method
  * configured to run within a transaction via Spring's {@code @Transactional}
  * annotation.
+ *
+ * <p>Generally speaking, {@code @AfterTransaction} methods must not accept any
+ * arguments. However, as of Spring Framework 6.1, for tests using the
+ * {@link org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}
+ * with JUnit Jupiter, {@code @AfterTransaction} methods may optionally accept
+ * arguments which will be resolved by any registered JUnit
+ * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolver}
+ * extension such as the {@code SpringExtension}. This means that JUnit-specific
+ * arguments like {@link org.junit.jupiter.api.TestInfo TestInfo} or beans from
+ * the test's {@code ApplicationContext} may be provided to {@code @AfterTransaction}
+ * methods analogous to {@code @AfterEach} methods.
  *
  * <p>{@code @AfterTransaction} methods declared in superclasses or as interface
  * default methods will be executed after those of the current test class.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
- *
- * <p>As of Spring Framework 4.3, {@code @AfterTransaction} may also be
- * declared on Java 8 based interface default methods.
  *
  * @author Sam Brannen
  * @since 2.5

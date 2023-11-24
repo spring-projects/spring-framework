@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.core.type.classreading;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
@@ -69,8 +69,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visit(String name, Object value) {
-		if (value instanceof Type) {
-			value = ((Type) value).getClassName();
+		if (value instanceof Type type) {
+			value = type.getClassName();
 		}
 		this.attributes.put(name, value);
 	}
@@ -93,8 +93,10 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visitEnd() {
+		Map<String, Object> compactedAttributes =
+				(this.attributes.isEmpty() ? Collections.emptyMap() : this.attributes);
 		MergedAnnotation<A> annotation = MergedAnnotation.of(
-				this.classLoader, this.source, this.annotationType, this.attributes);
+				this.classLoader, this.source, this.annotationType, compactedAttributes);
 		this.consumer.accept(annotation);
 	}
 
@@ -121,7 +123,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 	@SuppressWarnings("unchecked")
 	@Nullable
 	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader,
-			@Nullable Supplier<Object> sourceSupplier, String descriptor, boolean visible,
+			@Nullable Object source, String descriptor, boolean visible,
 			Consumer<MergedAnnotation<A>> consumer) {
 
 		if (!visible) {
@@ -133,7 +135,6 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 			return null;
 		}
 
-		Object source = (sourceSupplier != null ? sourceSupplier.get() : null);
 		try {
 			Class<A> annotationType = (Class<A>) ClassUtils.forName(typeName, classLoader);
 			return new MergedAnnotationReadingVisitor<>(classLoader, source, annotationType, consumer);
@@ -160,8 +161,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 		@Override
 		public void visit(String name, Object value) {
-			if (value instanceof Type) {
-				value = ((Type) value).getClassName();
+			if (value instanceof Type type) {
+				value = type.getClassName();
 			}
 			this.elements.add(value);
 		}
@@ -189,8 +190,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 				return Object.class;
 			}
 			Object firstElement = this.elements.get(0);
-			if (firstElement instanceof Enum) {
-				return ((Enum<?>) firstElement).getDeclaringClass();
+			if (firstElement instanceof Enum<?> enumeration) {
+				return enumeration.getDeclaringClass();
 			}
 			return firstElement.getClass();
 		}

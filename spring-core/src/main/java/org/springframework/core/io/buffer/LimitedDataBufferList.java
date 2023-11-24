@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.io.buffer;
 
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class LimitedDataBufferList extends ArrayList<DataBuffer> {
 	}
 
 	private void raiseLimitException() {
-		// Do not release here, it's likely down via doOnDiscard..
+		// Do not release here, it's likely done via doOnDiscard
 		throw new DataBufferLimitException(
 				"Exceeded limit on max bytes to buffer : " + this.maxByteCount);
 	}

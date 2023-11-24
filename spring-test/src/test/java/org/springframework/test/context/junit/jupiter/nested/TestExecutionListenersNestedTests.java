@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.junit.jupiter.nested.TestExecutionListenersNestedTests.FooTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -44,9 +44,12 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @author Sam Brannen
  * @since 5.3
  */
-@SpringJUnitConfig
+@ExtendWith(SpringExtension.class)
 @TestExecutionListeners(FooTestExecutionListener.class)
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
+// Since this test class does not load an ApplicationContext,
+// this test class simply is not supported for AOT processing.
+@DisabledInAotMode
 class TestExecutionListenersNestedTests {
 
 	private static final String FOO = "foo";
@@ -79,8 +82,8 @@ class TestExecutionListenersNestedTests {
 	}
 
 	@Nested
-	@SpringJUnitConfig(Config.class)
 	@TestExecutionListeners(BarTestExecutionListener.class)
+	@DisabledInAotMode
 	class ConfigOverriddenByDefaultTests {
 
 		@Test
@@ -91,7 +94,6 @@ class TestExecutionListenersNestedTests {
 
 	@Nested
 	@NestedTestConfiguration(INHERIT)
-	@SpringJUnitConfig(Config.class)
 	@TestExecutionListeners(BarTestExecutionListener.class)
 	class InheritedAndExtendedConfigTests {
 
@@ -103,8 +105,8 @@ class TestExecutionListenersNestedTests {
 
 		@Nested
 		@NestedTestConfiguration(OVERRIDE)
-		@SpringJUnitConfig(Config.class)
 		@TestExecutionListeners(BazTestExecutionListener.class)
+		@DisabledInAotMode
 		class DoubleNestedWithOverriddenConfigTests {
 
 			@Test
@@ -139,12 +141,7 @@ class TestExecutionListenersNestedTests {
 
 	// -------------------------------------------------------------------------
 
-	@Configuration
-	static class Config {
-		/* no user beans required for these tests */
-	}
-
-	private static abstract class BaseTestExecutionListener extends AbstractTestExecutionListener {
+	private abstract static class BaseTestExecutionListener extends AbstractTestExecutionListener {
 
 		protected abstract String name();
 

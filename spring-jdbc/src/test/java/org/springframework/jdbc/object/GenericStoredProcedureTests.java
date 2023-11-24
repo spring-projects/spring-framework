@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.object;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -46,10 +45,10 @@ public class GenericStoredProcedureTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));
-		Connection connection = mock(Connection.class);
-		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock();
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
-		CallableStatement callableStatement = mock(CallableStatement.class);
+		CallableStatement callableStatement = mock();
 		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
 		testDataSource.setTarget(dataSource);
 
@@ -60,12 +59,9 @@ public class GenericStoredProcedureTests {
 		given(connection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}")).willReturn(callableStatement);
 
 		StoredProcedure adder = (StoredProcedure) bf.getBean("genericProcedure");
-		Map<String, Object> in = new HashMap<>(2);
-		in.put("amount", 1106);
-		in.put("custid", 3);
+		Map<String, Object> in = Map.of("amount", 1106, "custid", 3);
 		Map<String, Object> out = adder.execute(in);
-		Integer id = (Integer) out.get("newid");
-		assertThat(id.intValue()).isEqualTo(4);
+		assertThat(out.get("newid")).isEqualTo(4);
 
 		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
 		verify(callableStatement).setObject(2, 3, Types.INTEGER);

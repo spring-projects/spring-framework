@@ -1,0 +1,69 @@
+[[spring-testing-annotation-testpropertysource]]
+= `@TestPropertySource`
+
+`@TestPropertySource` is a class-level annotation that you can use to configure the
+locations of properties files and inlined properties to be added to the set of
+`PropertySources` in the `Environment` for an `ApplicationContext` loaded for an
+integration test.
+
+The following example demonstrates how to declare a properties file from the classpath:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@TestPropertySource("/test.properties") // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Get properties from `test.properties` in the root of the classpath.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@TestPropertySource("/test.properties") // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Get properties from `test.properties` in the root of the classpath.
+======
+
+
+The following example demonstrates how to declare inlined properties:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = { "timezone = GMT", "port: 4242" }) // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Declare `timezone` and `port` properties.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Declare `timezone` and `port` properties.
+======
+
+See xref:testing/testcontext-framework/ctx-management/property-sources.adoc[Context Configuration with Test Property Sources] for examples and further details.
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
-public class HandlerMethodReturnValueHandlerCompositeTests {
+class HandlerMethodReturnValueHandlerCompositeTests {
 
-	private HandlerMethodReturnValueHandlerComposite handlers;
+	private HandlerMethodReturnValueHandlerComposite handlers = new HandlerMethodReturnValueHandlerComposite();
 
-	private HandlerMethodReturnValueHandler integerHandler;
+	private HandlerMethodReturnValueHandler integerHandler = mock();
 
-	ModelAndViewContainer mavContainer;
+	private ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
 	private MethodParameter integerType;
 
@@ -48,35 +48,31 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.integerType = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		this.stringType = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 
-		this.integerHandler = mock(HandlerMethodReturnValueHandler.class);
 		given(this.integerHandler.supportsReturnType(this.integerType)).willReturn(true);
 
-		this.handlers = new HandlerMethodReturnValueHandlerComposite();
 		this.handlers.addHandler(this.integerHandler);
-
-		mavContainer = new ModelAndViewContainer();
 	}
 
 
 	@Test
-	public void supportsReturnType() throws Exception {
+	void supportsReturnType() throws Exception {
 		assertThat(this.handlers.supportsReturnType(this.integerType)).isTrue();
 		assertThat(this.handlers.supportsReturnType(this.stringType)).isFalse();
 	}
 
 	@Test
-	public void handleReturnValue() throws Exception {
+	void handleReturnValue() throws Exception {
 		this.handlers.handleReturnValue(55, this.integerType, this.mavContainer, null);
 		verify(this.integerHandler).handleReturnValue(55, this.integerType, this.mavContainer, null);
 	}
 
 	@Test
-	public void handleReturnValueWithMultipleHandlers() throws Exception {
-		HandlerMethodReturnValueHandler anotherIntegerHandler = mock(HandlerMethodReturnValueHandler.class);
+	void handleReturnValueWithMultipleHandlers() throws Exception {
+		HandlerMethodReturnValueHandler anotherIntegerHandler = mock();
 		given(anotherIntegerHandler.supportsReturnType(this.integerType)).willReturn(true);
 
 		this.handlers.handleReturnValue(55, this.integerType, this.mavContainer, null);
@@ -86,15 +82,15 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	}
 
 	@Test  // SPR-13083
-	public void handleReturnValueWithAsyncHandler() throws Exception {
+	void handleReturnValueWithAsyncHandler() throws Exception {
 		Promise<Integer> promise = new Promise<>();
 		MethodParameter promiseType = new MethodParameter(getClass().getDeclaredMethod("handlePromise"), -1);
 
-		HandlerMethodReturnValueHandler responseBodyHandler = mock(HandlerMethodReturnValueHandler.class);
+		HandlerMethodReturnValueHandler responseBodyHandler = mock();
 		given(responseBodyHandler.supportsReturnType(promiseType)).willReturn(true);
 		this.handlers.addHandler(responseBodyHandler);
 
-		AsyncHandlerMethodReturnValueHandler promiseHandler = mock(AsyncHandlerMethodReturnValueHandler.class);
+		AsyncHandlerMethodReturnValueHandler promiseHandler = mock();
 		given(promiseHandler.supportsReturnType(promiseType)).willReturn(true);
 		given(promiseHandler.isAsyncReturnValue(promise, promiseType)).willReturn(true);
 		this.handlers.addHandler(promiseHandler);
@@ -109,7 +105,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	}
 
 	@Test
-	public void noSuitableReturnValueHandler() throws Exception {
+	void noSuitableReturnValueHandler() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.handlers.handleReturnValue("value", this.stringType, null, null));
 	}

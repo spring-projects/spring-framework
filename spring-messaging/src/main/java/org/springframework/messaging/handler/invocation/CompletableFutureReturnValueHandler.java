@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Support for {@link CompletableFuture} (and as of 4.3.7 also {@link CompletionStage})
@@ -39,9 +37,7 @@ public class CompletableFutureReturnValueHandler extends AbstractAsyncReturnValu
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
-		return new CompletableToListenableFutureAdapter<>((CompletionStage<Object>) returnValue);
+	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
+		return ((CompletionStage<?>) returnValue).toCompletableFuture();
 	}
-
 }

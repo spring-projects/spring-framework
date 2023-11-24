@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ public class UserCredentialsDataSourceAdapterTests {
 
 	@Test
 	public void testStaticCredentials() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
-		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock();
+		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);
 
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
@@ -48,8 +48,8 @@ public class UserCredentialsDataSourceAdapterTests {
 
 	@Test
 	public void testNoCredentials() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
-		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock();
+		Connection connection = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
 		adapter.setTargetDataSource(dataSource);
@@ -58,8 +58,8 @@ public class UserCredentialsDataSourceAdapterTests {
 
 	@Test
 	public void testThreadBoundCredentials() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
-		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock();
+		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);
 
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();

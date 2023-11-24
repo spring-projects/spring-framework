@@ -1,0 +1,45 @@
+[[spring-testing-annotation-contextcustomizerfactories]]
+= `@ContextCustomizerFactories`
+
+`@ContextCustomizerFactories` is used to register `ContextCustomizerFactory`
+implementations for a particular test class, its subclasses, and its nested classes. If
+you wish to register a factory globally, you should register it via the automatic
+discovery mechanism described in
+xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[`ContextCustomizerFactory` Configuration].
+
+The following example shows how to register two `ContextCustomizerFactory` implementations:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@ContextCustomizerFactories({CustomContextCustomizerFactory.class, AnotherContextCustomizerFactory.class}) // <1>
+	class CustomContextCustomizerFactoryTests {
+		// class body...
+	}
+----
+<1> Register two `ContextCustomizerFactory` implementations.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@ContextCustomizerFactories([CustomContextCustomizerFactory::class, AnotherContextCustomizerFactory::class]) // <1>
+	class CustomContextCustomizerFactoryTests {
+		// class body...
+	}
+----
+<1> Register two `ContextCustomizerFactory` implementations.
+======
+
+
+By default, `@ContextCustomizerFactories` provides support for inheriting factories from
+superclasses or enclosing classes. See
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] and the
+{spring-framework-api}/test/context/ContextCustomizerFactories.html[`@ContextCustomizerFactories`
+javadoc] for an example and further details.
+

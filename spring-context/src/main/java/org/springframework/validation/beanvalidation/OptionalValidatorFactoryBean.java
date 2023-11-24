@@ -16,8 +16,7 @@
 
 package org.springframework.validation.beanvalidation;
 
-import javax.validation.ValidationException;
-
+import jakarta.validation.ValidationException;
 import org.apache.commons.logging.LogFactory;
 
 /**
@@ -26,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
  * in case of no Bean Validation provider being available.
  *
  * <p>This is the actual class used by Spring's MVC configuration namespace,
- * in case of the {@code javax.validation} API being present but no explicit
+ * in case of the {@code jakarta.validation} API being present but no explicit
  * Validator having been configured.
  *
  * @author Juergen Hoeller

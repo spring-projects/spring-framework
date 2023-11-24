@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class EventCollector {
 	 */
 	public void assertNoEventReceived(String listenerId) {
 		List<Object> events = this.content.getOrDefault(listenerId, Collections.emptyList());
-		assertThat(events.size()).as("Expected no events but got " + events).isEqualTo(0);
+		assertThat(events).as("Expected no events but got " + events).isEmpty();
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class EventCollector {
 	 */
 	public void assertEvent(String listenerId, Object... events) {
 		List<Object> actual = this.content.getOrDefault(listenerId, Collections.emptyList());
-		assertThat(actual.size()).as("Wrong number of events").isEqualTo(events.length);
+		assertThat(actual).as("Wrong number of events").hasSameSizeAs(events);
 		for (int i = 0; i < events.length; i++) {
 			assertThat(actual.get(i)).as("Wrong event at index " + i).isEqualTo(events[i]);
 		}

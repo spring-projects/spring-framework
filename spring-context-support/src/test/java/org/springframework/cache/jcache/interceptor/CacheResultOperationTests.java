@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,11 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 		assertThat(operation.getExceptionCacheResolver()).isEqualTo(defaultExceptionCacheResolver);
 
 		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L);
-		assertThat(allParameters.length).isEqualTo(1);
+		assertThat(allParameters).hasSize(1);
 		assertCacheInvocationParameter(allParameters[0], Long.class, 2L, 0);
 
 		CacheInvocationParameter[] keyParameters = operation.getKeyParameters(2L);
-		assertThat(keyParameters.length).isEqualTo(1);
+		assertThat(keyParameters).hasSize(1);
 		assertCacheInvocationParameter(keyParameters[0], Long.class, 2L, 0);
 	}
 
@@ -72,7 +72,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 		CacheResultOperation operation = createDefaultOperation(methodDetails);
 
 		CacheInvocationParameter[] keyParameters = operation.getKeyParameters(3L, Boolean.TRUE, "Foo");
-		assertThat(keyParameters.length).isEqualTo(2);
+		assertThat(keyParameters).hasSize(2);
 		assertCacheInvocationParameter(keyParameters[0], Long.class, 3L, 0);
 		assertCacheInvocationParameter(keyParameters[1], String.class, "Foo", 2);
 	}
@@ -107,11 +107,11 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 		CacheInvocationParameter[] parameters = operation.getAllParameters(2L, "foo");
 
 		Set<Annotation> firstParameterAnnotations = parameters[0].getAnnotations();
-		assertThat(firstParameterAnnotations.size()).isEqualTo(1);
+		assertThat(firstParameterAnnotations).hasSize(1);
 		assertThat(firstParameterAnnotations.iterator().next().annotationType()).isEqualTo(CacheKey.class);
 
 		Set<Annotation> secondParameterAnnotations = parameters[1].getAnnotations();
-		assertThat(secondParameterAnnotations.size()).isEqualTo(1);
+		assertThat(secondParameterAnnotations).hasSize(1);
 		assertThat(secondParameterAnnotations.iterator().next().annotationType()).isEqualTo(Value.class);
 	}
 

@@ -17,6 +17,7 @@
 
 	<bean name="service" class="org.springframework.context.support.Service">
 		<property name="resources" value="/org/springframework/context/support/test/context*.xml"/>
+		<property name="resourceSet" value="/org/springframework/context/support/test/context*.xml"/>
 	</bean>
 
 	<bean name="service2" class="org.springframework.context.support.Service" autowire="byName" depends-on="service">

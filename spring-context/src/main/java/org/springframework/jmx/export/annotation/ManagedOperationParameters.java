@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Method-level annotation used to provide metadata about operation parameters,
- * corresponding to an array of {@code ManagedOperationParameter} attributes.
+ * Method-level annotation used as a container for one or more
+ * {@code @ManagedOperationParameter} declarations.
+ *
+ * <p>Note, however, that use of the {@code @ManagedOperationParameters} container
+ * is completely optional since {@code @ManagedOperationParameter} is a
+ * {@linkplain java.lang.annotation.Repeatable repeatable} annotation.
  *
  * @author Rob Harrop
  * @since 1.2

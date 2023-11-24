@@ -45,12 +45,12 @@ import org.springframework.util.StringUtils;
  * {@code public} setter methods for properties in a domain entity.</li>
  * <li>Spring's support for annotations such as
  * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
- * {@link javax.inject.Inject @Inject}, and
- * {@link javax.annotation.Resource @Resource} which provides dependency
+ * {@link jakarta.inject.Inject @Inject}, and
+ * {@link jakarta.annotation.Resource @Resource} which provides dependency
  * injection for {@code private} or {@code protected} fields, setter methods,
  * and configuration methods.</li>
- * <li>Use of annotations such as {@link javax.annotation.PostConstruct @PostConstruct}
- * and {@link javax.annotation.PreDestroy @PreDestroy} for lifecycle callback
+ * <li>Use of annotations such as {@link jakarta.annotation.PostConstruct @PostConstruct}
+ * and {@link jakarta.annotation.PreDestroy @PreDestroy} for lifecycle callback
  * methods.</li>
  * </ul>
  *

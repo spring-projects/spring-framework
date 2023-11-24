@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class UriUtilsTests {
 
 	@Test
 	public void decode() {
-		assertThat(UriUtils.decode("", CHARSET)).as("Invalid encoded URI").isEqualTo("");
+		assertThat(UriUtils.decode("", CHARSET)).as("Invalid encoded URI").isEmpty();
 		assertThat(UriUtils.decode("foobar", CHARSET)).as("Invalid encoded URI").isEqualTo("foobar");
 		assertThat(UriUtils.decode("foo%20bar", CHARSET)).as("Invalid encoded URI").isEqualTo("foo bar");
 		assertThat(UriUtils.decode("foo%2bbar", CHARSET)).as("Invalid encoded URI").isEqualTo("foo+bar");
@@ -133,6 +133,7 @@ public class UriUtilsTests {
 		assertThat(UriUtils.extractFileExtension("/products;q=11/view.html?param=/path/a.do")).isEqualTo("html");
 		assertThat(UriUtils.extractFileExtension("/products;q=11/view.html;r=22?param=/path/a.do")).isEqualTo("html");
 		assertThat(UriUtils.extractFileExtension("/products;q=11/view.html;r=22;s=33?param=/path/a.do")).isEqualTo("html");
+		assertThat(UriUtils.extractFileExtension("/products/.html")).isEqualTo("html");
 	}
 
 }

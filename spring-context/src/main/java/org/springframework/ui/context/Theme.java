@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.ui.context;
 import org.springframework.context.MessageSource;
 
 /**
- * A Theme can resolve theme-specific messages, codes, file paths, etcetera
+ * A Theme can resolve theme-specific messages, codes, file paths, etc.
  * (e&#46;g&#46; CSS and image files in a web environment).
  * The exposed {@link org.springframework.context.MessageSource} supports
  * theme-specific parameterization and internationalization.
@@ -28,7 +28,9 @@ import org.springframework.context.MessageSource;
  * @since 17.06.2003
  * @see ThemeSource
  * @see org.springframework.web.servlet.ThemeResolver
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
+@Deprecated(since = "6.0")
 public interface Theme {
 
 	/**

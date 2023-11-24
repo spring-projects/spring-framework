@@ -1,5 +1,5 @@
 /**
- * Support package for EJB/Java EE-related configuration,
+ * Support package for EJB/Jakarta EE-related configuration,
  * with XML schema being the primary configuration format.
  */
 @NonNullApi

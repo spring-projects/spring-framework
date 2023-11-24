@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.ui;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -46,7 +45,7 @@ public class ModelMapTests {
 
 	@Test
 	public void testNoArgCtorYieldsEmptyModel() throws Exception {
-		assertThat(new ModelMap().size()).isEqualTo(0);
+		assertThat(new ModelMap()).isEmpty();
 	}
 
 	/*
@@ -73,7 +72,7 @@ public class ModelMapTests {
 	@Test
 	public void testNamedObjectCtor() throws Exception {
 		ModelMap model = new ModelMap("foo", "bing");
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		String bing = (String) model.get("foo");
 		assertThat(bing).isNotNull();
 		assertThat(bing).isEqualTo("bing");
@@ -82,7 +81,7 @@ public class ModelMapTests {
 	@Test
 	public void testUnnamedCtorScalar() throws Exception {
 		ModelMap model = new ModelMap("foo", "bing");
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		String bing = (String) model.get("foo");
 		assertThat(bing).isNotNull();
 		assertThat(bing).isEqualTo("bing");
@@ -91,7 +90,7 @@ public class ModelMapTests {
 	@Test
 	public void testOneArgCtorWithScalar() throws Exception {
 		ModelMap model = new ModelMap("bing");
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		String string = (String) model.get("string");
 		assertThat(string).isNotNull();
 		assertThat(string).isEqualTo("bing");
@@ -107,10 +106,10 @@ public class ModelMapTests {
 	@Test
 	public void testOneArgCtorWithCollection() throws Exception {
 		ModelMap model = new ModelMap(new String[]{"foo", "boing"});
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		String[] strings = (String[]) model.get("stringList");
 		assertThat(strings).isNotNull();
-		assertThat(strings.length).isEqualTo(2);
+		assertThat(strings).hasSize(2);
 		assertThat(strings[0]).isEqualTo("foo");
 		assertThat(strings[1]).isEqualTo("boing");
 	}
@@ -119,7 +118,7 @@ public class ModelMapTests {
 	public void testOneArgCtorWithEmptyCollection() throws Exception {
 		ModelMap model = new ModelMap(new HashSet<>());
 		// must not add if collection is empty...
-		assertThat(model.size()).isEqualTo(0);
+		assertThat(model).isEmpty();
 	}
 
 	@Test
@@ -133,24 +132,24 @@ public class ModelMapTests {
 	@Test
 	public void testAddObjectWithEmptyArray() throws Exception {
 		ModelMap model = new ModelMap(new int[]{});
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		int[] ints = (int[]) model.get("intList");
 		assertThat(ints).isNotNull();
-		assertThat(ints.length).isEqualTo(0);
+		assertThat(ints).isEmpty();
 	}
 
 	@Test
 	public void testAddAllObjectsWithNullMap() throws Exception {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Map<String, ?>) null);
-		assertThat(model.size()).isEqualTo(0);
+		assertThat(model).isEmpty();
 	}
 
 	@Test
 	public void testAddAllObjectsWithNullCollection() throws Exception {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Collection<Object>) null);
-		assertThat(model.size()).isEqualTo(0);
+		assertThat(model).isEmpty();
 	}
 
 	@Test
@@ -171,7 +170,7 @@ public class ModelMapTests {
 		map.put("two", "two-value");
 		ModelMap model = new ModelMap();
 		model.addAttribute(map);
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		String key = StringUtils.uncapitalize(ClassUtils.getShortName(map.getClass()));
 		assertThat(model.containsKey(key)).isTrue();
 	}
@@ -181,7 +180,7 @@ public class ModelMapTests {
 		ModelMap model = new ModelMap();
 		model.addAttribute("foo");
 		model.addAttribute("bar");
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		String bar = (String) model.get("string");
 		assertThat(bar).isEqualTo("bar");
 	}
@@ -194,7 +193,7 @@ public class ModelMapTests {
 		beans.add(new TestBean("three"));
 		ModelMap model = new ModelMap();
 		model.addAllAttributes(beans);
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 	}
 
 	@Test
@@ -206,7 +205,7 @@ public class ModelMapTests {
 		ModelMap model = new ModelMap();
 		model.put("one", new TestBean("oneOld"));
 		model.mergeAttributes(beans);
-		assertThat(model.size()).isEqualTo(3);
+		assertThat(model).hasSize(3);
 		assertThat(((TestBean) model.get("one")).getName()).isEqualTo("oneOld");
 	}
 
@@ -281,12 +280,7 @@ public class ModelMapTests {
 		Object proxy = Proxy.newProxyInstance(
 				getClass().getClassLoader(),
 				new Class<?>[] {Map.class},
-				new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) {
-						return "proxy";
-					}
-				});
+				(proxy1, method, args) -> "proxy");
 		map.addAttribute(proxy);
 		assertThat(map.get("map")).isSameAs(proxy);
 	}
@@ -295,7 +289,7 @@ public class ModelMapTests {
 	public static class SomeInnerClass {
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			return (obj instanceof SomeInnerClass);
 		}
 

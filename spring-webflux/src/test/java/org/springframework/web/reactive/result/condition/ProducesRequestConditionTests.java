@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,19 +89,19 @@ public class ProducesRequestConditionTests {
 		String base = "application/atom+xml";
 		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
-		assertThat(condition.getMatchingCondition(exchange)).as("Declared parameter value must match if present in request").isNotNull();
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 
 		condition = new ProducesRequestCondition(base + ";type=feed");
 		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=entry"));
-		assertThat(condition.getMatchingCondition(exchange)).as("Declared parameter value must match if present in request").isNull();
+		assertThat(condition.getMatchingCondition(exchange)).isNull();
 
 		condition = new ProducesRequestCondition(base + ";type=feed");
 		exchange = MockServerWebExchange.from(get("/").header("Accept", base));
-		assertThat(condition.getMatchingCondition(exchange)).as("Declared parameter has no impact if not present in request").isNotNull();
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 
 		condition = new ProducesRequestCondition(base);
 		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
-		assertThat(condition.getMatchingCondition(exchange)).as("No impact from other parameters in request").isNotNull();
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
@@ -157,18 +157,18 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
 				.header("Accept", "application/xml, text/html"));
 
-		assertThat(html.compareTo(xml, exchange) > 0).isTrue();
-		assertThat(xml.compareTo(html, exchange) < 0).isTrue();
-		assertThat(xml.compareTo(none, exchange) < 0).isTrue();
-		assertThat(none.compareTo(xml, exchange) > 0).isTrue();
-		assertThat(html.compareTo(none, exchange) < 0).isTrue();
-		assertThat(none.compareTo(html, exchange) > 0).isTrue();
+		assertThat(html.compareTo(xml, exchange)).isGreaterThan(0);
+		assertThat(xml.compareTo(html, exchange)).isLessThan(0);
+		assertThat(xml.compareTo(none, exchange)).isLessThan(0);
+		assertThat(none.compareTo(xml, exchange)).isGreaterThan(0);
+		assertThat(html.compareTo(none, exchange)).isLessThan(0);
+		assertThat(none.compareTo(html, exchange)).isGreaterThan(0);
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/xml, text/*"));
 
-		assertThat(html.compareTo(xml, exchange) > 0).isTrue();
-		assertThat(xml.compareTo(html, exchange) < 0).isTrue();
+		assertThat(html.compareTo(xml, exchange)).isGreaterThan(0);
+		assertThat(xml.compareTo(html, exchange)).isLessThan(0);
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/pdf"));
@@ -180,8 +180,8 @@ public class ProducesRequestConditionTests {
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "text/html;q=0.9,application/xml"));
 
-		assertThat(html.compareTo(xml, exchange) > 0).isTrue();
-		assertThat(xml.compareTo(html, exchange) < 0).isTrue();
+		assertThat(html.compareTo(xml, exchange)).isGreaterThan(0);
+		assertThat(xml.compareTo(html, exchange)).isLessThan(0);
 	}
 
 	@Test
@@ -192,10 +192,10 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/*");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 	@Test
@@ -206,10 +206,10 @@ public class ProducesRequestConditionTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "text/plain"));
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 	}
 
 	@Test
@@ -221,19 +221,19 @@ public class ProducesRequestConditionTests {
 				get("/").header("Accept", "text/plain", "application/xml"));
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/xml", "text/plain"));
 
 		result = condition1.compareTo(condition2, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 	}
 
 	// SPR-8536
@@ -245,14 +245,16 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
 
-		assertThat(condition1.compareTo(condition2, exchange) < 0).as("Should have picked '*/*' condition as an exact match").isTrue();
-		assertThat(condition2.compareTo(condition1, exchange) > 0).as("Should have picked '*/*' condition as an exact match").isTrue();
+		assertThat(condition1.compareTo(condition2, exchange)).as("Should have picked '*/*' condition as an exact match")
+				.isLessThan(0);
+		assertThat(condition2.compareTo(condition1, exchange)).as("Should have picked '*/*' condition as an exact match")
+				.isGreaterThan(0);
 
 		condition1 = new ProducesRequestCondition("*/*");
 		condition2 = new ProducesRequestCondition("application/json");
 
-		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
-		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
+		assertThat(condition1.compareTo(condition2, exchange)).isLessThan(0);
+		assertThat(condition2.compareTo(condition1, exchange)).isGreaterThan(0);
 
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "*/*"));
@@ -260,14 +262,14 @@ public class ProducesRequestConditionTests {
 		condition1 = new ProducesRequestCondition();
 		condition2 = new ProducesRequestCondition("application/json");
 
-		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
-		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
+		assertThat(condition1.compareTo(condition2, exchange)).isLessThan(0);
+		assertThat(condition2.compareTo(condition1, exchange)).isGreaterThan(0);
 
 		condition1 = new ProducesRequestCondition("*/*");
 		condition2 = new ProducesRequestCondition("application/json");
 
-		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
-		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
+		assertThat(condition1.compareTo(condition2, exchange)).isLessThan(0);
+		assertThat(condition2.compareTo(condition1, exchange)).isGreaterThan(0);
 	}
 
 	// SPR-9021
@@ -279,8 +281,8 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
 
-		assertThat(condition1.compareTo(condition2, exchange) < 0).isTrue();
-		assertThat(condition2.compareTo(condition1, exchange) > 0).isTrue();
+		assertThat(condition1.compareTo(condition2, exchange)).isLessThan(0);
+		assertThat(condition2.compareTo(condition1, exchange)).isGreaterThan(0);
 	}
 
 	@Test
@@ -291,11 +293,23 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/xhtml");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Should have used MediaType.equals(Object) to break the match").isTrue();
+		assertThat(result).as("Should have used MediaType.equals(Object) to break the match").isLessThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Should have used MediaType.equals(Object) to break the match").isTrue();
+		assertThat(result).as("Should have used MediaType.equals(Object) to break the match").isGreaterThan(0);
 	}
+
+	@Test
+	public void compareEmptyInvalidAccept() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "foo"));
+
+		ProducesRequestCondition condition1 = new ProducesRequestCondition();
+		ProducesRequestCondition condition2 = new ProducesRequestCondition();
+
+		int result = condition1.compareTo(condition2, exchange);
+		assertThat(result).isEqualTo(0);
+	}
+
 
 	@Test
 	public void combine() {

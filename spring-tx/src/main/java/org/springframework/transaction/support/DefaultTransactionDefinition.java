@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.transaction.support;
 
 import java.io.Serializable;
+import java.util.Map;
 
-import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link TransactionDefinition} interface,
@@ -31,6 +32,7 @@ import org.springframework.transaction.TransactionDefinition;
  * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 08.05.2003
  */
 @SuppressWarnings("serial")
@@ -49,8 +51,31 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	public static final String READ_ONLY_MARKER = "readOnly";
 
 
-	/** Constants instance for TransactionDefinition. */
-	static final Constants constants = new Constants(TransactionDefinition.class);
+	/**
+	 * Map of constant names to constant values for the propagation constants
+	 * defined in {@link TransactionDefinition}.
+	 */
+	static final Map<String, Integer> propagationConstants = Map.of(
+			"PROPAGATION_REQUIRED", TransactionDefinition.PROPAGATION_REQUIRED,
+			"PROPAGATION_SUPPORTS", TransactionDefinition.PROPAGATION_SUPPORTS,
+			"PROPAGATION_MANDATORY", TransactionDefinition.PROPAGATION_MANDATORY,
+			"PROPAGATION_REQUIRES_NEW", TransactionDefinition.PROPAGATION_REQUIRES_NEW,
+			"PROPAGATION_NOT_SUPPORTED", TransactionDefinition.PROPAGATION_NOT_SUPPORTED,
+			"PROPAGATION_NEVER", TransactionDefinition.PROPAGATION_NEVER,
+			"PROPAGATION_NESTED", TransactionDefinition.PROPAGATION_NESTED
+		);
+
+	/**
+	 * Map of constant names to constant values for the isolation constants
+	 * defined in {@link TransactionDefinition}.
+	 */
+	static final Map<String, Integer> isolationConstants = Map.of(
+			"ISOLATION_DEFAULT", TransactionDefinition.ISOLATION_DEFAULT,
+			"ISOLATION_READ_UNCOMMITTED", TransactionDefinition.ISOLATION_READ_UNCOMMITTED,
+			"ISOLATION_READ_COMMITTED", TransactionDefinition.ISOLATION_READ_COMMITTED,
+			"ISOLATION_REPEATABLE_READ", TransactionDefinition.ISOLATION_REPEATABLE_READ,
+			"ISOLATION_SERIALIZABLE", TransactionDefinition.ISOLATION_SERIALIZABLE
+		);
 
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 
@@ -108,7 +133,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Set the propagation behavior by the name of the corresponding constant in
-	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
+	 * {@link TransactionDefinition} &mdash; for example, {@code "PROPAGATION_REQUIRED"}.
 	 * @param constantName name of the constant
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code PROPAGATION_} constants or is {@code null}
@@ -116,10 +141,10 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehaviorName(String constantName) throws IllegalArgumentException {
-		if (!constantName.startsWith(PREFIX_PROPAGATION)) {
-			throw new IllegalArgumentException("Only propagation constants allowed");
-		}
-		setPropagationBehavior(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer propagationBehavior = propagationConstants.get(constantName);
+		Assert.notNull(propagationBehavior, "Only propagation behavior constants allowed");
+		this.propagationBehavior = propagationBehavior;
 	}
 
 	/**
@@ -138,9 +163,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
-		if (!constants.getValues(PREFIX_PROPAGATION).contains(propagationBehavior)) {
-			throw new IllegalArgumentException("Only values of propagation constants allowed");
-		}
+		Assert.isTrue(propagationConstants.containsValue(propagationBehavior),
+				"Only values of propagation constants allowed");
 		this.propagationBehavior = propagationBehavior;
 	}
 
@@ -151,7 +175,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Set the isolation level by the name of the corresponding constant in
-	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
+	 * {@link TransactionDefinition} &mdash; for example, {@code "ISOLATION_DEFAULT"}.
 	 * @param constantName name of the constant
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code ISOLATION_} constants or is {@code null}
@@ -159,10 +183,10 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
-		if (!constantName.startsWith(PREFIX_ISOLATION)) {
-			throw new IllegalArgumentException("Only isolation constants allowed");
-		}
-		setIsolationLevel(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer isolationLevel = isolationConstants.get(constantName);
+		Assert.notNull(isolationLevel, "Only isolation constants allowed");
+		this.isolationLevel = isolationLevel;
 	}
 
 	/**
@@ -181,9 +205,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {
-		if (!constants.getValues(PREFIX_ISOLATION).contains(isolationLevel)) {
-			throw new IllegalArgumentException("Only values of isolation constants allowed");
-		}
+		Assert.isTrue(isolationConstants.containsValue(isolationLevel),
+				"Only values of isolation constants allowed");
 		this.isolationLevel = isolationLevel;
 	}
 
@@ -294,9 +317,9 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	protected final StringBuilder getDefinitionDescription() {
 		StringBuilder result = new StringBuilder();
-		result.append(constants.toCode(this.propagationBehavior, PREFIX_PROPAGATION));
+		result.append(getPropagationBehaviorName(this.propagationBehavior));
 		result.append(',');
-		result.append(constants.toCode(this.isolationLevel, PREFIX_ISOLATION));
+		result.append(getIsolationLevelName(this.isolationLevel));
 		if (this.timeout != TIMEOUT_DEFAULT) {
 			result.append(',');
 			result.append(PREFIX_TIMEOUT).append(this.timeout);
@@ -306,6 +329,30 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 			result.append(READ_ONLY_MARKER);
 		}
 		return result;
+	}
+
+	private static String getPropagationBehaviorName(int propagationBehavior) {
+		return switch(propagationBehavior) {
+			case TransactionDefinition.PROPAGATION_REQUIRED -> "PROPAGATION_REQUIRED";
+			case TransactionDefinition.PROPAGATION_SUPPORTS -> "PROPAGATION_SUPPORTS";
+			case TransactionDefinition.PROPAGATION_MANDATORY -> "PROPAGATION_MANDATORY";
+			case TransactionDefinition.PROPAGATION_REQUIRES_NEW -> "PROPAGATION_REQUIRES_NEW";
+			case TransactionDefinition.PROPAGATION_NOT_SUPPORTED -> "PROPAGATION_NOT_SUPPORTED";
+			case TransactionDefinition.PROPAGATION_NEVER -> "PROPAGATION_NEVER";
+			case TransactionDefinition.PROPAGATION_NESTED -> "PROPAGATION_NESTED";
+			default -> throw new IllegalArgumentException("Unsupported propagation behavior: " + propagationBehavior);
+		};
+	}
+
+	static String getIsolationLevelName(int isolationLevel) {
+		return switch(isolationLevel) {
+			case TransactionDefinition.ISOLATION_DEFAULT -> "ISOLATION_DEFAULT";
+			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED -> "ISOLATION_READ_UNCOMMITTED";
+			case TransactionDefinition.ISOLATION_READ_COMMITTED -> "ISOLATION_READ_COMMITTED";
+			case TransactionDefinition.ISOLATION_REPEATABLE_READ -> "ISOLATION_REPEATABLE_READ";
+			case TransactionDefinition.ISOLATION_SERIALIZABLE -> "ISOLATION_SERIALIZABLE";
+			default -> throw new IllegalArgumentException("Unsupported isolation level: " + isolationLevel);
+		};
 	}
 
 }

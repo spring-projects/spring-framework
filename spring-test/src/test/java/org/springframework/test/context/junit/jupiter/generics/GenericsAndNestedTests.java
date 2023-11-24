@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.test.context.junit.jupiter.generics;
 
 import org.junit.jupiter.api.Nested;
 
-import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.comics.Cat;
 import org.springframework.test.context.junit.jupiter.comics.Dog;
@@ -27,10 +26,6 @@ import org.springframework.test.context.junit.jupiter.comics.Dog;
  * Integration tests that verify support for Java generics combined with {@code @Nested}
  * test classes when used with the Spring TestContext Framework and the
  * {@link SpringExtension}.
- *
- * <p>
- * To run these tests in an IDE that does not have built-in support for the JUnit
- * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0.5

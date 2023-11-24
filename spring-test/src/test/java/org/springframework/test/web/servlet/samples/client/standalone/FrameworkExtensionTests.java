@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,17 @@
 package org.springframework.test.web.servlet.samples.client.standalone;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
+import org.springframework.test.web.servlet.client.MockMvcHttpConnector;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
@@ -30,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,22 +57,84 @@ public class FrameworkExtensionTests {
 
 	@Test
 	public void fooHeader() {
-		this.client.get().uri("/")
-				.header("Foo", "a=b")
+		this.client.mutateWith(headers().foo("a=b"))
+				.get().uri("/")
 				.exchange()
 				.expectBody(String.class).isEqualTo("Foo");
 	}
 
 	@Test
 	public void barHeader() {
-		this.client.get().uri("/")
-				.header("Bar", "a=b")
+		this.client.mutateWith(headers().bar("a=b"))
+				.get().uri("/")
 				.exchange()
 				.expectBody(String.class).isEqualTo("Bar");
 	}
 
 	private static TestMockMvcConfigurer defaultSetup() {
 		return new TestMockMvcConfigurer();
+	}
+
+	private static TestWebTestClientConfigurer headers() {
+		return new TestWebTestClientConfigurer();
+	}
+
+
+	/**
+	 * Test WebTestClientConfigurer that re-creates the MockMvcHttpConnector
+	 * with a {@code TestRequestPostProcessor}.
+	 */
+	private static class TestWebTestClientConfigurer implements WebTestClientConfigurer {
+
+		private final TestRequestPostProcessor requestPostProcessor = new TestRequestPostProcessor();
+
+		public TestWebTestClientConfigurer foo(String value) {
+			this.requestPostProcessor.foo(value);
+			return this;
+		}
+
+		public TestWebTestClientConfigurer bar(String value) {
+			this.requestPostProcessor.bar(value);
+			return this;
+		}
+
+		@Override
+		public void afterConfigurerAdded(
+				WebTestClient.Builder builder, WebHttpHandlerBuilder httpHandlerBuilder,
+				ClientHttpConnector connector) {
+
+			if (connector instanceof MockMvcHttpConnector mockMvcConnector) {
+				builder.clientConnector(mockMvcConnector.with(List.of(this.requestPostProcessor)));
+			}
+		}
+	}
+
+
+	/**
+	 * Test {@code RequestPostProcessor} for custom headers.
+	 */
+	private static class TestRequestPostProcessor implements RequestPostProcessor {
+
+		private final HttpHeaders headers = new HttpHeaders();
+
+
+		public TestRequestPostProcessor foo(String value) {
+			this.headers.add("Foo", value);
+			return this;
+		}
+
+		public TestRequestPostProcessor bar(String value) {
+			this.headers.add("Bar", value);
+			return this;
+		}
+
+		@Override
+		public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+			for (String headerName : this.headers.keySet()) {
+				request.addHeader(headerName, this.headers.get(headerName));
+			}
+			return request;
+		}
 	}
 
 
@@ -80,10 +149,11 @@ public class FrameworkExtensionTests {
 		}
 
 		@Override
-		public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder,
-				WebApplicationContext context) {
+		public RequestPostProcessor beforeMockMvcCreated(
+				ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context) {
+
 			return request -> {
-				request.setUserPrincipal(mock(Principal.class));
+				request.setUserPrincipal(mock());
 				return request;
 			};
 		}

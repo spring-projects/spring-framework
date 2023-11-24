@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,34 +20,41 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link RouterFunctionMapping}.
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
-public class RouterFunctionMappingTests {
-
-	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com/match"));
+class RouterFunctionMappingTests {
 
 	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 
 
 	@Test
-	public void normal() {
+	void normal() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
 		mapping.setMessageReaders(this.codecConfigurer.getReaders());
 
-		Mono<Object> result = mapping.getHandler(this.exchange);
+		Mono<Object> result = mapping.getHandler(createExchange("https://example.com/match"));
 
 		StepVerifier.create(result)
 				.expectNext(handlerFunction)
@@ -56,12 +63,12 @@ public class RouterFunctionMappingTests {
 	}
 
 	@Test
-	public void noMatch() {
+	void noMatch() {
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.empty();
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
 		mapping.setMessageReaders(this.codecConfigurer.getReaders());
 
-		Mono<Object> result = mapping.getHandler(this.exchange);
+		Mono<Object> result = mapping.getHandler(createExchange("https://example.com/match"));
 
 		StepVerifier.create(result)
 				.expectComplete()
@@ -69,7 +76,24 @@ public class RouterFunctionMappingTests {
 	}
 
 	@Test
-	public void changeParser() throws Exception {
+	void empty() throws Exception {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.refresh();
+
+		RouterFunctionMapping mapping = new RouterFunctionMapping();
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
+		mapping.setApplicationContext(context);
+		mapping.afterPropertiesSet();
+
+		Mono<Object> result = mapping.getHandler(createExchange("https://example.com/match"));
+
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void changeParser() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
 				.GET("/foo", handlerFunction)
@@ -88,6 +112,48 @@ public class RouterFunctionMappingTests {
 				.expectNext(handlerFunction)
 				.verifyComplete();
 
+	}
+
+	@Test
+	@SuppressWarnings("removal")
+	void mappedRequestShouldHoldAttributes() {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
+				.GET("/match", handlerFunction).build();
+
+		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
+
+		ServerWebExchange exchange = createExchange("https://example.com/match");
+		Mono<Object> result = mapping.getHandler(exchange);
+
+		StepVerifier.create(result)
+				.expectNext(handlerFunction)
+				.expectComplete()
+				.verify();
+
+		PathPattern matchingPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+		assertThat(matchingPattern).isNotNull();
+		assertThat(matchingPattern.getPatternString()).isEqualTo("/match");
+		assertThat(org.springframework.web.filter.reactive.ServerHttpObservationFilter.findObservationContext(exchange))
+				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
+		assertThat(ServerRequestObservationContext.findCurrent(exchange.getAttributes()))
+				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
+
+		ServerRequest serverRequest = exchange.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
+		assertThat(serverRequest).isNotNull();
+
+		HandlerFunction<?> handler = exchange.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
+		assertThat(handler).isEqualTo(handlerFunction);
+	}
+
+	@SuppressWarnings("removal")
+	private ServerWebExchange createExchange(String urlTemplate) {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(urlTemplate));
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
+		exchange.getAttributes().put(org.springframework.web.filter.reactive.ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		return exchange;
 	}
 
 }

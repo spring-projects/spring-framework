@@ -27,7 +27,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * A {@code VersionStrategy} that calculates an Hex MD5 hashes from the content
+ * A {@code VersionStrategy} that calculates a Hex MD5 hash from the content
  * of the resource and appends it to the file name, e.g.
  * {@code "styles/main-e36d2e05253c6c7085a91522ce43a0b4.css"}.
  *

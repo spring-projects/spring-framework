@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -91,8 +90,8 @@ final class SerializableTypeWrapper {
 	@SuppressWarnings("unchecked")
 	public static <T extends Type> T unwrap(T type) {
 		Type unwrapped = null;
-		if (type instanceof SerializableTypeProxy) {
-			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
+		if (type instanceof SerializableTypeProxy proxy) {
+			unwrapped = proxy.getTypeProvider().getType();
 		}
 		return (unwrapped != null ? (T) unwrapped : type);
 	}
@@ -190,8 +189,8 @@ final class SerializableTypeWrapper {
 				case "equals":
 					Object other = args[0];
 					// Unwrap proxies for speed
-					if (other instanceof Type) {
-						other = unwrap((Type) other);
+					if (other instanceof Type otherType) {
+						other = unwrap(otherType);
 					}
 					return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
 				case "hashCode":
@@ -204,19 +203,18 @@ final class SerializableTypeWrapper {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
 			else if (Type[].class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
-				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType())).length];
+				Object returnValue = ReflectionUtils.invokeMethod(method, this.provider.getType());
+				if (returnValue == null) {
+					return null;
+				}
+				Type[] result = new Type[((Type[]) returnValue).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));
 				}
 				return result;
 			}
 
-			try {
-				return method.invoke(this.provider.getType(), args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			return ReflectionUtils.invokeMethod(method, this.provider.getType(), args);
 		}
 	}
 
@@ -352,7 +350,7 @@ final class SerializableTypeWrapper {
 				// Cache the result for further calls to getType()
 				this.result = result;
 			}
-			return (result instanceof Type[] ? ((Type[]) result)[this.index] : (Type) result);
+			return (result instanceof Type[] results ? results[this.index] : (Type) result);
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,9 +194,9 @@ class EncoderHttpMessageWriterTests {
 		Method method = ReflectionUtils.findMethod(writer.getClass(), "isStreamingMediaType", MediaType.class);
 		ReflectionUtils.makeAccessible(method);
 
-		assertThat((boolean) (Boolean) method.invoke(writer, streamingMediaType)).isTrue();
-		assertThat((boolean) (Boolean) method.invoke(writer, new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "false")))).isFalse();
-		assertThat((boolean) (Boolean) method.invoke(writer, TEXT_HTML)).isFalse();
+		assertThat((Boolean) method.invoke(writer, streamingMediaType)).isTrue();
+		assertThat((Boolean) method.invoke(writer, new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "false")))).isFalse();
+		assertThat((Boolean) method.invoke(writer, TEXT_HTML)).isFalse();
 	}
 
 	private void configureEncoder(MimeType... mimeTypes) {

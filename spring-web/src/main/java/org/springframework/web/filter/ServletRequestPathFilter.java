@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.filter;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
- * A {@code Filter} to {@link ServletRequestPathUtils#parseAndCache parse}
- * and cache a {@link org.springframework.http.server.RequestPath} for further
- * {@link ServletRequestPathUtils#getParsedRequestPath access} throughout the
- * filter chain. This is useful when parsed
- * {@link org.springframework.web.util.pattern.PathPattern}s are in use anywhere
- * in an application instead of String pattern matching with
- * {@link org.springframework.util.PathMatcher}.
- * <p>Note that in Spring MVC, the {@code DispatcherServlet} will also parse and
- * cache the {@code RequestPath} if it detects that parsed {@code PathPatterns}
- * are enabled for any {@code HandlerMapping} but it will skip doing that if it
- * finds the {@link ServletRequestPathUtils#PATH_ATTRIBUTE} already exists.
+ * {@code Filter} that {@link ServletRequestPathUtils#parseAndCache parses and
+ * caches} a {@link org.springframework.http.server.RequestPath} that can then
+ * be accessed via {@link ServletRequestPathUtils#getParsedRequestPath}.
+ * <p><strong>Note:</strong> The {@code DispatcherServlet} already does the same,
+ * and therefore, this filter is mainly useful if you need to also have the
+ * parsed path available in the filter chain before and after the
+ * {@code DispatcherServlet}.
  *
  * @author Rossen Stoyanchev
  * @since 5.3

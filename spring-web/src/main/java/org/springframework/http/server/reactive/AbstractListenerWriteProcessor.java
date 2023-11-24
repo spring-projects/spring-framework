@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
  * event-listener write APIs and Reactive Streams.
  *
  * <p>Specifically a base class for writing to the HTTP response body with
- * Servlet 3.1 non-blocking I/O and Undertow XNIO as well for writing WebSocket
- * messages through the Java WebSocket API (JSR-356), Jetty, and Undertow.
+ * Servlet non-blocking I/O and Undertow XNIO as well for writing WebSocket
+ * messages through the Jakarta WebSocket API (JSR-356), Jetty, and Undertow.
  *
  * @author Arjen Poutsma
  * @author Violeta Georgieva
@@ -121,7 +121,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	/**
 	 * Error signal from the upstream, write Publisher. This is also used by
-	 * sub-classes to delegate error notifications from the container.
+	 * subclasses to delegate error notifications from the container.
 	 */
 	@Override
 	public final void onError(Throwable ex) {
@@ -134,7 +134,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	/**
 	 * Completion signal from the upstream, write Publisher. This is also used
-	 * by sub-classes to delegate completion notifications from the container.
+	 * by subclasses to delegate completion notifications from the container.
 	 */
 	@Override
 	public final void onComplete() {
@@ -254,7 +254,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * the next item from the upstream, write Publisher.
 	 * <p>The default implementation is a no-op.
 	 * @deprecated originally introduced for Undertow to stop write notifications
-	 * when no data is available, but deprecated as of as of 5.0.6 since constant
+	 * when no data is available, but deprecated as of 5.0.6 since constant
 	 * switching on every requested item causes a significant slowdown.
 	 */
 	@Deprecated
@@ -269,7 +269,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Invoked when an I/O error occurs during a write. Sub-classes may choose
+	 * Invoked when an I/O error occurs during a write. Subclasses may choose
 	 * to ignore this if they know the underlying API will provide an error
 	 * notification in a container thread.
 	 * <p>Defaults to no-op.

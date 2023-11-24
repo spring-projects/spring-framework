@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ public class SimpleUrlHandlerMappingTests {
 
 		testUrl("/welcome.html", mainController, handlerMapping, "");
 		testUrl("/welcome.x", otherController, handlerMapping, "welcome.x");
-		testUrl("/welcome/", otherController, handlerMapping, "welcome");
 		testUrl("/show.html", mainController, handlerMapping, "");
 		testUrl("/bookseats.html", mainController, handlerMapping, "");
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	private static final long serialVersionUID = -5470210965279837728L;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private final Message<?> originalMessage;
 
 

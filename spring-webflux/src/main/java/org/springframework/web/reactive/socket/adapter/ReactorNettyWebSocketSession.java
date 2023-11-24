@@ -64,6 +64,7 @@ public class ReactorNettyWebSocketSession
 	 * Constructor with an additional maxFramePayloadLength argument.
 	 * @since 5.1
 	 */
+	@SuppressWarnings("rawtypes")
 	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, NettyDataBufferFactory bufferFactory,
 			int maxFramePayloadLength) {

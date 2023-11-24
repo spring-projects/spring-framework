@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -29,6 +30,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 21.01.2004
  * @param <E> the element type
  */
@@ -51,6 +54,21 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		super(initialCapacity);
 	}
 
+
+	/**
+	 * Create a new instance containing an arbitrary number of elements.
+	 * @param elements the elements to be contained in the set
+	 * @param <E> the {@code Set}'s element type
+	 * @return a {@code ManagedSet} containing the specified elements
+	 * @since 5.3.16
+	 */
+	@SafeVarargs
+	@SuppressWarnings("varargs")
+	public static <E> ManagedSet<E> of(E... elements) {
+		ManagedSet<E> set = new ManagedSet<>();
+		Collections.addAll(set, elements);
+		return set;
+	}
 
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.

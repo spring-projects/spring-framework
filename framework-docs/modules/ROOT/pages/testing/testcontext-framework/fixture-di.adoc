@@ -1,0 +1,230 @@
+[[testcontext-fixture-di]]
+= Dependency Injection of Test Fixtures
+
+When you use the `DependencyInjectionTestExecutionListener` (which is configured by
+default), the dependencies of your test instances are injected from beans in the
+application context that you configured with `@ContextConfiguration` or related
+annotations. You may use setter injection, field injection, or both, depending on
+which annotations you choose and whether you place them on setter methods or fields.
+If you are using JUnit Jupiter you may also optionally use constructor injection
+(see xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with `SpringExtension`]). For consistency with Spring's annotation-based
+injection support, you may also use Spring's `@Autowired` annotation or the `@Inject`
+annotation from JSR-330 for field and setter injection.
+
+TIP: For testing frameworks other than JUnit Jupiter, the TestContext framework does not
+participate in instantiation of the test class. Thus, the use of `@Autowired` or
+`@Inject` for constructors has no effect for test classes.
+
+NOTE: Although field injection is discouraged in production code, field injection is
+actually quite natural in test code. The rationale for the difference is that you will
+never instantiate your test class directly. Consequently, there is no need to be able to
+invoke a `public` constructor or setter method on your test class.
+
+Because `@Autowired` is used to perform xref:core/beans/dependencies/factory-autowire.adoc[autowiring by type]
+, if you have multiple bean definitions of the same type, you cannot rely on this
+approach for those particular beans. In that case, you can use `@Autowired` in
+conjunction with `@Qualifier`. You can also choose to use `@Inject` in conjunction with
+`@Named`. Alternatively, if your test class has access to its `ApplicationContext`, you
+can perform an explicit lookup by using (for example) a call to
+`applicationContext.getBean("titleRepository", TitleRepository.class)`.
+
+If you do not want dependency injection applied to your test instances, do not annotate
+fields or setter methods with `@Autowired` or `@Inject`. Alternatively, you can disable
+dependency injection altogether by explicitly configuring your class with
+`@TestExecutionListeners` and omitting `DependencyInjectionTestExecutionListener.class`
+from the list of listeners.
+
+Consider the scenario of testing a `HibernateTitleRepository` class, as outlined in the
+xref:testing/integration.adoc#integration-testing-goals[Goals] section. The next two code listings demonstrate the
+use of `@Autowired` on fields and setter methods. The application context configuration
+is presented after all sample code listings.
+
+[NOTE]
+====
+The dependency injection behavior in the following code listings is not specific to JUnit
+Jupiter. The same DI techniques can be used in conjunction with any supported testing
+framework.
+
+The following examples make calls to static assertion methods, such as `assertNotNull()`,
+but without prepending the call with `Assertions`. In such cases, assume that the method
+was properly imported through an `import static` declaration that is not shown in the
+example.
+====
+
+The first code listing shows a JUnit Jupiter based implementation of the test class that
+uses `@Autowired` for field injection:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// specifies the Spring configuration to load for this test fixture
+	@ContextConfiguration("repository-config.xml")
+	class HibernateTitleRepositoryTests {
+
+		// this instance will be dependency injected by type
+		@Autowired
+		HibernateTitleRepository titleRepository;
+
+		@Test
+		void findById() {
+			Title title = titleRepository.findById(new Long(10));
+			assertNotNull(title);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// specifies the Spring configuration to load for this test fixture
+	@ContextConfiguration("repository-config.xml")
+	class HibernateTitleRepositoryTests {
+
+		// this instance will be dependency injected by type
+		@Autowired
+		lateinit var titleRepository: HibernateTitleRepository
+
+		@Test
+		fun findById() {
+			val title = titleRepository.findById(10)
+			assertNotNull(title)
+		}
+	}
+----
+======
+
+Alternatively, you can configure the class to use `@Autowired` for setter injection, as
+follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// specifies the Spring configuration to load for this test fixture
+	@ContextConfiguration("repository-config.xml")
+	class HibernateTitleRepositoryTests {
+
+		// this instance will be dependency injected by type
+		HibernateTitleRepository titleRepository;
+
+		@Autowired
+		void setTitleRepository(HibernateTitleRepository titleRepository) {
+			this.titleRepository = titleRepository;
+		}
+
+		@Test
+		void findById() {
+			Title title = titleRepository.findById(new Long(10));
+			assertNotNull(title);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// specifies the Spring configuration to load for this test fixture
+	@ContextConfiguration("repository-config.xml")
+	class HibernateTitleRepositoryTests {
+
+		// this instance will be dependency injected by type
+		lateinit var titleRepository: HibernateTitleRepository
+
+		@Autowired
+		fun setTitleRepository(titleRepository: HibernateTitleRepository) {
+			this.titleRepository = titleRepository
+		}
+
+		@Test
+		fun findById() {
+			val title = titleRepository.findById(10)
+			assertNotNull(title)
+		}
+	}
+----
+======
+
+The preceding code listings use the same XML context file referenced by the
+`@ContextConfiguration` annotation (that is, `repository-config.xml`). The following
+shows this configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<!-- this bean will be injected into the HibernateTitleRepositoryTests class -->
+		<bean id="titleRepository" class="com.foo.repository.hibernate.HibernateTitleRepository">
+			<property name="sessionFactory" ref="sessionFactory"/>
+		</bean>
+
+		<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+			<!-- configuration elided for brevity -->
+		</bean>
+
+	</beans>
+----
+
+[NOTE]
+=====
+If you are extending from a Spring-provided test base class that happens to use
+`@Autowired` on one of its setter methods, you might have multiple beans of the affected
+type defined in your application context (for example, multiple `DataSource` beans). In
+such a case, you can override the setter method and use the `@Qualifier` annotation to
+indicate a specific target bean, as follows (but make sure to delegate to the overridden
+method in the superclass as well):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// ...
+
+		@Autowired
+		@Override
+		public void setDataSource(@Qualifier("myDataSource") DataSource dataSource) {
+			super.setDataSource(dataSource);
+		}
+
+	// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// ...
+
+		@Autowired
+		override fun setDataSource(@Qualifier("myDataSource") dataSource: DataSource) {
+			super.setDataSource(dataSource)
+		}
+
+	// ...
+----
+======
+
+The specified qualifier value indicates the specific `DataSource` bean to inject,
+narrowing the set of type matches to a specific bean. Its value is matched against
+`<qualifier>` declarations within the corresponding `<bean>` definitions. The bean name
+is used as a fallback qualifier value, so you can effectively also point to a specific
+bean by name there (as shown earlier, assuming that `myDataSource` is the bean `id`).
+=====
+
+

@@ -1,0 +1,25 @@
+[[expressions-language-ref]]
+= Language Reference
+:page-section-summary-toc: 1
+
+This section describes how the Spring Expression Language works. It covers the following
+topics:
+
+* xref:core/expressions/language-ref/literal.adoc[Literal Expressions]
+* xref:core/expressions/language-ref/properties-arrays.adoc[Properties, Arrays, Lists, Maps, and Indexers]
+* xref:core/expressions/language-ref/inline-lists.adoc[Inline Lists]
+* xref:core/expressions/language-ref/inline-maps.adoc[Inline Maps]
+* xref:core/expressions/language-ref/array-construction.adoc[Array Construction]
+* xref:core/expressions/language-ref/methods.adoc[Methods]
+* xref:core/expressions/language-ref/operators.adoc[Operators]
+* xref:core/expressions/language-ref/types.adoc[Types]
+* xref:core/expressions/language-ref/constructors.adoc[Constructors]
+* xref:core/expressions/language-ref/variables.adoc[Variables]
+* xref:core/expressions/language-ref/functions.adoc[User-Defined Functions]
+* xref:core/expressions/language-ref/bean-references.adoc[Bean References]
+* xref:core/expressions/language-ref/operator-ternary.adoc[Ternary Operator (If-Then-Else)]
+* xref:core/expressions/language-ref/operator-elvis.adoc[The Elvis Operator]
+* xref:core/expressions/language-ref/operator-safe-navigation.adoc[Safe Navigation Operator]
+
+
+

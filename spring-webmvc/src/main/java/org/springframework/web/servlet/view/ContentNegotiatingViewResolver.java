@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -232,8 +233,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			}
 		}
 
-		String mediaTypeInfo = logger.isDebugEnabled() && requestedMediaTypes != null ?
-				" given " + requestedMediaTypes.toString() : "";
+		String mediaTypeInfo = (logger.isDebugEnabled() && requestedMediaTypes != null ?
+				" given " + requestedMediaTypes.toString() : "");
 
 		if (this.useNotAcceptableStatusCode) {
 			if (logger.isDebugEnabled()) {
@@ -268,7 +269,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 				}
 			}
 			List<MediaType> selectedMediaTypes = new ArrayList<>(compatibleMediaTypes);
-			MediaType.sortBySpecificityAndQuality(selectedMediaTypes);
+			MimeTypeUtils.sortBySpecificity(selectedMediaTypes);
 			return selectedMediaTypes;
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
@@ -297,7 +298,12 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 */
 	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
 		produceType = produceType.copyQualityValue(acceptType);
-		return (MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) < 0 ? acceptType : produceType);
+		if (acceptType.isLessSpecific(produceType)) {
+			return produceType;
+		}
+		else {
+			return acceptType;
+		}
 	}
 
 	private List<View> getCandidateViews(String viewName, Locale locale, List<MediaType> requestedMediaTypes)
@@ -332,8 +338,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	@Nullable
 	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
-			if (candidateView instanceof SmartView) {
-				SmartView smartView = (SmartView) candidateView;
+			if (candidateView instanceof SmartView smartView) {
 				if (smartView.isRedirectView()) {
 					return candidateView;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Method-level annotation used to provide metadata about operation parameters,
- * corresponding to a {@code ManagedOperationParameter} attribute.
- * Used as part of a {@link ManagedOperationParameters} annotation.
+ * Method-level annotation used to provide metadata about operation parameters, corresponding
+ * to a {@link org.springframework.jmx.export.metadata.ManagedOperationParameter} attribute.
  *
- * <p>As of Spring Framework 4.2.4, this annotation is declared as repeatable.
+ * <p>This annotation is a {@linkplain java.lang.annotation.Repeatable repeatable}
+ * annotation.
  *
  * @author Rob Harrop
  * @since 1.2
- * @see ManagedOperationParameters#value
+ * @see ManagedOperationParameters
  * @see org.springframework.jmx.export.metadata.ManagedOperationParameter
  */
 @Target(ElementType.METHOD)

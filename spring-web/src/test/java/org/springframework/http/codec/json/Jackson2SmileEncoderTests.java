@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  */
 public class Jackson2SmileEncoderTests extends AbstractEncoderTests<Jackson2SmileEncoder> {
 
-	private final static MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
-	private final static MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
+	private static final MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
+	private static final MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
 
 	private final Jackson2SmileEncoder encoder = new Jackson2SmileEncoder();
 
@@ -108,17 +108,13 @@ public class Jackson2SmileEncoderTests extends AbstractEncoderTests<Jackson2Smil
 	}
 
 	@Test
-	public void encodeError() throws Exception {
+	public void encodeError() {
 		Mono<Pojo> input = Mono.error(new InputException());
-
-		testEncode(input, Pojo.class, step -> step
-				.expectError(InputException.class)
-				.verify());
-
+		testEncode(input, Pojo.class, step -> step.expectError(InputException.class).verify());
 	}
 
 	@Test
-	public void encodeAsStream() throws Exception {
+	public void encodeAsStream() {
 		Pojo pojo1 = new Pojo("foo", "bar");
 		Pojo pojo2 = new Pojo("foofoo", "barbar");
 		Pojo pojo3 = new Pojo("foofoofoo", "barbarbar");

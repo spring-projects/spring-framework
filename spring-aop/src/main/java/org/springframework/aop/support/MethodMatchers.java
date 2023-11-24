@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
@@ -82,6 +83,18 @@ public abstract class MethodMatchers {
 	}
 
 	/**
+	 * Return a method matcher that represents the logical negation of the specified
+	 * matcher instance.
+	 * @param methodMatcher the {@link MethodMatcher} to negate
+	 * @return a matcher that represents the logical negation of the specified matcher
+	 * @since 6.1
+	 */
+	public static MethodMatcher negate(MethodMatcher methodMatcher) {
+		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
+		return new NegateMethodMatcher(methodMatcher);
+	}
+
+	/**
 	 * Apply the given MethodMatcher to the given Method, supporting an
 	 * {@link org.springframework.aop.IntroductionAwareMethodMatcher}
 	 * (if applicable).
@@ -90,12 +103,12 @@ public abstract class MethodMatchers {
 	 * @param targetClass the target class
 	 * @param hasIntroductions {@code true} if the object on whose behalf we are
 	 * asking is the subject on one or more introductions; {@code false} otherwise
-	 * @return whether or not this method matches statically
+	 * @return whether this method matches statically
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(mm, "MethodMatcher must not be null");
-		return (mm instanceof IntroductionAwareMethodMatcher ?
-				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions) :
+		return (mm instanceof IntroductionAwareMethodMatcher iamm ?
+				iamm.matches(method, targetClass, hasIntroductions) :
 				mm.matches(method, targetClass));
 	}
 
@@ -143,14 +156,8 @@ public abstract class MethodMatchers {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof UnionMethodMatcher)) {
-				return false;
-			}
-			UnionMethodMatcher that = (UnionMethodMatcher) other;
-			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
+			return (this == other || (other instanceof UnionMethodMatcher that &&
+					this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2)));
 		}
 
 		@Override
@@ -223,8 +230,7 @@ public abstract class MethodMatchers {
 			}
 			ClassFilter otherCf1 = ClassFilter.TRUE;
 			ClassFilter otherCf2 = ClassFilter.TRUE;
-			if (other instanceof ClassFilterAwareUnionMethodMatcher) {
-				ClassFilterAwareUnionMethodMatcher cfa = (ClassFilterAwareUnionMethodMatcher) other;
+			if (other instanceof ClassFilterAwareUnionMethodMatcher cfa) {
 				otherCf1 = cfa.cf1;
 				otherCf2 = cfa.cf2;
 			}
@@ -309,14 +315,8 @@ public abstract class MethodMatchers {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof IntersectionMethodMatcher)) {
-				return false;
-			}
-			IntersectionMethodMatcher that = (IntersectionMethodMatcher) other;
-			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
+			return (this == other || (other instanceof IntersectionMethodMatcher that &&
+					this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2)));
 		}
 
 		@Override
@@ -349,6 +349,49 @@ public abstract class MethodMatchers {
 			return (MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
 					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class NegateMethodMatcher implements MethodMatcher, Serializable {
+
+		private final MethodMatcher original;
+
+		NegateMethodMatcher(MethodMatcher original) {
+			this.original = original;
+		}
+
+		@Override
+		public boolean matches(Method method, Class<?> targetClass) {
+			return !this.original.matches(method, targetClass);
+		}
+
+		@Override
+		public boolean isRuntime() {
+			return this.original.isRuntime();
+		}
+
+		@Override
+		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+			return !this.original.matches(method, targetClass, args);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof NegateMethodMatcher that
+					&& this.original.equals(that.original)));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(getClass(), this.original);
+		}
+
+		@Override
+		public String toString() {
+			return "Negate " + this.original;
+		}
+
 	}
 
 }

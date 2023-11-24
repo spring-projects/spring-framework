@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
  * are present.
  *
  * <p>To limit the creation of objects, an ugly constructor is used
- * (rather then a dedicated 'closure'-like class for deferred execution).
+ * (rather than a dedicated 'closure'-like class for deferred execution).
  *
  * @author Costin Leau
  * @author Stephane Nicoll

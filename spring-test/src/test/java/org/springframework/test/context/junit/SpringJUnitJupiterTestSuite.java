@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,17 @@
 
 package org.springframework.test.context.junit;
 
-import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.ExcludeTags;
 import org.junit.platform.suite.api.IncludeClassNamePatterns;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectPackages;
-import org.junit.platform.suite.api.UseTechnicalNames;
-import org.junit.runner.RunWith;
+import org.junit.platform.suite.api.Suite;
 
 /**
- * JUnit 4 based test suite for tests that involve the Spring TestContext
+ * JUnit Platform based test suite for tests that involve the Spring TestContext
  * Framework and JUnit Jupiter (i.e., JUnit 5's programming model).
  *
- * <p>This class intentionally does not reside in the "jupiter" package
- * so that the entire "jupiter" package can be excluded from the Gradle
- * build. This class is therefore responsible for executing all JUnit
- * Jupiter based tests in Spring's official test suite.
+ * <p><strong>This suite is only intended to be used manually within an IDE.</strong>
  *
  * <h3>Logging Configuration</h3>
  *
@@ -46,11 +41,10 @@ import org.junit.runner.RunWith;
  * @author Sam Brannen
  * @since 5.0
  */
-@RunWith(JUnitPlatform.class)
+@Suite
 @IncludeEngines("junit-jupiter")
 @SelectPackages("org.springframework.test.context.junit.jupiter")
 @IncludeClassNamePatterns(".*Tests$")
 @ExcludeTags("failing-test-case")
-@UseTechnicalNames
 public class SpringJUnitJupiterTestSuite {
 }

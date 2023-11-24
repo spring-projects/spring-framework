@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,15 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link MessageHeaderAccessor} sub-class that supports storage and access of
+ * {@link MessageHeaderAccessor} subclass that supports storage and access of
  * headers from an external source such as a message broker. Headers from the
  * external source are kept separate from other headers, in a sub-map under the
  * key {@link #NATIVE_HEADERS}. This allows separating processing headers from
  * headers that need to be sent to or received from the external source.
  *
- * <p>This class is likely to be used through indirectly through a protocol
- * specific sub-class that also provide factory methods to translate
- * message headers to an from an external messaging source.
+ * <p>This class is likely to be used indirectly through a protocol-specific
+ * subclass that also provides factory methods to translate message headers
+ * to and from an external messaging source.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.transaction;
 
-import javax.transaction.Status;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
+import jakarta.transaction.Status;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -64,8 +63,8 @@ public class JndiJtaTransactionManagerTests {
 	private void doTestJtaTransactionManagerWithDefaultJndiLookups(String tmName, boolean tmFound, boolean defaultUt)
 			throws Exception {
 
-		UserTransaction ut = mock(UserTransaction.class);
-		TransactionManager tm = mock(TransactionManager.class);
+		UserTransaction ut = mock();
+		TransactionManager tm = mock();
 		if (defaultUt) {
 			given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 		}
@@ -129,10 +128,10 @@ public class JndiJtaTransactionManagerTests {
 
 	@Test
 	public void jtaTransactionManagerWithCustomJndiLookups() throws Exception {
-		UserTransaction ut = mock(UserTransaction.class);
+		UserTransaction ut = mock();
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
-		TransactionManager tm = mock(TransactionManager.class);
+		TransactionManager tm = mock();
 
 		JtaTransactionManager ptm = new JtaTransactionManager();
 		ptm.setUserTransactionName("jndi-ut");
@@ -168,10 +167,10 @@ public class JndiJtaTransactionManagerTests {
 
 	@Test
 	public void jtaTransactionManagerWithNotCacheUserTransaction() throws Exception {
-		UserTransaction ut = mock(UserTransaction.class);
+		UserTransaction ut = mock();
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
-		UserTransaction ut2 = mock(UserTransaction.class);
+		UserTransaction ut2 = mock();
 		given(ut2.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
 		JtaTransactionManager ptm = new JtaTransactionManager();
@@ -215,7 +214,7 @@ public class JndiJtaTransactionManagerTests {
 	}
 
 	/**
-	 * Prevent any side-effects due to this test modifying ThreadLocals that might
+	 * Prevent any side effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
 	@AfterEach

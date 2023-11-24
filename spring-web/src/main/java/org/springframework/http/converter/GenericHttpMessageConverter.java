@@ -40,14 +40,14 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 
 	/**
 	 * Indicates whether the given type can be read by this converter.
-	 * This method should perform the same checks than
+	 * This method should perform the same checks as
 	 * {@link HttpMessageConverter#canRead(Class, MediaType)} with additional ones
 	 * related to the generic type.
 	 * @param type the (potentially generic) type to test for readability
 	 * @param contextClass a context class for the target type, for example a class
 	 * in which the target type appears in a method signature (can be {@code null})
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
-	 * Typically the value of a {@code Content-Type} header.
+	 * Typically, the value of a {@code Content-Type} header.
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
 	boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType);
@@ -69,7 +69,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
-	 * <p>This method should perform the same checks than
+	 * <p>This method should perform the same checks as
 	 * {@link HttpMessageConverter#canWrite(Class, MediaType)} with additional ones
 	 * related to the generic type.
 	 * @param type the (potentially generic) type to test for writability
@@ -83,7 +83,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType);
 
 	/**
-	 * Write an given object to the given output message.
+	 * Write a given object to the given output message.
 	 * @param t the object to write to the output message. The type of this object must
 	 * have previously been passed to the {@link #canWrite canWrite} method of this
 	 * interface, which must have returned {@code true}.

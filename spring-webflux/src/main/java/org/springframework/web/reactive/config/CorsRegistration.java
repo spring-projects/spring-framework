@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,9 +76,11 @@ public class CorsRegistration {
 
 	/**
 	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"}, etc.
-	 * <p>The special value {@code "*"} allows all methods.
-	 * <p>By default "simple" methods {@code GET}, {@code HEAD}, and {@code POST}
+	 * The special value {@code "*"} allows all methods. By default,
+	 * "simple" methods {@code GET}, {@code HEAD}, and {@code POST}
 	 * are allowed.
+	 * <p>Please, see {@link CorsConfiguration#setAllowedMethods(List)} for
+	 * details.
 	 */
 	public CorsRegistration allowedMethods(String... methods) {
 		this.config.setAllowedMethods(Arrays.asList(methods));
@@ -87,11 +89,10 @@ public class CorsRegistration {
 
 	/**
 	 * Set the list of headers that a pre-flight request can list as allowed
-	 * for use during an actual request.
-	 * <p>The special value {@code "*"} may be used to allow all headers.
-	 * <p>A header name is not required to be listed if it is one of:
-	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
-	 * {@code Last-Modified}, or {@code Pragma} as per the CORS spec.
+	 * for use during an actual request. The special value {@code "*"}
+	 * may be used to allow all headers.
+	 * <p>Please, see {@link CorsConfiguration#setAllowedHeaders(List)} for
+	 * details.
 	 * <p>By default all headers are allowed.
 	 */
 	public CorsRegistration allowedHeaders(String... headers) {
@@ -100,12 +101,11 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Set the list of response headers other than "simple" headers, i.e.
-	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
-	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}, that an
-	 * actual response might have and can be exposed.
-	 * <p>The special value {@code "*"} allows all headers to be exposed for
-	 * non-credentialed requests.
+	 * Set the list of response headers that an actual response might have and
+	 * can be exposed. The special value {@code "*"} allows all headers to be
+	 * exposed.
+	 * <p>Please, see {@link CorsConfiguration#setExposedHeaders(List)} for
+	 * details.
 	 * <p>By default this is not set.
 	 */
 	public CorsRegistration exposedHeaders(String... headers) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,15 @@ import java.util.function.Supplier;
  */
 class DefaultApplicationStartup implements ApplicationStartup {
 
+	private static final DefaultStartupStep DEFAULT_STARTUP_STEP = new DefaultStartupStep();
+
 	@Override
 	public DefaultStartupStep start(String name) {
-		return new DefaultStartupStep();
+		return DEFAULT_STARTUP_STEP;
 	}
 
 
 	static class DefaultStartupStep implements StartupStep {
-
-		boolean recorded = false;
 
 		private final DefaultTags TAGS = new DefaultTags();
 
@@ -63,23 +63,17 @@ class DefaultApplicationStartup implements ApplicationStartup {
 
 		@Override
 		public StartupStep tag(String key, String value) {
-			if (this.recorded) {
-				throw new IllegalArgumentException();
-			}
 			return this;
 		}
 
 		@Override
 		public StartupStep tag(String key, Supplier<String> value) {
-			if (this.recorded) {
-				throw new IllegalArgumentException();
-			}
 			return this;
 		}
 
 		@Override
 		public void end() {
-			this.recorded = true;
+
 		}
 
 

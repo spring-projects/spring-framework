@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,10 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler handler) {
 		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(handler);
-		if (!(actual instanceof SubProtocolWebSocketHandler)) {
+		if (!(actual instanceof SubProtocolWebSocketHandler subProtocolWebSocketHandler)) {
 			throw new IllegalArgumentException("No SubProtocolWebSocketHandler in " + handler);
 		}
-		return (SubProtocolWebSocketHandler) actual;
+		return subProtocolWebSocketHandler;
 	}
 
 
@@ -140,6 +140,15 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	public WebMvcStompEndpointRegistry setErrorHandler(StompSubProtocolErrorHandler errorHandler) {
 		this.stompHandler.setErrorHandler(errorHandler);
 		return this;
+	}
+
+	public WebMvcStompEndpointRegistry setPreserveReceiveOrder(boolean preserveReceiveOrder) {
+		this.stompHandler.setPreserveReceiveOrder(preserveReceiveOrder);
+		return this;
+	}
+
+	protected boolean isPreserveReceiveOrder() {
+		return this.stompHandler.isPreserveReceiveOrder();
 	}
 
 	protected void setApplicationContext(ApplicationContext applicationContext) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>Designed for use as a base class, with the subclass invoking
  * the {@link #beforeAccess()} and {@link #afterAccess()} methods at
  * appropriate points of its workflow. Note that {@code afterAccess}
- * should usually be called in a finally block!
+ * should usually be called in a {@code finally} block!
  *
  * <p>The default concurrency limit of this support class is -1
  * ("unbounded concurrency"). Subclasses may override this default;
@@ -69,7 +69,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Set the maximum number of concurrent access attempts allowed.
-	 * -1 indicates unbounded concurrency.
+	 * The default of -1 indicates no concurrency limit at all.
 	 * <p>In principle, this limit can be changed at runtime,
 	 * although it is generally designed as a config time setting.
 	 * <p>NOTE: Do not switch between -1 and any concrete limit at runtime,
@@ -143,9 +143,10 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	 */
 	protected void afterAccess() {
 		if (this.concurrencyLimit >= 0) {
+			boolean debug = logger.isDebugEnabled();
 			synchronized (this.monitor) {
 				this.concurrencyCount--;
-				if (logger.isDebugEnabled()) {
+				if (debug) {
 					logger.debug("Returning from throttle at concurrency count " + this.concurrencyCount);
 				}
 				this.monitor.notify();

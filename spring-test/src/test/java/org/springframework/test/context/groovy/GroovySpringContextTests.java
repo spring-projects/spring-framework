@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.test.context.groovy;
 
-import javax.annotation.Resource;
-
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -87,8 +86,8 @@ class GroovySpringContextTests implements BeanNameAware, InitializingBean {
 
 	@Test
 	void verifyBeanNameSet() {
-		assertThat(this.beanName.startsWith(getClass().getName())).as("The bean name of this test instance should have been set to the fully qualified class name " +
-				"due to BeanNameAware semantics.").isTrue();
+		assertThat(this.beanName).as("The bean name of this test instance should have been set to the fully qualified class name " +
+				"due to BeanNameAware semantics.").startsWith(getClass().getName());
 	}
 
 	@Test

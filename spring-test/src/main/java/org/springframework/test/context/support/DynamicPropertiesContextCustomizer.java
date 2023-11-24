@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -46,7 +47,6 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 	private static final String PROPERTY_SOURCE_NAME = "Dynamic Test Properties";
 
-
 	private final Set<Method> methods;
 
 
@@ -65,9 +65,7 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	}
 
 	@Override
-	public void customizeContext(ConfigurableApplicationContext context,
-			MergedContextConfiguration mergedConfig) {
-
+	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		MutablePropertySources sources = context.getEnvironment().getPropertySources();
 		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertiesMap()));
 	}
@@ -90,20 +88,16 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 		return this.methods;
 	}
 
+
 	@Override
-	public int hashCode() {
-		return this.methods.hashCode();
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof DynamicPropertiesContextCustomizer that &&
+				this.methods.equals(that.methods)));
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		return this.methods.equals(((DynamicPropertiesContextCustomizer) obj).methods);
+	public int hashCode() {
+		return this.methods.hashCode();
 	}
 
 }

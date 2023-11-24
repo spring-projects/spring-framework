@@ -1,0 +1,429 @@
+[[transaction-declarative-first-example]]
+= Example of Declarative Transaction Implementation
+
+Consider the following interface and its attendant implementation. This example uses
+`Foo` and `Bar` classes as placeholders so that you can concentrate on the transaction
+usage without focusing on a particular domain model. For the purposes of this example,
+the fact that the `DefaultFooService` class throws `UnsupportedOperationException`
+instances in the body of each implemented method is good. That behavior lets you see
+transactions being created and then rolled back in response to the
+`UnsupportedOperationException` instance. The following listing shows the `FooService`
+interface:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	// the service interface that we want to make transactional
+
+	package x.y.service;
+
+	public interface FooService {
+
+		Foo getFoo(String fooName);
+
+		Foo getFoo(String fooName, String barName);
+
+		void insertFoo(Foo foo);
+
+		void updateFoo(Foo foo);
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	// the service interface that we want to make transactional
+
+	package x.y.service
+
+	interface FooService {
+
+		fun getFoo(fooName: String): Foo
+
+		fun getFoo(fooName: String, barName: String): Foo
+
+		fun insertFoo(foo: Foo)
+
+		fun updateFoo(foo: Foo)
+	}
+----
+======
+
+The following example shows an implementation of the preceding interface:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package x.y.service;
+
+	public class DefaultFooService implements FooService {
+
+		@Override
+		public Foo getFoo(String fooName) {
+			// ...
+		}
+
+		@Override
+		public Foo getFoo(String fooName, String barName) {
+			// ...
+		}
+
+		@Override
+		public void insertFoo(Foo foo) {
+			// ...
+		}
+
+		@Override
+		public void updateFoo(Foo foo) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	package x.y.service
+
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Foo {
+			// ...
+		}
+
+		override fun getFoo(fooName: String, barName: String): Foo {
+			// ...
+		}
+
+		override fun insertFoo(foo: Foo) {
+			// ...
+		}
+
+		override fun updateFoo(foo: Foo) {
+			// ...
+		}
+	}
+----
+======
+
+Assume that the first two methods of the `FooService` interface, `getFoo(String)` and
+`getFoo(String, String)`, must run in the context of a transaction with read-only
+semantics and that the other methods, `insertFoo(Foo)` and `updateFoo(Foo)`, must
+run in the context of a transaction with read-write semantics. The following
+configuration is explained in detail in the next few paragraphs:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<!-- from the file 'context.xml' -->
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/tx
+			https://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<!-- this is the service object that we want to make transactional -->
+		<bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+		<!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+		<tx:advice id="txAdvice" transaction-manager="txManager">
+			<!-- the transactional semantics... -->
+			<tx:attributes>
+				<!-- all methods starting with 'get' are read-only -->
+				<tx:method name="get*" read-only="true"/>
+				<!-- other methods use the default transaction settings (see below) -->
+				<tx:method name="*"/>
+			</tx:attributes>
+		</tx:advice>
+
+		<!-- ensure that the above transactional advice runs for any execution
+			of an operation defined by the FooService interface -->
+		<aop:config>
+			<aop:pointcut id="fooServiceOperation" expression="execution(* x.y.service.FooService.*(..))"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceOperation"/>
+		</aop:config>
+
+		<!-- don't forget the DataSource -->
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+			<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+			<property name="url" value="jdbc:oracle:thin:@rj-t42:1521:elvis"/>
+			<property name="username" value="scott"/>
+			<property name="password" value="tiger"/>
+		</bean>
+
+		<!-- similarly, don't forget the TransactionManager -->
+		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+
+		<!-- other <bean/> definitions here -->
+
+	</beans>
+----
+
+Examine the preceding configuration. It assumes that you want to make a service object,
+the `fooService` bean, transactional. The transaction semantics to apply are encapsulated
+in the `<tx:advice/>` definition. The `<tx:advice/>` definition reads as "all methods
+starting with `get` are to run in the context of a read-only transaction, and all
+other methods are to run with the default transaction semantics". The
+`transaction-manager` attribute of the `<tx:advice/>` tag is set to the name of the
+`TransactionManager` bean that is going to drive the transactions (in this case, the
+`txManager` bean).
+
+TIP: You can omit the `transaction-manager` attribute in the transactional advice
+(`<tx:advice/>`) if the bean name of the `TransactionManager` that you want to
+wire in has the name `transactionManager`. If the `TransactionManager` bean that
+you want to wire in has any other name, you must use the `transaction-manager`
+attribute explicitly, as in the preceding example.
+
+The `<aop:config/>` definition ensures that the transactional advice defined by the
+`txAdvice` bean runs at the appropriate points in the program. First, you define a
+pointcut that matches the execution of any operation defined in the `FooService` interface
+(`fooServiceOperation`). Then you associate the pointcut with the `txAdvice` by using an
+advisor. The result indicates that, at the execution of a `fooServiceOperation`,
+the advice defined by `txAdvice` is run.
+
+The expression defined within the `<aop:pointcut/>` element is an AspectJ pointcut
+expression. See xref:core/aop.adoc[the AOP section] for more details on pointcut
+expressions in Spring.
+
+A common requirement is to make an entire service layer transactional. The best way to
+do this is to change the pointcut expression to match any operation in your
+service layer. The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+		<aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.*.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>
+	</aop:config>
+----
+
+NOTE: In the preceding example, it is assumed that all your service interfaces are defined
+in the `x.y.service` package. See xref:core/aop.adoc[the AOP section] for more details.
+
+Now that we have analyzed the configuration, you may be asking yourself,
+"What does all this configuration actually do?"
+
+The configuration shown earlier is used to create a transactional proxy around the object
+that is created from the `fooService` bean definition. The proxy is configured with
+the transactional advice so that, when an appropriate method is invoked on the proxy,
+a transaction is started, suspended, marked as read-only, and so on, depending on the
+transaction configuration associated with that method. Consider the following program
+that test drives the configuration shown earlier:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public final class Boot {
+
+		public static void main(final String[] args) throws Exception {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml");
+			FooService fooService = ctx.getBean(FooService.class);
+			fooService.insertFoo(new Foo());
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("context.xml")
+		val fooService = ctx.getBean<FooService>("fooService")
+		fooService.insertFoo(Foo())
+	}
+----
+======
+
+The output from running the preceding program should resemble the following (the Log4J
+output and the stack trace from the `UnsupportedOperationException` thrown by the
+`insertFoo(..)` method of the `DefaultFooService` class have been truncated for clarity):
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- the Spring container is starting up... -->
+	[AspectJInvocationContextExposingAdvisorAutoProxyCreator] - Creating implicit proxy for bean 'fooService' with 0 common interceptors and 1 specific interceptors
+
+	<!-- the DefaultFooService is actually proxied -->
+	[JdkDynamicAopProxy] - Creating JDK dynamic proxy for [x.y.service.DefaultFooService]
+
+	<!-- ... the insertFoo(..) method is now being invoked on the proxy -->
+	[TransactionInterceptor] - Getting transaction for x.y.service.FooService.insertFoo
+
+	<!-- the transactional advice kicks in here... -->
+	[DataSourceTransactionManager] - Creating new transaction with name [x.y.service.FooService.insertFoo]
+	[DataSourceTransactionManager] - Acquired Connection [org.apache.commons.dbcp.PoolableConnection@a53de4] for JDBC transaction
+
+	<!-- the insertFoo(..) method from DefaultFooService throws an exception... -->
+	[RuleBasedTransactionAttribute] - Applying rules to determine whether transaction should rollback on java.lang.UnsupportedOperationException
+	[TransactionInterceptor] - Invoking rollback for transaction on x.y.service.FooService.insertFoo due to throwable [java.lang.UnsupportedOperationException]
+
+	<!-- and the transaction is rolled back (by default, RuntimeException instances cause rollback) -->
+	[DataSourceTransactionManager] - Rolling back JDBC transaction on Connection [org.apache.commons.dbcp.PoolableConnection@a53de4]
+	[DataSourceTransactionManager] - Releasing JDBC Connection after transaction
+	[DataSourceUtils] - Returning JDBC Connection to DataSource
+
+	Exception in thread "main" java.lang.UnsupportedOperationException at x.y.service.DefaultFooService.insertFoo(DefaultFooService.java:14)
+	<!-- AOP infrastructure stack trace elements removed for clarity -->
+	at $Proxy0.insertFoo(Unknown Source)
+	at Boot.main(Boot.java:11)
+----
+
+To use reactive transaction management the code has to use reactive types.
+
+NOTE: Spring Framework uses the `ReactiveAdapterRegistry` to determine whether a method
+return type is reactive.
+
+The following listing shows a modified version of the previously used `FooService`, but
+this time the code uses reactive types:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	// the reactive service interface that we want to make transactional
+
+	package x.y.service;
+
+	public interface FooService {
+
+		Flux<Foo> getFoo(String fooName);
+
+		Publisher<Foo> getFoo(String fooName, String barName);
+
+		Mono<Void> insertFoo(Foo foo);
+
+		Mono<Void> updateFoo(Foo foo);
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	// the reactive service interface that we want to make transactional
+
+	package x.y.service
+
+	interface FooService {
+
+		fun getFoo(fooName: String): Flow<Foo>
+
+		fun getFoo(fooName: String, barName: String): Publisher<Foo>
+
+		fun insertFoo(foo: Foo) : Mono<Void>
+
+		fun updateFoo(foo: Foo) : Mono<Void>
+	}
+----
+======
+
+The following example shows an implementation of the preceding interface:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package x.y.service;
+
+	public class DefaultFooService implements FooService {
+
+		@Override
+		public Flux<Foo> getFoo(String fooName) {
+			// ...
+		}
+
+		@Override
+		public Publisher<Foo> getFoo(String fooName, String barName) {
+			// ...
+		}
+
+		@Override
+		public Mono<Void> insertFoo(Foo foo) {
+			// ...
+		}
+
+		@Override
+		public Mono<Void> updateFoo(Foo foo) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	package x.y.service
+
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Flow<Foo> {
+			// ...
+		}
+
+		override fun getFoo(fooName: String, barName: String): Publisher<Foo> {
+			// ...
+		}
+
+		override fun insertFoo(foo: Foo): Mono<Void> {
+			// ...
+		}
+
+		override fun updateFoo(foo: Foo): Mono<Void> {
+			// ...
+		}
+	}
+----
+======
+
+Imperative and reactive transaction management share the same semantics for transaction
+boundary and transaction attribute definitions. The main difference between imperative
+and reactive transactions is the deferred nature of the latter. `TransactionInterceptor`
+decorates the returned reactive type with a transactional operator to begin and clean up
+the transaction. Therefore, calling a transactional reactive method defers the actual
+transaction management to a subscription type that activates processing of the reactive
+type.
+
+Another aspect of reactive transaction management relates to data escaping which is a
+natural consequence of the programming model.
+
+Method return values of imperative transactions are returned from transactional methods
+upon successful termination of a method so that partially computed results do not escape
+the method closure.
+
+Reactive transaction methods return a reactive wrapper type which represents a
+computation sequence along with a promise to begin and complete the computation.
+
+A `Publisher` can emit data while a transaction is ongoing but not necessarily completed.
+Therefore, methods that depend upon successful completion of an entire transaction need
+to ensure completion and buffer results in the calling code.
+
+

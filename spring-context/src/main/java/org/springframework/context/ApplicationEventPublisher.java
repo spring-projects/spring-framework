@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ package org.springframework.context;
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.event.ApplicationEventMulticaster
  * @see org.springframework.context.event.EventPublicationInterceptor
+ * @see org.springframework.transaction.event.TransactionalApplicationListener
  */
 @FunctionalInterface
 public interface ApplicationEventPublisher {
@@ -42,8 +43,21 @@ public interface ApplicationEventPublisher {
 	 * or even immediate execution at all. Event listeners are encouraged
 	 * to be as efficient as possible, individually using asynchronous
 	 * execution for longer-running and potentially blocking operations.
+	 * <p>For usage in a reactive call stack, include event publication
+	 * as a simple hand-off:
+	 * {@code Mono.fromRunnable(() -> eventPublisher.publishEvent(...))}.
+	 * As with any asynchronous execution, thread-local data is not going
+	 * to be available for reactive listener methods. All state which is
+	 * necessary to process the event needs to be included in the event
+	 * instance itself.
+	 * <p>For the convenient inclusion of the current transaction context
+	 * in a reactive hand-off, consider using
+	 * {@link org.springframework.transaction.reactive.TransactionalEventPublisher#publishEvent(Function)}.
+	 * For thread-bound transactions, this is not necessary since the
+	 * state will be implicitly available through thread-local storage.
 	 * @param event the event to publish
 	 * @see #publishEvent(Object)
+	 * @see ApplicationListener#supportsAsyncExecution()
 	 * @see org.springframework.context.event.ContextRefreshedEvent
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
@@ -61,6 +75,11 @@ public interface ApplicationEventPublisher {
 	 * or even immediate execution at all. Event listeners are encouraged
 	 * to be as efficient as possible, individually using asynchronous
 	 * execution for longer-running and potentially blocking operations.
+	 * <p>For the convenient inclusion of the current transaction context
+	 * in a reactive hand-off, consider using
+	 * {@link org.springframework.transaction.reactive.TransactionalEventPublisher#publishEvent(Object)}.
+	 * For thread-bound transactions, this is not necessary since the
+	 * state will be implicitly available through thread-local storage.
 	 * @param event the event to publish
 	 * @since 4.2
 	 * @see #publishEvent(ApplicationEvent)

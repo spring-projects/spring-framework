@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.context.annotation.role.ComponentWithoutRole;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Tests the use of the @Role and @Description annotation on @Bean methods and @Component classes.
  *
@@ -32,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class RoleAndDescriptionAnnotationTests {
+class RoleAndDescriptionAnnotationTests {
 
 	@Test
-	public void onBeanMethod() {
+	void onBeanMethod() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class);
 		ctx.refresh();
@@ -43,10 +42,11 @@ public class RoleAndDescriptionAnnotationTests {
 		assertThat(ctx.getBeanDefinition("foo").getDescription()).isNull();
 		assertThat(ctx.getBeanDefinition("bar").getRole()).isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
 		assertThat(ctx.getBeanDefinition("bar").getDescription()).isEqualTo("A Bean method with a role");
+		ctx.close();
 	}
 
 	@Test
-	public void onComponentClass() {
+	void onComponentClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentWithoutRole.class, ComponentWithRole.class);
 		ctx.refresh();
@@ -54,11 +54,11 @@ public class RoleAndDescriptionAnnotationTests {
 		assertThat(ctx.getBeanDefinition("componentWithoutRole").getDescription()).isNull();
 		assertThat(ctx.getBeanDefinition("componentWithRole").getRole()).isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
 		assertThat(ctx.getBeanDefinition("componentWithRole").getDescription()).isEqualTo("A Component with a role");
+		ctx.close();
 	}
 
-
 	@Test
-	public void viaComponentScanning() {
+	void viaComponentScanning() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.scan("org.springframework.context.annotation.role");
 		ctx.refresh();
@@ -66,20 +66,21 @@ public class RoleAndDescriptionAnnotationTests {
 		assertThat(ctx.getBeanDefinition("componentWithoutRole").getDescription()).isNull();
 		assertThat(ctx.getBeanDefinition("componentWithRole").getRole()).isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
 		assertThat(ctx.getBeanDefinition("componentWithRole").getDescription()).isEqualTo("A Component with a role");
+		ctx.close();
 	}
 
 
 	@Configuration
 	static class Config {
 		@Bean
-		public String foo() {
+		String foo() {
 			return "foo";
 		}
 
 		@Bean
 		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 		@Description("A Bean method with a role")
-		public String bar() {
+		String bar() {
 			return "bar";
 		}
 	}

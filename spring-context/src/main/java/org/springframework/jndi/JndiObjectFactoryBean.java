@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.util.ClassUtils;
  * a "proxyInterface" in such a scenario, since the actual JNDI object type is not
  * known in advance.
  *
- * <p>Of course, bean classes in a Spring environment may lookup e.g. a DataSource
+ * <p>Of course, bean classes in a Spring environment may look up e.g. a DataSource
  * from JNDI themselves. This class simply enables central configuration of the
  * JNDI name, and easy switching to non-JNDI alternatives. The latter is
  * particularly convenient for test setups, reuse in standalone clients, etc.
@@ -178,10 +178,10 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
 			// Just optional - for getting a specifically configured TypeConverter if needed.
 			// We'll simply fall back to a SimpleTypeConverter if no specific one available.
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+			this.beanFactory = cbf;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,50 +66,27 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 	}
 
 
-	<T> ResponseEntity<T> performGet(String url, MediaType out, Class<T> type) throws Exception {
+	<T> ResponseEntity<T> performGet(String url, MediaType out, Class<T> type) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(out));
 		return getRestTemplate().exchange(prepareGet(url, headers), type);
 	}
 
-	<T> ResponseEntity<T> performGet(String url, HttpHeaders headers, Class<T> type) throws Exception {
+	<T> ResponseEntity<T> performGet(String url, HttpHeaders headers, Class<T> type) {
 		return getRestTemplate().exchange(prepareGet(url, headers), type);
 	}
 
-	<T> ResponseEntity<T> performGet(String url, MediaType out, ParameterizedTypeReference<T> type)
-			throws Exception {
-
+	<T> ResponseEntity<T> performGet(String url, MediaType out, ParameterizedTypeReference<T> type) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(out));
 		return this.restTemplate.exchange(prepareGet(url, headers), type);
 	}
 
-	<T> ResponseEntity<T> performOptions(String url, HttpHeaders headers, Class<T> type)
-			throws Exception {
-
+	<T> ResponseEntity<T> performOptions(String url, HttpHeaders headers, Class<T> type) {
 		return getRestTemplate().exchange(prepareOptions(url, headers), type);
 	}
 
-	<T> ResponseEntity<T> performPost(String url, MediaType in, Object body, MediaType out, Class<T> type)
-			throws Exception {
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(in);
-		if (out != null) {
-			headers.setAccept(Collections.singletonList(out));
-		}
-		return  getRestTemplate().exchange(preparePost(url, headers, body), type);
-	}
-
-	<T> ResponseEntity<T> performPost(String url, HttpHeaders headers, Object body,
-			Class<T> type) throws Exception {
-
-		return  getRestTemplate().exchange(preparePost(url, headers, body), type);
-	}
-
-	<T> ResponseEntity<T> performPost(String url, MediaType in, Object body, MediaType out,
-			ParameterizedTypeReference<T> type) throws Exception {
-
+	<T> ResponseEntity<T> performPost(String url, MediaType in, Object body, MediaType out, Class<T> type) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(in);
 		if (out != null) {
@@ -118,15 +95,28 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 		return getRestTemplate().exchange(preparePost(url, headers, body), type);
 	}
 
-	private RequestEntity<Void> prepareGet(String url, HttpHeaders headers) throws Exception {
-		URI uri = new URI("http://localhost:" + this.port + url);
+	<T> ResponseEntity<T> performPost(String url, HttpHeaders headers, Object body, Class<T> type) {
+		return getRestTemplate().exchange(preparePost(url, headers, body), type);
+	}
+
+	<T> ResponseEntity<T> performPost(String url, MediaType in, Object body, MediaType out, ParameterizedTypeReference<T> type) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(in);
+		if (out != null) {
+			headers.setAccept(Collections.singletonList(out));
+		}
+		return getRestTemplate().exchange(preparePost(url, headers, body), type);
+	}
+
+	private RequestEntity<Void> prepareGet(String url, HttpHeaders headers) {
+		URI uri = URI.create("http://localhost:" + this.port + url);
 		RequestEntity.HeadersBuilder<?> builder = RequestEntity.get(uri);
 		addHeaders(builder, headers);
 		return builder.build();
 	}
 
-	private RequestEntity<Void> prepareOptions(String url, HttpHeaders headers) throws Exception {
-		URI uri = new URI("http://localhost:" + this.port + url);
+	private RequestEntity<Void> prepareOptions(String url, HttpHeaders headers) {
+		URI uri = URI.create("http://localhost:" + this.port + url);
 		RequestEntity.HeadersBuilder<?> builder = RequestEntity.options(uri);
 		addHeaders(builder, headers);
 		return builder.build();
@@ -140,8 +130,8 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 		}
 	}
 
-	private RequestEntity<?> preparePost(String url, HttpHeaders headers, Object body) throws Exception {
-		URI uri = new URI("http://localhost:" + this.port + url);
+	private RequestEntity<?> preparePost(String url, HttpHeaders headers, Object body) {
+		URI uri = URI.create("http://localhost:" + this.port + url);
 		RequestEntity.BodyBuilder builder = RequestEntity.post(uri);
 		addHeaders(builder, headers);
 		return builder.body(body);

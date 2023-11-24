@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
  * that can read and write JSON using the
- * <a href="http://json-b.net/">JSON Binding API</a>.
+ * <a href="https://javaee.github.io/jsonb-spec/">JSON Binding API</a>.
  *
  * <p>This converter can be used to bind to typed beans or untyped {@code HashMap}s.
  * By default, it supports {@code application/json} and {@code application/*+json} with
@@ -39,8 +39,8 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 5.0
- * @see javax.json.bind.Jsonb
- * @see javax.json.bind.JsonbBuilder
+ * @see jakarta.json.bind.Jsonb
+ * @see jakarta.json.bind.JsonbBuilder
  * @see #setJsonb
  */
 public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter {
@@ -110,4 +110,8 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 		}
 	}
 
+	@Override
+	protected boolean supportsRepeatableWrites(Object o) {
+		return true;
+	}
 }

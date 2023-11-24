@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.servlet.http.Part;
+import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of {@code javax.servlet.http.Part}.
+ * Mock implementation of {@code jakarta.servlet.http.Part}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

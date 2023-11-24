@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet;
 
+import org.springframework.test.util.ExceptionCollector;
+
 /**
  * Allows applying actions, such as expectations, on the result of an executed
  * request.
@@ -25,6 +27,8 @@ package org.springframework.test.web.servlet;
  * {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 3.2
  */
 public interface ResultActions {
@@ -33,31 +37,57 @@ public interface ResultActions {
 	 * Perform an expectation.
 	 *
 	 * <h4>Example</h4>
+	 * <p>You can invoke {@code andExpect()} multiple times as in the following
+	 * example.
 	 * <pre class="code">
-	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
+	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
 	 * mockMvc.perform(get("/person/1"))
 	 *   .andExpect(status().isOk())
 	 *   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 * </pre>
-	 *
-	 * <p>Or alternatively provide all matchers as a vararg:
-	 * <pre class="code">
-	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*, ResultMatcher.matchAll
-	 *
-	 * mockMvc.perform(post("/form"))
-	 *   .andExpect(matchAll(
-	 *       status().isOk(),
-	 *       redirectedUrl("/person/1"),
-	 *   	 model().size(1),
-	 *       model().attributeExists("person"),
-	 *       flash().attributeCount(1),
-	 *       flash().attribute("message", "success!"))
-	 *   );
-	 * </pre>
+	 * @see #andExpectAll(ResultMatcher...)
 	 */
 	ResultActions andExpect(ResultMatcher matcher) throws Exception;
+
+	/**
+	 * Perform multiple expectations, with the guarantee that all expectations
+	 * will be asserted even if one or more expectations fail with an exception.
+	 * <p>If a single {@link Error} or {@link Exception} is thrown, it will
+	 * be rethrown.
+	 * <p>If multiple exceptions are thrown, this method will throw an
+	 * {@link AssertionError} whose error message is a summary of all the
+	 * exceptions. In addition, each exception will be added as a
+	 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
+	 * the {@code AssertionError}.
+	 * <p>This feature is similar to the {@code SoftAssertions} support in AssertJ
+	 * and the {@code assertAll()} support in JUnit Jupiter.
+	 *
+	 * <h4>Example</h4>
+	 * <p>Instead of invoking {@code andExpect()} multiple times, you can invoke
+	 * {@code andExpectAll()} as in the following example.
+	 * <pre class="code">
+	 * // static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
+	 *
+	 * mockMvc.perform(get("/person/1"))
+	 *   .andExpectAll(
+	 *       status().isOk(),
+	 *       content().contentType(MediaType.APPLICATION_JSON),
+	 *       jsonPath("$.person.name").value("Jason")
+	 *   );
+	 * </pre>
+	 * @since 5.3.10
+	 * @see #andExpect(ResultMatcher)
+	 */
+	default ResultActions andExpectAll(ResultMatcher... matchers) throws Exception {
+		ExceptionCollector exceptionCollector = new ExceptionCollector();
+		for (ResultMatcher matcher : matchers) {
+			exceptionCollector.execute(() -> this.andExpect(matcher));
+		}
+		exceptionCollector.assertEmpty();
+		return this;
+	}
 
 	/**
 	 * Perform a general action.
@@ -73,7 +103,6 @@ public interface ResultActions {
 
 	/**
 	 * Return the result of the executed request for direct access to the results.
-	 *
 	 * @return the result of the request
 	 */
 	MvcResult andReturn();

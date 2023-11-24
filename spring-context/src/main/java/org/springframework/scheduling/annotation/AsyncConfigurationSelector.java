@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.scheduling.annotation;
 
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
-import org.springframework.lang.Nullable;
+import org.springframework.lang.NonNull;
 
 /**
  * Selects which implementation of {@link AbstractAsyncConfiguration} should
@@ -43,16 +43,12 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	 * respectively.
 	 */
 	@Override
-	@Nullable
+	@NonNull
 	public String[] selectImports(AdviceMode adviceMode) {
-		switch (adviceMode) {
-			case PROXY:
-				return new String[] {ProxyAsyncConfiguration.class.getName()};
-			case ASPECTJ:
-				return new String[] {ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};
-			default:
-				return null;
-		}
+		return switch (adviceMode) {
+			case PROXY -> new String[] {ProxyAsyncConfiguration.class.getName()};
+			case ASPECTJ -> new String[] {ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};
+		};
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,24 +56,6 @@ class AttributeMethodsTests {
 		assertThat(methods.get("value").getName()).isEqualTo("value");
 		assertThat(methods.get("intValue").getName()).isEqualTo("intValue");
 		assertThat(getAll(methods)).flatExtracting(Method::getName).containsExactly("intValue", "value");
-	}
-
-	@Test
-	void hasOnlyValueAttributeWhenHasOnlyValueAttributeReturnsTrue() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(ValueOnly.class);
-		assertThat(methods.hasOnlyValueAttribute()).isTrue();
-	}
-
-	@Test
-	void hasOnlyValueAttributeWhenHasOnlySingleNonValueAttributeReturnsFalse() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(NonValueOnly.class);
-		assertThat(methods.hasOnlyValueAttribute()).isFalse();
-	}
-
-	@Test
-	void hasOnlyValueAttributeWhenHasOnlyMultipleAttributesIncludingValueReturnsFalse() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
-		assertThat(methods.hasOnlyValueAttribute()).isFalse();
 	}
 
 	@Test
@@ -136,7 +118,7 @@ class AttributeMethodsTests {
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void isValidWhenDoesNotHaveTypeNotPresentExceptionReturnsTrue() {
-		ClassValue annotation = mock(ClassValue.class);
+		ClassValue annotation = mock();
 		given(annotation.value()).willReturn((Class) InputStream.class);
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		assertThat(attributes.isValid(annotation)).isTrue();

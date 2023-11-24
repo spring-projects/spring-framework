@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,26 @@ package org.springframework.beans.propertyeditors;
 import java.time.ZoneId;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Nicholas Williams
+ * @author Sam Brannen
  */
-public class ZoneIdEditorTests {
+class ZoneIdEditorTests {
 
 	private final ZoneIdEditor editor = new ZoneIdEditor();
 
-	@Test
-	public void americaChicago() {
-		editor.setAsText("America/Chicago");
+	@ParameterizedTest(name = "[{index}] text = ''{0}''")
+	@ValueSource(strings = {
+		"America/Chicago",
+		"   America/Chicago   ",
+	})
+	void americaChicago(String text) {
+		editor.setAsText(text);
 
 		ZoneId zoneId = (ZoneId) editor.getValue();
 		assertThat(zoneId).as("The zone ID should not be null.").isNotNull();
@@ -41,7 +48,7 @@ public class ZoneIdEditorTests {
 	}
 
 	@Test
-	public void americaLosAngeles() {
+	void americaLosAngeles() {
 		editor.setAsText("America/Los_Angeles");
 
 		ZoneId zoneId = (ZoneId) editor.getValue();
@@ -52,12 +59,12 @@ public class ZoneIdEditorTests {
 	}
 
 	@Test
-	public void getNullAsText() {
-		assertThat(editor.getAsText()).as("The returned value is not correct.").isEqualTo("");
+	void getNullAsText() {
+		assertThat(editor.getAsText()).as("The returned value is not correct.").isEmpty();
 	}
 
 	@Test
-	public void getValueAsText() {
+	void getValueAsText() {
 		editor.setValue(ZoneId.of("America/New_York"));
 		assertThat(editor.getAsText()).as("The text version is not correct.").isEqualTo("America/New_York");
 	}

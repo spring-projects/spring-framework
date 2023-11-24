@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.core.testfixture.security;
 
 import java.security.Principal;
+
+import org.springframework.lang.Nullable;
 
 /**
  * An implementation of {@link Principal} for testing.
@@ -37,14 +39,13 @@ public class TestPrincipal implements Principal {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof TestPrincipal)) {
+		if (!(obj instanceof TestPrincipal p)) {
 			return false;
 		}
-		TestPrincipal p = (TestPrincipal) obj;
 		return this.name.equals(p.name);
 	}
 

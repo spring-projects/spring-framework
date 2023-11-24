@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,5 +51,19 @@ public interface StompEndpointRegistry {
 	 * @since 4.2
 	 */
 	WebMvcStompEndpointRegistry setErrorHandler(StompSubProtocolErrorHandler errorHandler);
+
+	/**
+	 * Whether to handle client messages sequentially in the order in which
+	 * they were received.
+	 * <p>By default messages sent to the {@code "clientInboundChannel"} may
+	 * be handled in parallel and not in the same order as they were received
+	 * because the channel is backed by a ThreadPoolExecutor that in turn does
+	 * not guarantee processing in order.
+	 * <p>When this flag is set to {@code true} messages within the same session
+	 * will be sent to the {@code "clientInboundChannel"} one at a time in
+	 * order to preserve the order in which they were received.
+	 * @since 6.1
+	 */
+	WebMvcStompEndpointRegistry setPreserveReceiveOrder(boolean preserveReceiveOrder);
 
 }

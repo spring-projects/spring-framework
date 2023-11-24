@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.user;
 
+import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -111,7 +112,7 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 	@Override
 	public void onApplicationEvent(BrokerAvailabilityEvent event) {
 		if (event.isBrokerAvailable()) {
-			long delay = getRegistryExpirationPeriod() / 2;
+			Duration delay = Duration.ofMillis(getRegistryExpirationPeriod() / 2);
 			this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(this.schedulerTask, delay);
 		}
 		else {

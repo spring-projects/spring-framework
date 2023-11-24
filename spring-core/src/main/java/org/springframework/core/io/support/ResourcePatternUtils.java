@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public abstract class ResourcePatternUtils {
 	 * @see PathMatchingResourcePatternResolver
 	 */
 	public static ResourcePatternResolver getResourcePatternResolver(@Nullable ResourceLoader resourceLoader) {
-		if (resourceLoader instanceof ResourcePatternResolver) {
-			return (ResourcePatternResolver) resourceLoader;
+		if (resourceLoader instanceof ResourcePatternResolver resolver) {
+			return resolver;
 		}
 		else if (resourceLoader != null) {
 			return new PathMatchingResourcePatternResolver(resourceLoader);

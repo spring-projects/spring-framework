@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.web.bind.support;
 
 import java.beans.PropertyEditor;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.context.MessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -30,12 +32,11 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.util.BindErrorUtils;
 
 /**
- * A specialization of {@link ServerWebInputException} thrown when after data
- * binding and validation failure. Implements {@link BindingResult} (and its
- * super-interface {@link Errors}) to allow for direct analysis of binding and
- * validation errors.
+ * {@link ServerWebInputException} subclass that indicates a data binding or
+ * validation failure.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -47,20 +48,51 @@ public class WebExchangeBindException extends ServerWebInputException implements
 
 
 	public WebExchangeBindException(MethodParameter parameter, BindingResult bindingResult) {
-		super("Validation failure", parameter);
+		super("Validation failure", parameter, null, null, null);
 		this.bindingResult = bindingResult;
+		getBody().setDetail("Invalid request content.");
 	}
 
 
 	/**
 	 * Return the BindingResult that this BindException wraps.
-	 * Will typically be a BeanPropertyBindingResult.
+	 * <p>Will typically be a BeanPropertyBindingResult.
 	 * @see BeanPropertyBindingResult
 	 */
 	public final BindingResult getBindingResult() {
 		return this.bindingResult;
 	}
 
+
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return new Object[] {
+				BindErrorUtils.resolveAndJoin(getGlobalErrors()),
+				BindErrorUtils.resolveAndJoin(getFieldErrors())};
+	}
+
+	@Override
+	public Object[] getDetailMessageArguments(MessageSource source, Locale locale) {
+		return new Object[] {
+				BindErrorUtils.resolveAndJoin(getGlobalErrors(), source, locale),
+				BindErrorUtils.resolveAndJoin(getFieldErrors(), source, locale)};
+	}
+
+	/**
+	 * Resolve global and field errors to messages with the given
+	 * {@link MessageSource} and {@link Locale}.
+	 * @return a Map with errors as key and resolves messages as value
+	 * @since 6.0.3
+	 * @deprecated in favor of using {@link BindErrorUtils} and
+	 * {@link #getAllErrors()}, to be removed in 6.2
+	 */
+	@Deprecated(since = "6.1", forRemoval = true)
+	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
+		return BindErrorUtils.resolve(getAllErrors(), messageSource, locale);
+	}
+
+
+	// BindingResult implementation methods
 
 	@Override
 	public String getObjectName() {
@@ -86,7 +118,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public void popNestedPath() throws IllegalStateException {
 		this.bindingResult.popNestedPath();
 	}
-
 
 	@Override
 	public void reject(String errorCode) {
@@ -114,8 +145,8 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public void rejectValue(
-			@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		this.bindingResult.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
@@ -124,7 +155,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public void addAllErrors(Errors errors) {
 		this.bindingResult.addAllErrors(errors);
 	}
-
 
 	@Override
 	public boolean hasErrors() {
@@ -287,9 +317,9 @@ public class WebExchangeBindException extends ServerWebInputException implements
 		StringBuilder sb = new StringBuilder("Validation failed for argument at index ")
 				.append(parameter.getParameterIndex()).append(" in method: ")
 				.append(parameter.getExecutable().toGenericString())
-				.append(", with ").append(this.bindingResult.getErrorCount()).append(" error(s): ");
-		for (ObjectError error : this.bindingResult.getAllErrors()) {
-			sb.append("[").append(error).append("] ");
+				.append(", with ").append(getErrorCount()).append(" error(s): ");
+		for (ObjectError error : getAllErrors()) {
+			sb.append('[').append(error).append("] ");
 		}
 		return sb.toString();
 	}

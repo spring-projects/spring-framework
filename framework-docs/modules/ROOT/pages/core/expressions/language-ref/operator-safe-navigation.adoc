@@ -1,0 +1,51 @@
+[[expressions-operator-safe-navigation]]
+= Safe Navigation Operator
+
+The safe navigation operator is used to avoid a `NullPointerException` and comes from
+the https://www.groovy-lang.org/operators.html#_safe_navigation_operator[Groovy]
+language. Typically, when you have a reference to an object, you might need to verify that
+it is not null before accessing methods or properties of the object. To avoid this, the
+safe navigation operator returns null instead of throwing an exception. The following
+example shows how to use the safe navigation operator:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+
+	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
+
+	String city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
+	System.out.println(city);  // Smiljan
+
+	tesla.setPlaceOfBirth(null);
+	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
+	System.out.println(city);  // null - does not throw NullPointerException!!!
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val parser = SpelExpressionParser()
+	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
+
+	val tesla = Inventor("Nikola Tesla", "Serbian")
+	tesla.setPlaceOfBirth(PlaceOfBirth("Smiljan"))
+
+	var city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
+	println(city)  // Smiljan
+
+	tesla.setPlaceOfBirth(null)
+	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
+	println(city)  // null - does not throw NullPointerException!!!
+----
+======
+
+
+

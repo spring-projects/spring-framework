@@ -1,0 +1,393 @@
+[[beans-standard-annotations]]
+= Using JSR 330 Standard Annotations
+
+Spring offers support for JSR-330 standard annotations (Dependency Injection). Those
+annotations are scanned in the same way as the Spring annotations. To use them, you need
+to have the relevant jars in your classpath.
+
+[NOTE]
+=====
+If you use Maven, the `jakarta.inject` artifact is available in the standard Maven
+repository (
+https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
+You can add the following dependency to your file pom.xml:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<dependency>
+		<groupId>jakarta.inject</groupId>
+		<artifactId>jakarta.inject-api</artifactId>
+		<version>2.0.0</version>
+	</dependency>
+----
+=====
+
+
+
+[[beans-inject-named]]
+== Dependency Injection with `@Inject` and `@Named`
+
+Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import jakarta.inject.Inject;
+
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Inject
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		public void listMovies() {
+			this.movieFinder.findMovies(...);
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import jakarta.inject.Inject
+
+	class SimpleMovieLister {
+
+		@Inject
+		lateinit var movieFinder: MovieFinder
+
+
+		fun listMovies() {
+			movieFinder.findMovies(...)
+			// ...
+		}
+	}
+----
+======
+
+As with `@Autowired`, you can use `@Inject` at the field level, method level
+and constructor-argument level. Furthermore, you may declare your injection point as a
+`Provider`, allowing for on-demand access to beans of shorter scopes or lazy access to
+other beans through a `Provider.get()` call. The following example offers a variant of the
+preceding example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import jakarta.inject.Inject;
+	import jakarta.inject.Provider;
+
+	public class SimpleMovieLister {
+
+		private Provider<MovieFinder> movieFinder;
+
+		@Inject
+		public void setMovieFinder(Provider<MovieFinder> movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		public void listMovies() {
+			this.movieFinder.get().findMovies(...);
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import jakarta.inject.Inject
+
+	class SimpleMovieLister {
+
+		@Inject
+		lateinit var movieFinder: Provider<MovieFinder>
+
+
+		fun listMovies() {
+			movieFinder.get().findMovies(...)
+			// ...
+		}
+	}
+----
+======
+
+If you would like to use a qualified name for the dependency that should be injected,
+you should use the `@Named` annotation, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
+
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Inject
+		public void setMovieFinder(@Named("main") MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
+
+	class SimpleMovieLister {
+
+		private lateinit var movieFinder: MovieFinder
+
+		@Inject
+		fun setMovieFinder(@Named("main") movieFinder: MovieFinder) {
+			this.movieFinder = movieFinder
+		}
+
+		// ...
+	}
+----
+======
+
+As with `@Autowired`, `@Inject` can also be used with `java.util.Optional` or
+`@Nullable`. This is even more applicable here, since `@Inject` does not have
+a `required` attribute. The following pair of examples show how to use `@Inject` and
+`@Nullable`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Inject
+		public void setMovieFinder(Optional<MovieFinder> movieFinder) {
+			// ...
+		}
+	}
+----
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleMovieLister {
+
+		@Inject
+		public void setMovieFinder(@Nullable MovieFinder movieFinder) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleMovieLister {
+
+		@Inject
+		var movieFinder: MovieFinder? = null
+	}
+----
+======
+
+
+
+[[beans-named]]
+== `@Named` and `@ManagedBean`: Standard Equivalents to the `@Component` Annotation
+
+Instead of `@Component`, you can use `@jakarta.inject.Named` or `jakarta.annotation.ManagedBean`,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
+
+	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Inject
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
+
+	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
+	class SimpleMovieLister {
+
+		@Inject
+		lateinit var movieFinder: MovieFinder
+
+		// ...
+	}
+----
+======
+
+It is very common to use `@Component` without specifying a name for the component.
+`@Named` can be used in a similar fashion, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import jakarta.inject.Inject;
+	import jakarta.inject.Named;
+
+	@Named
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Inject
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import jakarta.inject.Inject
+	import jakarta.inject.Named
+
+	@Named
+	class SimpleMovieLister {
+
+		@Inject
+		lateinit var movieFinder: MovieFinder
+
+		// ...
+	}
+----
+======
+
+When you use `@Named` or `@ManagedBean`, you can use component scanning in the
+exact same way as when you use Spring annotations, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example")
+	public class AppConfig  {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@ComponentScan(basePackages = ["org.example"])
+	class AppConfig  {
+		// ...
+	}
+----
+======
+
+NOTE: In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `@ManagedBean`
+annotations are not composable. You should use Spring's stereotype model for building
+custom component annotations.
+
+
+
+[[beans-standard-annotations-limitations]]
+== Limitations of JSR-330 Standard Annotations
+
+When you work with standard annotations, you should know that some significant
+features are not available, as the following table shows:
+
+[[annotations-comparison]]
+.Spring component model elements versus JSR-330 variants
+|===
+| Spring| jakarta.inject.*| jakarta.inject restrictions / comments
+
+| @Autowired
+| @Inject
+| `@Inject` has no 'required' attribute. Can be used with Java 8's `Optional` instead.
+
+| @Component
+| @Named / @ManagedBean
+| JSR-330 does not provide a composable model, only a way to identify named components.
+
+| @Scope("singleton")
+| @Singleton
+| The JSR-330 default scope is like Spring's `prototype`. However, in order to keep it
+  consistent with Spring's general defaults, a JSR-330 bean declared in the Spring
+  container is a `singleton` by default. In order to use a scope other than `singleton`,
+  you should use Spring's `@Scope` annotation. `jakarta.inject` also provides a
+  `jakarta.inject.Scope` annotation: however, this one is only intended to be used
+  for creating custom annotations.
+
+| @Qualifier
+| @Qualifier / @Named
+| `jakarta.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
+  Concrete `String` qualifiers (like Spring's `@Qualifier` with a value) can be associated
+  through `jakarta.inject.Named`.
+
+| @Value
+| -
+| no equivalent
+
+| @Lazy
+| -
+| no equivalent
+
+| ObjectFactory
+| Provider
+| `jakarta.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
+  only with a shorter `get()` method name. It can also be used in combination with
+  Spring's `@Autowired` or with non-annotated constructors and setter methods.
+|===
+
+
+

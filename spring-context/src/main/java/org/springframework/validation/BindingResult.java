@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * General interface that represents binding results. Extends the
- * {@link Errors interface} for error registration capabilities,
+ * {@link Errors} interface for error registration capabilities,
  * allowing for a {@link Validator} to be applied, and adds
  * binding-specific analysis and model building.
  *

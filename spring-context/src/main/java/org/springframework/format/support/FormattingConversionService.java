@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,9 @@ public class FormattingConversionService extends GenericConversionService
 	@Override
 	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory) {
 		Class<? extends Annotation> annotationType = getAnnotationType(annotationFormatterFactory);
-		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
-			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
+		if (this.embeddedValueResolver != null &&
+				annotationFormatterFactory instanceof EmbeddedValueResolverAware embeddedValueResolverAware) {
+			embeddedValueResolverAware.setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (Class<?> fieldType : fieldTypes) {
@@ -116,9 +117,8 @@ public class FormattingConversionService extends GenericConversionService
 
 	private static <T> Class<?> getFieldType(T instance, Class<T> genericInterface) {
 		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(instance.getClass(), genericInterface);
-		if (fieldType == null && instance instanceof DecoratingProxy) {
-			fieldType = GenericTypeResolver.resolveTypeArgument(
-					((DecoratingProxy) instance).getDecoratedClass(), genericInterface);
+		if (fieldType == null && instance instanceof DecoratingProxy decoratingProxy) {
+			fieldType = GenericTypeResolver.resolveTypeArgument(decoratingProxy.getDecoratedClass(), genericInterface);
 		}
 		Assert.notNull(fieldType, () -> "Unable to extract the parameterized field type from " +
 					ClassUtils.getShortName(genericInterface) + " [" + instance.getClass().getName() +
@@ -367,14 +367,8 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof AnnotationConverterKey)) {
-				return false;
-			}
-			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
-			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
+			return (this == other || (other instanceof AnnotationConverterKey that &&
+					this.fieldType == that.fieldType && this.annotation.equals(that.annotation)));
 		}
 
 		@Override

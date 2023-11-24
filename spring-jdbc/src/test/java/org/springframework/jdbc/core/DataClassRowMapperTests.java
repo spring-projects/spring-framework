@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,49 +17,85 @@
 package org.springframework.jdbc.core;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.ConstructorPersonWithGenerics;
+import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link DataClassRowMapper}.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.3
  */
-public class DataClassRowMapperTests extends AbstractRowMapperTests {
+class DataClassRowMapperTests extends AbstractRowMapperTests {
 
 	@Test
-	public void testStaticQueryWithDataClass() throws Exception {
+	void staticQueryWithDataClass() throws Exception {
 		Mock mock = new Mock();
-		List<ConstructorPerson> result = mock.getJdbcTemplate().query(
+		ConstructorPerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPerson.class));
-		assertThat(result.size()).isEqualTo(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 
 		mock.verifyClosed();
 	}
 
 	@Test
-	public void testStaticQueryWithDataClassAndGenerics() throws Exception {
+	void staticQueryWithDataClassAndGenerics() throws Exception {
 		Mock mock = new Mock();
-		List<ConstructorPersonWithGenerics> result = mock.getJdbcTemplate().query(
+		ConstructorPersonWithGenerics person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPersonWithGenerics.class));
-		assertThat(result.size()).isEqualTo(1);
-		ConstructorPersonWithGenerics person = result.get(0);
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
-		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
-		assertThat(person.balance()).isEqualTo(Collections.singletonList(new BigDecimal("1234.56")));
+		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
+		assertThat(person.balance()).containsExactly(new BigDecimal("1234.56"));
 
 		mock.verifyClosed();
+	}
+
+	@Test
+	void staticQueryWithDataClassAndSetters() throws Exception {
+		Mock mock = new Mock(MockType.FOUR);
+		ConstructorPersonWithSetters person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birthdate, balance from people",
+				new DataClassRowMapper<>(ConstructorPersonWithSetters.class));
+		assertThat(person.name()).isEqualTo("BUBBA");
+		assertThat(person.age()).isEqualTo(22L);
+		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
+		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
+
+		mock.verifyClosed();
+	}
+
+	@Test
+	void staticQueryWithDataRecord() throws Exception {
+		Mock mock = new Mock();
+		RecordPerson person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birth_date, balance from people",
+				new DataClassRowMapper<>(RecordPerson.class));
+		verifyPerson(person);
+
+		mock.verifyClosed();
+	}
+
+	protected void verifyPerson(RecordPerson person) {
+		assertThat(person.name()).isEqualTo("Bubba");
+		assertThat(person.age()).isEqualTo(22L);
+		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
+		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
+		verifyPersonViaBeanWrapper(person);
+	}
+
+
+	record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package org.springframework.web;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Plain handler interface for components that process HTTP requests,
- * analogous to a Servlet. Only declares {@link javax.servlet.ServletException}
+ * analogous to a Servlet. Only declares {@link jakarta.servlet.ServletException}
  * and {@link java.io.IOException}, to allow for usage within any
- * {@link javax.servlet.http.HttpServlet}. This interface is essentially the
+ * {@link jakarta.servlet.http.HttpServlet}. This interface is essentially the
  * direct equivalent of an HttpServlet, reduced to a central handle method.
  *
  * <p>The easiest way to expose an HttpRequestHandler bean in Spring style
@@ -49,12 +49,6 @@ import javax.servlet.http.HttpServletResponse;
  * return value gives a clearer signature to callers other than the
  * DispatcherServlet, indicating that there will never be a view to render.
  *
- * <p>As of Spring 2.0, Spring's HTTP-based remote exporters, such as
- * {@link org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter}
- * and {@link org.springframework.remoting.caucho.HessianServiceExporter},
- * implement this interface rather than the more extensive Controller interface,
- * for minimal dependencies on Spring-specific web infrastructure.
- *
  * <p>Note that HttpRequestHandlers may optionally implement the
  * {@link org.springframework.web.servlet.mvc.LastModified} interface,
  * just like Controllers can, <i>provided that they run within Spring's
@@ -71,8 +65,6 @@ import javax.servlet.http.HttpServletResponse;
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.servlet.mvc.LastModified
  * @see org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter
- * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
- * @see org.springframework.remoting.caucho.HessianServiceExporter
  */
 @FunctionalInterface
 public interface HttpRequestHandler {

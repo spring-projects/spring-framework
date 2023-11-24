@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,13 +78,7 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SimpMessageMappingInfo)) {
-			return false;
-		}
-		return this.delegate.equals(((SimpMessageMappingInfo) other).delegate);
+		return (this == other || (other instanceof SimpMessageMappingInfo that && this.delegate.equals(that.delegate)));
 	}
 
 	@Override

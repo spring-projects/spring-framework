@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,33 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import org.springframework.core.Constants;
+import java.util.Map;
+
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * DataSource that routes to one of various target DataSources based on the
  * current transaction isolation level. The target DataSources need to be
  * configured with the isolation level name as key, as defined on the
- * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition interface}.
+ * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition}
+ * interface.
  *
  * <p>This is particularly useful in combination with JTA transaction management
  * (typically through Spring's {@link org.springframework.transaction.jta.JtaTransactionManager}).
  * Standard JTA does not support transaction-specific isolation levels. Some JTA
  * providers support isolation levels as a vendor-specific extension (e.g. WebLogic),
- * which is the preferred way of addressing this. As alternative (e.g. on WebSphere),
+ * which is the preferred way of addressing this. As an alternative (e.g. on WebSphere),
  * the target database can be represented through multiple JNDI DataSources, each
  * configured with a different isolation level (for the entire DataSource).
- * The present DataSource router allows to transparently switch to the
+ * {@code IsolationLevelDataSourceRouter} allows to transparently switch to the
  * appropriate DataSource based on the current transaction's isolation level.
  *
- * <p>The configuration can for example look like this, assuming that the target
- * DataSources are defined as individual Spring beans with names
- * "myRepeatableReadDataSource", "mySerializableDataSource" and "myDefaultDataSource":
+ * <p>For example, the configuration can look like the following, assuming that
+ * the target DataSources are defined as individual Spring beans with names
+ * "myRepeatableReadDataSource", "mySerializableDataSource", and "myDefaultDataSource":
  *
  * <pre class="code">
  * &lt;bean id="dataSourceRouter" class="org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter"&gt;
@@ -81,6 +83,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0.1
  * @see #setTargetDataSources
  * @see #setDefaultTargetDataSource
@@ -92,8 +95,17 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 
-	/** Constants instance for TransactionDefinition. */
-	private static final Constants constants = new Constants(TransactionDefinition.class);
+	/**
+	 * Map of constant names to constant values for the isolation constants
+	 * defined in {@link TransactionDefinition}.
+	 */
+	static final Map<String, Integer> constants = Map.of(
+			"ISOLATION_DEFAULT", TransactionDefinition.ISOLATION_DEFAULT,
+			"ISOLATION_READ_UNCOMMITTED", TransactionDefinition.ISOLATION_READ_UNCOMMITTED,
+			"ISOLATION_READ_COMMITTED", TransactionDefinition.ISOLATION_READ_COMMITTED,
+			"ISOLATION_REPEATABLE_READ", TransactionDefinition.ISOLATION_REPEATABLE_READ,
+			"ISOLATION_SERIALIZABLE", TransactionDefinition.ISOLATION_SERIALIZABLE
+		);
 
 
 	/**
@@ -103,15 +115,16 @@ public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 	 */
 	@Override
 	protected Object resolveSpecifiedLookupKey(Object lookupKey) {
-		if (lookupKey instanceof Integer) {
-			return lookupKey;
+		if (lookupKey instanceof Integer isolationLevel) {
+			Assert.isTrue(constants.containsValue(isolationLevel),
+					"Only values of isolation constants allowed");
+			return isolationLevel;
 		}
-		else if (lookupKey instanceof String) {
-			String constantName = (String) lookupKey;
-			if (!constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
-				throw new IllegalArgumentException("Only isolation constants allowed");
-			}
-			return constants.asNumber(constantName);
+		else if (lookupKey instanceof String constantName) {
+			Assert.hasText(constantName, "'lookupKey' must not be null or blank");
+			Integer isolationLevel = constants.get(constantName);
+			Assert.notNull(isolationLevel, "Only isolation constants allowed");
+			return isolationLevel;
 		}
 		else {
 			throw new IllegalArgumentException(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,14 @@ package org.springframework.web.socket.sockjs.client;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.Lifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -73,9 +70,11 @@ public class WebSocketTransport implements Transport, Lifecycle {
 		return Collections.singletonList(TransportType.WEBSOCKET);
 	}
 
+
 	@Override
-	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
-		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<>();
+	public CompletableFuture<WebSocketSession> connectAsync(TransportRequest request,
+			WebSocketHandler handler) {
+		CompletableFuture<WebSocketSession> future = new CompletableFuture<>();
 		WebSocketClientSockJsSession session = new WebSocketClientSockJsSession(request, handler, future);
 		handler = new ClientSockJsWebSocketHandler(session);
 		request.addTimeoutTask(session.getTimeoutTask());
@@ -85,26 +84,19 @@ public class WebSocketTransport implements Transport, Lifecycle {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting WebSocket session on " + url);
 		}
-		this.webSocketClient.doHandshake(handler, headers, url).addCallback(
-				new ListenableFutureCallback<WebSocketSession>() {
-					@Override
-					public void onSuccess(@Nullable WebSocketSession webSocketSession) {
-						// WebSocket session ready, SockJS Session not yet
-					}
-					@Override
-					public void onFailure(Throwable ex) {
-						future.setException(ex);
-					}
-				});
+		this.webSocketClient.execute(handler, headers, url).whenComplete((webSocketSession, throwable) -> {
+			if (throwable != null) {
+				future.completeExceptionally(throwable);
+			}
+		});
 		return future;
 	}
-
 
 	@Override
 	public void start() {
 		if (!isRunning()) {
-			if (this.webSocketClient instanceof Lifecycle) {
-				((Lifecycle) this.webSocketClient).start();
+			if (this.webSocketClient instanceof Lifecycle lifecycle) {
+				lifecycle.start();
 			}
 			else {
 				this.running = true;
@@ -115,8 +107,8 @@ public class WebSocketTransport implements Transport, Lifecycle {
 	@Override
 	public void stop() {
 		if (isRunning()) {
-			if (this.webSocketClient instanceof Lifecycle) {
-				((Lifecycle) this.webSocketClient).stop();
+			if (this.webSocketClient instanceof Lifecycle lifecycle) {
+				lifecycle.stop();
 			}
 			else {
 				this.running = false;
@@ -126,8 +118,8 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 	@Override
 	public boolean isRunning() {
-		if (this.webSocketClient instanceof Lifecycle) {
-			return ((Lifecycle) this.webSocketClient).isRunning();
+		if (this.webSocketClient instanceof Lifecycle lifecycle) {
+			return lifecycle.isRunning();
 		}
 		else {
 			return this.running;

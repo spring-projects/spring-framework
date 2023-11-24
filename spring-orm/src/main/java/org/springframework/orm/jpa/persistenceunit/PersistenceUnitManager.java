@@ -16,14 +16,14 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import javax.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 /**
  * Interface that defines an abstraction for finding and managing
  * JPA PersistenceUnitInfos. Used by
  * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
- * in order to obtain a {@link javax.persistence.spi.PersistenceUnitInfo}
- * for building a concrete {@link javax.persistence.EntityManagerFactory}.
+ * in order to obtain a {@link jakarta.persistence.spi.PersistenceUnitInfo}
+ * for building a concrete {@link jakarta.persistence.EntityManagerFactory}.
  *
  * <p>Obtaining a PersistenceUnitInfo instance is an exclusive process.
  * A PersistenceUnitInfo instance is not available for further calls

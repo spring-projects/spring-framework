@@ -22,7 +22,6 @@
 				<bean class="org.springframework.web.servlet.resource.CachingResourceTransformer">
 					<constructor-arg name="cache" ref="resourceCache" />
 				</bean>
-				<bean class="org.springframework.web.servlet.resource.AppCacheManifestTransformer"/>
 			</mvc:transformers>
 		</mvc:resource-chain>
 	</mvc:resources>

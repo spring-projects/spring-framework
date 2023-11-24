@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,12 +53,11 @@ public class OperatorBetween extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
-		if (!(right instanceof List) || ((List<?>) right).size() != 2) {
+		if (!(right instanceof List<?> list) || list.size() != 2) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);
 		}
 
-		List<?> list = (List<?>) right;
 		Object low = list.get(0);
 		Object high = list.get(1);
 		TypeComparator comp = state.getTypeComparator();

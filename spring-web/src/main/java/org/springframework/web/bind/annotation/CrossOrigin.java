@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,23 +54,6 @@ import org.springframework.web.cors.CorsConfiguration;
 @Documented
 public @interface CrossOrigin {
 
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	String[] DEFAULT_ORIGINS = {"*"};
-
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	String[] DEFAULT_ALLOWED_HEADERS = {"*"};
-
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	boolean DEFAULT_ALLOW_CREDENTIALS = false;
-
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	long DEFAULT_MAX_AGE = 1800;
-
-
 	/**
 	 * Alias for {@link #origins}.
 	 */
@@ -80,15 +63,15 @@ public @interface CrossOrigin {
 	/**
 	 * A list of origins for which cross-origin requests are allowed. Please,
 	 * see {@link CorsConfiguration#setAllowedOrigins(List)} for details.
-	 * <p>By default all origins are allowed unless {@code originPatterns} is
+	 * <p>By default all origins are allowed unless {@link #originPatterns} is
 	 * also set in which case {@code originPatterns} is used instead.
 	 */
 	@AliasFor("value")
 	String[] origins() default {};
 
 	/**
-	 * Alternative to {@link #origins()} that supports more flexible origins
-	 * patterns. Please, see @link CorsConfiguration#setAllowedOriginPatterns(List)}
+	 * Alternative to {@link #origins} that supports more flexible origin
+	 * patterns. Please, see {@link CorsConfiguration#setAllowedOriginPatterns(List)}
 	 * for details.
 	 * <p>By default this is not set.
 	 * @since 5.3
@@ -97,31 +80,23 @@ public @interface CrossOrigin {
 
 	/**
 	 * The list of request headers that are permitted in actual requests,
-	 * possibly {@code "*"}  to allow all headers.
-	 * <p>Allowed headers are listed in the {@code Access-Control-Allow-Headers}
-	 * response header of preflight requests.
-	 * <p>A header name is not required to be listed if it is one of:
-	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
-	 * {@code Last-Modified}, or {@code Pragma} as per the CORS spec.
+	 * possibly {@code "*"} to allow all headers. Please, see
+	 * {@link CorsConfiguration#setAllowedHeaders(List)} for details.
 	 * <p>By default all requested headers are allowed.
 	 */
 	String[] allowedHeaders() default {};
 
 	/**
 	 * The List of response headers that the user-agent will allow the client
-	 * to access on an actual response, other than "simple" headers, i.e.
-	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
-	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma},
-	 * <p>Exposed headers are listed in the {@code Access-Control-Expose-Headers}
-	 * response header of actual CORS requests.
-	 * <p>The special value {@code "*"} allows all headers to be exposed for
-	 * non-credentialed requests.
+	 * to access on an actual response, possibly {@code "*"} to expose all headers.
+	 * Please, see {@link CorsConfiguration#setExposedHeaders(List)} for details.
 	 * <p>By default no headers are listed as exposed.
 	 */
 	String[] exposedHeaders() default {};
 
 	/**
-	 * The list of supported HTTP request methods.
+	 * The list of supported HTTP request methods. Please, see
+	 * {@link CorsConfiguration#setAllowedMethods(List)} for details.
 	 * <p>By default the supported methods are the same as the ones to which a
 	 * controller method is mapped.
 	 */
@@ -129,9 +104,8 @@ public @interface CrossOrigin {
 
 	/**
 	 * Whether the browser should send credentials, such as cookies along with
-	 * cross domain requests, to the annotated endpoint. The configured value is
-	 * set on the {@code Access-Control-Allow-Credentials} response header of
-	 * preflight requests.
+	 * cross domain requests, to the annotated endpoint. Please, see
+	 * {@link CorsConfiguration#setAllowCredentials(Boolean)} for details.
 	 * <p><strong>NOTE:</strong> Be aware that this option establishes a high
 	 * level of trust with the configured domains and also increases the surface
 	 * attack of the web application by exposing sensitive user-specific

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class ProceedTests {
+class ProceedTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private SimpleBean testBean;
 
@@ -43,42 +46,46 @@ public class ProceedTests {
 
 
 	@BeforeEach
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean = (SimpleBean) ctx.getBean("testBean");
 		firstTestAspect = (ProceedTestingAspect) ctx.getBean("firstTestAspect");
 		secondTestAspect = (ProceedTestingAspect) ctx.getBean("secondTestAspect");
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void testSimpleProceedWithChangedArgs() {
+	void testSimpleProceedWithChangedArgs() {
 		this.testBean.setName("abc");
 		assertThat(this.testBean.getName()).as("Name changed in around advice").isEqualTo("ABC");
 	}
 
 	@Test
-	public void testGetArgsIsDefensive() {
+	void testGetArgsIsDefensive() {
 		this.testBean.setAge(5);
 		assertThat(this.testBean.getAge()).as("getArgs is defensive").isEqualTo(5);
 	}
 
 	@Test
-	public void testProceedWithArgsInSameAspect() {
+	void testProceedWithArgsInSameAspect() {
 		this.testBean.setMyFloat(1.0F);
-		assertThat(this.testBean.getMyFloat() > 1.9F).as("value changed in around advice").isTrue();
-		assertThat(this.firstTestAspect.getLastBeforeFloatValue() > 1.9F).as("changed value visible to next advice in chain").isTrue();
+		assertThat(this.testBean.getMyFloat()).as("value changed in around advice").isGreaterThan(1.9F);
+		assertThat(this.firstTestAspect.getLastBeforeFloatValue()).as("changed value visible to next advice in chain")
+				.isGreaterThan(1.9F);
 	}
 
 	@Test
-	public void testProceedWithArgsAcrossAspects() {
+	void testProceedWithArgsAcrossAspects() {
 		this.testBean.setSex("male");
 		assertThat(this.testBean.getSex()).as("value changed in around advice").isEqualTo("MALE");
 		assertThat(this.secondTestAspect.getLastBeforeStringValue()).as("changed value visible to next before advice in chain").isEqualTo("MALE");
 		assertThat(this.secondTestAspect.getLastAroundStringValue()).as("changed value visible to next around advice in chain").isEqualTo("MALE");
 	}
-
 
 }
 
@@ -161,14 +168,14 @@ class ProceedTestingAspect implements Ordered {
 	}
 
 	public Object doubleOrQuits(ProceedingJoinPoint pjp) throws Throwable {
-		int value = ((Integer) pjp.getArgs()[0]).intValue();
-		pjp.getArgs()[0] = new Integer(value * 2);
+		int value = (Integer) pjp.getArgs()[0];
+		pjp.getArgs()[0] = value * 2;
 		return pjp.proceed();
 	}
 
 	public Object addOne(ProceedingJoinPoint pjp, Float value) throws Throwable {
-		float fv = value.floatValue();
-		return pjp.proceed(new Object[] {new Float(fv + 1.0F)});
+		float fv = value;
+		return pjp.proceed(new Object[] {fv + 1.0F});
 	}
 
 	public void captureStringArgument(JoinPoint tjp, String arg) {
@@ -192,7 +199,7 @@ class ProceedTestingAspect implements Ordered {
 	}
 
 	public void captureFloatArgument(JoinPoint tjp, float arg) {
-		float tjpArg = ((Float) tjp.getArgs()[0]).floatValue();
+		float tjpArg = (Float) tjp.getArgs()[0];
 		if (Math.abs(tjpArg - arg) > 0.000001) {
 			throw new IllegalStateException(
 					"argument is '" + arg + "', " +
@@ -214,4 +221,3 @@ class ProceedTestingAspect implements Ordered {
 		return this.lastBeforeFloatValue;
 	}
 }
-

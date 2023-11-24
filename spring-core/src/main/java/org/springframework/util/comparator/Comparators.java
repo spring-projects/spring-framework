@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,49 +29,47 @@ public abstract class Comparators {
 
 	/**
 	 * Return a {@link Comparable} adapter.
-	 * @see ComparableComparator#INSTANCE
+	 * @see Comparator#naturalOrder()
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Comparator<T> comparable() {
-		return ComparableComparator.INSTANCE;
+		return (Comparator<T>) Comparator.naturalOrder();
 	}
 
 	/**
 	 * Return a {@link Comparable} adapter which accepts
 	 * null values and sorts them lower than non-null values.
-	 * @see NullSafeComparator#NULLS_LOW
+	 * @see Comparator#nullsLast(Comparator)
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> Comparator<T> nullsLow() {
-		return NullSafeComparator.NULLS_LOW;
+		return nullsLow(comparable());
 	}
 
 	/**
 	 * Return a decorator for the given comparator which accepts
 	 * null values and sorts them lower than non-null values.
-	 * @see NullSafeComparator#NullSafeComparator(boolean)
+	 * @see Comparator#nullsLast(Comparator)
 	 */
 	public static <T> Comparator<T> nullsLow(Comparator<T> comparator) {
-		return new NullSafeComparator<>(comparator, true);
+		return Comparator.nullsLast(comparator);
 	}
 
 	/**
 	 * Return a {@link Comparable} adapter which accepts
 	 * null values and sorts them higher than non-null values.
-	 * @see NullSafeComparator#NULLS_HIGH
+	 * @see Comparator#nullsFirst(Comparator)
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> Comparator<T> nullsHigh() {
-		return NullSafeComparator.NULLS_HIGH;
+		return nullsHigh(comparable());
 	}
 
 	/**
 	 * Return a decorator for the given comparator which accepts
 	 * null values and sorts them higher than non-null values.
-	 * @see NullSafeComparator#NullSafeComparator(boolean)
+	 * @see Comparator#nullsFirst(Comparator)
 	 */
 	public static <T> Comparator<T> nullsHigh(Comparator<T> comparator) {
-		return new NullSafeComparator<>(comparator, false);
+		return Comparator.nullsFirst(comparator);
 	}
 
 }

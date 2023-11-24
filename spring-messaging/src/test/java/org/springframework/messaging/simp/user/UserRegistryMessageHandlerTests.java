@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.user;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,10 +24,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -48,53 +46,44 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * User tests for {@link UserRegistryMessageHandler}.
+ *
  * @author Rossen Stoyanchev
  */
-@ExtendWith(MockitoExtension.class)
-public class UserRegistryMessageHandlerTests {
+class UserRegistryMessageHandlerTests {
+
+	private SimpUserRegistry localRegistry = mock();
+
+	private MessageChannel brokerChannel = mock();
+
+	private TaskScheduler taskScheduler = mock();
+
+	private MultiServerUserRegistry multiServerRegistry = new MultiServerUserRegistry(this.localRegistry);
+
+	private MessageConverter converter = new MappingJackson2MessageConverter();
 
 	private UserRegistryMessageHandler handler;
 
-	private SimpUserRegistry localRegistry;
-
-	private MultiServerUserRegistry multiServerRegistry;
-
-	private MessageConverter converter;
-
-
-	@Mock
-	private MessageChannel brokerChannel;
-
-	@Mock
-	private TaskScheduler taskScheduler;
-
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		this.converter = new MappingJackson2MessageConverter();
-
+	void setUp() throws Exception {
 		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.brokerChannel);
 		brokerTemplate.setMessageConverter(this.converter);
-
-		this.localRegistry = mock(SimpUserRegistry.class);
-		this.multiServerRegistry = new MultiServerUserRegistry(this.localRegistry);
 
 		this.handler = new UserRegistryMessageHandler(this.multiServerRegistry, brokerTemplate,
 				"/topic/simp-user-registry", this.taskScheduler);
 	}
 
 	@Test
-	public void brokerAvailableEvent() throws Exception {
+	void brokerAvailableEvent() throws Exception {
 		Runnable runnable = getUserRegistryTask();
 		assertThat(runnable).isNotNull();
 	}
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void brokerUnavailableEvent() throws Exception {
-
-		ScheduledFuture future = mock(ScheduledFuture.class);
-		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), any(Long.class))).willReturn(future);
+	void brokerUnavailableEvent() throws Exception {
+		ScheduledFuture future = mock();
+		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), any(Duration.class))).willReturn(future);
 
 		BrokerAvailabilityEvent event = new BrokerAvailabilityEvent(true, this);
 		this.handler.onApplicationEvent(event);
@@ -107,7 +96,7 @@ public class UserRegistryMessageHandlerTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void broadcastRegistry() throws Exception {
+	void broadcastRegistry() throws Exception {
 		given(this.brokerChannel.send(any())).willReturn(true);
 
 		TestSimpUser simpUser1 = new TestSimpUser("joe");
@@ -129,7 +118,7 @@ public class UserRegistryMessageHandlerTests {
 		MessageHeaders headers = message.getHeaders();
 		assertThat(SimpMessageHeaderAccessor.getDestination(headers)).isEqualTo("/topic/simp-user-registry");
 
-		MultiServerUserRegistry remoteRegistry = new MultiServerUserRegistry(mock(SimpUserRegistry.class));
+		MultiServerUserRegistry remoteRegistry = new MultiServerUserRegistry(mock());
 		remoteRegistry.addRemoteRegistryDto(message, this.converter, 20000);
 		assertThat(remoteRegistry.getUserCount()).isEqualTo(2);
 		assertThat(remoteRegistry.getUser("joe")).isNotNull();
@@ -137,8 +126,7 @@ public class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
-	public void handleMessage() throws Exception {
-
+	void handleMessage() throws Exception {
 		TestSimpUser simpUser1 = new TestSimpUser("joe");
 		TestSimpUser simpUser2 = new TestSimpUser("jane");
 
@@ -146,7 +134,7 @@ public class UserRegistryMessageHandlerTests {
 		simpUser2.addSessions(new TestSimpSession("456"));
 
 		HashSet<SimpUser> simpUsers = new HashSet<>(Arrays.asList(simpUser1, simpUser2));
-		SimpUserRegistry remoteUserRegistry = mock(SimpUserRegistry.class);
+		SimpUserRegistry remoteUserRegistry = mock();
 		given(remoteUserRegistry.getUserCount()).willReturn(2);
 		given(remoteUserRegistry.getUsers()).willReturn(simpUsers);
 
@@ -161,8 +149,7 @@ public class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
-	public void handleMessageFromOwnBroadcast() throws Exception {
-
+	void handleMessageFromOwnBroadcast() throws Exception {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
 		given(this.localRegistry.getUserCount()).willReturn(1);
@@ -181,7 +168,7 @@ public class UserRegistryMessageHandlerTests {
 		this.handler.onApplicationEvent(event);
 
 		ArgumentCaptor<? extends Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-		verify(this.taskScheduler).scheduleWithFixedDelay(captor.capture(), eq(10000L));
+		verify(this.taskScheduler).scheduleWithFixedDelay(captor.capture(), eq(Duration.ofMillis(10000L)));
 
 		return captor.getValue();
 	}

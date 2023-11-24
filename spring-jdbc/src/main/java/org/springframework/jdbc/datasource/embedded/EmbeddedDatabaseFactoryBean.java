@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
  * proxy since the {@link FactoryBean} will manage the initialization and destruction
  * lifecycle of the embedded database instance.
  *
- * <p>Implements {@link DisposableBean} to shutdown the embedded database when the
+ * <p>Implements {@link DisposableBean} to shut down the embedded database when the
  * managing Spring container is being closed.
  *
  * @author Keith Donald

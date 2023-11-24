@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,12 +227,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			engineCount++;
 		}
 		Assert.isTrue(engineCount == 1,
-				"You should define either 'engine', 'engineSupplier' or 'engineName'.");
+				"You should define either 'engine', 'engineSupplier', or 'engineName'.");
 
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Assert.isTrue(this.engine == null,
 					"When 'sharedEngine' is set to false, you should specify the " +
-					"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
+					"script engine using 'engineName' or 'engineSupplier', not 'engine'.");
 		}
 		else if (this.engine != null) {
 			loadScripts(this.engine);

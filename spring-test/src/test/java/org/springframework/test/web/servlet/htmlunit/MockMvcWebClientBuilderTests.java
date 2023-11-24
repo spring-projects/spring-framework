@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.io.IOException;
 import java.net.URL;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
@@ -104,7 +103,7 @@ class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("NA");
-		assertThat(postResponse(client, "http://localhost/?cookie=foo").getContentAsString()).isEqualTo("Set");
+		assertThat(postResponse(client, "http://localhost/", "cookie=foo").getContentAsString()).isEqualTo("Set");
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("foo");
 		assertThat(deleteResponse(client, "http://localhost/").getContentAsString()).isEqualTo("Delete");
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("NA");
@@ -118,8 +117,10 @@ class MockMvcWebClientBuilderTests {
 		return createResponse(client, new WebRequest(new URL(url)));
 	}
 
-	private WebResponse postResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url), HttpMethod.POST));
+	private WebResponse postResponse(WebClient client, String url, String body) throws IOException {
+		WebRequest request = new WebRequest(new URL(url), HttpMethod.POST);
+		request.setRequestBody(body);
+		return createResponse(client, request);
 	}
 
 	private WebResponse deleteResponse(WebClient client, String url) throws IOException {
@@ -157,13 +158,13 @@ class MockMvcWebClientBuilderTests {
 
 		@PostMapping(path = "/", produces = "text/plain")
 		String setCookie(@RequestParam String cookie, HttpServletResponse response) {
-			response.addCookie(new javax.servlet.http.Cookie(COOKIE_NAME, cookie));
+			response.addCookie(new jakarta.servlet.http.Cookie(COOKIE_NAME, cookie));
 			return "Set";
 		}
 
 		@DeleteMapping(path = "/", produces = "text/plain")
 		String deleteCookie(HttpServletResponse response) {
-			javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie(COOKIE_NAME, "");
+			jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(COOKIE_NAME, "");
 			cookie.setMaxAge(0);
 			response.addCookie(cookie);
 			return "Delete";

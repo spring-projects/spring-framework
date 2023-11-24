@@ -1,0 +1,157 @@
+[[testcontext-ctx-management-web]]
+= Loading a `WebApplicationContext`
+
+To instruct the TestContext framework to load a `WebApplicationContext` instead of a
+standard `ApplicationContext`, you can annotate the respective test class with
+`@WebAppConfiguration`.
+
+The presence of `@WebAppConfiguration` on your test class instructs the TestContext
+framework (TCF) that a `WebApplicationContext` (WAC) should be loaded for your
+integration tests. In the background, the TCF makes sure that a `MockServletContext` is
+created and supplied to your test's WAC. By default, the base resource path for your
+`MockServletContext` is set to `src/main/webapp`. This is interpreted as a path relative
+to the root of your JVM (normally the path to your project). If you are familiar with the
+directory structure of a web application in a Maven project, you know that
+`src/main/webapp` is the default location for the root of your WAR. If you need to
+override this default, you can provide an alternate path to the `@WebAppConfiguration`
+annotation (for example, `@WebAppConfiguration("src/test/webapp")`). If you wish to
+reference a base resource path from the classpath instead of the file system, you can use
+Spring's `classpath:` prefix.
+
+Note that Spring's testing support for `WebApplicationContext` implementations is on par
+with its support for standard `ApplicationContext` implementations. When testing with a
+`WebApplicationContext`, you are free to declare XML configuration files, Groovy scripts,
+or `@Configuration` classes by using `@ContextConfiguration`. You are also free to use
+any other test annotations, such as `@ActiveProfiles`, `@TestExecutionListeners`, `@Sql`,
+`@Rollback`, and others.
+
+The remaining examples in this section show some of the various configuration options for
+loading a `WebApplicationContext`. The following example shows the TestContext
+framework's support for convention over configuration:
+
+[tabs]
+======
+Conventions::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+
+	// defaults to "file:src/main/webapp"
+	@WebAppConfiguration
+
+	// detects "WacTests-context.xml" in the same package
+	// or static nested @Configuration classes
+	@ContextConfiguration
+	class WacTests {
+		//...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+
+	// defaults to "file:src/main/webapp"
+	@WebAppConfiguration
+
+	// detects "WacTests-context.xml" in the same package
+	// or static nested @Configuration classes
+	@ContextConfiguration
+	class WacTests {
+		//...
+	}
+----
+======
+
+If you annotate a test class with `@WebAppConfiguration` without specifying a resource
+base path, the resource path effectively defaults to `file:src/main/webapp`. Similarly,
+if you declare `@ContextConfiguration` without specifying resource `locations`, component
+`classes`, or context `initializers`, Spring tries to detect the presence of your
+configuration by using conventions (that is, `WacTests-context.xml` in the same package
+as the `WacTests` class or static nested `@Configuration` classes).
+
+The following example shows how to explicitly declare a resource base path with
+`@WebAppConfiguration` and an XML resource location with `@ContextConfiguration`:
+
+[tabs]
+======
+Default resource semantics::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+
+	// file system resource
+	@WebAppConfiguration("webapp")
+
+	// classpath resource
+	@ContextConfiguration("/spring/test-servlet-config.xml")
+	class WacTests {
+		//...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+
+	// file system resource
+	@WebAppConfiguration("webapp")
+
+	// classpath resource
+	@ContextConfiguration("/spring/test-servlet-config.xml")
+	class WacTests {
+		//...
+	}
+----
+======
+
+The important thing to note here is the different semantics for paths with these two
+annotations. By default, `@WebAppConfiguration` resource paths are file system based,
+whereas `@ContextConfiguration` resource locations are classpath based.
+
+The following example shows that we can override the default resource semantics for both
+annotations by specifying a Spring resource prefix:
+
+[tabs]
+======
+Explicit resource semantics::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+
+	// classpath resource
+	@WebAppConfiguration("classpath:test-web-resources")
+
+	// file system resource
+	@ContextConfiguration("file:src/main/webapp/WEB-INF/servlet-config.xml")
+	class WacTests {
+		//...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+
+	// classpath resource
+	@WebAppConfiguration("classpath:test-web-resources")
+
+	// file system resource
+	@ContextConfiguration("file:src/main/webapp/WEB-INF/servlet-config.xml")
+	class WacTests {
+		//...
+	}
+----
+======
+
+Contrast the comments in this example with the previous example.
+

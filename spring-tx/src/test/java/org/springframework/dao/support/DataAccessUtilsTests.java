@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.TypeMismatchDataAccessException;
@@ -39,13 +37,20 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @since 20.10.2004
  */
-public class DataAccessUtilsTests {
+class DataAccessUtilsTests {
 
 	@Test
-	public void withEmptyCollection() {
+	void withEmptyCollection() {
 		Collection<String> col = new HashSet<>();
 
 		assertThat(DataAccessUtils.uniqueResult(col)).isNull();
+
+		assertThat(DataAccessUtils.singleResult(col)).isNull();
+		assertThat(DataAccessUtils.singleResult(col.stream())).isNull();
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isNull();
+		assertThat(DataAccessUtils.optionalResult(col)).isEmpty();
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEmpty();
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEmpty();
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.requiredUniqueResult(col))
@@ -65,7 +70,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withTooLargeCollection() {
+	void withTooLargeCollection() {
 		Collection<String> col = new HashSet<>(2);
 		col.add("test1");
 		col.add("test2");
@@ -89,10 +94,34 @@ public class DataAccessUtilsTests {
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.longResult(col))
 			.satisfies(sizeRequirements(1, 2));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.singleResult(col))
+			.satisfies(sizeRequirements(1, 2));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.singleResult(col.stream()))
+			.satisfies(sizeRequirements(1));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.singleResult(col.iterator()))
+			.satisfies(sizeRequirements(1));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.optionalResult(col))
+			.satisfies(sizeRequirements(1, 2));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.optionalResult(col.stream()))
+			.satisfies(sizeRequirements(1));
+
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.optionalResult(col.iterator()))
+			.satisfies(sizeRequirements(1));
 	}
 
 	@Test
-	public void withInteger() {
+	void withInteger() {
 		Collection<Integer> col = new HashSet<>(1);
 		col.add(5);
 
@@ -102,10 +131,16 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
 		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
 		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo(5);
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of(5));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of(5));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of(5));
 	}
 
 	@Test
-	public void withSameIntegerInstanceTwice() {
+	void withSameIntegerInstanceTwice() {
 		Integer i = 5;
 		Collection<Integer> col = new ArrayList<>(1);
 		col.add(i);
@@ -120,8 +155,8 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withEquivalentIntegerInstanceTwice() {
-		Collection<Integer> col = Arrays.asList(Integer.valueOf(555), Integer.valueOf(555));
+	void withEquivalentIntegerInstanceTwice() {
+		Collection<Integer> col = Arrays.asList(555, 555);
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class)
 			.isThrownBy(() -> DataAccessUtils.uniqueResult(col))
@@ -129,7 +164,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withLong() {
+	void withLong() {
 		Collection<Long> col = new HashSet<>(1);
 		col.add(5L);
 
@@ -139,16 +174,28 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
 		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
 		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of(5L));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of(5L));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of(5L));
 	}
 
 	@Test
-	public void withString() {
+	void withString() {
 		Collection<String> col = new HashSet<>(1);
 		col.add("test1");
 
 		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo("test1");
 		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo("test1");
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("test1");
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo("test1");
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo("test1");
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo("test1");
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of("test1"));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of("test1"));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of("test1"));
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.intResult(col));
@@ -158,7 +205,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void withDate() {
+	void withDate() {
 		Date date = new Date();
 		Collection<Date> col = new HashSet<>(1);
 		col.add(date);
@@ -167,6 +214,12 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(date);
 		assertThat(DataAccessUtils.objectResult(col, Date.class)).isEqualTo(date);
 		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo(date.toString());
+		assertThat(DataAccessUtils.singleResult(col)).isEqualTo(date);
+		assertThat(DataAccessUtils.singleResult(col.stream())).isEqualTo(date);
+		assertThat(DataAccessUtils.singleResult(col.iterator())).isEqualTo(date);
+		assertThat(DataAccessUtils.optionalResult(col)).isEqualTo(Optional.of(date));
+		assertThat(DataAccessUtils.optionalResult(col.stream())).isEqualTo(Optional.of(date));
+		assertThat(DataAccessUtils.optionalResult(col.iterator())).isEqualTo(Optional.of(date));
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.intResult(col));
@@ -176,14 +229,14 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	public void exceptionTranslationWithNoTranslation() {
+	void exceptionTranslationWithNoTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException();
 		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(in);
 	}
 
 	@Test
-	public void exceptionTranslationWithTranslation() {
+	void exceptionTranslationWithTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException("in");
 		InvalidDataAccessApiUsageException out = new InvalidDataAccessApiUsageException("out");
@@ -191,27 +244,18 @@ public class DataAccessUtilsTests {
 		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(out);
 	}
 
+
 	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(
 			int expectedSize, int actualSize) {
+
 		return ex -> {
 			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 			assertThat(ex.getActualSize()).as("actual size").isEqualTo(actualSize);
 		};
 	}
 
-	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
-
-		// in to out
-		private final Map<RuntimeException, RuntimeException> translations = new HashMap<>();
-
-		public void addTranslation(RuntimeException in, RuntimeException out) {
-			this.translations.put(in, out);
-		}
-
-		@Override
-		public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-			return (DataAccessException) translations.get(ex);
-		}
+	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(int expectedSize) {
+		return ex -> assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
@@ -92,6 +91,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rick Evans
  * @author Mark Fisher
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -105,23 +105,31 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/**
 	 * Autodetection mode indicating that no autodetection should be used.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_NONE = 0;
 
 	/**
 	 * Autodetection mode indicating that only valid MBeans should be autodetected.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_MBEAN = 1;
 
 	/**
 	 * Autodetection mode indicating that only the {@link MBeanInfoAssembler} should be able
 	 * to autodetect beans.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_ASSEMBLER = 2;
 
 	/**
 	 * Autodetection mode indicating that all autodetection mechanisms should be used.
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public static final int AUTODETECT_ALL = AUTODETECT_MBEAN | AUTODETECT_ASSEMBLER;
 
 
@@ -134,12 +142,17 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/** Constant for the JMX {@code mr_type} "ObjectReference". */
 	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
 
-	/** Prefix for the autodetect constants defined in this class. */
-	private static final String CONSTANT_PREFIX_AUTODETECT = "AUTODETECT_";
+	/**
+	 * Map of constant names to constant values for the autodetect constants defined
+	 * in this class.
+	 */
+	private static final Map<String, Integer> constants = Map.of(
+			"AUTODETECT_NONE", AUTODETECT_NONE,
+			"AUTODETECT_MBEAN", AUTODETECT_MBEAN,
+			"AUTODETECT_ASSEMBLER", AUTODETECT_ASSEMBLER,
+			"AUTODETECT_ALL", AUTODETECT_ALL
+		);
 
-
-	/** Constants instance for this class. */
-	private static final Constants constants = new Constants(MBeanExporter.class);
 
 	/** The beans to be exposed as JMX managed resources, with JMX names as keys. */
 	@Nullable
@@ -147,7 +160,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/** The autodetect mode to use for this MBeanExporter. */
 	@Nullable
-	private Integer autodetectMode;
+	Integer autodetectMode;
 
 	/** Whether to eagerly initialize candidate beans when autodetecting MBeans. */
 	private boolean allowEagerInit = false;
@@ -165,7 +178,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection. */
-	private Set<String> excludedBeans = new HashSet<>();
+	private final Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	@Nullable
@@ -223,23 +236,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Set the autodetection mode to use.
-	 * @throws IllegalArgumentException if the supplied value is not
-	 * one of the {@code AUTODETECT_} constants
-	 * @see #setAutodetectModeName(String)
-	 * @see #AUTODETECT_ALL
-	 * @see #AUTODETECT_ASSEMBLER
-	 * @see #AUTODETECT_MBEAN
-	 * @see #AUTODETECT_NONE
-	 */
-	public void setAutodetectMode(int autodetectMode) {
-		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(autodetectMode)) {
-			throw new IllegalArgumentException("Only values of autodetect constants allowed");
-		}
-		this.autodetectMode = autodetectMode;
-	}
-
-	/**
 	 * Set the autodetection mode to use by name.
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
@@ -248,12 +244,32 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
 	 * @see #AUTODETECT_NONE
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
 	 */
+	@Deprecated(since = "6.1")
 	public void setAutodetectModeName(String constantName) {
-		if (!constantName.startsWith(CONSTANT_PREFIX_AUTODETECT)) {
-			throw new IllegalArgumentException("Only autodetect constants allowed");
-		}
-		this.autodetectMode = (Integer) constants.asNumber(constantName);
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer mode = constants.get(constantName);
+		Assert.notNull(mode, "Only autodetect constants allowed");
+		this.autodetectMode = mode;
+	}
+
+	/**
+	 * Set the autodetection mode to use.
+	 * @throws IllegalArgumentException if the supplied value is not
+	 * one of the {@code AUTODETECT_} constants
+	 * @see #setAutodetectModeName(String)
+	 * @see #AUTODETECT_ALL
+	 * @see #AUTODETECT_ASSEMBLER
+	 * @see #AUTODETECT_MBEAN
+	 * @see #AUTODETECT_NONE
+	 * @deprecated as of 6.1, in favor of the {@link #setAutodetect "autodetect" flag}
+	 */
+	@Deprecated(since = "6.1")
+	public void setAutodetectMode(int autodetectMode) {
+		Assert.isTrue(constants.containsValue(autodetectMode),
+				"Only values of autodetect constants allowed");
+		this.autodetectMode = autodetectMode;
 	}
 
 	/**
@@ -306,7 +322,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Indicates whether or not the managed resource should be exposed on the
+	 * Indicates whether the managed resource should be exposed on the
 	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before
 	 * allowing any invocations on the MBean to occur.
 	 * <p>The default value is {@code true}, exposing a {@link SpringModelMBean}
@@ -402,8 +418,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ListableBeanFactory) {
-			this.beanFactory = (ListableBeanFactory) beanFactory;
+		if (beanFactory instanceof ListableBeanFactory lbf) {
+			this.beanFactory = lbf;
 		}
 		else {
 			logger.debug("MBeanExporter not running in a ListableBeanFactory: autodetection of MBeans not available.");
@@ -513,7 +529,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * {@code ModelMBean}. The actual implementation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
 	 * the {@code ModelMBeanProvider} interface that is configured. By
-	 * default the {@code RequiredModelMBean} class that is supplied with
+	 * default, the {@code RequiredModelMBean} class that is supplied with
 	 * all JMX implementations is used.
 	 * <p>The management interface produced for each bean is dependent on the
 	 * {@code MBeanInfoAssembler} implementation being used. The
@@ -543,8 +559,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			}
 			// Allow the assembler a chance to vote for bean inclusion.
 			if ((mode == AUTODETECT_ASSEMBLER || mode == AUTODETECT_ALL) &&
-					this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
-				autodetect(this.beans, ((AutodetectCapableMBeanInfoAssembler) this.assembler)::includeBean);
+					this.assembler instanceof AutodetectCapableMBeanInfoAssembler autodetectCapableAssembler) {
+				autodetect(this.beans, autodetectCapableAssembler::includeBean);
 			}
 		}
 
@@ -561,8 +577,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isLazyInit
 	 */
 	protected boolean isBeanDefinitionLazyInit(ListableBeanFactory beanFactory, String beanName) {
-		return (beanFactory instanceof ConfigurableListableBeanFactory && beanFactory.containsBeanDefinition(beanName) &&
-				((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName).isLazyInit());
+		return (beanFactory instanceof ConfigurableListableBeanFactory clbf && beanFactory.containsBeanDefinition(beanName) &&
+				clbf.getBeanDefinition(beanName).isLazyInit());
 	}
 
 	/**
@@ -587,12 +603,11 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
 		try {
-			if (mapValue instanceof String) {
+			if (mapValue instanceof String beanName) {
 				// Bean name pointing to a potentially lazy-init bean in the factory.
 				if (this.beanFactory == null) {
 					throw new MBeanExportException("Cannot resolve bean names if not running in a BeanFactory");
 				}
-				String beanName = (String) mapValue;
 				if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
 					ObjectName objectName = registerLazyInit(beanName, beanKey);
 					replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
@@ -749,8 +764,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * if the retrieved {@code ObjectName} is malformed
 	 */
 	protected ObjectName getObjectName(Object bean, @Nullable String beanKey) throws MalformedObjectNameException {
-		if (bean instanceof SelfNaming) {
-			return ((SelfNaming) bean).getObjectName();
+		if (bean instanceof SelfNaming selfNaming) {
+			return selfNaming.getObjectName();
 		}
 		else {
 			return this.namingStrategy.getObjectName(bean, beanKey);
@@ -762,7 +777,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * <p>The default implementation delegates to {@link JmxUtils#isMBean},
 	 * which checks for {@link javax.management.DynamicMBean} classes as well
 	 * as classes with corresponding "*MBean" interface (Standard MBeans)
-	 * or corresponding "*MXBean" interface (Java 6 MXBeans).
+	 * or corresponding "*MXBean" interface (Java MXBeans).
 	 * @param beanClass the bean class to analyze
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)
@@ -870,8 +885,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
 		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
+		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			Collections.addAll(beanNames, cbf.getSingletonNames());
 		}
 
 		for (String beanName : beanNames) {
@@ -914,7 +929,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Indicates whether or not a particular bean name is present in the excluded beans list.
+	 * Indicates whether a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
 		return (this.excludedBeans.contains(beanName) ||
@@ -926,8 +941,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Return whether the specified bean definition should be considered as abstract.
 	 */
 	private boolean isBeanDefinitionAbstract(ListableBeanFactory beanFactory, String beanName) {
-		return (beanFactory instanceof ConfigurableListableBeanFactory && beanFactory.containsBeanDefinition(beanName) &&
-				((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName).isAbstract());
+		return (beanFactory instanceof ConfigurableListableBeanFactory clbf && beanFactory.containsBeanDefinition(beanName) &&
+				clbf.getBeanDefinition(beanName).isAbstract());
 	}
 
 
@@ -942,9 +957,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private void injectNotificationPublisherIfNecessary(
 			Object managedResource, @Nullable ModelMBean modelMBean, @Nullable ObjectName objectName) {
 
-		if (managedResource instanceof NotificationPublisherAware && modelMBean != null && objectName != null) {
-			((NotificationPublisherAware) managedResource).setNotificationPublisher(
-					new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
+		if (managedResource instanceof NotificationPublisherAware npa && modelMBean != null && objectName != null) {
+			npa.setNotificationPublisher(new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
 		}
 	}
 
@@ -1067,7 +1081,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		/**
 		 * Called during the autodetection process to decide whether
-		 * or not a bean should be included.
+		 * a bean should be included.
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */

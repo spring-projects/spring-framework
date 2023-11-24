@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -158,24 +159,15 @@ final class OpaqueUriComponents extends UriComponents {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof OpaqueUriComponents)) {
-			return false;
-		}
-		OpaqueUriComponents otherComp = (OpaqueUriComponents) other;
-		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
-				ObjectUtils.nullSafeEquals(this.ssp, otherComp.ssp) &&
-				ObjectUtils.nullSafeEquals(getFragment(), otherComp.getFragment()));
+		return (this == other || (other instanceof OpaqueUriComponents that &&
+				ObjectUtils.nullSafeEquals(getScheme(), that.getScheme()) &&
+				ObjectUtils.nullSafeEquals(this.ssp, that.ssp) &&
+				ObjectUtils.nullSafeEquals(getFragment(), that.getFragment())));
 	}
 
 	@Override
 	public int hashCode() {
-		int result = ObjectUtils.nullSafeHashCode(getScheme());
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.ssp);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(getFragment());
-		return result;
+		return Objects.hash(getScheme(), this.ssp, getFragment());
 	}
 
 }

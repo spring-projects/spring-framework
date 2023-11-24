@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.view.freemarker;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
@@ -28,7 +27,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
@@ -48,11 +46,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class FreeMarkerViewTests {
+class FreeMarkerViewTests {
 
 	private static final String TEMPLATE_PATH =
 			"classpath*:org/springframework/web/reactive/view/freemarker/";
 
+
+	private final FreeMarkerView freeMarkerView = new FreeMarkerView();
 
 	private final MockServerWebExchange exchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
@@ -63,7 +63,7 @@ public class FreeMarkerViewTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.context.refresh();
 
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
@@ -75,76 +75,85 @@ public class FreeMarkerViewTests {
 
 
 	@Test
-	public void noFreeMarkerConfig() throws Exception {
-		FreeMarkerView view = new FreeMarkerView();
-		view.setApplicationContext(this.context);
-		view.setUrl("anythingButNull");
-		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(
-				view::afterPropertiesSet)
+	void noFreeMarkerConfig() {
+		freeMarkerView.setApplicationContext(this.context);
+		freeMarkerView.setUrl("anythingButNull");
+
+		assertThatExceptionOfType(ApplicationContextException.class)
+			.isThrownBy(freeMarkerView::afterPropertiesSet)
 			.withMessageContaining("Must define a single FreeMarkerConfig bean");
 	}
 
 	@Test
-	public void noTemplateName() throws Exception {
-		FreeMarkerView freeMarkerView = new FreeMarkerView();
-		assertThatIllegalArgumentException().isThrownBy(
-				freeMarkerView::afterPropertiesSet)
+	void noTemplateName() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(freeMarkerView::afterPropertiesSet)
 			.withMessageContaining("Property 'url' is required");
 	}
 
 	@Test
-	public void checkResourceExists() throws Exception {
-		FreeMarkerView view = new FreeMarkerView();
-		view.setConfiguration(this.freeMarkerConfig);
-		view.setUrl("test.ftl");
+	void checkResourceExists() throws Exception {
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("test.ftl");
 
-		assertThat(view.checkResourceExists(Locale.US)).isTrue();
+		assertThat(freeMarkerView.checkResourceExists(Locale.US)).isTrue();
 	}
 
 	@Test
-	public void render() {
-		FreeMarkerView view = new FreeMarkerView();
-		view.setApplicationContext(this.context);
-		view.setConfiguration(this.freeMarkerConfig);
-		view.setUrl("test.ftl");
+	void resourceExists() {
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("test.ftl");
+
+		StepVerifier.create(freeMarkerView.resourceExists(Locale.US))
+				.assertNext(b -> assertThat(b).isTrue())
+				.verifyComplete();
+	}
+
+	@Test
+	void resourceDoesNotExists() {
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("foo-bar.ftl");
+
+		StepVerifier.create(freeMarkerView.resourceExists(Locale.US))
+				.assertNext(b -> assertThat(b).isFalse())
+				.verifyComplete();
+	}
+
+	@Test
+	void render() {
+		freeMarkerView.setApplicationContext(this.context);
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("test.ftl");
 
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
-		view.render(model, null, this.exchange).block(Duration.ofMillis(5000));
+		freeMarkerView.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertThat(asString(buf)).isEqualTo("<html><body>hi FreeMarker</body></html>"))
+				.consumeNextWith(buf -> assertThat(buf.toString(StandardCharsets.UTF_8))
+						.isEqualTo("<html><body>hi FreeMarker</body></html>"))
 				.expectComplete()
 				.verify();
 	}
 
 	@Test // gh-22754
-	public void subscribeWithoutDemand() {
+	void subscribeWithoutDemand() {
 		ZeroDemandResponse response = new ZeroDemandResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(
 				MockServerHttpRequest.get("/path").build(), response,
 				new DefaultWebSessionManager(), ServerCodecConfigurer.create(),
 				new AcceptHeaderLocaleContextResolver());
 
-		FreeMarkerView view = new FreeMarkerView();
-		view.setApplicationContext(this.context);
-		view.setConfiguration(this.freeMarkerConfig);
-		view.setUrl("test.ftl");
+		freeMarkerView.setApplicationContext(this.context);
+		freeMarkerView.setConfiguration(this.freeMarkerConfig);
+		freeMarkerView.setUrl("test.ftl");
 
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
-		view.render(model, null, exchange).subscribe();
+		freeMarkerView.render(model, null, exchange).subscribe();
 
 		response.cancelWrite();
 		response.checkForLeaks();
-	}
-
-
-	private static String asString(DataBuffer dataBuffer) {
-		ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
-		final byte[] bytes = new byte[byteBuffer.remaining()];
-		byteBuffer.get(bytes);
-		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 

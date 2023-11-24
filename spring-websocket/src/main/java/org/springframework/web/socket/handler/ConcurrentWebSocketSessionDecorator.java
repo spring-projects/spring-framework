@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,12 +210,12 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				}
 				else if (getBufferSize() > getBufferSizeLimit()) {
 					switch (this.overflowStrategy) {
-						case TERMINATE:
+						case TERMINATE -> {
 							String format = "Buffer size %d bytes for session '%s' exceeds the allowed limit %d";
 							String reason = String.format(format, getBufferSize(), getId(), getBufferSizeLimit());
 							limitExceeded(reason);
-							break;
-						case DROP:
+						}
+						case DROP -> {
 							int i = 0;
 							while (getBufferSize() > getBufferSizeLimit()) {
 								WebSocketMessage<?> message = this.buffer.poll();
@@ -228,8 +228,8 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 							if (logger.isDebugEnabled()) {
 								logger.debug("Dropped " + i + " messages, buffer size: " + getBufferSize());
 							}
-							break;
-						default:
+						}
+						default ->
 							// Should never happen..
 							throw new IllegalStateException("Unexpected OverflowStrategy: " + this.overflowStrategy);
 					}
@@ -289,7 +289,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	public enum OverflowStrategy {
 
 		/**
-		 * Throw {@link SessionLimitExceededException} that would will result
+		 * Throw {@link SessionLimitExceededException} that will result
 		 * in the session being terminated.
 		 */
 		TERMINATE,

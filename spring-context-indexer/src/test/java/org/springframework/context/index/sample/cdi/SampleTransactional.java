@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.cdi;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 /**
  * Test candidate for {@link Transactional}. This verifies that the annotation processor

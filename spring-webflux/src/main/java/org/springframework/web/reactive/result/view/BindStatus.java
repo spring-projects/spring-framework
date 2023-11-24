@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,8 +126,8 @@ public class BindStatus {
 					this.objectErrors = this.errors.getFieldErrors(this.expression);
 					this.value = this.errors.getFieldValue(this.expression);
 					this.valueType = this.errors.getFieldType(this.expression);
-					if (this.errors instanceof BindingResult) {
-						this.bindingResult = (BindingResult) this.errors;
+					if (this.errors instanceof BindingResult br) {
+						this.bindingResult = br;
 						this.actualValue = this.bindingResult.getRawFieldValue(this.expression);
 						this.editor = this.bindingResult.findEditor(this.expression, null);
 					}
@@ -162,8 +162,8 @@ public class BindStatus {
 			this.errorMessages = new String[0];
 		}
 
-		if (htmlEscape && this.value instanceof String) {
-			this.value = HtmlUtils.htmlEscape((String) this.value);
+		if (htmlEscape && this.value instanceof String text) {
+			this.value = HtmlUtils.htmlEscape(text);
 		}
 	}
 
@@ -238,8 +238,8 @@ public class BindStatus {
 	 * will get HTML-escaped.
 	 */
 	public String getDisplayValue() {
-		if (this.value instanceof String) {
-			return (String) this.value;
+		if (this.value instanceof String displayValue) {
+			return displayValue;
 		}
 		if (this.value != null) {
 			return (this.htmlEscape ?
@@ -353,7 +353,7 @@ public class BindStatus {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("BindStatus: ");
 		sb.append("expression=[").append(this.expression).append("]; ");
-		sb.append("value=[").append(this.value).append("]");
+		sb.append("value=[").append(this.value).append(']');
 		if (!ObjectUtils.isEmpty(this.errorCodes)) {
 			sb.append("; errorCodes=").append(Arrays.asList(this.errorCodes));
 		}

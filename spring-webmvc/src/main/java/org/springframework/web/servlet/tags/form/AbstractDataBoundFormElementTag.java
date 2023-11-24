@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.lang.Nullable;
@@ -35,7 +35,7 @@ import org.springframework.web.servlet.tags.NestedPathTag;
  * Base tag for all data-binding aware JSP form tags.
  *
  * <p>Provides the common {@link #setPath path} and {@link #setId id} properties.
- * Provides sub-classes with utility methods for accessing the {@link BindStatus}
+ * Provides subclasses with utility methods for accessing the {@link BindStatus}
  * of their bound value and also for {@link #writeOptionalAttribute interacting}
  * with the {@link TagWriter}.
  *
@@ -111,10 +111,10 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Writes the default set of attributes to the supplied {@link TagWriter}.
-	 * Further abstract sub-classes should override this method to add in
+	 * Further, abstract subclasses should override this method to add in
 	 * any additional default attributes but <strong>must</strong> remember
 	 * to call the {@code super} method.
-	 * <p>Concrete sub-classes should call this method when/if they want
+	 * <p>Concrete subclasses should call this method when/if they want
 	 * to render default attributes.
 	 * @param tagWriter the {@link TagWriter} to which any attributes are to be written
 	 */
@@ -243,8 +243,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	protected final String processFieldValue(@Nullable String name, String value, String type) {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if (processor != null && request instanceof HttpServletRequest) {
-			value = processor.processFormFieldValue((HttpServletRequest) request, name, value, type);
+		if (processor != null && request instanceof HttpServletRequest httpServletRequest) {
+			value = processor.processFormFieldValue(httpServletRequest, name, value, type);
 		}
 		return value;
 	}

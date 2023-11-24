@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
@@ -63,6 +64,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebTestClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  */
 class DefaultWebTestClient implements WebTestClient {
@@ -367,12 +370,28 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private ClientRequest.Builder initRequestBuilder() {
 			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
-					.headers(headers -> headers.addAll(initHeaders()))
-					.cookies(cookies -> cookies.addAll(initCookies()))
+					.headers(headersToUse -> {
+						if (!CollectionUtils.isEmpty(defaultHeaders)) {
+							headersToUse.putAll(defaultHeaders);
+						}
+						if (!CollectionUtils.isEmpty(this.headers)) {
+							headersToUse.putAll(this.headers);
+						}
+					})
+					.cookies(cookiesToUse -> {
+						if (!CollectionUtils.isEmpty(defaultCookies)) {
+							cookiesToUse.putAll(defaultCookies);
+						}
+						if (!CollectionUtils.isEmpty(this.cookies)) {
+							cookiesToUse.putAll(this.cookies);
+						}
+					})
 					.attributes(attributes -> attributes.putAll(this.attributes));
+
 			if (this.httpRequestConsumer != null) {
 				builder.httpRequest(this.httpRequestConsumer);
 			}
+
 			return builder;
 		}
 
@@ -380,30 +399,6 @@ class DefaultWebTestClient implements WebTestClient {
 			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
 		}
 
-		private HttpHeaders initHeaders() {
-			if (CollectionUtils.isEmpty(defaultHeaders)) {
-				return this.headers;
-			}
-			HttpHeaders result = new HttpHeaders();
-			result.putAll(defaultHeaders);
-			result.putAll(this.headers);
-			return result;
-		}
-
-		private MultiValueMap<String, String> initCookies() {
-			if (CollectionUtils.isEmpty(this.cookies)) {
-				return (defaultCookies != null ? defaultCookies : new LinkedMultiValueMap<>());
-			}
-			else if (CollectionUtils.isEmpty(defaultCookies)) {
-				return this.cookies;
-			}
-			else {
-				MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-				result.putAll(defaultCookies);
-				result.putAll(this.cookies);
-				return result;
-			}
-		}
 	}
 
 
@@ -483,7 +478,7 @@ class DefaultWebTestClient implements WebTestClient {
 			return new DefaultBodyContentSpec(entityResult);
 		}
 
-		private  <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
+		private <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
 			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
 			result.assertWithDiagnostics(() -> this.entityResultConsumer.accept(result));
 			return result;
@@ -506,6 +501,30 @@ class DefaultWebTestClient implements WebTestClient {
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
 			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
+		}
+
+		@Override
+		public ResponseSpec expectAll(ResponseSpecConsumer... consumers) {
+			ExceptionCollector exceptionCollector = new ExceptionCollector();
+			for (ResponseSpecConsumer consumer : consumers) {
+				exceptionCollector.execute(() -> consumer.accept(this));
+			}
+			try {
+				exceptionCollector.assertEmpty();
+			}
+			catch (RuntimeException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				// In theory, a ResponseSpecConsumer should never throw an Exception
+				// that is not a RuntimeException, but since ExceptionCollector may
+				// throw a checked Exception, we handle this to appease the compiler
+				// and in case someone uses a "sneaky throws" technique.
+				AssertionError assertionError = new AssertionError(ex.getMessage());
+				assertionError.initCause(ex);
+				throw assertionError;
+			}
+			return this;
 		}
 	}
 
@@ -632,10 +651,10 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public BodyContentSpec json(String json) {
+		public BodyContentSpec json(String json, boolean strict) {
 			this.result.assertWithDiagnostics(() -> {
 				try {
-					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString());
+					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString(), strict);
 				}
 				catch (Exception ex) {
 					throw new AssertionError("JSON parsing error", ex);

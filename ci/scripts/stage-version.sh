@@ -29,13 +29,14 @@ fi
 echo "Staging $stageVersion (next version will be $nextVersion)"
 sed -i "s/version=$snapshotVersion/version=$stageVersion/" gradle.properties
 
-git config user.name "Spring Buildmaster" > /dev/null
-git config user.email "buildmaster@springframework.org" > /dev/null
+git config user.name "Spring Builds" > /dev/null
+git config user.email "spring-builds@users.noreply.github.com" > /dev/null
 git add gradle.properties > /dev/null
 git commit -m"Release v$stageVersion" > /dev/null
 git tag -a "v$stageVersion" -m"Release v$stageVersion" > /dev/null
 
-./gradlew --no-daemon --max-workers=4 -PdeploymentRepository=${repository} build publishAllPublicationsToDeploymentRepository
+./gradlew --no-daemon --max-workers=4 -PdeploymentRepository=${repository} -Porg.gradle.java.installations.fromEnv=JDK17,JDK21 \
+  build publishAllPublicationsToDeploymentRepository
 
 git reset --hard HEAD^ > /dev/null
 if [[ $nextVersion != $snapshotVersion ]]; then

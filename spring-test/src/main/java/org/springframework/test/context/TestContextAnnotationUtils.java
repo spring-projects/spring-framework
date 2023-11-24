@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
@@ -64,7 +66,7 @@ import org.springframework.util.ObjectUtils;
  * example, {@link ContextConfiguration#inheritLocations}.
  *
  * @author Sam Brannen
- * @since 5.3, though originally since 4.0 as {@link org.springframework.test.util.MetaAnnotationUtils}
+ * @since 5.3, though originally since 4.0 as {@code org.springframework.test.util.MetaAnnotationUtils}
  * @see AnnotationUtils
  * @see AnnotatedElementUtils
  * @see AnnotationDescriptor
@@ -91,7 +93,10 @@ public abstract class TestContextAnnotationUtils {
 	 * @see #findMergedAnnotation(Class, Class)
 	 */
 	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		return (findMergedAnnotation(clazz, annotationType) != null);
+		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+				.withEnclosingClasses(TestContextAnnotationUtils::searchEnclosingClass)
+				.from(clazz)
+				.isPresent(annotationType);
 	}
 
 	/**
@@ -125,9 +130,11 @@ public abstract class TestContextAnnotationUtils {
 	private static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
 			Predicate<Class<?>> searchEnclosingClass) {
 
-		AnnotationDescriptor<T> descriptor =
-				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
-		return (descriptor != null ? descriptor.getAnnotation() : null);
+		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+				.withEnclosingClasses(searchEnclosingClass)
+				.from(clazz)
+				.get(annotationType)
+				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
 
 	/**
@@ -241,7 +248,7 @@ public abstract class TestContextAnnotationUtils {
 			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
-		AnnotationDescriptor<T> descriptor = null;
+		AnnotationDescriptor<T> descriptor;
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {
@@ -580,9 +587,9 @@ public abstract class TestContextAnnotationUtils {
 		 */
 		@Override
 		public String toString() {
-			return new ToStringCreator(this)
-					.append("rootDeclaringClass", this.rootDeclaringClass.getName())
-					.append("declaringClass", this.declaringClass.getName())
+			return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+					.append("rootDeclaringClass", this.rootDeclaringClass)
+					.append("declaringClass", this.declaringClass)
 					.append("annotation", this.annotation)
 					.toString();
 		}

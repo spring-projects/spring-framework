@@ -89,7 +89,6 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * Transform the given relative request path to an absolute path,
 	 * taking the path of the given request as a point of reference.
 	 * The resulting path is also cleaned from sequences like "path/..".
-	 *
 	 * @param path the relative path to transform
 	 * @param exchange the current exchange
 	 * @return the absolute request path for the given resource path

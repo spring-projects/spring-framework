@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@
 package org.springframework.dao;
 
 /**
- * Exception thrown when we couldn't cleanup after a data access operation,
+ * Exception thrown when we couldn't clean up after a data access operation,
  * but the actual operation went OK.
  *
  * <p>For example, this exception or a subclass might be thrown if a JDBC
  * Connection couldn't be closed after it had been used successfully.
  *
  * <p>Note that data access code might perform resources cleanup in a
- * finally block and therefore log cleanup failure rather than rethrow it,
+ * {@code finally} block and therefore log cleanup failure rather than rethrow it,
  * to keep the original data access exception, if any.
  *
  * @author Rod Johnson
+ * @deprecated as of 6.0.3 since it is not in use within core JDBC/ORM support
  */
+@Deprecated(since = "6.0.3")
 @SuppressWarnings("serial")
 public class CleanupFailureDataAccessException extends NonTransientDataAccessException {
 

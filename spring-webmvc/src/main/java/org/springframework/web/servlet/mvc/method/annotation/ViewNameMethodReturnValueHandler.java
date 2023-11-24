@@ -33,9 +33,9 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
  * as the actual return value is left as-is allowing the configured
  * {@link RequestToViewNameTranslator} to select a view name by convention.
  *
- * <p>A String return value can be interpreted in more than one ways depending on
+ * <p>A String return value can be interpreted in more than one way depending on
  * the presence of annotations like {@code @ModelAttribute} or {@code @ResponseBody}.
- * Therefore this handler should be configured after the handlers that support these
+ * Therefore, this handler should be configured after the handlers that support these
  * annotations.
  *
  * @author Rossen Stoyanchev

@@ -31,6 +31,6 @@ You'll notice these files are already intentionally in .gitignore. The same poli
 
 ## FAQ
 
-Q. What about IntelliJ IDEA's own [Gradle support](https://confluence.jetbrains.net/display/IDEADEV/Gradle+integration)?
+Q. What about IntelliJ IDEA's own [Gradle support](https://www.jetbrains.com/help/idea/gradle.html)?
 
 A. Keep an eye on https://youtrack.jetbrains.com/issue/IDEA-53476

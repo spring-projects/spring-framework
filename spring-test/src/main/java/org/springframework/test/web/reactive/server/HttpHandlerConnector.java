@@ -31,6 +31,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
@@ -142,8 +144,8 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	}
 
 	private ClientHttpResponse adaptResponse(MockServerHttpResponse response, Flux<DataBuffer> body) {
-		Integer status = response.getRawStatusCode();
-		MockClientHttpResponse clientResponse = new MockClientHttpResponse((status != null) ? status : 200);
+		HttpStatusCode status = response.getStatusCode();
+		MockClientHttpResponse clientResponse = new MockClientHttpResponse((status != null) ? status : HttpStatus.OK);
 		clientResponse.getHeaders().putAll(response.getHeaders());
 		clientResponse.getCookies().putAll(response.getCookies());
 		clientResponse.setBody(body);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 package org.springframework.jmx.export.assembler;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -72,7 +70,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * @see #setIgnoredMethodMappings(java.util.Properties)
 	 */
 	public void setIgnoredMethods(String... ignoredMethodNames) {
-		this.ignoredMethods = new HashSet<>(Arrays.asList(ignoredMethodNames));
+		this.ignoredMethods = Set.of(ignoredMethodNames);
 	}
 
 	/**
@@ -87,7 +85,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 		for (Enumeration<?> en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			this.ignoredMethodMappings.put(beanKey, new HashSet<>(Arrays.asList(methodNames)));
+			this.ignoredMethodMappings.put(beanKey, Set.of(methodNames));
 		}
 	}
 

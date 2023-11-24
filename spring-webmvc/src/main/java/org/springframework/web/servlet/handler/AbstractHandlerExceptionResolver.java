@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -99,6 +100,25 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
+	 * Add a mapped handler class.
+	 * @since 6.1
+	 */
+	public void addMappedHandlerClass(Class<?> mappedHandlerClass) {
+		this.mappedHandlerClasses = (this.mappedHandlerClasses != null ?
+				ObjectUtils.addObjectToArray(this.mappedHandlerClasses, mappedHandlerClass) :
+				new Class<?>[] {mappedHandlerClass});
+	}
+
+	/**
+	 * Return the {@link #setMappedHandlerClasses(Class[]) configured} mapped
+	 * handler classes.
+	 */
+	@Nullable
+	protected Class<?>[] getMappedHandlerClasses() {
+		return this.mappedHandlerClasses;
+	}
+
+	/**
 	 * Set the log category for warn logging. The name will be passed to the underlying logger
 	 * implementation through Commons Logging, getting interpreted as a log category according
 	 * to the logger's configuration. If {@code null} or empty String is passed, warn logging
@@ -142,7 +162,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			if (result != null) {
 				// Print debug message when warn logger is not enabled.
 				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
-					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
+					logger.debug(buildLogMessage(ex, request) + (result.isEmpty() ? "" : " to " + result));
 				}
 				// Explicitly configured warn logger in logException method.
 				logException(ex, request);
@@ -215,7 +235,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Resolved [" + ex + "]";
+		return "Resolved [" + LogFormatUtils.formatValue(ex, -1, true) + "]";
 	}
 
 	/**

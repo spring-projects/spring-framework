@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,14 +53,14 @@ class ResourceEditorTests {
 	void setAndGetAsTextWithNull() {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText(null);
-		assertThat(editor.getAsText()).isEqualTo("");
+		assertThat(editor.getAsText()).isEmpty();
 	}
 
 	@Test
 	void setAndGetAsTextWithWhitespaceResource() {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText("  ");
-		assertThat(editor.getAsText()).isEqualTo("");
+		assertThat(editor.getAsText()).isEmpty();
 	}
 
 	@Test

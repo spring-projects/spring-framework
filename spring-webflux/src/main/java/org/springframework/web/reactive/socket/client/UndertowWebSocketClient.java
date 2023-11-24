@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 					DefaultNegotiation negotiation = new DefaultNegotiation(protocols, headers, builder);
 					builder.setClientNegotiation(negotiation);
 					builder.connect().addNotifier(
-							new IoFuture.HandlingNotifier<WebSocketChannel, Object>() {
+							new IoFuture.HandlingNotifier<>() {
 								@Override
 								public void handleDone(WebSocketChannel channel, Object attachment) {
 									handleChannel(url, ContextWebSocketHandler.decorate(handler, contextView),
@@ -243,7 +243,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> headers) {
-			this.requestHeaders.forEach(headers::put);
+			headers.putAll(this.requestHeaders);
 			if (this.delegate != null) {
 				this.delegate.beforeRequest(headers);
 			}
@@ -251,7 +251,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 
 		@Override
 		public void afterRequest(Map<String, List<String>> headers) {
-			headers.forEach(this.responseHeaders::put);
+			this.responseHeaders.putAll(headers);
 			if (this.delegate != null) {
 				this.delegate.afterRequest(headers);
 			}

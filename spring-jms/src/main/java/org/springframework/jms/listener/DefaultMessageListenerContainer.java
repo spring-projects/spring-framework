@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.jms.listener;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 
-import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.JmsException;
@@ -45,7 +45,7 @@ import org.springframework.util.backoff.FixedBackOff;
  * Message listener container variant that uses plain JMS client APIs, specifically
  * a loop of {@code MessageConsumer.receive()} calls that also allow for
  * transactional reception of messages (registering them with XA transactions).
- * Designed to work in a native JMS environment as well as in a Java EE environment,
+ * Designed to work in a native JMS environment as well as in a Jakarta EE environment,
  * with only minimal differences in configuration.
  *
  * <p>This is a simple but nevertheless powerful form of message listener container.
@@ -62,22 +62,21 @@ import org.springframework.util.backoff.FixedBackOff;
  * abstraction. By default, the specified number of invoker tasks will be created
  * on startup, according to the {@link #setConcurrentConsumers "concurrentConsumers"}
  * setting. Specify an alternative {@code TaskExecutor} to integrate with an existing
- * thread pool facility (such as a Java EE server's), for example using a
- * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor CommonJ WorkManager}.
- * With a native JMS setup, each of those listener threads is going to use a
- * cached JMS {@code Session} and {@code MessageConsumer} (only refreshed in case
- * of failure), using the JMS provider's resources as efficiently as possible.
+ * thread pool facility (such as a Jakarta EE server's). With a native JMS setup,
+ * each of those listener threads is going to use a cached JMS {@code Session} and
+ * {@code MessageConsumer} (only refreshed in case of failure), using the JMS provider's
+ * resources as efficiently as possible.
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions by passing a Spring
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * Java EE environment, in combination with a JTA-aware JMS {@code ConnectionFactory}
- * obtained from JNDI (check your Java EE server's documentation). Note that this
+ * Jakarta EE environment, in combination with a JTA-aware JMS {@code ConnectionFactory}
+ * obtained from JNDI (check your Jakarta EE server's documentation). Note that this
  * listener container will automatically reobtain all JMS handles for each transaction
  * in case an external transaction manager is specified, for compatibility with
- * all Java EE servers (in particular JBoss). This non-caching behavior can be
+ * all Jakarta EE servers (in particular JBoss). This non-caching behavior can be
  * overridden through the {@link #setCacheLevel "cacheLevel"} /
  * {@link #setCacheLevelName "cacheLevelName"} property, enforcing caching of
  * the {@code Connection} (or also {@code Session} and {@code MessageConsumer})
@@ -99,12 +98,14 @@ import org.springframework.util.backoff.FixedBackOff;
  * number of 1 consumer, otherwise you'd receive the same message multiple times on
  * the same node.
  *
- * <p><b>Note: Don't use Spring's {@link org.springframework.jms.connection.CachingConnectionFactory}
- * in combination with dynamic scaling.</b> Ideally, don't use it with a message
- * listener container at all, since it is generally preferable to let the
- * listener container itself handle appropriate caching within its lifecycle.
- * Also, stopping and restarting a listener container will only work with an
- * independent, locally cached Connection - not with an externally cached one.
+ * <p><b>Note: You may use {@link org.springframework.jms.connection.CachingConnectionFactory}
+ * with a listener container but it comes with limitations.</b> It is generally preferable
+ * to let the listener container itself handle appropriate caching within its lifecycle.
+ * Also, stopping and restarting a listener container will only work with an independent,
+ * locally cached {@code Connection}, not with an externally cached one. Last but not least,
+ * with {@code CachingConnectionFactory}, dynamic scaling with custom provider hints such as
+ * {@link #setMaxMessagesPerTask "maxMessagesPerTask"} can result in JMS messages delivered
+ * to cached consumers even when they are no longer attached to the listener container.
  *
  * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
  * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
@@ -116,10 +117,11 @@ import org.springframework.util.backoff.FixedBackOff;
  * before listener execution, with no redelivery in case of an exception.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
- * @see javax.jms.MessageConsumer#receive(long)
+ * @see jakarta.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
@@ -172,7 +174,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public static final int CACHE_AUTO = 4;
 
 
-	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
+	/**
+	 * Map of constant names to constant values for the cache constants defined
+	 * in this class.
+	 */
+	private static final Map<String, Integer> constants = Map.of(
+			"CACHE_NONE", CACHE_NONE,
+			"CACHE_CONNECTION", CACHE_CONNECTION,
+			"CACHE_SESSION", CACHE_SESSION,
+			"CACHE_CONSUMER", CACHE_CONSUMER,
+			"CACHE_AUTO", CACHE_AUTO
+		);
 
 
 	@Nullable
@@ -219,12 +231,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * of concurrent consumers.
 	 * <p>Specify an alternative {@code TaskExecutor} for integration with an existing
 	 * thread pool. Note that this really only adds value if the threads are
-	 * managed in a specific fashion, for example within a Java EE environment.
+	 * managed in a specific fashion, for example within a Jakarta EE environment.
 	 * A plain thread pool does not add much value, as this listener container
 	 * will occupy a number of threads for its entire lifetime.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
-	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
@@ -258,14 +269,20 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Specify the level of caching that this listener container is allowed to apply,
-	 * in the form of the name of the corresponding constant: e.g. "CACHE_CONNECTION".
+	 * in the form of the name of the corresponding constant &mdash; for example,
+	 * {@code "CACHE_CONNECTION"}.
 	 * @see #setCacheLevel
+	 * @see #CACHE_NONE
+	 * @see #CACHE_CONNECTION
+	 * @see #CACHE_SESSION
+	 * @see #CACHE_CONSUMER
+	 * @see #CACHE_AUTO
 	 */
 	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
-		if (!constantName.startsWith("CACHE_")) {
-			throw new IllegalArgumentException("Only cache constants allowed");
-		}
-		setCacheLevel(constants.asNumber(constantName).intValue());
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer cacheLevel = constants.get(constantName);
+		Assert.notNull(cacheLevel, "Only cache constants allowed");
+		this.cacheLevel = cacheLevel;
 	}
 
 	/**
@@ -273,7 +290,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>Default is {@link #CACHE_NONE} if an external transaction manager has been specified
 	 * (to reobtain all resources freshly within the scope of the external transaction),
 	 * and {@link #CACHE_CONSUMER} otherwise (operating with local JMS resources).
-	 * <p>Some Java EE servers only register their JMS resources with an ongoing XA
+	 * <p>Some Jakarta EE servers only register their JMS resources with an ongoing XA
 	 * transaction in case of a freshly obtained JMS {@code Connection} and {@code Session},
 	 * which is why this listener container by default does not cache any of those.
 	 * However, depending on the rules of your server with respect to the caching
@@ -284,10 +301,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
 	 * @see #CACHE_CONSUMER
+	 * @see #CACHE_AUTO
 	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
 	 */
 	public void setCacheLevel(int cacheLevel) {
+		Assert.isTrue(constants.containsValue(cacheLevel), "Only values of cache constants allowed");
 		this.cacheLevel = cacheLevel;
 	}
 
@@ -311,8 +330,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		try {
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
-				setConcurrentConsumers(Integer.parseInt(concurrency.substring(0, separatorIndex)));
-				setMaxConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
+				setConcurrentConsumers(Integer.parseInt(concurrency, 0, separatorIndex, 10));
+				setMaxConcurrentConsumers(Integer.parseInt(concurrency, separatorIndex + 1, concurrency.length(), 10));
 			}
 			else {
 				setConcurrentConsumers(1);
@@ -570,8 +589,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			if (this.taskExecutor == null) {
 				this.taskExecutor = createDefaultTaskExecutor();
 			}
-			else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
-					((SchedulingTaskExecutor) this.taskExecutor).prefersShortLivedTasks() &&
+			else if (this.taskExecutor instanceof SchedulingTaskExecutor ste &&
+					ste.prefersShortLivedTasks() &&
 					this.maxMessagesPerTask == Integer.MIN_VALUE) {
 				// TaskExecutor indicated a preference for short-lived tasks. According to
 				// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
@@ -863,8 +882,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			super.establishSharedConnection();
 		}
 		catch (Exception ex) {
-			if (ex instanceof JMSException) {
-				invokeExceptionListener((JMSException) ex);
+			if (ex instanceof JMSException jmsException) {
+				invokeExceptionListener(jmsException);
 			}
 			logger.debug("Could not establish shared JMS Connection - " +
 					"leaving it up to asynchronous invokers to establish a Connection as soon as possible", ex);
@@ -872,7 +891,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * This implementations proceeds even after an exception thrown from
+	 * This implementation proceeds even after an exception thrown from
 	 * {@code Connection.start()}, relying on listeners to perform
 	 * appropriate recovery.
 	 */
@@ -887,7 +906,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * This implementations proceeds even after an exception thrown from
+	 * This implementation proceeds even after an exception thrown from
 	 * {@code Connection.stop()}, relying on listeners to perform
 	 * appropriate recovery after a restart.
 	 */
@@ -915,8 +934,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #recoverAfterListenerSetupFailure()
 	 */
 	protected void handleListenerSetupFailure(Throwable ex, boolean alreadyRecovered) {
-		if (ex instanceof JMSException) {
-			invokeExceptionListener((JMSException) ex);
+		if (ex instanceof JMSException jmsException) {
+			invokeExceptionListener(jmsException);
 		}
 		if (ex instanceof SharedConnectionNotInitializedException) {
 			if (!alreadyRecovered) {
@@ -932,7 +951,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				StringBuilder msg = new StringBuilder();
 				msg.append("Setup of JMS message listener invoker failed for destination '");
 				msg.append(getDestinationDescription()).append("' - trying to recover. Cause: ");
-				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
+				msg.append(ex instanceof JMSException jmsException ? JmsUtils.buildExceptionMessage(jmsException) :
+						ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.warn(msg, ex);
 				}
@@ -992,14 +1012,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
-				if (ex instanceof JMSException) {
-					invokeExceptionListener((JMSException) ex);
+				if (ex instanceof JMSException jmsException) {
+					invokeExceptionListener(jmsException);
 				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying using ");
 				msg.append(execution).append(". Cause: ");
-				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
+				msg.append(ex instanceof JMSException jmsException ? JmsUtils.buildExceptionMessage(jmsException) :
+						ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.error(msg, ex);
 				}
@@ -1028,8 +1049,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		String destName = getDestinationName();
 		if (destName != null) {
 			DestinationResolver destResolver = getDestinationResolver();
-			if (destResolver instanceof CachingDestinationResolver) {
-				((CachingDestinationResolver) destResolver).removeFromCache(destName);
+			if (destResolver instanceof CachingDestinationResolver cachingResolver) {
+				cachingResolver.removeFromCache(destName);
 			}
 		}
 	}
@@ -1245,9 +1266,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private void decreaseActiveInvokerCount() {
 			activeInvokerCount--;
-			if (stopCallback != null && activeInvokerCount == 0) {
-				stopCallback.run();
-				stopCallback = null;
+			if (activeInvokerCount == 0) {
+				if (!isRunning()) {
+					// Proactively release shared Connection when stopped.
+					releaseSharedConnection();
+				}
+				if (stopCallback != null) {
+					stopCallback.run();
+					stopCallback = null;
+				}
 			}
 		}
 

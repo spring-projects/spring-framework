@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Duration;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,8 +37,7 @@ import org.springframework.util.Assert;
  * @see java.net.HttpURLConnection
  * @see HttpComponentsClientHttpRequestFactory
  */
-@SuppressWarnings("deprecation")
-public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
+public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
@@ -46,18 +45,11 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	@Nullable
 	private Proxy proxy;
 
-	private boolean bufferRequestBody = true;
-
 	private int chunkSize = DEFAULT_CHUNK_SIZE;
 
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
-
-	private boolean outputStreaming = true;
-
-	@Nullable
-	private AsyncListenableTaskExecutor taskExecutor;
 
 
 	/**
@@ -79,9 +71,10 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * (if the {@code Content-Length} is not known in advance).
 	 * @see #setChunkSize(int)
 	 * @see HttpURLConnection#setFixedLengthStreamingMode(int)
+	 * @deprecated since 6.1 requests are never buffered, as if this property is {@code false}
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	public void setBufferRequestBody(boolean bufferRequestBody) {
-		this.bufferRequestBody = bufferRequestBody;
 	}
 
 	/**
@@ -108,6 +101,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	/**
+	 * Set the underlying URLConnection's connect timeout as {@code Duration}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.1
+	 * @see URLConnection#setConnectTimeout(int)
+	 */
+	public void setConnectTimeout(Duration connectTimeout) {
+		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
+		this.connectTimeout = (int) connectTimeout.toMillis();
+	}
+
+	/**
 	 * Set the underlying URLConnection's read timeout (in milliseconds).
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Default is the system's default timeout.
@@ -118,6 +123,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	/**
+	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.1
+	 * @see URLConnection#setReadTimeout(int)
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		this.readTimeout = (int) readTimeout.toMillis();
+	}
+
+	/**
 	 * Set if the underlying URLConnection can be set to 'output streaming' mode.
 	 * Default is {@code true}.
 	 * <p>When output streaming is enabled, authentication and redirection cannot be handled automatically.
@@ -125,18 +142,11 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
 	 * be called.
 	 * @param outputStreaming if output streaming is enabled
+	 * @deprecated as of 6.1, this property is ignored with no direct replacement.
+	 * @deprecated since 6.1 requests are always streamed, as if this property is {@code true}
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	public void setOutputStreaming(boolean outputStreaming) {
-		this.outputStreaming = outputStreaming;
-	}
-
-	/**
-	 * Set the task executor for this request factory. Setting this property is required
-	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous requests}.
-	 * @param taskExecutor the task executor
-	 */
-	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
-		this.taskExecutor = taskExecutor;
 	}
 
 
@@ -145,33 +155,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
 
-		if (this.bufferRequestBody) {
-			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
-		}
-		else {
-			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>Setting the {@link #setTaskExecutor taskExecutor} property is required before calling this method.
-	 */
-	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		Assert.state(this.taskExecutor != null, "Asynchronous execution requires TaskExecutor to be set");
-
-		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
-		prepareConnection(connection, httpMethod.name());
-
-		if (this.bufferRequestBody) {
-			return new SimpleBufferingAsyncClientHttpRequest(
-					connection, this.outputStreaming, this.taskExecutor);
-		}
-		else {
-			return new SimpleStreamingAsyncClientHttpRequest(
-					connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
-		}
+		return new SimpleClientHttpRequest(connection, this.chunkSize);
 	}
 
 	/**
@@ -185,11 +169,11 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 */
 	protected HttpURLConnection openConnection(URL url, @Nullable Proxy proxy) throws IOException {
 		URLConnection urlConnection = (proxy != null ? url.openConnection(proxy) : url.openConnection());
-		if (!(urlConnection instanceof HttpURLConnection)) {
+		if (!(urlConnection instanceof HttpURLConnection httpUrlConnection)) {
 			throw new IllegalStateException(
 					"HttpURLConnection required for [" + url + "] but got: " + urlConnection);
 		}
-		return (HttpURLConnection) urlConnection;
+		return httpUrlConnection;
 	}
 
 	/**

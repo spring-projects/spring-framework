@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.springframework.util.MultiValueMap;
  * {@code MultiValueMap} implementation for wrapping Undertow HTTP headers.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.1.1
  */
 class UndertowHeadersAdapter implements MultiValueMap<String, String> {
@@ -99,7 +101,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.contains((String) key));
+		return (key instanceof String headerName && this.headers.contains(headerName));
 	}
 
 	@Override
@@ -113,10 +115,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> get(Object key) {
-		if (key instanceof String) {
-			return this.headers.get((String) key);
-		}
-		return null;
+		return (key instanceof String headerName ? this.headers.get(headerName) : null);
 	}
 
 	@Override
@@ -130,8 +129,11 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
-			this.headers.remove((String) key);
+		if (key instanceof String headerName) {
+			Collection<String> removed = this.headers.remove(headerName);
+			if (removed != null) {
+				return new ArrayList<>(removed);
+			}
 		}
 		return null;
 	}
@@ -161,7 +163,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -183,7 +185,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Iterator<HttpString> names = headers.getHeaderNames().iterator();
+		private final Iterator<HttpString> names = headers.getHeaderNames().iterator();
 
 		@Override
 		public boolean hasNext() {

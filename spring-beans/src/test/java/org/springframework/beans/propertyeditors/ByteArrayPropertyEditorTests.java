@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class ByteArrayPropertyEditorTests {
 		byteEditor.setAsText(text);
 
 		Object value = byteEditor.getValue();
-		assertThat(value).isNotNull().isInstanceOf(byte[].class);
+		assertThat(value).isInstanceOf(byte[].class);
 		byte[] bytes = (byte[]) value;
 		for (int i = 0; i < text.length(); ++i) {
 			assertThat(bytes[i]).as("cyte[] differs at index '" + i + "'").isEqualTo((byte) text.charAt(i));
@@ -47,10 +47,10 @@ public class ByteArrayPropertyEditorTests {
 
 	@Test
 	public void getAsTextReturnsEmptyStringIfValueIsNull() throws Exception {
-		assertThat(byteEditor.getAsText()).isEqualTo("");
+		assertThat(byteEditor.getAsText()).isEmpty();
 
 		byteEditor.setAsText(null);
-		assertThat(byteEditor.getAsText()).isEqualTo("");
+		assertThat(byteEditor.getAsText()).isEmpty();
 	}
 
 }

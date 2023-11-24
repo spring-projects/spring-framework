@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class NullSafeComparatorTests {
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldCompareWithNullsLow() {
+		@SuppressWarnings("deprecation")
 		Comparator<String> c = NullSafeComparator.NULLS_LOW;
-		assertThat(c.compare(null, "boo") < 0).isTrue();
+		assertThat(c.compare(null, "boo")).isLessThan(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldCompareWithNullsHigh() {
+		@SuppressWarnings("deprecation")
 		Comparator<String> c = NullSafeComparator.NULLS_HIGH;
-		assertThat(c.compare(null, "boo") > 0).isTrue();
-		assertThat(c.compare(null, null) == 0).isTrue();
+		assertThat(c.compare(null, "boo")).isGreaterThan(0);
+		assertThat(c.compare(null, null)).isEqualTo(0);
 	}
 
 }

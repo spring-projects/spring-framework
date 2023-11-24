@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
-
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -36,16 +35,16 @@ public class JmsResponseTests {
 
 	@Test
 	public void destinationDoesNotUseDestinationResolver() throws JMSException {
-		Destination destination = mock(Destination.class);
+		Destination destination = mock();
 		Destination actual = JmsResponse.forDestination("foo", destination).resolveDestination(null, null);
 		assertThat(actual).isSameAs(destination);
 	}
 
 	@Test
 	public void resolveDestinationForQueue() throws JMSException {
-		Session session = mock(Session.class);
-		DestinationResolver destinationResolver = mock(DestinationResolver.class);
-		Destination destination = mock(Destination.class);
+		Session session = mock();
+		DestinationResolver destinationResolver = mock();
+		Destination destination = mock();
 
 		given(destinationResolver.resolveDestinationName(session, "myQueue", false)).willReturn(destination);
 		JmsResponse<String> jmsResponse = JmsResponse.forQueue("foo", "myQueue");
@@ -54,7 +53,7 @@ public class JmsResponseTests {
 	}
 
 	@Test
-	public void createWithNulResponse() {
+	public void createWithNullResponse() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				JmsResponse.forQueue(null, "myQueue"));
 	}

@@ -1,0 +1,18 @@
+[[webflux-web-security]]
+= Web Security
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webmvc/mvc-security.adoc[See equivalent in the Servlet stack]#
+
+The {spring-site-projects}/spring-security[Spring Security] project provides support
+for protecting web applications from malicious exploits. See the Spring Security
+reference documentation, including:
+
+* {docs-spring-security}/reactive/configuration/webflux.html[WebFlux Security]
+* {docs-spring-security}/reactive/test/index.html[WebFlux Testing Support]
+* {docs-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
+* {docs-spring-security}/features/exploits/headers.html[Security Response Headers]
+
+
+
+

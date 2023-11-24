@@ -60,7 +60,7 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @param message the message handled
 	 * @param channel the channel on which the message was sent to
 	 * @param handler the target handler that handled the message
-	 * @param ex any exception that may been raised by the handler
+	 * @param ex any exception that may have been raised by the handler
 	 */
 	default void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
 			@Nullable Exception ex) {

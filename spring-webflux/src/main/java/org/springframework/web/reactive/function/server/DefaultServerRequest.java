@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,29 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
@@ -47,7 +51,12 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
@@ -70,7 +79,8 @@ class DefaultServerRequest implements ServerRequest {
 			ex -> (ex.getContentType() != null ?
 					new UnsupportedMediaTypeStatusException(
 							ex.getContentType(), ex.getSupportedMediaTypes(), ex.getBodyType()) :
-					new UnsupportedMediaTypeStatusException(ex.getMessage()));
+					new UnsupportedMediaTypeStatusException(
+							ex.getMessage(), ex.getSupportedMediaTypes()));
 
 	private static final Function<DecodingException, ServerWebInputException> DECODING_MAPPER =
 			ex -> new ServerWebInputException("Failed to read HTTP message", null, ex);
@@ -85,7 +95,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	DefaultServerRequest(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
 		this.exchange = exchange;
-		this.messageReaders = Collections.unmodifiableList(new ArrayList<>(messageReaders));
+		this.messageReaders = List.copyOf(messageReaders);
 		this.headers = new DefaultHeaders();
 	}
 
@@ -97,8 +107,8 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		if (exchange.checkNotModified(etag, lastModified)) {
-			Integer statusCode = exchange.getResponse().getRawStatusCode();
-			return ServerResponse.status(statusCode != null ? statusCode : 200)
+			HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
+			return ServerResponse.status(statusCode != null ? statusCode : HttpStatus.OK)
 					.headers(headers -> headers.addAll(exchange.getResponse().getHeaders()))
 					.build();
 		}
@@ -108,8 +118,14 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public HttpMethod method() {
+		return request().getMethod();
+	}
+
+	@Override
+	@Deprecated
 	public String methodName() {
-		return request().getMethodValue();
+		return request().getMethod().name();
 	}
 
 	@Override
@@ -209,6 +225,33 @@ class DefaultServerRequest implements ServerRequest {
 		Flux<T> flux = body(BodyExtractors.toFlux(typeReference));
 		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
 				.onErrorMap(DecodingException.class, DECODING_MAPPER);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
+		Assert.notNull(bindType, "BindType must not be null");
+		Assert.notNull(dataBinderCustomizer, "DataBinderCustomizer must not be null");
+
+		return Mono.defer(() -> {
+			WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(null);
+			dataBinder.setTargetType(ResolvableType.forClass(bindType));
+			dataBinderCustomizer.accept(dataBinder);
+
+			ServerWebExchange exchange = exchange();
+			return dataBinder.construct(exchange)
+					.then(dataBinder.bind(exchange))
+					.then(Mono.defer(() -> {
+						BindingResult bindingResult = dataBinder.getBindingResult();
+						if (bindingResult.hasErrors()) {
+							return Mono.error(new BindException(bindingResult));
+						}
+						else {
+							T result = (T) bindingResult.getTarget();
+							return Mono.justOrEmpty(result);
+						}
+					}));
+		});
 	}
 
 	@Override

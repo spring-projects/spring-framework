@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.annotation;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -26,18 +25,17 @@ import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BridgeMethodAutowiringTests {
+class BridgeMethodAutowiringTests {
 
 	@Test
-	public void SPR8434() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(UserServiceImpl.class, Foo.class);
-		ctx.refresh();
+	void SPR8434() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(UserServiceImpl.class, Foo.class);
 		assertThat(ctx.getBean(UserServiceImpl.class).object).isNotNull();
+		ctx.close();
 	}
 
 
-	static abstract class GenericServiceImpl<D> {
+	abstract static class GenericServiceImpl<D> {
 
 		public abstract void setObject(D object);
 	}

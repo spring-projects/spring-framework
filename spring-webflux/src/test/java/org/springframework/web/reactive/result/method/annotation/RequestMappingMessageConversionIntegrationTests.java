@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -50,6 +49,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,25 +69,22 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	private static final ParameterizedTypeReference<List<Person>> PERSON_LIST =
-			new ParameterizedTypeReference<List<Person>>() {};
+			new ParameterizedTypeReference<>() {};
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
-		return wac;
+		return new AnnotationConfigApplicationContext(WebConfig.class);
 	}
 
 
 	@ParameterizedHttpServerTest
-	public void byteBufferResponseBodyWithPublisher(HttpServer httpServer) throws Exception {
+	void byteBufferResponseBodyWithPublisher(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -95,7 +92,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void byteBufferResponseBodyWithFlux(HttpServer httpServer) throws Exception {
+	void byteBufferResponseBodyWithFlux(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		String expected = "Hello!";
@@ -103,7 +100,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void byteBufferResponseBodyWithMono(HttpServer httpServer) throws Exception {
+	void byteBufferResponseBodyWithMono(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		String expected = "Hello!";
@@ -113,7 +110,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void byteBufferResponseBodyWithObservable(HttpServer httpServer) throws Exception {
+	void byteBufferResponseBodyWithObservable(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		String expected = "Hello!";
@@ -122,7 +119,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void byteBufferResponseBodyWithFlowable(HttpServer httpServer) throws Exception {
+	void byteBufferResponseBodyWithFlowable(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		String expected = "Hello!";
@@ -130,7 +127,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBody(HttpServer httpServer) throws Exception {
+	void personResponseBody(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -140,7 +137,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithCompletableFuture(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithCompletableFuture(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -150,7 +147,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithMono(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithMono(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -160,7 +157,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest // SPR-17506
-	public void personResponseBodyWithEmptyMono(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithEmptyMono(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Person> responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
@@ -168,14 +165,14 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(responseEntity.getBody()).isNull();
 
 		// As we're on the same connection, the 2nd request proves server response handling
-		// did complete after the 1st request..
+		// did complete after the 1st request.
 		responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
 		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(0);
 		assertThat(responseEntity.getBody()).isNull();
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithMonoDeclaredAsObject(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithMonoDeclaredAsObject(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -185,7 +182,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithSingle(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithSingle(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -195,7 +192,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithMonoResponseEntity(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithMonoResponseEntity(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		Person expected = new Person("Robert");
@@ -205,7 +202,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest // SPR-16172
-	public void personResponseBodyWithMonoResponseEntityXml(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithMonoResponseEntityXml(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 
@@ -219,7 +216,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithList(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithList(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
@@ -229,7 +226,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithPublisher(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithPublisher(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
@@ -239,7 +236,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithFlux(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithFlux(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
@@ -247,7 +244,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personResponseBodyWithObservable(HttpServer httpServer) throws Exception {
+	void personResponseBodyWithObservable(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
@@ -255,7 +252,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void resource(HttpServer httpServer) throws Exception {
+	void resource(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<byte[]> response = performGet("/resource", new HttpHeaders(), byte[].class);
@@ -263,12 +260,12 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.hasBody()).isTrue();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(951);
-		assertThat(response.getBody().length).isEqualTo(951);
+		assertThat(response.getBody()).hasSize(951);
 		assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("image", "png"));
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransform(HttpServer httpServer) throws Exception {
+	void personTransform(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		assertThat(performPost("/person-transform/person", JSON, new Person("Robert"),
@@ -276,7 +273,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithCompletableFuture(HttpServer httpServer) throws Exception {
+	void personTransformWithCompletableFuture(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		assertThat(performPost("/person-transform/completable-future", JSON, new Person("Robert"),
@@ -284,7 +281,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithMono(HttpServer httpServer) throws Exception {
+	void personTransformWithMono(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		assertThat(performPost("/person-transform/mono", JSON, new Person("Robert"),
@@ -292,7 +289,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest  // SPR-16759
-	public void personTransformWithMonoAndXml(HttpServer httpServer) throws Exception {
+	void personTransformWithMonoAndXml(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		assertThat(performPost("/person-transform/mono", MediaType.APPLICATION_XML, new Person("Robert"),
@@ -300,7 +297,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithSingle(HttpServer httpServer) throws Exception {
+	void personTransformWithSingle(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		assertThat(performPost("/person-transform/single", JSON, new Person("Robert"),
@@ -308,7 +305,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithMaybe(HttpServer httpServer) throws Exception {
+	void personTransformWithMaybe(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		assertThat(performPost("/person-transform/maybe", JSON, new Person("Robert"),
@@ -316,7 +313,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithPublisher(HttpServer httpServer) throws Exception {
+	void personTransformWithPublisher(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
@@ -325,7 +322,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithFlux(HttpServer httpServer) throws Exception {
+	void personTransformWithFlux(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
@@ -334,7 +331,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithObservable(HttpServer httpServer) throws Exception {
+	void personTransformWithObservable(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
@@ -343,7 +340,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personTransformWithFlowable(HttpServer httpServer) throws Exception {
+	void personTransformWithFlowable(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
@@ -352,117 +349,117 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithPublisherJson(HttpServer httpServer) throws Exception {
+	void personCreateWithPublisherJson(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Void> entity = performPost("/person-create/publisher", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithPublisherXml(HttpServer httpServer) throws Exception {
+	void personCreateWithPublisherXml(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/publisher", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithMono(HttpServer httpServer) throws Exception {
+	void personCreateWithMono(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Void> entity = performPost(
 				"/person-create/mono", JSON, new Person("Robert"), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(1);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithSingle(HttpServer httpServer) throws Exception {
+	void personCreateWithSingle(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Void> entity = performPost(
 				"/person-create/single", JSON, new Person("Robert"), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(1);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithFluxJson(HttpServer httpServer) throws Exception {
+	void personCreateWithFluxJson(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Void> entity = performPost("/person-create/flux", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithFluxXml(HttpServer httpServer) throws Exception {
+	void personCreateWithFluxXml(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/flux", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithObservableJson(HttpServer httpServer) throws Exception {
+	void personCreateWithObservableJson(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Void> entity = performPost("/person-create/observable", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithObservableXml(HttpServer httpServer) throws Exception {
+	void personCreateWithObservableXml(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/observable", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithFlowableJson(HttpServer httpServer) throws Exception {
+	void personCreateWithFlowableJson(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		ResponseEntity<Void> entity = performPost("/person-create/flowable", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
-	public void personCreateWithFlowableXml(HttpServer httpServer) throws Exception {
+	void personCreateWithFlowableXml(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/flowable", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest // gh-23791
-	public void personCreateViaDefaultMethodWithGenerics(HttpServer httpServer) throws Exception {
+	void personCreateViaDefaultMethodWithGenerics(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 		ResponseEntity<String> entity = performPost("/23791", JSON, new Person("Robert"), null, String.class);
 
@@ -485,29 +482,30 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	private static class RawResponseBodyController {
 
 		@GetMapping("/publisher")
-		public Publisher<ByteBuffer> getPublisher() {
+		@SuppressWarnings("deprecation")
+		Publisher<ByteBuffer> getPublisher() {
 			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), DefaultDataBufferFactory.sharedInstance,
-					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::asByteBuffer);
+					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::toByteBuffer);
 		}
 
 		@GetMapping("/flux")
-		public Flux<ByteBuffer> getFlux() {
+		Flux<ByteBuffer> getFlux() {
 			return Flux.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
 		@GetMapping("/mono")
-		public Mono<ByteBuffer> getMonoString() {
+		Mono<ByteBuffer> getMonoString() {
 			return Mono.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
 		@GetMapping("/observable")
-		public Observable<ByteBuffer> getObservable() {
+		Observable<ByteBuffer> getObservable() {
 			return Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
 		@GetMapping("/flowable")
-		public Flowable<ByteBuffer> getFlowable() {
+		Flowable<ByteBuffer> getFlowable() {
 			return Flowable.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 	}
@@ -519,64 +517,64 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	private static class PersonResponseBodyController {
 
 		@GetMapping("/person")
-		public Person getPerson() {
+		Person getPerson() {
 			return new Person("Robert");
 		}
 
 		@GetMapping("/completable-future")
-		public CompletableFuture<Person> getCompletableFuture() {
+		CompletableFuture<Person> getCompletableFuture() {
 			return CompletableFuture.completedFuture(new Person("Robert"));
 		}
 
 		@GetMapping("/mono")
-		public Mono<Person> getMono() {
+		Mono<Person> getMono() {
 			return Mono.just(new Person("Robert"));
 		}
 
 		@GetMapping("/mono-empty")
-		public Mono<Person> getMonoEmpty() {
+		Mono<Person> getMonoEmpty() {
 			return Mono.empty();
 		}
 
 		@GetMapping("/mono-declared-as-object")
-		public Object getMonoDeclaredAsObject() {
+		Object getMonoDeclaredAsObject() {
 			return Mono.just(new Person("Robert"));
 		}
 
 		@GetMapping("/single")
-		public Single<Person> getSingle() {
+		Single<Person> getSingle() {
 			return Single.just(new Person("Robert"));
 		}
 
 		@GetMapping("/mono-response-entity")
-		public ResponseEntity<Mono<Person>> getMonoResponseEntity() {
+		ResponseEntity<Mono<Person>> getMonoResponseEntity() {
 			Mono<Person> body = Mono.just(new Person("Robert"));
 			return ResponseEntity.ok(body);
 		}
 
 		@GetMapping("/mono-response-entity-xml")
-		public ResponseEntity<Mono<Person>> getMonoResponseEntityXml() {
+		ResponseEntity<Mono<Person>> getMonoResponseEntityXml() {
 			Mono<Person> body = Mono.just(new Person("Robert"));
 			return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(body);
 		}
 
 		@GetMapping("/list")
-		public List<Person> getList() {
+		List<Person> getList() {
 			return asList(new Person("Robert"), new Person("Marie"));
 		}
 
 		@GetMapping("/publisher")
-		public Publisher<Person> getPublisher() {
+		Publisher<Person> getPublisher() {
 			return Flux.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@GetMapping("/flux")
-		public Flux<Person> getFlux() {
+		Flux<Person> getFlux() {
 			return Flux.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@GetMapping("/observable")
-		public Observable<Person> getObservable() {
+		Observable<Person> getObservable() {
 			return Observable.just(new Person("Robert"), new Person("Marie"));
 		}
 	}
@@ -587,7 +585,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	private static class ResourceController {
 
 		@GetMapping("/resource")
-		public Resource resource() {
+		Resource resource() {
 			return new ClassPathResource("/org/springframework/web/reactive/spring.png");
 		}
 	}
@@ -599,47 +597,47 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	private static class PersonTransformationController {
 
 		@PostMapping("/person")
-		public Person transformPerson(@RequestBody Person person) {
+		Person transformPerson(@RequestBody Person person) {
 			return new Person(person.getName().toUpperCase());
 		}
 
 		@PostMapping("/completable-future")
-		public CompletableFuture<Person> transformCompletableFuture(@RequestBody CompletableFuture<Person> future) {
+		CompletableFuture<Person> transformCompletableFuture(@RequestBody CompletableFuture<Person> future) {
 			return future.thenApply(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/mono")
-		public Mono<Person> transformMono(@RequestBody Mono<Person> personFuture) {
+		Mono<Person> transformMono(@RequestBody Mono<Person> personFuture) {
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/single")
-		public Single<Person> transformSingle(@RequestBody Single<Person> personFuture) {
+		Single<Person> transformSingle(@RequestBody Single<Person> personFuture) {
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/maybe")
-		public Maybe<Person> transformMaybe(@RequestBody Maybe<Person> personFuture) {
+		Maybe<Person> transformMaybe(@RequestBody Maybe<Person> personFuture) {
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/publisher")
-		public Publisher<Person> transformPublisher(@RequestBody Publisher<Person> persons) {
+		Publisher<Person> transformPublisher(@RequestBody Publisher<Person> persons) {
 			return Flux.from(persons).map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/flux")
-		public Flux<Person> transformFlux(@RequestBody Flux<Person> persons) {
+		Flux<Person> transformFlux(@RequestBody Flux<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/observable")
-		public Observable<Person> transformObservable(@RequestBody Observable<Person> persons) {
+		Observable<Person> transformObservable(@RequestBody Observable<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@PostMapping("/flowable")
-		public Flowable<Person> transformFlowable(@RequestBody Flowable<Person> persons) {
+		Flowable<Person> transformFlowable(@RequestBody Flowable<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 	}
@@ -653,32 +651,32 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		final List<Person> persons = new ArrayList<>();
 
 		@PostMapping("/publisher")
-		public Publisher<Void> createWithPublisher(@RequestBody Publisher<Person> publisher) {
+		Publisher<Void> createWithPublisher(@RequestBody Publisher<Person> publisher) {
 			return Flux.from(publisher).doOnNext(persons::add).then();
 		}
 
 		@PostMapping("/mono")
-		public Mono<Void> createWithMono(@RequestBody Mono<Person> mono) {
+		Mono<Void> createWithMono(@RequestBody Mono<Person> mono) {
 			return mono.doOnNext(persons::add).then();
 		}
 
 		@PostMapping("/single")
-		public Completable createWithSingle(@RequestBody Single<Person> single) {
+		Completable createWithSingle(@RequestBody Single<Person> single) {
 			return single.map(persons::add).ignoreElement();
 		}
 
 		@PostMapping("/flux")
-		public Mono<Void> createWithFlux(@RequestBody Flux<Person> flux) {
+		Mono<Void> createWithFlux(@RequestBody Flux<Person> flux) {
 			return flux.doOnNext(persons::add).then();
 		}
 
 		@PostMapping("/observable")
-		public Completable createWithObservable(@RequestBody Observable<Person> observable) {
+		Completable createWithObservable(@RequestBody Observable<Person> observable) {
 			return observable.toList().doOnSuccess(persons::addAll).ignoreElement();
 		}
 
 		@PostMapping("/flowable")
-		public Completable createWithFlowable(@RequestBody Flowable<Person> flowable) {
+		Completable createWithFlowable(@RequestBody Flowable<Person> flowable) {
 			return flowable.toList().doOnSuccess(persons::addAll).ignoreElement();
 		}
 	}
@@ -706,7 +704,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (this == o) {
 				return true;
 			}

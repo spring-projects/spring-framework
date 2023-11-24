@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebInputException;
 
 /**
  * Resolver for {@code @RequestPart} arguments where the named part is decoded
@@ -47,7 +47,7 @@ import org.springframework.web.server.ServerWebInputException;
  * for a single value (e.g. Reactor {@code Mono}, RxJava {@code Single}).
  *
  * <p>This resolver also supports arguments of type {@link Part} which may be
- * wrapped with are reactive type for a single or multiple values.
+ * wrapped with a reactive type for a single value or multiple values.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -115,8 +115,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 					List<Part> list = map.get(name);
 					if (CollectionUtils.isEmpty(list)) {
 						if (isRequired) {
-							String reason = "Required request part '" + name + "' is not present";
-							throw new ServerWebInputException(reason, parameter);
+							throw new MissingRequestValueException(
+									name, parameter.getParameterType(), "request part", parameter);
 						}
 						return Collections.emptyList();
 					}

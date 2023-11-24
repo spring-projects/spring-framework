@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -39,7 +39,7 @@ import org.springframework.web.util.pattern.PathPattern;
 public class ViewControllerRegistry {
 
 	@Nullable
-	private ApplicationContext applicationContext;
+	private final ApplicationContext applicationContext;
 
 	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
@@ -104,7 +104,7 @@ public class ViewControllerRegistry {
 	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 * @since 4.1
 	 */
-	public void addStatusController(String urlPath, HttpStatus statusCode) {
+	public void addStatusController(String urlPath, HttpStatusCode statusCode) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
 		registration.setApplicationContext(this.applicationContext);
 		registration.setStatusCode(statusCode);

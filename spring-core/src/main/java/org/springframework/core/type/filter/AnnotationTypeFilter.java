@@ -32,7 +32,7 @@ import org.springframework.util.ClassUtils;
  * <p>By default, the matching logic mirrors that of
  * {@link AnnotationUtils#getAnnotation(java.lang.reflect.AnnotatedElement, Class)},
  * supporting annotations that are <em>present</em> or <em>meta-present</em> for a
- * single level of meta-annotations. The search for meta-annotations my be disabled.
+ * single level of meta-annotations. The search for meta-annotations may be disabled.
  * Similarly, the search for annotations on interfaces may optionally be enabled.
  * Consult the various constructors in this class for details.
  *

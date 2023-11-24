@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class XmlExpectationsHelper {
 		assertThat("Body content", document, matcher);
 	}
 
-	private Document parseXmlString(String xml) throws Exception  {
+	private Document parseXmlString(String xml) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
@@ -82,7 +82,7 @@ public class XmlExpectationsHelper {
 	public void assertXmlEqual(String expected, String actual) throws Exception {
 		XmlUnitDiff diff = new XmlUnitDiff(expected, actual);
 		if (diff.hasDifferences()) {
-			AssertionErrors.fail("Body content " + diff.toString());
+			AssertionErrors.fail("Body content " + diff);
 		}
 	}
 

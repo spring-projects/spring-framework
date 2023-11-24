@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,8 +184,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	/**
 	 * Overloaded version of {@code addPropertyValue} that takes
 	 * a property name and a property value.
-	 * <p>Note: As of Spring 3.0, we recommend using the more concise
-	 * and chaining-capable variant {@link #add}.
+	 * <p>Note: we recommend using the more concise and chaining-capable variant
+	 * {@link #add(String, Object)}.
 	 * @param propertyName name of the property
 	 * @param propertyValue value of the property
 	 * @see #addPropertyValue(PropertyValue)
@@ -221,8 +221,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	private PropertyValue mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
 		Object value = newPv.getValue();
-		if (value instanceof Mergeable) {
-			Mergeable mergeable = (Mergeable) value;
+		if (value instanceof Mergeable mergeable) {
 			if (mergeable.isMergeEnabled()) {
 				Object merged = mergeable.merge(currentPv.getValue());
 				return new PropertyValue(newPv.getName(), merged);
@@ -327,7 +326,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	/**
 	 * Register the specified property as "processed" in the sense
 	 * of some processor calling the corresponding setter method
-	 * outside of the PropertyValue(s) mechanism.
+	 * outside the PropertyValue(s) mechanism.
 	 * <p>This will lead to {@code true} being returned from
 	 * a {@link #contains} call for the specified property.
 	 * @param propertyName the name of the property.
@@ -368,8 +367,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof MutablePropertyValues &&
-				this.propertyValueList.equals(((MutablePropertyValues) other).propertyValueList)));
+		return (this == other || (other instanceof MutablePropertyValues that &&
+				this.propertyValueList.equals(that.propertyValueList)));
 	}
 
 	@Override

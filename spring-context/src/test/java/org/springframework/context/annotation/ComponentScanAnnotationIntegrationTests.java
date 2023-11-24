@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashSet;
+import java.util.Set;
 
 import example.scannable.CustomComponent;
 import example.scannable.CustomStereotype;
@@ -44,6 +43,7 @@ import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -52,9 +52,9 @@ import org.springframework.context.annotation.componentscan.simple.ClassWithNest
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.SimpleMapScope;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -73,78 +73,72 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ge
  * @since 3.1
  */
 @SuppressWarnings("resource")
-public class ComponentScanAnnotationIntegrationTests {
+class ComponentScanAnnotationIntegrationTests {
 
 	@Test
-	public void controlScan() {
+	void controlScan() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.scan(example.scannable.PackageMarker.class.getPackage().getName());
 		ctx.refresh();
-		assertThat(ctx.containsBean("fooServiceImpl")).as(
-				"control scan for example.scannable package failed to register FooServiceImpl bean").isTrue();
+		assertContextContainsBean(ctx, "fooServiceImpl");
 	}
 
 	@Test
-	public void viaContextRegistration() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanAnnotatedConfig.class);
-		ctx.refresh();
+	void viaContextRegistration() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ComponentScanAnnotatedConfig.class);
 		ctx.getBean(ComponentScanAnnotatedConfig.class);
 		ctx.getBean(TestBean.class);
-		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfig")).as("config class bean not found")
-			.isTrue();
+		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfig")).as("config class bean not found").isTrue();
 		assertThat(ctx.containsBean("fooServiceImpl")).as("@ComponentScan annotated @Configuration class registered directly against " +
-				"AnnotationConfigApplicationContext did not trigger component scanning as expected")
-			.isTrue();
+				"AnnotationConfigApplicationContext did not trigger component scanning as expected").isTrue();
 	}
 
 	@Test
-	public void viaContextRegistration_WithValueAttribute() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanAnnotatedConfig_WithValueAttribute.class);
-		ctx.refresh();
+	void viaContextRegistration_WithValueAttribute() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ComponentScanAnnotatedConfig_WithValueAttribute.class);
 		ctx.getBean(ComponentScanAnnotatedConfig_WithValueAttribute.class);
 		ctx.getBean(TestBean.class);
-		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfig_WithValueAttribute")).as("config class bean not found")
-			.isTrue();
+		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfig_WithValueAttribute")).as("config class bean not found").isTrue();
 		assertThat(ctx.containsBean("fooServiceImpl")).as("@ComponentScan annotated @Configuration class registered directly against " +
-				"AnnotationConfigApplicationContext did not trigger component scanning as expected")
-			.isTrue();
+				"AnnotationConfigApplicationContext did not trigger component scanning as expected").isTrue();
 	}
 
 	@Test
-	public void viaContextRegistration_FromPackageOfConfigClass() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanAnnotatedConfigWithImplicitBasePackage.class);
-		ctx.refresh();
+	void viaContextRegistration_FromPackageOfConfigClass() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ComponentScanAnnotatedConfigWithImplicitBasePackage.class);
 		ctx.getBean(ComponentScanAnnotatedConfigWithImplicitBasePackage.class);
-		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfigWithImplicitBasePackage")).as("config class bean not found")
-			.isTrue();
+		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfigWithImplicitBasePackage")).as("config class bean not found").isTrue();
 		assertThat(ctx.containsBean("scannedComponent")).as("@ComponentScan annotated @Configuration class registered directly against " +
-				"AnnotationConfigApplicationContext did not trigger component scanning as expected")
-			.isTrue();
-		assertThat(ctx.getBean(ConfigurableComponent.class).isFlag()).as("@Bean method overrides scanned class")
-			.isTrue();
+				"AnnotationConfigApplicationContext did not trigger component scanning as expected").isTrue();
+		assertThat(ctx.getBean(ConfigurableComponent.class).isFlag()).as("@Bean method overrides scanned class").isTrue();
 	}
 
 	@Test
-	public void viaContextRegistration_WithComposedAnnotation() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComposedAnnotationConfig.class);
-		ctx.refresh();
+	void viaContextRegistration_WithComposedAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComposedAnnotationConfig.class);
 		ctx.getBean(ComposedAnnotationConfig.class);
 		ctx.getBean(SimpleComponent.class);
 		ctx.getBean(ClassWithNestedComponents.NestedComponent.class);
 		ctx.getBean(ClassWithNestedComponents.OtherNestedComponent.class);
-		assertThat(ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig")).as("config class bean not found")
-			.isTrue();
+		assertThat(ctx.containsBeanDefinition("componentScanAnnotationIntegrationTests.ComposedAnnotationConfig")).as("config class bean not found").isTrue();
 		assertThat(ctx.containsBean("simpleComponent")).as("@ComponentScan annotated @Configuration class registered directly against " +
-				"AnnotationConfigApplicationContext did not trigger component scanning as expected")
-			.isTrue();
+				"AnnotationConfigApplicationContext did not trigger component scanning as expected").isTrue();
 	}
 
 	@Test
-	public void viaBeanRegistration() {
+	void multipleComposedComponentScanAnnotations() {  // gh-30941
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MultipleComposedAnnotationsConfig.class);
+		ctx.getBean(MultipleComposedAnnotationsConfig.class);
+		assertContextContainsBean(ctx, "componentScanAnnotationIntegrationTests.MultipleComposedAnnotationsConfig");
+		assertContextContainsBean(ctx, "simpleComponent");
+		assertContextContainsBean(ctx, "barComponent");
+	}
+
+	@Test
+	void viaBeanRegistration() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("componentScanAnnotatedConfig",
 				genericBeanDefinition(ComponentScanAnnotatedConfig.class).getBeanDefinition());
@@ -154,40 +148,36 @@ public class ComponentScanAnnotationIntegrationTests {
 		ctx.refresh();
 		ctx.getBean(ComponentScanAnnotatedConfig.class);
 		ctx.getBean(TestBean.class);
-		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfig")).as("config class bean not found")
-			.isTrue();
+		assertThat(ctx.containsBeanDefinition("componentScanAnnotatedConfig")).as("config class bean not found").isTrue();
 		assertThat(ctx.containsBean("fooServiceImpl")).as("@ComponentScan annotated @Configuration class registered as bean " +
-				"definition did not trigger component scanning as expected")
-			.isTrue();
+				"definition did not trigger component scanning as expected").isTrue();
 	}
 
 	@Test
-	public void withCustomBeanNameGenerator() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanWithBeanNameGenerator.class);
-		ctx.refresh();
-		assertThat(ctx.containsBean("custom_fooServiceImpl")).isTrue();
-		assertThat(ctx.containsBean("fooServiceImpl")).isFalse();
+	void withCustomBeanNameGenerator() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithBeanNameGenerator.class);
+		assertContextContainsBean(ctx, "custom_fooServiceImpl");
+		assertContextDoesNotContainBean(ctx, "fooServiceImpl");
 	}
 
 	@Test
-	public void withScopeResolver() {
+	void withScopeResolver() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithScopeResolver.class);
 		// custom scope annotation makes the bean prototype scoped. subsequent calls
 		// to getBean should return distinct instances.
 		assertThat(ctx.getBean(CustomScopeAnnotationBean.class)).isNotSameAs(ctx.getBean(CustomScopeAnnotationBean.class));
-		assertThat(ctx.containsBean("scannedComponent")).isFalse();
+		assertContextDoesNotContainBean(ctx, "scannedComponent");
 	}
 
 	@Test
-	public void multiComponentScan() {
+	void multiComponentScan() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MultiComponentScan.class);
 		assertThat(ctx.getBean(CustomScopeAnnotationBean.class)).isNotSameAs(ctx.getBean(CustomScopeAnnotationBean.class));
-		assertThat(ctx.containsBean("scannedComponent")).isTrue();
+		assertContextContainsBean(ctx, "scannedComponent");
 	}
 
 	@Test
-	public void withCustomTypeFilter() {
+	void withCustomTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithCustomTypeFilter.class);
 		assertThat(ctx.getDefaultListableBeanFactory().containsSingleton("componentScanParserTests.KustomAnnotationAutowiredBean")).isFalse();
 		KustomAnnotationAutowiredBean testBean = ctx.getBean("componentScanParserTests.KustomAnnotationAutowiredBean", KustomAnnotationAutowiredBean.class);
@@ -195,13 +185,13 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void withAwareTypeFilter() {
+	void withAwareTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithAwareTypeFilter.class);
-		assertThat(ctx.getEnvironment().acceptsProfiles(Profiles.of("the-filter-ran"))).isTrue();
+		assertThat(ctx.getEnvironment().matchesProfiles("the-filter-ran")).isTrue();
 	}
 
 	@Test
-	public void withScopedProxy() throws IOException, ClassNotFoundException {
+	void withScopedProxy() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithScopedProxy.class);
 		ctx.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -218,7 +208,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void withScopedProxyThroughRegex() throws IOException, ClassNotFoundException {
+	void withScopedProxyThroughRegex() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithScopedProxyThroughRegex.class);
 		ctx.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -230,7 +220,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void withScopedProxyThroughAspectJPattern() throws IOException, ClassNotFoundException {
+	void withScopedProxyThroughAspectJPattern() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithScopedProxyThroughAspectJPattern.class);
 		ctx.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -242,29 +232,50 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
-	public void withMultipleAnnotationIncludeFilters1() throws IOException, ClassNotFoundException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters1.class);
-		ctx.refresh();
+	void withMultipleAnnotationIncludeFilters1() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ComponentScanWithMultipleAnnotationIncludeFilters1.class);
 		ctx.getBean(DefaultNamedComponent.class); // @CustomStereotype-annotated
 		ctx.getBean(MessageBean.class);           // @CustomComponent-annotated
 	}
 
 	@Test
-	public void withMultipleAnnotationIncludeFilters2() throws IOException, ClassNotFoundException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters2.class);
-		ctx.refresh();
+	void withMultipleAnnotationIncludeFilters2() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ComponentScanWithMultipleAnnotationIncludeFilters2.class);
 		ctx.getBean(DefaultNamedComponent.class); // @CustomStereotype-annotated
 		ctx.getBean(MessageBean.class);           // @CustomComponent-annotated
 	}
 
 	@Test
-	public void withBasePackagesAndValueAlias() {
+	void withBeanMethodOverride() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanWithBasePackagesAndValueAlias.class);
+		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters3.class);
 		ctx.refresh();
-		assertThat(ctx.containsBean("fooServiceImpl")).isTrue();
+		assertThat(ctx.getBean(DefaultNamedComponent.class).toString()).isEqualTo("overridden");
+	}
+
+	@Test
+	void withBeanMethodOverrideAndGeneralOverridingDisabled() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getDefaultListableBeanFactory().setAllowBeanDefinitionOverriding(false);
+		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters3.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(DefaultNamedComponent.class).toString()).isEqualTo("overridden");
+	}
+
+	@Test
+	void withBasePackagesAndValueAlias() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ComponentScanWithBasePackagesAndValueAlias.class);
+		assertContextContainsBean(ctx, "fooServiceImpl");
+	}
+
+	private static void assertContextContainsBean(ApplicationContext ctx, String beanName) {
+		assertThat(ctx.containsBean(beanName)).as("context should contain bean " + beanName).isTrue();
+	}
+	private static void assertContextDoesNotContainBean(ApplicationContext ctx, String beanName) {
+		assertThat(ctx.containsBean(beanName)).as("context should not contain bean " + beanName).isFalse();
 	}
 
 
@@ -272,16 +283,33 @@ public class ComponentScanAnnotationIntegrationTests {
 	@ComponentScan
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public @interface ComposedConfiguration {
+	@interface ComposedConfiguration {
 
+		@AliasFor(annotation = ComponentScan.class)
+		String[] basePackages() default {};
+	}
+
+	@Configuration
+	@ComponentScan
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@interface ComposedConfiguration2 {
+
+		@AliasFor(annotation = ComponentScan.class)
 		String[] basePackages() default {};
 	}
 
 	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
-	public static class ComposedAnnotationConfig {
+	static class ComposedAnnotationConfig {
 	}
 
-	public static class AwareTypeFilter implements TypeFilter, EnvironmentAware,
+	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
+	@ComposedConfiguration2(basePackages = "example.scannable.sub")
+	static class MultipleComposedAnnotationsConfig {
+	}
+
+
+	static class AwareTypeFilter implements TypeFilter, EnvironmentAware,
 			ResourceLoaderAware, BeanClassLoaderAware, BeanFactoryAware {
 
 		private BeanFactory beanFactory;
@@ -318,9 +346,7 @@ public class ComponentScanAnnotationIntegrationTests {
 			assertThat(this.environment).isNotNull();
 			return false;
 		}
-
 	}
-
 
 }
 
@@ -395,9 +421,7 @@ class ComponentScanWithCustomTypeFilter {
 	@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 	public static CustomAutowireConfigurer customAutowireConfigurer() {
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
-		cac.setCustomQualifierTypes(new HashSet() {{
-				add(ComponentScanParserTests.CustomAnnotation.class);
-		}});
+		cac.setCustomQualifierTypes(Set.of(ComponentScanParserTests.CustomAnnotation.class));
 		return cac;
 	}
 
@@ -453,10 +477,26 @@ class ComponentScanWithMultipleAnnotationIncludeFilters1 {}
 class ComponentScanWithMultipleAnnotationIncludeFilters2 {}
 
 @Configuration
+@ComponentScan(basePackages = "example.scannable",
+		useDefaultFilters = false,
+		includeFilters = @Filter({CustomStereotype.class, CustomComponent.class})
+)
+class ComponentScanWithMultipleAnnotationIncludeFilters3 {
+
+	@Bean
+	public DefaultNamedComponent thoreau() {
+		return new DefaultNamedComponent() {
+			@Override
+			public String toString() {
+				return "overridden";
+			}
+		};
+	}
+}
+
+@Configuration
 @ComponentScan(
 		value = "example.scannable",
 		basePackages = "example.scannable",
 		basePackageClasses = example.scannable.PackageMarker.class)
 class ComponentScanWithBasePackagesAndValueAlias {}
-
-

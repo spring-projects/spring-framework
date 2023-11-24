@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,10 +70,10 @@ import org.springframework.util.StringUtils;
  * load or obtain and hook up a shared parent context to the root application context.
  * See the {@link #loadParentContext(ServletContext)} method for more information.
  *
- * <p>As of Spring 3.1, {@code ContextLoader} supports injecting the root web
- * application context via the {@link #ContextLoader(WebApplicationContext)}
- * constructor, allowing for programmatic configuration in Servlet 3.0+ environments.
- * See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
+ * <p>{@code ContextLoader} supports injecting the root web application context
+ * via the {@link #ContextLoader(WebApplicationContext)} constructor, allowing for
+ * programmatic configuration in Servlet initializers. See
+ * {@link org.springframework.web.WebApplicationInitializer} for usage examples.
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -133,22 +132,6 @@ public class ContextLoader {
 	private static final String DEFAULT_STRATEGIES_PATH = "ContextLoader.properties";
 
 
-	private static final Properties defaultStrategies;
-
-	static {
-		// Load default strategy implementations from properties file.
-		// This is currently strictly internal and not meant to be customized
-		// by application developers.
-		try {
-			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
-			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Could not load 'ContextLoader.properties': " + ex.getMessage());
-		}
-	}
-
-
 	/**
 	 * Map from (thread context) ClassLoader to corresponding 'current' WebApplicationContext.
 	 */
@@ -162,6 +145,8 @@ public class ContextLoader {
 	@Nullable
 	private static volatile WebApplicationContext currentContext;
 
+	@Nullable
+	private static Properties defaultStrategies;
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
@@ -194,9 +179,8 @@ public class ContextLoader {
 
 	/**
 	 * Create a new {@code ContextLoader} with the given application context. This
-	 * constructor is useful in Servlet 3.0+ environments where instance-based
-	 * registration of listeners is possible through the {@link ServletContext#addListener}
-	 * API.
+	 * constructor is useful in Servlet initializers where instance-based registration
+	 * of listeners is possible through the {@link ServletContext#addListener} API.
 	 * <p>The context may or may not yet be {@linkplain
 	 * ConfigurableApplicationContext#refresh() refreshed}. If it (a) is an implementation
 	 * of {@link ConfigurableWebApplicationContext} and (b) has <strong>not</strong>
@@ -278,19 +262,16 @@ public class ContextLoader {
 			if (this.context == null) {
 				this.context = createWebApplicationContext(servletContext);
 			}
-			if (this.context instanceof ConfigurableWebApplicationContext) {
-				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) this.context;
-				if (!cwac.isActive()) {
-					// The context has not yet been refreshed -> provide services such as
-					// setting the parent context, setting the application context id, etc
-					if (cwac.getParent() == null) {
-						// The context instance was injected without an explicit parent ->
-						// determine parent for root web application context, if any.
-						ApplicationContext parent = loadParentContext(servletContext);
-						cwac.setParent(parent);
-					}
-					configureAndRefreshWebApplicationContext(cwac, servletContext);
+			if (this.context instanceof ConfigurableWebApplicationContext cwac && !cwac.isActive()) {
+				// The context has not yet been refreshed -> provide services such as
+				// setting the parent context, setting the application context id, etc
+				if (cwac.getParent() == null) {
+					// The context instance was injected without an explicit parent ->
+					// determine parent for root web application context, if any.
+					ApplicationContext parent = loadParentContext(servletContext);
+					cwac.setParent(parent);
 				}
+				configureAndRefreshWebApplicationContext(cwac, servletContext);
 			}
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
@@ -357,6 +338,18 @@ public class ContextLoader {
 			}
 		}
 		else {
+			if (defaultStrategies == null) {
+				// Load default strategy implementations from properties file.
+				// This is currently strictly internal and not meant to be customized
+				// by application developers.
+				try {
+					ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
+					defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException("Could not load 'ContextLoader.properties': " + ex.getMessage());
+				}
+			}
 			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
 			try {
 				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
@@ -393,8 +386,8 @@ public class ContextLoader {
 		// is refreshed; do it eagerly here to ensure servlet property sources are in place for
 		// use in any post-processing or initialization that occurs below prior to #refresh
 		ConfigurableEnvironment env = wac.getEnvironment();
-		if (env instanceof ConfigurableWebEnvironment) {
-			((ConfigurableWebEnvironment) env).initPropertySources(sc, null);
+		if (env instanceof ConfigurableWebEnvironment cwe) {
+			cwe.initPropertySources(sc, null);
 		}
 
 		customizeContext(sc, wac);
@@ -513,8 +506,8 @@ public class ContextLoader {
 	public void closeWebApplicationContext(ServletContext servletContext) {
 		servletContext.log("Closing Spring root WebApplicationContext");
 		try {
-			if (this.context instanceof ConfigurableWebApplicationContext) {
-				((ConfigurableWebApplicationContext) this.context).close();
+			if (this.context instanceof ConfigurableWebApplicationContext cwac) {
+				cwac.close();
 			}
 		}
 		finally {

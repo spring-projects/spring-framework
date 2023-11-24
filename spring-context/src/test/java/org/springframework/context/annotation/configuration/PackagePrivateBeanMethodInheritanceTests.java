@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Reproduces SPR-8756, which has been marked as "won't fix" for reasons
  * described in the issue. Also demonstrates the suggested workaround.
@@ -34,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PackagePrivateBeanMethodInheritanceTests {
 
 	@Test
-	public void repro() {
+	void repro() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ReproConfig.class);
 		ctx.refresh();
@@ -42,10 +41,11 @@ public class PackagePrivateBeanMethodInheritanceTests {
 		Foo foo2 = ctx.getBean("foo2", Foo.class);
 		ctx.getBean("packagePrivateBar", Bar.class); // <-- i.e. @Bean was registered
 		assertThat(foo1.bar).isNotEqualTo(foo2.bar); // <-- i.e. @Bean *not* enhanced
+		ctx.close();
 	}
 
 	@Test
-	public void workaround() {
+	void workaround() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(WorkaroundConfig.class);
 		ctx.refresh();
@@ -53,7 +53,9 @@ public class PackagePrivateBeanMethodInheritanceTests {
 		Foo foo2 = ctx.getBean("foo2", Foo.class);
 		ctx.getBean("protectedBar", Bar.class);   // <-- i.e. @Bean was registered
 		assertThat(foo1.bar).isEqualTo(foo2.bar); // <-- i.e. @Bean *was* enhanced
+		ctx.close();
 	}
+
 
 	public static class Foo {
 		final Bar bar;
@@ -90,5 +92,5 @@ public class PackagePrivateBeanMethodInheritanceTests {
 			return new Foo(workaroundBar());
 		}
 	}
-}
 
+}

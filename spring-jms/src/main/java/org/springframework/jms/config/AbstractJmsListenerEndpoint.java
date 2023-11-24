@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.MessageListener;
+import jakarta.jms.MessageListener;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
@@ -134,8 +134,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 
 	@Override
 	public void setupListenerContainer(MessageListenerContainer listenerContainer) {
-		if (listenerContainer instanceof AbstractMessageListenerContainer) {
-			setupJmsListenerContainer((AbstractMessageListenerContainer) listenerContainer);
+		if (listenerContainer instanceof AbstractMessageListenerContainer abstractContainer) {
+			setupJmsListenerContainer(abstractContainer);
 		}
 		else {
 			new JcaEndpointConfigurer().configureEndpoint(listenerContainer);
@@ -177,9 +177,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	 */
 	protected StringBuilder getEndpointDescription() {
 		StringBuilder result = new StringBuilder();
-		return result.append(getClass().getSimpleName()).append("[").append(this.id).append("] destination=").
+		return result.append(getClass().getSimpleName()).append('[').append(this.id).append("] destination=").
 				append(this.destination).append("' | subscription='").append(this.subscription).
-				append(" | selector='").append(this.selector).append("'");
+				append(" | selector='").append(this.selector).append('\'');
 	}
 
 	@Override
@@ -194,8 +194,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	private class JcaEndpointConfigurer {
 
 		public void configureEndpoint(Object listenerContainer) {
-			if (listenerContainer instanceof JmsMessageEndpointManager) {
-				setupJcaMessageContainer((JmsMessageEndpointManager) listenerContainer);
+			if (listenerContainer instanceof JmsMessageEndpointManager endpointManager) {
+				setupJcaMessageContainer(endpointManager);
 			}
 			else {
 				throw new IllegalArgumentException("Could not configure endpoint with the specified container '" +

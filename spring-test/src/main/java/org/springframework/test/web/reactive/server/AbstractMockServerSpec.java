@@ -97,7 +97,7 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 	}
 
 	/**
-	 * Sub-classes must create an {@code WebHttpHandlerBuilder} that will then
+	 * Subclasses must create an {@code WebHttpHandlerBuilder} that will then
 	 * be used to create the HttpHandler for the mock server.
 	 */
 	protected abstract WebHttpHandlerBuilder initHttpHandlerBuilder();

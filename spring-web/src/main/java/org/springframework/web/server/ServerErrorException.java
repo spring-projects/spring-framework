@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class ServerErrorException extends ResponseStatusException {
 	 * @since 5.0.5
 	 */
 	public ServerErrorException(String reason, @Nullable Throwable cause) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause, null, new Object[] {reason});
 		this.handlerMethod = null;
 		this.parameter = null;
 	}
@@ -55,7 +55,7 @@ public class ServerErrorException extends ResponseStatusException {
 	 * @since 5.0.5
 	 */
 	public ServerErrorException(String reason, Method handlerMethod, @Nullable Throwable cause) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause, null, new Object[] {reason});
 		this.handlerMethod = handlerMethod;
 		this.parameter = null;
 	}
@@ -64,29 +64,9 @@ public class ServerErrorException extends ResponseStatusException {
 	 * Constructor for a 500 error with a {@link MethodParameter} and an optional cause.
 	 */
 	public ServerErrorException(String reason, MethodParameter parameter, @Nullable Throwable cause) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause, null, new Object[] {reason});
 		this.handlerMethod = parameter.getMethod();
 		this.parameter = parameter;
-	}
-
-	/**
-	 * Constructor for a 500 error linked to a specific {@code MethodParameter}.
-	 * @deprecated in favor of {@link #ServerErrorException(String, MethodParameter, Throwable)}
-	 */
-	@Deprecated
-	public ServerErrorException(String reason, MethodParameter parameter) {
-		this(reason, parameter, null);
-	}
-
-	/**
-	 * Constructor for a 500 error with a reason only.
-	 * @deprecated in favor of {@link #ServerErrorException(String, Throwable)}
-	 */
-	@Deprecated
-	public ServerErrorException(String reason) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, null);
-		this.handlerMethod = null;
-		this.parameter = null;
 	}
 
 

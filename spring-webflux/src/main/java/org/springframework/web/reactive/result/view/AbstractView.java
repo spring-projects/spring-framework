@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,9 +230,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 			attributes = new ConcurrentHashMap<>(0);
 		}
 
-		//noinspection deprecation
-		return resolveAsyncAttributes(attributes)
-				.then(resolveAsyncAttributes(attributes, exchange))
+		return resolveAsyncAttributes(attributes, exchange)
 				.doOnTerminate(() -> exchange.getAttributes().remove(BINDING_CONTEXT_ATTRIBUTE))
 				.thenReturn(attributes);
 	}
@@ -249,7 +247,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model, ServerWebExchange exchange) {
 		List<Mono<?>> asyncAttributes = null;
 		for (Map.Entry<String, ?> entry : model.entrySet()) {
-			Object value =  entry.getValue();
+			Object value = entry.getValue();
 			if (value == null) {
 				continue;
 			}
@@ -291,22 +289,6 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 		}
 		BindingResult result = context.createDataBinder(exchange, value, name).getBindingResult();
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, result);
-	}
-
-	/**
-	 * Use the configured {@link ReactiveAdapterRegistry} to adapt asynchronous
-	 * attributes to {@code Mono<T>} or {@code Mono<List<T>>} and then wait to
-	 * resolve them into actual values. When the returned {@code Mono<Void>}
-	 * completes, the asynchronous attributes in the model would have been
-	 * replaced with their corresponding resolved values.
-	 * @return result {@code Mono} that completes when the model is ready
-	 * @deprecated as of 5.1.8 this method is still invoked but it is a no-op.
-	 * Please use {@link #resolveAsyncAttributes(Map, ServerWebExchange)}
-	 * instead. It is invoked after this one and does the actual work.
-	 */
-	@Deprecated
-	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
-		return Mono.empty();
 	}
 
 	/**

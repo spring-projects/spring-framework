@@ -4,25 +4,27 @@
 <beans default-lazy-init="true">
 
 	<bean name="beta" class="org.springframework.beans.factory.FactoryBeanTests$Beta" autowire="byType">
-        <property name="name" value="${myName}"/>
+		<property name="name" value="${myName}"/>
 	</bean>
 
 	<bean id="alpha" class="org.springframework.beans.factory.FactoryBeanTests$Alpha" autowire="byType"/>
 
 	<bean id="gamma" class="org.springframework.beans.factory.FactoryBeanTests$Gamma"/>
 
-  <bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean" autowire="constructor">
-    <property name="beta" ref="beta"/>
-  </bean>
+	<bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean" autowire="constructor">
+    	<property name="beta" ref="beta"/>
+	</bean>
 
-  <bean id="gammaFactory" factory-bean="betaFactory" factory-method="getGamma"/>
+	<bean id="gammaFactory" factory-bean="${gammaFactory}" factory-method="${gamma}"/>
 
-  <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="properties">
-      <props>
-        <prop key="myName">yourName</prop>
-      </props>
-    </property>
-  </bean>
+	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="myName">yourName</prop>
+				<prop key="gammaFactory">betaFactory</prop>
+				<prop key="gamma">getGamma</prop>
+			</props>
+		</property>
+	</bean>
 
 </beans>

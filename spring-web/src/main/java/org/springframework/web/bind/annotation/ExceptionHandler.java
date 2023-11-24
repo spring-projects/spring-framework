@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+
 /**
  * Annotation for handling exceptions in specific handler classes and/or
  * handler methods.
@@ -38,8 +40,8 @@ import java.lang.annotation.Target;
  * exposed, whereas previously only an immediate cause was considered.
  * <li>Request and/or response objects (typically from the Servlet API).
  * You may choose any specific request/response type, e.g.
- * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}.
- * <li>Session object: typically {@link javax.servlet.http.HttpSession}.
+ * {@link jakarta.servlet.ServletRequest} / {@link jakarta.servlet.http.HttpServletRequest}.
+ * <li>Session object: typically {@link jakarta.servlet.http.HttpSession}.
  * An argument of this type will enforce the presence of a corresponding session.
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
@@ -88,7 +90,7 @@ import java.lang.annotation.Target;
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
- * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
+ * {@link jakarta.servlet.ServletResponse} / {@link jakarta.servlet.http.HttpServletResponse}
  * for that purpose) or if the view name is supposed to be implicitly determined
  * through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * (not declaring a response argument in the handler method signature).
@@ -100,11 +102,13 @@ import java.lang.annotation.Target;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ * @see ControllerAdvice
  * @see org.springframework.web.context.request.WebRequest
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective(ExceptionHandlerReflectiveProcessor.class)
 public @interface ExceptionHandler {
 
 	/**

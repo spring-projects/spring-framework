@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.web.reactive.function.server
 
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import kotlinx.coroutines.*
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders.*
-import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpHeaders.ACCEPT
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.HttpMethod.PATCH
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
@@ -163,6 +165,73 @@ class CoRouterFunctionDslTests {
 			.verifyComplete()
 	}
 
+	@Test
+	fun filteringWithContext() {
+		val mockRequest = get("https://example.com/").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(filterRouterWithContext.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("Filter context")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun contextProvider() {
+		val mockRequest = get("https://example.com/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(routerWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun contextProviderAndFilter() {
+		val mockRequest = get("https://example.com/")
+			.header("Custom-Header", "bar")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(routerWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.let {
+					it.contains("bar") && it.contains("Dispatchers.Default")
+				}
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun multipleContextProviders() {
+		assertThatIllegalStateException().isThrownBy {
+			coRouter {
+				context {
+					CoroutineName("foo")
+				}
+				context {
+					Dispatchers.Default
+				}
+			}
+		}
+	}
+
+	@Test
+	fun attributes() {
+		val visitor = AttributesTestVisitor()
+		attributesRouter.accept(visitor)
+		assertThat(visitor.routerFunctionsAttributes()).containsExactly(
+			listOf(mapOf("foo" to "bar", "baz" to "qux")),
+			listOf(mapOf("foo" to "bar", "baz" to "qux")),
+			listOf(mapOf("foo" to "bar"), mapOf("foo" to "n1")),
+			listOf(mapOf("baz" to "qux"), mapOf("foo" to "n1")),
+			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
+		);
+		assertThat(visitor.visitCount()).isEqualTo(7);
+	}
+
 	private fun sampleRouter() = coRouter {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
 		"/api".nest {
@@ -210,6 +279,36 @@ class CoRouterFunctionDslTests {
 		}
 	}
 
+	private val filterRouterWithContext = coRouter {
+		filter { request, next ->
+			withContext(CoroutineName("Filter context")) {
+				next(request)
+			}
+		}
+		GET("/") {
+			ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+		}
+	}
+
+	private val routerWithContextProvider = coRouter {
+		context {
+			CoroutineName(it.headers().firstHeader("Custom-Header")!!)
+		}
+		GET("/") {
+			ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+		}
+		filter { request, next ->
+			if (request.headers().firstHeader("Custom-Header") == "bar") {
+				withContext(currentCoroutineContext() + Dispatchers.Default) {
+					next.invoke(request)
+				}
+			}
+			else {
+				next.invoke(request)
+			}
+		}
+	}
+
 	private val otherRouter = router {
 		"/other" {
 			ok().build()
@@ -229,6 +328,39 @@ class CoRouterFunctionDslTests {
 		onError<IllegalStateException> { _, _ ->
 			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
 		}
+	}
+
+	private val attributesRouter = router {
+		GET("/atts/1") {
+			ok().build()
+		}
+		withAttribute("foo", "bar")
+		withAttribute("baz", "qux")
+		GET("/atts/2") {
+			ok().build()
+		}
+		withAttributes { atts ->
+			atts["foo"] = "bar"
+			atts["baz"] = "qux"
+		}
+		"/atts".nest {
+			GET("/3") {
+				ok().build()
+			}
+			withAttribute("foo", "bar")
+			GET("/4") {
+				ok().build()
+			}
+			withAttribute("baz", "qux")
+			"/5".nest {
+				GET {
+					ok().build()
+				}
+				withAttribute("foo", "n3")
+			}
+			withAttribute("foo", "n2")
+		}
+		withAttribute("foo", "n1")
 	}
 
 	@Suppress("UNUSED_PARAMETER")

@@ -1,0 +1,122 @@
+As a request goes through proxies such as load balancers the host, port, and
+scheme may change, and that makes it a challenge to create links that point to the correct
+host, port, and scheme from a client perspective.
+
+{rfc-site}/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
+that proxies can use to provide information about the original request.
+
+
+
+[[forwarded-headers-non-standard]]
+=== Non-standard Headers
+
+There are other non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
+`X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
+
+
+[[x-forwarded-host]]
+==== X-Forwarded-Host
+
+While not standard, https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Host[`X-Forwarded-Host: <host>`]
+is a de-facto standard header that is used to communicate the original host to a
+downstream server. For example, if a request of `https://example.com/resource` is sent to
+a proxy which forwards the request to `http://localhost:8080/resource`, then a header of
+`X-Forwarded-Host: example.com` can be sent to inform the server that the original host was `example.com`.
+
+
+[[x-forwarded-port]]
+==== X-Forwarded-Port
+
+While not standard, `X-Forwarded-Port: <port>` is a de-facto standard header that is used to
+communicate the original port to a downstream server. For example, if a request of
+`https://example.com/resource` is sent to a proxy which forwards the request to
+`http://localhost:8080/resource`, then a header of `X-Forwarded-Port: 443` can be sent
+to inform the server that the original port was `443`.
+
+
+[[x-forwarded-proto]]
+==== X-Forwarded-Proto
+
+While not standard, https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto[`X-Forwarded-Proto: (https|http)`]
+is a de-facto standard header that is used to communicate the original protocol (e.g. https / https)
+to a downstream server. For example, if a request of `https://example.com/resource` is sent to
+a proxy which forwards the request to `http://localhost:8080/resource`, then a header of
+`X-Forwarded-Proto: https` can be sent to inform the server that the original protocol was `https`.
+
+
+[[x-forwarded-ssl]]
+==== X-Forwarded-Ssl
+
+While not standard, `X-Forwarded-Ssl: (on|off)` is a de-facto standard header that is used to communicate the
+original protocol (e.g. https / https) to a downstream server. For example, if a request of
+`https://example.com/resource` is sent to a proxy which forwards the request to
+`http://localhost:8080/resource`, then a header of `X-Forwarded-Ssl: on` to inform the server that the
+original protocol was `https`.
+
+
+[[x-forwarded-prefix]]
+==== X-Forwarded-Prefix
+
+While not standard, https://microsoft.github.io/reverse-proxy/articles/transforms.html#defaults[`X-Forwarded-Prefix: <prefix>`]
+is a de-facto standard header that is used to communicate the original URL path prefix to a
+downstream server.
+
+Use of `X-Forwarded-Prefix` can vary by deployment scenario, and needs to be flexible to
+allow replacing, removing, or prepending the path prefix of the target server.
+
+_Scenario 1: Override path prefix_
+
+[subs="-attributes"]
+----
+https://example.com/api/{path} -> http://localhost:8080/app1/{path}
+----
+
+The prefix is the start of the path before the capture group `+{path}+`. For the proxy,
+the prefix is `/api` while for the server the prefix is `/app1`. In this case, the proxy
+can send `X-Forwarded-Prefix: /api` to have the original prefix `/api` override the
+server prefix `/app1`.
+
+_Scenario 2: Remove path prefix_
+
+At times, an application may want to have the prefix removed. For example, consider the
+following proxy to server mapping:
+
+[subs="-attributes"]
+----
+https://app1.example.com/{path} -> http://localhost:8080/app1/{path}
+https://app2.example.com/{path} -> http://localhost:8080/app2/{path}
+----
+
+The proxy has no prefix, while applications `app1` and `app2` have path prefixes
+`/app1` and `/app2` respectively. The proxy can send ``X-Forwarded-Prefix: `` to
+have the empty prefix override server prefixes `/app1` and `/app2`.
+
+[NOTE]
+====
+A common case for this deployment scenario is where licenses are paid per
+production application server, and it is preferable to deploy multiple applications per
+server to reduce fees. Another reason is to run more applications on the same server in
+order to share the resources required by the server to run.
+
+In these scenarios, applications need a non-empty context root because there are multiple
+applications on the same server. However, this should not be visible in URL paths of
+the public API where applications may use different subdomains that provides benefits
+such as:
+
+* Added security, e.g. same origin policy
+* Independent scaling of applications (different domain points to different IP address)
+====
+
+_Scenario 3: Insert path prefix_
+
+In other cases, it may be necessary to prepend a prefix. For example, consider the
+following proxy to server mapping:
+
+[subs="-attributes"]
+----
+https://example.com/api/app1/{path} -> http://localhost:8080/app1/{path}
+----
+
+In this case, the proxy has a prefix of `/api/app1` and the server has a prefix of
+`/app1`. The proxy can send `X-Forwarded-Prefix: /api/app1` to have the original prefix
+`/api/app1` override the server prefix `/app1`.

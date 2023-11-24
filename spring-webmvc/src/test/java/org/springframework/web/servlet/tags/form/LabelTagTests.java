@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -77,8 +76,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertThat(output.startsWith("<label ")).isTrue();
-		assertThat(output.endsWith("</label>")).isTrue();
+		assertThat(output).startsWith("<label ");
+		assertThat(output).endsWith("</label>");
 	}
 
 	@Test
@@ -105,8 +104,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertThat(output.startsWith("<label ")).isTrue();
-		assertThat(output.endsWith("</label>")).isTrue();
+		assertThat(output).startsWith("<label ");
+		assertThat(output).endsWith("</label>");
 	}
 
 	@Test
@@ -125,8 +124,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertThat(output.startsWith("<label ")).isTrue();
-		assertThat(output.endsWith("</label>")).isTrue();
+		assertThat(output).startsWith("<label ");
+		assertThat(output).endsWith("</label>");
 	}
 
 	@Test
@@ -145,8 +144,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertThat(output.startsWith("<label ")).isTrue();
-		assertThat(output.endsWith("</label>")).isTrue();
+		assertThat(output).startsWith("<label ");
+		assertThat(output).endsWith("</label>");
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.annotation.reactive;
 
 import java.nio.charset.StandardCharsets;
@@ -86,7 +87,7 @@ public class PayloadMethodArgumentResolverTests {
 		StepVerifier.create(mono)
 				.consumeErrorWith(ex -> {
 					assertThat(ex.getClass()).isEqualTo(MethodArgumentResolutionException.class);
-					assertThat(ex.getMessage().contains("Payload content is missing")).as(ex.getMessage()).isTrue();
+					assertThat(ex.getMessage()).as(ex.getMessage()).contains("Payload content is missing");
 				})
 				.verify();
 	}

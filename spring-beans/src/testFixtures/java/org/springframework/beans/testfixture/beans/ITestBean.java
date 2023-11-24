@@ -22,7 +22,7 @@ import java.io.IOException;
  * Interface used for {@link org.springframework.beans.testfixture.beans.TestBean}.
  *
  * <p>Two methods are the same as on Person, but if this
- * extends person it breaks quite a few tests..
+ * extends person it breaks quite a few tests.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

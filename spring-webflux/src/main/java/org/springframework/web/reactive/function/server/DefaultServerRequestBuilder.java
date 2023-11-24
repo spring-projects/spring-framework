@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
-	private ServerWebExchange exchange;
+	private final ServerWebExchange exchange;
 
-	private String methodName;
+	private HttpMethod method;
 
 	private URI uri;
+
+	@Nullable
+	private String contextPath;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -88,8 +91,9 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.messageReaders = other.messageReaders();
 		this.exchange = other.exchange();
-		this.methodName = other.methodName();
+		this.method = other.method();
 		this.uri = other.uri();
+		this.contextPath = other.requestPath().contextPath().value();
 		this.headers.addAll(other.headers().asHttpHeaders());
 		this.cookies.addAll(other.cookies());
 		this.attributes.putAll(other.attributes());
@@ -99,7 +103,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	@Override
 	public ServerRequest.Builder method(HttpMethod method) {
 		Assert.notNull(method, "HttpMethod must not be null");
-		this.methodName = method.name();
+		this.method = method;
 		return this;
 	}
 
@@ -111,7 +115,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	}
 
 	@Override
+	public ServerRequest.Builder contextPath(@Nullable String contextPath) {
+		this.contextPath = contextPath;
+		return this;
+	}
+
+	@Override
 	public ServerRequest.Builder header(String headerName, String... headerValues) {
+		Assert.notNull(headerName, "Header name must not be null");
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
 		}
@@ -120,12 +131,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "Headers consumer must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder cookie(String name, String... values) {
+		Assert.notNull(name, "Cookie name must not be null");
 		for (String value : values) {
 			this.cookies.add(name, new HttpCookie(name, value));
 		}
@@ -134,6 +147,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder cookies(Consumer<MultiValueMap<String, HttpCookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "Cookies consumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
@@ -164,12 +178,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder attribute(String name, Object value) {
+		Assert.notNull(name, "Name must not be null");
 		this.attributes.put(name, value);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
+		Assert.notNull(attributesConsumer, "Attributes consumer must not be null");
 		attributesConsumer.accept(this.attributes);
 		return this;
 	}
@@ -177,7 +193,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	@Override
 	public ServerRequest build() {
 		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.exchange.getRequest().getId(),
-				this.methodName, this.uri, this.headers, this.cookies, this.body);
+				this.method, this.uri, this.contextPath, this.headers, this.cookies, this.body);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
 				serverHttpRequest, this.attributes, this.exchange, this.messageReaders);
 		return new DefaultServerRequest(exchange, this.messageReaders);
@@ -190,7 +206,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final String id;
 
-		private final String method;
+		private final HttpMethod method;
 
 		private final URI uri;
 
@@ -204,13 +220,13 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltServerHttpRequest(String id, String method, URI uri, HttpHeaders headers,
-				MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
+		public BuiltServerHttpRequest(String id, HttpMethod method, URI uri, @Nullable String contextPath,
+				HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
 
 			this.id = id;
 			this.method = method;
 			this.uri = uri;
-			this.path = RequestPath.parse(uri, null);
+			this.path = RequestPath.parse(uri, contextPath);
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 			this.cookies = unmodifiableCopy(cookies);
 			this.queryParams = parseQueryParams(uri);
@@ -248,7 +264,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
-		public String getMethodValue() {
+		public HttpMethod getMethod() {
 			return this.method;
 		}
 

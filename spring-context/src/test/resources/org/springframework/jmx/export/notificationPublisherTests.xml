@@ -5,19 +5,19 @@
 
 	<bean id="publisher" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisher"/>
 
-  <bean id="publisherMBean" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisherMBean"/>
+	<bean id="publisherMBean" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisherMBean"/>
 
-  <bean id="publisherStandardMBean" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisherStandardMBean"/>
+	<bean id="publisherStandardMBean" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisherStandardMBean"/>
 
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
 				<entry key="spring:type=Publisher" value-ref="publisher"/>
-        <entry key="spring:type=PublisherMBean" value-ref="publisherMBean"/>
-        <entry key="spring:type=PublisherStandardMBean" value-ref="publisherStandardMBean"/>
+				<entry key="spring:type=PublisherMBean" value-ref="publisherMBean"/>
+				<entry key="spring:type=PublisherStandardMBean" value-ref="publisherStandardMBean"/>
 			</map>
 		</property>
-    <property name="server" ref="server"/>
+    	<property name="server" ref="server"/>
 	</bean>
 
 </beans>

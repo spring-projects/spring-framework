@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,7 @@ public class Projection extends SpelNodeImpl {
 		// has two fields 'key' and 'value' that refer to the map entries key
 		// and value, and they can be referenced in the operation
 		// eg. {'a':'y','b':'n'}.![value=='y'?key:null]" == ['a', null]
-		if (operand instanceof Map) {
-			Map<?, ?> mapData = (Map<?, ?>) operand;
+		if (operand instanceof Map<?, ?> mapData) {
 			List<Object> result = new ArrayList<>();
 			for (Map.Entry<?, ?> entry : mapData.entrySet()) {
 				try {
@@ -88,8 +87,8 @@ public class Projection extends SpelNodeImpl {
 		}
 
 		if (operand instanceof Iterable || operandIsArray) {
-			Iterable<?> data = (operand instanceof Iterable ?
-					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
+			Iterable<?> data = (operand instanceof Iterable<?> iterable ?
+					iterable : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
 			Class<?> arrayElementType = null;

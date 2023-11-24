@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
@@ -35,7 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class BeanNamePointcutAtAspectTests {
+class BeanNamePointcutAtAspectTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private ITestBean testBean1;
 
@@ -44,19 +48,24 @@ public class BeanNamePointcutAtAspectTests {
 	private CounterAspect counterAspect;
 
 
-	@org.junit.jupiter.api.BeforeEach
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean3 = (ITestBean) ctx.getBean("testBean3");
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
+
 
 	@Test
-	public void testMatchingBeanName() {
+	void matchingBeanName() {
 		boolean condition = testBean1 instanceof Advised;
 		assertThat(condition).as("Expected a proxy").isTrue();
 
@@ -67,7 +76,7 @@ public class BeanNamePointcutAtAspectTests {
 	}
 
 	@Test
-	public void testNonMatchingBeanName() {
+	void nonMatchingBeanName() {
 		boolean condition = testBean3 instanceof Advised;
 		assertThat(condition).as("Didn't expect a proxy").isFalse();
 
@@ -76,7 +85,7 @@ public class BeanNamePointcutAtAspectTests {
 	}
 
 	@Test
-	public void testProgrammaticProxyCreation() {
+	void programmaticProxyCreation() {
 		ITestBean testBean = new TestBean();
 
 		AspectJProxyFactory factory = new AspectJProxyFactory();

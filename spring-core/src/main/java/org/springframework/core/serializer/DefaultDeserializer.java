@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 
 import org.springframework.core.ConfigurableObjectInputStream;
-import org.springframework.core.NestedIOException;
 import org.springframework.lang.Nullable;
 
 /**
@@ -51,6 +50,7 @@ public class DefaultDeserializer implements Deserializer<Object> {
 	/**
 	 * Create a {@code DefaultDeserializer} for using an {@link ObjectInputStream}
 	 * with the given {@code ClassLoader}.
+	 * @param classLoader the ClassLoader to use
 	 * @since 4.2.1
 	 * @see ConfigurableObjectInputStream#ConfigurableObjectInputStream(InputStream, ClassLoader)
 	 */
@@ -65,14 +65,13 @@ public class DefaultDeserializer implements Deserializer<Object> {
 	 * @see ObjectInputStream#readObject()
 	 */
 	@Override
-	@SuppressWarnings("resource")
 	public Object deserialize(InputStream inputStream) throws IOException {
 		ObjectInputStream objectInputStream = new ConfigurableObjectInputStream(inputStream, this.classLoader);
 		try {
 			return objectInputStream.readObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new NestedIOException("Failed to deserialize object type", ex);
+			throw new IOException("Failed to deserialize object type", ex);
 		}
 	}
 

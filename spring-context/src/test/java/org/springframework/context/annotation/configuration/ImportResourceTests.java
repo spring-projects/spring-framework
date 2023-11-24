@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -121,7 +120,7 @@ public class ImportResourceTests {
 	static class ImportXmlConfig {
 		@Value("${name}")
 		private String name;
-		public @Bean TestBean javaDeclaredBean() {
+		@Bean public TestBean javaDeclaredBean() {
 			return new TestBean(this.name);
 		}
 	}
@@ -161,13 +160,15 @@ public class ImportResourceTests {
 	static class ImportXmlAutowiredConfig {
 		@Autowired TestBean xmlDeclaredBean;
 
-		public @Bean String xmlBeanName() {
+		@Bean public String xmlBeanName() {
 			return xmlDeclaredBean.getName();
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Configuration
-	@ImportResource(locations = "classpath:org/springframework/context/annotation/configuration/ImportNonXmlResourceConfig-context.properties", reader = PropertiesBeanDefinitionReader.class)
+	@ImportResource(locations = "classpath:org/springframework/context/annotation/configuration/ImportNonXmlResourceConfig-context.properties",
+			reader = org.springframework.beans.factory.support.PropertiesBeanDefinitionReader.class)
 	static class ImportNonXmlResourceConfig {
 	}
 

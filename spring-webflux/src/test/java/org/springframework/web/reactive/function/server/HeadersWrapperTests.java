@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -39,22 +38,15 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-public class HeadersWrapperTests {
+class HeadersWrapperTests {
 
-	private ServerRequest.Headers mockHeaders;
+	private ServerRequest.Headers mockHeaders = mock();
 
-	private ServerRequestWrapper.HeadersWrapper wrapper;
-
-
-	@BeforeEach
-	public void createWrapper() {
-		mockHeaders = mock(ServerRequest.Headers.class);
-		wrapper = new ServerRequestWrapper.HeadersWrapper(mockHeaders);
-	}
+	private ServerRequestWrapper.HeadersWrapper wrapper = new ServerRequestWrapper.HeadersWrapper(mockHeaders);
 
 
 	@Test
-	public void accept() {
+	void accept() {
 		List<MediaType> accept = Collections.singletonList(MediaType.APPLICATION_JSON);
 		given(mockHeaders.accept()).willReturn(accept);
 
@@ -62,7 +54,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void acceptCharset() {
+	void acceptCharset() {
 		List<Charset> acceptCharset = Collections.singletonList(StandardCharsets.UTF_8);
 		given(mockHeaders.acceptCharset()).willReturn(acceptCharset);
 
@@ -70,7 +62,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void contentLength() {
+	void contentLength() {
 		OptionalLong contentLength = OptionalLong.of(42L);
 		given(mockHeaders.contentLength()).willReturn(contentLength);
 
@@ -78,7 +70,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void contentType() {
+	void contentType() {
 		Optional<MediaType> contentType = Optional.of(MediaType.APPLICATION_JSON);
 		given(mockHeaders.contentType()).willReturn(contentType);
 
@@ -86,7 +78,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void host() {
+	void host() {
 		InetSocketAddress host = InetSocketAddress.createUnresolved("example.com", 42);
 		given(mockHeaders.host()).willReturn(host);
 
@@ -94,7 +86,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void range() {
+	void range() {
 		List<HttpRange> range = Collections.singletonList(HttpRange.createByteRange(42));
 		given(mockHeaders.range()).willReturn(range);
 
@@ -102,7 +94,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void header() {
+	void header() {
 		String name = "foo";
 		List<String> value = Collections.singletonList("bar");
 		given(mockHeaders.header(name)).willReturn(value);
@@ -111,7 +103,7 @@ public class HeadersWrapperTests {
 	}
 
 	@Test
-	public void asHttpHeaders() {
+	void asHttpHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		given(mockHeaders.asHttpHeaders()).willReturn(httpHeaders);
 

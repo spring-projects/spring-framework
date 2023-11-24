@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,20 @@ public interface ServerWebExchange {
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
+	 * Cleans up any storage used for multipart handling.
+	 * @since 6.0.10
+	 * @see Part#delete()
+	 */
+	default Mono<Void> cleanupMultipart() {
+		return getMultipartData()
+				.onErrorComplete()  // ignore errors reading multipart data
+				.flatMapIterable(Map::values)
+				.flatMapIterable(Function.identity())
+				.flatMap(part -> part.delete().onErrorComplete())
+				.then();
+	}
+
+	/**
 	 * Return the {@link LocaleContext} using the configured
 	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
 	 */
@@ -202,7 +216,7 @@ public interface ServerWebExchange {
 	/**
 	 * Transform the given url according to the registered transformation function(s).
 	 * By default, this method returns the given {@code url}, though additional
-	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * transformation functions can be registered with {@link #addUrlTransformer}
 	 * @param url the URL to transform
 	 * @return the transformed URL
 	 */
@@ -248,7 +262,7 @@ public interface ServerWebExchange {
 		 * Configure a consumer to modify the current request using a builder.
 		 * <p>Effectively this:
 		 * <pre>
-		 * exchange.mutate().request(builder-> builder.method(HttpMethod.PUT));
+		 * exchange.mutate().request(builder -&gt; builder.method(HttpMethod.PUT));
 		 *
 		 * // vs...
 		 *

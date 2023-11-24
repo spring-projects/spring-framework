@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class SimpMessagingTemplateTests {
 		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 
 		Message<byte[]> message = messages.get(0);
 		SimpMessageHeaderAccessor headerAccessor =
@@ -78,7 +78,7 @@ public class SimpMessagingTemplateTests {
 		this.messagingTemplate.convertAndSendToUser("https://joe.openid.example.org/", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
@@ -133,7 +133,7 @@ public class SimpMessagingTemplateTests {
 		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 
 		Message<byte[]> message = messages.get(0);
 		SimpMessageHeaderAccessor headerAccessor =
@@ -158,7 +158,6 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> message = messages.get(0);
 
 		assertThat(message.getHeaders()).isSameAs(headers);
-		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test
@@ -190,7 +189,6 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> sentMessage = messages.get(0);
 
 		assertThat(sentMessage).isSameAs(message);
-		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test

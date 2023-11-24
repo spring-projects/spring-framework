@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.context.index.CandidateComponentsIndexLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 /**
  * A test {@link ClassLoader} that can be used in a testing context to control the
@@ -36,21 +35,21 @@ import org.springframework.core.io.Resource;
 public class CandidateComponentsTestClassLoader extends ClassLoader {
 
 	/**
-	 * Create a test {@link ClassLoader} that disable the use of the index, even
+	 * Create a test {@link ClassLoader} that disables the use of the index, even
 	 * if resources are present at the standard location.
 	 * @param classLoader the classloader to use for all other operations
 	 * @return a test {@link ClassLoader} that has no index
-	 * @see CandidateComponentsIndexLoader#COMPONENTS_RESOURCE_LOCATION
+	 * @see org.springframework.context.index.CandidateComponentsIndexLoader#COMPONENTS_RESOURCE_LOCATION
 	 */
 	public static ClassLoader disableIndex(ClassLoader classLoader) {
-		return new CandidateComponentsTestClassLoader(classLoader,
-				Collections.enumeration(Collections.emptyList()));
+		return new CandidateComponentsTestClassLoader(classLoader, Collections.emptyEnumeration());
 	}
 
 	/**
 	 * Create a test {@link ClassLoader} that creates an index with the
-	 * specified {@link Resource} instances
+	 * specified {@link Resource} instances.
 	 * @param classLoader the classloader to use for all other operations
+	 * @param resources the resources for index files
 	 * @return a test {@link ClassLoader} with an index built based on the
 	 * specified resources.
 	 */
@@ -63,12 +62,14 @@ public class CandidateComponentsTestClassLoader extends ClassLoader {
 					catch (Exception ex) {
 						throw new IllegalArgumentException("Invalid resource " + r, ex);
 					}
-				}).collect(Collectors.toList())));
+				}).toList()));
 	}
 
 
+	@Nullable
 	private final Enumeration<URL> resourceUrls;
 
+	@Nullable
 	private final IOException cause;
 
 	public CandidateComponentsTestClassLoader(ClassLoader classLoader, Enumeration<URL> resourceUrls) {
@@ -84,8 +85,9 @@ public class CandidateComponentsTestClassLoader extends ClassLoader {
 	}
 
 	@Override
+	@SuppressWarnings({ "deprecation", "removal" })
 	public Enumeration<URL> getResources(String name) throws IOException {
-		if (CandidateComponentsIndexLoader.COMPONENTS_RESOURCE_LOCATION.equals(name)) {
+		if (org.springframework.context.index.CandidateComponentsIndexLoader.COMPONENTS_RESOURCE_LOCATION.equals(name)) {
 			if (this.resourceUrls != null) {
 				return this.resourceUrls;
 			}

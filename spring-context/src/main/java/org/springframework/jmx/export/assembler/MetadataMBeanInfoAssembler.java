@@ -119,7 +119,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 
 	/**
 	 * Used for autodetection of beans. Checks to see if the bean's class has a
-	 * {@code ManagedResource} attribute. If so it will add it list of included beans.
+	 * {@code ManagedResource} attribute. If so, it will add it to the list of included beans.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean in the bean factory
 	 */
@@ -410,7 +410,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	/**
 	 * Determines which of two {@code int} values should be used as the value
 	 * for an attribute descriptor. In general, only the getter or the setter will
-	 * be have a non-negative value so we use that value. In the event that both values
+	 * have a non-negative value, so we use that value. In the event that both values
 	 * are non-negative, we use the greater of the two. This method can be used to
 	 * resolve any {@code int} valued descriptor where there are two possible values.
 	 * @param getter the int value associated with the getter for this attribute

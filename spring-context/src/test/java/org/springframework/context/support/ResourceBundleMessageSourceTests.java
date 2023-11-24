@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -31,9 +32,12 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 03.02.2004
  */
 class ResourceBundleMessageSourceTests {
@@ -129,7 +133,7 @@ class ResourceBundleMessageSourceTests {
 
 		Locale.setDefault(expectGermanFallback ? Locale.GERMAN : Locale.CANADA);
 		assertThat(ac.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
-		Object expected = fallbackToSystemLocale && expectGermanFallback ? "nachricht2" : "message2";
+		Object expected = (fallbackToSystemLocale && expectGermanFallback ? "nachricht2" : "message2");
 		assertThat(ac.getMessage("code2", null, Locale.ENGLISH)).isEqualTo(expected);
 
 		assertThat(ac.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
@@ -207,6 +211,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -219,6 +225,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -231,6 +239,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -243,6 +253,8 @@ class ResourceBundleMessageSourceTests {
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
 		assertThat(ac.getMessage("code1", new Object[]{"value"}, "default {0}", Locale.ENGLISH)).isEqualTo("default value");
+		ac.close();
+		assertThatIllegalStateException().isThrownBy(() -> ac.getMessage("code1", null, "default", Locale.ENGLISH));
 	}
 
 	@Test
@@ -389,32 +401,57 @@ class ResourceBundleMessageSourceTests {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 
 		List<String> filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
-		assertThat(filenames.size()).isEqualTo(1);
+		assertThat(filenames).hasSize(1);
 		assertThat(filenames.get(0)).isEqualTo("messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", Locale.UK);
-		assertThat(filenames.size()).isEqualTo(2);
+		assertThat(filenames).hasSize(2);
 		assertThat(filenames.get(1)).isEqualTo("messages_en");
 		assertThat(filenames.get(0)).isEqualTo("messages_en_GB");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "GB", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(3);
+		assertThat(filenames).hasSize(3);
 		assertThat(filenames.get(2)).isEqualTo("messages_en");
 		assertThat(filenames.get(1)).isEqualTo("messages_en_GB");
 		assertThat(filenames.get(0)).isEqualTo("messages_en_GB_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(2);
+		assertThat(filenames).hasSize(2);
 		assertThat(filenames.get(1)).isEqualTo("messages_en");
 		assertThat(filenames.get(0)).isEqualTo("messages_en__POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "UK", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(2);
+		assertThat(filenames).hasSize(2);
 		assertThat(filenames.get(1)).isEqualTo("messages__UK");
 		assertThat(filenames.get(0)).isEqualTo("messages__UK_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(0);
+		assertThat(filenames).isEmpty();
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceWithCustomFileExtensions() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setFileExtensions(List.of(".toskip", ".custom"));
+		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
+		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceWithEmptyCustomFileExtensions() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		assertThatThrownBy(() -> ms.setFileExtensions(Collections.emptyList()))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("At least one file extension is required");
+	}
+
+	@Test
+	void reloadableResourceBundleMessageSourceWithInvalidCustomFileExtensions() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		assertThatThrownBy(() -> ms.setFileExtensions(List.of("invalid")))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("File extension 'invalid' should start with '.'");
 	}
 
 	@Test

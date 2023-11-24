@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests {
 		context.refresh();
 
 		FactoryMethodComponent fmc = context.getBean("factoryMethodComponent", FactoryMethodComponent.class);
-		assertThat(fmc.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)).isFalse();
+		assertThat(fmc.getClass().getName()).doesNotContain(ClassUtils.CGLIB_CLASS_SEPARATOR);
 
 		TestBean tb = (TestBean) context.getBean("publicInstance"); //2
 		assertThat(tb.getName()).isEqualTo("publicInstance");

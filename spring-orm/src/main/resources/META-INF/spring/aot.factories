@@ -1,0 +1,5 @@
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
+org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypesBeanRegistrationAotProcessor
+
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+org.springframework.orm.jpa.EntityManagerRuntimeHints

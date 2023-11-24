@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,9 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 
 	protected TestApplicationListener parentListener = new TestApplicationListener();
 
+
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.applicationContext = createContext();
 	}
 
@@ -79,33 +80,34 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	 */
 	protected abstract ConfigurableApplicationContext createContext() throws Exception;
 
+
 	@Test
 	public void contextAwareSingletonWasCalledBack() throws Exception {
 		ACATester aca = (ACATester) applicationContext.getBean("aca");
-		assertThat(aca.getApplicationContext() == applicationContext).as("has had context set").isTrue();
+		assertThat(aca.getApplicationContext()).as("has had context set").isSameAs(applicationContext);
 		Object aca2 = applicationContext.getBean("aca");
-		assertThat(aca == aca2).as("Same instance").isTrue();
+		assertThat(aca).as("Same instance").isSameAs(aca2);
 		assertThat(applicationContext.isSingleton("aca")).as("Says is singleton").isTrue();
 	}
 
 	@Test
 	public void contextAwarePrototypeWasCalledBack() throws Exception {
 		ACATester aca = (ACATester) applicationContext.getBean("aca-prototype");
-		assertThat(aca.getApplicationContext() == applicationContext).as("has had context set").isTrue();
+		assertThat(aca.getApplicationContext()).as("has had context set").isSameAs(applicationContext);
 		Object aca2 = applicationContext.getBean("aca-prototype");
-		assertThat(aca != aca2).as("NOT Same instance").isTrue();
+		assertThat(aca).as("NOT Same instance").isNotSameAs(aca2);
 		boolean condition = !applicationContext.isSingleton("aca-prototype");
 		assertThat(condition).as("Says is prototype").isTrue();
 	}
 
 	@Test
 	public void parentNonNull() {
-		assertThat(applicationContext.getParent() != null).as("parent isn't null").isTrue();
+		assertThat(applicationContext.getParent()).as("parent isn't null").isNotNull();
 	}
 
 	@Test
 	public void grandparentNull() {
-		assertThat(applicationContext.getParent().getParent() == null).as("grandparent is null").isTrue();
+		assertThat(applicationContext.getParent().getParent()).as("grandparent is null").isNull();
 	}
 
 	@Test
@@ -173,11 +175,12 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 			MyEvent event) {
 		listener.zeroCounter();
 		parentListener.zeroCounter();
-		assertThat(listener.getEventCount() == 0).as("0 events before publication").isTrue();
-		assertThat(parentListener.getEventCount() == 0).as("0 parent events before publication").isTrue();
+		assertThat(listener.getEventCount()).as("0 events before publication").isEqualTo(0);
+		assertThat(parentListener.getEventCount()).as("0 parent events before publication").isEqualTo(0);
 		this.applicationContext.publishEvent(event);
-		assertThat(listener.getEventCount() == 1).as("1 events after publication, not " + listener.getEventCount()).isTrue();
-		assertThat(parentListener.getEventCount() == 1).as("1 parent events after publication").isTrue();
+		assertThat(listener.getEventCount()).as("1 events after publication, not " + listener.getEventCount())
+				.isEqualTo(1);
+		assertThat(parentListener.getEventCount()).as("1 parent events after publication").isEqualTo(1);
 	}
 
 	@Test
@@ -186,9 +189,9 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		//assertTrue("listeners include beanThatListens", Arrays.asList(listenerNames).contains("beanThatListens"));
 		BeanThatListens b = (BeanThatListens) applicationContext.getBean("beanThatListens");
 		b.zero();
-		assertThat(b.getEventCount() == 0).as("0 events before publication").isTrue();
+		assertThat(b.getEventCount()).as("0 events before publication").isEqualTo(0);
 		this.applicationContext.publishEvent(new MyEvent(this));
-		assertThat(b.getEventCount() == 1).as("1 events after publication, not " + b.getEventCount()).isTrue();
+		assertThat(b.getEventCount()).as("1 events after publication, not " + b.getEventCount()).isEqualTo(1);
 	}
 
 

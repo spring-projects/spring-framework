@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.core.annotation.AliasFor;
  * Domain-Driven Design (Evans, 2003) as "a mechanism for encapsulating storage,
  * retrieval, and search behavior which emulates a collection of objects".
  *
- * <p>Teams implementing traditional Java EE patterns such as "Data Access Object"
+ * <p>Teams implementing traditional Jakarta EE patterns such as "Data Access Object"
  * may also apply this stereotype to DAO classes, though care should be taken to
  * understand the distinction between Data Access Object and DDD-style repositories
  * before doing so. This annotation is a general-purpose stereotype and individual teams
@@ -43,9 +43,8 @@ import org.springframework.core.annotation.AliasFor;
  * to its role in the overall application architecture for the purpose of tooling,
  * aspects, etc.
  *
- * <p>As of Spring 2.5, this annotation also serves as a specialization of
- * {@link Component @Component}, allowing for implementation classes to be autodetected
- * through classpath scanning.
+ * <p>This annotation also serves as a specialization of {@link Component @Component},
+ * allowing for implementation classes to be autodetected through classpath scanning.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -55,16 +54,14 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-@Target({ElementType.TYPE})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
 public @interface Repository {
 
 	/**
-	 * The value may indicate a suggestion for a logical component name,
-	 * to be turned into a Spring bean in case of an autodetected component.
-	 * @return the suggested component name, if any (or empty String otherwise)
+	 * Alias for {@link Component#value}.
 	 */
 	@AliasFor(annotation = Component.class)
 	String value() default "";

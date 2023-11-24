@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,8 +106,8 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof AttributeAccessorSupport &&
-				this.attributes.equals(((AttributeAccessorSupport) other).attributes)));
+		return (this == other || (other instanceof AttributeAccessorSupport that &&
+				this.attributes.equals(that.attributes)));
 	}
 
 	@Override

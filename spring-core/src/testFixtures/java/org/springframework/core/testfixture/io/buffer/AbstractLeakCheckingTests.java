@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core.testfixture.io.buffer;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.AfterEach;
 
@@ -42,7 +44,7 @@ public abstract class AbstractLeakCheckingTests {
 	 */
 	@AfterEach
 	final void checkForLeaks() {
-		this.bufferFactory.checkForLeaks();
+		this.bufferFactory.checkForLeaks(Duration.ofSeconds(1));
 	}
 
 }

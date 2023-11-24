@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
 package org.springframework.messaging.converter
 
 import kotlinx.serialization.Serializable
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
 import org.springframework.messaging.support.MessageBuilder
 import java.nio.charset.StandardCharsets
 import kotlin.reflect.typeOf
 
-@Suppress("UsePropertyAccessSyntax")
 class KotlinSerializationJsonMessageConverterTests {
 
 	private val converter = KotlinSerializationJsonMessageConverter()
@@ -50,12 +50,12 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = MessageBuilder.withPayload(payload.toByteArray(StandardCharsets.UTF_8)).build()
 		val result = converter.fromMessage(message, SerializableBean::class.java) as SerializableBean
 
-		Assertions.assertThat(result.bytes).containsExactly(0x1, 0x2)
-		Assertions.assertThat(result.array).containsExactly("Foo", "Bar")
-		Assertions.assertThat(result.number).isEqualTo(42)
-		Assertions.assertThat(result.string).isEqualTo("Foo")
-		Assertions.assertThat(result.bool).isTrue()
-		Assertions.assertThat(result.fraction).isEqualTo(42.0f)
+		assertThat(result.bytes).containsExactly(0x1, 0x2)
+		assertThat(result.array).containsExactly("Foo", "Bar")
+		assertThat(result.number).isEqualTo(42)
+		assertThat(result.string).isEqualTo("Foo")
+		assertThat(result.bool).isTrue()
+		assertThat(result.fraction).isEqualTo(42.0f)
 	}
 
 	@Test
@@ -82,13 +82,13 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = MessageBuilder.withPayload(payload.toByteArray(StandardCharsets.UTF_8)).build()
 		val result = converter.fromMessage(message, Array<SerializableBean>::class.java) as Array<SerializableBean>
 
-		Assertions.assertThat(result).hasSize(1)
-		Assertions.assertThat(result[0].bytes).containsExactly(0x1, 0x2)
-		Assertions.assertThat(result[0].array).containsExactly("Foo", "Bar")
-		Assertions.assertThat(result[0].number).isEqualTo(42)
-		Assertions.assertThat(result[0].string).isEqualTo("Foo")
-		Assertions.assertThat(result[0].bool).isTrue()
-		Assertions.assertThat(result[0].fraction).isEqualTo(42.0f)
+		assertThat(result).hasSize(1)
+		assertThat(result[0].bytes).containsExactly(0x1, 0x2)
+		assertThat(result[0].array).containsExactly("Foo", "Bar")
+		assertThat(result[0].number).isEqualTo(42)
+		assertThat(result[0].string).isEqualTo("Foo")
+		assertThat(result[0].bool).isTrue()
+		assertThat(result[0].fraction).isEqualTo(42.0f)
 	}
 
 	@Test
@@ -118,13 +118,13 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = MessageBuilder.withPayload(payload.toByteArray(StandardCharsets.UTF_8)).build()
 		val result = converter.fromMessage(message, typeOf<List<SerializableBean>>()::class.java, param) as List<SerializableBean>
 
-		Assertions.assertThat(result).hasSize(1)
-		Assertions.assertThat(result[0].bytes).containsExactly(0x1, 0x2)
-		Assertions.assertThat(result[0].array).containsExactly("Foo", "Bar")
-		Assertions.assertThat(result[0].number).isEqualTo(42)
-		Assertions.assertThat(result[0].string).isEqualTo("Foo")
-		Assertions.assertThat(result[0].bool).isTrue()
-		Assertions.assertThat(result[0].fraction).isEqualTo(42.0f)
+		assertThat(result).hasSize(1)
+		assertThat(result[0].bytes).containsExactly(0x1, 0x2)
+		assertThat(result[0].array).containsExactly("Foo", "Bar")
+		assertThat(result[0].number).isEqualTo(42)
+		assertThat(result[0].string).isEqualTo("Foo")
+		assertThat(result[0].bool).isTrue()
+		assertThat(result[0].fraction).isEqualTo(42.0f)
 	}
 
 	@Test
@@ -134,7 +134,7 @@ class KotlinSerializationJsonMessageConverterTests {
 		""".trimIndent()
 
 		val message = MessageBuilder.withPayload(payload.toByteArray(StandardCharsets.UTF_8)).build()
-		Assertions.assertThatExceptionOfType(MessageConversionException::class.java).isThrownBy {
+		assertThatExceptionOfType(MessageConversionException::class.java).isThrownBy {
 			converter.fromMessage(message, SerializableBean::class.java)
 		}
 	}
@@ -145,7 +145,7 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = converter.toMessage(serializableBean, null)
 		val result = String((message!!.payload as ByteArray), StandardCharsets.UTF_8)
 
-		Assertions.assertThat(result)
+		assertThat(result)
 				.contains("\"bytes\":[1,2]")
 				.contains("\"array\":[\"Foo\",\"Bar\"]")
 				.contains("\"number\":42")
@@ -160,7 +160,7 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = converter.toMessage(serializableBean, null)
 		val result = String((message!!.payload as ByteArray), StandardCharsets.UTF_8)
 
-		Assertions.assertThat(result)
+		assertThat(result)
 				.contains("\"bytes\":[1,2]")
 				.contains("\"array\":[\"Foo\",\"Bar\"]")
 				.contains("\"number\":42")
@@ -179,7 +179,7 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = converter.toMessage(arrayOf(serializableBean), null)
 		val result = String((message!!.payload as ByteArray), StandardCharsets.UTF_8)
 
-		Assertions.assertThat(result).isEqualTo(expectedJson)
+		assertThat(result).isEqualTo(expectedJson)
 	}
 
 	@Test
@@ -195,7 +195,7 @@ class KotlinSerializationJsonMessageConverterTests {
 		val message = converter.toMessage(arrayListOf(serializableBean), null, param)
 		val result = String((message!!.payload as ByteArray), StandardCharsets.UTF_8)
 
-		Assertions.assertThat(result).isEqualTo(expectedJson)
+		assertThat(result).isEqualTo(expectedJson)
 	}
 
 	@Suppress("UNUSED_PARAMETER")

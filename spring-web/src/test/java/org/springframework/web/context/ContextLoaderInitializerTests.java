@@ -18,9 +18,8 @@ package org.springframework.web.context;
 
 import java.util.EventListener;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

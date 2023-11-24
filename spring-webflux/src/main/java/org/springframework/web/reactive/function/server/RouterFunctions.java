@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,10 +33,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
@@ -50,9 +54,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
  * function.
  *
- * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
- * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
- * Reactor, or Undertow.
+ * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform}
+ * a {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet
+ * environments, Reactor, or Undertow.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -154,7 +158,26 @@ public abstract class RouterFunctions {
 	 * @see #resourceLookupFunction(String, Resource)
 	 */
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
-		return resources(resourceLookupFunction(pattern, location));
+		return resources(resourceLookupFunction(pattern, location), (resource, httpHeaders) -> {});
+	}
+
+	/**
+	 * Route requests that match the given pattern to resources relative to the given root location.
+	 * For instance
+	 * <pre class="code">
+	 * Resource location = new FileSystemResource("public-resources/");
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
+     * </pre>
+	 * @param pattern the pattern to match
+	 * @param location the location directory relative to which resources should be resolved
+	 * @param headersConsumer provides access to the HTTP headers for served resources
+	 * @return a router function that routes to resources
+	 * @since 6.1
+	 * @see #resourceLookupFunction(String, Resource)
+	 */
+	public static RouterFunction<ServerResponse> resources(String pattern, Resource location,
+			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+		return resources(resourceLookupFunction(pattern, location), headersConsumer);
 	}
 
 	/**
@@ -184,7 +207,21 @@ public abstract class RouterFunctions {
 	 * @return a router function that routes to resources
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
-		return new ResourcesRouterFunction(lookupFunction);
+		return new ResourcesRouterFunction(lookupFunction, (resource, httpHeaders) -> {});
+	}
+
+	/**
+	 * Route to resources using the provided lookup function. If the lookup function provides a
+	 * {@link Resource} for the given request, it will be it will be exposed using a
+	 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
+	 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+	 * @param headersConsumer provides access to the HTTP headers for served resources
+	 * @return a router function that routes to resources
+	 * @since 6.1
+	 */
+	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction,
+			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+		return new ResourcesRouterFunction(lookupFunction, headersConsumer);
 	}
 
 	/**
@@ -192,7 +229,7 @@ public abstract class RouterFunctions {
 	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
 	 * <p>The returned handler can be adapted to run in
 	 * <ul>
-	 * <li>Servlet 3.1+ using the
+	 * <li>Servlet environments using the
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
@@ -203,7 +240,7 @@ public abstract class RouterFunctions {
 	 * for additional filter and exception handler registration through
 	 * {@link WebHttpHandlerBuilder}.
 	 * @param routerFunction the router function to convert
-	 * @return an http handler that handles HTTP request using the given router function
+	 * @return an HTTP handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
@@ -214,7 +251,7 @@ public abstract class RouterFunctions {
 	 * using the given strategies.
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * <ul>
-	 * <li>Servlet 3.1+ using the
+	 * <li>Servlet environments using the
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
@@ -223,7 +260,7 @@ public abstract class RouterFunctions {
 	 * </ul>
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
-	 * @return an http handler that handles HTTP request using the given router function
+	 * @return an HTTP handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		WebHandler webHandler = toWebHandler(routerFunction, strategies);
@@ -652,6 +689,21 @@ public abstract class RouterFunctions {
 		Builder resources(String pattern, Resource location);
 
 		/**
+		 * Route requests that match the given pattern to resources relative to the given root location.
+		 * For instance
+		 * <pre class="code">
+		 * Resource location = new FileSystemResource("public-resources/");
+		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
+	     * </pre>
+		 * @param pattern the pattern to match
+		 * @param location the location directory relative to which resources should be resolved
+		 * @param headersConsumer provides access to the HTTP headers for served resources
+		 * @return this builder
+		 * @since 6.1
+		 */
+		Builder resources(String pattern, Resource location, BiConsumer<Resource, HttpHeaders> headersConsumer);
+
+		/**
 		 * Route to resources using the provided lookup function. If the lookup function provides a
 		 * {@link Resource} for the given request, it will be it will be exposed using a
 		 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
@@ -659,6 +711,17 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction);
+
+		/**
+		 * Route to resources using the provided lookup function. If the lookup function provides a
+		 * {@link Resource} for the given request, it will be it will be exposed using a
+		 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
+		 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+		 * @param headersConsumer provides access to the HTTP headers for served resources
+		 * @return this builder
+		 * @since 6.1
+		 */
+		Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction, BiConsumer<Resource, HttpHeaders> headersConsumer);
 
 		/**
 		 * Route to the supplied router function if the given request predicate applies. This method
@@ -670,7 +733,7 @@ public abstract class RouterFunctions {
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
 		 *   RouterFunctions.route()
-		 *     .nest(RequestPredicates.path("/user"), () ->
+		 *     .nest(RequestPredicates.path("/user"), () -&gt;
 		 *       RouterFunctions.route()
 		 *         .GET(this::listUsers)
 		 *         .POST(this::createUser)
@@ -695,7 +758,7 @@ public abstract class RouterFunctions {
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
 		 *   RouterFunctions.route()
-		 *     .nest(RequestPredicates.path("/user"), builder ->
+		 *     .nest(RequestPredicates.path("/user"), builder -&gt;
 		 *       builder.GET(this::listUsers)
 		 *              .POST(this::createUser))
 		 *     .build();
@@ -740,7 +803,7 @@ public abstract class RouterFunctions {
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
 		 *   RouterFunctions.route()
-		 *     .path("/user", builder ->
+		 *     .path("/user", builder -&gt;
 		 *       builder.GET(this::listUsers)
 		 *              .POST(this::createUser))
 		 *     .build();
@@ -762,7 +825,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .filter((request, next) -> {
+		 *     .filter((request, next) -&gt; {
 		 *       // check for authentication headers
 		 *       if (isAuthenticated(request)) {
 		 *         return next.handle(request);
@@ -788,7 +851,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .before(request -> {
+		 *     .before(request -&gt; {
 		 *       log(request);
 		 *       return request;
 		 *     })
@@ -809,7 +872,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .after((request, response) -> {
+		 *     .after((request, response) -&gt; {
 		 *       log(response);
 		 *       return response;
 		 *     })
@@ -829,8 +892,8 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .onError(e -> e instanceof IllegalStateException,
-		 *       (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *     .onError(e -&gt; e instanceof IllegalStateException,
+		 *       (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
 		 *     .build();
 		 * </pre>
 		 * @param predicate the type of exception to filter
@@ -838,7 +901,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder onError(Predicate<? super Throwable> predicate,
-				BiFunction<? super  Throwable, ServerRequest, Mono<ServerResponse>> responseProvider);
+				BiFunction<? super Throwable, ServerRequest, Mono<ServerResponse>> responseProvider);
 
 		/**
 		 * Filters all exceptions of the given type by applying the given response provider
@@ -850,7 +913,7 @@ public abstract class RouterFunctions {
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
 		 *     .onError(IllegalStateException.class,
-		 *       (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *       (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
 		 *     .build();
 		 * </pre>
 		 * @param exceptionType the type of exception to filter
@@ -1136,18 +1199,24 @@ public abstract class RouterFunctions {
 	}
 
 
-	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
+	private static class ResourcesRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
 		private final Function<ServerRequest, Mono<Resource>> lookupFunction;
 
-		public ResourcesRouterFunction(Function<ServerRequest, Mono<Resource>> lookupFunction) {
+		private final BiConsumer<Resource, HttpHeaders> headersConsumer;
+
+
+		public ResourcesRouterFunction(Function<ServerRequest, Mono<Resource>> lookupFunction,
+				BiConsumer<Resource, HttpHeaders> headersConsumer) {
 			Assert.notNull(lookupFunction, "Function must not be null");
+			Assert.notNull(headersConsumer, "HeadersConsumer must not be null");
 			this.lookupFunction = lookupFunction;
+			this.headersConsumer = headersConsumer;
 		}
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.lookupFunction.apply(request).map(ResourceHandlerFunction::new);
+			return this.lookupFunction.apply(request).map(resource -> new ResourceHandlerFunction(resource, this.headersConsumer));
 		}
 
 		@Override
@@ -1231,9 +1300,6 @@ public abstract class RouterFunctions {
 
 	private static class RouterFunctionWebHandler implements WebHandler {
 
-		private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
-				request -> ServerResponse.notFound().build();
-
 		private final HandlerStrategies strategies;
 
 		private final RouterFunction<?> routerFunction;
@@ -1249,7 +1315,7 @@ public abstract class RouterFunctions {
 				ServerRequest request = new DefaultServerRequest(exchange, this.strategies.messageReaders());
 				addAttributes(exchange, request);
 				return this.routerFunction.route(request)
-						.defaultIfEmpty(notFound())
+						.switchIfEmpty(createNotFoundError())
 						.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
 						.flatMap(response -> wrapException(() -> response.writeTo(exchange,
 								new HandlerStrategiesResponseContext(this.strategies))));
@@ -1261,9 +1327,8 @@ public abstract class RouterFunctions {
 			attributes.put(REQUEST_ATTRIBUTE, request);
 		}
 
-		@SuppressWarnings("unchecked")
-		private static <T extends ServerResponse> HandlerFunction<T> notFound() {
-			return (HandlerFunction<T>) NOT_FOUND_HANDLER;
+		private <R> Mono<R> createNotFoundError() {
+			return Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
 		}
 
 		private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  * @param <T> the message payload type
  * @see GenericMessage
@@ -110,7 +111,7 @@ public final class MessageBuilder<T> {
 
 	/**
 	 * Copy the name-value pairs from the provided Map. This operation will overwrite any
-	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
+	 * existing values. Use {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
 	public MessageBuilder<T> copyHeaders(@Nullable Map<String, ?> headersToCopy) {
@@ -153,14 +154,14 @@ public final class MessageBuilder<T> {
 			return this.providedMessage;
 		}
 		MessageHeaders headersToUse = this.headerAccessor.toMessageHeaders();
-		if (this.payload instanceof Throwable) {
-			if (this.providedMessage != null && this.providedMessage instanceof ErrorMessage) {
-				Message<?> message = ((ErrorMessage) this.providedMessage).getOriginalMessage();
+		if (this.payload instanceof Throwable throwable) {
+			if (this.providedMessage != null && this.providedMessage instanceof ErrorMessage errorMessage) {
+				Message<?> message = errorMessage.getOriginalMessage();
 				if (message != null) {
-					return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse, message);
+					return (Message<T>) new ErrorMessage(throwable, headersToUse, message);
 				}
 			}
-			return (Message<T>) new ErrorMessage((Throwable) this.payload, headersToUse);
+			return (Message<T>) new ErrorMessage(throwable, headersToUse);
 		}
 		else {
 			return new GenericMessage<>(this.payload, headersToUse);
@@ -169,7 +170,7 @@ public final class MessageBuilder<T> {
 
 
 	/**
-	 * Create a builder for a new {@link Message} instance pre-populated with all of the
+	 * Create a builder for a new {@link Message} instance pre-populated with all the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
 	 * <p>If the provided message is an {@link ErrorMessage}, the
@@ -200,11 +201,11 @@ public final class MessageBuilder<T> {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Message<T> createMessage(@Nullable T payload, MessageHeaders messageHeaders) {
+	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
 		Assert.notNull(payload, "Payload must not be null");
 		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
-		if (payload instanceof Throwable) {
-			return (Message<T>) new ErrorMessage((Throwable) payload, messageHeaders);
+		if (payload instanceof Throwable throwable) {
+			return (Message<T>) new ErrorMessage(throwable, messageHeaders);
 		}
 		else {
 			return new GenericMessage<>(payload, messageHeaders);

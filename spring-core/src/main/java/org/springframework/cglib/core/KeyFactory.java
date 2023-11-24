@@ -82,7 +82,7 @@ abstract public class KeyFactory {
 			TypeUtils.parseSignature("int getSort()");
 
 	//generated numbers:
-	private final static int PRIMES[] = {
+	private static final int PRIMES[] = {
 			11, 73, 179, 331,
 			521, 787, 1213, 1823,
 			2609, 3691, 5189, 7247,
@@ -98,20 +98,20 @@ abstract public class KeyFactory {
 			938313161, 1288102441, 1768288259};
 
 
-	public static final Customizer CLASS_BY_NAME = new Customizer() {
-		public void customize(CodeEmitter e, Type type) {
-			if (type.equals(Constants.TYPE_CLASS)) {
-				e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
-			}
+	public static final Customizer CLASS_BY_NAME = (e, type) -> {
+		if (type.equals(Constants.TYPE_CLASS)) {
+			e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
 		}
 	};
 
 	public static final FieldTypeCustomizer STORE_CLASS_AS_STRING = new FieldTypeCustomizer() {
+		@Override
 		public void customize(CodeEmitter e, int index, Type type) {
 			if (type.equals(Constants.TYPE_CLASS)) {
 				e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
 			}
 		}
+		@Override
 		public Type getOutType(int index, Type type) {
 			if (type.equals(Constants.TYPE_CLASS)) {
 				return Constants.TYPE_STRING;
@@ -124,14 +124,12 @@ abstract public class KeyFactory {
 	 * {@link Type#hashCode()} is very expensive as it traverses full descriptor to calculate hash code.
 	 * This customizer uses {@link Type#getSort()} as a hash code.
 	 */
-	public static final HashCodeCustomizer HASH_ASM_TYPE = new HashCodeCustomizer() {
-		public boolean customize(CodeEmitter e, Type type) {
-			if (Constants.TYPE_TYPE.equals(type)) {
-				e.invoke_virtual(type, GET_SORT);
-				return true;
-			}
-			return false;
+	public static final HashCodeCustomizer HASH_ASM_TYPE = (e, type) -> {
+		if (Constants.TYPE_TYPE.equals(type)) {
+			e.invoke_virtual(type, GET_SORT);
+			return true;
 		}
+		return false;
 	};
 
 	/**
@@ -139,11 +137,7 @@ abstract public class KeyFactory {
 	 * It is recommended to have pre-processing method that would strip Objects and represent Classes as Strings
 	 */
 	@Deprecated
-	public static final Customizer OBJECT_BY_CLASS = new Customizer() {
-		public void customize(CodeEmitter e, Type type) {
-			e.invoke_virtual(Constants.TYPE_OBJECT, GET_CLASS);
-		}
-	};
+	public static final Customizer OBJECT_BY_CLASS = (e, type) -> e.invoke_virtual(Constants.TYPE_OBJECT, GET_CLASS);
 
 	protected KeyFactory() {
 	}
@@ -204,10 +198,12 @@ abstract public class KeyFactory {
 			super(SOURCE);
 		}
 
+		@Override
 		protected ClassLoader getDefaultClassLoader() {
 			return keyInterface.getClassLoader();
 		}
 
+		@Override
 		protected ProtectionDomain getProtectionDomain() {
 			return ReflectUtils.getProtectionDomain(keyInterface);
 		}
@@ -245,14 +241,17 @@ abstract public class KeyFactory {
 			this.multiplier = multiplier;
 		}
 
+		@Override
 		protected Object firstInstance(Class type) {
 			return ReflectUtils.newInstance(type);
 		}
 
+		@Override
 		protected Object nextInstance(Object instance) {
 			return instance;
 		}
 
+		@Override
 		public void generateClass(ClassVisitor v) {
 			ClassEmitter ce = new ClassEmitter(v);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -50,10 +50,10 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a GET request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder get(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.GET, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder get(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.GET, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -68,10 +68,10 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a POST request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder post(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.POST, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder post(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.POST, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -86,10 +86,10 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a PUT request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder put(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.PUT, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder put(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PUT, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -104,10 +104,10 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a PATCH request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder patch(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder patch(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.PATCH, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -122,10 +122,10 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a DELETE request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder delete(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder delete(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -140,10 +140,10 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder options(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder options(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -158,11 +158,11 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a HEAD request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 * @since 4.1
 	 */
-	public static MockHttpServletRequestBuilder head(String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(HttpMethod.HEAD, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder head(String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.HEAD, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -178,10 +178,10 @@ public abstract class MockMvcRequestBuilders {
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	public static MockHttpServletRequestBuilder request(HttpMethod method, String urlTemplate, Object... uriVars) {
-		return new MockHttpServletRequestBuilder(method, urlTemplate, uriVars);
+	public static MockHttpServletRequestBuilder request(HttpMethod method, String urlTemplate, Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(method, urlTemplate, uriVariables);
 	}
 
 	/**
@@ -205,17 +205,30 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request,
+	 * using POST as the HTTP method.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
+	 * @param uriVariables zero or more URI variables
 	 * @since 5.0
 	 */
-	public static MockMultipartHttpServletRequestBuilder multipart(String urlTemplate, Object... uriVars) {
-		return new MockMultipartHttpServletRequestBuilder(urlTemplate, uriVars);
+	public static MockMultipartHttpServletRequestBuilder multipart(String urlTemplate, Object... uriVariables) {
+		return new MockMultipartHttpServletRequestBuilder(urlTemplate, uriVariables);
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Variant of {@link #multipart(String, Object...)} that also accepts an
+	 * {@link HttpMethod}.
+	 * @param httpMethod the HTTP method to use
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param uriVariables zero or more URI variables
+	 * @since 5.3.22
+	 */
+	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, String urlTemplate, Object... uriVariables) {
+		return new MockMultipartHttpServletRequestBuilder(httpMethod, urlTemplate, uriVariables);
+	}
+
+	/**
+	 * Variant of {@link #multipart(String, Object...)} with a {@link URI}.
 	 * @param uri the URL
 	 * @since 5.0
 	 */
@@ -224,27 +237,15 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
-	 * @deprecated in favor of {@link #multipart(String, Object...)}
-	 */
-	@Deprecated
-	public static MockMultipartHttpServletRequestBuilder fileUpload(String urlTemplate, Object... uriVars) {
-		return new MockMultipartHttpServletRequestBuilder(urlTemplate, uriVars);
-	}
-
-	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Variant of {@link #multipart(String, Object...)} with a {@link URI} and
+	 * an {@link HttpMethod}.
+	 * @param httpMethod the HTTP method to use
 	 * @param uri the URL
-	 * @since 4.0.3
-	 * @deprecated in favor of {@link #multipart(URI)}
+	 * @since 5.3.21
 	 */
-	@Deprecated
-	public static MockMultipartHttpServletRequestBuilder fileUpload(URI uri) {
-		return new MockMultipartHttpServletRequestBuilder(uri);
+	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, URI uri) {
+		return new MockMultipartHttpServletRequestBuilder(httpMethod, uri);
 	}
-
 
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the

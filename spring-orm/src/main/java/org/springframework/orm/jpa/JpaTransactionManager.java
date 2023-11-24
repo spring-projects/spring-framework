@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.RollbackException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -58,7 +59,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
- * for a single JPA {@link javax.persistence.EntityManagerFactory}. Binds a JPA
+ * for a single JPA {@link jakarta.persistence.EntityManagerFactory}. Binds a JPA
  * EntityManager from the specified factory to the thread, potentially allowing for
  * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator} and
  * {@code @PersistenceContext} are aware of thread-bound entity managers and participate
@@ -90,7 +91,7 @@ import org.springframework.util.CollectionUtils;
  * used as the connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * <p>This transaction manager supports nested transactions via JDBC Savepoints.
  * The {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
  * to {@code false} though, since nested transactions will just apply to the JDBC
  * Connection, not to the JPA EntityManager and its cached entity objects and related
@@ -109,7 +110,7 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @see org.springframework.jdbc.support.JdbcTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 @SuppressWarnings("serial")
@@ -209,7 +210,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
 	 * or a "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public void setJpaProperties(@Nullable Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
@@ -219,7 +220,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Specify JPA properties as a Map, to be passed into
 	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
@@ -228,9 +229,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * Allow {@code Map} access to the JPA properties to be passed to the persistence
 	 * provider, with the option to add or override specific entries.
-	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
+	 * <p>Useful for specifying entries directly, for example via {@code jpaPropertyMap[myKey]}.
 	 */
 	public Map<String, Object> getJpaPropertyMap() {
 		return this.jpaPropertyMap;
@@ -261,11 +262,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy proxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
-			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+			this.dataSource = proxy.getTargetDataSource();
 		}
 		else {
 			this.dataSource = dataSource;
@@ -325,11 +326,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getEntityManagerFactory() == null) {
-			if (!(beanFactory instanceof ListableBeanFactory)) {
+			if (!(beanFactory instanceof ListableBeanFactory lbf)) {
 				throw new IllegalStateException("Cannot retrieve EntityManagerFactory by persistence unit name " +
 						"in a non-listable BeanFactory: " + beanFactory);
 			}
-			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
 			setEntityManagerFactory(EntityManagerFactoryUtils.findEntityManagerFactory(lbf, getPersistenceUnitName()));
 		}
 	}
@@ -344,8 +344,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
-		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
+		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo emfInfo) {
 			DataSource dataSource = emfInfo.getDataSource();
 			if (dataSource != null) {
 				setDataSource(dataSource);
@@ -475,14 +474,14 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * {@link EntityManagerFactoryInfo#createNativeEntityManager}
 	 * if possible which in turns applies
 	 * {@link JpaVendorAdapter#postProcessEntityManager(EntityManager)}.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager()
 	 */
 	protected EntityManager createEntityManagerForTransaction() {
 		EntityManagerFactory emf = obtainEntityManagerFactory();
 		Map<String, Object> properties = getJpaPropertyMap();
 		EntityManager em;
-		if (emf instanceof EntityManagerFactoryInfo) {
-			em = ((EntityManagerFactoryInfo) emf).createNativeEntityManager(properties);
+		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
+			em = emfInfo.createNativeEntityManager(properties);
 		}
 		else {
 			em = (!CollectionUtils.isEmpty(properties) ?
@@ -562,8 +561,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			tx.commit();
 		}
 		catch (RollbackException ex) {
-			if (ex.getCause() instanceof RuntimeException) {
-				DataAccessException dae = getJpaDialect().translateExceptionIfPossible((RuntimeException) ex.getCause());
+			if (ex.getCause() instanceof RuntimeException runtimeException) {
+				DataAccessException dae = getJpaDialect().translateExceptionIfPossible(runtimeException);
 				if (dae != null) {
 					throw dae;
 				}
@@ -590,6 +589,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		catch (PersistenceException ex) {
+			DataAccessException dae = getJpaDialect().translateExceptionIfPossible(ex);
+			if (dae != null) {
+				throw dae;
+			}
 			throw new TransactionSystemException("Could not roll back JPA transaction", ex);
 		}
 		finally {
@@ -696,8 +699,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		public void setTransactionData(@Nullable Object transactionData) {
 			this.transactionData = transactionData;
 			getEntityManagerHolder().setTransactionActive(true);
-			if (transactionData instanceof SavepointManager) {
-				getEntityManagerHolder().setSavepointManager((SavepointManager) transactionData);
+			if (transactionData instanceof SavepointManager savepointManager) {
+				getEntityManagerHolder().setSavepointManager(savepointManager);
 			}
 		}
 

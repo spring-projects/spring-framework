@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.comics.Cat;
 import org.springframework.test.context.junit.jupiter.comics.Dog;
 import org.springframework.test.context.junit.jupiter.comics.Person;
@@ -42,10 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests which demonstrate that the Spring TestContext Framework can be used
  * with JUnit Jupiter by registering the {@link SpringExtension} via a static field.
  * Note, however, that this is not the recommended way to register the {@code SpringExtension}.
- *
- * <p>
- * To run these tests in an IDE that does not have built-in support for the JUnit
- * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.1
@@ -140,7 +135,7 @@ class RegisterExtensionSpringExtensionTests {
 	@Test
 	void autowiredParameterAsJavaUtilOptional(@Autowired Optional<Dog> dog) {
 		assertThat(dog).as("Optional dog should have been @Autowired by Spring").isNotNull();
-		assertThat(dog.isPresent()).as("Value of Optional should be 'present'").isTrue();
+		assertThat(dog).as("Value of Optional should be 'present'").isPresent();
 		assertThat(dog.get().getName()).as("Dog's name").isEqualTo("Dogbert");
 	}
 
@@ -175,7 +170,7 @@ class RegisterExtensionSpringExtensionTests {
 	@Test
 	void valueParameterFromDefaultValueForPropertyPlaceholder(@Value("${bogus:false}") Boolean defaultValue) {
 		assertThat(defaultValue).as("Default value should have been injected via @Value by Spring").isNotNull();
-		assertThat(defaultValue).as("default value").isEqualTo(false);
+		assertThat(defaultValue).as("default value").isFalse();
 	}
 
 	@Test

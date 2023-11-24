@@ -1,0 +1,16 @@
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+		"https://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+	<property name="charset" value="UTF-8"/>
+	<property name="fileExtensions" value=""/>
+
+	<!-- nohttp workaround, see https://github.com/spring-io/nohttp/issues/55 -->
+	<module name="io.spring.nohttp.checkstyle.check.NoHttpCheck">
+		<property name="allowlistFileName" value="${config_loc}/allowlist.lines" default=""/>
+	</module>
+	<module name="SuppressionFilter">
+		<property name="file" value="${config_loc}/suppressions.xml" default=""/>
+		<property name="optional" value="true"/>
+	</module>
+	<module name="SuppressWithPlainTextCommentFilter"/>
+</module>

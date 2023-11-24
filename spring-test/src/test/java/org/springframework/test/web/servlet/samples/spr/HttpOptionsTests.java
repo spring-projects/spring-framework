@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,12 @@ package org.springframework.test.web.servlet.samples.spr;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,24 +42,21 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  *
  * @author Arnaud Cogoluègnes
  */
-@ExtendWith(SpringExtension.class)
-@WebAppConfiguration
-@ContextConfiguration
+@SpringJUnitWebConfig
 public class HttpOptionsTests {
 
-	@Autowired
-	private WebApplicationContext wac;
+	private final WebApplicationContext wac;
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc;
 
-
-	@BeforeEach
-	public void setup() {
+	HttpOptionsTests(WebApplicationContext wac) {
+		this.wac = wac;
 		this.mockMvc = webAppContextSetup(this.wac).dispatchOptions(true).build();
 	}
 
+
 	@Test
-	public void test() throws Exception {
+	void test() throws Exception {
 		MyController controller = this.wac.getBean(MyController.class);
 		int initialCount = controller.counter.get();
 		this.mockMvc.perform(options("/myUrl")).andExpect(status().isOk());
@@ -73,25 +65,25 @@ public class HttpOptionsTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableWebMvc
 	static class WebConfig implements WebMvcConfigurer {
 
 		@Bean
-		public MyController myController() {
+		MyController myController() {
 			return new MyController();
 		}
 	}
 
 	@Controller
-	private static class MyController {
+	static class MyController {
 
-		private AtomicInteger counter = new AtomicInteger();
+		private final AtomicInteger counter = new AtomicInteger();
 
 
 		@RequestMapping(value = "/myUrl", method = RequestMethod.OPTIONS)
 		@ResponseBody
-		public void handle() {
+		void handle() {
 			counter.incrementAndGet();
 		}
 	}

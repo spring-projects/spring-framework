@@ -1,5 +1,6 @@
 plugins {
 	id 'java-gradle-plugin'
+	id 'checkstyle'
 }
 
 repositories {
@@ -7,24 +8,41 @@ repositories {
 	gradlePluginPortal()
 }
 
+ext {
+	def propertiesFile = new File(new File("$projectDir").parentFile, "gradle.properties")
+	propertiesFile.withInputStream {
+		def properties = new Properties()
+		properties.load(it)
+		set("kotlinVersion", properties["kotlinVersion"])
+	}
+}
+
 dependencies {
-	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.2.8"
-	implementation "com.google.guava:guava:28.2-jre" // required by japicmp-gradle-plugin
+	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
+	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+	implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}"
+	implementation "org.gradle:test-retry-gradle-plugin:1.5.6"
+	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
+	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
 }
 
 gradlePlugin {
 	plugins {
-		apiDiffPlugin {
-			id = "org.springframework.build.api-diff"
-			implementationClass = "org.springframework.build.api.ApiDiffPlugin"
+		conventionsPlugin {
+			id = "org.springframework.build.conventions"
+			implementationClass = "org.springframework.build.ConventionsPlugin"
 		}
-		compileConventionsPlugin {
-			id = "org.springframework.build.compile"
-			implementationClass = "org.springframework.build.compile.CompilerConventionsPlugin"
+		localDevPlugin {
+			id = "org.springframework.build.localdev"
+			implementationClass = "org.springframework.build.dev.LocalDevelopmentPlugin"
 		}
 		optionalDependenciesPlugin {
 			id = "org.springframework.build.optional-dependencies"
 			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
+		}
+		runtimeHintsAgentPlugin {
+			id = "org.springframework.build.runtimehints-agent"
+			implementationClass = "org.springframework.build.hint.RuntimeHintsAgentPlugin"
 		}
 	}
 }

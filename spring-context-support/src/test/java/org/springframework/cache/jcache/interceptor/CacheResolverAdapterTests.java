@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 		CacheResolverAdapter adapter = new CacheResolverAdapter(getCacheResolver(dummyContext, "testCache"));
 		Collection<? extends Cache> caches = adapter.resolveCaches(dummyContext);
 		assertThat(caches).isNotNull();
-		assertThat(caches.size()).isEqualTo(1);
+		assertThat(caches).hasSize(1);
 		assertThat(caches.iterator().next().getName()).isEqualTo("testCache");
 	}
 
@@ -61,13 +61,13 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected CacheResolver getCacheResolver(CacheInvocationContext<? extends Annotation> context, String cacheName) {
-		CacheResolver cacheResolver = mock(CacheResolver.class);
+		CacheResolver cacheResolver = mock();
 		javax.cache.Cache cache;
 		if (cacheName == null) {
 			cache = null;
 		}
 		else {
-			cache = mock(javax.cache.Cache.class);
+			cache = mock();
 			given(cache.getName()).willReturn(cacheName);
 		}
 		given(cacheResolver.resolveCache(context)).willReturn(cache);

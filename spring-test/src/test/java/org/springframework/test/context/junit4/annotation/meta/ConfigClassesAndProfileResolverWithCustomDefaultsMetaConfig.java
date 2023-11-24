@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,9 +43,16 @@ import org.springframework.test.context.ContextConfiguration;
 @Target(ElementType.TYPE)
 public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
+	@AliasFor(annotation = ContextConfiguration.class)
+	Class<?>[] classes() default { DevConfig.class, ProductionConfig.class, ResolverConfig.class };
+
+	@AliasFor(annotation = ActiveProfiles.class)
+	Class<? extends ActiveProfilesResolver> resolver() default CustomResolver.class;
+
+
 	@Configuration
 	@Profile("dev")
-	static class DevConfig {
+	class DevConfig {
 
 		@Bean
 		public String foo() {
@@ -54,7 +62,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
 	@Configuration
 	@Profile("prod")
-	static class ProductionConfig {
+	class ProductionConfig {
 
 		@Bean
 		public String foo() {
@@ -64,7 +72,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
 	@Configuration
 	@Profile("resolver")
-	static class ResolverConfig {
+	class ResolverConfig {
 
 		@Bean
 		public String foo() {
@@ -72,7 +80,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 		}
 	}
 
-	static class CustomResolver implements ActiveProfilesResolver {
+	class CustomResolver implements ActiveProfilesResolver {
 
 		@Override
 		public String[] resolve(Class<?> testClass) {
@@ -80,10 +88,5 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 					: new String[] {};
 		}
 	}
-
-
-	Class<?>[] classes() default { DevConfig.class, ProductionConfig.class, ResolverConfig.class };
-
-	Class<? extends ActiveProfilesResolver> resolver() default CustomResolver.class;
 
 }

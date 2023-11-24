@@ -1,26 +1,33 @@
+plugins {
+	id 'org.springframework.build.runtimehints-agent'
+	id 'kotlin'
+}
+
 description = "Spring Integration Tests"
 
 dependencies {
-	testCompile(project(":spring-aop"))
-	testCompile(project(":spring-beans"))
-	testCompile(project(":spring-context"))
-	testCompile(project(":spring-core"))
-	testCompile(testFixtures(project(":spring-aop")))
-	testCompile(testFixtures(project(":spring-beans")))
-	testCompile(testFixtures(project(":spring-core")))
-	testCompile(testFixtures(project(":spring-tx")))
-	testCompile(project(":spring-expression"))
-	testCompile(project(":spring-jdbc"))
-	testCompile(project(":spring-orm"))
-	testCompile(project(":spring-test"))
-	testCompile(project(":spring-tx"))
-	testCompile(project(":spring-web"))
-	testCompile("javax.inject:javax.inject")
-	testCompile("javax.resource:javax.resource-api")
-	testCompile("javax.servlet:javax.servlet-api")
-	testCompile("org.aspectj:aspectjweaver")
-	testCompile("org.hsqldb:hsqldb")
-	testCompile("org.hibernate:hibernate-core")
+	testImplementation(project(":spring-aop"))
+	testImplementation(project(":spring-beans"))
+	testImplementation(project(":spring-context"))
+	testImplementation(project(":spring-core"))
+	testImplementation(project(":spring-core-test"))
+	testImplementation(testFixtures(project(":spring-aop")))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation(project(":spring-expression"))
+	testImplementation(project(":spring-jdbc"))
+	testImplementation(project(":spring-orm"))
+	testImplementation(project(":spring-test"))
+	testImplementation(project(":spring-tx"))
+	testImplementation(project(":spring-web"))
+	testImplementation("jakarta.inject:jakarta.inject-api")
+	testImplementation("jakarta.resource:jakarta.resource-api")
+	testImplementation("jakarta.servlet:jakarta.servlet-api")
+	testImplementation("org.aspectj:aspectjweaver")
+	testImplementation("org.hsqldb:hsqldb")
+	testImplementation("org.hibernate:hibernate-core-jakarta")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 }
 
 normalization {

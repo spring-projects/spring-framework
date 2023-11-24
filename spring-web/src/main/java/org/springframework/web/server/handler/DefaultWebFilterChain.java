@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.server.handler;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -90,18 +89,6 @@ public class DefaultWebFilterChain implements WebFilterChain {
 		this.currentFilter = currentFilter;
 		this.handler = handler;
 		this.chain = chain;
-	}
-
-	/**
-	 * Public constructor with the list of filters and the target handler to use.
-	 * @param handler the target handler
-	 * @param filters the filters ahead of the handler
-	 * @deprecated as of 5.1 this constructor is deprecated in favor of
-	 * {@link #DefaultWebFilterChain(WebHandler, List)}.
-	 */
-	@Deprecated
-	public DefaultWebFilterChain(WebHandler handler, WebFilter... filters) {
-		this(handler, Arrays.asList(filters));
 	}
 
 

@@ -1,0 +1,70 @@
+plugins {
+	id 'kotlin'
+	id 'io.spring.antora.generate-antora-yml' version '0.0.1'
+	id 'org.antora' version '1.0.0'
+}
+
+description = "Spring Framework Docs"
+
+apply from: "${rootDir}/gradle/ide.gradle"
+apply from: "${rootDir}/gradle/publications.gradle"
+
+antora {
+	version = '3.2.0-alpha.2'
+	playbook = 'cached-antora-playbook.yml'
+	playbookProvider {
+		repository = 'spring-projects/spring-framework'
+		branch = 'docs-build'
+		path = 'lib/antora/templates/per-branch-antora-playbook.yml'
+		checkLocalBranch = true
+	}
+	options = ['--clean', '--stacktrace']
+	environment = [
+			'ALGOLIA_API_KEY': '82c7ead946afbac3cf98c32446154691',
+			'ALGOLIA_APP_ID': '244V8V9FGG',
+			'ALGOLIA_INDEX_NAME': 'framework-docs'
+	]
+	dependencies = [
+			'@antora/atlas-extension': '1.0.0-alpha.1',
+			'@antora/collector-extension': '1.0.0-alpha.3',
+			'@asciidoctor/tabs': '1.0.0-beta.3',
+			'@opendevise/antora-release-line-extension': '1.0.0-alpha.2',
+			'@springio/antora-extensions': '1.3.0',
+			'@springio/asciidoctor-extensions': '1.0.0-alpha.9'
+	]
+}
+
+tasks.named("generateAntoraYml") {
+	asciidocAttributes = project.provider( {
+		return  ["spring-version": project.version ]
+	} )
+}
+
+tasks.register("generateAntoraResources") {
+	dependsOn 'generateAntoraYml'
+}
+
+jar {
+	enabled = false
+}
+
+javadoc {
+	enabled = false
+}
+
+repositories {
+	maven {
+		url "https://repo.spring.io/release"
+	}
+}
+
+dependencies {
+	api(project(":spring-context"))
+	api(project(":spring-jms"))
+	api(project(":spring-web"))
+	api("jakarta.jms:jakarta.jms-api")
+	api("jakarta.servlet:jakarta.servlet-api")
+
+	implementation(project(":spring-core-test"))
+	implementation("org.assertj:assertj-core")
+}

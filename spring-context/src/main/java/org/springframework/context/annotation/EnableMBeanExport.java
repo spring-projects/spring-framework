@@ -27,7 +27,7 @@ import org.springframework.jmx.support.RegistrationPolicy;
 
 /**
  * Enables default exporting of all standard {@code MBean}s from the Spring context, as
- * well as well all {@code @ManagedResource} annotated beans.
+ * well as all {@code @ManagedResource} annotated beans.
  *
  * <p>The resulting {@link org.springframework.jmx.export.MBeanExporter MBeanExporter}
  * bean is defined under the name "mbeanExporter". Alternatively, consider defining a

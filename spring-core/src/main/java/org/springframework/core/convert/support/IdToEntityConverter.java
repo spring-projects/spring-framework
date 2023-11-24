@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Converts an entity identifier to a entity reference by calling a static finder method
+ * Converts an entity identifier to an entity reference by calling a static finder method
  * on the target entity type.
  *
  * <p>For this converter to match, the finder method must be static, have the signature

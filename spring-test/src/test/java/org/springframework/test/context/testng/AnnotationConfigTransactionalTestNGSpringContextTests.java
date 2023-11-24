@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void autowiringFromConfigClass() {
+	public void autowiringFromConfigClass() {
 		assertThat(employee).as("The employee should have been autowired.").isNotNull();
 		assertThat(employee.getName()).isEqualTo("John Smith");
 
@@ -136,7 +136,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@Test
-	void modifyTestDataWithinTransaction() {
+	public void modifyTestDataWithinTransaction() {
 		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
@@ -183,10 +183,11 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 		@Bean
 		DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder()//
-			.addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
-			.addScript("classpath:/org/springframework/test/jdbc/data.sql")//
-			.build();
+			return new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addScript("classpath:/org/springframework/test/jdbc/schema.sql")
+					.addScript("classpath:/org/springframework/test/jdbc/data.sql")
+					.build();
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,26 @@ package org.springframework.web.testfixture.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of the {@link javax.servlet.FilterConfig} interface which
+ * Implementation of the {@link jakarta.servlet.FilterChain} interface which
  * simply passes the call through to a given Filter/FilterChain combination
  * (indicating the next Filter in the chain along with the FilterChain that it is
  * supposed to work on) or to a given Servlet (indicating the end of the chain).
  *
  * @author Juergen Hoeller
  * @since 2.0.3
- * @see javax.servlet.Filter
- * @see javax.servlet.Servlet
+ * @see jakarta.servlet.Filter
+ * @see jakarta.servlet.Servlet
  * @see MockFilterChain
  */
 public class PassThroughFilterChain implements FilterChain {
@@ -84,7 +84,7 @@ public class PassThroughFilterChain implements FilterChain {
 			this.filter.doFilter(request, response, this.nextFilterChain);
 		}
 		else {
-			Assert.state(this.servlet != null, "Neither a Filter not a Servlet set");
+			Assert.state(this.servlet != null, "Neither a Filter nor a Servlet has been set");
 			this.servlet.service(request, response);
 		}
 	}

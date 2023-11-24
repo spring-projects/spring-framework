@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.context.annotation.componentscan.level3.Level3Compone
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Tests ensuring that configuration classes marked with @ComponentScan
  * may be processed recursively
@@ -33,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class ComponentScanAnnotationRecursionTests {
+class ComponentScanAnnotationRecursionTests {
 
 	@Test
-	public void recursion() {
+	void recursion() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Level1Config.class);
 		ctx.refresh();
@@ -49,14 +48,19 @@ public class ComponentScanAnnotationRecursionTests {
 		// assert that enhancement is working
 		assertThat(ctx.getBean("level1Bean")).isSameAs(ctx.getBean("level1Bean"));
 		assertThat(ctx.getBean("level2Bean")).isSameAs(ctx.getBean("level2Bean"));
+
+		ctx.close();
 	}
 
-	public void evenCircularScansAreSupported() {
+	@Test
+	void evenCircularScansAreSupported() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(LeftConfig.class); // left scans right, and right scans left
 		ctx.refresh();
 		ctx.getBean("leftConfig");      // but this is handled gracefully
 		ctx.getBean("rightConfig");     // and beans from both packages are available
+
+		ctx.close();
 	}
 
 }

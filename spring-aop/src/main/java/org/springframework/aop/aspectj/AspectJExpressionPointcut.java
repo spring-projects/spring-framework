@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,27 +78,24 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
  * @author Dave Syer
+ * @author Yanming Zhou
  * @since 2.0
  */
 @SuppressWarnings("serial")
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
-	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<>();
-
-	static {
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.ARGS);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.WITHIN);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ANNOTATION);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
-	}
-
+	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = Set.of(
+			PointcutPrimitive.EXECUTION,
+			PointcutPrimitive.ARGS,
+			PointcutPrimitive.REFERENCE,
+			PointcutPrimitive.THIS,
+			PointcutPrimitive.TARGET,
+			PointcutPrimitive.WITHIN,
+			PointcutPrimitive.AT_ANNOTATION,
+			PointcutPrimitive.AT_WITHIN,
+			PointcutPrimitive.AT_ARGS,
+			PointcutPrimitive.AT_TARGET);
 
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
@@ -205,8 +201,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 */
 	@Nullable
 	private ClassLoader determinePointcutClassLoader() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			return cbf.getBeanClassLoader();
 		}
 		if (this.pointcutDeclarationScope != null) {
 			return this.pointcutDeclarationScope.getClassLoader();
@@ -248,8 +244,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
-	 * write {@code and} as "&&" (though &amp;&amp; will work).
-	 * We also allow {@code and} between two pointcut sub-expressions.
+	 * write "and" as "&&" (though {@code &amp;&amp;} will work).
+	 * <p>We also allow "and" between two pointcut sub-expressions.
 	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
@@ -340,10 +336,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		try {
 			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
 			targetObject = mi.getThis();
-			if (!(mi instanceof ProxyMethodInvocation)) {
+			if (!(mi instanceof ProxyMethodInvocation _pmi)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
-			pmi = (ProxyMethodInvocation) mi;
+			pmi = _pmi;
 			thisObject = pmi.getProxy();
 		}
 		catch (IllegalStateException ex) {
@@ -378,7 +374,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to evaluate join point for arguments " + Arrays.asList(args) +
+				logger.debug("Failed to evaluate join point for arguments " + Arrays.toString(args) +
 						" - falling back to non-match", ex);
 			}
 			return false;
@@ -409,8 +405,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private RuntimeTestWalker getRuntimeTestWalker(ShadowMatch shadowMatch) {
-		if (shadowMatch instanceof DefensiveShadowMatch) {
-			return new RuntimeTestWalker(((DefensiveShadowMatch) shadowMatch).primary);
+		if (shadowMatch instanceof DefensiveShadowMatch defensiveShadowMatch) {
+			return new RuntimeTestWalker(defensiveShadowMatch.primary);
 		}
 		return new RuntimeTestWalker(shadowMatch);
 	}
@@ -427,7 +423,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private ShadowMatch getTargetShadowMatch(Method method, Class<?> targetClass) {
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		if (targetMethod.getDeclaringClass().isInterface()) {
+		if (targetMethod.getDeclaringClass().isInterface() && targetMethod.getDeclaringClass() != targetClass &&
+				obtainPointcutExpression().getPointcutExpression().contains("." + targetMethod.getName() + "(")) {
 			// Try to build the most specific interface possible for inherited methods to be
 			// considered for sub-interface matches as well, in particular for proxy classes.
 			// Note: AspectJ is only going to take Method.getDeclaringClass() into account.
@@ -475,10 +472,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 							}
 						}
 						if (targetMethod != originalMethod && (shadowMatch == null ||
-								(shadowMatch.neverMatches() && Proxy.isProxyClass(targetMethod.getDeclaringClass())))) {
+								(Proxy.isProxyClass(targetMethod.getDeclaringClass()) &&
+										(shadowMatch.neverMatches() || containsAnnotationPointcut())))) {
 							// Fall back to the plain original method in case of no resolvable match or a
 							// negative match on a proxy class (which doesn't carry any annotations on its
-							// redeclared methods).
+							// redeclared methods), as well as for annotation pointcuts.
 							methodToMatch = originalMethod;
 							try {
 								shadowMatch = obtainPointcutExpression().matchesMethodExecution(methodToMatch);
@@ -517,29 +515,24 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return shadowMatch;
 	}
 
+	private boolean containsAnnotationPointcut() {
+		return resolveExpression().contains("@annotation");
+	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AspectJExpressionPointcut)) {
-			return false;
-		}
-		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
-		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
-				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
-				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
-				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, otherPc.pointcutParameterTypes);
+		return (this == other || (other instanceof AspectJExpressionPointcut that &&
+				ObjectUtils.nullSafeEquals(getExpression(), that.getExpression()) &&
+				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, that.pointcutDeclarationScope) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, that.pointcutParameterNames) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, that.pointcutParameterTypes)));
 	}
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.getExpression());
-		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
-		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
-		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);
-		return hashCode;
+		return ObjectUtils.nullSafeHash(getExpression(), this.pointcutDeclarationScope,
+				this.pointcutParameterNames, this.pointcutParameterTypes);
 	}
 
 	@Override
@@ -547,7 +540,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
 			sb.append(this.pointcutParameterTypes[i].getName());
-			sb.append(" ");
+			sb.append(' ');
 			sb.append(this.pointcutParameterNames[i]);
 			if ((i+1) < this.pointcutParameterTypes.length) {
 				sb.append(", ");

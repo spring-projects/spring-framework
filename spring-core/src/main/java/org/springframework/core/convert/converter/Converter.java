@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public interface Converter<S, T> {
 	 * @since 5.3
 	 */
 	default <U> Converter<S, U> andThen(Converter<? super T, ? extends U> after) {
-		Assert.notNull(after, "After Converter must not be null");
+		Assert.notNull(after, "'after' Converter must not be null");
 		return (S s) -> {
 			T initialResult = convert(s);
 			return (initialResult != null ? after.convert(initialResult) : null);

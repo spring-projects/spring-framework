@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,14 +104,8 @@ public class MethodOverrides {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof MethodOverrides)) {
-			return false;
-		}
-		MethodOverrides that = (MethodOverrides) other;
-		return this.overrides.equals(that.overrides);
+		return (this == other || (other instanceof MethodOverrides that &&
+				this.overrides.equals(that.overrides)));
 	}
 
 	@Override

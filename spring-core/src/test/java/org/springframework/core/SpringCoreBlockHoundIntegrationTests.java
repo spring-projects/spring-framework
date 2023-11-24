@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,27 +26,34 @@ import reactor.blockhound.BlockHound;
 import reactor.core.scheduler.ReactorBlockHoundIntegration;
 import reactor.core.scheduler.Schedulers;
 
-import org.springframework.tests.sample.objects.TestObject;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.condition.JRE.JAVA_14;
+import static org.junit.jupiter.api.condition.JRE.JAVA_18;
 
 /**
  * Tests to verify the spring-core BlockHound integration rules.
  *
+ * <p>NOTE: to run this test class in the IDE, you need to specify the following
+ * JVM argument. For details, see
+ * <a href="https://github.com/reactor/BlockHound/issues/33">BlockHound issue 33</a>.
+ *
+ * <pre style="code">
+ * -XX:+AllowRedefinitionToAddDeleteMethods
+ * </pre>
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.2.4
  */
-@DisabledForJreRange(min = JAVA_14)
-public class SpringCoreBlockHoundIntegrationTests {
-
+@DisabledForJreRange(min = JAVA_18, disabledReason = "BlockHound is not compatible with Java 18+")
+class SpringCoreBlockHoundIntegrationTests {
 
 	@BeforeAll
-	static void setUp() {
+	static void setup() {
 		BlockHound.builder()
-				.with(new ReactorBlockHoundIntegration()) // Reactor non-blocking thread predicate
+				.with(new ReactorBlockHoundIntegration())  // Reactor non-blocking thread predicate
 				.with(new ReactiveAdapterRegistry.SpringCoreBlockHoundIntegration())
 				.install();
 	}
@@ -56,15 +63,6 @@ public class SpringCoreBlockHoundIntegrationTests {
 	void blockHoundIsInstalled() {
 		assertThatThrownBy(() -> testNonBlockingTask(() -> Thread.sleep(10)))
 				.hasMessageContaining("Blocking call!");
-	}
-
-	@Test
-	void localVariableTableParameterNameDiscoverer() {
-		testNonBlockingTask(() -> {
-			Method setName = TestObject.class.getMethod("setName", String.class);
-			String[] names = new LocalVariableTableParameterNameDiscoverer().getParameterNames(setName);
-			assertThat(names).isEqualTo(new String[] {"name"});
-		});
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,8 +202,8 @@ class RuntimeTestWalker {
 			}
 			Class<?> typeClass = null;
 			ResolvedType type = (ResolvedType) i.getType();
-			if (type instanceof ReferenceType) {
-				ReferenceTypeDelegate delegate = ((ReferenceType) type).getDelegate();
+			if (type instanceof ReferenceType referenceType) {
+				ReferenceTypeDelegate delegate = referenceType.getDelegate();
 				if (delegate instanceof ReflectionBasedReferenceTypeDelegate) {
 					try {
 						ReflectionUtils.makeAccessible(myClassField);

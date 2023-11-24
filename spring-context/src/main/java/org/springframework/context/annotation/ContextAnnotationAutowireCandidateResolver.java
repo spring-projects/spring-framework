@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,12 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		return (isLazy(descriptor) ? buildLazyResolutionProxy(descriptor, beanName) : null);
 	}
 
+	@Override
+	@Nullable
+	public Class<?> getLazyResolutionProxyClass(DependencyDescriptor descriptor, @Nullable String beanName) {
+		return (isLazy(descriptor) ? (Class<?>) buildLazyResolutionProxy(descriptor, beanName, true) : null);
+	}
+
 	protected boolean isLazy(DependencyDescriptor descriptor) {
 		for (Annotation ann : descriptor.getAnnotations()) {
 			Lazy lazy = AnnotationUtils.getAnnotation(ann, Lazy.class);
@@ -74,7 +80,13 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		return false;
 	}
 
-	protected Object buildLazyResolutionProxy(final DependencyDescriptor descriptor, final @Nullable String beanName) {
+	protected Object buildLazyResolutionProxy(DependencyDescriptor descriptor, @Nullable String beanName) {
+		return buildLazyResolutionProxy(descriptor, beanName, false);
+	}
+
+	private Object buildLazyResolutionProxy(
+			final DependencyDescriptor descriptor, final @Nullable String beanName, boolean classOnly) {
+
 		BeanFactory beanFactory = getBeanFactory();
 		Assert.state(beanFactory instanceof DefaultListableBeanFactory,
 				"BeanFactory needs to be a DefaultListableBeanFactory");
@@ -127,7 +139,8 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		if (dependencyType.isInterface()) {
 			pf.addInterface(dependencyType);
 		}
-		return pf.getProxy(dlbf.getBeanClassLoader());
+		ClassLoader classLoader = dlbf.getBeanClassLoader();
+		return (classOnly ? pf.getProxyClass(classLoader) : pf.getProxy(classLoader));
 	}
 
 }

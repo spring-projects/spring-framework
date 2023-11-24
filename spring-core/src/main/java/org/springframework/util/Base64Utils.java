@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.util;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -29,11 +27,11 @@ import java.util.Base64;
  * @author Gary Russell
  * @since 4.1
  * @see java.util.Base64
+ * @deprecated as of Spring Framework 6.0.5 in favor of {@link Base64}; scheduled
+ * for removal in 6.2
  */
+@Deprecated(since = "6.0.5", forRemoval = true)
 public abstract class Base64Utils {
-
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
 
 	/**
 	 * Base64-encode the given byte array.
@@ -96,11 +94,11 @@ public abstract class Base64Utils {
 		if (src.length == 0) {
 			return "";
 		}
-		return new String(encode(src), DEFAULT_CHARSET);
+		return Base64.getEncoder().encodeToString(src);
 	}
 
 	/**
-	 * Base64-decode the given byte array from an UTF-8 String.
+	 * Base64-decode the given byte array from a UTF-8 String.
 	 * @param src the encoded UTF-8 String
 	 * @return the original byte array
 	 */
@@ -108,7 +106,7 @@ public abstract class Base64Utils {
 		if (src.isEmpty()) {
 			return new byte[0];
 		}
-		return decode(src.getBytes(DEFAULT_CHARSET));
+		return Base64.getDecoder().decode(src);
 	}
 
 	/**
@@ -118,17 +116,17 @@ public abstract class Base64Utils {
 	 * @return the encoded byte array as a UTF-8 String
 	 */
 	public static String encodeToUrlSafeString(byte[] src) {
-		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
+		return Base64.getUrlEncoder().encodeToString(src);
 	}
 
 	/**
-	 * Base64-decode the given byte array from an UTF-8 String using the RFC 4648
+	 * Base64-decode the given byte array from a UTF-8 String using the RFC 4648
 	 * "URL and Filename Safe Alphabet".
 	 * @param src the encoded UTF-8 String
 	 * @return the original byte array
 	 */
 	public static byte[] decodeFromUrlSafeString(String src) {
-		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));
+		return Base64.getUrlDecoder().decode(src);
 	}
 
 }

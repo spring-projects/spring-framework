@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.handler.invocation;
 
+import java.util.concurrent.CompletableFuture;
+
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.MonoToListenableFutureAdapter;
 
 /**
  * Support for single-value reactive types (like {@code Mono} or {@code Single})
@@ -57,12 +57,11 @@ public class ReactiveReturnValueHandler extends AbstractAsyncReturnValueHandler 
 	}
 
 	@Override
-	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
 		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnType.getParameterType(), returnValue);
 		if (adapter != null) {
-			return new MonoToListenableFutureAdapter<>(Mono.from(adapter.toPublisher(returnValue)));
+			return Mono.from(adapter.toPublisher(returnValue)).toFuture();
 		}
 		return null;
 	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package org.springframework.test.web.servlet.setup;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletConfig;
@@ -48,16 +53,20 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.0
  * @param <B> a self reference to the builder type
  */
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
 		extends MockMvcBuilderSupport implements ConfigurableMockMvcBuilder<B> {
 
-	private List<Filter> filters = new ArrayList<>();
+	private final List<Filter> filters = new ArrayList<>();
 
 	@Nullable
 	private RequestBuilder defaultRequestBuilder;
+
+	@Nullable
+	private Charset defaultResponseCharacterEncoding;
 
 	private final List<ResultMatcher> globalResultMatchers = new ArrayList<>();
 
@@ -71,9 +80,9 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	@Override
 	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
-		for (Filter f : filters) {
-			Assert.notNull(f, "filters cannot contain null values");
-			this.filters.add(f);
+		for (Filter filter : filters) {
+			Assert.notNull(filter, "filters cannot contain null values");
+			this.filters.add(filter);
 		}
 		return self();
 	}
@@ -83,8 +92,18 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		Assert.notNull(filter, "filter cannot be null");
 		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
 		if (urlPatterns.length > 0) {
-			filter = new PatternMappingFilterProxy(filter, urlPatterns);
+			filter = new MockMvcFilterDecorator(filter, urlPatterns);
 		}
+		this.filters.add(filter);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T addFilter(
+			Filter filter, @Nullable String filterName, Map<String, String> initParams,
+			EnumSet<DispatcherType> dispatcherTypes, String... urlPatterns) {
+
+		filter = new MockMvcFilterDecorator(filter, filterName, initParams, dispatcherTypes, urlPatterns);
 		this.filters.add(filter);
 		return self();
 	}
@@ -92,6 +111,17 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	@Override
 	public final <T extends B> T defaultRequest(RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
+		return self();
+	}
+
+	/**
+	 * Define the default character encoding to be applied to every response.
+	 * @param defaultResponseCharacterEncoding the default response character encoding
+	 * @since 5.3.10
+	 */
+	@Override
+	public final <T extends B> T defaultResponseCharacterEncoding(Charset defaultResponseCharacterEncoding) {
+		this.defaultResponseCharacterEncoding = defaultResponseCharacterEncoding;
 		return self();
 	}
 
@@ -148,16 +178,27 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 				if (this.defaultRequestBuilder == null) {
 					this.defaultRequestBuilder = MockMvcRequestBuilders.get("/");
 				}
-				if (this.defaultRequestBuilder instanceof ConfigurableSmartRequestBuilder) {
-					((ConfigurableSmartRequestBuilder) this.defaultRequestBuilder).with(processor);
+				if (this.defaultRequestBuilder instanceof ConfigurableSmartRequestBuilder configurableBuilder) {
+					configurableBuilder.with(processor);
 				}
 			}
 		}
 
 		Filter[] filterArray = this.filters.toArray(new Filter[0]);
+		for (Filter filter : filterArray) {
+			if (filter instanceof MockMvcFilterDecorator filterDecorator) {
+				try {
+					filterDecorator.initIfRequired(servletContext);
+				}
+				catch (ServletException ex) {
+					throw new RuntimeException("Failed to initialize Filter " + filter, ex);
+				}
+			}
+		}
 
 		return super.createMockMvc(filterArray, mockServletConfig, wac, this.defaultRequestBuilder,
-				this.globalResultMatchers, this.globalResultHandlers, this.dispatcherServletCustomizers);
+				this.defaultResponseCharacterEncoding, this.globalResultMatchers, this.globalResultHandlers,
+				this.dispatcherServletCustomizers);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,15 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Annotation {@link Processor} that writes {@link CandidateComponentsMetadata}
+ * Annotation {@link Processor} that writes a {@link CandidateComponentsMetadata}
  * file for spring components.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 5.0
+ * @deprecated as of 6.1, in favor of the AOT engine.
  */
+@Deprecated(since = "6.1", forRemoval = true)
 public class CandidateComponentsIndexer implements Processor {
 
 	private MetadataStore metadataStore;
@@ -133,8 +135,8 @@ public class CandidateComponentsIndexer implements Processor {
 		List<TypeElement> list = new ArrayList<>();
 		for (Element element : elements) {
 			if ((element.getKind().isClass() || element.getKind() == ElementKind.INTERFACE) &&
-					element.getModifiers().contains(Modifier.STATIC) && element instanceof TypeElement) {
-				list.add((TypeElement) element);
+					element.getModifiers().contains(Modifier.STATIC) && element instanceof TypeElement te) {
+				list.add(te);
 			}
 		}
 		return list;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
+import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebInputException;
 
 /**
  * Resolver for method arguments annotated with @{@link RequestParam} from URI
@@ -109,9 +109,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		String type = parameter.getNestedParameterType().getSimpleName();
-		String reason = "Required " + type + " parameter '" + name + "' is not present";
-		throw new ServerWebInputException(reason, parameter);
+		throw new MissingRequestValueException(
+				name, parameter.getNestedParameterType(), "query parameter", parameter);
 	}
 
 

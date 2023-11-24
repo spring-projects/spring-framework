@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,9 @@ import org.springframework.ui.context.ThemeSource;
  * @see #setBasenamePrefix
  * @see java.util.ResourceBundle
  * @see org.springframework.context.support.ResourceBundleMessageSource
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
+@Deprecated(since = "6.0")
 public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanClassLoaderAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -87,7 +89,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	/**
 	 * Set the prefix that gets applied to the ResourceBundle basenames,
 	 * i.e. the theme names.
-	 * E.g.: basenamePrefix="test.", themeName="theme" -> basename="test.theme".
+	 * E.g.: basenamePrefix="test.", themeName="theme" &rarr; basename="test.theme".
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
@@ -189,8 +191,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * @param theme the Theme to (re-)initialize
 	 */
 	protected void initParent(Theme theme) {
-		if (theme.getMessageSource() instanceof HierarchicalMessageSource) {
-			HierarchicalMessageSource messageSource = (HierarchicalMessageSource) theme.getMessageSource();
+		if (theme.getMessageSource() instanceof HierarchicalMessageSource messageSource) {
 			if (getParentThemeSource() != null && messageSource.getParentMessageSource() == null) {
 				Theme parentTheme = getParentThemeSource().getTheme(theme.getName());
 				if (parentTheme != null) {

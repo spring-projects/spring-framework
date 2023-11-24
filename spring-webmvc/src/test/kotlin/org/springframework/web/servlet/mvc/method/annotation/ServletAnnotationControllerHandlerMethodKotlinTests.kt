@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.mvc.method.annotation
 
-import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.async.WebAsyncUtils
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest
@@ -84,6 +84,71 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 		assertThat(WebAsyncUtils.getAsyncManager(request).concurrentResult).isEqualTo("foo")
 	}
 
+	@PathPatternsParameterizedTest
+	fun defaultValue(usePathPatterns: Boolean) {
+		initDispatcherServlet(DefaultValueController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/default-value")
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(response.contentAsString).isEqualTo("default")
+	}
+
+	@PathPatternsParameterizedTest
+	fun defaultValueOverridden(usePathPatterns: Boolean) {
+		initDispatcherServlet(DefaultValueController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/default-value")
+		request.addParameter("value", "override")
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(response.contentAsString).isEqualTo("override")
+	}
+
+	@PathPatternsParameterizedTest
+	fun defaultValues(usePathPatterns: Boolean) {
+		initDispatcherServlet(DefaultValueController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/default-values")
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(response.contentAsString).isEqualTo("10-20")
+	}
+
+	@PathPatternsParameterizedTest
+	fun defaultValuesOverridden(usePathPatterns: Boolean) {
+		initDispatcherServlet(DefaultValueController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/default-values")
+		request.addParameter("limit2", "40")
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(response.contentAsString).isEqualTo("10-40")
+	}
+
+	@PathPatternsParameterizedTest
+	fun suspendingDefaultValue(usePathPatterns: Boolean) {
+		initDispatcherServlet(DefaultValueController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/suspending-default-value")
+		request.isAsyncSupported = true
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(WebAsyncUtils.getAsyncManager(request).concurrentResult).isEqualTo("default")
+	}
+
+	@PathPatternsParameterizedTest
+	fun suspendingDefaultValueOverridden(usePathPatterns: Boolean) {
+		initDispatcherServlet(DefaultValueController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/suspending-default-value")
+		request.isAsyncSupported = true
+		request.addParameter("value", "override")
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(WebAsyncUtils.getAsyncManager(request).concurrentResult).isEqualTo("override")
+	}
+
 
 	data class DataClass(val param1: String, val param2: Int)
 
@@ -107,6 +172,20 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 		suspend fun handle(): String {
 			return "foo"
 		}
+	}
+
+	@RestController
+	class DefaultValueController {
+
+		@RequestMapping("/default-value")
+		fun handle(@RequestParam value: String = "default") = value
+
+		@RequestMapping("/default-values")
+		fun handleMultiple(@RequestParam(defaultValue = "10") limit1: Int, @RequestParam limit2: Int = 20) = "${limit1}-${limit2}"
+
+		@Suppress("RedundantSuspendModifier")
+		@RequestMapping("/suspending-default-value")
+		suspend fun handleSuspending(@RequestParam value: String = "default") = value
 
 	}
 

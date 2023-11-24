@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -31,7 +30,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.client.MockMvcClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -68,19 +66,10 @@ public class MockMvcClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	public void test() throws Exception {
+	public void test() {
 		RestTemplate template = new RestTemplate(new MockMvcClientHttpRequestFactory(this.mockMvc));
 		String result = template.getForObject("/foo", String.class);
 		assertThat(result).isEqualTo("bar");
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void testAsyncTemplate() throws Exception {
-		org.springframework.web.client.AsyncRestTemplate template = new org.springframework.web.client.AsyncRestTemplate(
-				new MockMvcClientHttpRequestFactory(this.mockMvc));
-		ListenableFuture<ResponseEntity<String>> entity = template.getForEntity("/foo", String.class);
-		assertThat(entity.get().getBody()).isEqualTo("bar");
 	}
 
 

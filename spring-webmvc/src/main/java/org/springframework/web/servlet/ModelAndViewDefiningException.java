@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.util.Assert;
 

@@ -39,7 +39,7 @@ public interface MessageChannel {
 	 * <p>This method may block indefinitely, depending on the implementation.
 	 * To provide a maximum wait time, use {@link #send(Message, long)}.
 	 * @param message the message to send
-	 * @return whether or not the message was sent
+	 * @return whether the message was sent
 	 */
 	default boolean send(Message<?> message) {
 		return send(message, INDEFINITE_TIMEOUT);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,33 +28,35 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Mark Fisher
  */
-public class ComponentScanParserWithUserDefinedStrategiesTests {
+class ComponentScanParserWithUserDefinedStrategiesTests {
 
 	@Test
-	public void testCustomBeanNameGenerator() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
+	void customBeanNameGenerator() {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customNameGeneratorTests.xml");
 		assertThat(context.containsBean("testing.fooServiceImpl")).isTrue();
+		context.close();
 	}
 
 	@Test
-	public void testCustomScopeMetadataResolver() {
+	void customScopeMetadataResolver() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customScopeResolverTests.xml");
 		BeanDefinition bd = context.getBeanFactory().getBeanDefinition("fooServiceImpl");
 		assertThat(bd.getScope()).isEqualTo("myCustomScope");
 		assertThat(bd.isSingleton()).isFalse();
+		context.close();
 	}
 
 	@Test
-	public void testInvalidConstructorBeanNameGenerator() {
+	void invalidConstructorBeanNameGenerator() {
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 			new ClassPathXmlApplicationContext(
 					"org/springframework/context/annotation/invalidConstructorNameGeneratorTests.xml"));
 	}
 
 	@Test
-	public void testInvalidClassNameScopeMetadataResolver() {
+	void invalidClassNameScopeMetadataResolver() {
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 				new ClassPathXmlApplicationContext(
 						"org/springframework/context/annotation/invalidClassNameScopeResolverTests.xml"));

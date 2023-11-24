@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.BlockingExecutionConfigurer;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
@@ -62,7 +63,7 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 	private static List<Object> instantiateIfNecessary(Object[] specified) {
 		List<Object> instances = new ArrayList<>(specified.length);
 		for (Object obj : specified) {
-			instances.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+			instances.add(obj instanceof Class<?> clazz ? BeanUtils.instantiateClass(clazz) : obj);
 		}
 		return instances;
 	}
@@ -122,6 +123,11 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		return this;
 	}
 
+	@Override
+	public WebTestClient.ControllerSpec blockingExecution(Consumer<BlockingExecutionConfigurer> consumer) {
+		this.configurer.executionConsumer = consumer;
+		return this;
+	}
 
 	@Override
 	protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
@@ -145,7 +151,7 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 	}
 
 
-	private class TestWebFluxConfigurer implements WebFluxConfigurer {
+	private static class TestWebFluxConfigurer implements WebFluxConfigurer {
 
 		@Nullable
 		private Consumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer;
@@ -170,6 +176,9 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 		@Nullable
 		private Consumer<ViewResolverRegistry> viewResolversConsumer;
+
+		@Nullable
+		private Consumer<BlockingExecutionConfigurer> executionConsumer;
 
 		@Override
 		public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
@@ -223,6 +232,13 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			if (this.viewResolversConsumer != null) {
 				this.viewResolversConsumer.accept(registry);
+			}
+		}
+
+		@Override
+		public void configureBlockingExecution(BlockingExecutionConfigurer configurer) {
+			if (this.executionConsumer != null) {
+				this.executionConsumer.accept(configurer);
 			}
 		}
 	}

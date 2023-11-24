@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -45,10 +48,6 @@ public class OrderedMessageChannelDecoratorTests {
 	private static final Log logger = LogFactory.getLog(OrderedMessageChannelDecoratorTests.class);
 
 
-	private OrderedMessageChannelDecorator sender;
-
-	ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
-
 	private ThreadPoolTaskExecutor executor;
 
 
@@ -58,12 +57,6 @@ public class OrderedMessageChannelDecoratorTests {
 		this.executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
 		this.executor.setAllowCoreThreadTimeOut(true);
 		this.executor.afterPropertiesSet();
-
-		this.channel = new ExecutorSubscribableChannel(this.executor);
-		OrderedMessageChannelDecorator.configureInterceptor(this.channel, true);
-
-		this.sender = new OrderedMessageChannelDecorator(this.channel, logger);
-
 	}
 
 	@AfterEach
@@ -78,11 +71,48 @@ public class OrderedMessageChannelDecoratorTests {
 		int start = 1;
 		int end = 1000;
 
-		AtomicInteger index = new AtomicInteger(start);
-		AtomicReference<Object> result = new AtomicReference<>();
-		CountDownLatch latch = new CountDownLatch(1);
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
+		OrderedMessageChannelDecorator.configureInterceptor(channel, true);
 
-		this.channel.subscribe(message -> {
+		TestHandler handler1 = new TestHandler(start, end);
+		TestHandler handler2 = new TestHandler(start, end);
+		TestHandler handler3 = new TestHandler(start, end);
+
+		channel.subscribe(handler1);
+		channel.subscribe(handler2);
+		channel.subscribe(handler3);
+
+		OrderedMessageChannelDecorator sender = new OrderedMessageChannelDecorator(channel, logger);
+		for (int i = start; i <= end; i++) {
+			SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+			accessor.setHeader("seq", i);
+			accessor.setLeaveMutable(true);
+			sender.send(MessageBuilder.createMessage("payload", accessor.getMessageHeaders()));
+		}
+
+		handler1.verify();
+		handler2.verify();
+		handler3.verify();
+	}
+
+
+	private static class TestHandler implements MessageHandler {
+
+		private final AtomicInteger index;
+
+		private final int end;
+
+		private final AtomicReference<Object> result = new AtomicReference<>();
+
+		private final CountDownLatch latch = new CountDownLatch(1);
+
+		TestHandler(int start, int end) {
+			this.index = new AtomicInteger(start);
+			this.end = end;
+		}
+
+		@Override
+		public void handleMessage(Message<?> message) throws MessagingException {
 			int expected = index.getAndIncrement();
 			Integer actual = (Integer) message.getHeaders().getOrDefault("seq", -1);
 			if (actual != expected) {
@@ -104,17 +134,12 @@ public class OrderedMessageChannelDecoratorTests {
 				result.set("Done");
 				latch.countDown();
 			}
-		});
-
-		for (int i = start; i <= end; i++) {
-			SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-			accessor.setHeader("seq", i);
-			accessor.setLeaveMutable(true);
-			this.sender.send(MessageBuilder.createMessage("payload", accessor.getMessageHeaders()));
 		}
 
-		latch.await(10, TimeUnit.SECONDS);
-		assertThat(result.get()).isEqualTo("Done");
+		void verify() throws InterruptedException {
+			assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
+			assertThat(result.get()).isEqualTo("Done");
+		}
 	}
 
 }

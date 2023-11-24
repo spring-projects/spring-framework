@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.util.concurrent;
 
+import java.util.function.BiConsumer;
+
 /**
  * Callback mechanism for the outcome, success or failure, from a
  * {@link ListenableFuture}.
@@ -24,7 +26,10 @@ package org.springframework.util.concurrent;
  * @author Sebastien Deleuze
  * @since 4.0
  * @param <T> the result type
+ * @deprecated as of 6.0, in favor of
+ * {@link java.util.concurrent.CompletableFuture#whenComplete(BiConsumer)}
  */
+@Deprecated(since = "6.0")
 public interface ListenableFutureCallback<T> extends SuccessCallback<T>, FailureCallback {
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1.3
  * @see <a href="https://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -192,7 +193,12 @@ final class HierarchicalUriComponents extends UriComponents {
 			throw new IllegalStateException(
 					"The port contains a URI variable but has not been expanded yet: " + this.port);
 		}
-		return Integer.parseInt(this.port);
+		try {
+			return Integer.parseInt(this.port);
+		}
+		catch (NumberFormatException ex) {
+			throw new IllegalStateException("The port must be an integer: " + this.port);
+		}
 	}
 
 	@Override
@@ -533,7 +539,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (getHost() != null) {
 			builder.host(getHost());
 		}
-		// Avoid parsing the port, may have URI variable..
+		// Avoid parsing the port, may have URI variable.
 		if (this.port != null) {
 			builder.port(this.port);
 		}
@@ -549,32 +555,20 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof HierarchicalUriComponents)) {
-			return false;
-		}
-		HierarchicalUriComponents otherComp = (HierarchicalUriComponents) other;
-		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
-				ObjectUtils.nullSafeEquals(getUserInfo(), otherComp.getUserInfo()) &&
-				ObjectUtils.nullSafeEquals(getHost(), otherComp.getHost()) &&
-				getPort() == otherComp.getPort() &&
-				this.path.equals(otherComp.path) &&
-				this.queryParams.equals(otherComp.queryParams) &&
-				ObjectUtils.nullSafeEquals(getFragment(), otherComp.getFragment()));
+		return (this == other || (other instanceof HierarchicalUriComponents that &&
+				ObjectUtils.nullSafeEquals(getScheme(), that.getScheme()) &&
+				ObjectUtils.nullSafeEquals(getUserInfo(), that.getUserInfo()) &&
+				ObjectUtils.nullSafeEquals(getHost(), that.getHost()) &&
+				getPort() == that.getPort() &&
+				this.path.equals(that.path) &&
+				this.queryParams.equals(that.queryParams) &&
+				ObjectUtils.nullSafeEquals(getFragment(), that.getFragment())));
 	}
 
 	@Override
 	public int hashCode() {
-		int result = ObjectUtils.nullSafeHashCode(getScheme());
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.userInfo);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.host);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.port);
-		result = 31 * result + this.path.hashCode();
-		result = 31 * result + this.queryParams.hashCode();
-		result = 31 * result + ObjectUtils.nullSafeHashCode(getFragment());
-		return result;
+		return Objects.hash(getScheme(), this.userInfo, this.host, this.port,
+				this.path, this.queryParams, getFragment());
 	}
 
 
@@ -757,7 +751,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	private static class UriTemplateEncoder	implements BiFunction<String, Type, String> {
+	private static class UriTemplateEncoder implements BiFunction<String, Type, String> {
 
 		private final Charset charset;
 
@@ -898,7 +892,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public List<String> getPathSegments() {
 			String[] segments = StringUtils.tokenizeToStringArray(getPath(), PATH_DELIMITER_STRING);
-			return Collections.unmodifiableList(Arrays.asList(segments));
+			return List.of(segments);
 		}
 
 		@Override
@@ -925,8 +919,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof FullPathComponent &&
-					getPath().equals(((FullPathComponent) other).getPath())));
+			return (this == other || (other instanceof FullPathComponent fullPathComponent &&
+					getPath().equals(fullPathComponent.getPath())));
 		}
 
 		@Override
@@ -945,7 +939,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		public PathSegmentComponent(List<String> pathSegments) {
 			Assert.notNull(pathSegments, "List must not be null");
-			this.pathSegments = Collections.unmodifiableList(new ArrayList<>(pathSegments));
+			this.pathSegments = List.copyOf(pathSegments);
 		}
 
 		@Override
@@ -999,8 +993,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof PathSegmentComponent &&
-					getPathSegments().equals(((PathSegmentComponent) other).getPathSegments())));
+			return (this == other || (other instanceof PathSegmentComponent pathSegmentComponent &&
+					getPathSegments().equals(pathSegmentComponent.getPathSegments())));
 		}
 
 		@Override

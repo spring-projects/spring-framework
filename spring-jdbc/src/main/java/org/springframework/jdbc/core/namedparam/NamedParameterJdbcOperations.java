@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,12 @@ import org.springframework.lang.Nullable;
  * implemented by {@link NamedParameterJdbcTemplate}. This interface is not
  * often used directly, but provides a useful option to enhance testability,
  * as it can easily be mocked or stubbed.
+ *
+ * <p><b>NOTE: As of 6.1, there is a unified JDBC access facade available in
+ * the form of {@link org.springframework.jdbc.core.simple.JdbcClient}.</b>
+ * {@code JdbcClient} provides a fluent API style for common JDBC queries/updates
+ * with flexible use of indexed or named parameters. It delegates to
+ * {@code JdbcOperations}/{@code NamedParameterJdbcOperations} for actual execution.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -268,8 +274,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
@@ -287,8 +292,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
@@ -305,10 +309,12 @@ public interface NamedParameterJdbcOperations {
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
+	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
 	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
@@ -325,8 +331,9 @@ public interface NamedParameterJdbcOperations {
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
@@ -526,17 +533,6 @@ public interface NamedParameterJdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
-	 * @param sql the SQL statement to execute
-	 * @param batchValues the array of Maps containing the batch of arguments for the query
-	 * @return an array containing the numbers of rows affected by each update in the batch
-	 * (may also contain special JDBC-defined negative values for affected rows such as
-	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
-	 * @throws DataAccessException if there is any problem issuing the update
-	 */
-	int[] batchUpdate(String sql, Map<String, ?>[] batchValues);
-
-	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
@@ -548,4 +544,48 @@ public interface NamedParameterJdbcOperations {
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
 
+	/**
+	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * @param sql the SQL statement to execute
+	 * @param batchValues the array of Maps containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	int[] batchUpdate(String sql, Map<String, ?>[] batchValues);
+
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied
+	 * arguments, returning generated keys.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
+	 * arguments for the query
+	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder);
+
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments,
+	 * returning generated keys.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
+	 * arguments for the query
+	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+	 * @param keyColumnNames names of the columns that will have keys generated for them
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 * @since 6.1
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
+			String[] keyColumnNames);
 }

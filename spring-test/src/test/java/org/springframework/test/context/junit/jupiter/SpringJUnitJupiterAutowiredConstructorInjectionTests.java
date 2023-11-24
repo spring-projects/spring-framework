@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,68 +16,93 @@
 
 package org.springframework.test.context.junit.jupiter;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.comics.Dog;
 import org.springframework.test.context.junit.jupiter.comics.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests which demonstrate support for {@link Autowired @Autowired}
- * test class constructors with the Spring TestContext Framework and JUnit Jupiter.
- *
- * <p>To run these tests in an IDE that does not have built-in support for the JUnit
- * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
+ * Integration tests which demonstrate support for <em>autowired</em> test class
+ * constructors with the Spring TestContext Framework and JUnit Jupiter.
  *
  * @author Sam Brannen
  * @since 5.0
  * @see SpringExtension
  * @see SpringJUnitJupiterConstructorInjectionTests
  */
-@SpringJUnitConfig(TestConfig.class)
-@TestPropertySource(properties = "enigma = 42")
 class SpringJUnitJupiterAutowiredConstructorInjectionTests {
 
-	final ApplicationContext applicationContext;
-	final Person dilbert;
-	final Dog dog;
-	final Integer enigma;
+	@Nested
+	class SpringAutowiredTests extends BaseClass {
 
-	@Autowired
-	SpringJUnitJupiterAutowiredConstructorInjectionTests(ApplicationContext applicationContext, Person dilbert, Dog dog,
-			@Value("${enigma}") Integer enigma) {
-
-		this.applicationContext = applicationContext;
-		this.dilbert = dilbert;
-		this.dog = dog;
-		this.enigma = enigma;
+		@Autowired
+		SpringAutowiredTests(ApplicationContext context, Person dilbert, Dog dog, @Value("${enigma}") Integer enigma) {
+			super(context, dilbert, dog, enigma);
+		}
 	}
 
-	@Test
-	void applicationContextInjected() {
-		assertThat(applicationContext).as("ApplicationContext should have been injected by Spring").isNotNull();
-		assertThat(applicationContext.getBean("dilbert", Person.class)).isEqualTo(this.dilbert);
+	@Nested
+	class JakartaInjectTests extends BaseClass {
+
+		@jakarta.inject.Inject
+		JakartaInjectTests(ApplicationContext context, Person dilbert, Dog dog, @Value("${enigma}") Integer enigma) {
+			super(context, dilbert, dog, enigma);
+		}
 	}
 
-	@Test
-	void beansInjected() {
-		assertThat(this.dilbert).as("Dilbert should have been @Autowired by Spring").isNotNull();
-		assertThat(this.dilbert.getName()).as("Person's name").isEqualTo("Dilbert");
+	@Nested
+	class JavaxInjectTests extends BaseClass {
 
-		assertThat(this.dog).as("Dogbert should have been @Autowired by Spring").isNotNull();
-		assertThat(this.dog.getName()).as("Dog's name").isEqualTo("Dogbert");
+		@javax.inject.Inject
+		JavaxInjectTests(ApplicationContext context, Person dilbert, Dog dog, @Value("${enigma}") Integer enigma) {
+			super(context, dilbert, dog, enigma);
+		}
 	}
 
-	@Test
-	void propertyPlaceholderInjected() {
-		assertThat(this.enigma).as("Enigma should have been injected via @Value by Spring").isNotNull();
-		assertThat(this.enigma).as("enigma").isEqualTo(42);
+
+	@SpringJUnitConfig(TestConfig.class)
+	@TestPropertySource(properties = "enigma = 42")
+	private abstract static class BaseClass {
+
+		final ApplicationContext context;
+		final Person dilbert;
+		final Dog dog;
+		final Integer enigma;
+
+		BaseClass(ApplicationContext context, Person dilbert, Dog dog, Integer enigma) {
+			this.context = context;
+			this.dilbert = dilbert;
+			this.dog = dog;
+			this.enigma = enigma;
+		}
+
+		@Test
+		void applicationContextInjected() {
+			assertThat(context).as("ApplicationContext should have been injected").isNotNull();
+			assertThat(context.getBean("dilbert", Person.class)).isEqualTo(this.dilbert);
+		}
+
+		@Test
+		void beansInjected() {
+			assertThat(this.dilbert).as("Dilbert should have been injected").isNotNull();
+			assertThat(this.dilbert.getName()).as("Person's name").isEqualTo("Dilbert");
+
+			assertThat(this.dog).as("Dogbert should have been injected").isNotNull();
+			assertThat(this.dog.getName()).as("Dog's name").isEqualTo("Dogbert");
+		}
+
+		@Test
+		void propertyPlaceholderInjected() {
+			assertThat(this.enigma).as("Enigma should have been injected via @Value").isEqualTo(42);
+		}
+
 	}
 
 }

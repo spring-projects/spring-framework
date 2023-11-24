@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		ModelMBeanOperationInfo oper = info.getOperation("add");
 		MBeanParameterInfo[] params = oper.getSignature();
 
-		assertThat(params.length).as("Invalid number of params").isEqualTo(2);
+		assertThat(params).as("Invalid number of params").hasSize(2);
 		assertThat(params[0].getName()).as("Incorrect name for x param").isEqualTo("x");
 		assertThat(params[0].getType()).as("Incorrect type for x param").isEqualTo(int.class.getName());
 
@@ -176,8 +176,8 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		start(exporter);
 
 		MBeanInfo inf = getServer().getMBeanInfo(ObjectNameManager.getInstance(objectName));
-		assertThat(inf.getOperations().length).as("Incorrect number of operations").isEqualTo(getExpectedOperationCount());
-		assertThat(inf.getAttributes().length).as("Incorrect number of attributes").isEqualTo(getExpectedAttributeCount());
+		assertThat(inf.getOperations()).as("Incorrect number of operations").hasSize(getExpectedOperationCount());
+		assertThat(inf.getAttributes()).as("Incorrect number of attributes").hasSize(getExpectedAttributeCount());
 
 		assertThat(assembler.includeBean(proxy.getClass(), "some bean name")).as("Not included in autodetection").isTrue();
 	}

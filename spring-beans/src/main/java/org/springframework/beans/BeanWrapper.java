@@ -82,7 +82,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	 * Obtain the property descriptor for a specific property
 	 * of the wrapped object.
 	 * @param propertyName the property to obtain the descriptor for
-	 * (may be a nested path, but no indexed/mapped property)
+	 * (may be a nested path, but not an indexed/mapped property)
 	 * @return the property descriptor for the specified property
 	 * @throws InvalidPropertyException if there is no such property
 	 */

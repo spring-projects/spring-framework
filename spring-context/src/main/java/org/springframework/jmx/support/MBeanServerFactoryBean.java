@@ -74,7 +74,7 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 
 
 	/**
-	 * Set whether or not the {@code MBeanServerFactoryBean} should attempt
+	 * Set whether the {@code MBeanServerFactoryBean} should attempt
 	 * to locate a running {@code MBeanServer} before creating one.
 	 * <p>Default is {@code false}.
 	 */

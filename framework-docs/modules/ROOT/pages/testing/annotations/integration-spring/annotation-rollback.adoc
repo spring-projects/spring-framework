@@ -1,0 +1,45 @@
+[[spring-testing-annotation-rollback]]
+= `@Rollback`
+
+`@Rollback` indicates whether the transaction for a transactional test method should be
+rolled back after the test method has completed. If `true`, the transaction is rolled
+back. Otherwise, the transaction is committed (see also
+xref:testing/annotations/integration-spring/annotation-commit.adoc[`@Commit`]). Rollback for integration tests in the Spring
+TestContext Framework defaults to `true` even if `@Rollback` is not explicitly declared.
+
+When declared as a class-level annotation, `@Rollback` defines the default rollback
+semantics for all test methods within the test class hierarchy. When declared as a
+method-level annotation, `@Rollback` defines rollback semantics for the specific test
+method, potentially overriding class-level `@Rollback` or `@Commit` semantics.
+
+The following example causes a test method's result to not be rolled back (that is, the
+result is committed to the database):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Rollback(false) // <1>
+	@Test
+	void testProcessWithoutRollback() {
+		// ...
+	}
+----
+<1> Do not roll back the result.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Rollback(false) // <1>
+	@Test
+	fun testProcessWithoutRollback() {
+		// ...
+	}
+----
+<1> Do not roll back the result.
+======
+
+

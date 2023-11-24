@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,19 +255,19 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			StringBuilder sb = new StringBuilder();
 			if (includeModifier) {
 				sb.append(Modifier.toString(getModifiers()));
-				sb.append(" ");
+				sb.append(' ');
 			}
 			if (includeReturnTypeAndArgs) {
 				appendType(sb, getReturnType(), useLongReturnAndArgumentTypeName);
-				sb.append(" ");
+				sb.append(' ');
 			}
 			appendType(sb, getDeclaringType(), useLongTypeName);
-			sb.append(".");
+			sb.append('.');
 			sb.append(getMethod().getName());
-			sb.append("(");
+			sb.append('(');
 			Class<?>[] parametersTypes = getParameterTypes();
 			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs, useLongReturnAndArgumentTypeName);
-			sb.append(")");
+			sb.append(')');
 			return sb.toString();
 		}
 
@@ -278,7 +278,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 				for (int size = types.length, i = 0; i < size; i++) {
 					appendType(sb, types[i], useLongReturnAndArgumentTypeName);
 					if (i < size - 1) {
-						sb.append(",");
+						sb.append(',');
 					}
 				}
 			}
@@ -291,7 +291,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 		private void appendType(StringBuilder sb, Class<?> type, boolean useLongTypeName) {
 			if (type.isArray()) {
-				appendType(sb, type.getComponentType(), useLongTypeName);
+				appendType(sb, type.componentType(), useLongTypeName);
 				sb.append("[]");
 			}
 			else {

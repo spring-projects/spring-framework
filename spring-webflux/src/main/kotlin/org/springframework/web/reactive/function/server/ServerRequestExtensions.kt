@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitSingleOrNull
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
@@ -76,6 +76,7 @@ fun <T : Any> ServerRequest.bodyToFlow(clazz: KClass<T>): Flow<T> =
 /**
  * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Sebastien Deleuze
  * @since 5.2
  */
@@ -86,6 +87,7 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
  * `KClass` non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  * Please consider `awaitBody<Foo>` variant if possible.
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Igor Manushin
  * @since 5.3
  */
@@ -98,7 +100,6 @@ suspend fun <T : Any> ServerRequest.awaitBody(clazz: KClass<T>): T =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@Suppress("DEPRECATION")
 suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitSingleOrNull()
 
@@ -109,7 +110,6 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
  * @author Igor Manushin
  * @since 5.3
  */
-@Suppress("DEPRECATION")
 suspend fun <T : Any> ServerRequest.awaitBodyOrNull(clazz: KClass<T>): T? =
 		bodyToMono(clazz.java).awaitSingleOrNull()
 
@@ -137,7 +137,6 @@ suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@Suppress("DEPRECATION")
 suspend fun ServerRequest.awaitPrincipal(): Principal? =
 		principal().awaitSingleOrNull()
 
@@ -174,15 +173,7 @@ fun ServerRequest.attributeOrNull(name: String): Any? = attributes()[name]
  */
 fun ServerRequest.queryParamOrNull(name: String): String? {
 	val queryParamValues = queryParams()[name]
-	return if (CollectionUtils.isEmpty(queryParamValues)) {
-		null
-	} else {
-		var value: String? = queryParamValues!![0]
-		if (value == null) {
-			value = ""
-		}
-		value
-	}
+	return if (queryParamValues.isNullOrEmpty()) null else queryParamValues[0] ?: ""
 }
 
 /**

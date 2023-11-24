@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
 
 package org.springframework.web.testfixture.servlet;
 
-import javax.servlet.SessionCookieConfig;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import jakarta.servlet.SessionCookieConfig;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Mock implementation of the {@link javax.servlet.SessionCookieConfig} interface.
+ * Mock implementation of the {@link jakarta.servlet.SessionCookieConfig} interface.
  *
  * @author Juergen Hoeller
  * @since 4.0
- * @see javax.servlet.ServletContext#getSessionCookieConfig()
+ * @see jakarta.servlet.ServletContext#getSessionCookieConfig()
  */
 public class MockSessionCookieConfig implements SessionCookieConfig {
 
@@ -46,6 +50,8 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 	private boolean secure;
 
 	private int maxAge = -1;
+
+	private Map<String, String> attributes = new LinkedHashMap<>();
 
 
 	@Override
@@ -81,11 +87,13 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 		return this.path;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public void setComment(@Nullable String comment) {
 		this.comment = comment;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	@Nullable
 	public String getComment() {
@@ -120,6 +128,21 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 	@Override
 	public int getMaxAge() {
 		return this.maxAge;
+	}
+
+	@Override
+	public void setAttribute(String name, String value) {
+		this.attributes.put(name, value);
+	}
+
+	@Override
+	public String getAttribute(String name) {
+		return this.attributes.get(name);
+	}
+
+	@Override
+	public Map<String, String> getAttributes() {
+		return Collections.unmodifiableMap(this.attributes);
 	}
 
 }

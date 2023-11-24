@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.converter;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,8 +75,8 @@ public class JsonbMessageConverterTests {
 		HashMap<String, Object> actual = (HashMap<String, Object>) converter.fromMessage(message, HashMap.class);
 
 		assertThat(actual.get("string")).isEqualTo("Foo");
-		assertThat(actual.get("number")).isEqualTo(42);
-		assertThat((Double) actual.get("fraction")).isCloseTo(42D, within(0D));
+		assertThat(actual.get("number")).isEqualTo(new BigDecimal(42));
+		assertThat((BigDecimal) actual.get("fraction")).isCloseTo(new BigDecimal(42), within(new BigDecimal(0)));
 		assertThat(actual.get("array")).isEqualTo(Arrays.asList("Foo", "Bar"));
 		assertThat(actual.get("bool")).isEqualTo(Boolean.TRUE);
 	}
@@ -130,7 +131,7 @@ public class JsonbMessageConverterTests {
 		MethodParameter param = new MethodParameter(method, 0);
 		Object actual = converter.fromMessage(message, MyBean.class, param);
 
-		assertThat(actual instanceof MyBean).isTrue();
+		assertThat(actual).isInstanceOf(MyBean.class);
 		assertThat(((MyBean) actual).getString()).isEqualTo("foo");
 	}
 
@@ -147,11 +148,11 @@ public class JsonbMessageConverterTests {
 		Message<?> message = converter.toMessage(payload, null);
 		String actual = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 
-		assertThat(actual.contains("\"string\":\"Foo\"")).isTrue();
-		assertThat(actual.contains("\"number\":42")).isTrue();
-		assertThat(actual.contains("fraction\":42.0")).isTrue();
-		assertThat(actual.contains("\"array\":[\"Foo\",\"Bar\"]")).isTrue();
-		assertThat(actual.contains("\"bool\":true")).isTrue();
+		assertThat(actual).contains("\"string\":\"Foo\"");
+		assertThat(actual).contains("\"number\":42");
+		assertThat(actual).contains("fraction\":42.0");
+		assertThat(actual).contains("\"array\":[\"Foo\",\"Bar\"]");
+		assertThat(actual).contains("\"bool\":true");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE, MimeType.class)).as("Invalid content-type").isEqualTo(new MimeType("application", "json"));
 	}
 
@@ -165,7 +166,7 @@ public class JsonbMessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo(payload);
+		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo("\"" + payload + "\"");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
@@ -181,7 +182,7 @@ public class JsonbMessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertThat(message.getPayload()).isEqualTo(payload);
+		assertThat(message.getPayload()).isEqualTo("\"" + payload + "\"");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 

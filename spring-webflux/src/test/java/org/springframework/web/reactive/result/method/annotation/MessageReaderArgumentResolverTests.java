@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -350,12 +349,11 @@ public class MessageReaderArgumentResolverTests {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (this == o) {
 				return true;
 			}
-			if (o instanceof TestBean) {
-				TestBean other = (TestBean) o;
+			if (o instanceof TestBean other) {
 				return this.foo.equals(other.foo) && this.bar.equals(other.bar);
 			}
 			return false;
@@ -390,7 +388,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 
-	private static abstract class AbstractParameterizedController<DTO extends Identifiable> {
+	private abstract static class AbstractParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(DTO dto) {}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.core;
 
+import java.util.Objects;
+import java.util.function.Supplier;
+
 import org.springframework.util.Assert;
 
 /**
@@ -23,6 +26,7 @@ import org.springframework.util.Assert;
  * as {@link #toString()} result (allowing for introspection).
  *
  * @author Juergen Hoeller
+ * @author Qimiao Chen
  * @since 2.5.2
  * @param <T> the value type
  * @see NamedInheritableThreadLocal
@@ -44,6 +48,41 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 	@Override
 	public String toString() {
 		return this.name;
+	}
+
+
+	/**
+	 * Create a named thread local variable. The initial value of the variable is
+	 * determined by invoking the {@code get} method on the {@code Supplier}.
+	 * @param <S> the type of the named thread local's value
+	 * @param name a descriptive name for the thread local
+	 * @param supplier the supplier to be used to determine the initial value
+	 * @return a new named thread local
+	 * @since 6.1
+	 */
+	public static <S> ThreadLocal<S> withInitial(String name, Supplier<? extends S> supplier) {
+		return new SuppliedNamedThreadLocal<>(name, supplier);
+	}
+
+
+	/**
+	 * An extension of NamedThreadLocal that obtains its initial value from
+	 * the specified {@code Supplier}.
+	 * @param <T> the type of the named thread local's value
+	 */
+	private static final class SuppliedNamedThreadLocal<T> extends NamedThreadLocal<T> {
+
+		private final Supplier<? extends T> supplier;
+
+		SuppliedNamedThreadLocal(String name, Supplier<? extends T> supplier) {
+			super(name);
+			this.supplier = Objects.requireNonNull(supplier);
+		}
+
+		@Override
+		protected T initialValue() {
+			return this.supplier.get();
+		}
 	}
 
 }

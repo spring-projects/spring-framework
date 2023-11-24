@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ public class RdbmsOperationTests {
 
 	@Test
 	public void tooFewMapParameters() {
+		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
@@ -85,22 +86,31 @@ public class RdbmsOperationTests {
 	}
 
 	@Test
-	public void operationConfiguredViaJdbcTemplateMustGetDataSource() throws Exception {
+	public void operationConfiguredViaJdbcTemplateMustGetDataSource() {
 		operation.setSql("foo");
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
 				operation.compile())
-			.withMessageContaining("ataSource");
+			.withMessageContaining("'dataSource'");
 	}
 
 	@Test
 	public void tooManyParameters() {
+		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
 				operation.validateParameters(new Object[] { 1, 2 }));
 	}
+	@Test
+	public void tooManyMapParameters() {
+		operation.setDataSource(new DriverManagerDataSource());
+		operation.setSql("select * from mytable");
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				operation.validateNamedParameters(Map.of("a", "b", "c", "d")));
+	}
 
 	@Test
 	public void unspecifiedMapParameters() {
+		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		Map<String, String> params = new HashMap<>();
 		params.put("col1", "value");
@@ -157,7 +167,7 @@ public class RdbmsOperationTests {
 				new SqlParameter("two", Types.NUMERIC)});
 		operation.afterPropertiesSet();
 		operation.validateParameters(new Object[] { 1, "2" });
-		assertThat(operation.getDeclaredParameters().size()).isEqualTo(2);
+		assertThat(operation.getDeclaredParameters()).hasSize(2);
 	}
 
 

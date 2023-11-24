@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValue(String content, @Nullable Object expectedValue) {
 		Object actualValue = evaluateJsonPath(content);
-		if ((actualValue instanceof List) && !(expectedValue instanceof List)) {
-			@SuppressWarnings("rawtypes")
-			List actualValueList = (List) actualValue;
+		if ((actualValue instanceof List<?> actualValueList) && !(expectedValue instanceof List)) {
 			if (actualValueList.isEmpty()) {
 				AssertionErrors.fail("No matching value at JSON path \"" + this.expression + "\"");
 			}
@@ -209,8 +207,8 @@ public class JsonPathExpectationsHelper {
 			return;
 		}
 		String reason = failureReason("no value", value);
-		if (pathIsIndefinite() && value instanceof List) {
-			AssertionErrors.assertTrue(reason, ((List<?>) value).isEmpty());
+		if (pathIsIndefinite() && value instanceof List<?> list) {
+			AssertionErrors.assertTrue(reason, list.isEmpty());
 		}
 		else {
 			AssertionErrors.assertTrue(reason, (value == null));
@@ -252,9 +250,9 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void hasJsonPath(String content) {
 		Object value = evaluateJsonPath(content);
-		if (pathIsIndefinite() && value instanceof List) {
+		if (pathIsIndefinite() && value instanceof List<?> list) {
 			String message = "No values for JSON path \"" + this.expression + "\"";
-			AssertionErrors.assertTrue(message, !((List<?>) value).isEmpty());
+			AssertionErrors.assertTrue(message, !list.isEmpty());
 		}
 	}
 
@@ -276,8 +274,8 @@ public class JsonPathExpectationsHelper {
 		catch (AssertionError ex) {
 			return;
 		}
-		if (pathIsIndefinite() && value instanceof List) {
-			AssertionErrors.assertTrue(failureReason("no values", value), ((List<?>) value).isEmpty());
+		if (pathIsIndefinite() && value instanceof List<?> list) {
+			AssertionErrors.assertTrue(failureReason("no values", value), list.isEmpty());
 		}
 		else {
 			AssertionErrors.fail(failureReason("no value", value));
@@ -328,8 +326,8 @@ public class JsonPathExpectationsHelper {
 		Object value = evaluateJsonPath(content);
 		String reason = "No value at JSON path \"" + this.expression + "\"";
 		AssertionErrors.assertTrue(reason, value != null);
-		if (pathIsIndefinite() && value instanceof List) {
-			AssertionErrors.assertTrue(reason, !((List<?>) value).isEmpty());
+		if (pathIsIndefinite() && value instanceof List<?> list) {
+			AssertionErrors.assertTrue(reason, !list.isEmpty());
 		}
 		return value;
 	}

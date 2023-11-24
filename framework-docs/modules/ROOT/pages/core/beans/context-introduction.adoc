@@ -1,0 +1,1069 @@
+[[context-introduction]]
+= Additional Capabilities of the `ApplicationContext`
+
+As discussed in the xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[chapter introduction], the `org.springframework.beans.factory`
+package provides basic functionality for managing and manipulating beans, including in a
+programmatic way. The `org.springframework.context` package adds the
+{spring-framework-api}/context/ApplicationContext.html[`ApplicationContext`]
+interface, which extends the `BeanFactory` interface, in addition to extending other
+interfaces to provide additional functionality in a more application
+framework-oriented style. Many people use the `ApplicationContext` in a completely
+declarative fashion, not even creating it programmatically, but instead relying on
+support classes such as `ContextLoader` to automatically instantiate an
+`ApplicationContext` as part of the normal startup process of a Jakarta EE web application.
+
+To enhance `BeanFactory` functionality in a more framework-oriented style, the context
+package also provides the following functionality:
+
+* Access to messages in i18n-style, through the `MessageSource` interface.
+* Access to resources, such as URLs and files, through the `ResourceLoader` interface.
+* Event publication, namely to beans that implement the `ApplicationListener` interface,
+  through the use of the `ApplicationEventPublisher` interface.
+* Loading of multiple (hierarchical) contexts, letting each be focused on one
+  particular layer, such as the web layer of an application, through the
+  `HierarchicalBeanFactory` interface.
+
+
+
+[[context-functionality-messagesource]]
+== Internationalization using `MessageSource`
+
+The `ApplicationContext` interface extends an interface called `MessageSource` and,
+therefore, provides internationalization ("`i18n`") functionality. Spring also provides the
+`HierarchicalMessageSource` interface, which can resolve messages hierarchically.
+Together, these interfaces provide the foundation upon which Spring effects message
+resolution. The methods defined on these interfaces include:
+
+* `String getMessage(String code, Object[] args, String default, Locale loc)`: The basic
+  method used to retrieve a message from the `MessageSource`. When no message is found
+  for the specified locale, the default message is used. Any arguments passed in become
+  replacement values, using the `MessageFormat` functionality provided by the standard
+  library.
+* `String getMessage(String code, Object[] args, Locale loc)`: Essentially the same as
+  the previous method but with one difference: No default message can be specified. If
+  the message cannot be found, a `NoSuchMessageException` is thrown.
+* `String getMessage(MessageSourceResolvable resolvable, Locale locale)`: All properties
+  used in the preceding methods are also wrapped in a class named
+  `MessageSourceResolvable`, which you can use with this method.
+
+When an `ApplicationContext` is loaded, it automatically searches for a `MessageSource`
+bean defined in the context. The bean must have the name `messageSource`. If such a bean
+is found, all calls to the preceding methods are delegated to the message source. If no
+message source is found, the `ApplicationContext` attempts to find a parent containing a
+bean with the same name. If it does, it uses that bean as the `MessageSource`. If the
+`ApplicationContext` cannot find any source for messages, an empty
+`DelegatingMessageSource` is instantiated in order to be able to accept calls to the
+methods defined above.
+
+Spring provides three `MessageSource` implementations, `ResourceBundleMessageSource`, `ReloadableResourceBundleMessageSource`
+and `StaticMessageSource`. All of them implement `HierarchicalMessageSource` in order to do nested
+messaging. The `StaticMessageSource` is rarely used but provides programmatic ways to
+add messages to the source. The following example shows `ResourceBundleMessageSource`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="messageSource"
+				class="org.springframework.context.support.ResourceBundleMessageSource">
+			<property name="basenames">
+				<list>
+					<value>format</value>
+					<value>exceptions</value>
+					<value>windows</value>
+				</list>
+			</property>
+		</bean>
+	</beans>
+----
+
+The example assumes that you have three resource bundles called `format`, `exceptions` and `windows`
+defined in your classpath. Any request to resolve a message is
+handled in the JDK-standard way of resolving messages through `ResourceBundle` objects. For the
+purposes of the example, assume the contents of two of the above resource bundle files
+are as follows:
+
+[source,properties,indent=0,subs="verbatim,quotes"]
+----
+	# in format.properties
+	message=Alligators rock!
+----
+
+[source,properties,indent=0,subs="verbatim,quotes"]
+----
+	# in exceptions.properties
+	argument.required=The {0} argument is required.
+----
+
+The next example shows a program to run the `MessageSource` functionality.
+Remember that all `ApplicationContext` implementations are also `MessageSource`
+implementations and so can be cast to the `MessageSource` interface.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+		String message = resources.getMessage("message", null, "Default", Locale.ENGLISH);
+		System.out.println(message);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun main() {
+		val resources = ClassPathXmlApplicationContext("beans.xml")
+		val message = resources.getMessage("message", null, "Default", Locale.ENGLISH)
+		println(message)
+	}
+----
+======
+
+The resulting output from the above program is as follows:
+
+[literal,subs="verbatim,quotes"]
+----
+Alligators rock!
+----
+
+To summarize, the `MessageSource` is defined in a file called `beans.xml`, which
+exists at the root of your classpath. The `messageSource` bean definition refers to a
+number of resource bundles through its `basenames` property. The three files that are
+passed in the list to the `basenames` property exist as files at the root of your
+classpath and are called `format.properties`, `exceptions.properties`, and
+`windows.properties`, respectively.
+
+The next example shows arguments passed to the message lookup. These arguments are
+converted into `String` objects and inserted into placeholders in the lookup message.
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<!-- this MessageSource is being used in a web application -->
+		<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+			<property name="basename" value="exceptions"/>
+		</bean>
+
+		<!-- lets inject the above MessageSource into this POJO -->
+		<bean id="example" class="com.something.Example">
+			<property name="messages" ref="messageSource"/>
+		</bean>
+
+	</beans>
+----
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class Example {
+
+		private MessageSource messages;
+
+		public void setMessages(MessageSource messages) {
+			this.messages = messages;
+		}
+
+		public void execute() {
+			String message = this.messages.getMessage("argument.required",
+				new Object [] {"userDao"}, "Required", Locale.ENGLISH);
+			System.out.println(message);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Example {
+
+	lateinit var messages: MessageSource
+
+	fun execute() {
+		val message = messages.getMessage("argument.required",
+				arrayOf("userDao"), "Required", Locale.ENGLISH)
+		println(message)
+	}
+}
+----
+======
+
+The resulting output from the invocation of the `execute()` method is as follows:
+
+[literal,subs="verbatim,quotes"]
+----
+The userDao argument is required.
+----
+
+With regard to internationalization ("`i18n`"), Spring's various `MessageSource`
+implementations follow the same locale resolution and fallback rules as the standard JDK
+`ResourceBundle`. In short, and continuing with the example `messageSource` defined
+previously, if you want to resolve messages against the British (`en-GB`) locale, you
+would create files called `format_en_GB.properties`, `exceptions_en_GB.properties`, and
+`windows_en_GB.properties`, respectively.
+
+Typically, locale resolution is managed by the surrounding environment of the
+application. In the following example, the locale against which (British) messages are
+resolved is specified manually:
+
+[literal,subs="verbatim,quotes"]
+----
+# in exceptions_en_GB.properties
+argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
+----
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(final String[] args) {
+		MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+		String message = resources.getMessage("argument.required",
+			new Object [] {"userDao"}, "Required", Locale.UK);
+		System.out.println(message);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun main() {
+		val resources = ClassPathXmlApplicationContext("beans.xml")
+		val message = resources.getMessage("argument.required",
+				arrayOf("userDao"), "Required", Locale.UK)
+		println(message)
+	}
+----
+======
+
+The resulting output from the running of the above program is as follows:
+
+[literal,subs="verbatim,quotes"]
+----
+Ebagum lad, the 'userDao' argument is required, I say, required.
+----
+
+You can also use the `MessageSourceAware` interface to acquire a reference to any
+`MessageSource` that has been defined. Any bean that is defined in an
+`ApplicationContext` that implements the `MessageSourceAware` interface is injected with
+the application context's `MessageSource` when the bean is created and configured.
+
+NOTE: Because Spring's `MessageSource` is based on Java's `ResourceBundle`, it does not merge
+bundles with the same base name, but will only use the first bundle found.
+Subsequent message bundles with the same base name are ignored.
+
+NOTE: As an alternative to `ResourceBundleMessageSource`, Spring provides a
+`ReloadableResourceBundleMessageSource` class. This variant supports the same bundle
+file format but is more flexible than the standard JDK based
+`ResourceBundleMessageSource` implementation. In particular, it allows for reading
+files from any Spring resource location (not only from the classpath) and supports hot
+reloading of bundle property files (while efficiently caching them in between).
+See the {spring-framework-api}/context/support/ReloadableResourceBundleMessageSource.html[`ReloadableResourceBundleMessageSource`]
+javadoc for details.
+
+
+
+[[context-functionality-events]]
+== Standard and Custom Events
+
+Event handling in the `ApplicationContext` is provided through the `ApplicationEvent`
+class and the `ApplicationListener` interface. If a bean that implements the
+`ApplicationListener` interface is deployed into the context, every time an
+`ApplicationEvent` gets published to the `ApplicationContext`, that bean is notified.
+Essentially, this is the standard Observer design pattern.
+
+TIP: As of Spring 4.2, the event infrastructure has been significantly improved and offers
+an xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[annotation-based model] as well as the
+ability to publish any arbitrary event (that is, an object that does not necessarily
+extend from `ApplicationEvent`). When such an object is published, we wrap it in an
+event for you.
+
+The following table describes the standard events that Spring provides:
+
+[[beans-ctx-events-tbl]]
+.Built-in Events
+[cols="30%,70%"]
+|===
+| Event| Explanation
+
+| `ContextRefreshedEvent`
+| Published when the `ApplicationContext` is initialized or refreshed (for example, by
+  using the `refresh()` method on the `ConfigurableApplicationContext` interface).
+  Here, "`initialized`" means that all beans are loaded, post-processor beans are detected
+  and activated, singletons are pre-instantiated, and the `ApplicationContext` object is
+  ready for use. As long as the context has not been closed, a refresh can be triggered
+  multiple times, provided that the chosen `ApplicationContext` actually supports such
+  "`hot`" refreshes. For example, `XmlWebApplicationContext` supports hot refreshes, but
+  `GenericApplicationContext` does not.
+
+| `ContextStartedEvent`
+| Published when the `ApplicationContext` is started by using the `start()` method on the
+  `ConfigurableApplicationContext` interface. Here, "`started`" means that all `Lifecycle`
+  beans receive an explicit start signal. Typically, this signal is used to restart beans
+  after an explicit stop, but it may also be used to start components that have not been
+  configured for autostart (for example, components that have not already started on
+  initialization).
+
+| `ContextStoppedEvent`
+| Published when the `ApplicationContext` is stopped by using the `stop()` method on the
+  `ConfigurableApplicationContext` interface. Here, "`stopped`" means that all `Lifecycle`
+  beans receive an explicit stop signal. A stopped context may be restarted through a
+  `start()` call.
+
+| `ContextClosedEvent`
+| Published when the `ApplicationContext` is being closed by using the `close()` method
+  on the `ConfigurableApplicationContext` interface or via a JVM shutdown hook. Here,
+  "closed" means that all singleton beans will be destroyed. Once the context is closed,
+  it reaches its end of life and cannot be refreshed or restarted.
+
+| `RequestHandledEvent`
+| A web-specific event telling all beans that an HTTP request has been serviced. This
+  event is published after the request is complete. This event is only applicable to
+  web applications that use Spring's `DispatcherServlet`.
+
+| `ServletRequestHandledEvent`
+| A subclass of `RequestHandledEvent` that adds Servlet-specific context information.
+
+|===
+
+You can also create and publish your own custom events. The following example shows a
+simple class that extends Spring's `ApplicationEvent` base class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class BlockedListEvent extends ApplicationEvent {
+
+		private final String address;
+		private final String content;
+
+		public BlockedListEvent(Object source, String address, String content) {
+			super(source);
+			this.address = address;
+			this.content = content;
+		}
+
+		// accessor and other methods...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class BlockedListEvent(source: Any,
+						val address: String,
+						val content: String) : ApplicationEvent(source)
+----
+======
+
+To publish a custom `ApplicationEvent`, call the `publishEvent()` method on an
+`ApplicationEventPublisher`. Typically, this is done by creating a class that implements
+`ApplicationEventPublisherAware` and registering it as a Spring bean. The following
+example shows such a class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class EmailService implements ApplicationEventPublisherAware {
+
+		private List<String> blockedList;
+		private ApplicationEventPublisher publisher;
+
+		public void setBlockedList(List<String> blockedList) {
+			this.blockedList = blockedList;
+		}
+
+		public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+			this.publisher = publisher;
+		}
+
+		public void sendEmail(String address, String content) {
+			if (blockedList.contains(address)) {
+				publisher.publishEvent(new BlockedListEvent(this, address, content));
+				return;
+			}
+			// send email...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class EmailService : ApplicationEventPublisherAware {
+
+		private lateinit var blockedList: List<String>
+		private lateinit var publisher: ApplicationEventPublisher
+
+		fun setBlockedList(blockedList: List<String>) {
+			this.blockedList = blockedList
+		}
+
+		override fun setApplicationEventPublisher(publisher: ApplicationEventPublisher) {
+			this.publisher = publisher
+		}
+
+		fun sendEmail(address: String, content: String) {
+			if (blockedList!!.contains(address)) {
+				publisher!!.publishEvent(BlockedListEvent(this, address, content))
+				return
+			}
+			// send email...
+		}
+	}
+----
+======
+
+At configuration time, the Spring container detects that `EmailService` implements
+`ApplicationEventPublisherAware` and automatically calls
+`setApplicationEventPublisher()`. In reality, the parameter passed in is the Spring
+container itself. You are interacting with the application context through its
+`ApplicationEventPublisher` interface.
+
+To receive the custom `ApplicationEvent`, you can create a class that implements
+`ApplicationListener` and register it as a Spring bean. The following example
+shows such a class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class BlockedListNotifier implements ApplicationListener<BlockedListEvent> {
+
+		private String notificationAddress;
+
+		public void setNotificationAddress(String notificationAddress) {
+			this.notificationAddress = notificationAddress;
+		}
+
+		public void onApplicationEvent(BlockedListEvent event) {
+			// notify appropriate parties via notificationAddress...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class BlockedListNotifier : ApplicationListener<BlockedListEvent> {
+
+		lateinit var notificationAddress: String
+
+		override fun onApplicationEvent(event: BlockedListEvent) {
+			// notify appropriate parties via notificationAddress...
+		}
+	}
+----
+======
+
+Notice that `ApplicationListener` is generically parameterized with the type of your custom event (`BlockedListEvent` in the preceding example).
+This means that the `onApplicationEvent()` method can remain type-safe, avoiding any need for downcasting.
+You can register as many event listeners as you wish, but note that, by default, event listeners receive events synchronously.
+This means that the `publishEvent()` method blocks until all listeners have finished processing the event.
+One advantage of this synchronous and single-threaded approach is that, when a listener receives an event,
+it operates inside the transaction context of the publisher if a transaction context is available.
+If another strategy for event publication becomes necessary, e.g. asynchronous event processing by default,
+see the javadoc for Spring's {spring-framework-api}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
+and {spring-framework-api}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`] implementation
+for configuration options which can be applied to a custom "applicationEventMulticaster" bean definition.
+In these cases, ThreadLocals and logging context are not propagated for the event processing.
+See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
+for more information on Observability concerns.
+
+
+
+The following example shows the bean definitions used to register and configure each of
+the classes above:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="emailService" class="example.EmailService">
+		<property name="blockedList">
+			<list>
+				<value>known.spammer@example.org</value>
+				<value>known.hacker@example.org</value>
+				<value>john.doe@example.org</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="blockedListNotifier" class="example.BlockedListNotifier">
+		<property name="notificationAddress" value="blockedlist@example.org"/>
+	</bean>
+
+    <!-- optional: a custom ApplicationEventMulticaster definition -->
+	<bean id="applicationEventMulticaster" class="org.springframework.context.event.SimpleApplicationEventMulticaster">
+		<property name="taskExecutor" ref="..."/>
+		<property name="errorHandler" ref="..."/>
+	</bean>
+----
+
+Putting it all together, when the `sendEmail()` method of the `emailService` bean is
+called, if there are any email messages that should be blocked, a custom event of type
+`BlockedListEvent` is published. The `blockedListNotifier` bean is registered as an
+`ApplicationListener` and receives the `BlockedListEvent`, at which point it can
+notify appropriate parties.
+
+NOTE: Spring's eventing mechanism is designed for simple communication between Spring beans
+within the same application context. However, for more sophisticated enterprise
+integration needs, the separately maintained
+{spring-site-projects}/spring-integration/[Spring Integration] project provides
+complete support for building lightweight,
+https://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
+architectures that build upon the well-known Spring programming model.
+
+
+[[context-functionality-events-annotation]]
+=== Annotation-based Event Listeners
+
+You can register an event listener on any method of a managed bean by using the
+`@EventListener` annotation. The `BlockedListNotifier` can be rewritten as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class BlockedListNotifier {
+
+		private String notificationAddress;
+
+		public void setNotificationAddress(String notificationAddress) {
+			this.notificationAddress = notificationAddress;
+		}
+
+		@EventListener
+		public void processBlockedListEvent(BlockedListEvent event) {
+			// notify appropriate parties via notificationAddress...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class BlockedListNotifier {
+
+		lateinit var notificationAddress: String
+
+		@EventListener
+		fun processBlockedListEvent(event: BlockedListEvent) {
+			// notify appropriate parties via notificationAddress...
+		}
+	}
+----
+======
+
+The method signature once again declares the event type to which it listens,
+but, this time, with a flexible name and without implementing a specific listener interface.
+The event type can also be narrowed through generics as long as the actual event type
+resolves your generic parameter in its implementation hierarchy.
+
+If your method should listen to several events or if you want to define it with no
+parameter at all, the event types can also be specified on the annotation itself. The
+following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
+	public void handleContextStart() {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EventListener(ContextStartedEvent::class, ContextRefreshedEvent::class)
+	fun handleContextStart() {
+		// ...
+	}
+----
+======
+
+It is also possible to add additional runtime filtering by using the `condition` attribute
+of the annotation that defines a xref:core/expressions.adoc[`SpEL` expression], which should match
+to actually invoke the method for a particular event.
+
+The following example shows how our notifier can be rewritten to be invoked only if the
+`content` attribute of the event is equal to `my-event`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EventListener(condition = "#blEvent.content == 'my-event'")
+	public void processBlockedListEvent(BlockedListEvent blEvent) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EventListener(condition = "#blEvent.content == 'my-event'")
+	fun processBlockedListEvent(blEvent: BlockedListEvent) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+======
+
+Each `SpEL` expression evaluates against a dedicated context. The following table lists the
+items made available to the context so that you can use them for conditional event processing:
+
+[[context-functionality-events-annotation-tbl]]
+.Event SpEL available metadata
+|===
+| Name| Location| Description| Example
+
+| Event
+| root object
+| The actual `ApplicationEvent`.
+| `#root.event` or `event`
+
+| Arguments array
+| root object
+| The arguments (as an object array) used to invoke the method.
+| `#root.args` or `args`; `args[0]` to access the first argument, etc.
+
+| __Argument name__
+| evaluation context
+| The name of any of the method arguments. If, for some reason, the names are not available
+  (for example, because there is no debug information in the compiled byte code), individual
+  arguments are also available using the `#a<#arg>` syntax where `<#arg>` stands for the
+  argument index (starting from 0).
+| `#blEvent` or `#a0` (you can also use `#p0` or `#p<#arg>` parameter notation as an alias)
+|===
+
+Note that `#root.event` gives you access to the underlying event, even if your method
+signature actually refers to an arbitrary object that was published.
+
+If you need to publish an event as the result of processing another event, you can change the
+method signature to return the event that should be published, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EventListener
+	public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
+		// notify appropriate parties via notificationAddress and
+		// then publish a ListUpdateEvent...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EventListener
+	fun handleBlockedListEvent(event: BlockedListEvent): ListUpdateEvent {
+		// notify appropriate parties via notificationAddress and
+		// then publish a ListUpdateEvent...
+	}
+----
+======
+
+NOTE: This feature is not supported for
+xref:core/beans/context-introduction.adoc#context-functionality-events-async[asynchronous listeners].
+
+The `handleBlockedListEvent()` method publishes a new `ListUpdateEvent` for every
+`BlockedListEvent` that it handles. If you need to publish several events, you can return
+a `Collection` or an array of events instead.
+
+
+[[context-functionality-events-async]]
+=== Asynchronous Listeners
+
+If you want a particular listener to process events asynchronously, you can reuse the
+xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support].
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EventListener
+	@Async
+	public void processBlockedListEvent(BlockedListEvent event) {
+		// BlockedListEvent is processed in a separate thread
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EventListener
+	@Async
+	fun processBlockedListEvent(event: BlockedListEvent) {
+		// BlockedListEvent is processed in a separate thread
+	}
+----
+======
+
+Be aware of the following limitations when using asynchronous events:
+
+* If an asynchronous event listener throws an `Exception`, it is not propagated to the
+  caller. See
+  {spring-framework-api}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`AsyncUncaughtExceptionHandler`]
+  for more details.
+* Asynchronous event listener methods cannot publish a subsequent event by returning a
+  value. If you need to publish another event as the result of the processing, inject an
+  {spring-framework-api}/context/ApplicationEventPublisher.html[`ApplicationEventPublisher`]
+  to publish the event manually.
+* ThreadLocals and logging context are not propagated by default for the event processing.
+  See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
+  for more information on Observability concerns.
+
+
+[[context-functionality-events-order]]
+=== Ordering Listeners
+
+If you need one listener to be invoked before another one, you can add the `@Order`
+annotation to the method declaration, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EventListener
+	@Order(42)
+	public void processBlockedListEvent(BlockedListEvent event) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EventListener
+	@Order(42)
+	fun processBlockedListEvent(event: BlockedListEvent) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+======
+
+
+[[context-functionality-events-generics]]
+=== Generic Events
+
+You can also use generics to further define the structure of your event. Consider using an
+`EntityCreatedEvent<T>` where `T` is the type of the actual entity that got created. For example, you
+can create the following listener definition to receive only `EntityCreatedEvent` for a
+`Person`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EventListener
+	public void onPersonCreated(EntityCreatedEvent<Person> event) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EventListener
+	fun onPersonCreated(event: EntityCreatedEvent<Person>) {
+		// ...
+	}
+----
+======
+
+Due to type erasure, this works only if the event that is fired resolves the generic
+parameters on which the event listener filters (that is, something like
+`class PersonCreatedEvent extends EntityCreatedEvent<Person> { ... }`).
+
+In certain circumstances, this may become quite tedious if all events follow the same
+structure (as should be the case for the event in the preceding example). In such a case,
+you can implement `ResolvableTypeProvider` to guide the framework beyond what the runtime
+environment provides. The following event shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class EntityCreatedEvent<T> extends ApplicationEvent implements ResolvableTypeProvider {
+
+		public EntityCreatedEvent(T entity) {
+			super(entity);
+		}
+
+		@Override
+		public ResolvableType getResolvableType() {
+			return ResolvableType.forClassWithGenerics(getClass(), ResolvableType.forInstance(getSource()));
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class EntityCreatedEvent<T>(entity: T) : ApplicationEvent(entity), ResolvableTypeProvider {
+
+		override fun getResolvableType(): ResolvableType? {
+			return ResolvableType.forClassWithGenerics(javaClass, ResolvableType.forInstance(getSource()))
+		}
+	}
+----
+======
+
+TIP: This works not only for `ApplicationEvent` but any arbitrary object that you send as
+an event.
+
+Finally, as with classic `ApplicationListener` implementations, the actual multicasting
+happens via a context-wide `ApplicationEventMulticaster` at runtime. By default, this is a
+`SimpleApplicationEventMulticaster` with synchronous event publication in the caller thread.
+This can be replaced/customized through an "applicationEventMulticaster" bean definition,
+e.g. for processing all events asynchronously and/or for handling listener exceptions:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Bean
+	ApplicationEventMulticaster applicationEventMulticaster() {
+		SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
+		multicaster.setTaskExecutor(...);
+		multicaster.setErrorHandler(...);
+		return multicaster;
+	}
+----
+
+
+
+[[context-functionality-resources]]
+== Convenient Access to Low-level Resources
+
+For optimal usage and understanding of application contexts, you should familiarize
+yourself with Spring's `Resource` abstraction, as described in xref:web/webflux-webclient/client-builder.adoc#webflux-client-builder-reactor-resources[Resources].
+
+An application context is a `ResourceLoader`, which can be used to load `Resource` objects.
+A `Resource` is essentially a more feature rich version of the JDK `java.net.URL` class.
+In fact, the implementations of the `Resource` wrap an instance of `java.net.URL`, where
+appropriate. A `Resource` can obtain low-level resources from almost any location in a
+transparent fashion, including from the classpath, a filesystem location, anywhere
+describable with a standard URL, and some other variations. If the resource location
+string is a simple path without any special prefixes, where those resources come from is
+specific and appropriate to the actual application context type.
+
+You can configure a bean deployed into the application context to implement the special
+callback interface, `ResourceLoaderAware`, to be automatically called back at
+initialization time with the application context itself passed in as the `ResourceLoader`.
+You can also expose properties of type `Resource`, to be used to access static resources.
+They are injected into it like any other properties. You can specify those `Resource`
+properties as simple `String` paths and rely on automatic conversion from those text
+strings to actual `Resource` objects when the bean is deployed.
+
+The location path or paths supplied to an `ApplicationContext` constructor are actually
+resource strings and, in simple form, are treated appropriately according to the specific
+context implementation. For example `ClassPathXmlApplicationContext` treats a simple
+location path as a classpath location. You can also use location paths (resource strings)
+with special prefixes to force loading of definitions from the classpath or a URL,
+regardless of the actual context type.
+
+
+
+[[context-functionality-startup]]
+== Application Startup Tracking
+
+The `ApplicationContext` manages the lifecycle of Spring applications and provides a rich
+programming model around components. As a result, complex applications can have equally
+complex component graphs and startup phases.
+
+Tracking the application startup steps with specific metrics can help understand where
+time is being spent during the startup phase, but it can also be used as a way to better
+understand the context lifecycle as a whole.
+
+The `AbstractApplicationContext` (and its subclasses) is instrumented with an
+`ApplicationStartup`, which collects `StartupStep` data about various startup phases:
+
+* application context lifecycle (base packages scanning, config classes management)
+* beans lifecycle (instantiation, smart initialization, post processing)
+* application events processing
+
+Here is an example of instrumentation in the `AnnotationConfigApplicationContext`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// create a startup step and start recording
+	StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan");
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages);
+	// end the current step
+	scanPackages.end();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// create a startup step and start recording
+	val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages))
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages)
+	// end the current step
+	scanPackages.end()
+----
+======
+
+The application context is already instrumented with multiple steps.
+Once recorded, these startup steps can be collected, displayed and analyzed with specific tools.
+For a complete list of existing startup steps, you can check out the
+xref:core/appendix/application-startup-steps.adoc[dedicated appendix section].
+
+The default `ApplicationStartup` implementation is a no-op variant, for minimal overhead.
+This means no metrics will be collected during application startup by default.
+Spring Framework ships with an implementation for tracking startup steps with Java Flight Recorder:
+`FlightRecorderApplicationStartup`. To use this variant, you must configure an instance of it
+to the `ApplicationContext` as soon as it's been created.
+
+Developers can also use the `ApplicationStartup` infrastructure if they're providing their own
+`AbstractApplicationContext` subclass, or if they wish to collect more precise data.
+
+WARNING: `ApplicationStartup` is meant to be only used during application startup and for
+the core container; this is by no means a replacement for Java profilers or
+metrics libraries like https://micrometer.io[Micrometer].
+
+To start collecting custom `StartupStep`, components can either get the `ApplicationStartup`
+instance from the application context directly, make their component implement `ApplicationStartupAware`,
+or ask for the `ApplicationStartup` type on any injection point.
+
+NOTE: Developers should not use the `"spring.*"` namespace when creating custom startup steps.
+This namespace is reserved for internal Spring usage and is subject to change.
+
+[[context-create]]
+== Convenient ApplicationContext Instantiation for Web Applications
+
+You can create `ApplicationContext` instances declaratively by using, for example, a
+`ContextLoader`. Of course, you can also create `ApplicationContext` instances
+programmatically by using one of the `ApplicationContext` implementations.
+
+You can register an `ApplicationContext` by using the `ContextLoaderListener`, as the
+following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+----
+
+The listener inspects the `contextConfigLocation` parameter. If the parameter does not
+exist, the listener uses `/WEB-INF/applicationContext.xml` as a default. When the
+parameter does exist, the listener separates the `String` by using predefined
+delimiters (comma, semicolon, and whitespace) and uses the values as locations where
+application contexts are searched. Ant-style path patterns are supported as well.
+Examples are `/WEB-INF/{asterisk}Context.xml` (for all files with names that end with
+`Context.xml` and that reside in the `WEB-INF` directory) and `/WEB-INF/**/*Context.xml`
+(for all such files in any subdirectory of `WEB-INF`).
+
+
+
+[[context-deploy-rar]]
+== Deploying a Spring `ApplicationContext` as a Jakarta EE RAR File
+
+It is possible to deploy a Spring `ApplicationContext` as a RAR file, encapsulating the
+context and all of its required bean classes and library JARs in a Jakarta EE RAR deployment
+unit. This is the equivalent of bootstrapping a stand-alone `ApplicationContext` (only hosted
+in Jakarta EE environment) being able to access the Jakarta EE servers facilities. RAR deployment
+is a more natural alternative to a scenario of deploying a headless WAR file -- in effect,
+a WAR file without any HTTP entry points that is used only for bootstrapping a Spring
+`ApplicationContext` in a Jakarta EE environment.
+
+RAR deployment is ideal for application contexts that do not need HTTP entry points but
+rather consist only of message endpoints and scheduled jobs. Beans in such a context can
+use application server resources such as the JTA transaction manager and JNDI-bound JDBC
+`DataSource` instances and JMS `ConnectionFactory` instances and can also register with
+the platform's JMX server -- all through Spring's standard transaction management and JNDI
+and JMX support facilities. Application components can also interact with the application
+server's JCA `WorkManager` through Spring's `TaskExecutor` abstraction.
+
+See the javadoc of the
+{spring-framework-api}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
+class for the configuration details involved in RAR deployment.
+
+For a simple deployment of a Spring ApplicationContext as a Jakarta EE RAR file:
+
+. Package
+all application classes into a RAR file (which is a standard JAR file with a different
+file extension).
+. Add all required library JARs into the root of the RAR archive.
+. Add a
+`META-INF/ra.xml` deployment descriptor (as shown in the {spring-framework-api}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
+and the corresponding Spring XML bean definition file(s) (typically
+`META-INF/applicationContext.xml`).
+. Drop the resulting RAR file into your
+application server's deployment directory.
+
+NOTE: Such RAR deployment units are usually self-contained. They do not expose components
+to the outside world, not even to other modules of the same application. Interaction with a
+RAR-based `ApplicationContext` usually occurs through JMS destinations that it shares with
+other modules. A RAR-based `ApplicationContext` may also, for example, schedule some jobs
+or react to new files in the file system (or the like). If it needs to allow synchronous
+access from the outside, it could (for example) export RMI endpoints, which may be used
+by other application modules on the same machine.
+
+
+
+

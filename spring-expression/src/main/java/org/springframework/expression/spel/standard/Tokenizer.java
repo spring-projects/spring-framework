@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.expression.spel.SpelParseException;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  */
 class Tokenizer {
@@ -44,8 +45,6 @@ class Tokenizer {
 
 	private static final byte IS_HEXDIGIT = 0x02;
 
-	private static final byte IS_ALPHA = 0x04;
-
 	static {
 		for (int ch = '0'; ch <= '9'; ch++) {
 			FLAGS[ch] |= IS_DIGIT | IS_HEXDIGIT;
@@ -56,24 +55,18 @@ class Tokenizer {
 		for (int ch = 'a'; ch <= 'f'; ch++) {
 			FLAGS[ch] |= IS_HEXDIGIT;
 		}
-		for (int ch = 'A'; ch <= 'Z'; ch++) {
-			FLAGS[ch] |= IS_ALPHA;
-		}
-		for (int ch = 'a'; ch <= 'z'; ch++) {
-			FLAGS[ch] |= IS_ALPHA;
-		}
 	}
 
 
-	private String expressionString;
+	private final String expressionString;
 
-	private char[] charsToProcess;
+	private final char[] charsToProcess;
 
 	private int pos;
 
-	private int max;
+	private final int max;
 
-	private List<Token> tokens = new ArrayList<>();
+	private final List<Token> tokens = new ArrayList<>();
 
 
 	public Tokenizer(String inputData) {
@@ -265,7 +258,9 @@ class Tokenizer {
 						raiseParseException(this.pos, SpelMessage.UNEXPECTED_ESCAPE_CHAR);
 						break;
 					default:
-						throw new IllegalStateException("Cannot handle (" + (int) ch + ") '" + ch + "'");
+						throw new IllegalStateException(
+								"Unsupported character '%s' (%d) encountered at position %d in expression."
+										.formatted(ch, (int) ch, (this.pos + 1)));
 				}
 			}
 		}
@@ -567,10 +562,7 @@ class Tokenizer {
 	}
 
 	private boolean isAlphabetic(char ch) {
-		if (ch > 255) {
-			return false;
-		}
-		return (FLAGS[ch] & IS_ALPHA) != 0;
+		return Character.isLetter(ch);
 	}
 
 	private boolean isHexadecimalDigit(char ch) {

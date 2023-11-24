@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,17 +63,17 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Resolve the list of lists of {@linkplain ContextConfigurationAttributes context
 	 * configuration attributes} for the supplied {@linkplain Class test class} and its
-	 * superclasses, taking into account context hierarchies declared via
-	 * {@link ContextHierarchy @ContextHierarchy} and
+	 * superclasses and enclosing classes, taking into account context hierarchies
+	 * declared via {@link ContextHierarchy @ContextHierarchy} and
 	 * {@link ContextConfiguration @ContextConfiguration}.
 	 * <p>The outer list represents a top-down ordering of context configuration
 	 * attributes, where each element in the list represents the context configuration
-	 * declared on a given test class in the class hierarchy. Each nested list
-	 * contains the context configuration attributes declared either via a single
-	 * instance of {@code @ContextConfiguration} on the particular class or via
-	 * multiple instances of {@code @ContextConfiguration} declared within a
-	 * single {@code @ContextHierarchy} instance on the particular class.
-	 * Furthermore, each nested list maintains the order in which
+	 * declared on a given test class in the class hierarchy or enclosing class
+	 * hierarchy. Each nested list contains the context configuration attributes
+	 * declared either via a single instance of {@code @ContextConfiguration} on
+	 * the particular class or via multiple instances of {@code @ContextConfiguration}
+	 * declared within a single {@code @ContextHierarchy} instance on the particular
+	 * class. Furthermore, each nested list maintains the order in which
 	 * {@code @ContextConfiguration} instances are declared.
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations inheritLocations} and
 	 * {@link ContextConfiguration#inheritInitializers() inheritInitializers} flags of
@@ -157,14 +157,14 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Build a <em>context hierarchy map</em> for the supplied {@linkplain Class
-	 * test class} and its superclasses, taking into account context hierarchies
-	 * declared via {@link ContextHierarchy @ContextHierarchy} and
-	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * test class} and its superclasses and enclosing classes, taking into account
+	 * context hierarchies declared via {@link ContextHierarchy @ContextHierarchy}
+	 * and {@link ContextConfiguration @ContextConfiguration}.
 	 * <p>Each value in the map represents the consolidated list of {@linkplain
 	 * ContextConfigurationAttributes context configuration attributes} for a
 	 * given level in the context hierarchy (potentially across the test class
-	 * hierarchy), keyed by the {@link ContextConfiguration#name() name} of the
-	 * context hierarchy level.
+	 * hierarchy and enclosing class hierarchy), keyed by the
+	 * {@link ContextConfiguration#name() name} of the context hierarchy level.
 	 * <p>If a given level in the context hierarchy does not have an explicit
 	 * name (i.e., configured via {@link ContextConfiguration#name}), a name will
 	 * be generated for that hierarchy level by appending the numerical level to
@@ -217,8 +217,8 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Resolve the list of {@linkplain ContextConfigurationAttributes context
-	 * configuration attributes} for the supplied {@linkplain Class test class} and its
-	 * superclasses.
+	 * configuration attributes} for the supplied {@linkplain Class test class}
+	 * and its superclasses and enclosing classes.
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations inheritLocations} and
 	 * {@link ContextConfiguration#inheritInitializers() inheritInitializers} flags of
 	 * {@link ContextConfiguration @ContextConfiguration} will <strong>not</strong>
@@ -227,8 +227,8 @@ abstract class ContextLoaderUtils {
 	 * @param testClass the class for which to resolve the configuration attributes
 	 * (must not be {@code null})
 	 * @return the list of configuration attributes for the specified class, ordered
-	 * <em>bottom-up</em> (i.e., as if we were traversing up the class hierarchy);
-	 * never {@code null}
+	 * <em>bottom-up</em> (i.e., as if we were traversing up the class hierarchy
+	 * and enclosing class hierarchy); never {@code null}
 	 * @throws IllegalArgumentException if the supplied class is {@code null} or if
 	 * {@code @ContextConfiguration} is not <em>present</em> on the supplied class
 	 */

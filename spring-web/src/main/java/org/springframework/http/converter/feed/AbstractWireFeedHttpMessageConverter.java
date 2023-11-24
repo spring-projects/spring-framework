@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.converter.feed;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -35,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -74,7 +76,8 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 		Charset charset = (contentType != null && contentType.getCharset() != null ?
 				contentType.getCharset() : DEFAULT_CHARSET);
 		try {
-			Reader reader = new InputStreamReader(inputMessage.getBody(), charset);
+			InputStream inputStream = StreamUtils.nonClosing(inputMessage.getBody());
+			Reader reader = new InputStreamReader(inputStream, charset);
 			return (T) feedInput.build(reader);
 		}
 		catch (FeedException ex) {
@@ -104,4 +107,8 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 		}
 	}
 
+	@Override
+	protected boolean supportsRepeatableWrites(T t) {
+		return true;
+	}
 }

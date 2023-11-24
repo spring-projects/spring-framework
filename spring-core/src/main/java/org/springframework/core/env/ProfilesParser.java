@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Internal parser used by {@link Profiles#of}.
@@ -43,7 +43,7 @@ final class ProfilesParser {
 
 
 	static Profiles parse(String... expressions) {
-		Assert.notEmpty(expressions, "Must specify at least one profile");
+		Assert.notEmpty(expressions, "Must specify at least one profile expression");
 		Profiles[] parsed = new Profiles[expressions.length];
 		for (int i = 0; i < expressions.length; i++) {
 			parsed[i] = parseExpression(expressions[i]);
@@ -70,39 +70,38 @@ final class ProfilesParser {
 				continue;
 			}
 			switch (token) {
-				case "(":
-					Profiles contents = parseTokens(expression, tokens, Context.BRACKET);
-					if (context == Context.INVERT) {
+				case "(" -> {
+					Profiles contents = parseTokens(expression, tokens, Context.PARENTHESIS);
+					if (context == Context.NEGATE) {
 						return contents;
 					}
 					elements.add(contents);
-					break;
-				case "&":
+				}
+				case "&" -> {
 					assertWellFormed(expression, operator == null || operator == Operator.AND);
 					operator = Operator.AND;
-					break;
-				case "|":
+				}
+				case "|" -> {
 					assertWellFormed(expression, operator == null || operator == Operator.OR);
 					operator = Operator.OR;
-					break;
-				case "!":
-					elements.add(not(parseTokens(expression, tokens, Context.INVERT)));
-					break;
-				case ")":
+				}
+				case "!" -> elements.add(not(parseTokens(expression, tokens, Context.NEGATE)));
+				case ")" -> {
 					Profiles merged = merge(expression, elements, operator);
-					if (context == Context.BRACKET) {
+					if (context == Context.PARENTHESIS) {
 						return merged;
 					}
 					elements.clear();
 					elements.add(merged);
 					operator = null;
-					break;
-				default:
+				}
+				default -> {
 					Profiles value = equals(token);
-					if (context == Context.INVERT) {
+					if (context == Context.NEGATE) {
 						return value;
 					}
 					elements.add(value);
+				}
 			}
 		}
 		return merge(expression, elements, operator);
@@ -137,15 +136,14 @@ final class ProfilesParser {
 		return activeProfile -> activeProfile.test(profile);
 	}
 
-	private static Predicate<Profiles> isMatch(Predicate<String> activeProfile) {
-		return profiles -> profiles.matches(activeProfile);
+	private static Predicate<Profiles> isMatch(Predicate<String> activeProfiles) {
+		return profiles -> profiles.matches(activeProfiles);
 	}
 
 
-	private enum Operator {AND, OR}
+	private enum Operator { AND, OR }
 
-
-	private enum Context {NONE, INVERT, BRACKET}
+	private enum Context { NONE, NEGATE, PARENTHESIS }
 
 
 	private static class ParsedProfiles implements Profiles {
@@ -170,30 +168,27 @@ final class ProfilesParser {
 		}
 
 		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof ParsedProfiles that &&
+					this.expressions.equals(that.expressions)));
+		}
+
+		@Override
 		public int hashCode() {
 			return this.expressions.hashCode();
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			ParsedProfiles that = (ParsedProfiles) obj;
-			return this.expressions.equals(that.expressions);
-		}
-
-		@Override
 		public String toString() {
-			return StringUtils.collectionToDelimitedString(this.expressions, " or ");
+			if (this.expressions.size() == 1) {
+				return this.expressions.iterator().next();
+			}
+			return this.expressions.stream().map(this::wrap).collect(Collectors.joining(" | "));
 		}
 
+		private String wrap(String str) {
+			return "(" + str + ")";
+		}
 	}
 
 }

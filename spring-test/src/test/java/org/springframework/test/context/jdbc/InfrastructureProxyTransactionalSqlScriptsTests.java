@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class InfrastructureProxyTransactionalSqlScriptsTests extends AbstractTransactio
 		@Bean
 		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
-					.setName("empty-sql-scripts-test-db")//
+					.generateUniqueName(true)
 					.build();
 		}
 
@@ -107,21 +107,19 @@ class InfrastructureProxyTransactionalSqlScriptsTests extends AbstractTransactio
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			switch (method.getName()) {
-				case "equals":
-					return (proxy == args[0]);
-				case "hashCode":
-					return System.identityHashCode(proxy);
-				case "getWrappedObject":
-					return this.dataSource;
-				default:
+			return switch (method.getName()) {
+				case "equals" -> (proxy == args[0]);
+				case "hashCode" -> System.identityHashCode(proxy);
+				case "getWrappedObject" -> this.dataSource;
+				default -> {
 					try {
-						return method.invoke(this.dataSource, args);
+						yield method.invoke(this.dataSource, args);
 					}
 					catch (InvocationTargetException ex) {
 						throw ex.getTargetException();
 					}
-			}
+				}
+			};
 		}
 	}
 

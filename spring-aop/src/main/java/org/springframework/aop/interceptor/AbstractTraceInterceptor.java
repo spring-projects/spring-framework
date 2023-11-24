@@ -56,7 +56,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	protected transient Log defaultLogger = LogFactory.getLog(getClass());
 
 	/**
-	 * Indicates whether or not proxy class names should be hidden when using dynamic loggers.
+	 * Indicates whether proxy class names should be hidden when using dynamic loggers.
 	 * @see #setUseDynamicLogger
 	 */
 	private boolean hideProxyClassNames = false;
@@ -119,7 +119,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 
 
 	/**
-	 * Determines whether or not logging is enabled for the particular {@code MethodInvocation}.
+	 * Determines whether logging is enabled for the particular {@code MethodInvocation}.
 	 * If not, the method invocation proceeds as normal, otherwise the method invocation is passed
 	 * to the {@code invokeUnderTrace} method for handling.
 	 * @see #invokeUnderTrace(org.aopalliance.intercept.MethodInvocation, org.apache.commons.logging.Log)

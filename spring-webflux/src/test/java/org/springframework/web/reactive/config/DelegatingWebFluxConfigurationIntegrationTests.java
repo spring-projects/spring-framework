@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class DelegatingWebFluxConfigurationIntegrationTests {
 
 	@Test
 	void requestMappingHandlerAdapterWithPrimaryUsesQualifiedReactiveAdapterRegistry() {
-		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class));
+		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class, new ReactiveAdapterRegistry()));
 		RequestMappingHandlerAdapter mappingHandlerAdapter = this.context.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(mappingHandlerAdapter.getReactiveAdapterRegistry()).isSameAs(this.context.getBean("webFluxAdapterRegistry"));
 		assertThat(this.context.getBeansOfType(ReactiveAdapterRegistry.class)).containsOnlyKeys(
@@ -117,7 +117,7 @@ public class DelegatingWebFluxConfigurationIntegrationTests {
 
 	@Test
 	void responseEntityResultHandlerWithPrimaryUsesQualifiedReactiveAdapterRegistry() {
-		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class));
+		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class, new ReactiveAdapterRegistry()));
 		ResponseEntityResultHandler responseEntityResultHandler = this.context.getBean(ResponseEntityResultHandler.class);
 		assertThat(responseEntityResultHandler.getAdapterRegistry()).isSameAs(this.context.getBean("webFluxAdapterRegistry"));
 		assertThat(this.context.getBeansOfType(ReactiveAdapterRegistry.class)).containsOnlyKeys(
@@ -143,7 +143,7 @@ public class DelegatingWebFluxConfigurationIntegrationTests {
 
 	@Test
 	void responseBodyResultHandlerWithPrimaryUsesQualifiedReactiveAdapterRegistry() {
-		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class));
+		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class, new ReactiveAdapterRegistry()));
 		ResponseBodyResultHandler responseBodyResultHandler = this.context.getBean(ResponseBodyResultHandler.class);
 		assertThat(responseBodyResultHandler.getAdapterRegistry()).isSameAs(this.context.getBean("webFluxAdapterRegistry"));
 		assertThat(this.context.getBeansOfType(ReactiveAdapterRegistry.class)).containsOnlyKeys(
@@ -169,7 +169,7 @@ public class DelegatingWebFluxConfigurationIntegrationTests {
 
 	@Test
 	void viewResolutionResultHandlerWithPrimaryUsesQualifiedReactiveAdapterRegistry() {
-		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class));
+		load(registerPrimaryBean("testReactiveAdapterRegistry", ReactiveAdapterRegistry.class, new ReactiveAdapterRegistry()));
 		ViewResolutionResultHandler viewResolutionResultHandler = this.context.getBean(ViewResolutionResultHandler.class);
 		assertThat(viewResolutionResultHandler.getAdapterRegistry()).isSameAs(this.context.getBean("webFluxAdapterRegistry"));
 		assertThat(this.context.getBeansOfType(ReactiveAdapterRegistry.class)).containsOnlyKeys(
@@ -189,6 +189,10 @@ public class DelegatingWebFluxConfigurationIntegrationTests {
 		return context -> context.registerBean(beanName, type, () -> mock(type), definition -> definition.setPrimary(true));
 	}
 
+	private <T> Consumer<AnnotationConfigApplicationContext> registerPrimaryBean(String beanName, Class<T> type, T instance) {
+		return context -> context.registerBean(beanName, type, () -> instance, definition -> definition.setPrimary(true));
+	}
+
 	private void load(Consumer<AnnotationConfigApplicationContext> context) {
 		AnnotationConfigApplicationContext testContext = new AnnotationConfigApplicationContext();
 		context.accept(testContext);
@@ -196,4 +200,5 @@ public class DelegatingWebFluxConfigurationIntegrationTests {
 		testContext.refresh();
 		this.context = testContext;
 	}
+
 }

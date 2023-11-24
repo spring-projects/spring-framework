@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.web.testfixture.servlet.MockServletContext;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractTagTests {
 
 	protected MockPageContext createPageContext() {

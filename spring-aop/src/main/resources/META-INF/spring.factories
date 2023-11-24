@@ -1,0 +1,2 @@
+org.springframework.beans.factory.generator.BeanRegistrationContributionProvider= \
+org.springframework.aop.scope.ScopedProxyBeanRegistrationContributionProvider

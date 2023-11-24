@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,24 +26,26 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
- * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy insert
- * capabilities for a table. It provides meta-data processing to simplify the code
- * needed to construct a basic insert statement. All you need to provide is the
- * name of the table and a Map containing the column names and the column values.
+ * A {@code SimpleJdbcInsert} is a multi-threaded, reusable object providing easy
+ * (batch) insert capabilities for a table. It provides meta-data processing to
+ * simplify the code needed to construct a basic insert statement. All you need
+ * to provide is the name of the table and a {@code Map} containing the column
+ * names and the column values.
  *
- * <p>The meta-data processing is based on the DatabaseMetaData provided by the
- * JDBC driver. As long as the JDBC driver can provide the names of the columns
- * for a specified table than we can rely on this auto-detection feature. If that
+ * <p>The meta-data processing is based on the {@code DatabaseMetaData} provided
+ * by the JDBC driver. As long as the JDBC driver can provide the names of the columns
+ * for a specified table then we can rely on this auto-detection feature. If that
  * is not the case, then the column names must be specified explicitly.
  *
- * <p>The actual insert is being handled using Spring's {@link JdbcTemplate}.
+ * <p>The actual (batch) insert is handled using Spring's {@link JdbcTemplate}.
  *
  * <p>Many of the configuration methods return the current instance of the
- * SimpleJdbcInsert to provide the ability to chain multiple ones together
- * in a "fluent" interface style.
+ * {@code SimpleJdbcInsert} to provide the ability to chain multiple ones together
+ * in a "fluent" API style.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  * @see java.sql.DatabaseMetaData
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -51,8 +53,8 @@ import org.springframework.jdbc.support.KeyHolder;
 public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcInsertOperations {
 
 	/**
-	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
-	 * JdbcTemplate.
+	 * Constructor that accepts the JDBC {@link DataSource} to use when creating
+	 * the {@link JdbcTemplate}.
 	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
@@ -61,7 +63,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	/**
-	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
+	 * Alternative constructor that accepts the {@link JdbcTemplate} to be used.
 	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
@@ -101,13 +103,19 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public SimpleJdbcInsertOperations withoutTableColumnMetaDataAccess() {
+	public SimpleJdbcInsert usingQuotedIdentifiers() {
+		setQuoteIdentifiers(true);
+		return this;
+	}
+
+	@Override
+	public SimpleJdbcInsert withoutTableColumnMetaDataAccess() {
 		setAccessTableColumnMetaData(false);
 		return this;
 	}
 
 	@Override
-	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
+	public SimpleJdbcInsert includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
 		return this;
 	}
@@ -142,8 +150,8 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 		return doExecuteAndReturnKeyHolder(parameterSource);
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
+	@Override
 	public int[] executeBatch(Map<String, ?>... batch) {
 		return doExecuteBatch(batch);
 	}

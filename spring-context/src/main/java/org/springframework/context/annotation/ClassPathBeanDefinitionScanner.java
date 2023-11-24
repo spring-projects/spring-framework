@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -47,8 +48,8 @@ import org.springframework.util.PatternMatchUtils;
  * {@link org.springframework.stereotype.Service @Service}, or
  * {@link org.springframework.stereotype.Controller @Controller} stereotype.
  *
- * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
- * JSR-330's {@link javax.inject.Named} annotations, if available.
+ * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
+ * JSR-330's {@link jakarta.inject.Named} annotations, if available.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -138,7 +139,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			Environment environment) {
 
 		this(registry, useDefaultFilters, environment,
-				(registry instanceof ResourceLoader ? (ResourceLoader) registry : null));
+				(registry instanceof ResourceLoader resourceLoader ? resourceLoader : null));
 	}
 
 	/**
@@ -278,11 +279,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
-				if (candidate instanceof AbstractBeanDefinition) {
-					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
+				if (candidate instanceof AbstractBeanDefinition abstractBeanDefinition) {
+					postProcessBeanDefinition(abstractBeanDefinition, beanName);
 				}
-				if (candidate instanceof AnnotatedBeanDefinition) {
-					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
+				if (candidate instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+					AnnotationConfigUtils.processCommonDefinitionAnnotations(annotatedBeanDefinition);
 				}
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
@@ -329,21 +330,32 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return {@code true} if the bean can be registered as-is;
 	 * {@code false} if it should be skipped because there is an
 	 * existing, compatible bean definition for the specified name
-	 * @throws ConflictingBeanDefinitionException if an existing, incompatible
-	 * bean definition has been found for the specified name
+	 * @throws IllegalStateException if an existing, incompatible bean definition
+	 * has been found for the specified name
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}
+
 		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
 		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
 		if (originatingDef != null) {
 			existingDef = originatingDef;
 		}
+
+		// Explicitly registered overriding bean?
+		if (!(existingDef instanceof ScannedGenericBeanDefinition) &&
+				(this.registry.isBeanDefinitionOverridable(beanName) || ObjectUtils.nullSafeEquals(
+						beanDefinition.getBeanClassName(), existingDef.getBeanClassName()))) {
+			return false;
+		}
+
+		// Scanned same file or equivalent class twice?
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
+
 		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +
 				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
 				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
@@ -354,16 +366,15 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * the given existing bean definition.
 	 * <p>The default implementation considers them as compatible when the existing
 	 * bean definition comes from the same source or from a non-scanning source.
-	 * @param newDefinition the new bean definition, originated from scanning
-	 * @param existingDefinition the existing bean definition, potentially an
+	 * @param newDef the new bean definition, originated from scanning
+	 * @param existingDef the existing bean definition, potentially an
 	 * explicitly defined one or a previously generated one from scanning
 	 * @return whether the definitions are considered as compatible, with the
 	 * new definition to be skipped in favor of the existing definition
 	 */
-	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
-		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
-				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
+	protected boolean isCompatible(BeanDefinition newDef, BeanDefinition existingDef) {
+		return ((newDef.getSource() != null && newDef.getSource().equals(existingDef.getSource())) ||
+				newDef.equals(existingDef));
 	}
 
 
@@ -373,8 +384,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
-		if (registry instanceof EnvironmentCapable) {
-			return ((EnvironmentCapable) registry).getEnvironment();
+		if (registry instanceof EnvironmentCapable environmentCapable) {
+			return environmentCapable.getEnvironment();
 		}
 		return new StandardEnvironment();
 	}

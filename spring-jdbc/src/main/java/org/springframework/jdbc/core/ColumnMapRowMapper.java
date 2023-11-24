@@ -84,7 +84,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * Retrieve a JDBC object value for the specified column.
 	 * <p>The default implementation uses the {@code getObject} method.
 	 * Additionally, this implementation includes a "hack" to get around Oracle
-	 * returning a non standard object for their TIMESTAMP data type.
+	 * returning a non-standard object for their TIMESTAMP data type.
 	 * @param rs the ResultSet holding the data
 	 * @param index the column index
 	 * @return the Object returned

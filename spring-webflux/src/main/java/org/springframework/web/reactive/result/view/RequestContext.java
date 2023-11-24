@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class RequestContext {
 	private Map<String, Errors> errorsMap;
 
 	@Nullable
-	private RequestDataValueProcessor dataValueProcessor;
+	private final RequestDataValueProcessor dataValueProcessor;
 
 
 	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource) {
@@ -92,8 +92,8 @@ public class RequestContext {
 		LocaleContext localeContext = exchange.getLocaleContext();
 		Locale locale = localeContext.getLocale();
 		this.locale = (locale != null ? locale : Locale.getDefault());
-		TimeZone timeZone = (localeContext instanceof TimeZoneAwareLocaleContext ?
-				((TimeZoneAwareLocaleContext) localeContext).getTimeZone() : null);
+		TimeZone timeZone = (localeContext instanceof TimeZoneAwareLocaleContext tzaLocaleContext ?
+				tzaLocaleContext.getTimeZone() : null);
 		this.timeZone = (timeZone != null ? timeZone : TimeZone.getDefault());
 
 		this.defaultHtmlEscape = null;  // TODO
@@ -385,15 +385,15 @@ public class RequestContext {
 			}
 		}
 
-		if (errors instanceof BindException) {
-			errors = ((BindException) errors).getBindingResult();
+		if (errors instanceof BindException bindException) {
+			errors = bindException.getBindingResult();
 		}
 
 		if (htmlEscape && !(errors instanceof EscapedErrors)) {
 			errors = new EscapedErrors(errors);
 		}
-		else if (!htmlEscape && errors instanceof EscapedErrors) {
-			errors = ((EscapedErrors) errors).getSource();
+		else if (!htmlEscape && errors instanceof EscapedErrors escapedErrors) {
+			errors = escapedErrors.getSource();
 		}
 
 		this.errorsMap.put(name, errors);

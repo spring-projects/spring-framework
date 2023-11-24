@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,8 @@ public interface TestContextBootstrapper {
 	 * flag of {@link TestExecutionListeners @TestExecutionListeners} must be
 	 * taken into consideration. Specifically, if the {@code inheritListeners}
 	 * flag is set to {@code true}, listeners declared for a given test class must
-	 * be appended to the end of the list of listeners declared in superclasses.
+	 * be appended to the end of the list of listeners declared in superclasses
+	 * or enclosing classes.
 	 * @return a list of {@code TestExecutionListener} instances
 	 */
 	List<TestExecutionListener> getTestExecutionListeners();

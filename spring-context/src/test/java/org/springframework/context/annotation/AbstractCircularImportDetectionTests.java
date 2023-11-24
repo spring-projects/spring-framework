@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ public abstract class AbstractCircularImportDetectionTests {
 			newParser().parse(loadAsConfigurationSource(A.class), "A");
 		}
 		catch (BeanDefinitionParsingException ex) {
-			assertThat(ex.getMessage().contains(
-							"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
-							"to import class 'AbstractCircularImportDetectionTests.A'")).as("Wrong message. Got: " + ex.getMessage()).isTrue();
+			assertThat(ex.getMessage()).as("Wrong message. Got: " + ex.getMessage())
+					.contains("Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
+					"to import class 'AbstractCircularImportDetectionTests.A'");
 			threw = true;
 		}
 		assertThat(threw).isTrue();
@@ -58,9 +58,9 @@ public abstract class AbstractCircularImportDetectionTests {
 			newParser().parse(loadAsConfigurationSource(X.class), "X");
 		}
 		catch (BeanDefinitionParsingException ex) {
-			assertThat(ex.getMessage().contains(
-							"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +
-							"to import class 'AbstractCircularImportDetectionTests.Z'")).as("Wrong message. Got: " + ex.getMessage()).isTrue();
+			assertThat(ex.getMessage()).as("Wrong message. Got: " + ex.getMessage())
+					.contains("Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +
+					"to import class 'AbstractCircularImportDetectionTests.Z'");
 			threw = true;
 		}
 		assertThat(threw).isTrue();

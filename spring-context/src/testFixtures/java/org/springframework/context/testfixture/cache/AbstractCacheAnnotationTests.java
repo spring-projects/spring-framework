@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -504,6 +504,26 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(primary.get(id).get()).isSameAs(entity);
 	}
 
+	protected void testPutRefersToResultWithUnless(CacheableService<?> service) {
+		Long id = 42L;
+		TestEntity entity = new TestEntity();
+		entity.setId(id);
+		Cache primary = this.cm.getCache("primary");
+		assertThat(primary.get(id)).isNull();
+		assertThat(service.putEvaluatesUnlessBeforeKey(entity)).isNotNull();
+		assertThat(primary.get(id).get()).isSameAs(entity);
+	}
+
+	protected void testPutEvaluatesUnlessBeforeKey(CacheableService<?> service) {
+		Long id = Long.MIN_VALUE; // return null
+		TestEntity entity = new TestEntity();
+		entity.setId(id);
+		Cache primary = this.cm.getCache("primary");
+		assertThat(primary.get(id)).isNull();
+		assertThat(service.putEvaluatesUnlessBeforeKey(entity)).isNull();
+		assertThat(primary.get(id)).isNull();
+	}
+
 	protected void testMultiCacheAndEvict(CacheableService<?> service) {
 		String methodName = "multiCacheAndEvict";
 
@@ -850,8 +870,28 @@ public abstract class AbstractCacheAnnotationTests {
 	}
 
 	@Test
+	public void testPutRefersToResultWithUnless() {
+		testPutRefersToResultWithUnless(this.cs);
+	}
+
+	@Test
+	public void testPutEvaluatesUnlessBeforeKey() {
+		testPutEvaluatesUnlessBeforeKey(this.cs);
+	}
+
+	@Test
 	public void testClassPutRefersToResult() {
 		testPutRefersToResult(this.ccs);
+	}
+
+	@Test
+	public void testClassPutRefersToResultWithUnless(){
+		testPutRefersToResultWithUnless(this.ccs);
+	}
+
+	@Test
+	public void testClassPutEvaluatesUnlessBeforeKey(){
+		testPutEvaluatesUnlessBeforeKey(this.ccs);
 	}
 
 	@Test

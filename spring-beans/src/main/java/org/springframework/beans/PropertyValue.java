@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,8 +135,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	public PropertyValue getOriginalPropertyValue() {
 		PropertyValue original = this;
 		Object source = getSource();
-		while (source instanceof PropertyValue && source != original) {
-			original = (PropertyValue) source;
+		while (source instanceof PropertyValue pv && source != original) {
+			original = pv;
 			source = original.getSource();
 		}
 		return original;
@@ -189,21 +189,15 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof PropertyValue)) {
-			return false;
-		}
-		PropertyValue otherPv = (PropertyValue) other;
-		return (this.name.equals(otherPv.name) &&
-				ObjectUtils.nullSafeEquals(this.value, otherPv.value) &&
-				ObjectUtils.nullSafeEquals(getSource(), otherPv.getSource()));
+		return (this == other || (other instanceof PropertyValue that &&
+				this.name.equals(that.name) &&
+				ObjectUtils.nullSafeEquals(this.value, that.value) &&
+				ObjectUtils.nullSafeEquals(getSource(), that.getSource())));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.name.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.value);
+		return ObjectUtils.nullSafeHash(this.name, this.value);
 	}
 
 	@Override

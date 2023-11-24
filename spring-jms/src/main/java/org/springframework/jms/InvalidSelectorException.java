@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see javax.jms.InvalidSelectorException
+ * @see jakarta.jms.InvalidSelectorException
  */
 @SuppressWarnings("serial")
 public class InvalidSelectorException extends JmsException {
 
-	public InvalidSelectorException(javax.jms.InvalidSelectorException cause) {
+	public InvalidSelectorException(jakarta.jms.InvalidSelectorException cause) {
 		super(cause);
 	}
 

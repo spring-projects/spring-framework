@@ -111,7 +111,7 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * Create a PropertySource having the given name based on Properties loaded from
 	 * the given resource location. The default thread context class loader will be
 	 * used to load the resource (assuming the location string is prefixed with
-	 * {@code classpath:}.
+	 * {@code classpath:}).
 	 */
 	public ResourcePropertySource(String name, String location) throws IOException {
 		this(name, new DefaultResourceLoader().getResource(location));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.test.context.web;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
@@ -65,10 +66,11 @@ public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader 
 	@Override
 	protected void validateMergedContextConfiguration(WebMergedContextConfiguration webMergedConfig) {
 		if (webMergedConfig.hasClasses()) {
-			String msg = String.format(
-				"Test class [%s] has been configured with @ContextConfiguration's 'classes' attribute %s, "
-						+ "but %s does not support annotated classes.", webMergedConfig.getTestClass().getName(),
-				ObjectUtils.nullSafeToString(webMergedConfig.getClasses()), getClass().getSimpleName());
+			String msg = """
+					Test class [%s] has been configured with @ContextConfiguration's 'classes' \
+					attribute %s, but %s does not support annotated classes."""
+						.formatted(webMergedConfig.getTestClass().getName(),
+							Arrays.toString(webMergedConfig.getClasses()), getClass().getSimpleName());
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}

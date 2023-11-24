@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,24 +88,11 @@ class ProgrammaticTxMgmtTests {
 	@AfterTransaction
 	void afterTransaction() {
 		switch (this.methodName) {
-			case "commitTxAndStartNewTx":
-			case "commitTxButDoNotStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTx":
-			case "rollbackTxButDoNotStartNewTx":
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics": {
-				assertUsers("Dilbert", "Dogbert");
-				break;
-			}
-			default: {
-				fail("missing 'after transaction' assertion for test method: " + this.methodName);
-			}
+			case "commitTxAndStartNewTx", "commitTxButDoNotStartNewTx" -> assertUsers("Dogbert");
+			case "rollbackTxAndStartNewTx", "rollbackTxButDoNotStartNewTx", "startTxWithExistingTransaction" ->
+					assertUsers("Dilbert");
+			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics" -> assertUsers("Dilbert", "Dogbert");
+			default -> fail("missing 'after transaction' assertion for test method: " + this.methodName);
 		}
 	}
 
@@ -290,10 +277,10 @@ class ProgrammaticTxMgmtTests {
 
 		@Bean
 		DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder()//
-			.generateUniqueName(true)//
-			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql") //
-			.build();
+			return new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")
+					.build();
 		}
 	}
 

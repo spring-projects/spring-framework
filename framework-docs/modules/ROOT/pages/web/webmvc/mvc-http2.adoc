@@ -1,0 +1,15 @@
+[[mvc-http2]]
+= HTTP/2
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webflux/http2.adoc[See equivalent in the Reactive stack]#
+
+Servlet 4 containers are required to support HTTP/2, and Spring Framework 5 is compatible
+with Servlet API 4. From a programming model perspective, there is nothing specific that
+applications need to do. However, there are considerations related to server configuration.
+For more details, see the
+{spring-framework-wiki}/HTTP-2-support[HTTP/2 wiki page].
+
+The Servlet API does expose one construct related to HTTP/2. You can use the
+`jakarta.servlet.http.PushBuilder` to proactively push resources to clients, and it
+is supported as a xref:web/webmvc/mvc-controller/ann-methods/arguments.adoc[method argument] to `@RequestMapping` methods.

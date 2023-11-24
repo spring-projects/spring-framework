@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Predicate;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.annotation.AliasFor;
 
@@ -84,10 +85,12 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.2
  * @see EventListenerMethodProcessor
+ * @see org.springframework.transaction.event.TransactionalEventListener
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective
 public @interface EventListener {
 
 	/**

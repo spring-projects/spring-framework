@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,15 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import javax.servlet.Filter;
+import java.nio.charset.Charset;
+import java.util.EnumSet;
+import java.util.Map;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterConfig;
+
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -28,45 +35,46 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * Defines common methods for building a {@code MockMvc}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  * @param <B> a self reference to the builder type
  */
 public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder<B>> extends MockMvcBuilder {
 
 	/**
-	 * Add filters mapped to any request (i.e. "/*"). For example:
-	 * <pre class="code">
-	 * mockMvcBuilder.addFilters(springSecurityFilterChain);
-	 * </pre>
-	 * <p>It is the equivalent of the following web.xml configuration:
-	 * <pre class="code">
-	 * &lt;filter-mapping&gt;
-	 *     &lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
-	 *     &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-	 * &lt;/filter-mapping&gt;
-	 * </pre>
-	 * <p>Filters will be invoked in the order in which they are provided.
+	 * Add filters mapped to all requests. Filters are invoked in the same order.
+	 * <p>Note: if you need the filter to be initialized with {@link Filter#init(FilterConfig)},
+	 * please use {@link #addFilter(Filter, String, Map, EnumSet, String...)} instead.
 	 * @param filters the filters to add
 	 */
 	<T extends B> T addFilters(Filter... filters);
 
 	/**
-	 * Add a filter mapped to a specific set of patterns. For example:
-	 * <pre class="code">
-	 * mockMvcBuilder.addFilter(myResourceFilter, "/resources/*");
-	 * </pre>
-	 * <p>It is the equivalent of:
-	 * <pre class="code">
-	 * &lt;filter-mapping&gt;
-	 *     &lt;filter-name&gt;myResourceFilter&lt;/filter-name&gt;
-	 *     &lt;url-pattern&gt;/resources/*&lt;/url-pattern&gt;
-	 * &lt;/filter-mapping&gt;
-	 * </pre>
-	 * <p>Filters will be invoked in the order in which they are provided.
+	 * Add a filter mapped to specific patterns.
+	 * <p>Note: if you need the filter to be initialized with {@link Filter#init(FilterConfig)},
+	 * please use {@link #addFilter(Filter, String, Map, EnumSet, String...)} instead.
 	 * @param filter the filter to add
-	 * @param urlPatterns the URL patterns to map to; if empty, "/*" is used by default
+	 * @param urlPatterns the URL patterns to map to; if empty, matches all requests
 	 */
 	<T extends B> T addFilter(Filter filter, String... urlPatterns);
+
+	/**
+	 * Add a filter that will be initialized via {@link Filter#init(FilterConfig)}
+	 * with the given init parameters, and will also apply only to requests that
+	 * match the given dispatcher types and URL patterns.
+	 * @param filter the filter to add
+	 * @param filterName the name to use for the filter; if {@code null}, then
+	 * {@link org.springframework.mock.web.MockFilterConfig} is created without
+	 * a name, which defaults to an empty String for the name
+	 * @param initParams the init parameters to initialize the filter with
+	 * @param dispatcherTypes dispatcher types the filter applies to
+	 * @param urlPatterns the URL patterns to map to; if empty, matches all requests
+	 * @since 6.1
+	 * @see org.springframework.mock.web.MockFilterConfig
+	 */
+	<T extends B> T addFilter(
+			Filter filter, @Nullable String filterName, Map<String, String> initParams,
+			EnumSet<DispatcherType> dispatcherTypes, String... urlPatterns);
 
 	/**
 	 * Define default request properties that should be merged into all
@@ -80,6 +88,18 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * {@link org.springframework.test.web.servlet.request.MockMvcRequestBuilders}
 	 */
 	<T extends B> T defaultRequest(RequestBuilder requestBuilder);
+
+	/**
+	 * Define the default character encoding to be applied to every response.
+	 * <p>The default implementation of this method throws an
+	 * {@link UnsupportedOperationException}. Concrete implementations are therefore
+	 * encouraged to override this method.
+	 * @param defaultResponseCharacterEncoding the default response character encoding
+	 * @since 5.3.10
+	 */
+	default <T extends B> T defaultResponseCharacterEncoding(Charset defaultResponseCharacterEncoding) {
+		throw new UnsupportedOperationException("defaultResponseCharacterEncoding is not supported by this MockMvcBuilder");
+	}
 
 	/**
 	 * Define a global expectation that should <em>always</em> be applied to
@@ -110,6 +130,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * A more advanced variant of {@link #dispatchOptions(boolean)} that allows
 	 * customizing any {@link org.springframework.web.servlet.DispatcherServlet}
 	 * property.
+	 * @since 5.3
 	 */
 	<T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer);
 

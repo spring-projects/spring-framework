@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -50,6 +49,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -67,8 +67,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class DefaultServerRequestTests {
 
-	private final List<HttpMessageConverter<?>> messageConverters = Collections.singletonList(
-			new StringHttpMessageConverter());
+	private final List<HttpMessageConverter<?>> messageConverters = List.of(new StringHttpMessageConverter());
+
 
 	@Test
 	void method() {
@@ -85,8 +85,7 @@ class DefaultServerRequestTests {
 		servletRequest.setScheme("https");
 		servletRequest.setServerPort(443);
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.uri()).isEqualTo(URI.create("https://example.com/"));
 	}
@@ -96,8 +95,7 @@ class DefaultServerRequestTests {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/path", true);
 		servletRequest.setQueryString("a=1");
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		URI result = request.uriBuilder().build();
 		assertThat(result.getScheme()).isEqualTo("http");
@@ -112,10 +110,9 @@ class DefaultServerRequestTests {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setAttribute("foo", "bar");
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.attribute("foo")).isEqualTo(Optional.of("bar"));
+		assertThat(request.attribute("foo")).contains("bar");
 	}
 
 	@Test
@@ -123,10 +120,9 @@ class DefaultServerRequestTests {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setParameter("foo", "bar");
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.param("foo")).isEqualTo(Optional.of("bar"));
+		assertThat(request.param("foo")).contains("bar");
 	}
 
 	@Test
@@ -138,8 +134,7 @@ class DefaultServerRequestTests {
 		servletRequest.addPart(formPart);
 		servletRequest.addPart(filePart);
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		MultiValueMap<String, Part> result = request.multipartData();
 
@@ -153,10 +148,9 @@ class DefaultServerRequestTests {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setParameter("foo", "");
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.param("foo")).isEqualTo(Optional.of(""));
+		assertThat(request.param("foo")).contains("");
 	}
 
 	@Test
@@ -164,21 +158,18 @@ class DefaultServerRequestTests {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setParameter("foo", "");
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.param("bar")).isEqualTo(Optional.empty());
+		assertThat(request.param("bar")).isNotPresent();
 	}
 
 	@Test
 	void pathVariable() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		servletRequest
-				.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
+		servletRequest.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.pathVariable("foo")).isEqualTo("bar");
 	}
@@ -187,25 +178,20 @@ class DefaultServerRequestTests {
 	void pathVariableNotFound() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		servletRequest
-				.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
+		servletRequest.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				request.pathVariable("baz"));
+		assertThatIllegalArgumentException().isThrownBy(() -> request.pathVariable("baz"));
 	}
 
 	@Test
 	void pathVariables() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		servletRequest
-				.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
+		servletRequest.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.pathVariables()).isEqualTo(pathVariables);
 	}
@@ -213,8 +199,7 @@ class DefaultServerRequestTests {
 	@Test
 	void header() {
 		HttpHeaders httpHeaders = new HttpHeaders();
-		List<MediaType> accept =
-				Collections.singletonList(MediaType.APPLICATION_JSON);
+		List<MediaType> accept = Collections.singletonList(MediaType.APPLICATION_JSON);
 		httpHeaders.setAccept(accept);
 		List<Charset> acceptCharset = Collections.singletonList(UTF_8);
 		httpHeaders.setAcceptCharset(acceptCharset);
@@ -231,14 +216,13 @@ class DefaultServerRequestTests {
 		httpHeaders.forEach(servletRequest::addHeader);
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		ServerRequest.Headers headers = request.headers();
 		assertThat(headers.accept()).isEqualTo(accept);
 		assertThat(headers.acceptCharset()).isEqualTo(acceptCharset);
 		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
-		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.contentType()).contains(contentType);
 		assertThat(headers.header(HttpHeaders.CONTENT_TYPE)).containsExactly(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.firstHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);
@@ -251,8 +235,7 @@ class DefaultServerRequestTests {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setCookies(cookie);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		MultiValueMap<String, Cookie> expected = new LinkedMultiValueMap<>();
 		expected.add("foo", cookie);
@@ -267,8 +250,7 @@ class DefaultServerRequestTests {
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		servletRequest.setContent("foo".getBytes(UTF_8));
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		String result = request.body(String.class);
 		assertThat(result).isEqualTo("foo");
@@ -281,10 +263,10 @@ class DefaultServerRequestTests {
 		servletRequest.setContent("[\"foo\",\"bar\"]".getBytes(UTF_8));
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				Collections.singletonList(new MappingJackson2HttpMessageConverter()));
+				List.of(new MappingJackson2HttpMessageConverter()));
 
 		List<String> result = request.body(new ParameterizedTypeReference<List<String>>() {});
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).hasSize(2);
 		assertThat(result.get(0)).isEqualTo("foo");
 		assertThat(result.get(1)).isEqualTo("bar");
 	}
@@ -295,11 +277,10 @@ class DefaultServerRequestTests {
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		servletRequest.setContent("foo".getBytes(UTF_8));
 
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, Collections.emptyList());
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 
-		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
-				request.body(String.class));
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class)
+				.isThrownBy(() -> request.body(String.class));
 	}
 
 	@Test
@@ -308,29 +289,86 @@ class DefaultServerRequestTests {
 		MockHttpSession session = new MockHttpSession();
 		servletRequest.setSession(session);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.session()).isEqualTo(session);
-
 	}
 
 	@Test
 	void principal() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
-		Principal principal = new Principal() {
-			@Override
-			public String getName() {
-				return "foo";
-			}
-		};
+		Principal principal = () -> "foo";
 		servletRequest.setUserPrincipal(principal);
 
-		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.principal().get()).isEqualTo(principal);
+		assertThat(request.principal()).contains(principal);
 	}
+
+	@Test
+	void bindToConstructor() throws BindException {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.addParameter("foo", "FOO");
+		servletRequest.addParameter("bar", "BAR");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		ConstructorInjection result = request.bind(ConstructorInjection.class);
+		assertThat(result.getFoo()).isEqualTo("FOO");
+		assertThat(result.getBar()).isEqualTo("BAR");
+	}
+
+	@Test
+	void bindToProperties() throws BindException {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.addParameter("foo", "FOO");
+		servletRequest.addParameter("bar", "BAR");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		PropertyInjection result = request.bind(PropertyInjection.class);
+		assertThat(result.getFoo()).isEqualTo("FOO");
+		assertThat(result.getBar()).isEqualTo("BAR");
+	}
+
+	@Test
+	void bindToMixed() throws BindException {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.addParameter("foo", "FOO");
+		servletRequest.addParameter("bar", "BAR");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		MixedInjection result = request.bind(MixedInjection.class);
+		assertThat(result.getFoo()).isEqualTo("FOO");
+		assertThat(result.getBar()).isEqualTo("BAR");
+	}
+
+	@Test
+	void bindCustomizer() throws BindException {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.addParameter("foo", "FOO");
+		servletRequest.addParameter("bar", "BAR");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		PropertyInjection result = request.bind(PropertyInjection.class, dataBinder -> dataBinder.setAllowedFields("foo"));
+		assertThat(result.getFoo()).isEqualTo("FOO");
+		assertThat(result.getBar()).isNull();
+	}
+
+	@Test
+	void bindError() throws BindException {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.addParameter("foo", "FOO");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		assertThatExceptionOfType(BindException.class).isThrownBy(() ->
+			request.bind(ErrorInjection.class)
+		);
+	}
+
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedTimestamp(String method) throws Exception {
@@ -513,6 +551,90 @@ class DefaultServerRequestTests {
 	@ParameterizedTest(name = "[{index}] {0}")
 	@ValueSource(strings = { "GET", "HEAD" })
 	@interface ParameterizedHttpMethodTest {
+	}
+
+
+	@SuppressWarnings("unused")
+	private static final class ConstructorInjection {
+
+		private final String foo;
+
+		private final String bar;
+
+		public ConstructorInjection(String foo, String bar) {
+			this.foo = foo;
+			this.bar = bar;
+		}
+
+		public String getFoo() {
+			return this.foo;
+		}
+
+		public String getBar() {
+			return this.bar;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static final class PropertyInjection {
+
+		private String foo;
+
+		private String bar;
+
+		public String getFoo() {
+			return this.foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
+		public String getBar() {
+			return this.bar;
+		}
+
+		public void setBar(String bar) {
+			this.bar = bar;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static final class MixedInjection {
+
+		private final String foo;
+
+		private String bar;
+
+		public MixedInjection(String foo) {
+			this.foo = foo;
+		}
+
+		public String getFoo() {
+			return this.foo;
+		}
+
+		public String getBar() {
+			return this.bar;
+		}
+
+		public void setBar(String bar) {
+			this.bar = bar;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static final class ErrorInjection {
+
+		private int foo;
+
+		public int getFoo() {
+			return this.foo;
+		}
+
+		public void setFoo(int foo) {
+			this.foo = foo;
+		}
 	}
 
 }

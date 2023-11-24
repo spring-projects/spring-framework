@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 				Config.class, SimpleMessageListenerTestBean.class);
 
 		JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
-		assertThat(factory.getListenerContainers().size()).as("One container should have been registered").isEqualTo(1);
+		assertThat(factory.getListenerContainers()).as("One container should have been registered").hasSize(1);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
 
 		JmsListenerEndpoint endpoint = container.getEndpoint();
@@ -84,7 +84,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 	void metaAnnotationIsDiscovered() throws Exception {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class, MetaAnnotationTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
-			assertThat(factory.getListenerContainers().size()).as("one container should have been registered").isEqualTo(1);
+			assertThat(factory.getListenerContainers()).as("one container should have been registered").hasSize(1);
 
 			JmsListenerEndpoint endpoint = factory.getListenerContainers().get(0).getEndpoint();
 			assertThat(endpoint.getClass()).as("Wrong endpoint type").isEqualTo(MethodJmsListenerEndpoint.class);
@@ -100,7 +100,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 	void sendToAnnotationFoundOnInterfaceProxy() throws Exception {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InterfaceProxyTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
-			assertThat(factory.getListenerContainers().size()).as("one container should have been registered").isEqualTo(1);
+			assertThat(factory.getListenerContainers()).as("one container should have been registered").hasSize(1);
 
 			JmsListenerEndpoint endpoint = factory.getListenerContainers().get(0).getEndpoint();
 			assertThat(endpoint.getClass()).as("Wrong endpoint type").isEqualTo(MethodJmsListenerEndpoint.class);
@@ -122,7 +122,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 	void sendToAnnotationFoundOnCglibProxy() throws Exception {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, ClassProxyTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
-			assertThat(factory.getListenerContainers().size()).as("one container should have been registered").isEqualTo(1);
+			assertThat(factory.getListenerContainers()).as("one container should have been registered").hasSize(1);
 
 			JmsListenerEndpoint endpoint = factory.getListenerContainers().get(0).getEndpoint();
 			assertThat(endpoint.getClass()).as("Wrong endpoint type").isEqualTo(MethodJmsListenerEndpoint.class);
@@ -204,7 +204,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 
 		@Bean
 		public PlatformTransactionManager transactionManager() {
-			return mock(PlatformTransactionManager.class);
+			return mock();
 		}
 	}
 

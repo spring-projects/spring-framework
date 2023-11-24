@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.jstl.core.Config;
-import javax.servlet.jsp.jstl.fmt.LocalizationContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.jstl.core.Config;
+import jakarta.servlet.jsp.jstl.fmt.LocalizationContext;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
 public abstract class JstlUtils {
 
 	/**
-	 * Checks JSTL's "javax.servlet.jsp.jstl.fmt.localizationContext"
+	 * Checks JSTL's "jakarta.servlet.jsp.jstl.fmt.localizationContext"
 	 * context-param and creates a corresponding child message source,
 	 * with the provided Spring-defined MessageSource as parent.
 	 * @param servletContext the ServletContext we're running in
@@ -132,8 +132,8 @@ public abstract class JstlUtils {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {
 				Object lcObject = Config.get(session, Config.FMT_LOCALIZATION_CONTEXT);
-				if (lcObject instanceof LocalizationContext) {
-					ResourceBundle lcBundle = ((LocalizationContext) lcObject).getResourceBundle();
+				if (lcObject instanceof LocalizationContext localizationContext) {
+					ResourceBundle lcBundle = localizationContext.getResourceBundle();
 					return new MessageSourceResourceBundle(this.messageSource, getLocale(), lcBundle);
 				}
 			}
@@ -145,8 +145,8 @@ public abstract class JstlUtils {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {
 				Object localeObject = Config.get(session, Config.FMT_LOCALE);
-				if (localeObject instanceof Locale) {
-					return (Locale) localeObject;
+				if (localeObject instanceof Locale locale) {
+					return locale;
 				}
 			}
 			return RequestContextUtils.getLocale(this.request);

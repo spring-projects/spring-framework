@@ -1,0 +1,11 @@
+[[webflux-client-testing]]
+= Testing
+:page-section-summary-toc: 1
+
+To test code that uses the `WebClient`, you can use a mock web server, such as the
+https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see an example
+of its use, check out
+{spring-framework-code}/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
+in the Spring Framework test suite or the
+https://github.com/square/okhttp/tree/master/samples/static-server[`static-server`]
+sample in the OkHttp repository.

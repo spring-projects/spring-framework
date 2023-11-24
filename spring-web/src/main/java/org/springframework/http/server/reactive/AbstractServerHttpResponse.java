@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -29,9 +29,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -62,7 +61,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
-	private Integer statusCode;
+	private HttpStatusCode statusCode;
 
 	private final HttpHeaders headers;
 
@@ -70,7 +69,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
-	private final List<Supplier<? extends Mono<Void>>> commitActions = new ArrayList<>(4);
+	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
 
 	@Nullable
 	private HttpHeaders readOnlyHeaders;
@@ -95,62 +94,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus status) {
+	public boolean setStatusCode(@Nullable HttpStatusCode status) {
 		if (this.state.get() == State.COMMITTED) {
 			return false;
 		}
 		else {
-			this.statusCode = (status != null ? status.value() : null);
+			this.statusCode = status;
 			return true;
 		}
 	}
 
 	@Override
 	@Nullable
-	public HttpStatus getStatusCode() {
-		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
 	}
 
 	@Override
 	public boolean setRawStatusCode(@Nullable Integer statusCode) {
-		if (this.state.get() == State.COMMITTED) {
-			return false;
-		}
-		else {
-			this.statusCode = statusCode;
-			return true;
-		}
+		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
 	public Integer getRawStatusCode() {
-		return this.statusCode;
-	}
-
-	/**
-	 * Set the HTTP status code of the response.
-	 * @param statusCode the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#setRawStatusCode(Integer)}.
-	 */
-	@Deprecated
-	public void setStatusCodeValue(@Nullable Integer statusCode) {
-		if (this.state.get() != State.COMMITTED) {
-			this.statusCode = statusCode;
-		}
-	}
-
-	/**
-	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#getRawStatusCode()}.
-	 */
-	@Nullable
-	@Deprecated
-	public Integer getStatusCodeValue() {
-		return this.statusCode;
+		return (this.statusCode != null ? this.statusCode.value() : null);
 	}
 
 	@Override
@@ -220,7 +189,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 									try {
 										return writeWithInternal(Mono.fromCallable(() -> buffer)
 												.doOnSubscribe(s -> subscribed.set(true))
-												.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+												.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
 									}
 									catch (Throwable ex) {
 										return Mono.error(ex);
@@ -234,7 +203,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 								});
 					})
 					.doOnError(t -> getHeaders().clearContentHeaders())
-					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+					.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 		}
 		else {
 			return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
@@ -254,7 +223,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	/**
-	 * A variant of {@link #doCommit(Supplier)} for a response without no body.
+	 * A variant of {@link #doCommit(Supplier)} for a response without a body.
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit() {
@@ -320,12 +289,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract void applyStatusCode();
 
 	/**
-	 * Invoked when the response is getting committed allowing sub-classes to
+	 * Invoked when the response is getting committed allowing subclasses to
 	 * make apply header values to the underlying response.
-	 * <p>Note that most sub-classes use an {@link HttpHeaders} instance that
+	 * <p>Note that some subclasses use an {@link HttpHeaders} instance that
 	 * wraps an adapter to the native response headers such that changes are
 	 * propagated to the underlying response on the go. That means this callback
-	 * is typically not used other than for specialized updates such as setting
+	 * might not be used other than for specialized updates such as setting
 	 * the contentType or characterEncoding fields in a Servlet response.
 	 */
 	protected abstract void applyHeaders();
@@ -337,7 +306,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract void applyCookies();
 
 	/**
-	 * Allow sub-classes to associate a hint with the data buffer if it is a
+	 * Allow subclasses to associate a hint with the data buffer if it is a
 	 * pooled buffer and supports leak tracking.
 	 * @param buffer the buffer to attach a hint to
 	 * @since 5.3.2

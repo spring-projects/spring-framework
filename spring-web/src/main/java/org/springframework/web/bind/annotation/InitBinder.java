@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +22,43 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+
 /**
- * Annotation that identifies methods which initialize the
+ * Annotation that identifies methods that initialize the
  * {@link org.springframework.web.bind.WebDataBinder} which
  * will be used for populating command and form object arguments
  * of annotated handler methods.
  *
- * <p>Such init-binder methods support all arguments that {@link RequestMapping}
- * supports, except for command/form objects and corresponding validation result
- * objects. Init-binder methods must not have a return value; they are usually
- * declared as {@code void}.
+ * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
+ * parts of the object graph that are not meant to be accessed or modified by
+ * external clients. Therefore the design and use of data binding should be considered
+ * carefully with regard to security. For more details, please refer to the dedicated
+ * sections on data binding for
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-ann-initbinder-model-design">Spring WebFlux</a>
+ * in the reference manual.
+ *
+ * <p>{@code @InitBinder} methods support all arguments that
+ * {@link RequestMapping @RequestMapping} methods support, except for command/form
+ * objects and corresponding validation result objects. {@code @InitBinder} methods
+ * must not have a return value; they are usually declared as {@code void}.
  *
  * <p>Typical arguments are {@link org.springframework.web.bind.WebDataBinder}
  * in combination with {@link org.springframework.web.context.request.WebRequest}
  * or {@link java.util.Locale}, allowing to register context-specific editors.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 2.5
+ * @see ControllerAdvice
  * @see org.springframework.web.bind.WebDataBinder
  * @see org.springframework.web.context.request.WebRequest
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective
 public @interface InitBinder {
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ abstract class TransactionSynchronizationUtils {
 		Assert.notNull(resource, "Resource must not be null");
 		Object resourceRef = resource;
 		// unwrap infrastructure proxy
-		if (resourceRef instanceof InfrastructureProxy) {
-			resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
+		if (resourceRef instanceof InfrastructureProxy infrastructureProxy) {
+			resourceRef = infrastructureProxy.getWrappedObject();
 		}
 		if (aopAvailable) {
 			// now unwrap scoped proxy
@@ -85,7 +85,7 @@ abstract class TransactionSynchronizationUtils {
 	public static Mono<Void> triggerBeforeCompletion(Collection<TransactionSynchronization> synchronizations) {
 		return Flux.fromIterable(synchronizations)
 				.concatMap(TransactionSynchronization::beforeCompletion).onErrorContinue((t, o) ->
-						logger.debug("TransactionSynchronization.beforeCompletion threw exception", t)).then();
+						logger.error("TransactionSynchronization.beforeCompletion threw exception", t)).then();
 	}
 
 	/**
@@ -115,7 +115,7 @@ abstract class TransactionSynchronizationUtils {
 			Collection<TransactionSynchronization> synchronizations, int completionStatus) {
 
 		return Flux.fromIterable(synchronizations).concatMap(it -> it.afterCompletion(completionStatus))
-				.onErrorContinue((t, o) -> logger.debug("TransactionSynchronization.afterCompletion threw exception", t)).then();
+				.onErrorContinue((t, o) -> logger.error("TransactionSynchronization.afterCompletion threw exception", t)).then();
 	}
 
 
@@ -125,8 +125,8 @@ abstract class TransactionSynchronizationUtils {
 	private static class ScopedProxyUnwrapper {
 
 		public static Object unwrapIfNecessary(Object resource) {
-			if (resource instanceof ScopedObject) {
-				return ((ScopedObject) resource).getTargetObject();
+			if (resource instanceof ScopedObject scopedObject) {
+				return scopedObject.getTargetObject();
 			}
 			else {
 				return resource;

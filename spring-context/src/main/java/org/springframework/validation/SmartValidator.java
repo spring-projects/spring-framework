@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface SmartValidator extends Validator {
 	 * @param target the object that is to be validated
 	 * @param errors contextual state about the validation process
 	 * @param validationHints one or more hint objects to be passed to the validation engine
-	 * @see javax.validation.Validator#validate(Object, Class[])
+	 * @see jakarta.validation.Validator#validate(Object, Class[])
 	 */
 	void validate(Object target, Errors errors, Object... validationHints);
 
@@ -56,12 +56,27 @@ public interface SmartValidator extends Validator {
 	 * @param errors contextual state about the validation process
 	 * @param validationHints one or more hint objects to be passed to the validation engine
 	 * @since 5.1
-	 * @see javax.validation.Validator#validateValue(Class, String, Object, Class[])
+	 * @see jakarta.validation.Validator#validateValue(Class, String, Object, Class[])
 	 */
 	default void validateValue(
 			Class<?> targetType, String fieldName, @Nullable Object value, Errors errors, Object... validationHints) {
 
 		throw new IllegalArgumentException("Cannot validate individual value for " + targetType);
+	}
+
+	/**
+	 * Return a contained validator instance of the specified type, unwrapping
+	 * as far as necessary.
+	 * @param type the class of the object to return
+	 * @param <T> the type of the object to return
+	 * @return a validator instance of the specified type; {@code null} if there
+	 * isn't a nested validator; an exception may be raised if the specified
+	 * validator type does not match.
+	 * @since 6.1
+	 */
+	@Nullable
+	default <T> T unwrap(@Nullable Class<T> type) {
+		return null;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,27 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.expression.Expression;
 import org.springframework.expression.spel.ast.Operator;
 import org.springframework.expression.spel.standard.SpelExpression;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.expression.spel.SpelMessage.MAX_CONCATENATED_STRING_LENGTH_EXCEEDED;
+import static org.springframework.expression.spel.SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED;
+import static org.springframework.expression.spel.SpelMessage.NEGATIVE_REPEATED_TEXT_COUNT;
 
 /**
- * Tests the evaluation of expressions using relational operators.
+ * Tests the evaluation of expressions using various operators.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  */
-public class OperatorTests extends AbstractExpressionTests {
+class OperatorTests extends AbstractExpressionTests {
 
 	@Test
-	public void testEqual() {
+	void equal() {
 		evaluate("3 == 5", false, Boolean.class);
 		evaluate("5 == 3", false, Boolean.class);
 		evaluate("6 == 6", true, Boolean.class);
@@ -58,7 +63,9 @@ public class OperatorTests extends AbstractExpressionTests {
 		evaluate("'abc' == new java.lang.StringBuilder('abc')", true, Boolean.class);
 		evaluate("'abc' == 'def'", false, Boolean.class);
 		evaluate("'abc' == null", false, Boolean.class);
-		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable() == new org.springframework.expression.spel.OperatorTests$OtherSubComparable()", true, Boolean.class);
+		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable(0) == new org.springframework.expression.spel.OperatorTests$OtherSubComparable(0)", true, Boolean.class);
+		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable(1) < new org.springframework.expression.spel.OperatorTests$OtherSubComparable(2)", true, Boolean.class);
+		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable(2) > new org.springframework.expression.spel.OperatorTests$OtherSubComparable(1)", true, Boolean.class);
 
 		evaluate("3 eq 5", false, Boolean.class);
 		evaluate("5 eQ 3", false, Boolean.class);
@@ -85,7 +92,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testNotEqual() {
+	void notEqual() {
 		evaluate("3 != 5", true, Boolean.class);
 		evaluate("5 != 3", true, Boolean.class);
 		evaluate("6 != 6", false, Boolean.class);
@@ -134,7 +141,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testLessThan() {
+	void lessThan() {
 		evaluate("5 < 5", false, Boolean.class);
 		evaluate("3 < 5", true, Boolean.class);
 		evaluate("5 < 3", false, Boolean.class);
@@ -176,7 +183,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testLessThanOrEqual() {
+	void lessThanOrEqual() {
 		evaluate("3 <= 5", true, Boolean.class);
 		evaluate("5 <= 3", false, Boolean.class);
 		evaluate("6 <= 6", true, Boolean.class);
@@ -225,7 +232,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testGreaterThan() {
+	void greaterThan() {
 		evaluate("3 > 5", false, Boolean.class);
 		evaluate("5 > 3", true, Boolean.class);
 		evaluate("3L > 5L", false, Boolean.class);
@@ -266,7 +273,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testGreaterThanOrEqual() {
+	void greaterThanOrEqual() {
 		evaluate("3 >= 5", false, Boolean.class);
 		evaluate("5 >= 3", true, Boolean.class);
 		evaluate("6 >= 6", true, Boolean.class);
@@ -315,27 +322,22 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testIntegerLiteral() {
+	void integerLiteral() {
 		evaluate("3", 3, Integer.class);
 	}
 
 	@Test
-	public void testRealLiteral() {
+	void realLiteral() {
 		evaluate("3.5", 3.5d, Double.class);
 	}
 
 	@Test
-	public void testMultiplyStringInt() {
-		evaluate("'a' * 5", "aaaaa", String.class);
-	}
-
-	@Test
-	public void testMultiplyDoubleDoubleGivesDouble() {
+	void multiplyDoubleDoubleGivesDouble() {
 		evaluate("3.0d * 5.0d", 15.0d, Double.class);
 	}
 
 	@Test
-	public void testMixedOperandsBigDecimal() {
+	void mixedOperandsBigDecimal() {
 		evaluate("3 * new java.math.BigDecimal('5')", new BigDecimal("15"), BigDecimal.class);
 		evaluate("3L * new java.math.BigDecimal('5')", new BigDecimal("15"), BigDecimal.class);
 		evaluate("3.0d * new java.math.BigDecimal('5')", new BigDecimal("15.0"), BigDecimal.class);
@@ -361,19 +363,19 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testMathOperatorAdd02() {
+	void mathOperatorAdd02() {
 		evaluate("'hello' + ' ' + 'world'", "hello world", String.class);
 	}
 
 	@Test
-	public void testMathOperatorsInChains() {
+	void mathOperatorsInChains() {
 		evaluate("1+2+3",6,Integer.class);
 		evaluate("2*3*4",24,Integer.class);
 		evaluate("12-1-2",9,Integer.class);
 	}
 
 	@Test
-	public void testIntegerArithmetic() {
+	void integerArithmetic() {
 		evaluate("2 + 4", "6", Integer.class);
 		evaluate("5 - 4", "1", Integer.class);
 		evaluate("3 * 5", 15, Integer.class);
@@ -388,56 +390,47 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testPlus() throws Exception {
+	void plus() {
 		evaluate("7 + 2", "9", Integer.class);
 		evaluate("3.0f + 5.0f", 8.0f, Float.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
 		evaluate("3 + new java.math.BigDecimal('5')", new BigDecimal("8"), BigDecimal.class);
-
-		evaluate("'ab' + 2", "ab2", String.class);
-		evaluate("2 + 'a'", "2a", String.class);
-		evaluate("'ab' + null", "abnull", String.class);
-		evaluate("null + 'ab'", "nullab", String.class);
+		evaluate("5 + new Integer('37')", 42, Integer.class);
 
 		// AST:
-		SpelExpression expr = (SpelExpression)parser.parseExpression("+3");
+		SpelExpression expr = (SpelExpression) parser.parseExpression("+3");
 		assertThat(expr.toStringAST()).isEqualTo("+3");
-		expr = (SpelExpression)parser.parseExpression("2+3");
+		expr = (SpelExpression) parser.parseExpression("2+3");
 		assertThat(expr.toStringAST()).isEqualTo("(2 + 3)");
 
 		// use as a unary operator
-		evaluate("+5d",5d,Double.class);
-		evaluate("+5L",5L,Long.class);
-		evaluate("+5",5,Integer.class);
-		evaluate("+new java.math.BigDecimal('5')", new BigDecimal("5"),BigDecimal.class);
-		evaluateAndCheckError("+'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-
-		// string concatenation
-		evaluate("'abc'+'def'","abcdef",String.class);
-
-		evaluate("5 + new Integer('37')",42,Integer.class);
+		evaluate("+5d", 5d, Double.class);
+		evaluate("+5L", 5L, Long.class);
+		evaluate("+5", 5, Integer.class);
+		evaluate("+new java.math.BigDecimal('5')", new BigDecimal("5"), BigDecimal.class);
+		evaluateAndCheckError("+'abc'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
-	public void testMinus() throws Exception {
+	void minus() {
 		evaluate("'c' - 2", "a", String.class);
 		evaluate("3.0f - 5.0f", -2.0f, Float.class);
 		evaluateAndCheckError("'ab' - 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("2-'ab'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
+		SpelExpression expr = (SpelExpression) parser.parseExpression("-3");
 		assertThat(expr.toStringAST()).isEqualTo("-3");
-		expr = (SpelExpression)parser.parseExpression("2-3");
+		expr = (SpelExpression) parser.parseExpression("2-3");
 		assertThat(expr.toStringAST()).isEqualTo("(2 - 3)");
 
-		evaluate("-5d",-5d,Double.class);
-		evaluate("-5L",-5L,Long.class);
+		evaluate("-5d", -5d, Double.class);
+		evaluate("-5L", -5L, Long.class);
 		evaluate("-5", -5, Integer.class);
-		evaluate("-new java.math.BigDecimal('5')", new BigDecimal("-5"),BigDecimal.class);
+		evaluate("-new java.math.BigDecimal('5')", new BigDecimal("-5"), BigDecimal.class);
 		evaluateAndCheckError("-'abc'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
-	public void testModulus() {
+	void modulus() {
 		evaluate("3%2",1,Integer.class);
 		evaluate("3L%2L",1L,Long.class);
 		evaluate("3.0f%2.0f",1f,Float.class);
@@ -448,7 +441,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testDivide() {
+	void divide() {
 		evaluate("3.0f / 5.0f", 0.6f, Float.class);
 		evaluate("4L/2L",2L,Long.class);
 		evaluate("3.0f div 5.0f", 0.6f, Float.class);
@@ -461,17 +454,17 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testMathOperatorDivide_ConvertToDouble() {
-		evaluateAndAskForReturnType("8/4", new Double(2.0), Double.class);
+	void mathOperatorDivide_ConvertToDouble() {
+		evaluateAndAskForReturnType("8/4", 2.0, Double.class);
 	}
 
 	@Test
-	public void testMathOperatorDivide04_ConvertToFloat() {
-		evaluateAndAskForReturnType("8/4", new Float(2.0), Float.class);
+	void mathOperatorDivide04_ConvertToFloat() {
+		evaluateAndAskForReturnType("8/4", 2.0F, Float.class);
 	}
 
 	@Test
-	public void testDoubles() {
+	void doubles() {
 		evaluate("3.0d == 5.0d", false, Boolean.class);
 		evaluate("3.0d == 3.0d", true, Boolean.class);
 		evaluate("3.0d != 5.0d", true, Boolean.class);
@@ -484,7 +477,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testBigDecimals() {
+	void bigDecimals() {
 		evaluate("3 + new java.math.BigDecimal('5')", new BigDecimal("8"), BigDecimal.class);
 		evaluate("3 - new java.math.BigDecimal('5')", new BigDecimal("-2"), BigDecimal.class);
 		evaluate("3 * new java.math.BigDecimal('5')", new BigDecimal("15"), BigDecimal.class);
@@ -495,7 +488,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testOperatorNames() throws Exception {
+	void operatorNames() {
 		Operator node = getOperatorNode((SpelExpression)parser.parseExpression("1==3"));
 		assertThat(node.getOperatorName()).isEqualTo("==");
 
@@ -534,22 +527,22 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testOperatorOverloading() {
+	void operatorOverloading() {
 		evaluateAndCheckError("'a' * '2'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("'a' ^ '2'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
-	public void testPower() {
-		evaluate("3^2",9,Integer.class);
-		evaluate("3.0d^2.0d",9.0d,Double.class);
-		evaluate("3L^2L",9L,Long.class);
+	void power() {
+		evaluate("3^2", 9, Integer.class);
+		evaluate("3.0d^2.0d", 9.0d, Double.class);
+		evaluate("3L^2L", 9L, Long.class);
 		evaluate("(2^32)^2", 9223372036854775807L, Long.class);
 		evaluate("new java.math.BigDecimal('5') ^ 3", new BigDecimal("125"), BigDecimal.class);
 	}
 
 	@Test
-	public void testMixedOperands_FloatsAndDoubles() {
+	void mixedOperands_FloatsAndDoubles() {
 		evaluate("3.0d + 5.0f", 8.0d, Double.class);
 		evaluate("3.0D - 5.0f", -2.0d, Double.class);
 		evaluate("3.0f * 5.0d", 15.0d, Double.class);
@@ -558,7 +551,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testMixedOperands_DoublesAndInts() {
+	void mixedOperands_DoublesAndInts() {
 		evaluate("3.0d + 5", 8.0d, Double.class);
 		evaluate("3.0D - 5", -2.0d, Double.class);
 		evaluate("3.0f * 5", 15.0f, Float.class);
@@ -569,7 +562,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testStrings() {
+	void strings() {
 		evaluate("'abc' == 'abc'", true, Boolean.class);
 		evaluate("'abc' == 'def'", false, Boolean.class);
 		evaluate("'abc' != 'abc'", false, Boolean.class);
@@ -577,7 +570,86 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testLongs() {
+	void stringRepeat() {
+		evaluate("'abc' * 0", "", String.class);
+		evaluate("'abc' * 1", "abc", String.class);
+		evaluate("'abc' * 2", "abcabc", String.class);
+
+		Expression expr = parser.parseExpression("'a' * 256");
+		assertThat(expr.getValue(context, String.class)).hasSize(256);
+
+		// 4 is the position of the '*' (repeat operator)
+		evaluateAndCheckError("'a' * 257", String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 4);
+
+		// Integer overflow: 2 * ((Integer.MAX_VALUE / 2) + 1) --> integer overflow
+		int repeatCount = (Integer.MAX_VALUE / 2) + 1;
+		assertThat(2 * repeatCount).isNegative();
+		// 5 is the position of the '*' (repeat operator)
+		evaluateAndCheckError("'ab' * " + repeatCount, String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 5);
+	}
+
+	@Test
+	void stringRepeatWithNegativeRepeatCount() {
+		// 4 is the position of the '*' (repeat operator)
+		// -1 is the negative repeat count
+		evaluateAndCheckError("'a' * -1", String.class, NEGATIVE_REPEATED_TEXT_COUNT, 4, -1);
+	}
+
+	@Test
+	void stringConcatenation() {
+		evaluate("'' + ''", "", String.class);
+		evaluate("'' + null", "null", String.class);
+		evaluate("null + ''", "null", String.class);
+		evaluate("'ab' + null", "abnull", String.class);
+		evaluate("null + 'ab'", "nullab", String.class);
+		evaluate("'ab' + 2", "ab2", String.class);
+		evaluate("2 + 'ab'", "2ab", String.class);
+		evaluate("'abc' + 'def'", "abcdef", String.class);
+
+		// Text is big but not too big
+		final int maxSize = 100_000;
+		context.setVariable("text1", createString(maxSize));
+		Expression expr = parser.parseExpression("#text1 + ''");
+		assertThat(expr.getValue(context, String.class)).hasSize(maxSize);
+
+		expr = parser.parseExpression("'' + #text1");
+		assertThat(expr.getValue(context, String.class)).hasSize(maxSize);
+
+		context.setVariable("text1", createString(maxSize / 2));
+		expr = parser.parseExpression("#text1 + #text1");
+		assertThat(expr.getValue(context, String.class)).hasSize(maxSize);
+
+		// Text is too big
+		context.setVariable("text1", createString(maxSize + 1));
+		evaluateAndCheckError("#text1 + ''", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+		evaluateAndCheckError("#text1 + true", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+		evaluateAndCheckError("'' + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 3);
+		evaluateAndCheckError("true + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 5);
+
+		context.setVariable("text1", createString(maxSize / 2));
+		context.setVariable("text2", createString((maxSize / 2) + 1));
+		evaluateAndCheckError("#text1 + #text2", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+		evaluateAndCheckError("#text1 + #text2 + true", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+		evaluateAndCheckError("#text1 + true + #text2", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 14);
+		evaluateAndCheckError("true + #text1 + #text2", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 14);
+
+		evaluateAndCheckError("#text2 + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+		evaluateAndCheckError("#text2 + #text1 + true", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+		evaluateAndCheckError("#text2 + true + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 14);
+		evaluateAndCheckError("true + #text2 + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 14);
+
+		context.setVariable("text1", createString((maxSize / 3) + 1));
+		evaluateAndCheckError("#text1 + #text1 + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 16);
+		evaluateAndCheckError("(#text1 + #text1) + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 18);
+		evaluateAndCheckError("#text1 + (#text1 + #text1)", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+	}
+
+	private static String createString(int size) {
+		return new String(new char[size]);
+	}
+
+	@Test
+	void longs() {
 		evaluate("3L == 4L", false, Boolean.class);
 		evaluate("3L == 3L", true, Boolean.class);
 		evaluate("3L != 4L", true, Boolean.class);
@@ -588,7 +660,7 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testBigIntegers() {
+	void bigIntegers() {
 		evaluate("3 + new java.math.BigInteger('5')", new BigInteger("8"), BigInteger.class);
 		evaluate("3 - new java.math.BigInteger('5')", new BigInteger("-2"), BigInteger.class);
 		evaluate("3 * new java.math.BigInteger('5')", new BigInteger("15"), BigInteger.class);
@@ -605,8 +677,8 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	private Operator findOperator(SpelNode node) {
-		if (node instanceof Operator) {
-			return (Operator) node;
+		if (node instanceof Operator operator) {
+			return operator;
 		}
 		int childCount = node.getChildCount();
 		for (int i = 0; i < childCount; i++) {
@@ -619,20 +691,42 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 
-	public static class BaseComparable implements Comparable<BaseComparable> {
+	static class BaseComparable implements Comparable<BaseComparable> {
+
+		private int id;
+
+		public BaseComparable() {
+			this.id = 0;
+		}
+
+		public BaseComparable(int id) {
+			this.id = id;
+		}
 
 		@Override
 		public int compareTo(BaseComparable other) {
-			return 0;
+			return this.id - other.id;
 		}
 	}
 
 
-	public static class SubComparable extends BaseComparable {
+	static class SubComparable extends BaseComparable {
+		public SubComparable() {
+		}
+
+		public SubComparable(int id) {
+			super(id);
+		}
 	}
 
 
-	public static class OtherSubComparable extends BaseComparable {
+	static class OtherSubComparable extends BaseComparable {
+		public OtherSubComparable() {
+		}
+
+		public OtherSubComparable(int id) {
+			super(id);
+		}
 	}
 
 }

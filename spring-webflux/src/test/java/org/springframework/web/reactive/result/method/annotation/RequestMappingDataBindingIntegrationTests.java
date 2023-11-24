@@ -110,8 +110,8 @@ class RequestMappingDataBindingIntegrationTests extends AbstractRequestMappingIn
 		}
 
 		@ModelAttribute
-		public Mono<Foo> addFooAttribute(@PathVariable("id") Optional<Long> optiponalId) {
-			return optiponalId.map(id -> Mono.just(new Foo(id))).orElse(Mono.empty());
+		public Mono<Foo> addFooAttribute(@PathVariable("id") Optional<Long> optionalId) {
+			return optionalId.map(id -> Mono.just(new Foo(id))).orElse(Mono.empty());
 		}
 
 		@PostMapping("/foos/{id}")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,8 +228,7 @@ public class MessageBrokerRegistry {
 	 * ThreadPoolExecutor that in turn does not guarantee processing in order.
 	 * <p>When this flag is set to {@code true} messages within the same session
 	 * will be sent to the {@code "clientOutboundChannel"} one at a time in
-	 * order to preserve the order of publication. Enable this only if needed
-	 * since there is some performance overhead to keep messages in order.
+	 * order to preserve the order of publication.
 	 * @since 5.1
 	 */
 	public MessageBrokerRegistry setPreservePublishOrder(boolean preservePublishOrder) {

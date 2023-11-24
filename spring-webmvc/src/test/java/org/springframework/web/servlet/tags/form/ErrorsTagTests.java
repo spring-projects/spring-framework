@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -304,7 +303,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
-		assertThat(output.length()).isEqualTo(0);
+		assertThat(output).isEmpty();
 	}
 
 	@Test
@@ -316,7 +315,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
-		assertThat(output.length()).isEqualTo(0);
+		assertThat(output).isEmpty();
 	}
 
 	@Test
@@ -427,9 +426,9 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertThat(output.contains("id=\"testBean.errors\"")).isTrue();
-		assertThat(output.contains("object error")).isTrue();
-		assertThat(output.contains("field error")).isFalse();
+		assertThat(output).contains("id=\"testBean.errors\"");
+		assertThat(output).contains("object error");
+		assertThat(output).doesNotContain("field error");
 	}
 
 	@Test
@@ -443,9 +442,9 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertThat(output.contains("id=\"name.errors\"")).isTrue();
-		assertThat(output.contains("object error")).isFalse();
-		assertThat(output.contains("field error")).isTrue();
+		assertThat(output).contains("id=\"name.errors\"");
+		assertThat(output).doesNotContain("object error");
+		assertThat(output).contains("field error");
 	}
 
 	@Test
@@ -459,9 +458,9 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertThat(output.contains("id=\"testBean.errors\"")).isTrue();
-		assertThat(output.contains("object error")).isTrue();
-		assertThat(output.contains("field error")).isTrue();
+		assertThat(output).contains("id=\"testBean.errors\"");
+		assertThat(output).contains("object error");
+		assertThat(output).contains("field error");
 	}
 
 	@Override
@@ -477,11 +476,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	private void assertElementTagOpened(String output) {
-		assertThat(output.startsWith("<" + this.tag.getElement() + " ")).isTrue();
+		assertThat(output).startsWith("<" + this.tag.getElement() + " ");
 	}
 
 	private void assertElementTagClosed(String output) {
-		assertThat(output.endsWith("</" + this.tag.getElement() + ">")).isTrue();
+		assertThat(output).endsWith("</" + this.tag.getElement() + ">");
 	}
 
 	private void assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(int scope) throws JspException {
@@ -497,7 +496,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
-		assertThat(output.length()).isEqualTo(0);
+		assertThat(output).isEmpty();
 
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, scope)).isEqualTo(existingAttribute);
 	}

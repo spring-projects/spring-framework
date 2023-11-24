@@ -26,7 +26,7 @@ import javax.xml.transform.Result;
  *
  * <p>Although the {@code marshal} method accepts a {@code java.lang.Object} as its
  * first parameter, most {@code Marshaller} implementations cannot handle arbitrary
- * {@code Object}s. Instead, a object class must be registered with the marshaller,
+ * {@code Object}s. Instead, an object class must be registered with the marshaller,
  * or have a common base class.
  *
  * @author Arjen Poutsma

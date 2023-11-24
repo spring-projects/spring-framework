@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,16 +162,10 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof FlashMap)) {
-			return false;
-		}
-		FlashMap otherFlashMap = (FlashMap) other;
-		return (super.equals(otherFlashMap) &&
-				ObjectUtils.nullSafeEquals(this.targetRequestPath, otherFlashMap.targetRequestPath) &&
-				this.targetRequestParams.equals(otherFlashMap.targetRequestParams));
+		return (this == other || (other instanceof FlashMap that &&
+				super.equals(other) &&
+				ObjectUtils.nullSafeEquals(this.targetRequestPath, that.targetRequestPath) &&
+				this.targetRequestParams.equals(that.targetRequestParams)));
 	}
 
 	@Override

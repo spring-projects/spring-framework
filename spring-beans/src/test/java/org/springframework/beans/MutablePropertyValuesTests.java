@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 		pvs.addPropertyValue(new PropertyValue("age", "50"));
 		MutablePropertyValues pvs2 = pvs;
 		PropertyValues changes = pvs2.changesSince(pvs);
-		assertThat(changes.getPropertyValues().length == 0).as("changes are empty").isTrue();
+		assertThat(changes.getPropertyValues().length).as("changes are empty").isEqualTo(0);
 	}
 
 	@Test
@@ -82,26 +82,28 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 
 		MutablePropertyValues pvs2 = new MutablePropertyValues(pvs);
 		PropertyValues changes = pvs2.changesSince(pvs);
-		assertThat(changes.getPropertyValues().length == 0).as("changes are empty, not of length " + changes.getPropertyValues().length).isTrue();
+		assertThat(changes.getPropertyValues().length).as("changes are empty, not of length " + changes.getPropertyValues().length)
+				.isEqualTo(0);
 
 		pvs2.addPropertyValue(new PropertyValue("forname", "Gordon"));
 		changes = pvs2.changesSince(pvs);
 		assertThat(changes.getPropertyValues().length).as("1 change").isEqualTo(1);
 		PropertyValue fn = changes.getPropertyValue("forname");
-		assertThat(fn != null).as("change is forname").isTrue();
+		assertThat(fn).as("change is forname").isNotNull();
 		assertThat(fn.getValue().equals("Gordon")).as("new value is gordon").isTrue();
 
 		MutablePropertyValues pvs3 = new MutablePropertyValues(pvs);
 		changes = pvs3.changesSince(pvs);
-		assertThat(changes.getPropertyValues().length == 0).as("changes are empty, not of length " + changes.getPropertyValues().length).isTrue();
+		assertThat(changes.getPropertyValues().length).as("changes are empty, not of length " + changes.getPropertyValues().length)
+				.isEqualTo(0);
 
 		// add new
 		pvs3.addPropertyValue(new PropertyValue("foo", "bar"));
 		pvs3.addPropertyValue(new PropertyValue("fi", "fum"));
 		changes = pvs3.changesSince(pvs);
-		assertThat(changes.getPropertyValues().length == 2).as("2 change").isTrue();
+		assertThat(changes.getPropertyValues().length).as("2 change").isEqualTo(2);
 		fn = changes.getPropertyValue("foo");
-		assertThat(fn != null).as("change in foo").isTrue();
+		assertThat(fn).as("change in foo").isNotNull();
 		assertThat(fn.getValue().equals("bar")).as("new value is bar").isTrue();
 	}
 

@@ -25,13 +25,16 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
@@ -66,7 +69,7 @@ public class ResourceHttpMessageWriterTests {
 	}
 
 	@Test
-	public void writeResource() throws Exception {
+	public void writeResourceServer() throws Exception {
 
 		testWrite(get("/").build());
 
@@ -76,6 +79,21 @@ public class ResourceHttpMessageWriterTests {
 
 		String content = "Spring Framework test resource content.";
 		StepVerifier.create(this.response.getBodyAsString()).expectNext(content).expectComplete().verify();
+	}
+
+	@Test
+	public void writeResourceClient() throws Exception {
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/");
+		Mono<Void> mono = this.writer.write(this.input, ResolvableType.forClass(Resource.class), TEXT_PLAIN, request, HINTS);
+		StepVerifier.create(mono).expectComplete().verify();
+
+		assertThat(request.getHeaders().getContentType()).isEqualTo(TEXT_PLAIN);
+		assertThat(request.getHeaders().getContentLength()).isEqualTo(39L);
+		assertThat(request.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isNull();
+
+		String content = "Spring Framework test resource content.";
+		StepVerifier.create(request.getBodyAsString()).expectNext(content).expectComplete().verify();
 	}
 
 	@Test

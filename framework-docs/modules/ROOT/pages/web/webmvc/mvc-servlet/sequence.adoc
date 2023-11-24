@@ -1,0 +1,73 @@
+[[mvc-servlet-sequence]]
+= Processing
+
+[.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-dispatcher-handler-sequence[See equivalent in the Reactive stack]#
+
+The `DispatcherServlet` processes requests as follows:
+
+* The `WebApplicationContext` is searched for and bound in the request as an attribute
+  that the controller and other elements in the process can use. It is bound by default
+  under the `DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE` key.
+* The locale resolver is bound to the request to let elements in the process
+  resolve the locale to use when processing the request (rendering the view, preparing
+  data, and so on). If you do not need locale resolving, you do not need the locale resolver.
+* The theme resolver is bound to the request to let elements such as views determine
+  which theme to use. If you do not use themes, you can ignore it.
+* If you specify a multipart file resolver, the request is inspected for multiparts. If
+  multiparts are found, the request is wrapped in a `MultipartHttpServletRequest` for
+  further processing by other elements in the process. See xref:web/webmvc/mvc-servlet/multipart.adoc[Multipart Resolver] for further
+  information about multipart handling.
+* An appropriate handler is searched for. If a handler is found, the execution chain
+  associated with the handler (preprocessors, postprocessors, and controllers) is
+  run to prepare a model for rendering. Alternatively, for annotated
+  controllers, the response can be rendered (within the `HandlerAdapter`) instead of
+  returning a view.
+* If a model is returned, the view is rendered. If no model is returned (maybe due to
+  a preprocessor or postprocessor intercepting the request, perhaps for security
+  reasons), no view is rendered, because the request could already have been fulfilled.
+
+The `HandlerExceptionResolver` beans declared in the `WebApplicationContext` are used to
+resolve exceptions thrown during request processing. Those exception resolvers allow
+customizing the logic to address exceptions. See xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[Exceptions] for more details.
+
+For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
+along with further options for annotated controllers as described in
+xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[HTTP Caching for Controllers].
+
+You can customize individual `DispatcherServlet` instances by adding Servlet
+initialization parameters (`init-param` elements) to the Servlet declaration in the
+`web.xml` file. The following table lists the supported parameters:
+
+[[mvc-disp-servlet-init-params-tbl]]
+.DispatcherServlet initialization parameters
+|===
+| Parameter| Explanation
+
+| `contextClass`
+| Class that implements `ConfigurableWebApplicationContext`, to be instantiated and
+  locally configured by this Servlet. By default, `XmlWebApplicationContext` is used.
+
+| `contextConfigLocation`
+| String that is passed to the context instance (specified by `contextClass`) to
+  indicate where contexts can be found. The string consists potentially of multiple
+  strings (using a comma as a delimiter) to support multiple contexts. In the case of
+  multiple context locations with beans that are defined twice, the latest location
+  takes precedence.
+
+| `namespace`
+| Namespace of the `WebApplicationContext`. Defaults to `[servlet-name]-servlet`.
+
+| `throwExceptionIfNoHandlerFound`
+| Whether to throw a `NoHandlerFoundException` when no handler was found for a request.
+  The exception can then be caught with a `HandlerExceptionResolver` (for example, by using an
+  `@ExceptionHandler` controller method) and handled as any others.
+
+  As of 6.1, this property is set to `true` and deprecated.
+
+  Note that, if xref:web/webmvc/mvc-config/default-servlet-handler.adoc[default servlet handling]  is
+  also configured, unresolved requests are always forwarded to the default servlet
+  and a 404 is never raised.
+|===
+
+
+

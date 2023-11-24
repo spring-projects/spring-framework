@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -186,8 +185,8 @@ public class HttpEntityMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
-		assertThat(content.contains("\"type\":\"foo\"")).isTrue();
-		assertThat(content.contains("\"type\":\"bar\"")).isTrue();
+		assertThat(content).contains("\"type\":\"foo\"");
+		assertThat(content).contains("\"type\":\"bar\"");
 	}
 
 	@Test  // SPR-13423
@@ -271,7 +270,7 @@ public class HttpEntityMethodProcessorTests {
 
 
 	@SuppressWarnings("unused")
-	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+	private abstract static class MyParameterizedController<DTO extends Identifiable> {
 
 		public void handleDto(HttpEntity<DTO> dto) {
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,16 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import okio.BufferedSink;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequest} implementation based on OkHttp 3.x.
@@ -35,7 +40,8 @@ import org.springframework.http.HttpMethod;
  * @author Roy Clarkson
  * @since 4.3
  */
-class OkHttp3ClientHttpRequest extends AbstractBufferingClientHttpRequest {
+@Deprecated(since = "6.1", forRemoval = true)
+class OkHttp3ClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final OkHttpClient client;
 
@@ -57,20 +63,78 @@ class OkHttp3ClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	}
 
 	@Override
-	public String getMethodValue() {
-		return this.method.name();
-	}
-
-	@Override
 	public URI getURI() {
 		return this.uri;
 	}
 
-
 	@Override
-	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content) throws IOException {
-		Request request = OkHttp3ClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
+	@SuppressWarnings("removal")
+	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
+
+		RequestBody requestBody;
+		if (body != null) {
+			requestBody = new BodyRequestBody(headers, body);
+		}
+		else if (okhttp3.internal.http.HttpMethod.requiresRequestBody(getMethod().name())) {
+			String header = headers.getFirst(HttpHeaders.CONTENT_TYPE);
+			MediaType contentType = (header != null) ? MediaType.parse(header) : null;
+			requestBody = RequestBody.create(contentType, new byte[0]);
+		}
+		else {
+			requestBody = null;
+		}
+		Request.Builder builder = new Request.Builder()
+				.url(this.uri.toURL());
+		builder.method(this.method.name(), requestBody);
+		headers.forEach((headerName, headerValues) -> {
+			for (String headerValue : headerValues) {
+				builder.addHeader(headerName, headerValue);
+			}
+		});
+		Request request = builder.build();
 		return new OkHttp3ClientHttpResponse(this.client.newCall(request).execute());
 	}
+
+
+	private static class BodyRequestBody extends RequestBody {
+
+		private final HttpHeaders headers;
+
+		private final Body body;
+
+
+		public BodyRequestBody(HttpHeaders headers, Body body) {
+			this.headers = headers;
+			this.body = body;
+		}
+
+		@Override
+		public long contentLength() {
+			return this.headers.getContentLength();
+		}
+
+		@Nullable
+		@Override
+		public MediaType contentType() {
+			String contentType = this.headers.getFirst(HttpHeaders.CONTENT_TYPE);
+			if (StringUtils.hasText(contentType)) {
+				return MediaType.parse(contentType);
+			}
+			else {
+				return null;
+			}
+		}
+
+		@Override
+		public void writeTo(BufferedSink sink) throws IOException {
+			this.body.writeTo(sink.outputStream());
+		}
+
+		@Override
+		public boolean isOneShot() {
+			return !this.body.repeatable();
+		}
+	}
+
 
 }

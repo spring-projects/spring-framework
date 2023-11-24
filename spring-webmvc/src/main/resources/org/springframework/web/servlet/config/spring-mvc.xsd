@@ -52,7 +52,9 @@
 								<xsd:documentation><![CDATA[
 	Whether to match to URLs irrespective of the presence of a trailing slash.
 	If enabled a method mapped to "/users" also matches to "/users/".
-	The default value is true.
+
+	The default was changed in 6.0 from true to false in order to support the
+	deprecation of the property.
 										]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -251,7 +253,7 @@
 
 	As of 5.0 this executor is also used when a controller returns a reactive type that does streaming
 	(e.g. "text/event-stream" or "application/x-ndjson") for the blocking writes to the
-	"javax.servlet.ServletOutputStream".
+	"jakarta.servlet.ServletOutputStream".
 
 								]]></xsd:documentation>
 								<xsd:appinfo>
@@ -1041,15 +1043,6 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-					<xsd:element name="tiles" type="urlViewResolverType">
-						<xsd:annotation>
-							<xsd:documentation><![CDATA[
-	Register a TilesViewResolver based on Tiles 3.x.
-	To configure Tiles you must also add a top-level <mvc:tiles-configurer> element
-	or declare a TilesConfigurer bean.
-							]]></xsd:documentation>
-						</xsd:annotation>
-					</xsd:element>
 					<xsd:element name="freemarker" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -1112,62 +1105,6 @@
 	By default this property is not set, which means the resolver is ordered at
 	Ordered.LOWEST_PRECEDENCE unless content negotiation is enabled in which case
 	the order (if not set explicitly) is changed to Ordered.HIGHEST_PRECEDENCE.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:complexType>
-	</xsd:element>
-
-	<xsd:element name="tiles-configurer">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
-	Configure Tiles 3.x by registering a TilesConfigurer bean.
-	This is a shortcut alternative to declaring a TilesConfigurer bean directly.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="definitions" minOccurs="0" maxOccurs="unbounded">
-					<xsd:complexType>
-						<xsd:attribute name="location" type="xsd:string" use="required">
-							<xsd:annotation>
-								<xsd:documentation><![CDATA[
-	The location of a file containing Tiles definitions (or a Spring resource pattern).
-	If no Tiles definitions are registered, then "/WEB-INF/tiles.xml" is expected to exists.
-								]]></xsd:documentation>
-							</xsd:annotation>
-						</xsd:attribute>
-					</xsd:complexType>
-				</xsd:element>
-			</xsd:sequence>
-			<xsd:attribute name="check-refresh" type="xsd:boolean">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Whether to check Tiles definition files for a refresh at runtime.
-	Default is "false".
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="validate-definitions" type="xsd:boolean">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Whether to validate the Tiles XML definitions. Default is "true".
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="definitions-factory" type="xsd:string">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The Tiles DefinitionsFactory class to use. Default is Tiles' default.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="preparer-factory" type="xsd:string">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The Tiles PreparerFactory class to use. Default is Tiles' default.
-	Consider "org.springframework.web.servlet.view.tiles3.SimpleSpringPreparerFactory" or
-	"org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory" (see javadoc).
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -1413,12 +1350,12 @@
 	set on the "Access-Control-Allow-Credentials" response header of
 	preflight requests.
 
-	NOTE: Be aware that this option establishes a high
-	level of trust with the configured domains and also increases the surface
-	attack of the web application by exposing sensitive user-specific
-	information such as cookies and CSRF tokens.
+	NOTE: Be aware that this option establishes a high level of trust with
+	the configured domains and also increases the surface attack of the web
+	application by exposing sensitive user-specific information such as
+	cookies and CSRF tokens.
 
-	By default this is not set in which case the
+	By default, this is not set in which case the
 	"Access-Control-Allow-Credentials" header is also not set and
 	credentials are therefore not allowed.
 								]]></xsd:documentation>

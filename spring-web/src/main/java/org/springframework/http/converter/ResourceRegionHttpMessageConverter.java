@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -37,11 +38,12 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion},
- * or Collections of {@link ResourceRegion ResourceRegions}.
+ * Implementation of {@link HttpMessageConverter} that can write a single
+ * {@link ResourceRegion} or Collections of {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
@@ -55,8 +57,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	@SuppressWarnings("unchecked")
 	protected MediaType getDefaultContentType(Object object) {
 		Resource resource = null;
-		if (object instanceof ResourceRegion) {
-			resource = ((ResourceRegion) object).getResource();
+		if (object instanceof ResourceRegion resourceRegion) {
+			resource = resourceRegion.getResource();
 		}
 		else {
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
@@ -98,15 +100,12 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 	@Override
 	public boolean canWrite(@Nullable Type type, @Nullable Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!(type instanceof ParameterizedType)) {
-			return (type instanceof Class && ResourceRegion.class.isAssignableFrom((Class<?>) type));
+		if (!(type instanceof ParameterizedType parameterizedType)) {
+			return (type instanceof Class<?> c && ResourceRegion.class.isAssignableFrom(c));
 		}
-
-		ParameterizedType parameterizedType = (ParameterizedType) type;
-		if (!(parameterizedType.getRawType() instanceof Class)) {
+		if (!(parameterizedType.getRawType() instanceof Class<?> rawType)) {
 			return false;
 		}
-		Class<?> rawType = (Class<?>) parameterizedType.getRawType();
 		if (!(Collection.class.isAssignableFrom(rawType))) {
 			return false;
 		}
@@ -114,11 +113,9 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			return false;
 		}
 		Type typeArgument = parameterizedType.getActualTypeArguments()[0];
-		if (!(typeArgument instanceof Class)) {
+		if (!(typeArgument instanceof Class<?> typeArgumentClass)) {
 			return false;
 		}
-
-		Class<?> typeArgumentClass = (Class<?>) typeArgument;
 		return ResourceRegion.class.isAssignableFrom(typeArgumentClass);
 	}
 
@@ -127,8 +124,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		if (object instanceof ResourceRegion) {
-			writeResourceRegion((ResourceRegion) object, outputMessage);
+		if (object instanceof ResourceRegion resourceRegion) {
+			writeResourceRegion(resourceRegion, outputMessage);
 		}
 		else {
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
@@ -136,7 +133,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				writeResourceRegion(regions.iterator().next(), outputMessage);
 			}
 			else {
-				writeResourceRegionCollection((Collection<ResourceRegion>) object, outputMessage);
+				writeResourceRegionCollection(regions, outputMessage);
 			}
 		}
 	}
@@ -155,6 +152,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		responseHeaders.setContentLength(rangeLength);
 
 		InputStream in = region.getResource().getInputStream();
+		// We cannot use try-with-resources here for the InputStream, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			StreamUtils.copyRange(in, outputMessage.getBody(), start, end);
 		}
@@ -240,4 +239,24 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		os.write(buf.getBytes(StandardCharsets.US_ASCII));
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	protected boolean supportsRepeatableWrites(Object object) {
+		if (object instanceof ResourceRegion resourceRegion) {
+			return supportsRepeatableWrites(resourceRegion);
+		}
+		else {
+			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
+			for (ResourceRegion region : regions) {
+				if (!supportsRepeatableWrites(region)) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	private boolean supportsRepeatableWrites(ResourceRegion region) {
+		return !(region.getResource() instanceof InputStreamResource);
+	}
 }

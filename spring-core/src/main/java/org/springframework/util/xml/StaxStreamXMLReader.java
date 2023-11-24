@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,41 +84,29 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 				documentStarted = true;
 			}
 			switch (eventType) {
-				case XMLStreamConstants.START_ELEMENT:
+				case XMLStreamConstants.START_ELEMENT -> {
 					elementDepth++;
 					handleStartElement();
-					break;
-				case XMLStreamConstants.END_ELEMENT:
+				}
+				case XMLStreamConstants.END_ELEMENT -> {
 					elementDepth--;
 					if (elementDepth >= 0) {
 						handleEndElement();
 					}
-					break;
-				case XMLStreamConstants.PROCESSING_INSTRUCTION:
-					handleProcessingInstruction();
-					break;
-				case XMLStreamConstants.CHARACTERS:
-				case XMLStreamConstants.SPACE:
-				case XMLStreamConstants.CDATA:
-					handleCharacters();
-					break;
-				case XMLStreamConstants.START_DOCUMENT:
+				}
+				case XMLStreamConstants.PROCESSING_INSTRUCTION -> handleProcessingInstruction();
+				case XMLStreamConstants.CHARACTERS, XMLStreamConstants.SPACE, XMLStreamConstants.CDATA -> handleCharacters();
+				case XMLStreamConstants.START_DOCUMENT -> {
 					handleStartDocument();
 					documentStarted = true;
-					break;
-				case XMLStreamConstants.END_DOCUMENT:
+				}
+				case XMLStreamConstants.END_DOCUMENT -> {
 					handleEndDocument();
 					documentEnded = true;
-					break;
-				case XMLStreamConstants.COMMENT:
-					handleComment();
-					break;
-				case XMLStreamConstants.DTD:
-					handleDtd();
-					break;
-				case XMLStreamConstants.ENTITY_REFERENCE:
-					handleEntityReference();
-					break;
+				}
+				case XMLStreamConstants.COMMENT -> handleComment();
+				case XMLStreamConstants.DTD -> handleDtd();
+				case XMLStreamConstants.ENTITY_REFERENCE -> handleEntityReference();
 			}
 			if (this.reader.hasNext() && elementDepth >= 0) {
 				eventType = this.reader.next();

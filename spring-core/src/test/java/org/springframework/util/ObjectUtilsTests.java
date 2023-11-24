@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,41 @@
 
 package org.springframework.util;
 
+import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Currency;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -109,7 +133,7 @@ class ObjectUtilsTests {
 		Set<String> set = new HashSet<>();
 		set.add("foo");
 		assertThat(isEmpty(set)).isFalse();
-		assertThat(isEmpty(Arrays.asList("foo"))).isFalse();
+		assertThat(isEmpty(Collections.singletonList("foo"))).isFalse();
 	}
 
 	@Test
@@ -142,9 +166,9 @@ class ObjectUtilsTests {
 	void toObjectArray() {
 		int[] a = new int[] {1, 2, 3, 4, 5};
 		Integer[] wrapper = (Integer[]) ObjectUtils.toObjectArray(a);
-		assertThat(wrapper.length == 5).isTrue();
+		assertThat(wrapper).hasSize(5);
 		for (int i = 0; i < wrapper.length; i++) {
-			assertThat(wrapper[i].intValue()).isEqualTo(a[i]);
+			assertThat(wrapper[i]).isEqualTo(a[i]);
 		}
 	}
 
@@ -152,14 +176,14 @@ class ObjectUtilsTests {
 	void toObjectArrayWithNull() {
 		Object[] objects = ObjectUtils.toObjectArray(null);
 		assertThat(objects).isNotNull();
-		assertThat(objects.length).isEqualTo(0);
+		assertThat(objects).isEmpty();
 	}
 
 	@Test
 	void toObjectArrayWithEmptyPrimitiveArray() {
 		Object[] objects = ObjectUtils.toObjectArray(new byte[] {});
 		assertThat(objects).isNotNull();
-		assertThat(objects.length).isEqualTo(0);
+		assertThat(objects).isEmpty();
 	}
 
 	@Test
@@ -179,8 +203,17 @@ class ObjectUtilsTests {
 		String[] array = new String[] {"foo", "bar"};
 		String newElement = "baz";
 		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(3);
+		assertThat(newArray).hasSize(3);
 		assertThat(newArray[2]).isEqualTo(newElement);
+	}
+
+	@Test
+	void addObjectToArraysAtPosition() {
+		String[] array = new String[] {"foo", "bar", "baz"};
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 3)).containsExactly("foo", "bar", "baz", "bat");
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 2)).containsExactly("foo", "bar", "bat", "baz");
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 1)).containsExactly("foo", "bat", "bar", "baz");
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 0)).containsExactly("bat", "foo", "bar", "baz");
 	}
 
 	@Test
@@ -188,7 +221,7 @@ class ObjectUtilsTests {
 		String[] array = new String[0];
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(1);
+		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isEqualTo(newElement);
 	}
 
@@ -198,7 +231,7 @@ class ObjectUtilsTests {
 		String[] array = new String[] {existingElement};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(2);
+		assertThat(newArray).hasSize(2);
 		assertThat(newArray[0]).isEqualTo(existingElement);
 		assertThat(newArray[1]).isEqualTo(newElement);
 	}
@@ -208,68 +241,30 @@ class ObjectUtilsTests {
 		String[] array = new String[] {null};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(2);
-		assertThat(newArray[0]).isEqualTo(null);
+		assertThat(newArray).hasSize(2);
+		assertThat(newArray[0]).isNull();
 		assertThat(newArray[1]).isEqualTo(newElement);
 	}
 
 	@Test
-	void addObjectToNullArray() throws Exception {
+	void addObjectToNullArray() {
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(null, newElement);
-		assertThat(newArray.length).isEqualTo(1);
+		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isEqualTo(newElement);
 	}
 
 	@Test
-	void addNullObjectToNullArray() throws Exception {
+	void addNullObjectToNullArray() {
 		Object[] newArray = ObjectUtils.addObjectToArray(null, null);
-		assertThat(newArray.length).isEqualTo(1);
-		assertThat(newArray[0]).isEqualTo(null);
+		assertThat(newArray).hasSize(1);
+		assertThat(newArray[0]).isNull();
 	}
 
 	@Test
-	void nullSafeEqualsWithArrays() throws Exception {
+	void nullSafeEqualsWithArrays() {
 		assertThat(ObjectUtils.nullSafeEquals(new String[] {"a", "b", "c"}, new String[] {"a", "b", "c"})).isTrue();
 		assertThat(ObjectUtils.nullSafeEquals(new int[] {1, 2, 3}, new int[] {1, 2, 3})).isTrue();
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithBooleanFalse() {
-		int expected = Boolean.FALSE.hashCode();
-		assertThat(ObjectUtils.hashCode(false)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithBooleanTrue() {
-		int expected = Boolean.TRUE.hashCode();
-		assertThat(ObjectUtils.hashCode(true)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithDouble() {
-		double dbl = 9830.43;
-		int expected = (new Double(dbl)).hashCode();
-		assertThat(ObjectUtils.hashCode(dbl)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithFloat() {
-		float flt = 34.8f;
-		int expected = (new Float(flt)).hashCode();
-		assertThat(ObjectUtils.hashCode(flt)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithLong() {
-		long lng = 883L;
-		int expected = (new Long(lng)).hashCode();
-		assertThat(ObjectUtils.hashCode(lng)).isEqualTo(expected);
 	}
 
 	@Test
@@ -282,7 +277,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void identityToStringWithNullObject() {
-		assertThat(ObjectUtils.identityToString(null)).isEqualTo("");
+		assertThat(ObjectUtils.identityToString(null)).isEmpty();
 	}
 
 	@Test
@@ -386,119 +381,197 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void nullSafeHashCodeWithBooleanArray() {
-		int expected = 31 * 7 + Boolean.TRUE.hashCode();
-		expected = 31 * expected + Boolean.FALSE.hashCode();
+	void nullSafeHashWithNull() {
+		assertThat(ObjectUtils.nullSafeHash((Object[]) null)).isEqualTo(0);
+	}
 
+	@Test
+	void nullSafeHashWithIntermediateNullElements() {
+		assertThat(ObjectUtils.nullSafeHash(3, null, 5)).isEqualTo(Objects.hash(3, null, 5));
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullBooleanArray() {
+		boolean[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithBooleanArray() {
 		boolean[] array = {true, false};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithBooleanArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((boolean[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingBooleanArray() {
+		Object array = new boolean[] {true, false};
+		int expected = ObjectUtils.nullSafeHashCode((boolean[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullByteArray() {
+		byte[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithByteArray() {
-		int expected = 31 * 7 + 8;
-		expected = 31 * expected + 10;
-
 		byte[] array = {8, 10};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithByteArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((byte[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingByteArray() {
+		Object array = new byte[] {6, 39};
+		int expected = ObjectUtils.nullSafeHashCode((byte[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullCharArray() {
+		char[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithCharArray() {
-		int expected = 31 * 7 + 'a';
-		expected = 31 * expected + 'E';
-
 		char[] array = {'a', 'E'};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithCharArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((char[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingCharArray() {
+		Object array = new char[] {'l', 'M'};
+		int expected = ObjectUtils.nullSafeHashCode((char[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullDoubleArray() {
+		double[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithDoubleArray() {
-		long bits = Double.doubleToLongBits(8449.65);
-		int expected = 31 * 7 + (int) (bits ^ (bits >>> 32));
-		bits = Double.doubleToLongBits(9944.923);
-		expected = 31 * expected + (int) (bits ^ (bits >>> 32));
-
 		double[] array = {8449.65, 9944.923};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithDoubleArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((double[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingDoubleArray() {
+		Object array = new double[] {68930.993, 9022.009};
+		int expected = ObjectUtils.nullSafeHashCode((double[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullFloatArray() {
+		float[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithFloatArray() {
-		int expected = 31 * 7 + Float.floatToIntBits(9.6f);
-		expected = 31 * expected + Float.floatToIntBits(7.4f);
-
 		float[] array = {9.6f, 7.4f};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithFloatArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((float[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingFloatArray() {
+		Object array = new float[] {9.9f, 9.54f};
+		int expected = ObjectUtils.nullSafeHashCode((float[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullIntArray() {
+		int[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithIntArray() {
-		int expected = 31 * 7 + 884;
-		expected = 31 * expected + 340;
-
 		int[] array = {884, 340};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithIntArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((int[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingIntArray() {
+		Object array = new int[] {89, 32};
+		int expected = ObjectUtils.nullSafeHashCode((int[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullLongArray() {
+		long[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
 	void nullSafeHashCodeWithLongArray() {
-		long lng = 7993L;
-		int expected = 31 * 7 + (int) (lng ^ (lng >>> 32));
-		lng = 84320L;
-		expected = 31 * expected + (int) (lng ^ (lng >>> 32));
-
 		long[] array = {7993L, 84320L};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
-	void nullSafeHashCodeWithLongArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((long[]) null)).isEqualTo(0);
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingLongArray() {
+		Object array = new long[] {4389, 320};
+		int expected = ObjectUtils.nullSafeHashCode((long[]) array);
+		assertEqualHashCodes(expected, array);
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithNullShortArray() {
+		short[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithShortArray() {
+		short[] array = {4, 25};
+		int actual = ObjectUtils.nullSafeHashCode(array);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
+	}
+
+	@Test
+	@Deprecated
+	void nullSafeHashCodeWithObjectBeingShortArray() {
+		Object array = new short[] {5, 3};
+		int expected = ObjectUtils.nullSafeHashCode((short[]) array);
+		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
@@ -508,71 +581,21 @@ class ObjectUtilsTests {
 	}
 
 	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectArray() {
-		int expected = 31 * 7 + "Leia".hashCode();
-		expected = 31 * expected + "Han".hashCode();
-
 		Object[] array = {"Leia", "Han"};
 		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(Arrays.hashCode(array));
 	}
 
 	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectArrayEqualToNull() {
 		assertThat(ObjectUtils.nullSafeHashCode((Object[]) null)).isEqualTo(0);
 	}
 
 	@Test
-	void nullSafeHashCodeWithObjectBeingBooleanArray() {
-		Object array = new boolean[] {true, false};
-		int expected = ObjectUtils.nullSafeHashCode((boolean[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingByteArray() {
-		Object array = new byte[] {6, 39};
-		int expected = ObjectUtils.nullSafeHashCode((byte[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingCharArray() {
-		Object array = new char[] {'l', 'M'};
-		int expected = ObjectUtils.nullSafeHashCode((char[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingDoubleArray() {
-		Object array = new double[] {68930.993, 9022.009};
-		int expected = ObjectUtils.nullSafeHashCode((double[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingFloatArray() {
-		Object array = new float[] {9.9f, 9.54f};
-		int expected = ObjectUtils.nullSafeHashCode((float[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingIntArray() {
-		Object array = new int[] {89, 32};
-		int expected = ObjectUtils.nullSafeHashCode((int[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
-	void nullSafeHashCodeWithObjectBeingLongArray() {
-		Object array = new long[] {4389, 320};
-		int expected = ObjectUtils.nullSafeHashCode((long[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectBeingObjectArray() {
 		Object array = new Object[] {"Luke", "Anakin"};
 		int expected = ObjectUtils.nullSafeHashCode((Object[]) array);
@@ -580,31 +603,10 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void nullSafeHashCodeWithObjectBeingShortArray() {
-		Object array = new short[] {5, 3};
-		int expected = ObjectUtils.nullSafeHashCode((short[]) array);
-		assertEqualHashCodes(expected, array);
-	}
-
-	@Test
+	@Deprecated
 	void nullSafeHashCodeWithObjectEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((Object) null)).isEqualTo(0);
-	}
-
-	@Test
-	void nullSafeHashCodeWithShortArray() {
-		int expected = 31 * 7 + 70;
-		expected = 31 * expected + 8;
-
-		short[] array = {70, 8};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
-	}
-
-	@Test
-	void nullSafeHashCodeWithShortArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((short[]) null)).isEqualTo(0);
+		Object[] array = null;
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
 	}
 
 	@Test
@@ -733,7 +735,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeToStringWithObjectArray() {
-		Object[] array = {"Han", Long.valueOf(43)};
+		Object[] array = {"Han", 43L};
 		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{Han, 43}");
 	}
 
@@ -821,13 +823,294 @@ class ObjectUtilsTests {
 			.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
 	}
 
-	private void assertEqualHashCodes(int expected, Object array) {
+
+	private static void assertEqualHashCodes(int expected, Object array) {
 		int actual = ObjectUtils.nullSafeHashCode(array);
 		assertThat(actual).isEqualTo(expected);
-		assertThat(array.hashCode() != actual).isTrue();
+		assertThat(array.hashCode()).isNotEqualTo(actual);
 	}
 
 
 	enum Tropes {FOO, BAR, baz}
+
+
+	@Nested
+	class NullSafeConciseToStringTests {
+
+		private static final String truncated = " (truncated)...";
+		private static final int truncatedLength = 100 + truncated.length();
+
+		@Test
+		void nullSafeConciseToStringForNull() {
+			assertThat(ObjectUtils.nullSafeConciseToString(null)).isEqualTo("null");
+		}
+
+		@Test
+		void nullSafeConciseToStringForEmptyOptional() {
+			Optional<String> optional = Optional.empty();
+			assertThat(ObjectUtils.nullSafeConciseToString(optional)).isEqualTo("Optional.empty");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyOptionals() {
+			Optional<Tropes> optionalEnum = Optional.of(Tropes.BAR);
+			String expected = "Optional[BAR]";
+			assertThat(ObjectUtils.nullSafeConciseToString(optionalEnum)).isEqualTo(expected);
+
+			String repeat100 = "X".repeat(100);
+			String repeat101 = "X".repeat(101);
+
+			Optional<String> optionalString = Optional.of(repeat100);
+			expected = "Optional[%s]".formatted(repeat100);
+			assertThat(ObjectUtils.nullSafeConciseToString(optionalString)).isEqualTo(expected);
+
+			optionalString = Optional.of(repeat101);
+			expected = "Optional[%s]".formatted(repeat100 + truncated);
+			assertThat(ObjectUtils.nullSafeConciseToString(optionalString)).isEqualTo(expected);
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyOptionalCustomType() {
+			class CustomType {
+			}
+
+			CustomType customType = new CustomType();
+			Optional<CustomType> optional = Optional.of(customType);
+			String expected = "Optional[%s]".formatted(ObjectUtils.nullSafeConciseToString(customType));
+			assertThat(ObjectUtils.nullSafeConciseToString(optional)).isEqualTo(expected);
+		}
+
+		@Test
+		void nullSafeConciseToStringForClass() {
+			assertThat(ObjectUtils.nullSafeConciseToString(String.class)).isEqualTo("java.lang.String");
+		}
+
+		@Test
+		void nullSafeConciseToStringForStrings() {
+			String repeat100 = "X".repeat(100);
+			String repeat101 = "X".repeat(101);
+
+			assertThat(ObjectUtils.nullSafeConciseToString("")).isEqualTo("");
+			assertThat(ObjectUtils.nullSafeConciseToString("foo")).isEqualTo("foo");
+			assertThat(ObjectUtils.nullSafeConciseToString(repeat100)).isEqualTo(repeat100);
+			assertThat(ObjectUtils.nullSafeConciseToString(repeat101)).hasSize(truncatedLength).endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForStringBuilders() {
+			String repeat100 = "X".repeat(100);
+			String repeat101 = "X".repeat(101);
+
+			assertThat(ObjectUtils.nullSafeConciseToString(new StringBuilder("foo"))).isEqualTo("foo");
+			assertThat(ObjectUtils.nullSafeConciseToString(new StringBuilder(repeat100))).isEqualTo(repeat100);
+			assertThat(ObjectUtils.nullSafeConciseToString(new StringBuilder(repeat101))).hasSize(truncatedLength).endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForEnum() {
+			assertThat(ObjectUtils.nullSafeConciseToString(Tropes.FOO)).isEqualTo("FOO");
+		}
+
+		@Test
+		void nullSafeConciseToStringForPrimitivesAndWrappers() {
+			assertThat(ObjectUtils.nullSafeConciseToString(true)).isEqualTo("true");
+			assertThat(ObjectUtils.nullSafeConciseToString('X')).isEqualTo("X");
+			assertThat(ObjectUtils.nullSafeConciseToString(42L)).isEqualTo("42");
+			assertThat(ObjectUtils.nullSafeConciseToString(99.1234D)).isEqualTo("99.1234");
+		}
+
+		@Test
+		void nullSafeConciseToStringForBigNumbers() {
+			assertThat(ObjectUtils.nullSafeConciseToString(BigInteger.valueOf(42L))).isEqualTo("42");
+			assertThat(ObjectUtils.nullSafeConciseToString(BigDecimal.valueOf(99.1234D))).isEqualTo("99.1234");
+		}
+
+		@Test
+		void nullSafeConciseToStringForDate() {
+			Date date = new Date();
+			assertThat(ObjectUtils.nullSafeConciseToString(date)).isEqualTo(date.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForTemporal() {
+			LocalDate localDate = LocalDate.now();
+			assertThat(ObjectUtils.nullSafeConciseToString(localDate)).isEqualTo(localDate.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForUUID() {
+			UUID id = UUID.randomUUID();
+			assertThat(ObjectUtils.nullSafeConciseToString(id)).isEqualTo(id.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForFile() {
+			String path = "/tmp/file.txt".replace('/', File.separatorChar);
+			assertThat(ObjectUtils.nullSafeConciseToString(new File(path))).isEqualTo(path);
+
+			path = ("/tmp/" + "xyz".repeat(32)).replace('/', File.separatorChar);
+			assertThat(ObjectUtils.nullSafeConciseToString(new File(path)))
+					.hasSize(truncatedLength)
+					.startsWith(path.subSequence(0, 100))
+					.endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForPath() {
+			String path = "/tmp/file.txt".replace('/', File.separatorChar);
+			assertThat(ObjectUtils.nullSafeConciseToString(Path.of(path))).isEqualTo(path);
+
+			path = ("/tmp/" + "xyz".repeat(32)).replace('/', File.separatorChar);
+			assertThat(ObjectUtils.nullSafeConciseToString(Path.of(path)))
+					.hasSize(truncatedLength)
+					.startsWith(path.subSequence(0, 100))
+					.endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForURI() {
+			String uri = "https://www.example.com/?foo=1&bar=2&baz=3";
+			assertThat(ObjectUtils.nullSafeConciseToString(URI.create(uri))).isEqualTo(uri);
+
+			uri += "&qux=" + "4".repeat(60);
+			assertThat(ObjectUtils.nullSafeConciseToString(URI.create(uri)))
+					.hasSize(truncatedLength)
+					.startsWith(uri.subSequence(0, 100))
+					.endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForURL() throws Exception {
+			String url = "https://www.example.com/?foo=1&bar=2&baz=3";
+			assertThat(ObjectUtils.nullSafeConciseToString(new URL(url))).isEqualTo(url);
+
+			url += "&qux=" + "4".repeat(60);
+			assertThat(ObjectUtils.nullSafeConciseToString(new URL(url)))
+					.hasSize(truncatedLength)
+					.startsWith(url.subSequence(0, 100))
+					.endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForInetAddress() {
+			InetAddress localhost = getLocalhost();
+			assertThat(ObjectUtils.nullSafeConciseToString(localhost)).isEqualTo(localhost.toString());
+		}
+
+		private static InetAddress getLocalhost() {
+			try {
+				return InetAddress.getLocalHost();
+			}
+			catch (UnknownHostException ex) {
+				return InetAddress.getLoopbackAddress();
+			}
+		}
+
+		@Test
+		void nullSafeConciseToStringForCharset() {
+			Charset charset = StandardCharsets.UTF_8;
+			assertThat(ObjectUtils.nullSafeConciseToString(charset)).isEqualTo(charset.name());
+		}
+
+		@Test
+		void nullSafeConciseToStringForCurrency() {
+			Currency currency = Currency.getInstance(Locale.US);
+			assertThat(ObjectUtils.nullSafeConciseToString(currency)).isEqualTo(currency.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForLocale() {
+			assertThat(ObjectUtils.nullSafeConciseToString(Locale.GERMANY)).isEqualTo("de_DE");
+		}
+
+		@Test
+		void nullSafeConciseToStringForRegExPattern() {
+			Pattern pattern = Pattern.compile("^(foo|bar)$");
+			assertThat(ObjectUtils.nullSafeConciseToString(pattern)).isEqualTo(pattern.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForTimeZone() {
+			TimeZone timeZone = TimeZone.getDefault();
+			assertThat(ObjectUtils.nullSafeConciseToString(timeZone)).isEqualTo(timeZone.getID());
+		}
+
+		@Test
+		void nullSafeConciseToStringForZoneId() {
+			ZoneId zoneId = ZoneId.systemDefault();
+			assertThat(ObjectUtils.nullSafeConciseToString(zoneId)).isEqualTo(zoneId.getId());
+		}
+
+		@Test
+		void nullSafeConciseToStringForEmptyArrays() {
+			assertThat(ObjectUtils.nullSafeConciseToString(new char[] {})).isEqualTo("{}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new int[][] {})).isEqualTo("{}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new String[] {})).isEqualTo("{}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new Integer[][] {})).isEqualTo("{}");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyArrays() {
+			assertThat(ObjectUtils.nullSafeConciseToString(new char[] {'a'})).isEqualTo("{...}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new int[][] {{1}, {2}})).isEqualTo("{...}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new String[] {"enigma"})).isEqualTo("{...}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new Integer[][] {{1}, {2}})).isEqualTo("{...}");
+		}
+
+		@Test
+		void nullSafeConciseToStringForEmptyCollections() {
+			List<String> list = List.of();
+			Set<Integer> set = Set.of();
+			assertThat(ObjectUtils.nullSafeConciseToString(list)).isEqualTo("[...]");
+			assertThat(ObjectUtils.nullSafeConciseToString(set)).isEqualTo("[...]");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyCollections() {
+			List<String> list = List.of("a", "b");
+			Set<Integer> set = Set.of(1);
+			assertThat(ObjectUtils.nullSafeConciseToString(list)).isEqualTo("[...]");
+			assertThat(ObjectUtils.nullSafeConciseToString(set)).isEqualTo("[...]");
+		}
+
+		@Test
+		void nullSafeConciseToStringForEmptyMaps() {
+			Map<String, String> map = Map.of();
+			assertThat(ObjectUtils.nullSafeConciseToString(map)).isEqualTo("{...}");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyMaps() {
+			Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+			assertThat(ObjectUtils.nullSafeConciseToString(map)).isEqualTo("{...}");
+		}
+
+		@Test
+		void nullSafeConciseToStringForCustomTypes() {
+			class ExplosiveType {
+				@Override
+				public String toString() {
+					throw new UnsupportedOperationException("no-go");
+				}
+			}
+			ExplosiveType explosiveType = new ExplosiveType();
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(explosiveType::toString);
+			assertThat(ObjectUtils.nullSafeConciseToString(explosiveType)).startsWith(prefix(ExplosiveType.class));
+
+			class WordyType {
+				@Override
+				public String toString() {
+					return "blah blah".repeat(20);
+				}
+			}
+			WordyType wordyType = new WordyType();
+			assertThat(wordyType).asString().hasSizeGreaterThanOrEqualTo(180 /* 9x20 */);
+			assertThat(ObjectUtils.nullSafeConciseToString(wordyType)).startsWith(prefix(WordyType.class));
+		}
+
+		private static String prefix(Class<?> clazz) {
+			return clazz.getTypeName() + "@";
+		}
+	}
 
 }

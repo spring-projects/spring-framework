@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,24 @@ import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.GregorianCalendar;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -38,13 +50,7 @@ import static org.mockito.Mockito.verify;
  */
 public class StatementCreatorUtilsTests {
 
-	private PreparedStatement preparedStatement;
-
-
-	@BeforeEach
-	public void setUp() {
-		preparedStatement = mock(PreparedStatement.class);
-	}
+	private PreparedStatement preparedStatement = mock();
 
 
 	@Test
@@ -62,8 +68,8 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndUnknownType() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(dbmd.getDriverName()).willReturn("Oracle Driver");
@@ -76,8 +82,8 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(con.getMetaData()).willReturn(dbmd);
 		given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
@@ -92,8 +98,8 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(con.getMetaData()).willReturn(dbmd);
 		given(dbmd.getDatabaseProductName()).willReturn("Apache Derby");
@@ -107,7 +113,7 @@ public class StatementCreatorUtilsTests {
 
 	@Test
 	public void testSetParameterValueWithNullAndGetParameterTypeWorking() throws SQLException {
-		ParameterMetaData pmd = mock(ParameterMetaData.class);
+		ParameterMetaData pmd = mock();
 		given(preparedStatement.getParameterMetaData()).willReturn(pmd);
 		given(pmd.getParameterType(1)).willReturn(Types.SMALLINT);
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
@@ -210,10 +216,55 @@ public class StatementCreatorUtilsTests {
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 	}
 
+	@ParameterizedTest
+	@MethodSource("javaTimeTypes")
+	public void testSetParameterValueWithJavaTimeTypes(Object o, int sqlType) throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, sqlType, null, o);
+		verify(preparedStatement).setObject(1, o, sqlType);
+	}
+
+	@ParameterizedTest
+	@MethodSource("javaTimeTypes")
+	void javaTimeTypesToSqlParameterType(Object o, int expectedSqlType) {
+		assertThat(StatementCreatorUtils.javaTypeToSqlParameterType(o.getClass()))
+				.isEqualTo(expectedSqlType);
+	}
+
+	static Stream<Arguments> javaTimeTypes() {
+		ZoneOffset PLUS_NINE = ZoneOffset.ofHours(9);
+		final LocalDateTime now = LocalDateTime.now();
+		return Stream.of(
+				Arguments.of(named("LocalTime", LocalTime.NOON), named("TIME", Types.TIME)),
+				Arguments.of(named("LocalDate", LocalDate.EPOCH), named("DATE", Types.DATE)),
+				Arguments.of(named("LocalDateTime", now), named("TIMESTAMP", Types.TIMESTAMP)),
+				Arguments.of(named("OffsetTime", LocalTime.NOON.atOffset(PLUS_NINE)),
+						named("TIME_WITH_TIMEZONE", Types.TIME_WITH_TIMEZONE)),
+				Arguments.of(named("OffsetDateTime", now.atOffset(PLUS_NINE)),
+						named("TIMESTAMP_WITH_TIMEZONE", Types.TIMESTAMP_WITH_TIMEZONE))
+		);
+	}
+
+	@Test  // gh-30556
+	public void testSetParameterValueWithOffsetDateTimeAndNotSupported() throws SQLException {
+		OffsetDateTime time = OffsetDateTime.now();
+		doThrow(new SQLFeatureNotSupportedException()).when(preparedStatement).setObject(1, time, Types.TIMESTAMP_WITH_TIMEZONE);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null, time);
+		verify(preparedStatement).setObject(1, time, Types.TIMESTAMP_WITH_TIMEZONE);
+		verify(preparedStatement).setObject(1, time);
+	}
+
+	@Test  // gh-30556
+	public void testSetParameterValueWithNullAndNotSupported() throws SQLException {
+		doThrow(new SQLFeatureNotSupportedException()).when(preparedStatement).setNull(1, Types.TIMESTAMP_WITH_TIMEZONE);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null, null);
+		verify(preparedStatement).setNull(1, Types.TIMESTAMP_WITH_TIMEZONE);
+		verify(preparedStatement).setNull(1, Types.NULL);
+	}
+
 	@Test  // SPR-8571
 	public void testSetParameterValueWithStringAndVendorSpecificType() throws SQLException {
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(con.getMetaData()).willReturn(dbmd);
@@ -224,8 +275,8 @@ public class StatementCreatorUtilsTests {
 	@Test  // SPR-8571
 	public void testSetParameterValueWithNullAndVendorSpecificType() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(dbmd.getDriverName()).willReturn("Oracle Driver");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,7 +37,7 @@ import org.springframework.web.multipart.MultipartResolver;
 /**
  * {@link ServerHttpRequest} implementation that accesses one part of a multipart
  * request. If using {@link MultipartResolver} configuration the part is accessed
- * through a {@link MultipartFile}. Or if using Servlet 3.0 multipart processing
+ * through a {@link MultipartFile}. Or if using Servlet multipart processing
  * the part is accessed through {@code ServletRequest.getPart}.
  *
  * @author Rossen Stoyanchev

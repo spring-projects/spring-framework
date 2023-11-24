@@ -1,0 +1,52 @@
+[[expressions-types]]
+= Types
+
+You can use the special `T` operator to specify an instance of `java.lang.Class` (the
+type). Static methods are invoked by using this operator as well. The
+`StandardEvaluationContext` uses a `TypeLocator` to find types, and the
+`StandardTypeLocator` (which can be replaced) is built with an understanding of the
+`java.lang` package. This means that `T()` references to types within the `java.lang`
+package do not need to be fully qualified, but all other type references must be. The
+following example shows how to use the `T` operator:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
+
+	Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
+
+	boolean trueValue = parser.parseExpression(
+			"T(java.math.RoundingMode).CEILING < T(java.math.RoundingMode).FLOOR")
+			.getValue(Boolean.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class::class.java)
+
+	val stringClass = parser.parseExpression("T(String)").getValue(Class::class.java)
+
+	val trueValue = parser.parseExpression(
+			"T(java.math.RoundingMode).CEILING < T(java.math.RoundingMode).FLOOR")
+			.getValue(Boolean::class.java)
+----
+======
+
+[NOTE]
+====
+If your application or framework manages its own `EvaluationContext`, you may need to
+manually configure a `StandardTypeLocator` with a specific `ClassLoader` to ensure that
+the SpEL expression parser is able to reliably locate user types.
+
+For example, the `StandardBeanExpressionResolver` in the `spring-context` module
+configures a `StandardTypeLocator` using the bean `ClassLoader` of the corresponding
+`BeanFactory`.
+====
+
+

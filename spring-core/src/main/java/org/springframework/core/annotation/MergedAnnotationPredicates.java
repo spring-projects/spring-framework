@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public abstract class MergedAnnotationPredicates {
 	 */
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Collection<?> types) {
 		return annotation -> types.stream()
-				.map(type -> type instanceof Class ? ((Class<?>) type).getName() : type.toString())
+				.map(type -> type instanceof Class<?> clazz ? clazz.getName() : type.toString())
 				.anyMatch(typeName -> typeName.equals(annotation.getType().getName()));
 	}
 

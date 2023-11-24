@@ -1,0 +1,496 @@
+[[transaction-programmatic]]
+= Programmatic Transaction Management
+
+The Spring Framework provides two means of programmatic transaction management, by using:
+
+* The `TransactionTemplate` or `TransactionalOperator`.
+* A `TransactionManager` implementation directly.
+
+The Spring team generally recommends the `TransactionTemplate` for programmatic
+transaction management in imperative flows and `TransactionalOperator` for reactive code.
+The second approach is similar to using the JTA `UserTransaction` API, although exception
+handling is less cumbersome.
+
+
+[[tx-prog-template]]
+== Using the `TransactionTemplate`
+
+The `TransactionTemplate` adopts the same approach as other Spring templates, such as
+the `JdbcTemplate`. It uses a callback approach (to free application code from having to
+do the boilerplate acquisition and release transactional resources) and results in
+code that is intention driven, in that your code focuses solely on what
+you want to do.
+
+NOTE: As the examples that follow show, using the `TransactionTemplate` absolutely
+couples you to Spring's transaction infrastructure and APIs. Whether or not programmatic
+transaction management is suitable for your development needs is a decision that you
+have to make yourself.
+
+Application code that must run in a transactional context and that explicitly uses the
+`TransactionTemplate` resembles the next example. You, as an application
+developer, can write a `TransactionCallback` implementation (typically expressed as an
+anonymous inner class) that contains the code that you need to run in the context of
+a transaction. You can then pass an instance of your custom `TransactionCallback` to the
+`execute(..)` method exposed on the `TransactionTemplate`. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleService implements Service {
+
+		// single TransactionTemplate shared amongst all methods in this instance
+		private final TransactionTemplate transactionTemplate;
+
+		// use constructor-injection to supply the PlatformTransactionManager
+		public SimpleService(PlatformTransactionManager transactionManager) {
+			this.transactionTemplate = new TransactionTemplate(transactionManager);
+		}
+
+		public Object someServiceMethod() {
+			return transactionTemplate.execute(new TransactionCallback() {
+				// the code in this method runs in a transactional context
+				public Object doInTransaction(TransactionStatus status) {
+					updateOperation1();
+					return resultOfUpdateOperation2();
+				}
+			});
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// use constructor-injection to supply the PlatformTransactionManager
+	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
+
+		// single TransactionTemplate shared amongst all methods in this instance
+		private val transactionTemplate = TransactionTemplate(transactionManager)
+
+		fun someServiceMethod() = transactionTemplate.execute<Any?> {
+			updateOperation1()
+			resultOfUpdateOperation2()
+		}
+	}
+----
+======
+
+
+If there is no return value, you can use the convenient `TransactionCallbackWithoutResult` class
+with an anonymous class, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+		protected void doInTransactionWithoutResult(TransactionStatus status) {
+			updateOperation1();
+			updateOperation2();
+		}
+	});
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
+		override fun doInTransactionWithoutResult(status: TransactionStatus) {
+			updateOperation1()
+			updateOperation2()
+		}
+	})
+----
+======
+
+
+Code within the callback can roll the transaction back by calling the
+`setRollbackOnly()` method on the supplied `TransactionStatus` object, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+		protected void doInTransactionWithoutResult(TransactionStatus status) {
+			try {
+				updateOperation1();
+				updateOperation2();
+			} catch (SomeBusinessException ex) {
+				status.setRollbackOnly();
+			}
+		}
+	});
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
+
+		override fun doInTransactionWithoutResult(status: TransactionStatus) {
+			try {
+				updateOperation1()
+				updateOperation2()
+			} catch (ex: SomeBusinessException) {
+				status.setRollbackOnly()
+			}
+		}
+	})
+----
+======
+
+[[tx-prog-template-settings]]
+=== Specifying Transaction Settings
+
+You can specify transaction settings (such as the propagation mode, the isolation level,
+the timeout, and so forth) on the `TransactionTemplate` either programmatically or in
+configuration. By default, `TransactionTemplate` instances have the
+xref:data-access/transaction/declarative/txadvice-settings.adoc[default transactional settings]. The
+following example shows the programmatic customization of the transactional settings for
+a specific `TransactionTemplate:`
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleService implements Service {
+
+		private final TransactionTemplate transactionTemplate;
+
+		public SimpleService(PlatformTransactionManager transactionManager) {
+			this.transactionTemplate = new TransactionTemplate(transactionManager);
+
+			// the transaction settings can be set here explicitly if so desired
+			this.transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+			this.transactionTemplate.setTimeout(30); // 30 seconds
+			// and so forth...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
+
+		private val transactionTemplate = TransactionTemplate(transactionManager).apply {
+			// the transaction settings can be set here explicitly if so desired
+			isolationLevel = TransactionDefinition.ISOLATION_READ_UNCOMMITTED
+			timeout = 30 // 30 seconds
+			// and so forth...
+		}
+	}
+----
+======
+
+The following example defines a `TransactionTemplate` with some custom transactional
+settings by using Spring XML configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="sharedTransactionTemplate"
+			class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
+		<property name="timeout" value="30"/>
+	</bean>
+----
+
+You can then inject the `sharedTransactionTemplate`
+into as many services as are required.
+
+Finally, instances of the `TransactionTemplate` class are thread-safe, in that instances
+do not maintain any conversational state. `TransactionTemplate` instances do, however,
+maintain configuration state. So, while a number of classes may share a single instance
+of a `TransactionTemplate`, if a class needs to use a `TransactionTemplate` with
+different settings (for example, a different isolation level), you need to create
+two distinct `TransactionTemplate` instances.
+
+[[tx-prog-operator]]
+== Using the `TransactionalOperator`
+
+The `TransactionalOperator` follows an operator design that is similar to other reactive
+operators. It uses a callback approach (to free application code from having to do the
+boilerplate acquisition and release transactional resources) and results in code that is
+intention driven, in that your code focuses solely on what you want to do.
+
+NOTE: As the examples that follow show, using the `TransactionalOperator` absolutely
+couples you to Spring's transaction infrastructure and APIs. Whether or not programmatic
+transaction management is suitable for your development needs is a decision that you have
+to make yourself.
+
+Application code that must run in a transactional context and that explicitly uses
+the `TransactionalOperator` resembles the next example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleService implements Service {
+
+		// single TransactionalOperator shared amongst all methods in this instance
+		private final TransactionalOperator transactionalOperator;
+
+		// use constructor-injection to supply the ReactiveTransactionManager
+		public SimpleService(ReactiveTransactionManager transactionManager) {
+			this.transactionalOperator = TransactionalOperator.create(transactionManager);
+		}
+
+		public Mono<Object> someServiceMethod() {
+
+			// the code in this method runs in a transactional context
+
+			Mono<Object> update = updateOperation1();
+
+			return update.then(resultOfUpdateOperation2).as(transactionalOperator::transactional);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// use constructor-injection to supply the ReactiveTransactionManager
+	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
+
+		// single TransactionalOperator shared amongst all methods in this instance
+		private val transactionalOperator = TransactionalOperator.create(transactionManager)
+
+		suspend fun someServiceMethod() = transactionalOperator.executeAndAwait<Any?> {
+			updateOperation1()
+			resultOfUpdateOperation2()
+		}
+	}
+----
+======
+
+`TransactionalOperator` can be used in two ways:
+
+* Operator-style using Project Reactor types (`mono.as(transactionalOperator::transactional)`)
+* Callback-style for every other case (`transactionalOperator.execute(TransactionCallback<T>)`)
+
+Code within the callback can roll the transaction back by calling the `setRollbackOnly()`
+method on the supplied `ReactiveTransaction` object, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	transactionalOperator.execute(new TransactionCallback<>() {
+
+		public Mono<Object> doInTransaction(ReactiveTransaction status) {
+			return updateOperation1().then(updateOperation2)
+						.doOnError(SomeBusinessException.class, e -> status.setRollbackOnly());
+			}
+		}
+	});
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	transactionalOperator.execute(object : TransactionCallback() {
+
+		override fun doInTransactionWithoutResult(status: ReactiveTransaction) {
+			updateOperation1().then(updateOperation2)
+						.doOnError(SomeBusinessException.class, e -> status.setRollbackOnly())
+		}
+	})
+----
+======
+
+[[tx-prog-operator-cancel]]
+=== Cancel Signals
+
+In Reactive Streams, a `Subscriber` can cancel its `Subscription` and stop its
+`Publisher`. Operators in Project Reactor, as well as in other libraries, such as `next()`,
+`take(long)`, `timeout(Duration)`, and others can issue cancellations. There is no way to
+know the reason for the cancellation, whether it is due to an error or a simply lack of
+interest to consume further. Since version 5.3 cancel signals lead to a roll back.
+As a result it is important to consider the operators used downstream from a transaction
+`Publisher`. In particular in the case of a `Flux` or other multi-value `Publisher`,
+the full output must be consumed to allow the transaction to complete.
+
+
+[[tx-prog-operator-settings]]
+=== Specifying Transaction Settings
+
+You can specify transaction settings (such as the propagation mode, the isolation level,
+the timeout, and so forth) for the `TransactionalOperator`. By default,
+`TransactionalOperator` instances have
+xref:data-access/transaction/declarative/txadvice-settings.adoc[default transactional settings]. The
+following example shows customization of the transactional settings for a specific
+`TransactionalOperator:`
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleService implements Service {
+
+		private final TransactionalOperator transactionalOperator;
+
+		public SimpleService(ReactiveTransactionManager transactionManager) {
+			DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+
+			// the transaction settings can be set here explicitly if so desired
+			definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+			definition.setTimeout(30); // 30 seconds
+			// and so forth...
+
+			this.transactionalOperator = TransactionalOperator.create(transactionManager, definition);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
+
+		private val definition = DefaultTransactionDefinition().apply {
+			// the transaction settings can be set here explicitly if so desired
+			isolationLevel = TransactionDefinition.ISOLATION_READ_UNCOMMITTED
+			timeout = 30 // 30 seconds
+			// and so forth...
+		}
+		private val transactionalOperator = TransactionalOperator(transactionManager, definition)
+	}
+----
+======
+
+[[transaction-programmatic-tm]]
+== Using the `TransactionManager`
+
+The following sections explain programmatic usage of imperative and reactive transaction
+managers.
+
+[[transaction-programmatic-ptm]]
+=== Using the `PlatformTransactionManager`
+
+For imperative transactions, you can use a
+`org.springframework.transaction.PlatformTransactionManager` directly to manage your
+transaction. To do so, pass the implementation of the `PlatformTransactionManager` you
+use to your bean through a bean reference. Then, by using the `TransactionDefinition` and
+`TransactionStatus` objects, you can initiate transactions, roll back, and commit. The
+following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName");
+	def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+	TransactionStatus status = txManager.getTransaction(def);
+	try {
+		// put your business logic here
+	} catch (MyException ex) {
+		txManager.rollback(status);
+		throw ex;
+	}
+	txManager.commit(status);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val def = DefaultTransactionDefinition()
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName")
+	def.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRED
+
+	val status = txManager.getTransaction(def)
+	try {
+		// put your business logic here
+	} catch (ex: MyException) {
+		txManager.rollback(status)
+		throw ex
+	}
+
+	txManager.commit(status)
+----
+======
+
+
+[[transaction-programmatic-rtm]]
+=== Using the `ReactiveTransactionManager`
+
+When working with reactive transactions, you can use a
+`org.springframework.transaction.ReactiveTransactionManager` directly to manage your
+transaction. To do so, pass the implementation of the `ReactiveTransactionManager` you
+use to your bean through a bean reference. Then, by using the `TransactionDefinition` and
+`ReactiveTransaction` objects, you can initiate transactions, roll back, and commit. The
+following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName");
+	def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+	Mono<ReactiveTransaction> reactiveTx = txManager.getReactiveTransaction(def);
+
+	reactiveTx.flatMap(status -> {
+
+		Mono<Object> tx = ...; // put your business logic here
+
+		return tx.then(txManager.commit(status))
+				.onErrorResume(ex -> txManager.rollback(status).then(Mono.error(ex)));
+	});
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val def = DefaultTransactionDefinition()
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName")
+	def.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRED
+
+	val reactiveTx = txManager.getReactiveTransaction(def)
+	reactiveTx.flatMap { status ->
+
+		val tx = ... // put your business logic here
+
+		tx.then(txManager.commit(status))
+				.onErrorResume { ex -> txManager.rollback(status).then(Mono.error(ex)) }
+	}
+----
+======
+
+

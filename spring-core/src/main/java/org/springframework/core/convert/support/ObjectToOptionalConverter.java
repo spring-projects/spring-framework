@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		else if (targetType.getResolvableType().hasGenerics()) {
 			Object target = this.conversionService.convert(source, sourceType, new GenericTypeDescriptor(targetType));
 			if (target == null || (target.getClass().isArray() && Array.getLength(target) == 0) ||
-						(target instanceof Collection && ((Collection<?>) target).isEmpty())) {
+						(target instanceof Collection<?> collection && collection.isEmpty())) {
 				return Optional.empty();
 			}
 			return Optional.of(target);

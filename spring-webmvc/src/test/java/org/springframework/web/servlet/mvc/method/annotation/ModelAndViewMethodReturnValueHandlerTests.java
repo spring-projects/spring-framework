@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithViewReference() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView(new RedirectView(), "attrName", "attrValue");
@@ -103,7 +103,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithViewName() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView("redirect:viewName", "attrName", "attrValue");
@@ -117,7 +117,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithCustomPrefix() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView("myRedirect:viewName", "attrName", "attrValue");
@@ -132,29 +132,27 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithoutRedirect() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView();
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
 
 		ModelMap model = mavContainer.getModel();
-		assertThat(mavContainer.getView()).isEqualTo(null);
+		assertThat(mavContainer.getView()).isNull();
 		assertThat(mavContainer.getModel().isEmpty()).isTrue();
 		assertThat(model).as("RedirectAttributes should not be used if controller doesn't redirect").isNotSameAs(redirectAttributes);
 	}
 
 	@Test  // SPR-14045
 	public void handleRedirectWithIgnoreDefaultModel() throws Exception {
-		mavContainer.setIgnoreDefaultModelOnRedirect(true);
-
 		RedirectView redirectView = new RedirectView();
 		ModelAndView mav = new ModelAndView(redirectView, "name", "value");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
 
 		ModelMap model = mavContainer.getModel();
 		assertThat(mavContainer.getView()).isSameAs(redirectView);
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		assertThat(model.get("name")).isEqualTo("value");
 	}
 

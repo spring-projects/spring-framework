@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.reactive.result.condition;
 
+import java.util.Map;
+
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -78,10 +81,31 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 	protected abstract boolean matchMediaType(ServerWebExchange exchange)
 			throws NotAcceptableStatusException, UnsupportedMediaTypeStatusException;
 
+	protected boolean matchParameters(MediaType contentType) {
+		for (Map.Entry<String, String> entry : getMediaType().getParameters().entrySet()) {
+			if (StringUtils.hasText(entry.getValue())) {
+				String value = contentType.getParameter(entry.getKey());
+				if (StringUtils.hasText(value) && !entry.getValue().equalsIgnoreCase(value)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
 	@Override
 	public int compareTo(AbstractMediaTypeExpression other) {
-		return MediaType.SPECIFICITY_COMPARATOR.compare(this.getMediaType(), other.getMediaType());
+		MediaType mediaType1 = getMediaType();
+		MediaType mediaType2 = other.getMediaType();
+		if (mediaType1.isMoreSpecific(mediaType2)) {
+			return -1;
+		}
+		else if (mediaType1.isLessSpecific(mediaType2)) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
 	}
 
 	@Override

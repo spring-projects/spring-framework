@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,15 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
 public class MethodMatchersTests {
+
+	private static final Method TEST_METHOD = mock(Method.class);
 
 	private final Method EXCEPTION_GETMESSAGE;
 
@@ -109,6 +112,65 @@ public class MethodMatchersTests {
 		MethodMatcher second = new ComposablePointcut(MethodMatcher.TRUE).union(new ComposablePointcut(MethodMatcher.TRUE)).getMethodMatcher();
 		assertThat(first.equals(second)).isTrue();
 		assertThat(second.equals(first)).isTrue();
+	}
+
+	@Test
+	void negateMethodMatcher() {
+		MethodMatcher getterMatcher = new StartsWithMatcher("get");
+		MethodMatcher negate = MethodMatchers.negate(getterMatcher);
+		assertThat(negate.matches(ITESTBEAN_SETAGE, int.class)).isTrue();
+	}
+
+	@Test
+	void negateTrueMethodMatcher() {
+		MethodMatcher negate = MethodMatchers.negate(MethodMatcher.TRUE);
+		assertThat(negate.matches(TEST_METHOD, String.class)).isFalse();
+		assertThat(negate.matches(TEST_METHOD, Object.class)).isFalse();
+		assertThat(negate.matches(TEST_METHOD, Integer.class)).isFalse();
+	}
+
+	@Test
+	void negateTrueMethodMatcherAppliedTwice() {
+		MethodMatcher negate = MethodMatchers.negate(MethodMatchers.negate(MethodMatcher.TRUE));
+		assertThat(negate.matches(TEST_METHOD, String.class)).isTrue();
+		assertThat(negate.matches(TEST_METHOD, Object.class)).isTrue();
+		assertThat(negate.matches(TEST_METHOD, Integer.class)).isTrue();
+	}
+
+	@Test
+	void negateIsNotEqualsToOriginalMatcher() {
+		MethodMatcher original = MethodMatcher.TRUE;
+		MethodMatcher negate = MethodMatchers.negate(original);
+		assertThat(original).isNotEqualTo(negate);
+	}
+
+	@Test
+	void negateOnSameMatcherIsEquals() {
+		MethodMatcher original = MethodMatcher.TRUE;
+		MethodMatcher first = MethodMatchers.negate(original);
+		MethodMatcher second = MethodMatchers.negate(original);
+		assertThat(first).isEqualTo(second);
+	}
+
+	@Test
+	void negateHasNotSameHashCodeAsOriginalMatcher() {
+		MethodMatcher original = MethodMatcher.TRUE;
+		MethodMatcher negate = MethodMatchers.negate(original);
+		assertThat(original).doesNotHaveSameHashCodeAs(negate);
+	}
+
+	@Test
+	void negateOnSameMatcherHasSameHashCode() {
+		MethodMatcher original = MethodMatcher.TRUE;
+		MethodMatcher first = MethodMatchers.negate(original);
+		MethodMatcher second = MethodMatchers.negate(original);
+		assertThat(first).hasSameHashCodeAs(second);
+	}
+
+	@Test
+	void toStringIncludesRepresentationOfOriginalMatcher() {
+		MethodMatcher original = MethodMatcher.TRUE;
+		assertThat(MethodMatchers.negate(original)).hasToString("Negate " + original);
 	}
 
 

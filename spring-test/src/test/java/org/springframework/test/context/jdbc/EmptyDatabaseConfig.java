@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ public class EmptyDatabaseConfig {
 
 	@Bean
 	DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder()//
-		.setName("empty-sql-scripts-test-db")//
-		.build();
+		return new EmbeddedDatabaseBuilder()
+				.generateUniqueName(true)
+				.build();
 	}
 
 }

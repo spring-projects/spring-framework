@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ abstract class AutowireUtils {
 
 	public static final Comparator<Executable> EXECUTABLE_COMPARATOR = (e1, e2) -> {
 		int result = Boolean.compare(Modifier.isPublic(e2.getModifiers()), Modifier.isPublic(e1.getModifiers()));
-		return result != 0 ? result : Integer.compare(e2.getParameterCount(), e1.getParameterCount());
+		return (result != 0 ? result : Integer.compare(e2.getParameterCount(), e1.getParameterCount()));
 	};
 
 
@@ -128,8 +128,7 @@ abstract class AutowireUtils {
 	 * @return the resolved value
 	 */
 	public static Object resolveAutowiringValue(Object autowiringValue, Class<?> requiredType) {
-		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
-			ObjectFactory<?> factory = (ObjectFactory<?>) autowiringValue;
+		if (autowiringValue instanceof ObjectFactory<?> factory && !requiredType.isInstance(autowiringValue)) {
 			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
 				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
 						new Class<?>[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
@@ -198,8 +197,7 @@ abstract class AutowireUtils {
 				Type methodParameterType = methodParameterTypes[i];
 				Object arg = args[i];
 				if (methodParameterType.equals(genericReturnType)) {
-					if (arg instanceof TypedStringValue) {
-						TypedStringValue typedValue = ((TypedStringValue) arg);
+					if (arg instanceof TypedStringValue typedValue) {
 						if (typedValue.hasTargetType()) {
 							return typedValue.getTargetType();
 						}
@@ -220,21 +218,19 @@ abstract class AutowireUtils {
 					}
 					return method.getReturnType();
 				}
-				else if (methodParameterType instanceof ParameterizedType) {
-					ParameterizedType parameterizedType = (ParameterizedType) methodParameterType;
+				else if (methodParameterType instanceof ParameterizedType parameterizedType) {
 					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 					for (Type typeArg : actualTypeArguments) {
 						if (typeArg.equals(genericReturnType)) {
-							if (arg instanceof Class) {
-								return (Class<?>) arg;
+							if (arg instanceof Class<?> clazz) {
+								return clazz;
 							}
 							else {
 								String className = null;
-								if (arg instanceof String) {
-									className = (String) arg;
+								if (arg instanceof String name) {
+									className = name;
 								}
-								else if (arg instanceof TypedStringValue) {
-									TypedStringValue typedValue = ((TypedStringValue) arg);
+								else if (arg instanceof TypedStringValue typedValue) {
 									String targetTypeName = typedValue.getTargetTypeName();
 									if (targetTypeName == null || Class.class.getName().equals(targetTypeName)) {
 										className = typedValue.getValue();
@@ -278,22 +274,19 @@ abstract class AutowireUtils {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			switch (method.getName()) {
-				case "equals":
-					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
-				case "hashCode":
-					// Use hashCode of proxy.
-					return System.identityHashCode(proxy);
-				case "toString":
-					return this.objectFactory.toString();
-			}
-			try {
-				return method.invoke(this.objectFactory.getObject(), args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			return switch (method.getName()) {
+				case "equals" -> (proxy == args[0]); // Only consider equal when proxies are identical.
+				case "hashCode" -> System.identityHashCode(proxy); // Use hashCode of proxy.
+				case "toString" -> this.objectFactory.toString();
+				default -> {
+					try {
+						yield method.invoke(this.objectFactory.getObject(), args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 	}
 

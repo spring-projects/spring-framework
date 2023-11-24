@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Simple ClassFilter that looks for a specific Java 5 annotation
- * being present on a class.
+ * Simple ClassFilter that looks for a specific annotation being present on a class.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -69,14 +68,9 @@ public class AnnotationClassFilter implements ClassFilter {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof AnnotationClassFilter)) {
-			return false;
-		}
-		AnnotationClassFilter otherCf = (AnnotationClassFilter) other;
-		return (this.annotationType.equals(otherCf.annotationType) && this.checkInherited == otherCf.checkInherited);
+		return (this == other || (other instanceof AnnotationClassFilter otherCf &&
+				this.annotationType.equals(otherCf.annotationType) &&
+				this.checkInherited == otherCf.checkInherited));
 	}
 
 	@Override

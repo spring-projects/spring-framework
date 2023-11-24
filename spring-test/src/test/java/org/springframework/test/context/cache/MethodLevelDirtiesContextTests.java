@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ class MethodLevelDirtiesContextTests {
 		assertThat(this.context.isActive()).as("context must be active").isTrue();
 
 		assertThat(this.count).as("count must not be null").isNotNull();
-		assertThat(this.count.intValue()).as("count: ").isEqualTo(expectedContextCreationCount);
+		assertThat(this.count).as("count").isEqualTo(expectedContextCreationCount);
 
 		assertThat(contextCount.get()).as("context creation count: ").isEqualTo(expectedContextCreationCount);
 	}

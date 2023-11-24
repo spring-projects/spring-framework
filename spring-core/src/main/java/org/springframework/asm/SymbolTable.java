@@ -108,10 +108,34 @@ final class SymbolTable {
    * An ASM specific type table used to temporarily store internal names that will not necessarily
    * be stored in the constant pool. This type table is used by the control flow and data flow
    * analysis algorithm used to compute stack map frames from scratch. This array stores {@link
-   * Symbol#TYPE_TAG} and {@link Symbol#UNINITIALIZED_TYPE_TAG}) Symbol. The type symbol at index
-   * {@code i} has its {@link Symbol#index} equal to {@code i} (and vice versa).
+   * Symbol#TYPE_TAG}, {@link Symbol#UNINITIALIZED_TYPE_TAG},{@link
+   * Symbol#FORWARD_UNINITIALIZED_TYPE_TAG} and {@link Symbol#MERGED_TYPE_TAG} entries. The type
+   * symbol at index {@code i} has its {@link Symbol#index} equal to {@code i} (and vice versa).
    */
   private Entry[] typeTable;
+
+  /**
+   * The actual number of {@link LabelEntry} in {@link #labelTable}. These elements are stored from
+   * index 0 to labelCount (excluded). The other array entries are empty. These label entries are
+   * also stored in the {@link #labelEntries} hash set.
+   */
+  private int labelCount;
+
+  /**
+   * The labels corresponding to the "forward uninitialized" types in the ASM specific {@link
+   * typeTable} (see {@link Symbol#FORWARD_UNINITIALIZED_TYPE_TAG}). The label entry at index {@code
+   * i} has its {@link LabelEntry#index} equal to {@code i} (and vice versa).
+   */
+  private LabelEntry[] labelTable;
+
+  /**
+   * A hash set of all the {@link LabelEntry} elements in the {@link #labelTable}. Each {@link
+   * LabelEntry} instance is stored at the array index given by its hash code modulo the array size.
+   * If several entries must be stored at the same array index, they are linked together via their
+   * {@link LabelEntry#next} field. The {@link #getOrAddLabelEntry(Label)} method ensures that this
+   * table does not contain duplicated entries.
+   */
+  private LabelEntry[] labelEntries;
 
   /**
    * Constructs a new, empty SymbolTable for the given ClassWriter.
@@ -1130,6 +1154,18 @@ final class SymbolTable {
   }
 
   /**
+   * Returns the label corresponding to the "forward uninitialized" type table element whose index
+   * is given.
+   *
+   * @param typeIndex the type table index of a "forward uninitialized" type table element.
+   * @return the label corresponding of the NEW instruction which created this "forward
+   *     uninitialized" type.
+   */
+  Label getForwardUninitializedLabel(final int typeIndex) {
+    return labelTable[(int) typeTable[typeIndex].data].label;
+  }
+
+  /**
    * Adds a type in the type table of this symbol table. Does nothing if the type table already
    * contains a similar type.
    *
@@ -1149,13 +1185,13 @@ final class SymbolTable {
   }
 
   /**
-   * Adds an {@link Frame#ITEM_UNINITIALIZED} type in the type table of this symbol table. Does
-   * nothing if the type table already contains a similar type.
+   * Adds an uninitialized type in the type table of this symbol table. Does nothing if the type
+   * table already contains a similar type.
    *
    * @param value an internal class name.
-   * @param bytecodeOffset the bytecode offset of the NEW instruction that created this {@link
-   *     Frame#ITEM_UNINITIALIZED} type value.
-   * @return the index of a new or already existing type Symbol with the given value.
+   * @param bytecodeOffset the bytecode offset of the NEW instruction that created this
+   *     uninitialized type value.
+   * @return the index of a new or already existing type #@link Symbol} with the given value.
    */
   int addUninitializedType(final String value, final int bytecodeOffset) {
     int hashCode = hash(Symbol.UNINITIALIZED_TYPE_TAG, value, bytecodeOffset);
@@ -1171,6 +1207,32 @@ final class SymbolTable {
     }
     return addTypeInternal(
         new Entry(typeCount, Symbol.UNINITIALIZED_TYPE_TAG, value, bytecodeOffset, hashCode));
+  }
+
+  /**
+   * Adds a "forward uninitialized" type in the type table of this symbol table. Does nothing if the
+   * type table already contains a similar type.
+   *
+   * @param value an internal class name.
+   * @param label the label of the NEW instruction that created this uninitialized type value. If
+   *     the label is resolved, use the {@link #addUninitializedType} method instead.
+   * @return the index of a new or already existing type {@link Symbol} with the given value.
+   */
+  int addForwardUninitializedType(final String value, final Label label) {
+    int labelIndex = getOrAddLabelEntry(label).index;
+    int hashCode = hash(Symbol.FORWARD_UNINITIALIZED_TYPE_TAG, value, labelIndex);
+    Entry entry = get(hashCode);
+    while (entry != null) {
+      if (entry.tag == Symbol.FORWARD_UNINITIALIZED_TYPE_TAG
+          && entry.hashCode == hashCode
+          && entry.data == labelIndex
+          && entry.value.equals(value)) {
+        return entry.index;
+      }
+      entry = entry.next;
+    }
+    return addTypeInternal(
+        new Entry(typeCount, Symbol.FORWARD_UNINITIALIZED_TYPE_TAG, value, labelIndex, hashCode));
   }
 
   /**
@@ -1225,6 +1287,59 @@ final class SymbolTable {
     return put(entry).index;
   }
 
+  /**
+   * Returns the {@link LabelEntry} corresponding to the given label. Creates a new one if there is
+   * no such entry.
+   *
+   * @param label the {@link Label} of a NEW instruction which created an uninitialized type, in the
+   *     case where this NEW instruction is after the &lt;init&gt; constructor call (in bytecode
+   *     offset order). See {@link Symbol#FORWARD_UNINITIALIZED_TYPE_TAG}.
+   * @return the {@link LabelEntry} corresponding to {@code label}.
+   */
+  private LabelEntry getOrAddLabelEntry(final Label label) {
+    if (labelEntries == null) {
+      labelEntries = new LabelEntry[16];
+      labelTable = new LabelEntry[16];
+    }
+    int hashCode = System.identityHashCode(label);
+    LabelEntry labelEntry = labelEntries[hashCode % labelEntries.length];
+    while (labelEntry != null && labelEntry.label != label) {
+      labelEntry = labelEntry.next;
+    }
+    if (labelEntry != null) {
+      return labelEntry;
+    }
+
+    if (labelCount > (labelEntries.length * 3) / 4) {
+      int currentCapacity = labelEntries.length;
+      int newCapacity = currentCapacity * 2 + 1;
+      LabelEntry[] newLabelEntries = new LabelEntry[newCapacity];
+      for (int i = currentCapacity - 1; i >= 0; --i) {
+        LabelEntry currentEntry = labelEntries[i];
+        while (currentEntry != null) {
+          int newCurrentEntryIndex = System.identityHashCode(currentEntry.label) % newCapacity;
+          LabelEntry nextEntry = currentEntry.next;
+          currentEntry.next = newLabelEntries[newCurrentEntryIndex];
+          newLabelEntries[newCurrentEntryIndex] = currentEntry;
+          currentEntry = nextEntry;
+        }
+      }
+      labelEntries = newLabelEntries;
+    }
+    if (labelCount == labelTable.length) {
+      LabelEntry[] newLabelTable = new LabelEntry[2 * labelTable.length];
+      System.arraycopy(labelTable, 0, newLabelTable, 0, labelTable.length);
+      labelTable = newLabelTable;
+    }
+
+    labelEntry = new LabelEntry(labelCount, label);
+    int index = hashCode % labelEntries.length;
+    labelEntry.next = labelEntries[index];
+    labelEntries[index] = labelEntry;
+    labelTable[labelCount++] = labelEntry;
+    return labelEntry;
+  }
+
   // -----------------------------------------------------------------------------------------------
   // Static helper methods to compute hash codes.
   // -----------------------------------------------------------------------------------------------
@@ -1275,7 +1390,7 @@ final class SymbolTable {
    *
    * @author Eric Bruneton
    */
-  private static class Entry extends Symbol {
+  private static final class Entry extends Symbol {
 
     /** The hash code of this entry. */
     final int hashCode;
@@ -1317,6 +1432,32 @@ final class SymbolTable {
     Entry(final int index, final int tag, final long data, final int hashCode) {
       super(index, tag, /* owner = */ null, /* name = */ null, /* value = */ null, data);
       this.hashCode = hashCode;
+    }
+  }
+
+  /**
+   * A label corresponding to a "forward uninitialized" type in the ASM specific {@link
+   * SymbolTable#typeTable} (see {@link Symbol#FORWARD_UNINITIALIZED_TYPE_TAG}).
+   *
+   * @author Eric Bruneton
+   */
+  private static final class LabelEntry {
+
+    /** The index of this label entry in the {@link SymbolTable#labelTable} array. */
+    final int index;
+
+    /** The value of this label entry. */
+    final Label label;
+
+    /**
+     * Another entry (and so on recursively) having the same hash code (modulo the size of {@link
+     * SymbolTable#labelEntries}}) as this one.
+     */
+    LabelEntry next;
+
+    LabelEntry(final int index, final Label label) {
+      this.index = index;
+      this.label = label;
     }
   }
 }

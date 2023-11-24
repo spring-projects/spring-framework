@@ -16,12 +16,12 @@
 
 package org.springframework.jms.listener;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 /**
- * Variant of the standard JMS {@link javax.jms.MessageListener} interface,
+ * Variant of the standard JMS {@link jakarta.jms.MessageListener} interface,
  * offering not only the received Message but also the underlying
  * JMS Session object. The latter can be used to send reply messages,
  * without the need to access an external Connection/Session,
@@ -40,7 +40,7 @@ import javax.jms.Session;
  * @see DefaultMessageListenerContainer
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
- * @see javax.jms.MessageListener
+ * @see jakarta.jms.MessageListener
  */
 @FunctionalInterface
 public interface SessionAwareMessageListener<M extends Message> {

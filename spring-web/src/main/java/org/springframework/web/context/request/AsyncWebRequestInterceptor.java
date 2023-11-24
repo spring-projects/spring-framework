@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request;
 
 /**
@@ -41,7 +42,6 @@ public interface AsyncWebRequestInterceptor extends WebRequestInterceptor{
 	/**
 	 * Called instead of {@code postHandle} and {@code afterCompletion}, when the
 	 * handler started handling the request concurrently.
-	 *
 	 * @param request the current request
 	 */
 	void afterConcurrentHandlingStarted(WebRequest request);

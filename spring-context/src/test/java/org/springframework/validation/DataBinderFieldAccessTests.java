@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,47 +36,47 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Stephane Nicoll
  * @since 07.03.2006
  */
-public class DataBinderFieldAccessTests {
+class DataBinderFieldAccessTests {
 
 	@Test
-	public void bindingNoErrors() throws Exception {
+	void bindingNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		assertThat(binder.isIgnoreUnknownFields()).isTrue();
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
+		pvs.addPropertyValue(new PropertyValue("age", 32));
 		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
 
 		binder.bind(pvs);
 		binder.close();
 
-		assertThat(rod.getName().equals("Rod")).as("changed name correctly").isTrue();
-		assertThat(rod.getAge() == 32).as("changed age correctly").isTrue();
+		assertThat(rod.getName()).as("changed name correctly").isEqualTo("Rod");
+		assertThat(rod.getAge()).as("changed age correctly").isEqualTo(32);
 
 		Map<?, ?> m = binder.getBindingResult().getModel();
-		assertThat(m.size() == 2).as("There is one element in map").isTrue();
+		assertThat(m).as("There is one element in map").hasSize(2);
 		FieldAccessBean tb = (FieldAccessBean) m.get("person");
 		assertThat(tb.equals(rod)).as("Same object").isTrue();
 	}
 
 	@Test
-	public void bindingNoErrorsNotIgnoreUnknown() throws Exception {
+	void bindingNoErrorsNotIgnoreUnknown() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
 		binder.setIgnoreUnknownFields(false);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
+		pvs.addPropertyValue(new PropertyValue("age", 32));
 		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
 		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
 				binder.bind(pvs));
 	}
 
 	@Test
-	public void bindingWithErrors() throws Exception {
+	void bindingWithErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
@@ -105,7 +105,7 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void nestedBindingWithDefaultConversionNoErrors() throws Exception {
+	void nestedBindingWithDefaultConversionNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		assertThat(binder.isIgnoreUnknownFields()).isTrue();
@@ -122,7 +122,7 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void nestedBindingWithDisabledAutoGrow() throws Exception {
+	void nestedBindingWithDisabledAutoGrow() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.setAutoGrowNestedPaths(false);
@@ -135,7 +135,7 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void bindingWithErrorsAndCustomEditors() throws Exception {
+	void bindingWithErrorsAndCustomEditors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();

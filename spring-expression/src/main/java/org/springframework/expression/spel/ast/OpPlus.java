@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
@@ -46,9 +48,17 @@ import org.springframework.util.NumberUtils;
  * @author Juergen Hoeller
  * @author Ivo Smid
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  * @since 3.0
  */
 public class OpPlus extends Operator {
+
+	/**
+	 * Maximum number of characters permitted in a concatenated string.
+	 * @since 5.2.24
+	 */
+	private static final int MAX_CONCATENATED_STRING_LENGTH = 100_000;
+
 
 	public OpPlus(int startPos, int endPos, SpelNodeImpl... operands) {
 		super("+", startPos, endPos, operands);
@@ -85,10 +95,7 @@ public class OpPlus extends Operator {
 		TypedValue operandTwoValue = getRightOperand().getValueInternal(state);
 		Object rightOperand = operandTwoValue.getValue();
 
-		if (leftOperand instanceof Number && rightOperand instanceof Number) {
-			Number leftNumber = (Number) leftOperand;
-			Number rightNumber = (Number) rightOperand;
-
+		if (leftOperand instanceof Number leftNumber && rightOperand instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -121,22 +128,41 @@ public class OpPlus extends Operator {
 			}
 		}
 
-		if (leftOperand instanceof String && rightOperand instanceof String) {
+		if (leftOperand instanceof String leftString && rightOperand instanceof String rightString) {
 			this.exitTypeDescriptor = "Ljava/lang/String";
-			return new TypedValue((String) leftOperand + rightOperand);
+			checkStringLength(leftString);
+			checkStringLength(rightString);
+			return concatenate(leftString, rightString);
 		}
 
-		if (leftOperand instanceof String) {
-			return new TypedValue(
-					leftOperand + (rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue, state)));
+		if (leftOperand instanceof String leftString) {
+			checkStringLength(leftString);
+			String rightString = (rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue, state));
+			checkStringLength(rightString);
+			return concatenate(leftString, rightString);
 		}
 
-		if (rightOperand instanceof String) {
-			return new TypedValue(
-					(leftOperand == null ? "null" : convertTypedValueToString(operandOneValue, state)) + rightOperand);
+		if (rightOperand instanceof String rightString) {
+			checkStringLength(rightString);
+			String leftString = (leftOperand == null ? "null" : convertTypedValueToString(operandOneValue, state));
+			checkStringLength(leftString);
+			return concatenate(leftString, rightString);
 		}
 
 		return state.operate(Operation.ADD, leftOperand, rightOperand);
+	}
+
+	private void checkStringLength(String string) {
+		if (string.length() > MAX_CONCATENATED_STRING_LENGTH) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, MAX_CONCATENATED_STRING_LENGTH);
+		}
+	}
+
+	private TypedValue concatenate(String leftString, String rightString) {
+		String result = leftString + rightString;
+		checkStringLength(result);
+		return new TypedValue(result);
 	}
 
 	@Override
@@ -190,8 +216,7 @@ public class OpPlus extends Operator {
 	 * them all to the same (on stack) StringBuilder.
 	 */
 	private void walk(MethodVisitor mv, CodeFlow cf, @Nullable SpelNodeImpl operand) {
-		if (operand instanceof OpPlus) {
-			OpPlus plus = (OpPlus)operand;
+		if (operand instanceof OpPlus plus) {
 			walk(mv, cf, plus.getLeftOperand());
 			walk(mv, cf, plus.getRightOperand());
 		}
@@ -230,21 +255,12 @@ public class OpPlus extends Operator {
 				cf.exitCompilationScope();
 				CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
 				switch (targetDesc) {
-					case 'I':
-						mv.visitInsn(IADD);
-						break;
-					case 'J':
-						mv.visitInsn(LADD);
-						break;
-					case 'F':
-						mv.visitInsn(FADD);
-						break;
-					case 'D':
-						mv.visitInsn(DADD);
-						break;
-					default:
-						throw new IllegalStateException(
-								"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+					case 'I' -> mv.visitInsn(IADD);
+					case 'J' -> mv.visitInsn(LADD);
+					case 'F' -> mv.visitInsn(FADD);
+					case 'D' -> mv.visitInsn(DADD);
+					default -> throw new IllegalStateException(
+							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
 				}
 			}
 		}

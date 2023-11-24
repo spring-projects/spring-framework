@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.r2dbc.core
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.r2dbc.spi.Parameters
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
@@ -42,7 +43,7 @@ class DatabaseClientExtensionsTests {
 		}
 
 		verify {
-			spec.bind(0, Parameter.fromOrEmpty("foo", String::class.java))
+			spec.bind(0, Parameters.`in`("foo"))
 		}
 	}
 
@@ -56,7 +57,7 @@ class DatabaseClientExtensionsTests {
 		}
 
 		verify {
-			spec.bind(0, Parameter.empty(String::class.java))
+			spec.bind(0, Parameters.`in`(String::class.java))
 		}
 	}
 
@@ -70,7 +71,7 @@ class DatabaseClientExtensionsTests {
 		}
 
 		verify {
-			spec.bind("field", Parameter.fromOrEmpty("foo", String::class.java))
+			spec.bind("field", Parameters.`in`("foo"))
 		}
 	}
 
@@ -84,7 +85,7 @@ class DatabaseClientExtensionsTests {
 		}
 
 		verify {
-			spec.bind("field", Parameter.empty(String::class.java))
+			spec.bind("field", Parameters.`in`(String::class.java))
 		}
 	}
 

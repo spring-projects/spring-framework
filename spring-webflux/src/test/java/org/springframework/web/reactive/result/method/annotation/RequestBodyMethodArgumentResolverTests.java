@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestBody;
 
 /**
@@ -214,6 +216,17 @@ public class RequestBodyMethodArgumentResolverTests {
 		});
 	}
 
+	@Test // gh-29565
+	public void invalidContentType() {
+		MethodParameter parameter = this.testMethod.annot(requestBody()).arg(String.class);
+
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.post("/path").header("Content-Type", "invalid").build());
+
+		assertThatThrownBy(() -> this.resolver.readBody(parameter, true, new BindingContext(), exchange))
+				.isInstanceOf(UnsupportedMediaTypeStatusException.class);
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/path").body(body));
@@ -221,7 +234,8 @@ public class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
+		assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
+				.as("Unexpected return value type: " + value).isTrue();
 
 		//no inspection unchecked
 		return (T) value;
@@ -234,7 +248,8 @@ public class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {
-			assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected parameter type: " + value).isTrue();
+			assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
+					.as("Unexpected parameter type: " + value).isTrue();
 		}
 
 		//no inspection unchecked

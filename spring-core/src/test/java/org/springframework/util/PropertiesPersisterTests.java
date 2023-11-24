@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,10 +125,10 @@ class PropertiesPersisterTests {
 			propCopy = new String(propOut.toByteArray());
 		}
 		if (header != null) {
-			assertThat(propCopy.contains(header)).isTrue();
+			assertThat(propCopy).contains(header);
 		}
-		assertThat(propCopy.contains("\ncode1=message1")).isTrue();
-		assertThat(propCopy.contains("\ncode2=message2")).isTrue();
+		assertThat(propCopy).contains("\ncode1=message1");
+		assertThat(propCopy).contains("\ncode2=message2");
 		return propCopy;
 	}
 

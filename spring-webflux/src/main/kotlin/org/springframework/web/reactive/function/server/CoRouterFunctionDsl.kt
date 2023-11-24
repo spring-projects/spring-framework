@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,19 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.withContext
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.RouterFunctions.nest
+import reactor.core.publisher.Mono
 import java.net.URI
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Allow to create easily a WebFlux.fn [RouterFunction] with a [Coroutines router Kotlin DSL][CoRouterFunctionDsl].
@@ -67,6 +72,8 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	@PublishedApi
 	internal val builder = RouterFunctions.route()
+
+	private var contextProvider: (suspend (ServerRequest) -> CoroutineContext)? = null
 
 	/**
 	 * Return a composed request predicate that tests against both this predicate AND
@@ -506,9 +513,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun resources(lookupFunction: suspend (ServerRequest) -> Resource?) {
 		builder.resources {
-			mono(Dispatchers.Unconfined) {
-				lookupFunction.invoke(it)
-			}
+			asMono(it, handler = lookupFunction)
 		}
 	}
 
@@ -530,9 +535,14 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun filter(filterFunction: suspend (ServerRequest, suspend (ServerRequest) -> ServerResponse) -> ServerResponse) {
 		builder.filter { serverRequest, handlerFunction ->
-			mono(Dispatchers.Unconfined) {
+			asMono(serverRequest) {
 				filterFunction(serverRequest) { handlerRequest ->
-					handlerFunction.handle(handlerRequest).awaitSingle()
+					if (handlerFunction is CoroutineContextAwareHandlerFunction<*>) {
+						handlerFunction.handle(currentCoroutineContext().minusKey(Job.Key), handlerRequest).awaitSingle()
+					}
+					else {
+						handlerFunction.handle(handlerRequest).awaitSingle()
+					}
 				}
 			}
 		}
@@ -569,7 +579,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	fun onError(predicate: (Throwable) -> Boolean, responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
 		builder.onError(predicate) { throwable, request ->
-			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
+			asMono(request) { responseProvider.invoke(throwable, request) }
 		}
 	}
 
@@ -582,8 +592,45 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 */
 	inline fun <reified E : Throwable> onError(noinline responseProvider: suspend (Throwable, ServerRequest) -> ServerResponse) {
 		builder.onError({it is E}) { throwable, request ->
-			mono(Dispatchers.Unconfined) { responseProvider.invoke(throwable, request) }
+			asMono(request) { responseProvider.invoke(throwable, request) }
 		}
+	}
+
+	/**
+	 * Add an attribute with the given name and value to the last route built with this builder.
+	 * @param name the attribute name
+	 * @param value the attribute value
+-	 * @since 6.0
+	 */
+	fun withAttribute(name: String, value: Any) {
+		builder.withAttribute(name, value)
+	}
+
+	/**
+	 * Manipulate the attributes of the last route built with the given consumer.
+	 *
+	 * The map provided to the consumer is "live", so that the consumer can be used
+	 * to [overwrite][MutableMap.put] existing attributes,
+	 * [remove][MutableMap.remove] attributes, or use any of the other
+	 * [MutableMap] methods.
+	 * @param attributesConsumer a function that consumes the attributes map
+	 * @since 6.0
+	 */
+	fun withAttributes(attributesConsumer: (MutableMap<String, Any>) -> Unit) {
+		builder.withAttributes(attributesConsumer)
+	}
+
+	/**
+	 * Allow to provide the default [CoroutineContext], potentially dynamically based on
+	 * the incoming [ServerRequest].
+	 * @param provider the [CoroutineContext] provider
+	 * @since 6.1
+	 */
+	fun context(provider: suspend (ServerRequest) -> CoroutineContext) {
+		if (this.contextProvider != null) {
+			throw IllegalStateException("The Coroutine context provider should not be defined more than once")
+		}
+		this.contextProvider = provider
 	}
 
 	/**
@@ -594,10 +641,21 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 		return builder.build()
 	}
 
-	private fun asHandlerFunction(init: suspend (ServerRequest) -> ServerResponse) = HandlerFunction {
-		mono(Dispatchers.Unconfined) {
-			init(it)
+	@PublishedApi
+	internal fun <T> asMono(request: ServerRequest, context: CoroutineContext = Dispatchers.Unconfined, handler: suspend (ServerRequest) -> T): Mono<T> {
+		return mono(context) {
+			contextProvider?.let {
+				withContext(it.invoke(request)) {
+					handler.invoke(request)
+				}
+			} ?: run {
+				handler.invoke(request)
+			}
 		}
+	}
+
+	private fun asHandlerFunction(handler: suspend (ServerRequest) -> ServerResponse) = CoroutineContextAwareHandlerFunction { request ->
+		handler.invoke(request)
 	}
 
 	/**
@@ -660,12 +718,27 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	/**
 	 * @see ServerResponse.status
 	 */
-	fun status(status: HttpStatus) = ServerResponse.status(status)
+	fun status(status: HttpStatusCode) = ServerResponse.status(status)
 
 	/**
 	 * @see ServerResponse.status
 	 */
 	fun status(status: Int) = ServerResponse.status(status)
+
+
+	private inner class CoroutineContextAwareHandlerFunction<T : ServerResponse>(
+		private val handler: suspend (ServerRequest) -> T
+	) : HandlerFunction<T> {
+
+		override fun handle(request: ServerRequest): Mono<T> {
+			return handle(Dispatchers.Unconfined, request)
+		}
+
+		fun handle(context: CoroutineContext, request: ServerRequest) = asMono(request, context) {
+			handler(request)
+		}
+
+	}
 
 }
 

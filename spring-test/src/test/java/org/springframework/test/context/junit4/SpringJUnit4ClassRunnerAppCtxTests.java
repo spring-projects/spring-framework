@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -164,7 +163,8 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	@Test
 	public void verifyBeanNameSet() {
-		assertThat(this.beanName.startsWith(getClass().getName())).as("The bean name of this test instance should have been set due to BeanNameAware semantics.").isTrue();
+		assertThat(this.beanName).as("The bean name of this test instance should have been set due to BeanNameAware semantics.")
+				.startsWith(getClass().getName());
 	}
 
 	@Test
@@ -202,7 +202,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 		assertThat(this.literalFieldValue).as("Literal @Value field should have been autowired").isNotNull();
 		assertThat(this.spelFieldValue).as("SpEL @Value field should have been autowired.").isNotNull();
 		assertThat(this.literalFieldValue).isEqualTo("enigma");
-		assertThat(this.spelFieldValue).isEqualTo(Boolean.TRUE);
+		assertThat(this.spelFieldValue).isTrue();
 	}
 
 	@Test
@@ -210,7 +210,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 		assertThat(this.literalParameterValue).as("Literal @Value method parameter should have been autowired.").isNotNull();
 		assertThat(this.spelParameterValue).as("SpEL @Value method parameter should have been autowired.").isNotNull();
 		assertThat(this.literalParameterValue).isEqualTo("enigma");
-		assertThat(this.spelParameterValue).isEqualTo(Boolean.TRUE);
+		assertThat(this.spelParameterValue).isTrue();
 	}
 
 	@Test

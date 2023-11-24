@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,8 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
-			@Nullable String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
@@ -204,7 +204,7 @@ public class EscapedErrors implements Errors {
 	@Nullable
 	public Object getFieldValue(String field) {
 		Object value = this.source.getFieldValue(field);
-		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
+		return (value instanceof String text ? HtmlUtils.htmlEscape(text) : value);
 	}
 
 	@Override
@@ -223,11 +223,10 @@ public class EscapedErrors implements Errors {
 		if (defaultMessage != null) {
 			defaultMessage = HtmlUtils.htmlEscape(defaultMessage);
 		}
-		if (source instanceof FieldError) {
-			FieldError fieldError = (FieldError) source;
+		if (source instanceof FieldError fieldError) {
 			Object value = fieldError.getRejectedValue();
-			if (value instanceof String) {
-				value = HtmlUtils.htmlEscape((String) value);
+			if (value instanceof String text) {
+				value = HtmlUtils.htmlEscape(text);
 			}
 			return (T) new FieldError(
 					fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),

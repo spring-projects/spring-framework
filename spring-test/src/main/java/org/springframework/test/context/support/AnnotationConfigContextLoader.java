@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,7 +27,6 @@ import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that loads
@@ -155,10 +157,11 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	@Override
 	protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 		if (mergedConfig.hasLocations()) {
-			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'locations' " +
-							"(or 'value') attribute %s, but %s does not support resource locations.",
-					mergedConfig.getTestClass().getName(), ObjectUtils.nullSafeToString(mergedConfig.getLocations()),
-					getClass().getSimpleName());
+			String msg = """
+					Test class [%s] has been configured with @ContextConfiguration's 'locations' \
+					(or 'value') attribute %s, but %s does not support resource locations."""
+						.formatted(mergedConfig.getTestClass().getName(),
+							Arrays.toString(mergedConfig.getLocations()), getClass().getSimpleName());
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
@@ -181,9 +184,13 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
 		Class<?>[] componentClasses = mergedConfig.getClasses();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering component classes: " + ObjectUtils.nullSafeToString(componentClasses));
+			logger.debug("Registering component classes: " + classNames(componentClasses));
 		}
 		new AnnotatedBeanDefinitionReader(context).register(componentClasses);
+	}
+
+	private static List<String> classNames(Class<?>... classes) {
+		return Arrays.stream(classes).map(Class::getName).toList();
 	}
 
 	/**

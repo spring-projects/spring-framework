@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -97,7 +96,7 @@ public class ServletUriComponentsBuilderTests {
 		request.addHeader("X-Forwarded-Port", "443");
 
 		HttpServletRequest requestToUse = adaptFromForwardedHeaders(request);
-		UriComponents result =  ServletUriComponentsBuilder.fromRequest(requestToUse).build();
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(requestToUse).build();
 
 		assertThat(result.toString()).isEqualTo("https://84.198.58.199/mvc-showcase");
 	}
@@ -117,7 +116,7 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setRequestURI("/mvc-showcase/bar");
 
 		HttpServletRequest requestToUse = adaptFromForwardedHeaders(this.request);
-		UriComponents result =  ServletUriComponentsBuilder.fromRequest(requestToUse).build();
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(requestToUse).build();
 
 		assertThat(result.toUriString()).isEqualTo("http://localhost/prefix/bar");
 	}
@@ -129,7 +128,7 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setRequestURI("/spring-mvc-showcase/bar");
 
 		HttpServletRequest requestToUse = adaptFromForwardedHeaders(this.request);
-		UriComponents result =  ServletUriComponentsBuilder.fromRequest(requestToUse).build();
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(requestToUse).build();
 
 		assertThat(result.toUriString()).isEqualTo("http://localhost/foo/bar");
 	}
@@ -141,7 +140,7 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setRequestURI("/mvc-showcase/bar");
 
 		HttpServletRequest requestToUse = adaptFromForwardedHeaders(this.request);
-		UriComponents result =  ServletUriComponentsBuilder.fromRequest(requestToUse).build();
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(requestToUse).build();
 
 		assertThat(result.toUriString()).isEqualTo("http://localhost/bar");
 	}

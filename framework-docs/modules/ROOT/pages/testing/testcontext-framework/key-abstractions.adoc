@@ -1,0 +1,86 @@
+[[testcontext-key-abstractions]]
+= Key Abstractions
+
+The core of the framework consists of the `TestContextManager` class and the
+`TestContext`, `TestExecutionListener`, and `SmartContextLoader` interfaces. A
+`TestContextManager` is created for each test class (for example, for the execution of
+all test methods within a single test class in JUnit Jupiter). The `TestContextManager`,
+in turn, manages a `TestContext` that holds the context of the current test. The
+`TestContextManager` also updates the state of the `TestContext` as the test progresses
+and delegates to `TestExecutionListener` implementations, which instrument the actual
+test execution by providing dependency injection, managing transactions, and so on. A
+`SmartContextLoader` is responsible for loading an `ApplicationContext` for a given test
+class. See the {spring-framework-api}/test/context/package-summary.html[javadoc] and the
+Spring test suite for further information and examples of various implementations.
+
+[[testcontext]]
+== `TestContext`
+
+`TestContext` encapsulates the context in which a test is run (agnostic of the
+actual testing framework in use) and provides context management and caching support for
+the test instance for which it is responsible. The `TestContext` also delegates to a
+`SmartContextLoader` to load an `ApplicationContext` if requested.
+
+[[testcontextmanager]]
+== `TestContextManager`
+
+`TestContextManager` is the main entry point into the Spring TestContext Framework and is
+responsible for managing a single `TestContext` and signaling events to each registered
+`TestExecutionListener` at well-defined test execution points:
+
+* Prior to any "`before class`" or "`before all`" methods of a particular testing framework.
+* Test instance post-processing.
+* Prior to any "`before`" or "`before each`" methods of a particular testing framework.
+* Immediately before execution of the test method but after test setup.
+* Immediately after execution of the test method but before test tear down.
+* After any "`after`" or "`after each`" methods of a particular testing framework.
+* After any "`after class`" or "`after all`" methods of a particular testing framework.
+
+[[testexecutionlistener]]
+== `TestExecutionListener`
+
+`TestExecutionListener` defines the API for reacting to test-execution events published by
+the `TestContextManager` with which the listener is registered. See xref:testing/testcontext-framework/tel-config.adoc[`TestExecutionListener` Configuration].
+
+[[context-loaders]]
+== Context Loaders
+
+`ContextLoader` is a strategy interface for loading an `ApplicationContext` for an
+integration test managed by the Spring TestContext Framework. You should implement
+`SmartContextLoader` instead of this interface to provide support for component classes,
+active bean definition profiles, test property sources, context hierarchies, and
+`WebApplicationContext` support.
+
+`SmartContextLoader` is an extension of the `ContextLoader` interface that supersedes the
+original minimal `ContextLoader` SPI. Specifically, a `SmartContextLoader` can choose to
+process resource locations, component classes, or context initializers. Furthermore, a
+`SmartContextLoader` can set active bean definition profiles and test property sources in
+the context that it loads.
+
+Spring provides the following implementations:
+
+* `DelegatingSmartContextLoader`: One of two default loaders, it delegates internally to
+  an `AnnotationConfigContextLoader`, a `GenericXmlContextLoader`, or a
+  `GenericGroovyXmlContextLoader`, depending either on the configuration declared for the
+  test class or on the presence of default locations or default configuration classes.
+  Groovy support is enabled only if Groovy is on the classpath.
+* `WebDelegatingSmartContextLoader`: One of two default loaders, it delegates internally
+  to an `AnnotationConfigWebContextLoader`, a `GenericXmlWebContextLoader`, or a
+  `GenericGroovyXmlWebContextLoader`, depending either on the configuration declared for
+  the test class or on the presence of default locations or default configuration
+  classes. A web `ContextLoader` is used only if `@WebAppConfiguration` is present on the
+  test class. Groovy support is enabled only if Groovy is on the classpath.
+* `AnnotationConfigContextLoader`: Loads a standard `ApplicationContext` from component
+  classes.
+* `AnnotationConfigWebContextLoader`: Loads a `WebApplicationContext` from component
+  classes.
+* `GenericGroovyXmlContextLoader`: Loads a standard `ApplicationContext` from resource
+  locations that are either Groovy scripts or XML configuration files.
+* `GenericGroovyXmlWebContextLoader`: Loads a `WebApplicationContext` from resource
+  locations that are either Groovy scripts or XML configuration files.
+* `GenericXmlContextLoader`: Loads a standard `ApplicationContext` from XML resource
+  locations.
+* `GenericXmlWebContextLoader`: Loads a `WebApplicationContext` from XML resource
+  locations.
+
+

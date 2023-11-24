@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ package org.springframework.core;
  * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.beans.factory.config.PropertyOverrideConfigurer
- * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
  */
 public interface PriorityOrdered extends Ordered {
 }

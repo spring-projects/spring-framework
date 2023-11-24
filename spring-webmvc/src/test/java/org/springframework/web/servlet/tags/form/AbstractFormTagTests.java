@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.springframework.lang.Nullable;
  * template methods for specific states of the underlying transaction,
  * for example: begin, suspend, resume, commit.
  *
- * <p>The default implementations of this strategy interface are
- * {@link org.springframework.transaction.jta.JtaTransactionManager} and
- * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager},
- * which can serve as an implementation guide for other transaction strategies.
+ * <p>A classic implementation of this strategy interface is
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}. However,
+ * in common single-resource scenarios, Spring's specific transaction managers
+ * for e.g. JDBC, JPA, JMS are preferred choices.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.ReactiveTransactionManager
+ * @see ConfigurableTransactionManager
  */
 public interface PlatformTransactionManager extends TransactionManager {
 
@@ -68,8 +69,7 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
-			throws TransactionException;
+	TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction
@@ -81,12 +81,9 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * <p>Note that when the commit call completes, no matter if normally or
 	 * throwing an exception, the transaction must be fully completed and
 	 * cleaned up. No rollback call should be expected in such a case.
-	 * <p>If this method throws an exception other than a TransactionException,
-	 * then some before-commit error caused the commit attempt to fail. For
-	 * example, an O/R Mapping tool might have tried to flush changes to the
-	 * database right before commit, with the resulting DataAccessException
-	 * causing the transaction to fail. The original exception will be
-	 * propagated to the caller of this commit method in such a case.
+	 * <p>Depending on the concrete transaction manager setup, {@code commit}
+	 * may propagate {@link org.springframework.dao.DataAccessException} as well,
+	 * either from before-commit flushes or from the actual commit step.
 	 * @param status object returned by the {@code getTransaction} method
 	 * @throws UnexpectedRollbackException in case of an unexpected rollback
 	 * that the transaction coordinator initiated
@@ -110,6 +107,8 @@ public interface PlatformTransactionManager extends TransactionManager {
 	 * The transaction will already have been completed and cleaned up when commit
 	 * returns, even in case of a commit exception. Consequently, a rollback call
 	 * after commit failure will lead to an IllegalTransactionStateException.
+	 * <p>Depending on the concrete transaction manager setup, {@code rollback}
+	 * may propagate {@link org.springframework.dao.DataAccessException} as well.
 	 * @param status object returned by the {@code getTransaction} method
 	 * @throws TransactionSystemException in case of rollback or system errors
 	 * (typically caused by fundamental resource failures)

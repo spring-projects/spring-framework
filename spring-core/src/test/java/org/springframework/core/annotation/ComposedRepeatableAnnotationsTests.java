@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ class ComposedRepeatableAnnotationsTests {
 		Class<?> element = SubNoninheritedRepeatableClass.class;
 		Set<Noninherited> annotations = getMergedRepeatableAnnotations(element, Noninherited.class);
 		assertThat(annotations).isNotNull();
-		assertThat(annotations.size()).isEqualTo(0);
+		assertThat(annotations).isEmpty();
 	}
 
 	@Test
@@ -216,7 +216,7 @@ class ComposedRepeatableAnnotationsTests {
 
 		Set<PeteRepeat> peteRepeats = getMergedRepeatableAnnotations(element, PeteRepeat.class);
 		assertThat(peteRepeats).isNotNull();
-		assertThat(peteRepeats.size()).isEqualTo(3);
+		assertThat(peteRepeats).hasSize(3);
 
 		Iterator<PeteRepeat> iterator = peteRepeats.iterator();
 		assertThat(iterator.next().value()).isEqualTo("A");
@@ -229,7 +229,7 @@ class ComposedRepeatableAnnotationsTests {
 
 		Set<PeteRepeat> peteRepeats = findMergedRepeatableAnnotations(element, PeteRepeat.class);
 		assertThat(peteRepeats).isNotNull();
-		assertThat(peteRepeats.size()).isEqualTo(3);
+		assertThat(peteRepeats).hasSize(3);
 
 		Iterator<PeteRepeat> iterator = peteRepeats.iterator();
 		assertThat(iterator.next().value()).isEqualTo("A");
@@ -239,7 +239,7 @@ class ComposedRepeatableAnnotationsTests {
 
 	private void assertNoninheritedRepeatableAnnotations(Set<Noninherited> annotations) {
 		assertThat(annotations).isNotNull();
-		assertThat(annotations.size()).isEqualTo(3);
+		assertThat(annotations).hasSize(3);
 
 		Iterator<Noninherited> iterator = annotations.iterator();
 		assertThat(iterator.next().value()).isEqualTo("A");

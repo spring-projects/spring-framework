@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,10 @@ import org.springframework.util.ResourceUtils;
  * Extension of {@link SpringJUnit4ClassRunnerAppCtxTests}, which verifies that
  * we can specify multiple resource locations for our application context, each
  * configured differently.
- * <p>
- * As of Spring 3.0,
- * {@code MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests} is also used
- * to verify support for the new {@code value} attribute alias for
+ *
+ * <p>{@code MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests} is also used
+ * to verify support for the {@code value} attribute alias for
  * {@code @ContextConfiguration}'s {@code locations} attribute.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5

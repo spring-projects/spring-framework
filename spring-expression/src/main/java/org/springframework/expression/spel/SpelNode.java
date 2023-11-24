@@ -66,7 +66,7 @@ public interface SpelNode {
 	void setValue(ExpressionState expressionState, @Nullable Object newValue) throws EvaluationException;
 
 	/**
-	 * Return the string form the this AST node.
+	 * Return the string form of this AST node.
 	 * @return the string form
 	 */
 	String toStringAST();

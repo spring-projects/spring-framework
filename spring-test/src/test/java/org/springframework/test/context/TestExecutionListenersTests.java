@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
@@ -33,6 +34,7 @@ import org.springframework.test.context.support.DirtiesContextBeforeModesTestExe
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.context.web.ServletTestExecutionListener;
+import org.springframework.util.ClassUtils;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -55,12 +57,16 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  */
 class TestExecutionListenersTests {
 
+	private static final Class<?> micrometerListenerClass =
+			ClassUtils.resolveClassName("org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener", null);
+
 	@Test
 	void defaultListeners() {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
@@ -79,6 +85,7 @@ class TestExecutionListenersTests {
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
@@ -96,6 +103,7 @@ class TestExecutionListenersTests {
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
@@ -115,6 +123,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
@@ -199,7 +208,7 @@ class TestExecutionListenersTests {
 	}
 
 	private List<String> names(List<Class<?>> classes) {
-		return classes.stream().map(Class::getSimpleName).collect(toList());
+		return classes.stream().map(Class::getSimpleName).toList();
 	}
 
 	private void assertRegisteredListeners(Class<?> testClass, List<Class<?>> expected) {
@@ -209,7 +218,7 @@ class TestExecutionListenersTests {
 
 	private void assertNumRegisteredListeners(Class<?> testClass, int expected) {
 		TestContextManager testContextManager = new TestContextManager(testClass);
-		assertThat(testContextManager.getTestExecutionListeners().size()).as("Num registered TELs for " + testClass).isEqualTo(expected);
+		assertThat(testContextManager.getTestExecutionListeners()).as("Num registered TELs for " + testClass).hasSize(expected);
 	}
 
 
@@ -294,6 +303,7 @@ class TestExecutionListenersTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MetaListenersWithOverrides {
 
+		@AliasFor(annotation = TestExecutionListeners.class)
 		Class<? extends TestExecutionListener>[] listeners() default
 				{FooTestExecutionListener.class, BarTestExecutionListener.class};
 	}
@@ -302,8 +312,10 @@ class TestExecutionListenersTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MetaInheritedListenersWithOverrides {
 
+		@AliasFor(annotation = TestExecutionListeners.class)
 		Class<? extends TestExecutionListener>[] listeners() default QuuxTestExecutionListener.class;
 
+		@AliasFor(annotation = TestExecutionListeners.class)
 		boolean inheritListeners() default true;
 	}
 
@@ -311,8 +323,10 @@ class TestExecutionListenersTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MetaNonInheritedListenersWithOverrides {
 
+		@AliasFor(annotation = TestExecutionListeners.class)
 		Class<? extends TestExecutionListener>[] listeners() default QuuxTestExecutionListener.class;
 
+		@AliasFor(annotation = TestExecutionListeners.class)
 		boolean inheritListeners() default false;
 	}
 
@@ -355,9 +369,9 @@ class TestExecutionListenersTests {
 
 		@Override
 		public int getOrder() {
-			// 2500 is between DependencyInjectionTestExecutionListener (2000) and
-			// DirtiesContextTestExecutionListener (3000)
-			return 2500;
+			// 2250 is between DependencyInjectionTestExecutionListener (2000) and
+			// MicrometerObservationRegistryTestExecutionListener (2500)
+			return 2250;
 		}
 	}
 

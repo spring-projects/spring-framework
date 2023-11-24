@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
@@ -27,10 +29,11 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.lang.Nullable;
 
 /**
- * Represents a variable reference, eg. #someVar. Note this is different to a *local*
- * variable like $someVar
+ * Represents a variable reference &mdash; for example, {@code #someVar}. Note
+ * that this is different than a <em>local</em> variable like {@code $someVar}.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
  */
 public class VariableReference extends SpelNodeImpl {
@@ -53,14 +56,14 @@ public class VariableReference extends SpelNodeImpl {
 	@Override
 	public ValueRef getValueRef(ExpressionState state) throws SpelEvaluationException {
 		if (this.name.equals(THIS)) {
-			return new ValueRef.TypedValueHolderValueRef(state.getActiveContextObject(),this);
+			return new ValueRef.TypedValueHolderValueRef(state.getActiveContextObject(), this);
 		}
 		if (this.name.equals(ROOT)) {
-			return new ValueRef.TypedValueHolderValueRef(state.getRootContextObject(),this);
+			return new ValueRef.TypedValueHolderValueRef(state.getRootContextObject(), this);
 		}
 		TypedValue result = state.lookupVariable(this.name);
 		// a null value will mean either the value was null or the variable was not found
-		return new VariableRef(this.name,result,state.getEvaluationContext());
+		return new VariableRef(this.name, result, state.getEvaluationContext());
 	}
 
 	@Override
@@ -90,8 +93,10 @@ public class VariableReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public void setValue(ExpressionState state, @Nullable Object value) throws SpelEvaluationException {
-		state.setVariable(this.name, value);
+	public TypedValue setValueInternal(ExpressionState state, Supplier<TypedValue> valueSupplier)
+			throws EvaluationException {
+
+		return state.assignVariable(this.name, valueSupplier);
 	}
 
 	@Override

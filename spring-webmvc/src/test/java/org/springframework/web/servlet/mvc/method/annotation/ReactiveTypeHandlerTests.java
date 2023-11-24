@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,54 @@ public class ReactiveTypeHandlerTests {
 	@Test
 	public void doesNotSupportType() throws Exception {
 		assertThat(this.handler.isReactiveType(String.class)).isFalse();
+	}
+
+	@Test
+	void findsConcreteStreamingMediaType() {
+		final List<MediaType> accept = List.of(
+				MediaType.ALL,
+				MediaType.parseMediaType("application/*+x-ndjson"),
+				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
+
+		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+				.isEqualTo(MediaType.APPLICATION_NDJSON);
+	}
+
+	@Test
+	void findsConcreteStreamingMediaType_vendorFirst() {
+		final List<MediaType> accept = List.of(
+				MediaType.ALL,
+				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"),
+				MediaType.parseMediaType("application/*+x-ndjson"),
+				MediaType.APPLICATION_NDJSON);
+
+		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+				.hasToString("application/vnd.myapp.v1+x-ndjson");
+	}
+
+	@Test
+	void findsConcreteStreamingMediaType_plainNdJsonFirst() {
+		final List<MediaType> accept = List.of(
+				MediaType.ALL,
+				MediaType.APPLICATION_NDJSON,
+				MediaType.parseMediaType("application/*+x-ndjson"),
+				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
+
+		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+				.isEqualTo(MediaType.APPLICATION_NDJSON);
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	void findsConcreteStreamingMediaType_plainStreamingJsonFirst() {
+		final List<MediaType> accept = List.of(
+				MediaType.ALL,
+				MediaType.APPLICATION_STREAM_JSON,
+				MediaType.parseMediaType("application/*+x-ndjson"),
+				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
+
+		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+				.isEqualTo(MediaType.APPLICATION_STREAM_JSON);
 	}
 
 	@Test
@@ -251,7 +299,59 @@ public class ReactiveTypeHandlerTests {
 		sink.tryEmitNext(bar2);
 		sink.tryEmitComplete();
 
-		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/x-ndjson");
+		assertThat(message.getHeaders().getContentType()).hasToString("application/x-ndjson");
+		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
+	}
+
+	@Test
+	public void writeStreamJsonWithVendorSubtype() throws Exception {
+		this.servletRequest.addHeader("Accept", "application/vnd.myapp.v1+x-ndjson");
+
+		Sinks.Many<Bar> sink = Sinks.many().unicast().onBackpressureBuffer();
+		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(Bar.class));
+
+		assertThat(emitter).as("emitter").isNotNull();
+
+		EmitterHandler emitterHandler = new EmitterHandler();
+		emitter.initialize(emitterHandler);
+
+		ServletServerHttpResponse message = new ServletServerHttpResponse(this.servletResponse);
+		emitter.extendResponse(message);
+
+		Bar bar1 = new Bar("foo");
+		Bar bar2 = new Bar("bar");
+
+		sink.tryEmitNext(bar1);
+		sink.tryEmitNext(bar2);
+		sink.tryEmitComplete();
+
+		assertThat(message.getHeaders().getContentType()).hasToString("application/vnd.myapp.v1+x-ndjson");
+		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
+	}
+
+	@Test
+	public void writeStreamJsonWithWildcardSubtype() throws Exception {
+		this.servletRequest.addHeader("Accept", "application/*+x-ndjson");
+
+		Sinks.Many<Bar> sink = Sinks.many().unicast().onBackpressureBuffer();
+		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(Bar.class));
+
+		assertThat(emitter).as("emitter").isNotNull();
+
+		EmitterHandler emitterHandler = new EmitterHandler();
+		emitter.initialize(emitterHandler);
+
+		ServletServerHttpResponse message = new ServletServerHttpResponse(this.servletResponse);
+		emitter.extendResponse(message);
+
+		Bar bar1 = new Bar("foo");
+		Bar bar2 = new Bar("bar");
+
+		sink.tryEmitNext(bar1);
+		sink.tryEmitNext(bar2);
+		sink.tryEmitComplete();
+
+		assertThat(message.getHeaders().getContentType()).hasToString("application/x-ndjson");
 		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
 	}
 
@@ -363,6 +463,11 @@ public class ReactiveTypeHandlerTests {
 		@Override
 		public void send(Object data, MediaType mediaType) throws IOException {
 			this.values.add(data);
+		}
+
+		@Override
+		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) throws IOException {
+			items.forEach(item -> this.values.add(item.getData()));
 		}
 
 		@Override

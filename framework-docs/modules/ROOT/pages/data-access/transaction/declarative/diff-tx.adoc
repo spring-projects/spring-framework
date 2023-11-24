@@ -1,0 +1,114 @@
+[[transaction-declarative-diff-tx]]
+= Configuring Different Transactional Semantics for Different Beans
+
+Consider the scenario where you have a number of service layer objects, and you want to
+apply a totally different transactional configuration to each of them. You can do so
+by defining distinct `<aop:advisor/>` elements with differing `pointcut` and
+`advice-ref` attribute values.
+
+As a point of comparison, first assume that all of your service layer classes are
+defined in a root `x.y.service` package. To make all beans that are instances of classes
+defined in that package (or in subpackages) and that have names ending in `Service` have
+the default transactional configuration, you could write the following:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/tx
+			https://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<aop:config>
+
+			<aop:pointcut id="serviceOperation"
+					expression="execution(* x.y.service..*Service.*(..))"/>
+
+			<aop:advisor pointcut-ref="serviceOperation" advice-ref="txAdvice"/>
+
+		</aop:config>
+
+		<!-- these two beans will be transactional... -->
+		<bean id="fooService" class="x.y.service.DefaultFooService"/>
+		<bean id="barService" class="x.y.service.extras.SimpleBarService"/>
+
+		<!-- ... and these two beans won't -->
+		<bean id="anotherService" class="org.xyz.SomeService"/> <!-- (not in the right package) -->
+		<bean id="barManager" class="x.y.service.SimpleBarManager"/> <!-- (doesn't end in 'Service') -->
+
+		<tx:advice id="txAdvice">
+			<tx:attributes>
+				<tx:method name="get*" read-only="true"/>
+				<tx:method name="*"/>
+			</tx:attributes>
+		</tx:advice>
+
+		<!-- other transaction infrastructure beans such as a TransactionManager omitted... -->
+
+	</beans>
+----
+
+The following example shows how to configure two distinct beans with totally different
+transactional settings:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/tx
+			https://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<aop:config>
+
+			<aop:pointcut id="defaultServiceOperation"
+					expression="execution(* x.y.service.*Service.*(..))"/>
+
+			<aop:pointcut id="noTxServiceOperation"
+					expression="execution(* x.y.service.ddl.DefaultDdlManager.*(..))"/>
+
+			<aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
+
+			<aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
+
+		</aop:config>
+
+		<!-- this bean will be transactional (see the 'defaultServiceOperation' pointcut) -->
+		<bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+		<!-- this bean will also be transactional, but with totally different transactional settings -->
+		<bean id="anotherFooService" class="x.y.service.ddl.DefaultDdlManager"/>
+
+		<tx:advice id="defaultTxAdvice">
+			<tx:attributes>
+				<tx:method name="get*" read-only="true"/>
+				<tx:method name="*"/>
+			</tx:attributes>
+		</tx:advice>
+
+		<tx:advice id="noTxAdvice">
+			<tx:attributes>
+				<tx:method name="*" propagation="NEVER"/>
+			</tx:attributes>
+		</tx:advice>
+
+		<!-- other transaction infrastructure beans such as a TransactionManager omitted... -->
+
+	</beans>
+----
+
+

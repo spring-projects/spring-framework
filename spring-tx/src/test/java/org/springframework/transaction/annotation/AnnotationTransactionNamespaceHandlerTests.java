@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class AnnotationTransactionNamespaceHandlerTests {
 	public void transactionalEventListenerRegisteredProperly() {
 		assertThat(this.context.containsBean(TransactionManagementConfigUtils
 				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)).isTrue();
-		assertThat(this.context.getBeansOfType(TransactionalEventListenerFactory.class).size()).isEqualTo(1);
+		assertThat(this.context.getBeansOfType(TransactionalEventListenerFactory.class)).hasSize(1);
 	}
 
 	private TransactionalTestBean getTestBean() {

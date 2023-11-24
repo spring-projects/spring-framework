@@ -1,0 +1,81 @@
+[[testcontext-ctx-management-web-mocks]]
+= Working with Web Mocks
+
+To provide comprehensive web testing support, the TestContext framework has a
+`ServletTestExecutionListener` that is enabled by default. When testing against a
+`WebApplicationContext`, this xref:testing/testcontext-framework/key-abstractions.adoc[`TestExecutionListener`]
+sets up default thread-local state by using Spring Web's `RequestContextHolder` before
+each test method and creates a `MockHttpServletRequest`, a `MockHttpServletResponse`, and
+a `ServletWebRequest` based on the base resource path configured with
+`@WebAppConfiguration`. `ServletTestExecutionListener` also ensures that the
+`MockHttpServletResponse` and `ServletWebRequest` can be injected into the test instance,
+and, once the test is complete, it cleans up thread-local state.
+
+Once you have a `WebApplicationContext` loaded for your test, you might find that you
+need to interact with the web mocks -- for example, to set up your test fixture or to
+perform assertions after invoking your web component. The following example shows which
+mocks can be autowired into your test instance. Note that the `WebApplicationContext` and
+`MockServletContext` are both cached across the test suite, whereas the other mocks are
+managed per test method by the `ServletTestExecutionListener`.
+
+[tabs]
+======
+Injecting mocks::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitWebConfig
+	class WacTests {
+
+		@Autowired
+		WebApplicationContext wac; // cached
+
+		@Autowired
+		MockServletContext servletContext; // cached
+
+		@Autowired
+		MockHttpSession session;
+
+		@Autowired
+		MockHttpServletRequest request;
+
+		@Autowired
+		MockHttpServletResponse response;
+
+		@Autowired
+		ServletWebRequest webRequest;
+
+		//...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitWebConfig
+	class WacTests {
+
+		@Autowired
+		lateinit var wac: WebApplicationContext // cached
+
+		@Autowired
+		lateinit var servletContext: MockServletContext // cached
+
+		@Autowired
+		lateinit var session: MockHttpSession
+
+		@Autowired
+		lateinit var request: MockHttpServletRequest
+
+		@Autowired
+		lateinit var response: MockHttpServletResponse
+
+		@Autowired
+		lateinit var webRequest: ServletWebRequest
+
+		//...
+	}
+----
+======
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.web.socket.WebSocketHandler;
  * <p>Decoration should be done through sub-classing
  * {@link org.springframework.web.socket.handler.WebSocketHandlerDecorator
  * WebSocketHandlerDecorator} to allow any code to traverse decorators and/or
- * unwrap the original handler when necessary .
+ * unwrap the original handler when necessary.
  *
  * @author Rossen Stoyanchev
  * @since 4.1.2
@@ -34,8 +34,8 @@ public interface WebSocketHandlerDecoratorFactory {
 	/**
 	 * Decorate the given WebSocketHandler.
 	 * @param handler the handler to be decorated.
-	 * @return the same handler or the handler wrapped with a sub-class of
-	 * {@code WebSocketHandlerDecorator}.
+	 * @return the same handler or the handler wrapped with a subclass of
+	 * {@code WebSocketHandlerDecorator}
 	 */
 	WebSocketHandler decorate(WebSocketHandler handler);
 

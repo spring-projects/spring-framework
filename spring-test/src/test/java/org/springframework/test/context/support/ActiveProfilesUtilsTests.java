@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	 * @since 4.0
 	 */
 	@Test
-	void resolveActiveProfilesWithOverridenInheritedResolver() {
+	void resolveActiveProfilesWithOverriddenInheritedResolver() {
 		assertResolvedProfiles(OverriddenInheritedFooActiveProfilesResolverTestCase.class, "bar");
 	}
 
@@ -264,13 +264,13 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	@ActiveProfiles(profiles = { "dog", "cat" }, inheritProfiles = false)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	private static @interface MetaAnimalsConfig {
+	private @interface MetaAnimalsConfig {
 	}
 
 	@ActiveProfiles(resolver = TestClassVerifyingActiveProfilesResolver.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	private static @interface MetaResolverConfig {
+	private @interface MetaResolverConfig {
 	}
 
 	@MetaAnimalsConfig

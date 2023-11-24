@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ import java.util.Map;
 import org.springframework.lang.Nullable;
 
 /**
- * Java-5-specific interface that defines a holder for model attributes.
- * Primarily designed for adding attributes to the model.
- * Allows for accessing the overall model as a {@code java.util.Map}.
+ * Interface that defines a holder for model attributes.
+ *
+ * <p>Primarily designed for adding attributes to the model.
+ *
+ * <p>Allows for accessing the overall model as a {@code java.util.Map}.
  *
  * @author Juergen Hoeller
  * @since 2.5.1

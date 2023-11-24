@@ -1,0 +1,203 @@
+[[webflux-ann-modelattrib-method-args]]
+= `@ModelAttribute`
+
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[See equivalent in the Servlet stack]#
+
+The `@ModelAttribute` method parameter annotation binds request parameters onto a model
+object. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(@ModelAttribute Pet pet) { } // <1>
+----
+<1> Bind to an instance of `Pet`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@ModelAttribute pet: Pet): String { } // <1>
+----
+<1> Bind to an instance of `Pet`.
+======
+
+The `Pet` instance may be:
+
+* Accessed from the model where it could have been added by a
+  xref:web/webflux/controller/ann-modelattrib-methods.adoc[`Model`].
+* Accessed from the HTTP session if the model attribute was listed in
+  the class-level xref:web/webflux/controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`].
+* Instantiated through a default constructor.
+* Instantiated through a "`primary constructor`" with arguments that match to Servlet
+request parameters. Argument names are determined through runtime-retained parameter
+names in the bytecode.
+
+By default, both constructor and property
+xref:core/validation/beans-beans.adoc#beans-binding[data binding] are applied. However,
+model object design requires careful consideration, and for security reasons it is
+recommended either to use an object tailored specifically for web binding, or to apply
+constructor binding only. If property binding must still be used, then _allowedFields_
+patterns should be set to limit which properties can be set. For further details on this
+and example configuration, see
+xref:web/webflux/controller/ann-initbinder.adoc#webflux-ann-initbinder-model-design[model design].
+
+When using constructor binding, you can customize request parameter names through an
+`@BindParam` annotation. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class Account {
+
+	    private final String firstName;
+
+		public Account(@BindParam("first-name") String firstName) {
+			this.firstName = firstName;
+		}
+	}
+----
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Account(@BindParam("first-name") val firstName: String)
+----
+======
+
+NOTE: The `@BindParam` may also be placed on the fields that correspond to constructor
+parameters. While `@BindParam` is supported out of the box, you can also use a
+different annotation by setting a `DataBinder.NameResolver` on `DataBinder`
+
+WebFlux, unlike Spring MVC, supports reactive types in the model, e.g. `Mono<Account>`.
+You can declare a `@ModelAttribute` argument with or without a reactive type wrapper, and
+it will be resolved accordingly to the actual value.
+
+If data binding results in errors, by default a `WebExchangeBindException` is raised,
+but you can also add a `BindingResult` argument immediately next to the `@ModelAttribute`
+in order to handle such errors in the controller method. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result) { <1>
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		// ...
+	}
+----
+<1> Adding a `BindingResult`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
+		if (result.hasErrors()) {
+			return "petForm"
+		}
+		// ...
+	}
+----
+<1> Adding a `BindingResult`.
+======
+
+To use a `BindingResult` argument, you must declare the `@ModelAttribute` argument before
+it without a reactive type wrapper. If you want to use the reactive, you can handle errors
+directly through it. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public Mono<String> processSubmit(@Valid @ModelAttribute("pet") Mono<Pet> petMono) {
+		return petMono
+			.flatMap(pet -> {
+				// ...
+			})
+			.onErrorResume(ex -> {
+				// ...
+			});
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@Valid @ModelAttribute("pet") petMono: Mono<Pet>): Mono<String> {
+		return petMono
+				.flatMap { pet ->
+					// ...
+				}
+				.onErrorResume{ ex ->
+					// ...
+				}
+	}
+----
+======
+
+You can automatically apply validation after data binding by adding the
+`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation (see
+xref:core/validation/beanvalidation.adoc[Bean Validation] and
+xref:web/webmvc/mvc-config/validation.adoc[Spring validation]). For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		// ...
+	}
+----
+<1> Using `@Valid` on a model attribute argument.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	fun processSubmit(@Valid @ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
+		if (result.hasErrors()) {
+			return "petForm"
+		}
+		// ...
+	}
+----
+<1> Using `@Valid` on a model attribute argument.
+======
+
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` would be raised instead. See the section on
+controller method xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
+
+TIP: Using `@ModelAttribute` is optional. By default, any argument that is not a simple
+value type as determined by
+{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+_AND_ that is not resolved by any other argument resolver is treated as an `@ModelAttribute`.
+
+

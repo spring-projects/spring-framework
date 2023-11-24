@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 package org.springframework.util;
 
 import java.lang.reflect.Array;
+import java.nio.charset.Charset;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.TimeZone;
 
 import org.springframework.lang.Nullable;
 
@@ -45,9 +49,6 @@ import org.springframework.lang.Nullable;
  */
 public abstract class ObjectUtils {
 
-	private static final int INITIAL_HASH = 7;
-	private static final int MULTIPLIER = 31;
-
 	private static final String EMPTY_STRING = "";
 	private static final String NULL_STRING = "null";
 	private static final String ARRAY_START = "{";
@@ -55,6 +56,9 @@ public abstract class ObjectUtils {
 	private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+	private static final String NON_EMPTY_ARRAY = ARRAY_START + "..." + ARRAY_END;
+	private static final String COLLECTION = "[...]";
+	private static final String MAP = NON_EMPTY_ARRAY;
 
 
 	/**
@@ -72,7 +76,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Check whether the given exception is compatible with the specified
-	 * exception types, as declared in a throws clause.
+	 * exception types, as declared in a {@code throws} clause.
 	 * @param ex the exception to check
 	 * @param declaredExceptions the exception types declared in the throws clause
 	 * @return whether the given exception is compatible
@@ -114,7 +118,7 @@ public abstract class ObjectUtils {
 	 * Determine whether the given object is empty.
 	 * <p>This method supports the following object types.
 	 * <ul>
-	 * <li>{@code Optional}: considered empty if {@link Optional#empty()}</li>
+	 * <li>{@code Optional}: considered empty if not {@link Optional#isPresent()}</li>
 	 * <li>{@code Array}: considered empty if its length is zero</li>
 	 * <li>{@link CharSequence}: considered empty if its length is zero</li>
 	 * <li>{@link Collection}: delegates to {@link Collection#isEmpty()}</li>
@@ -136,20 +140,20 @@ public abstract class ObjectUtils {
 			return true;
 		}
 
-		if (obj instanceof Optional) {
-			return !((Optional<?>) obj).isPresent();
+		if (obj instanceof Optional<?> optional) {
+			return optional.isEmpty();
 		}
-		if (obj instanceof CharSequence) {
-			return ((CharSequence) obj).length() == 0;
+		if (obj instanceof CharSequence charSequence) {
+			return charSequence.isEmpty();
 		}
 		if (obj.getClass().isArray()) {
 			return Array.getLength(obj) == 0;
 		}
-		if (obj instanceof Collection) {
-			return ((Collection<?>) obj).isEmpty();
+		if (obj instanceof Collection<?> collection) {
+			return collection.isEmpty();
 		}
-		if (obj instanceof Map) {
-			return ((Map<?, ?>) obj).isEmpty();
+		if (obj instanceof Map<?, ?> map) {
+			return map.isEmpty();
 		}
 
 		// else
@@ -165,9 +169,8 @@ public abstract class ObjectUtils {
 	 */
 	@Nullable
 	public static Object unwrapOptional(@Nullable Object obj) {
-		if (obj instanceof Optional) {
-			Optional<?> optional = (Optional<?>) obj;
-			if (!optional.isPresent()) {
+		if (obj instanceof Optional<?> optional) {
+			if (optional.isEmpty()) {
 				return null;
 			}
 			Object result = optional.get();
@@ -239,7 +242,7 @@ public abstract class ObjectUtils {
 			}
 		}
 		throw new IllegalArgumentException("Constant [" + constant + "] does not exist in enum type " +
-				enumValues.getClass().getComponentType().getName());
+				enumValues.getClass().componentType().getName());
 	}
 
 	/**
@@ -250,21 +253,35 @@ public abstract class ObjectUtils {
 	 * @return the new array (of the same component type; never {@code null})
 	 */
 	public static <A, O extends A> A[] addObjectToArray(@Nullable A[] array, @Nullable O obj) {
-		Class<?> compType = Object.class;
+		return addObjectToArray(array, obj, (array != null ? array.length : 0));
+	}
+
+	/**
+	 * Add the given object to the given array at the specified position, returning
+	 * a new array consisting of the input array contents plus the given object.
+	 * @param array the array to add to (can be {@code null})
+	 * @param obj the object to append
+	 * @param position the position at which to add the object
+	 * @return the new array (of the same component type; never {@code null})
+	 * @since 6.0
+	 */
+	public static <A, O extends A> A[] addObjectToArray(@Nullable A[] array, @Nullable O obj, int position) {
+		Class<?> componentType = Object.class;
 		if (array != null) {
-			compType = array.getClass().getComponentType();
+			componentType = array.getClass().componentType();
 		}
 		else if (obj != null) {
-			compType = obj.getClass();
+			componentType = obj.getClass();
 		}
-		int newArrLength = (array != null ? array.length + 1 : 1);
+		int newArrayLength = (array != null ? array.length + 1 : 1);
 		@SuppressWarnings("unchecked")
-		A[] newArr = (A[]) Array.newInstance(compType, newArrLength);
+		A[] newArray = (A[]) Array.newInstance(componentType, newArrayLength);
 		if (array != null) {
-			System.arraycopy(array, 0, newArr, 0, array.length);
+			System.arraycopy(array, 0, newArray, 0, position);
+			System.arraycopy(array, position, newArray, position + 1, array.length - position);
 		}
-		newArr[newArr.length - 1] = obj;
-		return newArr;
+		newArray[position] = obj;
+		return newArray;
 	}
 
 	/**
@@ -277,8 +294,8 @@ public abstract class ObjectUtils {
 	 * @throws IllegalArgumentException if the parameter is not an array
 	 */
 	public static Object[] toObjectArray(@Nullable Object source) {
-		if (source instanceof Object[]) {
-			return (Object[]) source;
+		if (source instanceof Object[] objects) {
+			return objects;
 		}
 		if (source == null) {
 			return EMPTY_OBJECT_ARRAY;
@@ -340,84 +357,95 @@ public abstract class ObjectUtils {
 	 * @see java.util.Arrays#equals
 	 */
 	private static boolean arrayEquals(Object o1, Object o2) {
-		if (o1 instanceof Object[] && o2 instanceof Object[]) {
-			return Arrays.equals((Object[]) o1, (Object[]) o2);
+		if (o1 instanceof Object[] objects1 && o2 instanceof Object[] objects2) {
+			return Arrays.equals(objects1, objects2);
 		}
-		if (o1 instanceof boolean[] && o2 instanceof boolean[]) {
-			return Arrays.equals((boolean[]) o1, (boolean[]) o2);
+		if (o1 instanceof boolean[] booleans1 && o2 instanceof boolean[] booleans2) {
+			return Arrays.equals(booleans1, booleans2);
 		}
-		if (o1 instanceof byte[] && o2 instanceof byte[]) {
-			return Arrays.equals((byte[]) o1, (byte[]) o2);
+		if (o1 instanceof byte[] bytes1 && o2 instanceof byte[] bytes2) {
+			return Arrays.equals(bytes1, bytes2);
 		}
-		if (o1 instanceof char[] && o2 instanceof char[]) {
-			return Arrays.equals((char[]) o1, (char[]) o2);
+		if (o1 instanceof char[] chars1 && o2 instanceof char[] chars2) {
+			return Arrays.equals(chars1, chars2);
 		}
-		if (o1 instanceof double[] && o2 instanceof double[]) {
-			return Arrays.equals((double[]) o1, (double[]) o2);
+		if (o1 instanceof double[] doubles1 && o2 instanceof double[] doubles2) {
+			return Arrays.equals(doubles1, doubles2);
 		}
-		if (o1 instanceof float[] && o2 instanceof float[]) {
-			return Arrays.equals((float[]) o1, (float[]) o2);
+		if (o1 instanceof float[] floats1 && o2 instanceof float[] floats2) {
+			return Arrays.equals(floats1, floats2);
 		}
-		if (o1 instanceof int[] && o2 instanceof int[]) {
-			return Arrays.equals((int[]) o1, (int[]) o2);
+		if (o1 instanceof int[] ints1 && o2 instanceof int[] ints2) {
+			return Arrays.equals(ints1, ints2);
 		}
-		if (o1 instanceof long[] && o2 instanceof long[]) {
-			return Arrays.equals((long[]) o1, (long[]) o2);
+		if (o1 instanceof long[] longs1 && o2 instanceof long[] longs2) {
+			return Arrays.equals(longs1, longs2);
 		}
-		if (o1 instanceof short[] && o2 instanceof short[]) {
-			return Arrays.equals((short[]) o1, (short[]) o2);
+		if (o1 instanceof short[] shorts1 && o2 instanceof short[] shorts2) {
+			return Arrays.equals(shorts1, shorts2);
 		}
 		return false;
 	}
 
 	/**
-	 * Return as hash code for the given object; typically the value of
+	 * Return a hash code for the given elements, delegating to
+	 * {@link #nullSafeHashCode(Object)} for each element. Contrary
+	 * to {@link Objects#hash(Object...)}, this method can handle an
+	 * element that is an array.
+	 * @param elements the elements to be hashed
+	 * @return a hash value of the elements
+	 * @since 6.1
+	 */
+	public static int nullSafeHash(@Nullable Object... elements) {
+		if (elements == null) {
+			return 0;
+		}
+		int result = 1;
+		for (Object element : elements) {
+			result = 31 * result + nullSafeHashCode(element);
+		}
+		return result;
+	}
+
+	/**
+	 * Return a hash code for the given object; typically the value of
 	 * {@code Object#hashCode()}}. If the object is an array,
-	 * this method will delegate to any of the {@code nullSafeHashCode}
-	 * methods for arrays in this class. If the object is {@code null},
-	 * this method returns 0.
+	 * this method will delegate to any of the {@code Arrays.hashCode}
+	 * methods. If the object is {@code null}, this method returns 0.
 	 * @see Object#hashCode()
-	 * @see #nullSafeHashCode(Object[])
-	 * @see #nullSafeHashCode(boolean[])
-	 * @see #nullSafeHashCode(byte[])
-	 * @see #nullSafeHashCode(char[])
-	 * @see #nullSafeHashCode(double[])
-	 * @see #nullSafeHashCode(float[])
-	 * @see #nullSafeHashCode(int[])
-	 * @see #nullSafeHashCode(long[])
-	 * @see #nullSafeHashCode(short[])
+	 * @see Arrays
 	 */
 	public static int nullSafeHashCode(@Nullable Object obj) {
 		if (obj == null) {
 			return 0;
 		}
 		if (obj.getClass().isArray()) {
-			if (obj instanceof Object[]) {
-				return nullSafeHashCode((Object[]) obj);
+			if (obj instanceof Object[] objects) {
+				return Arrays.hashCode(objects);
 			}
-			if (obj instanceof boolean[]) {
-				return nullSafeHashCode((boolean[]) obj);
+			if (obj instanceof boolean[] booleans) {
+				return Arrays.hashCode(booleans);
 			}
-			if (obj instanceof byte[]) {
-				return nullSafeHashCode((byte[]) obj);
+			if (obj instanceof byte[] bytes) {
+				return Arrays.hashCode(bytes);
 			}
-			if (obj instanceof char[]) {
-				return nullSafeHashCode((char[]) obj);
+			if (obj instanceof char[] chars) {
+				return Arrays.hashCode(chars);
 			}
-			if (obj instanceof double[]) {
-				return nullSafeHashCode((double[]) obj);
+			if (obj instanceof double[] doubles) {
+				return Arrays.hashCode(doubles);
 			}
-			if (obj instanceof float[]) {
-				return nullSafeHashCode((float[]) obj);
+			if (obj instanceof float[] floats) {
+				return Arrays.hashCode(floats);
 			}
-			if (obj instanceof int[]) {
-				return nullSafeHashCode((int[]) obj);
+			if (obj instanceof int[] ints) {
+				return Arrays.hashCode(ints);
 			}
-			if (obj instanceof long[]) {
-				return nullSafeHashCode((long[]) obj);
+			if (obj instanceof long[] longs) {
+				return Arrays.hashCode(longs);
 			}
-			if (obj instanceof short[]) {
-				return nullSafeHashCode((short[]) obj);
+			if (obj instanceof short[] shorts) {
+				return Arrays.hashCode(shorts);
 			}
 		}
 		return obj.hashCode();
@@ -426,172 +454,91 @@ public abstract class ObjectUtils {
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(Object[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable Object[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (Object element : array) {
-			hash = MULTIPLIER * hash + nullSafeHashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(boolean[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable boolean[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (boolean element : array) {
-			hash = MULTIPLIER * hash + Boolean.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(byte[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable byte[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (byte element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(char[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable char[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (char element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(double[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable double[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (double element : array) {
-			hash = MULTIPLIER * hash + Double.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(float[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable float[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (float element : array) {
-			hash = MULTIPLIER * hash + Float.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(int[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable int[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (int element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(long[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable long[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (long element : array) {
-			hash = MULTIPLIER * hash + Long.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated as of 6.1 in favor of {@link Arrays#hashCode(short[])}
 	 */
+	@Deprecated(since = "6.1")
 	public static int nullSafeHashCode(@Nullable short[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (short element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
-	}
-
-	/**
-	 * Return the same value as {@link Boolean#hashCode(boolean)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(boolean bool) {
-		return Boolean.hashCode(bool);
-	}
-
-	/**
-	 * Return the same value as {@link Double#hashCode(double)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(double dbl) {
-		return Double.hashCode(dbl);
-	}
-
-	/**
-	 * Return the same value as {@link Float#hashCode(float)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(float flt) {
-		return Float.hashCode(flt);
-	}
-
-	/**
-	 * Return the same value as {@link Long#hashCode(long)}}.
-	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
-	 */
-	@Deprecated
-	public static int hashCode(long lng) {
-		return Long.hashCode(lng);
+		return Arrays.hashCode(array);
 	}
 
 
@@ -653,40 +600,41 @@ public abstract class ObjectUtils {
 	 * Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to build a String representation for
 	 * @return a String representation of {@code obj}
+	 * @see #nullSafeConciseToString(Object)
 	 */
 	public static String nullSafeToString(@Nullable Object obj) {
 		if (obj == null) {
 			return NULL_STRING;
 		}
-		if (obj instanceof String) {
-			return (String) obj;
+		if (obj instanceof String string) {
+			return string;
 		}
-		if (obj instanceof Object[]) {
-			return nullSafeToString((Object[]) obj);
+		if (obj instanceof Object[] objects) {
+			return nullSafeToString(objects);
 		}
-		if (obj instanceof boolean[]) {
-			return nullSafeToString((boolean[]) obj);
+		if (obj instanceof boolean[] booleans) {
+			return nullSafeToString(booleans);
 		}
-		if (obj instanceof byte[]) {
-			return nullSafeToString((byte[]) obj);
+		if (obj instanceof byte[] bytes) {
+			return nullSafeToString(bytes);
 		}
-		if (obj instanceof char[]) {
-			return nullSafeToString((char[]) obj);
+		if (obj instanceof char[] chars) {
+			return nullSafeToString(chars);
 		}
-		if (obj instanceof double[]) {
-			return nullSafeToString((double[]) obj);
+		if (obj instanceof double[] doubles) {
+			return nullSafeToString(doubles);
 		}
-		if (obj instanceof float[]) {
-			return nullSafeToString((float[]) obj);
+		if (obj instanceof float[] floats) {
+			return nullSafeToString(floats);
 		}
-		if (obj instanceof int[]) {
-			return nullSafeToString((int[]) obj);
+		if (obj instanceof int[] ints) {
+			return nullSafeToString(ints);
 		}
-		if (obj instanceof long[]) {
-			return nullSafeToString((long[]) obj);
+		if (obj instanceof long[] longs) {
+			return nullSafeToString(longs);
 		}
-		if (obj instanceof short[]) {
-			return nullSafeToString((short[]) obj);
+		if (obj instanceof short[] shorts) {
+			return nullSafeToString(shorts);
 		}
 		String str = obj.toString();
 		return (str != null ? str : EMPTY_STRING);
@@ -906,6 +854,90 @@ public abstract class ObjectUtils {
 			stringJoiner.add(String.valueOf(s));
 		}
 		return stringJoiner.toString();
+	}
+
+	/**
+	 * Generate a null-safe, concise string representation of the supplied object
+	 * as described below.
+	 * <p>Favor this method over {@link #nullSafeToString(Object)} when you need
+	 * the length of the generated string to be limited.
+	 * <p>Returns:
+	 * <ul>
+	 * <li>{@code "null"} if {@code obj} is {@code null}</li>
+	 * <li>{@code "Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
+	 * <li>{@code "Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
+	 * where {@code <concise-string>} is the result of invoking this method on the object
+	 * contained in the {@code Optional}</li>
+	 * <li>{@code "{}"} if {@code obj} is an empty array</li>
+	 * <li>{@code "{...}"} if {@code obj} is a {@link Map} or a non-empty array</li>
+	 * <li>{@code "[...]"} if {@code obj} is a {@link Collection}</li>
+	 * <li>{@linkplain Class#getName() Class name} if {@code obj} is a {@link Class}</li>
+	 * <li>{@linkplain Charset#name() Charset name} if {@code obj} is a {@link Charset}</li>
+	 * <li>{@linkplain TimeZone#getID() TimeZone ID} if {@code obj} is a {@link TimeZone}</li>
+	 * <li>{@linkplain ZoneId#getId() Zone ID} if {@code obj} is a {@link ZoneId}</li>
+	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
+	 * if {@code obj} is a {@link String} or {@link CharSequence}</li>
+	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
+	 * if {@code obj} is a <em>simple value type</em> whose {@code toString()} method
+	 * returns a non-null value</li>
+	 * <li>Otherwise, a string representation of the object's type name concatenated
+	 * with {@code "@"} and a hex string form of the object's identity hash code</li>
+	 * </ul>
+	 * <p>In the context of this method, a <em>simple value type</em> is any of the following:
+	 * primitive wrapper (excluding {@link Void}), {@link Enum}, {@link Number},
+	 * {@link java.util.Date Date}, {@link java.time.temporal.Temporal Temporal},
+	 * {@link java.io.File File}, {@link java.nio.file.Path Path},
+	 * {@link java.net.URI URI}, {@link java.net.URL URL},
+	 * {@link java.net.InetAddress InetAddress}, {@link java.util.Currency Currency},
+	 * {@link java.util.Locale Locale}, {@link java.util.UUID UUID},
+	 * {@link java.util.regex.Pattern Pattern}.
+	 * @param obj the object to build a string representation for
+	 * @return a concise string representation of the supplied object
+	 * @since 5.3.27
+	 * @see #nullSafeToString(Object)
+	 * @see StringUtils#truncate(CharSequence)
+	 * @see ClassUtils#isSimpleValueType(Class)
+	 */
+	public static String nullSafeConciseToString(@Nullable Object obj) {
+		if (obj == null) {
+			return "null";
+		}
+		if (obj instanceof Optional<?> optional) {
+			return (optional.isEmpty() ? "Optional.empty" :
+				"Optional[%s]".formatted(nullSafeConciseToString(optional.get())));
+		}
+		if (obj.getClass().isArray()) {
+			return (Array.getLength(obj) == 0 ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
+		}
+		if (obj instanceof Collection) {
+			return COLLECTION;
+		}
+		if (obj instanceof Map) {
+			return MAP;
+		}
+		if (obj instanceof Class<?> clazz) {
+			return clazz.getName();
+		}
+		if (obj instanceof Charset charset) {
+			return charset.name();
+		}
+		if (obj instanceof TimeZone timeZone) {
+			return timeZone.getID();
+		}
+		if (obj instanceof ZoneId zoneId) {
+			return zoneId.getId();
+		}
+		if (obj instanceof CharSequence charSequence) {
+			return StringUtils.truncate(charSequence);
+		}
+		Class<?> type = obj.getClass();
+		if (ClassUtils.isSimpleValueType(type)) {
+			String str = obj.toString();
+			if (str != null) {
+				return StringUtils.truncate(str);
+			}
+		}
+		return type.getTypeName() + "@" + getIdentityHexString(obj);
 	}
 
 }

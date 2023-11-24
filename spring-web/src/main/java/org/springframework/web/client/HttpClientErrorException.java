@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 
 /**
@@ -37,14 +38,14 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	/**
 	 * Constructor with a status code only.
 	 */
-	public HttpClientErrorException(HttpStatus statusCode) {
+	public HttpClientErrorException(HttpStatusCode statusCode) {
 		super(statusCode);
 	}
 
 	/**
 	 * Constructor with a status code and status text.
 	 */
-	public HttpClientErrorException(HttpStatus statusCode, String statusText) {
+	public HttpClientErrorException(HttpStatusCode statusCode, String statusText) {
 		super(statusCode, statusText);
 	}
 
@@ -52,7 +53,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	 * Constructor with a status code and status text, and content.
 	 */
 	public HttpClientErrorException(
-			HttpStatus statusCode, String statusText, @Nullable byte[] body, @Nullable Charset responseCharset) {
+			HttpStatusCode statusCode, String statusText, @Nullable byte[] body, @Nullable Charset responseCharset) {
 
 		super(statusCode, statusText, body, responseCharset);
 	}
@@ -60,7 +61,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	/**
 	 * Constructor with a status code and status text, headers, and content.
 	 */
-	public HttpClientErrorException(HttpStatus statusCode, String statusText,
+	public HttpClientErrorException(HttpStatusCode statusCode, String statusText,
 			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset responseCharset) {
 
 		super(statusCode, statusText, headers, body, responseCharset);
@@ -68,10 +69,10 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 
 	/**
 	 * Constructor with a status code and status text, headers, and content,
-	 * and an prepared message.
+	 * and a prepared message.
 	 * @since 5.2.2
 	 */
-	public HttpClientErrorException(String message, HttpStatus statusCode, String statusText,
+	public HttpClientErrorException(String message, HttpStatusCode statusCode, String statusText,
 			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset responseCharset) {
 
 		super(message, statusCode, statusText, headers, body, responseCharset);
@@ -79,72 +80,68 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 
 
 	/**
-	 * Create {@code HttpClientErrorException} or an HTTP status specific sub-class.
+	 * Create {@code HttpClientErrorException} or an HTTP status specific subclass.
 	 * @since 5.1
 	 */
 	public static HttpClientErrorException create(
-			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+			HttpStatusCode statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
 		return create(null, statusCode, statusText, headers, body, charset);
 	}
 
 	/**
-	 * Variant of {@link #create(HttpStatus, String, HttpHeaders, byte[], Charset)}
+	 * Variant of {@link #create(HttpStatusCode, String, HttpHeaders, byte[], Charset)}
 	 * with an optional prepared message.
 	 * @since 5.2.2
 	 */
-	public static HttpClientErrorException create(@Nullable String message, HttpStatus statusCode,
+	public static HttpClientErrorException create(@Nullable String message, HttpStatusCode statusCode,
 			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
-		switch (statusCode) {
-			case BAD_REQUEST:
-				return message != null ?
-						new HttpClientErrorException.BadRequest(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.BadRequest(statusText, headers, body, charset);
-			case UNAUTHORIZED:
-				return message != null ?
-						new HttpClientErrorException.Unauthorized(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.Unauthorized(statusText, headers, body, charset);
-			case FORBIDDEN:
-				return message != null ?
-						new HttpClientErrorException.Forbidden(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.Forbidden(statusText, headers, body, charset);
-			case NOT_FOUND:
-				return message != null ?
-						new HttpClientErrorException.NotFound(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.NotFound(statusText, headers, body, charset);
-			case METHOD_NOT_ALLOWED:
-				return message != null ?
-						new HttpClientErrorException.MethodNotAllowed(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.MethodNotAllowed(statusText, headers, body, charset);
-			case NOT_ACCEPTABLE:
-				return message != null ?
-						new HttpClientErrorException.NotAcceptable(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.NotAcceptable(statusText, headers, body, charset);
-			case CONFLICT:
-				return message != null ?
-						new HttpClientErrorException.Conflict(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.Conflict(statusText, headers, body, charset);
-			case GONE:
-				return message != null ?
-						new HttpClientErrorException.Gone(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.Gone(statusText, headers, body, charset);
-			case UNSUPPORTED_MEDIA_TYPE:
-				return message != null ?
-						new HttpClientErrorException.UnsupportedMediaType(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.UnsupportedMediaType(statusText, headers, body, charset);
-			case TOO_MANY_REQUESTS:
-				return message != null ?
-						new HttpClientErrorException.TooManyRequests(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.TooManyRequests(statusText, headers, body, charset);
-			case UNPROCESSABLE_ENTITY:
-				return message != null ?
-						new HttpClientErrorException.UnprocessableEntity(message, statusText, headers, body, charset) :
-						new HttpClientErrorException.UnprocessableEntity(statusText, headers, body, charset);
-			default:
-				return message != null ?
+		if (statusCode instanceof HttpStatus status) {
+			return switch (status) {
+				case BAD_REQUEST -> message != null ?
+						new BadRequest(message, statusText, headers, body, charset) :
+						new BadRequest(statusText, headers, body, charset);
+				case UNAUTHORIZED -> message != null ?
+						new Unauthorized(message, statusText, headers, body, charset) :
+						new Unauthorized(statusText, headers, body, charset);
+				case FORBIDDEN -> message != null ?
+						new Forbidden(message, statusText, headers, body, charset) :
+						new Forbidden(statusText, headers, body, charset);
+				case NOT_FOUND -> message != null ?
+						new NotFound(message, statusText, headers, body, charset) :
+						new NotFound(statusText, headers, body, charset);
+				case METHOD_NOT_ALLOWED -> message != null ?
+						new MethodNotAllowed(message, statusText, headers, body, charset) :
+						new MethodNotAllowed(statusText, headers, body, charset);
+				case NOT_ACCEPTABLE -> message != null ?
+						new NotAcceptable(message, statusText, headers, body, charset) :
+						new NotAcceptable(statusText, headers, body, charset);
+				case CONFLICT -> message != null ?
+						new Conflict(message, statusText, headers, body, charset) :
+						new Conflict(statusText, headers, body, charset);
+				case GONE -> message != null ?
+						new Gone(message, statusText, headers, body, charset) :
+						new Gone(statusText, headers, body, charset);
+				case UNSUPPORTED_MEDIA_TYPE -> message != null ?
+						new UnsupportedMediaType(message, statusText, headers, body, charset) :
+						new UnsupportedMediaType(statusText, headers, body, charset);
+				case TOO_MANY_REQUESTS -> message != null ?
+						new TooManyRequests(message, statusText, headers, body, charset) :
+						new TooManyRequests(statusText, headers, body, charset);
+				case UNPROCESSABLE_ENTITY -> message != null ?
+						new UnprocessableEntity(message, statusText, headers, body, charset) :
+						new UnprocessableEntity(statusText, headers, body, charset);
+				default -> message != null ?
 						new HttpClientErrorException(message, statusCode, statusText, headers, body, charset) :
 						new HttpClientErrorException(statusCode, statusText, headers, body, charset);
+			};
+		}
+		if (message != null) {
+			return new HttpClientErrorException(message, statusCode, statusText, headers, body, charset);
+		}
+		else {
+			return new HttpClientErrorException(statusCode, statusText, headers, body, charset);
 		}
 	}
 

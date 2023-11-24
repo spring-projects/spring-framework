@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of JSON objects using Jackson 2.9.
+ * Encode from an {@code Object} stream to a byte stream of JSON objects using Jackson 2.x.
  * For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
  * before serialization for performance reason.
  *
@@ -45,6 +46,10 @@ import org.springframework.util.MimeType;
  * @see Jackson2JsonDecoder
  */
 public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
+
+	private static final List<MimeType> problemDetailMimeTypes =
+			Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
+
 
 	@Nullable
 	private final PrettyPrinter ssePrettyPrinter;
@@ -67,6 +72,11 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 		return printer;
 	}
 
+
+	@Override
+	protected List<MimeType> getMediaTypesForProblemDetail() {
+		return problemDetailMimeTypes;
+	}
 
 	@Override
 	protected ObjectWriter customizeWriter(ObjectWriter writer, @Nullable MimeType mimeType,

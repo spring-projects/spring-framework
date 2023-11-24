@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,16 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
-
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -59,9 +58,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.ServletContext} interface.
+ * Mock implementation of the {@link jakarta.servlet.ServletContext} interface.
  *
- * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
  *
  * <p>Compatible with Servlet 3.1 but can be configured to expose a specific version
  * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.1.
@@ -112,13 +111,13 @@ public class MockServletContext implements ServletContext {
 
 	private final Map<String, ServletContext> contexts = new HashMap<>();
 
-	private int majorVersion = 3;
+	private int majorVersion = 6;
 
-	private int minorVersion = 1;
+	private int minorVersion = 0;
 
-	private int effectiveMajorVersion = 3;
+	private int effectiveMajorVersion = 6;
 
-	private int effectiveMinorVersion = 1;
+	private int effectiveMinorVersion = 0;
 
 	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<>();
 
@@ -431,34 +430,9 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Deprecated
-	@Override
-	@Nullable
-	public Servlet getServlet(String name) {
-		return null;
-	}
-
-	@Override
-	@Deprecated
-	public Enumeration<Servlet> getServlets() {
-		return Collections.enumeration(Collections.emptySet());
-	}
-
-	@Override
-	@Deprecated
-	public Enumeration<String> getServletNames() {
-		return Collections.enumeration(Collections.emptySet());
-	}
-
 	@Override
 	public void log(String message) {
 		logger.info(message);
-	}
-
-	@Override
-	@Deprecated
-	public void log(Exception ex, String message) {
-		logger.info(message, ex);
 	}
 
 	@Override
@@ -663,7 +637,7 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * This method always returns {@code null}.
-	 * @see javax.servlet.ServletContext#getServletRegistration(java.lang.String)
+	 * @see jakarta.servlet.ServletContext#getServletRegistration(java.lang.String)
 	 */
 	@Override
 	@Nullable
@@ -673,7 +647,7 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * This method always returns an {@linkplain Collections#emptyMap empty map}.
-	 * @see javax.servlet.ServletContext#getServletRegistrations()
+	 * @see jakarta.servlet.ServletContext#getServletRegistrations()
 	 */
 	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
@@ -702,7 +676,7 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * This method always returns {@code null}.
-	 * @see javax.servlet.ServletContext#getFilterRegistration(java.lang.String)
+	 * @see jakarta.servlet.ServletContext#getFilterRegistration(java.lang.String)
 	 */
 	@Override
 	@Nullable
@@ -712,7 +686,7 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * This method always returns an {@linkplain Collections#emptyMap empty map}.
-	 * @see javax.servlet.ServletContext#getFilterRegistrations()
+	 * @see jakarta.servlet.ServletContext#getFilterRegistrations()
 	 */
 	@Override
 	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {

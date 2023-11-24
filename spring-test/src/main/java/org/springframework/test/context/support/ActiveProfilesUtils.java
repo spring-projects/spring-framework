@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,11 +60,12 @@ abstract class ActiveProfilesUtils {
 	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles} flag of
 	 * {@link ActiveProfiles @ActiveProfiles} will be taken into consideration.
 	 * Specifically, if the {@code inheritProfiles} flag is set to {@code true}, profiles
-	 * defined in the test class will be merged with those defined in superclasses.
+	 * defined in the test class will be merged with those defined in superclasses
+	 * and enclosing classes.
 	 * @param testClass the class for which to resolve the active profiles (must not be
 	 * {@code null})
-	 * @return the set of active profiles for the specified class, including active
-	 * profiles from superclasses if appropriate (never {@code null})
+	 * @return the active profiles for the specified class, including active
+	 * profiles from superclasses and enclosing classes if appropriate (never {@code null})
 	 * @see ActiveProfiles
 	 * @see ActiveProfilesResolver
 	 * @see org.springframework.context.annotation.Profile
@@ -75,10 +76,9 @@ abstract class ActiveProfilesUtils {
 		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, ActiveProfiles.class);
 		List<String[]> profileArrays = new ArrayList<>();
 
-		if (descriptor == null && logger.isDebugEnabled()) {
-			logger.debug(String.format(
-					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-					ActiveProfiles.class.getName(), testClass.getName()));
+		if (descriptor == null && logger.isTraceEnabled()) {
+			logger.trace("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]"
+					.formatted(ActiveProfiles.class.getName(), testClass.getName()));
 		}
 
 		while (descriptor != null) {
@@ -86,8 +86,8 @@ abstract class ActiveProfilesUtils {
 			ActiveProfiles annotation = descriptor.getAnnotation();
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s]",
-						annotation, descriptor.getDeclaringClass().getName()));
+				logger.trace("Retrieved @ActiveProfiles [%s] for declaring class [%s]"
+						.formatted(annotation, descriptor.getDeclaringClass().getName()));
 			}
 
 			ActiveProfilesResolver resolver;
@@ -100,8 +100,8 @@ abstract class ActiveProfilesUtils {
 					resolver = BeanUtils.instantiateClass(resolverClass, ActiveProfilesResolver.class);
 				}
 				catch (Exception ex) {
-					String msg = String.format("Could not instantiate ActiveProfilesResolver of type [%s] " +
-							"for test class [%s]", resolverClass.getName(), rootDeclaringClass.getName());
+					String msg = "Could not instantiate ActiveProfilesResolver of type [%s] for test class [%s]"
+							.formatted(resolverClass.getName(), rootDeclaringClass.getName());
 					logger.error(msg);
 					throw new IllegalStateException(msg, ex);
 				}

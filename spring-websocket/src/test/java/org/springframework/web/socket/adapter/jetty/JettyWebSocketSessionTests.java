@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,40 @@
 
 package org.springframework.web.socket.adapter.jetty;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.testfixture.security.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link org.springframework.web.socket.adapter.jetty.JettyWebSocketSession}.
+ * Unit tests for {@link JettyWebSocketSession}.
  *
  * @author Rossen Stoyanchev
  */
-public class JettyWebSocketSessionTests {
+class JettyWebSocketSessionTests {
 
-	private final Map<String, Object> attributes = new HashMap<>();
+	private final Map<String, Object> attributes = Map.of();
+
+	private final UpgradeRequest request = mock();
+
+	private final UpgradeResponse response = mock();
+
+	private final Session nativeSession = mock();
 
 
 	@Test
 	@SuppressWarnings("resource")
-	public void getPrincipalWithConstructorArg() {
+	void getPrincipalWithConstructorArg() {
 		TestPrincipal user = new TestPrincipal("joe");
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes, user);
 
@@ -53,16 +58,13 @@ public class JettyWebSocketSessionTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void getPrincipalFromNativeSession() {
+	void getPrincipalFromNativeSession() {
 		TestPrincipal user = new TestPrincipal("joe");
 
-		UpgradeRequest request = Mockito.mock(UpgradeRequest.class);
 		given(request.getUserPrincipal()).willReturn(user);
 
-		UpgradeResponse response = Mockito.mock(UpgradeResponse.class);
 		given(response.getAcceptedSubProtocol()).willReturn(null);
 
-		Session nativeSession = Mockito.mock(Session.class);
 		given(nativeSession.getUpgradeRequest()).willReturn(request);
 		given(nativeSession.getUpgradeResponse()).willReturn(response);
 
@@ -77,14 +79,11 @@ public class JettyWebSocketSessionTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void getPrincipalNotAvailable() {
-		UpgradeRequest request = Mockito.mock(UpgradeRequest.class);
+	void getPrincipalNotAvailable() {
 		given(request.getUserPrincipal()).willReturn(null);
 
-		UpgradeResponse response = Mockito.mock(UpgradeResponse.class);
 		given(response.getAcceptedSubProtocol()).willReturn(null);
 
-		Session nativeSession = Mockito.mock(Session.class);
 		given(nativeSession.getUpgradeRequest()).willReturn(request);
 		given(nativeSession.getUpgradeResponse()).willReturn(response);
 
@@ -99,16 +98,13 @@ public class JettyWebSocketSessionTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void getAcceptedProtocol() {
+	void getAcceptedProtocol() {
 		String protocol = "foo";
 
-		UpgradeRequest request = Mockito.mock(UpgradeRequest.class);
 		given(request.getUserPrincipal()).willReturn(null);
 
-		UpgradeResponse response = Mockito.mock(UpgradeResponse.class);
 		given(response.getAcceptedSubProtocol()).willReturn(protocol);
 
-		Session nativeSession = Mockito.mock(Session.class);
 		given(nativeSession.getUpgradeRequest()).willReturn(request);
 		given(nativeSession.getUpgradeResponse()).willReturn(response);
 

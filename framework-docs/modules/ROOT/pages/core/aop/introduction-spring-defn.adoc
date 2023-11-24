@@ -1,0 +1,61 @@
+[[aop-introduction-spring-defn]]
+= Spring AOP Capabilities and Goals
+
+Spring AOP is implemented in pure Java. There is no need for a special compilation
+process. Spring AOP does not need to control the class loader hierarchy and is thus
+suitable for use in a servlet container or application server.
+
+Spring AOP currently supports only method execution join points (advising the execution
+of methods on Spring beans). Field interception is not implemented, although support for
+field interception could be added without breaking the core Spring AOP APIs. If you need
+to advise field access and update join points, consider a language such as AspectJ.
+
+Spring AOP's approach to AOP differs from that of most other AOP frameworks. The aim is
+not to provide the most complete AOP implementation (although Spring AOP is quite
+capable). Rather, the aim is to provide a close integration between AOP implementation and
+Spring IoC, to help solve common problems in enterprise applications.
+
+Thus, for example, the Spring Framework's AOP functionality is normally used in
+conjunction with the Spring IoC container. Aspects are configured by using normal bean
+definition syntax (although this allows powerful "auto-proxying" capabilities). This is a
+crucial difference from other AOP implementations. You cannot do some things
+easily or efficiently with Spring AOP, such as advise very fine-grained objects (typically,
+domain objects). AspectJ is the best choice in such cases. However, our
+experience is that Spring AOP provides an excellent solution to most problems in
+enterprise Java applications that are amenable to AOP.
+
+Spring AOP never strives to compete with AspectJ to provide a comprehensive AOP
+solution. We believe that both proxy-based frameworks such as Spring AOP and full-blown
+frameworks such as AspectJ are valuable and that they are complementary, rather than in
+competition. Spring seamlessly integrates Spring AOP and IoC with AspectJ, to enable
+all uses of AOP within a consistent Spring-based application
+architecture. This integration does not affect the Spring AOP API or the AOP Alliance
+API. Spring AOP remains backward-compatible. See xref:core/aop-api.adoc[the following chapter]
+for a discussion of the Spring AOP APIs.
+
+[NOTE]
+====
+One of the central tenets of the Spring Framework is that of non-invasiveness. This
+is the idea that you should not be forced to introduce framework-specific classes and
+interfaces into your business or domain model. However, in some places, the Spring Framework
+does give you the option to introduce Spring Framework-specific dependencies into your
+codebase. The rationale in giving you such options is because, in certain scenarios, it
+might be just plain easier to read or code some specific piece of functionality in such
+a way. However, the Spring Framework (almost) always offers you the choice: You have the
+freedom to make an informed decision as to which option best suits your particular use
+case or scenario.
+
+One such choice that is relevant to this chapter is that of which AOP framework (and
+which AOP style) to choose. You have the choice of AspectJ, Spring AOP, or both. You
+also have the choice of either the @AspectJ annotation-style approach or the Spring XML
+configuration-style approach. The fact that this chapter chooses to introduce the
+@AspectJ-style approach first should not be taken as an indication that the Spring team
+favors the @AspectJ annotation-style approach over the Spring XML configuration-style.
+
+See xref:core/aop/choosing.adoc[Choosing which AOP Declaration Style to Use] for a more complete discussion of the advantages and disadvantages of
+each style.
+====
+
+
+
+

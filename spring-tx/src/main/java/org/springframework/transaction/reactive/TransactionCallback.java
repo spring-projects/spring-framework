@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.transaction.ReactiveTransaction;
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
- * @see TransactionalOperator
  * @param <T> the result type
+ * @see TransactionalOperator
  */
 @FunctionalInterface
 public interface TransactionCallback<T> {

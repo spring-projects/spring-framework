@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ package org.springframework.dao;
  * Thrown by Spring's SQLException translation mechanism
  * if a corresponding database error is encountered.
  *
- * <p>Serves as superclass for more specific exceptions, like
- * CannotAcquireLockException and DeadlockLoserDataAccessException.
+ * <p>Serves as a superclass for more specific exceptions, e.g.
+ * {@link CannotAcquireLockException}. However, it is generally
+ * recommended to handle {@code PessimisticLockingFailureException}
+ * itself instead of relying on specific exception subclasses.
  *
  * @author Thomas Risberg
  * @since 1.2
- * @see CannotAcquireLockException
- * @see DeadlockLoserDataAccessException
  * @see OptimisticLockingFailureException
  */
 @SuppressWarnings("serial")

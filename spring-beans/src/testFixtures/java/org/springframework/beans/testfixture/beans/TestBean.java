@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Set;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -74,7 +75,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Date date = new Date();
 
-	private Float myFloat = Float.valueOf(0.0f);
+	private Float myFloat = 0.0f;
 
 	private Collection<? super Object> friends = new ArrayList<>();
 
@@ -464,20 +465,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof TestBean)) {
-			return false;
-		}
-		TestBean tb2 = (TestBean) other;
-		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof TestBean that &&
+				ObjectUtils.nullSafeEquals(this.name, that.name) && this.age == that.age));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.age;
+		return TestBean.class.hashCode();
 	}
 
 	@Override

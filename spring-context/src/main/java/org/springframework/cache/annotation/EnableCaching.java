@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.core.Ordered;
  *     public CacheManager cacheManager() {
  *         // configure and return an implementation of Spring's CacheManager SPI
  *         SimpleCacheManager cacheManager = new SimpleCacheManager();
- *         cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
+ *         cacheManager.setCaches(Set.of(new ConcurrentMapCache("default")));
  *         return cacheManager;
  *     }
  * }</pre>
@@ -103,7 +103,7 @@ import org.springframework.core.Ordered;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableCaching
- * public class AppConfig extends CachingConfigurerSupport {
+ * public class AppConfig implements CachingConfigurer {
  *
  *     &#064;Bean
  *     public MyService myService() {
@@ -116,7 +116,7 @@ import org.springframework.core.Ordered;
  *     public CacheManager cacheManager() {
  *         // configure and return an implementation of Spring's CacheManager SPI
  *         SimpleCacheManager cacheManager = new SimpleCacheManager();
- *         cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
+ *         cacheManager.setCaches(Set.of(new ConcurrentMapCache("default")));
  *         return cacheManager;
  *     }
  *
@@ -141,11 +141,8 @@ import org.springframework.core.Ordered;
  * must be provided explicitly. Return {@code null} or {@code new SimpleKeyGenerator()}
  * from this method if no customization is necessary.
  *
- * <p>{@link CachingConfigurer} offers additional customization options: it is recommended
- * to extend from {@link org.springframework.cache.annotation.CachingConfigurerSupport
- * CachingConfigurerSupport} that provides a default implementation for all methods which
- * can be useful if you do not need to customize everything. See {@link CachingConfigurer}
- * Javadoc for further details.
+ * <p>{@link CachingConfigurer} offers additional customization options:
+ * see the {@link CachingConfigurer} javadoc for further details.
  *
  * <p>The {@link #mode} attribute controls how advice is applied: If the mode is
  * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior

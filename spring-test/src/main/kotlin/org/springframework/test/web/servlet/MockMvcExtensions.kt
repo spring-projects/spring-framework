@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,9 +229,33 @@ fun MockMvc.multipart(urlTemplate: String, vararg vars: Any?, dsl: MockMultipart
  *
  * @see MockMvcRequestBuilders.multipart
  * @author Sebastien Deleuze
+ * @since 5.3.26
+ */
+fun MockMvc.multipart(httpMethod: HttpMethod, urlTemplate: String, vararg vars: Any?, dsl: MockMultipartHttpServletRequestDsl.() -> Unit = {}): ResultActionsDsl {
+	val requestBuilder = MockMvcRequestBuilders.multipart(httpMethod, urlTemplate, *vars)
+	return MockMultipartHttpServletRequestDsl(requestBuilder).apply(dsl).perform(this)
+}
+
+/**
+ * [MockMvc] extension providing access to [MockMultipartHttpServletRequestDsl] Kotlin DSL.
+ *
+ * @see MockMvcRequestBuilders.multipart
+ * @author Sebastien Deleuze
  * @since 5.2
  */
 fun MockMvc.multipart(uri: URI, dsl: MockMultipartHttpServletRequestDsl.() -> Unit = {}): ResultActionsDsl {
 	val requestBuilder = MockMvcRequestBuilders.multipart(uri)
+	return MockMultipartHttpServletRequestDsl(requestBuilder).apply(dsl).perform(this)
+}
+
+/**
+ * [MockMvc] extension providing access to [MockMultipartHttpServletRequestDsl] Kotlin DSL.
+ *
+ * @see MockMvcRequestBuilders.multipart
+ * @author Sebastien Deleuze
+ * @since 5.3.26
+ */
+fun MockMvc.multipart(httpMethod: HttpMethod, uri: URI, dsl: MockMultipartHttpServletRequestDsl.() -> Unit = {}): ResultActionsDsl {
+	val requestBuilder = MockMvcRequestBuilders.multipart(httpMethod, uri)
 	return MockMultipartHttpServletRequestDsl(requestBuilder).apply(dsl).perform(this)
 }

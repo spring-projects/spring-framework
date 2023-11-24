@@ -24,10 +24,10 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.PushBuilder;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.PushBuilder;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -73,7 +73,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 
 	static {
 		try {
-			pushBuilder = ClassUtils.forName("javax.servlet.http.PushBuilder",
+			pushBuilder = ClassUtils.forName("jakarta.servlet.http.PushBuilder",
 					ServletRequestMethodArgumentResolver.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
@@ -171,7 +171,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			return userPrincipal;
 		}
 		else if (HttpMethod.class == paramType) {
-			return HttpMethod.resolve(request.getMethod());
+			return HttpMethod.valueOf(request.getMethod());
 		}
 		else if (Locale.class == paramType) {
 			return RequestContextUtils.getLocale(request);

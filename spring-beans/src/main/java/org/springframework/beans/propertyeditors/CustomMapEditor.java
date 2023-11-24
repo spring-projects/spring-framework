@@ -107,9 +107,8 @@ public class CustomMapEditor extends PropertyEditorSupport {
 			// Use the source value as-is, as it matches the target type.
 			super.setValue(value);
 		}
-		else if (value instanceof Map) {
+		else if (value instanceof Map<?, ?> source) {
 			// Convert Map elements.
-			Map<?, ?> source = (Map<?, ?>) value;
 			Map<Object, Object> target = createMap(this.mapType, source.size());
 			source.forEach((key, val) -> target.put(convertKey(key), convertValue(val)));
 			super.setValue(target);

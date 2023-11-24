@@ -72,7 +72,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		AutowiredRepeatedTestMethod.class,
 		AutowiredParameterizedTestMethod.class
 	})
-	void autowiredTestMethodsTestTemplateMethodsAndLifecyleMethods(Class<?> testClass) {
+	void autowiredTestMethodsTestTemplateMethodsAndLifecycleMethods(Class<?> testClass) {
 		testEventsFor(testClass)
 			.assertStatistics(stats -> stats.started(1).succeeded(0).failed(1))
 			.assertThatEvents().haveExactly(1,
@@ -111,7 +111,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		NonStaticAutowiredBeforeAllMethod.class,
 		NonStaticAutowiredAfterAllMethod.class
 	})
-	void autowiredNonStaticClassLevelLifecyleMethods(Class<?> testClass) {
+	void autowiredNonStaticClassLevelLifecycleMethods(Class<?> testClass) {
 		containerEventsFor(testClass)
 			.assertStatistics(stats -> stats.started(2).succeeded(1).failed(1))
 			.assertThatEvents().haveExactly(1,

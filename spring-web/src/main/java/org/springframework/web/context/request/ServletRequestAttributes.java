@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -39,8 +39,8 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see javax.servlet.ServletRequest#getAttribute
- * @see javax.servlet.http.HttpSession#getAttribute
+ * @see jakarta.servlet.ServletRequest#getAttribute
+ * @see jakarta.servlet.http.HttpSession#getAttribute
  */
 public class ServletRequestAttributes extends AbstractRequestAttributes {
 

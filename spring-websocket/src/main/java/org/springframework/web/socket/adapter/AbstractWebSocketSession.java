@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,9 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	 */
 	public AbstractWebSocketSession(@Nullable Map<String, Object> attributes) {
 		if (attributes != null) {
-			this.attributes.putAll(attributes);
+			attributes.entrySet().stream()
+					.filter(entry -> (entry.getKey() != null && entry.getValue() != null))
+					.forEach(entry -> this.attributes.put(entry.getKey(), entry.getValue()));
 		}
 	}
 
@@ -102,17 +104,17 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 			logger.trace("Sending " + message + ", " + this);
 		}
 
-		if (message instanceof TextMessage) {
-			sendTextMessage((TextMessage) message);
+		if (message instanceof TextMessage textMessage) {
+			sendTextMessage(textMessage);
 		}
-		else if (message instanceof BinaryMessage) {
-			sendBinaryMessage((BinaryMessage) message);
+		else if (message instanceof BinaryMessage binaryMessage) {
+			sendBinaryMessage(binaryMessage);
 		}
-		else if (message instanceof PingMessage) {
-			sendPingMessage((PingMessage) message);
+		else if (message instanceof PingMessage pingMessage) {
+			sendPingMessage(pingMessage);
 		}
-		else if (message instanceof PongMessage) {
-			sendPongMessage((PongMessage) message);
+		else if (message instanceof PongMessage pongMessage) {
+			sendPongMessage(pongMessage);
 		}
 		else {
 			throw new IllegalStateException("Unexpected WebSocketMessage type: " + message);

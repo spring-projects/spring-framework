@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.propertyeditors;
 
+import java.io.IOException;
 import java.io.Reader;
 
 import org.junit.jupiter.api.Test;
@@ -34,13 +35,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 public class ReaderEditorTests {
 
 	@Test
-	public void testCtorWithNullResourceEditor() throws Exception {
+	public void testCtorWithNullResourceEditor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ReaderEditor(null));
 	}
 
 	@Test
-	public void testSunnyDay() throws Exception {
+	public void testSunnyDay() throws IOException {
 		Reader reader = null;
 		try {
 			String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
@@ -49,8 +50,7 @@ public class ReaderEditorTests {
 			editor.setAsText(resource);
 			Object value = editor.getValue();
 			assertThat(value).isNotNull();
-			boolean condition = value instanceof Reader;
-			assertThat(condition).isTrue();
+			assertThat(value instanceof Reader).isTrue();
 			reader = (Reader) value;
 			assertThat(reader.ready()).isTrue();
 		}
@@ -62,7 +62,7 @@ public class ReaderEditorTests {
 	}
 
 	@Test
-	public void testWhenResourceDoesNotExist() throws Exception {
+	public void testWhenResourceDoesNotExist() {
 		String resource = "classpath:bingo!";
 		ReaderEditor editor = new ReaderEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -70,7 +70,7 @@ public class ReaderEditorTests {
 	}
 
 	@Test
-	public void testGetAsTextReturnsNullByDefault() throws Exception {
+	public void testGetAsTextReturnsNullByDefault() {
 		assertThat(new ReaderEditor().getAsText()).isNull();
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class";

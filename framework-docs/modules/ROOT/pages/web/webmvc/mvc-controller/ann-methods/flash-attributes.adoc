@@ -1,0 +1,46 @@
+[[mvc-flash-attributes]]
+= Flash Attributes
+
+Flash attributes provide a way for one request to store attributes that are intended for use in
+another. This is most commonly needed when redirecting -- for example, the
+Post-Redirect-Get pattern. Flash attributes are saved temporarily before the
+redirect (typically in the session) to be made available to the request after the
+redirect and are removed immediately.
+
+Spring MVC has two main abstractions in support of flash attributes. `FlashMap` is used
+to hold flash attributes, while `FlashMapManager` is used to store, retrieve, and manage
+`FlashMap` instances.
+
+Flash attribute support is always "`on`" and does not need to be enabled explicitly.
+However, if not used, it never causes HTTP session creation. On each request, there is an
+"`input`" `FlashMap` with attributes passed from a previous request (if any) and an
+"`output`" `FlashMap` with attributes to save for a subsequent request. Both `FlashMap`
+instances are accessible from anywhere in Spring MVC through static methods in
+`RequestContextUtils`.
+
+Annotated controllers typically do not need to work with `FlashMap` directly. Instead, a
+`@RequestMapping` method can accept an argument of type `RedirectAttributes` and use it
+to add flash attributes for a redirect scenario. Flash attributes added through
+`RedirectAttributes` are automatically propagated to the "`output`" FlashMap. Similarly,
+after the redirect, attributes from the "`input`" `FlashMap` are automatically added to the
+`Model` of the controller that serves the target URL.
+
+.Matching requests to flash attributes
+****
+The concept of flash attributes exists in many other web frameworks and has proven to sometimes
+be exposed to concurrency issues. This is because, by definition, flash attributes
+are to be stored until the next request. However the very "`next`" request may not be the
+intended recipient but another asynchronous request (for example, polling or resource requests),
+in which case the flash attributes are removed too early.
+
+To reduce the possibility of such issues, `RedirectView` automatically "`stamps`"
+`FlashMap` instances with the path and query parameters of the target redirect URL. In
+turn, the default `FlashMapManager` matches that information to incoming requests when
+it looks up the "`input`" `FlashMap`.
+
+This does not entirely eliminate the possibility of a concurrency issue but
+reduces it greatly with information that is already available in the redirect URL.
+Therefore, we recommend that you use flash attributes mainly for redirect scenarios.
+****
+
+

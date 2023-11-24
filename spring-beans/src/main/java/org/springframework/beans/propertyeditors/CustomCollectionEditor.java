@@ -117,9 +117,8 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			// Use the source value as-is, as it matches the target type.
 			super.setValue(value);
 		}
-		else if (value instanceof Collection) {
+		else if (value instanceof Collection<?> source) {
 			// Convert Collection elements.
-			Collection<?> source = (Collection<?>) value;
 			Collection<Object> target = createCollection(this.collectionType, source.size());
 			for (Object elem : source) {
 				target.add(convertElement(elem));

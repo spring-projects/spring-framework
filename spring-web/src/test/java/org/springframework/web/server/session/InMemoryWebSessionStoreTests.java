@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -59,11 +57,10 @@ public class InMemoryWebSessionStoreTests {
 		assertThat(session.isStarted()).isTrue();
 	}
 
-	@Disabled // TODO: remove if/when Blockhound is enabled
-	@Test // gh-24027
+	@Test // gh-24027, gh-26958
 	public void createSessionDoesNotBlock() {
-		Mono.defer(() -> this.store.createWebSession())
-				.subscribeOn(Schedulers.parallel())
+		this.store.createWebSession()
+				.doOnNext(session -> assertThat(Schedulers.isInNonBlockingThread()).isTrue())
 				.block();
 	}
 
@@ -141,15 +138,15 @@ public class InMemoryWebSessionStoreTests {
 
 		// Create 100 sessions
 		IntStream.range(0, 100).forEach(i -> insertSession());
-		assertThat(sessions.size()).isEqualTo(100);
+		assertThat(sessions).hasSize(100);
 
 		// Force a new clock (31 min later), don't use setter which would clean expired sessions
 		accessor.setPropertyValue("clock", Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
-		assertThat(sessions.size()).isEqualTo(100);
+		assertThat(sessions).hasSize(100);
 
 		// Create 1 more which forces a time-based check (clock moved forward)
 		insertSession();
-		assertThat(sessions.size()).isEqualTo(1);
+		assertThat(sessions).hasSize(1);
 	}
 
 	@Test

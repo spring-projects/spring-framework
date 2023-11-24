@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,13 @@ import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -79,7 +85,7 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
-	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<>(32);
+	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<>(64);
 
 	static {
 		javaTypeToSqlTypeMap.put(boolean.class, Types.BOOLEAN);
@@ -98,6 +104,11 @@ public abstract class StatementCreatorUtils {
 		javaTypeToSqlTypeMap.put(double.class, Types.DOUBLE);
 		javaTypeToSqlTypeMap.put(Double.class, Types.DOUBLE);
 		javaTypeToSqlTypeMap.put(BigDecimal.class, Types.DECIMAL);
+		javaTypeToSqlTypeMap.put(LocalDate.class, Types.DATE);
+		javaTypeToSqlTypeMap.put(LocalTime.class, Types.TIME);
+		javaTypeToSqlTypeMap.put(LocalDateTime.class, Types.TIMESTAMP);
+		javaTypeToSqlTypeMap.put(OffsetTime.class, Types.TIME_WITH_TIMEZONE);
+		javaTypeToSqlTypeMap.put(OffsetDateTime.class, Types.TIMESTAMP_WITH_TIMEZONE);
 		javaTypeToSqlTypeMap.put(java.sql.Date.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(java.sql.Time.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);
@@ -202,8 +213,7 @@ public abstract class StatementCreatorUtils {
 		Object inValueToUse = inValue;
 
 		// override type info?
-		if (inValue instanceof SqlParameterValue) {
-			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
+		if (inValue instanceof SqlParameterValue parameterValue) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() + ", type name " + parameterValue.getTypeName());
@@ -281,18 +291,30 @@ public abstract class StatementCreatorUtils {
 			ps.setNull(paramIndex, sqlType, typeName);
 		}
 		else {
-			ps.setNull(paramIndex, sqlType);
+			// Fall back to generic setNull call.
+			try {
+				// Try generic setNull call with SQL type specified.
+				ps.setNull(paramIndex, sqlType);
+			}
+			catch (SQLFeatureNotSupportedException ex) {
+				if (sqlType == Types.NULL) {
+					throw ex;
+				}
+				// Fall back to generic setNull call without SQL type specified
+				// (e.g. for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
+				ps.setNull(paramIndex, Types.NULL);
+			}
 		}
 	}
 
 	private static void setValue(PreparedStatement ps, int paramIndex, int sqlType,
 			@Nullable String typeName, @Nullable Integer scale, Object inValue) throws SQLException {
 
-		if (inValue instanceof SqlTypeValue) {
-			((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
+		if (inValue instanceof SqlTypeValue sqlTypeValue) {
+			sqlTypeValue.setTypeValue(ps, paramIndex, sqlType, typeName);
 		}
-		else if (inValue instanceof SqlValue) {
-			((SqlValue) inValue).setValue(ps, paramIndex);
+		else if (inValue instanceof SqlValue sqlValue) {
+			sqlValue.setValue(ps, paramIndex);
 		}
 		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ) {
 			ps.setString(paramIndex, inValue.toString());
@@ -323,8 +345,8 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
-			if (inValue instanceof BigDecimal) {
-				ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
+			if (inValue instanceof BigDecimal bigDecimal) {
+				ps.setBigDecimal(paramIndex, bigDecimal);
 			}
 			else if (scale != null) {
 				ps.setObject(paramIndex, inValue, sqlType, scale);
@@ -334,24 +356,23 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else if (sqlType == Types.BOOLEAN) {
-			if (inValue instanceof Boolean) {
-				ps.setBoolean(paramIndex, (Boolean) inValue);
+			if (inValue instanceof Boolean flag) {
+				ps.setBoolean(paramIndex, flag);
 			}
 			else {
 				ps.setObject(paramIndex, inValue, Types.BOOLEAN);
 			}
 		}
 		else if (sqlType == Types.DATE) {
-			if (inValue instanceof java.util.Date) {
-				if (inValue instanceof java.sql.Date) {
-					ps.setDate(paramIndex, (java.sql.Date) inValue);
+			if (inValue instanceof java.util.Date date) {
+				if (inValue instanceof java.sql.Date sqlDate) {
+					ps.setDate(paramIndex, sqlDate);
 				}
 				else {
-					ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
+					ps.setDate(paramIndex, new java.sql.Date(date.getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -359,16 +380,15 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else if (sqlType == Types.TIME) {
-			if (inValue instanceof java.util.Date) {
-				if (inValue instanceof java.sql.Time) {
-					ps.setTime(paramIndex, (java.sql.Time) inValue);
+			if (inValue instanceof java.util.Date date) {
+				if (inValue instanceof java.sql.Time time) {
+					ps.setTime(paramIndex, time);
 				}
 				else {
-					ps.setTime(paramIndex, new java.sql.Time(((java.util.Date) inValue).getTime()));
+					ps.setTime(paramIndex, new java.sql.Time(date.getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -376,16 +396,15 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else if (sqlType == Types.TIMESTAMP) {
-			if (inValue instanceof java.util.Date) {
-				if (inValue instanceof java.sql.Timestamp) {
-					ps.setTimestamp(paramIndex, (java.sql.Timestamp) inValue);
+			if (inValue instanceof java.util.Date date) {
+				if (inValue instanceof java.sql.Timestamp timestamp) {
+					ps.setTimestamp(paramIndex, timestamp);
 				}
 				else {
-					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
+					ps.setTimestamp(paramIndex, new java.sql.Timestamp(date.getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -400,8 +419,7 @@ public abstract class StatementCreatorUtils {
 			else if (isDateValue(inValue.getClass())) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -410,8 +428,16 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else {
-			// Fall back to generic setObject call with SQL type specified.
-			ps.setObject(paramIndex, inValue, sqlType);
+			// Fall back to generic setObject call.
+			try {
+				// Try generic setObject call with SQL type specified.
+				ps.setObject(paramIndex, inValue, sqlType);
+			}
+			catch (SQLFeatureNotSupportedException ex) {
+				// Fall back to generic setObject call without SQL type specified
+				// (e.g. for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
+				ps.setObject(paramIndex, inValue);
+			}
 		}
 	}
 
@@ -459,15 +485,15 @@ public abstract class StatementCreatorUtils {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
 				// Unwrap SqlParameterValue first...
-				if (inValue instanceof SqlParameterValue) {
-					inValue = ((SqlParameterValue) inValue).getValue();
+				if (inValue instanceof SqlParameterValue sqlParameterValue) {
+					inValue = sqlParameterValue.getValue();
 				}
 				// Check for disposable value types
-				if (inValue instanceof SqlValue) {
-					((SqlValue) inValue).cleanup();
+				if (inValue instanceof SqlValue sqlValue) {
+					sqlValue.cleanup();
 				}
-				else if (inValue instanceof DisposableSqlTypeValue) {
-					((DisposableSqlTypeValue) inValue).cleanup();
+				else if (inValue instanceof DisposableSqlTypeValue disposableSqlTypeValue) {
+					disposableSqlTypeValue.cleanup();
 				}
 			}
 		}

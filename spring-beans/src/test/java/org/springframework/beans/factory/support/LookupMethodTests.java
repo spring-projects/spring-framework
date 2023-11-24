@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class LookupMethodTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	public void setup() {
 		beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("lookupMethodTests.xml", getClass()));
@@ -83,8 +83,8 @@ public class LookupMethodTests {
 	public void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
-		assertThatExceptionOfType(AbstractMethodError.class).as("does not have a three arg constructor").isThrownBy(() ->
-			bean.getThreeArguments("name", 1, 2));
+		assertThatExceptionOfType(AbstractMethodError.class).as("does not have a three arg constructor")
+				.isThrownBy(() -> bean.getThreeArguments("name", 1, 2));
 	}
 
 	@Test
@@ -97,8 +97,23 @@ public class LookupMethodTests {
 		assertThat(expected.isJedi()).isTrue();
 	}
 
+	@Test
+	public void testWithGenericBean() {
+		RootBeanDefinition bd = new RootBeanDefinition(NumberBean.class);
+		bd.getMethodOverrides().addOverride(new LookupOverride("getDoubleStore", null));
+		bd.getMethodOverrides().addOverride(new LookupOverride("getFloatStore", null));
+		beanFactory.registerBeanDefinition("numberBean", bd);
+		beanFactory.registerBeanDefinition("doubleStore", new RootBeanDefinition(DoubleStore.class));
+		beanFactory.registerBeanDefinition("floatStore", new RootBeanDefinition(FloatStore.class));
 
-	public static abstract class AbstractBean {
+		NumberBean bean = (NumberBean) beanFactory.getBean("numberBean");
+		assertThat(bean).isNotNull();
+		assertThat(beanFactory.getBean(DoubleStore.class)).isSameAs(bean.getDoubleStore());
+		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
+	}
+
+
+	public abstract static class AbstractBean {
 
 		public abstract TestBean get();
 
@@ -109,6 +124,26 @@ public class LookupMethodTests {
 		public abstract TestBean getTwoArguments(String name, int age);
 
 		public abstract TestBean getThreeArguments(String name, int age, int anotherArg);
+	}
+
+
+	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class DoubleStore extends NumberStore<Double> {
+	}
+
+
+	public static class FloatStore extends NumberStore<Float> {
+	}
+
+
+	public abstract static class NumberBean {
+
+		public abstract NumberStore<Double> getDoubleStore();
+
+		public abstract NumberStore<Float> getFloatStore();
 	}
 
 }

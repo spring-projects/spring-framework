@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public class FormContentFilterTests {
 		Map<String, String[]> parameters = this.filterChain.getRequest().getParameterMap();
 
 		assertThat(this.filterChain.getRequest()).as("Request not wrapped").isNotSameAs(this.request);
-		assertThat(parameters.size()).isEqualTo(2);
+		assertThat(parameters).hasSize(2);
 		assertThat(parameters.get("name")).isEqualTo(new String[] {"value1", "value2", "value3"});
 		assertThat(parameters.get("name4")).isEqualTo(new String[] {"value4"});
 	}

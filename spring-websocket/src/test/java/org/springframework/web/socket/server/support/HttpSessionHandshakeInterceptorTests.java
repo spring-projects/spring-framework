@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	private final Map<String, Object> attributes = new HashMap<>();
-	private final WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+	private final WebSocketHandler wsHandler = mock();
 
 
 	@Test
@@ -50,7 +50,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(3);
+		assertThat(attributes).hasSize(3);
 		assertThat(attributes.get("foo")).isEqualTo("bar");
 		assertThat(attributes.get("bar")).isEqualTo("baz");
 		assertThat(attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME)).isEqualTo("123");
@@ -66,7 +66,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor(names);
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(2);
+		assertThat(attributes).hasSize(2);
 		assertThat(attributes.get("foo")).isEqualTo("bar");
 		assertThat(attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME)).isEqualTo("123");
 	}
@@ -80,7 +80,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		interceptor.setCopyHttpSessionId(false);
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(1);
+		assertThat(attributes).hasSize(1);
 		assertThat(attributes.get("foo")).isEqualTo("bar");
 	}
 
@@ -94,7 +94,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		interceptor.setCopyAllAttributes(false);
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(1);
+		assertThat(attributes).hasSize(1);
 		assertThat(attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME)).isEqualTo("123");
 	}
 

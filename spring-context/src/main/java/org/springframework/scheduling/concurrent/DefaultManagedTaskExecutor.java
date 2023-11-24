@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,27 +24,31 @@ import javax.naming.NamingException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.lang.Nullable;
 
 /**
  * JNDI-based variant of {@link ConcurrentTaskExecutor}, performing a default lookup for
- * JSR-236's "java:comp/DefaultManagedExecutorService" in a Java EE 7/8 environment.
+ * JSR-236's "java:comp/DefaultManagedExecutorService" in a Jakarta EE/8 environment.
  *
  * <p>Note: This class is not strictly JSR-236 based; it can work with any regular
  * {@link java.util.concurrent.Executor} that can be found in JNDI.
- * The actual adapting to {@link javax.enterprise.concurrent.ManagedExecutorService}
+ * The actual adapting to {@link jakarta.enterprise.concurrent.ManagedExecutorService}
  * happens in the base class {@link ConcurrentTaskExecutor} itself.
  *
  * @author Juergen Hoeller
  * @since 4.0
- * @see javax.enterprise.concurrent.ManagedExecutorService
+ * @see jakarta.enterprise.concurrent.ManagedExecutorService
  */
 public class DefaultManagedTaskExecutor extends ConcurrentTaskExecutor implements InitializingBean {
 
 	private final JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
 
-	@Nullable
 	private String jndiName = "java:comp/DefaultManagedExecutorService";
+
+
+	public DefaultManagedTaskExecutor() {
+		// Executor initialization happens in afterPropertiesSet
+		super(null);
+	}
 
 
 	/**
@@ -64,7 +68,7 @@ public class DefaultManagedTaskExecutor extends ConcurrentTaskExecutor implement
 	}
 
 	/**
-	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Jakarta EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef
@@ -87,9 +91,7 @@ public class DefaultManagedTaskExecutor extends ConcurrentTaskExecutor implement
 
 	@Override
 	public void afterPropertiesSet() throws NamingException {
-		if (this.jndiName != null) {
-			setConcurrentExecutor(this.jndiLocator.lookup(this.jndiName, Executor.class));
-		}
+		setConcurrentExecutor(this.jndiLocator.lookup(this.jndiName, Executor.class));
 	}
 
 }

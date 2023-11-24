@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	@Nullable
 	public Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
-			Object result = (converter instanceof SmartMessageConverter ?
-					((SmartMessageConverter) converter).fromMessage(message, targetClass, conversionHint) :
+			Object result = (converter instanceof SmartMessageConverter smartMessageConverter ?
+					smartMessageConverter.fromMessage(message, targetClass, conversionHint) :
 					converter.fromMessage(message, targetClass));
 			if (result != null) {
 				return result;
@@ -92,8 +92,8 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	@Nullable
 	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
-			Message<?> result = (converter instanceof SmartMessageConverter ?
-					((SmartMessageConverter) converter).toMessage(payload, headers, conversionHint) :
+			Message<?> result = (converter instanceof SmartMessageConverter smartMessageConverter ?
+					smartMessageConverter.toMessage(payload, headers, conversionHint) :
 					converter.toMessage(payload, headers));
 			if (result != null) {
 				return result;

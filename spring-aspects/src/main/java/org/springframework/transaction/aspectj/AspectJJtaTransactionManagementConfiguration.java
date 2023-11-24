@@ -27,7 +27,7 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
 /**
  * {@code @Configuration} class that registers the Spring infrastructure beans necessary
  * to enable AspectJ-based annotation-driven transaction management for the JTA 1.2
- * {@link javax.transaction.Transactional} annotation in addition to Spring's own
+ * {@link jakarta.transaction.Transactional} annotation in addition to Spring's own
  * {@link org.springframework.transaction.annotation.Transactional} annotation.
  *
  * @author Juergen Hoeller

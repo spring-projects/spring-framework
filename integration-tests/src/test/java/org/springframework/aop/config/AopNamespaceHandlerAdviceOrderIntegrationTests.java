@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatException;
 
 /**
  * Integration tests for advice invocation order for advice configured via the
@@ -52,7 +52,7 @@ class AopNamespaceHandlerAdviceOrderIntegrationTests {
 			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after returning");
 
 			aspect.invocations.clear();
-			assertThatExceptionOfType(Exception.class).isThrownBy(() -> echo.echo(new Exception()));
+			assertThatException().isThrownBy(() -> echo.echo(new Exception()));
 			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after throwing");
 		}
 	}
@@ -69,7 +69,7 @@ class AopNamespaceHandlerAdviceOrderIntegrationTests {
 			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
 
 			aspect.invocations.clear();
-			assertThatExceptionOfType(Exception.class).isThrownBy(() -> echo.echo(new Exception()));
+			assertThatException().isThrownBy(() -> echo.echo(new Exception()));
 			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after throwing", "after");
 		}
 	}

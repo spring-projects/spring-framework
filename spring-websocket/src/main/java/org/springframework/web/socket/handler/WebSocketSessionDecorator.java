@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,15 +59,15 @@ public class WebSocketSessionDecorator implements WebSocketSession {
 
 	public WebSocketSession getLastSession() {
 		WebSocketSession result = this.delegate;
-		while (result instanceof WebSocketSessionDecorator) {
-			result = ((WebSocketSessionDecorator) result).getDelegate();
+		while (result instanceof WebSocketSessionDecorator webSocketSessionDecorator) {
+			result = webSocketSessionDecorator.getDelegate();
 		}
 		return result;
 	}
 
 	public static WebSocketSession unwrap(WebSocketSession session) {
-		if (session instanceof WebSocketSessionDecorator) {
-			return ((WebSocketSessionDecorator) session).getLastSession();
+		if (session instanceof WebSocketSessionDecorator webSocketSessionDecorator) {
+			return webSocketSessionDecorator.getLastSession();
 		}
 		else {
 			return session;

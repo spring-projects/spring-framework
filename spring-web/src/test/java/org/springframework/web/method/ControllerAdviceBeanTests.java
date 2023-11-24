@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
-import javax.annotation.Priority;
-
+import jakarta.annotation.Priority;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanUtils;
@@ -75,7 +74,7 @@ public class ControllerAdviceBeanTests {
 	@Test
 	public void equalsHashCodeAndToStringForBeanName() {
 		String beanName = "myBean";
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		given(beanFactory.containsBean(beanName)).willReturn(true);
 
 		ControllerAdviceBean bean1 = new ControllerAdviceBean(beanName, beanFactory);
@@ -233,7 +232,7 @@ public class ControllerAdviceBeanTests {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void assertOrder(Class beanType, int expectedOrder) {
 		String beanName = "myBean";
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		given(beanFactory.containsBean(beanName)).willReturn(true);
 		given(beanFactory.getType(beanName)).willReturn(beanType);
 		given(beanFactory.getBean(beanName)).willReturn(BeanUtils.instantiateClass(beanType));
@@ -334,7 +333,7 @@ public class ControllerAdviceBeanTests {
 
 	static class ImplementationController implements ControllerInterface {}
 
-	static abstract class AbstractController {}
+	abstract static class AbstractController {}
 
 	static class InheritanceController extends AbstractController {}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,17 +64,20 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 	 * Create a new WebSocket session.
 	 */
 	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo info, DataBufferFactory bufferFactory) {
-		Assert.notNull(delegate, "Native session is required.");
-		Assert.notNull(id, "Session id is required.");
-		Assert.notNull(info, "HandshakeInfo is required.");
-		Assert.notNull(bufferFactory, "DataBuffer factory is required.");
+		Assert.notNull(delegate, "Native session is required");
+		Assert.notNull(id, "Session id is required");
+		Assert.notNull(info, "HandshakeInfo is required");
+		Assert.notNull(bufferFactory, "DataBuffer factory is required");
 
 		this.delegate = delegate;
 		this.id = id;
 		this.handshakeInfo = info;
 		this.bufferFactory = bufferFactory;
-		this.attributes.putAll(info.getAttributes());
 		this.logPrefix = initLogPrefix(info, id);
+
+		info.getAttributes().entrySet().stream()
+				.filter(entry -> (entry.getKey() != null && entry.getValue() != null))
+				.forEach(entry -> this.attributes.put(entry.getKey(), entry.getValue()));
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(getLogPrefix() + "Session id \"" + getId() + "\" for " + getHandshakeInfo().getUri());

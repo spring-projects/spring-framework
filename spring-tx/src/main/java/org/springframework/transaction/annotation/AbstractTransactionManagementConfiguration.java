@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableTx = AnnotationAttributes.fromMap(
-				importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName(), false));
+				importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName()));
 		if (this.enableTx == null) {
 			throw new IllegalArgumentException(
 					"@EnableTransactionManagement is not present on importing class " + importMetadata.getClassName());
@@ -80,7 +80,7 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public static TransactionalEventListenerFactory transactionalEventListenerFactory() {
-		return new TransactionalEventListenerFactory();
+		return new RestrictedTransactionalEventListenerFactory();
 	}
 
 }

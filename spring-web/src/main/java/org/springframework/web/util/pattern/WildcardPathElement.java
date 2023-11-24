@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
+import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
@@ -46,11 +46,11 @@ class WildcardPathElement extends PathElement {
 		// Assert if it exists it is a segment
 		if (pathIndex < matchingContext.pathLength) {
 			Element element = matchingContext.pathElements.get(pathIndex);
-			if (!(element instanceof PathContainer.PathSegment)) {
+			if (!(element instanceof PathSegment pathSegment)) {
 				// Should not match a separator
 				return false;
 			}
-			segmentData = ((PathContainer.PathSegment)element).valueToMatch();
+			segmentData = pathSegment.valueToMatch();
 			pathIndex++;
 		}
 
@@ -87,6 +87,11 @@ class WildcardPathElement extends PathElement {
 	}
 
 	@Override
+	public char[] getChars() {
+		return new char[] {'*'};
+	}
+
+	@Override
 	public int getWildcardCount() {
 		return 1;
 	}
@@ -102,8 +107,4 @@ class WildcardPathElement extends PathElement {
 		return "Wildcard(*)";
 	}
 
-	@Override
-	public char[] getChars() {
-		return new char[] {'*'};
-	}
 }

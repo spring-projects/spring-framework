@@ -22,14 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerContainer;
-
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.Extension;
+import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.server.ServerContainer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -66,9 +65,9 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	protected ServerContainer getContainer(HttpServletRequest request) {
 		ServletContext servletContext = request.getServletContext();
-		String attrName = "javax.websocket.server.ServerContainer";
+		String attrName = "jakarta.websocket.server.ServerContainer";
 		ServerContainer container = (ServerContainer) servletContext.getAttribute(attrName);
-		Assert.notNull(container, "No 'javax.websocket.server.ServerContainer' ServletContext attribute. " +
+		Assert.notNull(container, "No 'jakarta.websocket.server.ServerContainer' ServletContext attribute. " +
 				"Are you running in a Servlet container that supports JSR-356?");
 		return container;
 	}

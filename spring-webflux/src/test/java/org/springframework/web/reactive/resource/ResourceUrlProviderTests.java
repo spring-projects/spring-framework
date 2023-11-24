@@ -158,11 +158,13 @@ public class ResourceUrlProviderTests {
 		assertThat(parentUrlProvider.getHandlerMap()).isEmpty();
 		ResourceUrlProvider childUrlProvider = childContext.getBean(ResourceUrlProvider.class);
 		assertThat(childUrlProvider.getHandlerMap()).hasKeySatisfying(pathPatternStringOf("/resources/**"));
+		childContext.close();
+		parentContext.close();
 	}
 
 
 	private Condition<PathPattern> pathPatternStringOf(String expected) {
-		return new Condition<PathPattern>(
+		return new Condition<>(
 				actual -> actual != null && actual.getPatternString().equals(expected),
 				"Pattern %s", expected);
 	}

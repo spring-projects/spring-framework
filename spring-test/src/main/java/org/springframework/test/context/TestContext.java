@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,14 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  * that does not provide a copy constructor will likely fail in an environment
  * that executes tests concurrently.
  *
+ * <p>As of Spring Framework 6.1, concrete implementations are highly encouraged to
+ * override {@link #setMethodInvoker(MethodInvoker)} and {@link #getMethodInvoker()}.
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see TestContextManager
  * @see TestExecutionListener
  */
-// Suppression required due to bug in javac in Java 8: presence of default method in a Serializable interface
-@SuppressWarnings("serial")
 public interface TestContext extends AttributeAccessor, Serializable {
 
 	/**
@@ -151,5 +152,29 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * or {@code null} if no exception was thrown
 	 */
 	void updateState(@Nullable Object testInstance, @Nullable Method testMethod, @Nullable Throwable testException);
+
+	/**
+	 * Set the {@link MethodInvoker} to use.
+	 * <p>By default, this method does nothing.
+	 * <p>Concrete implementations should track the supplied {@code MethodInvoker}
+	 * and return it from {@link #getMethodInvoker()}. Note that the standard
+	 * {@code TestContext} implementation in Spring overrides this method appropriately.
+	 * @since 6.1
+	 */
+	default void setMethodInvoker(MethodInvoker methodInvoker) {
+		/* no-op */
+	}
+
+	/**
+	 * Get the {@link MethodInvoker} to use.
+	 * <p>By default, this method returns {@link MethodInvoker#DEFAULT_INVOKER}.
+	 * <p>Concrete implementations should return the {@code MethodInvoker} supplied
+	 * to {@link #setMethodInvoker(MethodInvoker)}. Note that the standard
+	 * {@code TestContext} implementation in Spring overrides this method appropriately.
+	 * @since 6.1
+	 */
+	default MethodInvoker getMethodInvoker() {
+		return MethodInvoker.DEFAULT_INVOKER;
+	}
 
 }

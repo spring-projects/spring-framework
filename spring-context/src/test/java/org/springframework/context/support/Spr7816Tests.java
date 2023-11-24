@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,48 +28,49 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Keith Donald
  * @author Juergen Hoeller
  */
-public class Spr7816Tests {
+class Spr7816Tests {
 
 	@Test
-	public void spr7816() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("spr7816.xml", getClass());
+	void spr7816() {
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("spr7816.xml", getClass());
 		FilterAdapter adapter = ctx.getBean(FilterAdapter.class);
 		assertThat(adapter.getSupportedTypes().get("Building")).isEqualTo(Building.class);
 		assertThat(adapter.getSupportedTypes().get("Entrance")).isEqualTo(Entrance.class);
 		assertThat(adapter.getSupportedTypes().get("Dwelling")).isEqualTo(Dwelling.class);
+		ctx.close();
 	}
 
-	public static class FilterAdapter {
+	static class FilterAdapter {
 
 		private String extensionPrefix;
 
 		private Map<String, Class<? extends DomainEntity>> supportedTypes;
 
-		public FilterAdapter(final String extensionPrefix, final Map<String, Class<? extends DomainEntity>> supportedTypes) {
+		FilterAdapter(final String extensionPrefix, final Map<String, Class<? extends DomainEntity>> supportedTypes) {
 			this.extensionPrefix = extensionPrefix;
 			this.supportedTypes = supportedTypes;
 		}
 
-		public String getExtensionPrefix() {
+		String getExtensionPrefix() {
 			return extensionPrefix;
 		}
 
-		public Map<String, Class<? extends DomainEntity>> getSupportedTypes() {
+		Map<String, Class<? extends DomainEntity>> getSupportedTypes() {
 			return supportedTypes;
 		}
 
 	}
 
-	public static class Building extends DomainEntity {
+	abstract static sealed class DomainEntity permits Building, Entrance, Dwelling {
 	}
 
-	public static class Entrance extends DomainEntity {
+	static final class Building extends DomainEntity {
 	}
 
-	public static class Dwelling extends DomainEntity {
+	static final class Entrance extends DomainEntity {
 	}
 
-	public abstract static class DomainEntity {
-
+	static final class Dwelling extends DomainEntity {
 	}
+
 }

@@ -1,2 +1,11 @@
-# Test configuration file containing a non-existent default TestExecutionListener.
+# Test configuration file containing a non-existent default TestExecutionListener,
+# a demo ContextCustomizerFactory, and a demo ApplicationContextFailureProcessor.
+
 org.springframework.test.context.TestExecutionListener = org.example.FooListener
+
+org.springframework.test.context.ContextCustomizerFactory =\
+	org.springframework.test.context.aot.samples.basic.ImportsContextCustomizerFactory,\
+	org.springframework.test.context.customizers.GlobalFruitContextCustomizerFactory
+
+org.springframework.test.context.ApplicationContextFailureProcessor =\
+	org.springframework.test.context.failures.TrackingApplicationContextFailureProcessor

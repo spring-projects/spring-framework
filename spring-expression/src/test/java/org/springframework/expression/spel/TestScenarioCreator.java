@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -29,13 +33,19 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  * <li>The root context object is an Inventor instance {@link Inventor}
  * </ul>
  */
-public class TestScenarioCreator {
+class TestScenarioCreator {
 
 	public static StandardEvaluationContext getTestEvaluationContext() {
 		StandardEvaluationContext testContext = new StandardEvaluationContext();
 		setupRootContextObject(testContext);
 		populateVariables(testContext);
 		populateFunctions(testContext);
+		try {
+			populateMethodHandles(testContext);
+		}
+		catch (NoSuchMethodException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 		return testContext;
 	}
 
@@ -51,14 +61,44 @@ public class TestScenarioCreator {
 					TestScenarioCreator.class.getDeclaredMethod("reverseInt", Integer.TYPE, Integer.TYPE, Integer.TYPE));
 			testContext.registerFunction("reverseString",
 					TestScenarioCreator.class.getDeclaredMethod("reverseString", String.class));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge",
-					TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge", String[].class));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2",
-					TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2", Integer.TYPE, String[].class));
+			testContext.registerFunction("varargsFunction",
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunction", String[].class));
+			testContext.registerFunction("varargsFunction2",
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", Integer.TYPE, String[].class));
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	/**
+	 * Register some Java {@code MethodHandle} as well known functions that can be called from an expression.
+	 * @param testContext the test evaluation context
+	 */
+	private static void populateMethodHandles(StandardEvaluationContext testContext) throws NoSuchMethodException, IllegalAccessException {
+		// #message(template, args...)
+		MethodHandle message = MethodHandles.lookup().findVirtual(String.class, "formatted",
+				MethodType.methodType(String.class, Object[].class));
+		testContext.registerFunction("message", message);
+		// #messageTemplate(args...)
+		MethodHandle messageWithParameters = message.bindTo("This is a %s message with %s words: <%s>");
+		testContext.registerFunction("messageTemplate", messageWithParameters);
+		// #messageTemplateBound()
+		MethodHandle messageBound = messageWithParameters
+				.bindTo(new Object[] { "prerecorded", 3, "Oh Hello World", "ignored"});
+		testContext.registerFunction("messageBound", messageBound);
+
+		//#messageStatic(template, args...)
+		MethodHandle messageStatic = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"message", MethodType.methodType(String.class, String.class, String[].class));
+		testContext.registerFunction("messageStatic", messageStatic);
+		//#messageStaticTemplate(args...)
+		MethodHandle messageStaticPartiallyBound = messageStatic.bindTo("This is a %s message with %s words: <%s>");
+		testContext.registerFunction("messageStaticTemplate", messageStaticPartiallyBound);
+		//#messageStaticBound()
+		MethodHandle messageStaticFullyBound = messageStaticPartiallyBound
+				.bindTo(new String[] { "prerecorded", "3", "Oh Hello World", "ignored"});
+		testContext.registerFunction("messageStaticBound", messageStaticFullyBound);
 	}
 
 	/**
@@ -108,25 +148,16 @@ public class TestScenarioCreator {
 		return backwards.toString();
 	}
 
-	public static String varargsFunctionReverseStringsAndMerge(String... strings) {
-		StringBuilder sb = new StringBuilder();
-		if (strings != null) {
-			for (int i = strings.length - 1; i >= 0; i--) {
-				sb.append(strings[i]);
-			}
-		}
-		return sb.toString();
+	public static String varargsFunction(String... strings) {
+		return Arrays.toString(strings);
 	}
 
-	public static String varargsFunctionReverseStringsAndMerge2(int j, String... strings) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(j);
-		if (strings != null) {
-			for (int i = strings.length - 1; i >= 0; i--) {
-				sb.append(strings[i]);
-			}
-		}
-		return sb.toString();
+	public static String varargsFunction2(int i, String... strings) {
+		return String.valueOf(i) + "-" + Arrays.toString(strings);
+	}
+
+	public static String message(String template, String... args) {
+		return template.formatted((Object[]) args);
 	}
 
 }

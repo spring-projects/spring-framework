@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,11 +106,15 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 		}
 
 		if (parameter != nestedParameter || !ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
-			arg = this.conversionService.convert(arg, TypeDescriptor.forObject(arg), new TypeDescriptor(parameter));
+			arg = this.conversionService.convert(arg, new TypeDescriptor(parameter));
 			// Check for null value after conversion of incoming argument value
-			if (arg == null && namedValueInfo.defaultValue == null &&
-					namedValueInfo.required && !nestedParameter.isOptional()) {
-				handleMissingValue(namedValueInfo.name, nestedParameter, message);
+			if (arg == null) {
+				if (namedValueInfo.defaultValue != null) {
+					arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
+				}
+				else if (namedValueInfo.required && !nestedParameter.isOptional()) {
+					handleMissingValue(namedValueInfo.name, nestedParameter, message);
+				}
 			}
 		}
 
@@ -186,7 +190,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 
 	/**
 	 * Invoked when a value is required, but {@link #resolveArgumentInternal}
-	 * returned {@code null} and there is no default value. Sub-classes can
+	 * returned {@code null} and there is no default value. Subclasses can
 	 * throw an appropriate exception for this case.
 	 * @param name the name for the value
 	 * @param parameter the target method parameter

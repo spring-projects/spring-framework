@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -73,7 +72,7 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendWithTimeout() {
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		willAnswer(invocation -> {
 			sent.set(invocation.getArgument(0));
@@ -92,7 +91,7 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendWithTimeoutMutable() {
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		willAnswer(invocation -> {
 			sent.set(invocation.getArgument(0));
@@ -112,12 +111,9 @@ public class GenericMessagingTemplateTests {
 	@Test
 	public void sendAndReceive() {
 		SubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
-		channel.subscribe(new MessageHandler() {
-			@Override
-			public void handleMessage(Message<?> message) throws MessagingException {
-				MessageChannel replyChannel = (MessageChannel) message.getHeaders().getReplyChannel();
-				replyChannel.send(new GenericMessage<>("response"));
-			}
+		channel.subscribe(message -> {
+			MessageChannel replyChannel = (MessageChannel) message.getHeaders().getReplyChannel();
+			replyChannel.send(new GenericMessage<>("response"));
 		});
 
 		String actual = this.template.convertSendAndReceive(channel, "request", String.class);
@@ -126,14 +122,14 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceiveTimeout() throws InterruptedException {
-		final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		this.template.setReceiveTimeout(1);
 		this.template.setSendTimeout(30_000L);
 		this.template.setThrowExceptionOnLateReply(true);
 
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		MessageHandler handler = createLateReplier(latch, failure);
 		willAnswer(invocation -> {
 			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
@@ -152,14 +148,14 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceiveVariableTimeout() throws InterruptedException {
-		final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		this.template.setSendTimeout(20_000);
 		this.template.setReceiveTimeout(10_000);
 		this.template.setThrowExceptionOnLateReply(true);
 
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		MessageHandler handler = createLateReplier(latch, failure);
 		willAnswer(invocation -> {
 			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
@@ -182,7 +178,7 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceiveVariableTimeoutCustomHeaders() throws InterruptedException {
-		final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		this.template.setSendTimeout(20_000);
@@ -191,7 +187,7 @@ public class GenericMessagingTemplateTests {
 		this.template.setSendTimeoutHeader("sto");
 		this.template.setReceiveTimeoutHeader("rto");
 
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		MessageHandler handler = createLateReplier(latch, failure);
 		willAnswer(invocation -> {
 			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));

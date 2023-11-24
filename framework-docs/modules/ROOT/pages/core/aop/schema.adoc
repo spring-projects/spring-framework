@@ -1,0 +1,987 @@
+[[aop-schema]]
+= Schema-based AOP Support
+
+If you prefer an XML-based format, Spring also offers support for defining aspects
+using the `aop` namespace tags. The exact same pointcut expressions and advice kinds
+as when using the @AspectJ style are supported. Hence, in this section we focus on
+that syntax and refer the reader to the discussion in the previous section
+(xref:core/aop/ataspectj.adoc[@AspectJ support]) for an understanding of writing pointcut expressions and the binding
+of advice parameters.
+
+To use the aop namespace tags described in this section, you need to import the
+`spring-aop` schema, as described in xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration]
+. See xref:core/appendix/xsd-schemas.adoc#aop[the AOP schema]
+for how to import the tags in the `aop` namespace.
+
+Within your Spring configurations, all aspect and advisor elements must be placed within
+an `<aop:config>` element (you can have more than one `<aop:config>` element in an
+application context configuration). An `<aop:config>` element can contain pointcut,
+advisor, and aspect elements (note that these must be declared in that order).
+
+WARNING: The `<aop:config>` style of configuration makes heavy use of Spring's
+xref:core/aop-api/autoproxy.adoc[auto-proxying] mechanism. This can cause issues (such as advice
+not being woven) if you already use explicit auto-proxying through the use of
+`BeanNameAutoProxyCreator` or something similar. The recommended usage pattern is to
+use either only the `<aop:config>` style or only the `AutoProxyCreator` style and
+never mix them.
+
+
+
+[[aop-schema-declaring-an-aspect]]
+== Declaring an Aspect
+
+When you use the schema support, an aspect is a regular Java object defined as a bean in
+your Spring application context. The state and behavior are captured in the fields and
+methods of the object, and the pointcut and advice information are captured in the XML.
+
+You can declare an aspect by using the `<aop:aspect>` element, and reference the backing bean
+by using the `ref` attribute, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+		<aop:aspect id="myAspect" ref="aBean">
+			...
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="aBean" class="...">
+		...
+	</bean>
+----
+
+The bean that backs the aspect (`aBean` in this case) can of course be configured and
+dependency injected just like any other Spring bean.
+
+
+
+[[aop-schema-pointcuts]]
+== Declaring a Pointcut
+
+You can declare a _named pointcut_ inside an `<aop:config>` element, letting the pointcut
+definition be shared across several aspects and advisors.
+
+A pointcut that represents the execution of any business service in the service layer can
+be defined as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:pointcut id="businessService"
+			expression="execution(* com.xyz.service.*.*(..))" />
+
+	</aop:config>
+----
+
+Note that the pointcut expression itself uses the same AspectJ pointcut expression
+language as described in xref:core/aop/ataspectj.adoc[@AspectJ support]. If you use the schema based declaration
+style, you can also refer to _named pointcuts_ defined in `@Aspect` types within the
+pointcut expression. Thus, another way of defining the above pointcut would be as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:pointcut id="businessService"
+			expression="com.xyz.CommonPointcuts.businessService()" /> <1>
+
+	</aop:config>
+----
+<1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
+
+Declaring a pointcut _inside_ an aspect is very similar to declaring a top-level pointcut,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="myAspect" ref="aBean">
+
+			<aop:pointcut id="businessService"
+				expression="execution(* com.xyz.service.*.*(..))"/>
+
+			...
+		</aop:aspect>
+
+	</aop:config>
+----
+
+In much the same way as an @AspectJ aspect, pointcuts declared by using the schema based
+definition style can collect join point context. For example, the following pointcut
+collects the `this` object as the join point context and passes it to the advice:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="myAspect" ref="aBean">
+
+			<aop:pointcut id="businessService"
+				expression="execution(* com.xyz.service.*.*(..)) &amp;&amp; this(service)"/>
+
+			<aop:before pointcut-ref="businessService" method="monitor"/>
+
+			...
+		</aop:aspect>
+
+	</aop:config>
+----
+
+The advice must be declared to receive the collected join point context by including
+parameters of the matching names, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public void monitor(Object service) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	fun monitor(service: Any) {
+		// ...
+	}
+----
+======
+
+When combining pointcut sub-expressions, `+&amp;&amp;+` is awkward within an XML
+document, so you can use the `and`, `or`, and `not` keywords in place of `+&amp;&amp;+`,
+`||`, and `!`, respectively. For example, the previous pointcut can be better written as
+follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="myAspect" ref="aBean">
+
+			<aop:pointcut id="businessService"
+				expression="execution(* com.xyz.service.*.*(..)) and this(service)"/>
+
+			<aop:before pointcut-ref="businessService" method="monitor"/>
+
+			...
+		</aop:aspect>
+
+	</aop:config>
+----
+
+Note that pointcuts defined in this way are referred to by their XML `id` and cannot be
+used as named pointcuts to form composite pointcuts. The named pointcut support in the
+schema-based definition style is thus more limited than that offered by the @AspectJ
+style.
+
+
+
+[[aop-schema-advice]]
+== Declaring Advice
+
+The schema-based AOP support uses the same five kinds of advice as the @AspectJ style, and they have
+exactly the same semantics.
+
+
+[[aop-schema-advice-before]]
+=== Before Advice
+
+Before advice runs before a matched method execution. It is declared inside an
+`<aop:aspect>` by using the `<aop:before>` element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="beforeExample" ref="aBean">
+
+		<aop:before
+			pointcut-ref="dataAccessOperation"
+			method="doAccessCheck"/>
+
+		...
+
+	</aop:aspect>
+----
+
+In the example above, `dataAccessOperation` is the `id` of a _named pointcut_ defined at
+the top (`<aop:config>`) level (see xref:core/aop/schema.adoc#aop-schema-pointcuts[Declaring a Pointcut]).
+
+NOTE: As we noted in the discussion of the @AspectJ style, using _named pointcuts_ can
+significantly improve the readability of your code. See xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions] for
+details.
+
+To define the pointcut inline instead, replace the `pointcut-ref` attribute with a
+`pointcut` attribute, as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="beforeExample" ref="aBean">
+
+		<aop:before
+			pointcut="execution(* com.xyz.dao.*.*(..))"
+			method="doAccessCheck"/>
+
+		...
+
+	</aop:aspect>
+----
+
+The `method` attribute identifies a method (`doAccessCheck`) that provides the body of
+the advice. This method must be defined for the bean referenced by the aspect element
+that contains the advice. Before a data access operation is performed (a method execution
+join point matched by the pointcut expression), the `doAccessCheck` method on the aspect
+bean is invoked.
+
+
+[[aop-schema-advice-after-returning]]
+=== After Returning Advice
+
+After returning advice runs when a matched method execution completes normally. It is
+declared inside an `<aop:aspect>` in the same way as before advice. The following example
+shows how to declare it:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="afterReturningExample" ref="aBean">
+
+		<aop:after-returning
+			pointcut="execution(* com.xyz.dao.*.*(..))"
+			method="doAccessCheck"/>
+
+		...
+	</aop:aspect>
+----
+
+As in the @AspectJ style, you can get the return value within the advice body.
+To do so, use the `returning` attribute to specify the name of the parameter to which
+the return value should be passed, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="afterReturningExample" ref="aBean">
+
+		<aop:after-returning
+			pointcut="execution(* com.xyz.dao.*.*(..))"
+			returning="retVal"
+			method="doAccessCheck"/>
+
+		...
+	</aop:aspect>
+----
+
+The `doAccessCheck` method must declare a parameter named `retVal`. The type of this
+parameter constrains matching in the same way as described for `@AfterReturning`. For
+example, you can declare the method signature as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public void doAccessCheck(Object retVal) {...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	fun doAccessCheck(retVal: Any) {...
+----
+======
+
+
+[[aop-schema-advice-after-throwing]]
+=== After Throwing Advice
+
+After throwing advice runs when a matched method execution exits by throwing an
+exception. It is declared inside an `<aop:aspect>` by using the `after-throwing` element,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="afterThrowingExample" ref="aBean">
+
+		<aop:after-throwing
+			pointcut="execution(* com.xyz.dao.*.*(..))"
+			method="doRecoveryActions"/>
+
+		...
+	</aop:aspect>
+----
+
+As in the @AspectJ style, you can get the thrown exception within the advice body.
+To do so, use the `throwing` attribute to specify the name of the parameter to
+which the exception should be passed as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="afterThrowingExample" ref="aBean">
+
+		<aop:after-throwing
+			pointcut="execution(* com.xyz.dao.*.*(..))"
+			throwing="dataAccessEx"
+			method="doRecoveryActions"/>
+
+		...
+	</aop:aspect>
+----
+
+The `doRecoveryActions` method must declare a parameter named `dataAccessEx`.
+The type of this parameter constrains matching in the same way as described for
+`@AfterThrowing`. For example, the method signature may be declared as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public void doRecoveryActions(DataAccessException dataAccessEx) {...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	fun doRecoveryActions(dataAccessEx: DataAccessException) {...
+----
+======
+
+
+[[aop-schema-advice-after-finally]]
+=== After (Finally) Advice
+
+After (finally) advice runs no matter how a matched method execution exits.
+You can declare it by using the `after` element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="afterFinallyExample" ref="aBean">
+
+		<aop:after
+			pointcut="execution(* com.xyz.dao.*.*(..))"
+			method="doReleaseLock"/>
+
+		...
+	</aop:aspect>
+----
+
+
+[[aop-schema-advice-around]]
+=== Around Advice
+
+The last kind of advice is _around_ advice. Around advice runs "around" a matched
+method's execution. It has the opportunity to do work both before and after the method
+runs and to determine when, how, and even if the method actually gets to run at all.
+Around advice is often used if you need to share state before and after a method
+execution in a thread-safe manner – for example, starting and stopping a timer.
+
+[TIP]
+====
+Always use the least powerful form of advice that meets your requirements.
+
+For example, do not use _around_ advice if _before_ advice is sufficient for your needs.
+====
+
+You can declare around advice by using the `aop:around` element. The advice method should
+declare `Object` as its return type, and the first parameter of the method must be of
+type `ProceedingJoinPoint`. Within the body of the advice method, you must invoke
+`proceed()` on the `ProceedingJoinPoint` in order for the underlying method to run.
+Invoking `proceed()` without arguments will result in the caller's original arguments
+being supplied to the underlying method when it is invoked. For advanced use cases, there
+is an overloaded variant of the `proceed()` method which accepts an array of arguments
+(`Object[]`). The values in the array will be used as the arguments to the underlying
+method when it is invoked. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-around-advice[Around Advice] for notes on calling
+`proceed` with an `Object[]`.
+
+The following example shows how to declare around advice in XML:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="aroundExample" ref="aBean">
+
+		<aop:around
+			pointcut="execution(* com.xyz.service.*.*(..))"
+			method="doBasicProfiling"/>
+
+		...
+	</aop:aspect>
+----
+
+The implementation of the `doBasicProfiling` advice can be exactly the same as in the
+@AspectJ example (minus the annotation, of course), as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+		// start stopwatch
+		Object retVal = pjp.proceed();
+		// stop stopwatch
+		return retVal;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	fun doBasicProfiling(pjp: ProceedingJoinPoint): Any? {
+		// start stopwatch
+		val retVal = pjp.proceed()
+		// stop stopwatch
+		return pjp.proceed()
+	}
+----
+======
+
+
+[[aop-schema-params]]
+=== Advice Parameters
+
+The schema-based declaration style supports fully typed advice in the same way as
+described for the @AspectJ support -- by matching pointcut parameters by name against
+advice method parameters. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params[Advice Parameters] for details. If you wish
+to explicitly specify argument names for the advice methods (not relying on the
+detection strategies previously described), you can do so by using the `arg-names`
+attribute of the advice element, which is treated in the same manner as the `argNames`
+attribute in an advice annotation (as described in xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names[Determining Argument Names]).
+The following example shows how to specify an argument name in XML:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:before
+		pointcut="com.xyz.Pointcuts.publicMethod() and @annotation(auditable)" <1>
+		method="audit"
+		arg-names="auditable" />
+----
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+
+The `arg-names` attribute accepts a comma-delimited list of parameter names.
+
+The following slightly more involved example of the XSD-based approach shows
+some around advice used in conjunction with a number of strongly typed parameters:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz.service;
+
+	public interface PersonService {
+
+		Person getPerson(String personName, int age);
+	}
+
+	public class DefaultPersonService implements PersonService {
+
+		public Person getPerson(String name, int age) {
+			return new Person(name, age);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz.service
+
+	interface PersonService {
+
+		fun getPerson(personName: String, age: Int): Person
+	}
+
+	class DefaultPersonService : PersonService {
+
+		fun getPerson(name: String, age: Int): Person {
+			return Person(name, age)
+		}
+	}
+----
+======
+
+Next up is the aspect. Notice the fact that the `profile(..)` method accepts a number of
+strongly-typed parameters, the first of which happens to be the join point used to
+proceed with the method call. The presence of this parameter is an indication that the
+`profile(..)` is to be used as `around` advice, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz;
+
+	import org.aspectj.lang.ProceedingJoinPoint;
+	import org.springframework.util.StopWatch;
+
+	public class SimpleProfiler {
+
+		public Object profile(ProceedingJoinPoint call, String name, int age) throws Throwable {
+			StopWatch clock = new StopWatch("Profiling for '" + name + "' and '" + age + "'");
+			try {
+				clock.start(call.toShortString());
+				return call.proceed();
+			} finally {
+				clock.stop();
+				System.out.println(clock.prettyPrint());
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz
+
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.springframework.util.StopWatch
+
+	class SimpleProfiler {
+
+		fun profile(call: ProceedingJoinPoint, name: String, age: Int): Any? {
+			val clock = StopWatch("Profiling for '$name' and '$age'")
+			try {
+				clock.start(call.toShortString())
+				return call.proceed()
+			} finally {
+				clock.stop()
+				println(clock.prettyPrint())
+			}
+		}
+	}
+----
+======
+
+Finally, the following example XML configuration effects the execution of the
+preceding advice for a particular join point:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<!-- this is the object that will be proxied by Spring's AOP infrastructure -->
+		<bean id="personService" class="com.xyz.service.DefaultPersonService"/>
+
+		<!-- this is the actual advice itself -->
+		<bean id="profiler" class="com.xyz.SimpleProfiler"/>
+
+		<aop:config>
+			<aop:aspect ref="profiler">
+
+				<aop:pointcut id="theExecutionOfSomePersonServiceMethod"
+					expression="execution(* com.xyz.service.PersonService.getPerson(String,int))
+					and args(name, age)"/>
+
+				<aop:around pointcut-ref="theExecutionOfSomePersonServiceMethod"
+					method="profile"/>
+
+			</aop:aspect>
+		</aop:config>
+
+	</beans>
+----
+
+Consider the following driver script:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public class Boot {
+
+		public static void main(String[] args) {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+			PersonService person = ctx.getBean(PersonService.class);
+			person.getPerson("Pengo", 12);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("beans.xml")
+		val person = ctx.getBean(PersonService.class)
+		person.getPerson("Pengo", 12)
+	}
+----
+======
+
+With such a `Boot` class, we would get output similar to the following on standard output:
+
+[literal,subs="verbatim"]
+----
+StopWatch 'Profiling for 'Pengo' and '12': running time (millis) = 0
+-----------------------------------------
+ms     %     Task name
+-----------------------------------------
+00000  ?  execution(getFoo)
+----
+
+
+[[aop-ordering]]
+=== Advice Ordering
+
+When multiple pieces of advice need to run at the same join point (executing method)
+the ordering rules are as described in xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice Ordering]. The precedence
+between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
+by either adding the `@Order` annotation to the bean that backs the aspect or by having
+the bean implement the `Ordered` interface.
+
+[NOTE]
+====
+In contrast to the precedence rules for advice methods defined in the same `@Aspect`
+class, when two pieces of advice defined in the same `<aop:aspect>` element both need to
+run at the same join point, the precedence is determined by the order in which the advice
+elements are declared within the enclosing `<aop:aspect>` element, from highest to lowest
+precedence.
+
+For example, given an `around` advice and a `before` advice defined in the same
+`<aop:aspect>` element that apply to the same join point, to ensure that the `around`
+advice has higher precedence than the `before` advice, the `<aop:around>` element must be
+declared before the `<aop:before>` element.
+
+As a general rule of thumb, if you find that you have multiple pieces of advice defined
+in the same `<aop:aspect>` element that apply to the same join point, consider collapsing
+such advice methods into one advice method per join point in each `<aop:aspect>` element
+or refactor the pieces of advice into separate `<aop:aspect>` elements that you can order
+at the aspect level.
+====
+
+
+
+[[aop-schema-introductions]]
+== Introductions
+
+Introductions (known as inter-type declarations in AspectJ) let an aspect declare
+that advised objects implement a given interface and provide an implementation of
+that interface on behalf of those objects.
+
+You can make an introduction by using the `aop:declare-parents` element inside an `aop:aspect`.
+You can use the `aop:declare-parents` element to declare that matching types have a new parent (hence the name).
+For example, given an interface named `UsageTracked` and an implementation of that interface named
+`DefaultUsageTracked`, the following aspect declares that all implementors of service
+interfaces also implement the `UsageTracked` interface. (In order to expose statistics
+through JMX for example.)
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="usageTrackerAspect" ref="usageTracking">
+
+		<aop:declare-parents
+			types-matching="com.xyz.service.*+"
+			implement-interface="com.xyz.service.tracking.UsageTracked"
+			default-impl="com.xyz.service.tracking.DefaultUsageTracked"/>
+
+		<aop:before
+			pointcut="execution(* com.xyz..service.*.*(..))
+				and this(usageTracked)"
+				method="recordUsage"/>
+
+	</aop:aspect>
+----
+
+The class that backs the `usageTracking` bean would then contain the following method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public void recordUsage(UsageTracked usageTracked) {
+		usageTracked.incrementUseCount();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	fun recordUsage(usageTracked: UsageTracked) {
+		usageTracked.incrementUseCount()
+	}
+----
+======
+
+The interface to be implemented is determined by the `implement-interface` attribute. The
+value of the `types-matching` attribute is an AspectJ type pattern. Any bean of a
+matching type implements the `UsageTracked` interface. Note that, in the before
+advice of the preceding example, service beans can be directly used as implementations of
+the `UsageTracked` interface. To access a bean programmatically, you could write the
+following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	val usageTracked = context.getBean("myService", UsageTracked.class)
+----
+======
+
+
+
+[[aop-schema-instantiation-models]]
+== Aspect Instantiation Models
+
+The only supported instantiation model for schema-defined aspects is the singleton
+model. Other instantiation models may be supported in future releases.
+
+
+
+[[aop-schema-advisors]]
+== Advisors
+
+The concept of "advisors" comes from the AOP support defined in Spring
+and does not have a direct equivalent in AspectJ. An advisor is like a small
+self-contained aspect that has a single piece of advice. The advice itself is
+represented by a bean and must implement one of the advice interfaces described in
+xref:core/aop-api/advice.adoc#aop-api-advice-types[Advice Types in Spring]. Advisors can take advantage of AspectJ pointcut expressions.
+
+Spring supports the advisor concept with the `<aop:advisor>` element. You most
+commonly see it used in conjunction with transactional advice, which also has its own
+namespace support in Spring. The following example shows an advisor:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:pointcut id="businessService"
+			expression="execution(* com.xyz.service.*.*(..))"/>
+
+		<aop:advisor
+			pointcut-ref="businessService"
+			advice-ref="tx-advice" />
+
+	</aop:config>
+
+	<tx:advice id="tx-advice">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+As well as the `pointcut-ref` attribute used in the preceding example, you can also use the
+`pointcut` attribute to define a pointcut expression inline.
+
+To define the precedence of an advisor so that the advice can participate in ordering,
+use the `order` attribute to define the `Ordered` value of the advisor.
+
+
+
+[[aop-schema-example]]
+== An AOP Schema Example
+
+This section shows how the concurrent locking failure retry example from
+xref:core/aop/ataspectj/example.adoc[An AOP Example] looks when rewritten with the schema support.
+
+The execution of business services can sometimes fail due to concurrency issues (for
+example, a deadlock loser). If the operation is retried, it is likely to succeed
+on the next try. For business services where it is appropriate to retry in such
+conditions (idempotent operations that do not need to go back to the user for conflict
+resolution), we want to transparently retry the operation to avoid the client seeing a
+`PessimisticLockingFailureException`. This is a requirement that clearly cuts across
+multiple services in the service layer and, hence, is ideal for implementing through an
+aspect.
+
+Because we want to retry the operation, we need to use around advice so that we can
+call `proceed` multiple times. The following listing shows the basic aspect implementation
+(which is a regular Java class that uses the schema support):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public class ConcurrentOperationExecutor implements Ordered {
+
+		private static final int DEFAULT_MAX_RETRIES = 2;
+
+		private int maxRetries = DEFAULT_MAX_RETRIES;
+		private int order = 1;
+
+		public void setMaxRetries(int maxRetries) {
+			this.maxRetries = maxRetries;
+		}
+
+		public int getOrder() {
+			return this.order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+			int numAttempts = 0;
+			PessimisticLockingFailureException lockFailureException;
+			do {
+				numAttempts++;
+				try {
+					return pjp.proceed();
+				}
+				catch(PessimisticLockingFailureException ex) {
+					lockFailureException = ex;
+				}
+			} while(numAttempts <= this.maxRetries);
+			throw lockFailureException;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	class ConcurrentOperationExecutor : Ordered {
+
+		private val DEFAULT_MAX_RETRIES = 2
+
+		private var maxRetries = DEFAULT_MAX_RETRIES
+		private var order = 1
+
+		fun setMaxRetries(maxRetries: Int) {
+			this.maxRetries = maxRetries
+		}
+
+		override fun getOrder(): Int {
+			return this.order
+		}
+
+		fun setOrder(order: Int) {
+			this.order = order
+		}
+
+		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any? {
+			var numAttempts = 0
+			var lockFailureException: PessimisticLockingFailureException
+			do {
+				numAttempts++
+				try {
+					return pjp.proceed()
+				} catch (ex: PessimisticLockingFailureException) {
+					lockFailureException = ex
+				}
+
+			} while (numAttempts <= this.maxRetries)
+			throw lockFailureException
+		}
+	}
+----
+======
+
+Note that the aspect implements the `Ordered` interface so that we can set the precedence of
+the aspect higher than the transaction advice (we want a fresh transaction each time we
+retry). The `maxRetries` and `order` properties are both configured by Spring. The
+main action happens in the `doConcurrentOperation` around advice method. We try to
+proceed. If we fail with a `PessimisticLockingFailureException`, we try again,
+unless we have exhausted all of our retry attempts.
+
+NOTE: This class is identical to the one used in the @AspectJ example, but with the
+annotations removed.
+
+The corresponding Spring configuration is as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor">
+
+			<aop:pointcut id="idempotentOperation"
+				expression="execution(* com.xyz.service.*.*(..))"/>
+
+			<aop:around
+				pointcut-ref="idempotentOperation"
+				method="doConcurrentOperation"/>
+
+		</aop:aspect>
+
+	</aop:config>
+
+	<bean id="concurrentOperationExecutor"
+		class="com.xyz.service.impl.ConcurrentOperationExecutor">
+			<property name="maxRetries" value="3"/>
+			<property name="order" value="100"/>
+	</bean>
+----
+
+Notice that, for the time being, we assume that all business services are idempotent. If
+this is not the case, we can refine the aspect so that it retries only genuinely
+idempotent operations, by introducing an `Idempotent` annotation and using the annotation
+to annotate the implementation of service operations, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Retention(RetentionPolicy.RUNTIME)
+	// marker annotation
+	public @interface Idempotent {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Retention(AnnotationRetention.RUNTIME)
+	// marker annotation
+	annotation class Idempotent
+----
+======
+
+The
+change to the aspect to retry only idempotent operations involves refining the
+pointcut expression so that only `@Idempotent` operations match, as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:pointcut id="idempotentOperation"
+			expression="execution(* com.xyz.service.*.*(..)) and
+			@annotation(com.xyz.service.Idempotent)"/>
+----
+
+
+
+

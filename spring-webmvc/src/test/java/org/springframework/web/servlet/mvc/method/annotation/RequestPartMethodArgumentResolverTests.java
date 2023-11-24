@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -23,14 +26,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.Part;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
+import jakarta.servlet.http.Part;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -68,20 +70,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 
 /**
- * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
+ * Tests for {@link RequestPartMethodArgumentResolver} with a mock {@link HttpMessageConverter}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class RequestPartMethodArgumentResolverTests {
+class RequestPartMethodArgumentResolverTests {
 
-	private HttpMessageConverter<SimpleBean> messageConverter;
+	@SuppressWarnings("unchecked")
+	private HttpMessageConverter<SimpleBean> messageConverter = mock();
 
 	private RequestPartMethodArgumentResolver resolver;
 
 	private MultipartFile multipartFile1;
 
 	private MultipartFile multipartFile2;
+
+	private CloseTrackingInputStream trackedStream;
 
 	private MockMultipartHttpServletRequest multipartRequest;
 
@@ -108,15 +113,21 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@BeforeEach
 	@SuppressWarnings("unchecked")
-	public void setup() throws Exception {
-		messageConverter = mock(HttpMessageConverter.class);
+	void setup() throws Exception {
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
 		resolver = new RequestPartMethodArgumentResolver(Collections.singletonList(messageConverter));
 		reset(messageConverter);
 
 		byte[] content = "doesn't matter as long as not empty".getBytes(StandardCharsets.UTF_8);
-		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", content);
+		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", content) {
+			@Override
+			public InputStream getInputStream() throws IOException {
+				CloseTrackingInputStream in = new CloseTrackingInputStream(super.getInputStream());
+				trackedStream = in;
+				return in;
+			}
+		};
 		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", content);
 		multipartRequest = new MockMultipartHttpServletRequest();
 		multipartRequest.addFile(multipartFile1);
@@ -126,7 +137,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		paramRequestPart = new SynthesizingMethodParameter(method, 0);
-		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		paramRequestPart.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		paramNamedRequestPart = new SynthesizingMethodParameter(method, 1);
 		paramValidRequestPart = new SynthesizingMethodParameter(method, 2);
 		paramMultipartFile = new SynthesizingMethodParameter(method, 3);
@@ -134,26 +145,26 @@ public class RequestPartMethodArgumentResolverTests {
 		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
 		paramInt = new SynthesizingMethodParameter(method, 6);
 		paramMultipartFileNotAnnot = new SynthesizingMethodParameter(method, 7);
-		paramMultipartFileNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		paramMultipartFileNotAnnot.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		paramPart = new SynthesizingMethodParameter(method, 8);
-		paramPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		paramPart.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		paramPartList = new SynthesizingMethodParameter(method, 9);
 		paramPartArray = new SynthesizingMethodParameter(method, 10);
 		paramRequestParamAnnot = new SynthesizingMethodParameter(method, 11);
 		optionalMultipartFile = new SynthesizingMethodParameter(method, 12);
-		optionalMultipartFile.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalMultipartFile.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalMultipartFileList = new SynthesizingMethodParameter(method, 13);
-		optionalMultipartFileList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalMultipartFileList.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalPart = new SynthesizingMethodParameter(method, 14);
-		optionalPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalPart.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalPartList = new SynthesizingMethodParameter(method, 15);
-		optionalPartList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalPartList.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalRequestPart = new SynthesizingMethodParameter(method, 16);
 	}
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(resolver.supportsParameter(paramRequestPart)).isTrue();
 		assertThat(resolver.supportsParameter(paramNamedRequestPart)).isTrue();
 		assertThat(resolver.supportsParameter(paramValidRequestPart)).isTrue();
@@ -174,33 +185,31 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMultipartFile() throws Exception {
+	void resolveMultipartFile() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
 		assertThat(actual).isSameAs(multipartFile1);
 	}
 
 	@Test
-	public void resolveMultipartFileList() throws Exception {
+	void resolveMultipartFileList() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFileList, null, webRequest, null);
-		boolean condition = actual instanceof List;
-		assertThat(condition).isTrue();
+		assertThat(actual).isInstanceOf(List.class);
 		assertThat(actual).isEqualTo(Arrays.asList(multipartFile1, multipartFile2));
 	}
 
 	@Test
-	public void resolveMultipartFileArray() throws Exception {
+	void resolveMultipartFileArray() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFileArray, null, webRequest, null);
 		assertThat(actual).isNotNull();
-		boolean condition = actual instanceof MultipartFile[];
-		assertThat(condition).isTrue();
+		assertThat(actual).isInstanceOf(MultipartFile[].class);
 		MultipartFile[] parts = (MultipartFile[]) actual;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(multipartFile1).isEqualTo(parts[0]);
 		assertThat(multipartFile2).isEqualTo(parts[1]);
 	}
 
 	@Test
-	public void resolveMultipartFileNotAnnotArgument() throws Exception {
+	void resolveMultipartFileNotAnnotArgument() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected = new MockMultipartFile("multipartFileNotAnnot", "Hello World".getBytes());
 		request.addFile(expected);
@@ -209,13 +218,12 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(paramMultipartFileNotAnnot, null, webRequest, null);
 
-		boolean condition = result instanceof MultipartFile;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(MultipartFile.class);
 		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
-	public void resolvePartArgument() throws Exception {
+	void resolvePartArgument() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
@@ -225,13 +233,12 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPart, null, webRequest, null);
-		boolean condition = result instanceof Part;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(Part.class);
 		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
-	public void resolvePartListArgument() throws Exception {
+	void resolvePartListArgument() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
@@ -243,13 +250,12 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartList, null, webRequest, null);
-		boolean condition = result instanceof List;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(List.class);
 		assertThat(result).isEqualTo(Arrays.asList(part1, part2));
 	}
 
 	@Test
-	public void resolvePartArrayArgument() throws Exception {
+	void resolvePartArrayArgument() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
@@ -261,31 +267,30 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartArray, null, webRequest, null);
-		boolean condition = result instanceof Part[];
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(Part[].class);
 		Part[] parts = (Part[]) result;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(part1).isEqualTo(parts[0]);
 		assertThat(part2).isEqualTo(parts[1]);
 	}
 
 	@Test
-	public void resolveRequestPart() throws Exception {
+	void resolveRequestPart() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramRequestPart);
 	}
 
 	@Test
-	public void resolveNamedRequestPart() throws Exception {
+	void resolveNamedRequestPart() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramNamedRequestPart);
 	}
 
 	@Test
-	public void resolveNamedRequestPartNotPresent() throws Exception {
+	void resolveNamedRequestPartNotPresent() throws Exception {
 		testResolveArgument(null, paramNamedRequestPart);
 	}
 
 	@Test
-	public void resolveRequestPartNotValid() throws Exception {
+	void resolveRequestPartNotValid() throws Exception {
 		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
 				testResolveArgument(new SimpleBean(null), paramValidRequestPart))
 			.satisfies(ex -> {
@@ -297,24 +302,24 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveRequestPartValid() throws Exception {
+	void resolveRequestPartValid() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramValidRequestPart);
 	}
 
 	@Test
-	public void resolveRequestPartRequired() throws Exception {
+	void resolveRequestPartRequired() throws Exception {
 		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
 				testResolveArgument(null, paramValidRequestPart))
 			.satisfies(ex -> assertThat(ex.getRequestPartName()).isEqualTo("requestPart"));
 	}
 
 	@Test
-	public void resolveRequestPartNotRequired() throws Exception {
+	void resolveRequestPartNotRequired() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramValidRequestPart);
 	}
 
 	@Test // gh-26501
-	public void resolveRequestPartWithoutContentType() throws Exception {
+	void resolveRequestPartWithoutContentType() throws Exception {
 		MockMultipartHttpServletRequest servletRequest = new MockMultipartHttpServletRequest();
 		servletRequest.addPart(new MockPart("requestPartString", "part value".getBytes(StandardCharsets.UTF_8)));
 		ServletWebRequest webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -330,21 +335,21 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void isMultipartRequest() throws Exception {
+	void isMultipartRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		assertThatExceptionOfType(MultipartException.class).isThrownBy(() ->
 				resolver.resolveArgument(paramMultipartFile, new ModelAndViewContainer(), new ServletWebRequest(request), null));
 	}
 
 	@Test  // SPR-9079
-	public void isMultipartRequestPut() throws Exception {
+	void isMultipartRequestPut() throws Exception {
 		this.multipartRequest.setMethod("PUT");
 		Object actualValue = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
 		assertThat(actualValue).isSameAs(multipartFile1);
 	}
 
 	@Test
-	public void resolveOptionalMultipartFileArgument() throws Exception {
+	void resolveOptionalMultipartFileArgument() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected = new MockMultipartFile("optionalMultipartFile", "Hello World".getBytes());
 		request.addFile(expected);
@@ -352,18 +357,16 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
-		boolean condition1 = actualValue instanceof Optional;
-		assertThat(condition1).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(expected);
 
 		actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
-		boolean condition = actualValue instanceof Optional;
-		assertThat(condition).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
-	public void resolveOptionalMultipartFileArgumentNotPresent() throws Exception {
+	void resolveOptionalMultipartFileArgumentNotPresent() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		webRequest = new ServletWebRequest(request);
 
@@ -375,7 +378,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalMultipartFileArgumentWithoutMultipartRequest() throws Exception {
+	void resolveOptionalMultipartFileArgumentWithoutMultipartRequest() throws Exception {
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
 		Object actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
@@ -386,7 +389,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalMultipartFileList() throws Exception {
+	void resolveOptionalMultipartFileList() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected = new MockMultipartFile("requestPart", "Hello World".getBytes());
 		request.addFile(expected);
@@ -399,13 +402,12 @@ public class RequestPartMethodArgumentResolverTests {
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(Collections.singletonList(expected));
 
 		actualValue = resolver.resolveArgument(optionalMultipartFileList, null, webRequest, null);
-		boolean condition = actualValue instanceof Optional;
-		assertThat(condition).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(Collections.singletonList(expected));
 	}
 
 	@Test
-	public void resolveOptionalMultipartFileListNotPresent() throws Exception {
+	void resolveOptionalMultipartFileListNotPresent() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		webRequest = new ServletWebRequest(request);
 
@@ -417,7 +419,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalMultipartFileListWithoutMultipartRequest() throws Exception {
+	void resolveOptionalMultipartFileListWithoutMultipartRequest() throws Exception {
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
 		Object actualValue = resolver.resolveArgument(optionalMultipartFileList, null, webRequest, null);
@@ -428,7 +430,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalPartArgument() throws Exception {
+	void resolveOptionalPartArgument() throws Exception {
 		MockPart expected = new MockPart("optionalPart", "Hello World".getBytes());
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
@@ -443,13 +445,12 @@ public class RequestPartMethodArgumentResolverTests {
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(expected);
 
 		actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
-		boolean condition = actualValue instanceof Optional;
-		assertThat(condition).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
-	public void resolveOptionalPartArgumentNotPresent() throws Exception {
+	void resolveOptionalPartArgumentNotPresent() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
@@ -463,7 +464,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalPartArgumentWithoutMultipartRequest() throws Exception {
+	void resolveOptionalPartArgumentWithoutMultipartRequest() throws Exception {
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
 		Object actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
@@ -474,7 +475,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalPartList() throws Exception {
+	void resolveOptionalPartList() throws Exception {
 		MockPart expected = new MockPart("requestPart", "Hello World".getBytes());
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
@@ -489,13 +490,12 @@ public class RequestPartMethodArgumentResolverTests {
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(Collections.singletonList(expected));
 
 		actualValue = resolver.resolveArgument(optionalPartList, null, webRequest, null);
-		boolean condition = actualValue instanceof Optional;
-		assertThat(condition).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(Collections.singletonList(expected));
 	}
 
 	@Test
-	public void resolveOptionalPartListNotPresent() throws Exception {
+	void resolveOptionalPartListNotPresent() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
@@ -509,7 +509,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalPartListWithoutMultipartRequest() throws Exception {
+	void resolveOptionalPartListWithoutMultipartRequest() throws Exception {
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
 		Object actualValue = resolver.resolveArgument(optionalPartList, null, webRequest, null);
@@ -520,7 +520,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalRequestPart() throws Exception {
+	void resolveOptionalRequestPart() throws Exception {
 		SimpleBean simpleBean = new SimpleBean("foo");
 		given(messageConverter.canRead(SimpleBean.class, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(simpleBean);
@@ -538,7 +538,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalRequestPartNotPresent() throws Exception {
+	void resolveOptionalRequestPartNotPresent() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
@@ -552,7 +552,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalRequestPartWithoutMultipartRequest() throws Exception {
+	void resolveOptionalRequestPartWithoutMultipartRequest() throws Exception {
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
 		Object actualValue = resolver.resolveArgument(optionalRequestPart, null, webRequest, null);
@@ -572,6 +572,7 @@ public class RequestPartMethodArgumentResolverTests {
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 		assertThat(actualValue).as("Invalid argument value").isEqualTo(argValue);
 		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
+		assertThat(trackedStream != null && trackedStream.closed).isTrue();
 	}
 
 
@@ -591,7 +592,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 
-	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+	private static class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target,
@@ -602,6 +603,21 @@ public class RequestPartMethodArgumentResolverTests {
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
 			dataBinder.setValidator(validator);
 			return dataBinder;
+		}
+	}
+
+
+	private static class CloseTrackingInputStream extends FilterInputStream {
+
+		public boolean closed = false;
+
+		public CloseTrackingInputStream(InputStream in) {
+			super(in);
+		}
+
+		@Override
+		public void close() {
+			this.closed = true;
 		}
 	}
 

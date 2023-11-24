@@ -141,8 +141,8 @@
 
 	Note that it's possible to specify a relative URL in which case the URL
 	must be relative to the iframe URL. For example assuming a SockJS endpoint
-	mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
-	The relative URL must start with "../../" to traverse up to the location
+	mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
+	the relative URL must start with "../../" to traverse up to the location
 	above the SockJS mapping. In case of a prefix-based Servlet mapping one more
 	traversal may be needed.
                 ]]></xsd:documentation>
@@ -420,7 +420,7 @@
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	Set the core pool size of the ThreadPoolExecutor.
-	NOTE: the core pool size is effectively the max pool size when an unbounded queue-capacity is configured (the default).
+	NOTE: The core pool size is effectively the max pool size when an unbounded queue-capacity is configured (the default).
 	This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
 	When this strategy is used, the max pool size is effectively ignored.
 	By default this is set to twice the value of Runtime.availableProcessors().
@@ -433,7 +433,7 @@
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the max pool size of the ThreadPoolExecutor.
-	 NOTE: when an unbounded queue-capacity is configured (the default), the max pool size is effectively ignored.
+	 NOTE: When an unbounded queue-capacity is configured (the default), the max pool size is effectively ignored.
 	 See the "Unbounded queues" strategy in java.util.concurrent.ThreadPoolExecutor for more details.
 	 By default this is set to Integer.MAX_VALUE.
                 ]]></xsd:documentation>
@@ -453,7 +453,7 @@
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the queue capacity for the ThreadPoolExecutor.
-	 NOTE: when an unbounded queue-capacity is configured (the default) the core pool size is effectively the max pool size.
+	 NOTE: When an unbounded queue-capacity is configured (the default) the core pool size is effectively the max pool size.
 	 This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
 	 When this strategy is used, the max pool size is effectively ignored.
 	 By default this is set to Integer.MAX_VALUE.

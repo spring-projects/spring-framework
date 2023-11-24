@@ -1,0 +1,125 @@
+[[testcontext-ctx-management]]
+= Context Management
+
+Each `TestContext` provides context management and caching support for the test instance
+for which it is responsible. Test instances do not automatically receive access to the
+configured `ApplicationContext`. However, if a test class implements the
+`ApplicationContextAware` interface, a reference to the `ApplicationContext` is supplied
+to the test instance. Note that `AbstractJUnit4SpringContextTests` and
+`AbstractTestNGSpringContextTests` implement `ApplicationContextAware` and, therefore,
+provide access to the `ApplicationContext` automatically.
+
+.@Autowired ApplicationContext
+[TIP]
+=====
+As an alternative to implementing the `ApplicationContextAware` interface, you can inject
+the application context for your test class through the `@Autowired` annotation on either
+a field or setter method, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitConfig
+	class MyTest {
+
+		@Autowired // <1>
+		ApplicationContext applicationContext;
+
+		// class body...
+	}
+----
+<1> Injecting the `ApplicationContext`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitConfig
+	class MyTest {
+
+		@Autowired // <1>
+		lateinit var applicationContext: ApplicationContext
+
+		// class body...
+	}
+----
+<1> Injecting the `ApplicationContext`.
+======
+
+
+Similarly, if your test is configured to load a `WebApplicationContext`, you can inject
+the web application context into your test, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitWebConfig // <1>
+	class MyWebAppTest {
+
+		@Autowired // <2>
+		WebApplicationContext wac;
+
+		// class body...
+	}
+----
+<1> Configuring the `WebApplicationContext`.
+<2> Injecting the `WebApplicationContext`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitWebConfig // <1>
+	class MyWebAppTest {
+
+		@Autowired // <2>
+		lateinit var wac: WebApplicationContext
+		// class body...
+	}
+----
+<1> Configuring the `WebApplicationContext`.
+<2> Injecting the `WebApplicationContext`.
+======
+
+
+Dependency injection by using `@Autowired` is provided by the
+`DependencyInjectionTestExecutionListener`, which is configured by default
+(see xref:testing/testcontext-framework/fixture-di.adoc[Dependency Injection of Test Fixtures]).
+=====
+
+Test classes that use the TestContext framework do not need to extend any particular
+class or implement a specific interface to configure their application context. Instead,
+configuration is achieved by declaring the `@ContextConfiguration` annotation at the
+class level. If your test class does not explicitly declare application context resource
+locations or component classes, the configured `ContextLoader` determines how to load a
+context from a default location or default configuration classes. In addition to context
+resource locations and component classes, an application context can also be configured
+through application context initializers.
+
+The following sections explain how to use Spring's `@ContextConfiguration` annotation to
+configure a test `ApplicationContext` by using XML configuration files, Groovy scripts,
+component classes (typically `@Configuration` classes), or context initializers.
+Alternatively, you can implement and configure your own custom `SmartContextLoader` for
+advanced use cases.
+
+* xref:testing/testcontext-framework/ctx-management/xml.adoc[Context Configuration with XML resources]
+* xref:testing/testcontext-framework/ctx-management/groovy.adoc[Context Configuration with Groovy Scripts]
+* xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[Context Configuration with Component Classes]
+* xref:testing/testcontext-framework/ctx-management/mixed-config.adoc[Mixing XML, Groovy Scripts, and Component Classes]
+* xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[Context Configuration with Context Customizers]
+* xref:testing/testcontext-framework/ctx-management/initializers.adoc[Context Configuration with Context Initializers]
+* xref:testing/testcontext-framework/ctx-management/inheritance.adoc[Context Configuration Inheritance]
+* xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles]
+* xref:testing/testcontext-framework/ctx-management/property-sources.adoc[Context Configuration with Test Property Sources]
+* xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources]
+* xref:testing/testcontext-framework/ctx-management/web.adoc[Loading a `WebApplicationContext`]
+* xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching]
+* xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context Failure Threshold]
+* xref:testing/testcontext-framework/ctx-management/hierarchies.adoc[Context Hierarchies]
+

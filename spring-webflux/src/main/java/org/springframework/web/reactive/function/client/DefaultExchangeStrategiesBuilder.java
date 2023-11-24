@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -34,7 +32,7 @@ import org.springframework.http.codec.HttpMessageWriter;
  */
 final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 
-	final static ExchangeStrategies DEFAULT_EXCHANGE_STRATEGIES;
+	static final ExchangeStrategies DEFAULT_EXCHANGE_STRATEGIES;
 
 	static {
 		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
@@ -83,12 +81,8 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 
 		public DefaultExchangeStrategies(ClientCodecConfigurer codecConfigurer) {
 			this.codecConfigurer = codecConfigurer;
-			this.readers = unmodifiableCopy(this.codecConfigurer.getReaders());
-			this.writers = unmodifiableCopy(this.codecConfigurer.getWriters());
-		}
-
-		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
-			return Collections.unmodifiableList(new ArrayList<>(list));
+			this.readers = List.copyOf(this.codecConfigurer.getReaders());
+			this.writers = List.copyOf(this.codecConfigurer.getWriters());
 		}
 
 		@Override

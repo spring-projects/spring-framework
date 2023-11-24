@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,28 @@
 package org.springframework.cache;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
 
 /**
  * Interface that defines common cache operations.
  *
- * <b>Note:</b> Due to the generic use of caching, it is recommended that
- * implementations allow storage of <tt>null</tt> values (for example to
- * cache methods that return {@code null}).
+ * <p>Serves primarily as an SPI for Spring's annotation-based caching
+ * model ({@link org.springframework.cache.annotation.Cacheable} and co)
+ * and secondarily as an API for direct usage in applications.
+ *
+ * <p><b>Note:</b> Due to the generic use of caching, it is recommended
+ * that implementations allow storage of {@code null} values
+ * (for example to cache methods that return {@code null}).
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1
+ * @see CacheManager
+ * @see org.springframework.cache.annotation.Cacheable
  */
 public interface Cache {
 
@@ -101,6 +109,66 @@ public interface Cache {
 	<T> T get(Object key, Callable<T> valueLoader);
 
 	/**
+	 * Return the value to which this cache maps the specified key,
+	 * wrapped in a {@link CompletableFuture}. This operation must not block
+	 * but is allowed to return a completed {@link CompletableFuture} if the
+	 * corresponding value is immediately available.
+	 * <p>Can return {@code null} if the cache can immediately determine that
+	 * it contains no mapping for this key (e.g. through an in-memory key map).
+	 * Otherwise, the cached value will be returned in the {@link CompletableFuture},
+	 * with {@code null} indicating a late-determined cache miss. A nested
+	 * {@link ValueWrapper} potentially indicates a nullable cached value;
+	 * the cached value may also be represented as a plain element if null
+	 * values are not supported. Calling code needs to be prepared to handle
+	 * all those variants of the result returned by this method.
+	 * @param key the key whose associated value is to be returned
+	 * @return the value to which this cache maps the specified key, contained
+	 * within a {@link CompletableFuture} which may also be empty when a cache
+	 * miss has been late-determined. A straight {@code null} being returned
+	 * means that the cache immediately determined that it contains no mapping
+	 * for this key. A {@link ValueWrapper} contained within the
+	 * {@code CompletableFuture} indicates a cached value that is potentially
+	 * {@code null}; this is sensible in a late-determined scenario where a regular
+	 * CompletableFuture-contained {@code null} indicates a cache miss. However,
+	 * a cache may also return a plain value if it does not support the actual
+	 * caching of {@code null} values, avoiding the extra level of value wrapping.
+	 * Spring's cache processing can deal with all such implementation strategies.
+	 * @since 6.1
+	 * @see #retrieve(Object, Supplier)
+	 */
+	@Nullable
+	default CompletableFuture<?> retrieve(Object key) {
+		throw new UnsupportedOperationException(
+				getClass().getName() + " does not support CompletableFuture-based retrieval");
+	}
+
+	/**
+	 * Return the value to which this cache maps the specified key, obtaining
+	 * that value from {@code valueLoader} if necessary. This method provides
+	 * a simple substitute for the conventional "if cached, return; otherwise
+	 * create, cache and return" pattern, based on {@link CompletableFuture}.
+	 * This operation must not block.
+	 * <p>If possible, implementations should ensure that the loading operation
+	 * is synchronized so that the specified {@code valueLoader} is only called
+	 * once in case of concurrent access on the same key.
+	 * <p>Null values always indicate a user-level {@code null} value with this
+	 * method. The provided {@link CompletableFuture} handle produces a value
+	 * or raises an exception. If the {@code valueLoader} raises an exception,
+	 * it will be propagated to the returned {@code CompletableFuture} handle.
+	 * @param key the key whose associated value is to be returned
+	 * @return the value to which this cache maps the specified key, contained
+	 * within a {@link CompletableFuture} which will never be {@code null}.
+	 * The provided future is expected to produce a value or raise an exception.
+	 * @since 6.1
+	 * @see #retrieve(Object)
+	 * @see #get(Object, Callable)
+	 */
+	default <T> CompletableFuture<T> retrieve(Object key, Supplier<CompletableFuture<T>> valueLoader) {
+		throw new UnsupportedOperationException(
+				getClass().getName() + " does not support CompletableFuture-based retrieval");
+	}
+
+	/**
 	 * Associate the specified value with the specified key in this cache.
 	 * <p>If the cache previously contained a mapping for this key, the old
 	 * value is replaced by the specified value.
@@ -108,6 +176,11 @@ public interface Cache {
 	 * fashion, with subsequent lookups possibly not seeing the entry yet.
 	 * This may for example be the case with transactional cache decorators.
 	 * Use {@link #putIfAbsent} for guaranteed immediate registration.
+	 * <p>If the cache is supposed to be compatible with {@link CompletableFuture}
+	 * and reactive interactions, the put operation needs to be effectively
+	 * non-blocking, with any backend write-through happening asynchronously.
+	 * This goes along with a cache implemented and configured to support
+	 * {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}.
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
 	 * @see #putIfAbsent(Object, Object)
@@ -156,6 +229,11 @@ public interface Cache {
 	 * fashion, with subsequent lookups possibly still seeing the entry.
 	 * This may for example be the case with transactional cache decorators.
 	 * Use {@link #evictIfPresent} for guaranteed immediate removal.
+	 * <p>If the cache is supposed to be compatible with {@link CompletableFuture}
+	 * and reactive interactions, the evict operation needs to be effectively
+	 * non-blocking, with any backend write-through happening asynchronously.
+	 * This goes along with a cache implemented and configured to support
+	 * {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}.
 	 * @param key the key whose mapping is to be removed from the cache
 	 * @see #evictIfPresent(Object)
 	 */
@@ -188,6 +266,11 @@ public interface Cache {
 	 * fashion, with subsequent lookups possibly still seeing the entries.
 	 * This may for example be the case with transactional cache decorators.
 	 * Use {@link #invalidate()} for guaranteed immediate removal of entries.
+	 * <p>If the cache is supposed to be compatible with {@link CompletableFuture}
+	 * and reactive interactions, the clear operation needs to be effectively
+	 * non-blocking, with any backend write-through happening asynchronously.
+	 * This goes along with a cache implemented and configured to support
+	 * {@link #retrieve(Object)} and {@link #retrieve(Object, Supplier)}.
 	 * @see #invalidate()
 	 */
 	void clear();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,26 @@
 
 package org.springframework.util;
 
-import java.beans.Introspector;
 import java.io.Closeable;
 import java.io.Externalizable;
+import java.io.File;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,21 +43,27 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TimeZone;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
- * Mainly for internal use within the framework.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -83,22 +97,28 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
+	/** Precomputed value for the combination of private, static and final modifiers. */
+	private static final int NON_OVERRIDABLE_MODIFIER = Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL;
+
+	/** Precomputed value for the combination of public and protected modifiers. */
+	private static final int OVERRIDABLE_MODIFIER = Modifier.PUBLIC | Modifier.PROTECTED;
+
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
-	 * type as value, for example: Integer.class -> int.class.
+	 * type as value, for example: {@code Integer.class -> int.class}.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(8);
+	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(9);
 
 	/**
 	 * Map with primitive type as key and corresponding wrapper
-	 * type as value, for example: int.class -> Integer.class.
+	 * type as value, for example: {@code int.class -> Integer.class}.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
+	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(9);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
-	 * type as value, for example: "int" -> "int.class".
+	 * type as value, for example: {@code "int" -> int.class}.
 	 */
 	private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<>(32);
 
@@ -157,7 +177,7 @@ public abstract class ClassUtils {
 		Class<?>[] javaLanguageInterfaceArray = {Serializable.class, Externalizable.class,
 				Closeable.class, AutoCloseable.class, Cloneable.class, Comparable.class};
 		registerCommonClasses(javaLanguageInterfaceArray);
-		javaLanguageInterfaces = new HashSet<>(Arrays.asList(javaLanguageInterfaceArray));
+		javaLanguageInterfaces = Set.of(javaLanguageInterfaceArray);
 	}
 
 
@@ -259,21 +279,21 @@ public abstract class ClassUtils {
 		if (name.endsWith(ARRAY_SUFFIX)) {
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
 			Class<?> elementClass = forName(elementClassName, classLoader);
-			return Array.newInstance(elementClass, 0).getClass();
+			return elementClass.arrayType();
 		}
 
 		// "[Ljava.lang.String;" style arrays
 		if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
 			String elementName = name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(), name.length() - 1);
 			Class<?> elementClass = forName(elementName, classLoader);
-			return Array.newInstance(elementClass, 0).getClass();
+			return elementClass.arrayType();
 		}
 
 		// "[[I" or "[[Ljava.lang.String;" style arrays
 		if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
 			String elementName = name.substring(INTERNAL_ARRAY_PREFIX.length());
 			Class<?> elementClass = forName(elementName, classLoader);
-			return Array.newInstance(elementClass, 0).getClass();
+			return elementClass.arrayType();
 		}
 
 		ClassLoader clToUse = classLoader;
@@ -285,7 +305,8 @@ public abstract class ClassUtils {
 		}
 		catch (ClassNotFoundException ex) {
 			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
-			if (lastDotIndex != -1) {
+			int previousDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex -1);
+			if (lastDotIndex != -1 && previousDotIndex != -1 && Character.isUpperCase(name.charAt(previousDotIndex + 1))) {
 				String nestedClassName =
 						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
 				try {
@@ -503,7 +524,7 @@ public abstract class ClassUtils {
 	 */
 	public static boolean isPrimitiveArray(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
+		return (clazz.isArray() && clazz.componentType().isPrimitive());
 	}
 
 	/**
@@ -514,7 +535,7 @@ public abstract class ClassUtils {
 	 */
 	public static boolean isPrimitiveWrapperArray(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+		return (clazz.isArray() && isPrimitiveWrapper(clazz.componentType()));
 	}
 
 	/**
@@ -529,12 +550,51 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Delegate for {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
+	 * Also used by {@link ObjectUtils#nullSafeConciseToString}.
+	 * <p>Check if the given type represents a common "simple" value type:
+	 * primitive or primitive wrapper, {@link Enum}, {@link String} or other
+	 * {@link CharSequence}, {@link Number}, {@link Date}, {@link Temporal},
+	 * {@link ZoneId}, {@link TimeZone}, {@link File}, {@link Path}, {@link URI},
+	 * {@link URL}, {@link InetAddress}, {@link Charset}, {@link Currency},
+	 * {@link Locale}, {@link UUID}, {@link Pattern}, or {@link Class}.
+	 * <p>{@code Void} and {@code void} are not considered simple value types.
+	 * @param type the type to check
+	 * @return whether the given type represents a "simple" value type,
+	 * suggesting value-based data binding and {@code toString} output
+	 * @since 6.1
+	 */
+	public static boolean isSimpleValueType(Class<?> type) {
+		return (Void.class != type && void.class != type &&
+				(isPrimitiveOrWrapper(type) ||
+				Enum.class.isAssignableFrom(type) ||
+				CharSequence.class.isAssignableFrom(type) ||
+				Number.class.isAssignableFrom(type) ||
+				Date.class.isAssignableFrom(type) ||
+				Temporal.class.isAssignableFrom(type) ||
+				ZoneId.class.isAssignableFrom(type) ||
+				TimeZone.class.isAssignableFrom(type) ||
+				File.class.isAssignableFrom(type) ||
+				Path.class.isAssignableFrom(type) ||
+				Charset.class.isAssignableFrom(type) ||
+				Currency.class.isAssignableFrom(type) ||
+				InetAddress.class.isAssignableFrom(type) ||
+				URI.class == type ||
+				URL.class == type ||
+				UUID.class == type ||
+				Locale.class == type ||
+				Pattern.class == type ||
+				Class.class == type));
+	}
+
+	/**
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * @param lhsType the target type
-	 * @param rhsType the value type that should be assigned to the target type
-	 * @return if the target type is assignable from the value type
+	 * @param lhsType the target type (left-hand side (LHS) type)
+	 * @param rhsType the value type (right-hand side (RHS) type) that should
+	 * be assigned to the target type
+	 * @return {@code true} if {@code rhsType} is assignable to {@code lhsType}
 	 * @see TypeUtils#isAssignable(java.lang.reflect.Type, java.lang.reflect.Type)
 	 */
 	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
@@ -778,7 +838,7 @@ public abstract class ClassUtils {
 	 * conflicting method signatures (or a similar constraint is violated)
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Class<?> createCompositeInterface(Class<?>[] interfaces, @Nullable ClassLoader classLoader) {
 		Assert.notEmpty(interfaces, "Interface array must not be empty");
 		return Proxy.getProxyClass(classLoader, interfaces);
@@ -832,22 +892,48 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the supplied class is a static class.
+	 * @return {@code true} if the supplied class is a static class
+	 * @since 6.0
+	 * @see Modifier#isStatic(int)
+	 * @see #isInnerClass(Class)
+	 */
+	public static boolean isStaticClass(Class<?> clazz) {
+		return Modifier.isStatic(clazz.getModifiers());
+	}
+
+	/**
 	 * Determine if the supplied class is an <em>inner class</em>,
 	 * i.e. a non-static member of an enclosing class.
 	 * @return {@code true} if the supplied class is an inner class
 	 * @since 5.0.5
 	 * @see Class#isMemberClass()
+	 * @see #isStaticClass(Class)
 	 */
 	public static boolean isInnerClass(Class<?> clazz) {
-		return (clazz.isMemberClass() && !Modifier.isStatic(clazz.getModifiers()));
+		return (clazz.isMemberClass() && !isStaticClass(clazz));
+	}
+
+	/**
+	 * Determine if the supplied {@link Class} is a JVM-generated implementation
+	 * class for a lambda expression or method reference.
+	 * <p>This method makes a best-effort attempt at determining this, based on
+	 * checks that work on modern, mainstream JVMs.
+	 * @param clazz the class to check
+	 * @return {@code true} if the class is a lambda implementation class
+	 * @since 5.3.19
+	 */
+	public static boolean isLambdaClass(Class<?> clazz) {
+		return (clazz.isSynthetic() && (clazz.getSuperclass() == Object.class) &&
+				(clazz.getInterfaces().length > 0) && clazz.getName().contains("$$Lambda"));
 	}
 
 	/**
 	 * Check whether the given object is a CGLIB proxy.
 	 * @param object the object to check
-	 * @see #isCglibProxyClass(Class)
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * such as for a Spring AOP proxy
 	 */
 	@Deprecated
 	public static boolean isCglibProxy(Object object) {
@@ -857,8 +943,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
-	 * @see #isCglibProxyClassName(String)
+	 * @see #getUserClass(Class)
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
 	@Deprecated
 	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
@@ -868,7 +955,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
+	 * @see #CGLIB_CLASS_SEPARATOR
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
 	@Deprecated
 	public static boolean isCglibProxyClassName(@Nullable String className) {
@@ -892,6 +981,7 @@ public abstract class ClassUtils {
 	 * class, but the original class in case of a CGLIB-generated subclass.
 	 * @param clazz the class to check
 	 * @return the user-defined class
+	 * @see #CGLIB_CLASS_SEPARATOR
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
 		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
@@ -971,13 +1061,13 @@ public abstract class ClassUtils {
 	 * property format. Strips the outer class name in case of a nested class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
-	 * @see java.beans.Introspector#decapitalize(String)
+	 * @see StringUtils#uncapitalizeAsProperty(String)
 	 */
 	public static String getShortNameAsProperty(Class<?> clazz) {
 		String shortName = getShortName(clazz);
 		int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
-		return Introspector.decapitalize(shortName);
+		return StringUtils.uncapitalizeAsProperty(shortName);
 	}
 
 	/**
@@ -1240,23 +1330,23 @@ public abstract class ClassUtils {
 	/**
 	 * Given a method, which may come from an interface, and a target class used
 	 * in the current reflective invocation, find the corresponding target method
-	 * if there is one. E.g. the method may be {@code IFoo.bar()} and the
-	 * target class may be {@code DefaultFoo}. In this case, the method may be
+	 * if there is one &mdash; for example, the method may be {@code IFoo.bar()},
+	 * and the target class may be {@code DefaultFoo}. In this case, the method may be
 	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.aop.support.AopUtils#getMostSpecificMethod},
-	 * this method does <i>not</i> resolve Java 5 bridge methods automatically.
+	 * this method does <i>not</i> resolve bridge methods automatically.
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
-	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
-	 * the original method definition).
-	 * <p><b>NOTE:</b> Since Spring 3.1.1, if Java security settings disallow reflective
-	 * access (e.g. calls to {@code Class#getDeclaredMethods} etc, this implementation
-	 * will fall back to returning the originally provided method.
+	 * if bridge method resolution is desirable &mdash; for example, to obtain
+	 * metadata from the original method definition.
+	 * <p><b>NOTE:</b> If Java security settings disallow reflective access &mdash;
+	 * for example, calls to {@code Class#getDeclaredMethods}, etc. &mdash; this
+	 * implementation will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation
 	 * (may be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} does not implement it
-	 * @see #getInterfaceMethodIfPossible
+	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
 		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
@@ -1289,28 +1379,54 @@ public abstract class ClassUtils {
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.1
+	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
+	 */
+	@Deprecated
+	public static Method getInterfaceMethodIfPossible(Method method) {
+		return getInterfaceMethodIfPossible(method, null);
+	}
+
+	/**
+	 * Determine a corresponding interface method for the given method handle, if possible.
+	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
+	 * which can be reflectively invoked without an illegal access warning.
+	 * @param method the method to be invoked, potentially from an implementation class
+	 * @param targetClass the target class to check for declared interfaces
+	 * @return the corresponding interface method, or the original method if none found
+	 * @since 5.3.16
 	 * @see #getMostSpecificMethod
 	 */
-	public static Method getInterfaceMethodIfPossible(Method method) {
+	public static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
 		if (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
 			return method;
 		}
-		return interfaceMethodCache.computeIfAbsent(method, key -> {
-			Class<?> current = key.getDeclaringClass();
-			while (current != null && current != Object.class) {
-				Class<?>[] ifcs = current.getInterfaces();
-				for (Class<?> ifc : ifcs) {
-					try {
-						return ifc.getMethod(key.getName(), key.getParameterTypes());
-					}
-					catch (NoSuchMethodException ex) {
-						// ignore
-					}
+		// Try cached version of method in its declaring class
+		Method result = interfaceMethodCache.computeIfAbsent(method,
+				key -> findInterfaceMethodIfPossible(key, key.getDeclaringClass(), Object.class));
+		if (result == method && targetClass != null) {
+			// No interface method found yet -> try given target class (possibly a subclass of the
+			// declaring class, late-binding a base class method to a subclass-declared interface:
+			// see e.g. HashMap.HashIterator.hasNext)
+			result = findInterfaceMethodIfPossible(method, targetClass, method.getDeclaringClass());
+		}
+		return result;
+	}
+
+	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
+		Class<?> current = startClass;
+		while (current != null && current != endClass) {
+			Class<?>[] ifcs = current.getInterfaces();
+			for (Class<?> ifc : ifcs) {
+				try {
+					return ifc.getMethod(method.getName(), method.getParameterTypes());
 				}
-				current = current.getSuperclass();
+				catch (NoSuchMethodException ex) {
+					// ignore
+				}
 			}
-			return key;
-		});
+			current = current.getSuperclass();
+		}
+		return method;
 	}
 
 	/**
@@ -1322,7 +1438,7 @@ public abstract class ClassUtils {
 	 * Note that, despite being synthetic, bridge methods ({@link Method#isBridge()}) are considered
 	 * as user-level methods since they are eventually pointing to a user-declared generic method.
 	 * @param method the method to check
-	 * @return {@code true} if the method can be considered as user-declared; [@code false} otherwise
+	 * @return {@code true} if the method can be considered as user-declared; {@code false} otherwise
 	 */
 	public static boolean isUserLevelMethod(Method method) {
 		Assert.notNull(method, "Method must not be null");
@@ -1339,10 +1455,10 @@ public abstract class ClassUtils {
 	 * @param targetClass the target class to check against
 	 */
 	private static boolean isOverridable(Method method, @Nullable Class<?> targetClass) {
-		if (Modifier.isPrivate(method.getModifiers())) {
+		if ((method.getModifiers() & NON_OVERRIDABLE_MODIFIER) != 0) {
 			return false;
 		}
-		if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
+		if ((method.getModifiers() & OVERRIDABLE_MODIFIER) != 0) {
 			return true;
 		}
 		return (targetClass == null ||
@@ -1363,7 +1479,7 @@ public abstract class ClassUtils {
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
 			Method method = clazz.getMethod(methodName, args);
-			return Modifier.isStatic(method.getModifiers()) ? method : null;
+			return (Modifier.isStatic(method.getModifiers()) ? method : null);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;

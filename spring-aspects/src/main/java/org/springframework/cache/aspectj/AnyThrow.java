@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.cache.aspectj;
 
 /**
- * Utility to trick the compiler to throw a valid checked
- * exceptions within the interceptor.
+ * Utility to trick the compiler to throw valid checked exceptions masked as
+ * runtime exceptions within the interceptor.
  *
  * @author Stephane Nicoll
  */
@@ -36,4 +36,5 @@ final class AnyThrow {
 	private static <E extends Throwable> void throwAny(Throwable e) throws E {
 		throw (E) e;
 	}
+
 }

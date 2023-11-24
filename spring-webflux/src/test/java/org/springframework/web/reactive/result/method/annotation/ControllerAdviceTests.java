@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,9 +82,10 @@ public class ControllerAdviceTests {
 
 	@Test
 	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
-		AssertionError cause = new AssertionError("argh");
-		FatalBeanException exception = new FatalBeanException("wrapped", cause);
-		testException(exception, cause.toString());
+		AssertionError rootCause = new AssertionError("argh");
+		FatalBeanException cause = new FatalBeanException("wrapped", rootCause);
+		Exception exception = new Exception(cause);
+		testException(exception, rootCause.toString());
 	}
 
 	private void testException(Throwable exception, String expected) throws Exception {
@@ -106,7 +107,7 @@ public class ControllerAdviceTests {
 
 		Model model = handle(adapter, controller, "handle").getModel();
 
-		assertThat(model.asMap().size()).isEqualTo(2);
+		assertThat(model.asMap()).hasSize(2);
 		assertThat(model.asMap().get("attr1")).isEqualTo("lAttr1");
 		assertThat(model.asMap().get("attr2")).isEqualTo("gAttr2");
 	}
@@ -117,7 +118,7 @@ public class ControllerAdviceTests {
 		RequestMappingHandlerAdapter adapter = createAdapter(context);
 		TestController controller = context.getBean(TestController.class);
 
-		Validator validator = mock(Validator.class);
+		Validator validator = mock();
 		controller.setValidator(validator);
 
 		BindingContext bindingContext = handle(adapter, controller, "handle").getBindingContext();

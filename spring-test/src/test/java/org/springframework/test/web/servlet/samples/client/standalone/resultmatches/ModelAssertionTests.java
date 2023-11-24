@@ -16,8 +16,7 @@
 
 package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
-import javax.validation.Valid;
-
+import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;

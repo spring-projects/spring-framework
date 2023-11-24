@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.test.web.servlet;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletException;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
@@ -37,9 +38,30 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MockMvcBuilderSupport {
+
+	/**
+	 * Delegates to {@link #createMockMvc(Filter[], MockServletConfig, WebApplicationContext, RequestBuilder, List, List, List)}
+	 * for creation of the {@link MockMvc} instance and configures that instance
+	 * with the supplied {@code defaultResponseCharacterEncoding}.
+	 * @since 5.3.10
+	 */
+	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
+			WebApplicationContext webAppContext, @Nullable RequestBuilder defaultRequestBuilder,
+			@Nullable Charset defaultResponseCharacterEncoding,
+			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
+			@Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
+
+		MockMvc mockMvc = createMockMvc(
+				filters, servletConfig, webAppContext, defaultRequestBuilder,
+				globalResultMatchers, globalResultHandlers, dispatcherServletCustomizers);
+
+		mockMvc.setDefaultResponseCharacterEncoding(defaultResponseCharacterEncoding);
+		return mockMvc;
+	}
 
 	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
 			WebApplicationContext webAppContext, @Nullable RequestBuilder defaultRequestBuilder,
@@ -56,7 +78,7 @@ public abstract class MockMvcBuilderSupport {
 			dispatcherServlet.init(servletConfig);
 		}
 		catch (ServletException ex) {
-			// should never happen..
+			// should never happen...
 			throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet", ex);
 		}
 

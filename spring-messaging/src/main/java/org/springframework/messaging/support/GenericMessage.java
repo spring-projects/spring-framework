@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	private static final long serialVersionUID = 4268801052358035098L;
 
-
+	@SuppressWarnings("serial")
 	private final T payload;
 
 	private final MessageHeaders headers;
@@ -90,34 +90,28 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof GenericMessage)) {
-			return false;
-		}
-		GenericMessage<?> otherMsg = (GenericMessage<?>) other;
 		// Using nullSafeEquals for proper array equals comparisons
-		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
+		return (this == other || (other instanceof GenericMessage<?> that &&
+				ObjectUtils.nullSafeEquals(this.payload, that.payload) && this.headers.equals(that.headers)));
 	}
 
 	@Override
 	public int hashCode() {
 		// Using nullSafeHashCode for proper array hashCode handling
-		return (ObjectUtils.nullSafeHashCode(this.payload) * 23 + this.headers.hashCode());
+		return ObjectUtils.nullSafeHash(this.payload, this.headers);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" [payload=");
-		if (this.payload instanceof byte[]) {
-			sb.append("byte[").append(((byte[]) this.payload).length).append("]");
+		if (this.payload instanceof byte[] bytes) {
+			sb.append("byte[").append(bytes.length).append(']');
 		}
 		else {
 			sb.append(this.payload);
 		}
-		sb.append(", headers=").append(this.headers).append("]");
+		sb.append(", headers=").append(this.headers).append(']');
 		return sb.toString();
 	}
 

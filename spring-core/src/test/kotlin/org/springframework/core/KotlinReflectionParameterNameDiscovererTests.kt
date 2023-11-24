@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,10 @@
 
 package org.springframework.core
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-
-import org.springframework.util.ReflectionUtils
-
 /**
- * Tests for KotlinReflectionParameterNameDiscoverer
+ * Tests for [KotlinReflectionParameterNameDiscoverer].
+ *
+ * @author Sebastien Deleuze
  */
-class KotlinReflectionParameterNameDiscovererTests {
-
-	private val parameterNameDiscoverer = KotlinReflectionParameterNameDiscoverer()
-
-	@Test
-	fun getParameterNamesOnInterface() {
-		val method = ReflectionUtils.findMethod(MessageService::class.java,"sendMessage", String::class.java)!!
-		val actualParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualParams).contains("message")
-	}
-
-	@Test
-	fun getParameterNamesOnClass() {
-		val method = ReflectionUtils.findMethod(MessageServiceImpl::class.java,"sendMessage", String::class.java)!!
-		val actualParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualParams).contains("message")
-	}
-
-	@Test
-	fun getParameterNamesOnExtensionMethod() {
-		val method = ReflectionUtils.findMethod(UtilityClass::class.java, "identity", String::class.java)!!
-		val actualParams = parameterNameDiscoverer.getParameterNames(method)!!
-		assertThat(actualParams).contains("\$receiver")
-	}
-
-	interface MessageService {
-		fun sendMessage(message: String)
-	}
-
-	class MessageServiceImpl {
-		fun sendMessage(message: String) = message
-	}
-
-	class UtilityClass {
-		fun String.identity() = this
-	}
-}
+class KotlinReflectionParameterNameDiscovererTests :
+    AbstractReflectionParameterNameDiscovererKotlinTests(KotlinReflectionParameterNameDiscoverer())

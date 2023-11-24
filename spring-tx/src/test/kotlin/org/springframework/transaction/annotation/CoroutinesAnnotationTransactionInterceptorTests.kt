@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import kotlinx.coroutines.withContext
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.ProxyFactory
 import org.springframework.transaction.interceptor.TransactionInterceptor
 import org.springframework.transaction.testfixture.ReactiveCallCountingTransactionManager
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 /**
  * @author Sebastien Deleuze
@@ -54,13 +58,10 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(TestWithCoroutines())
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				proxy.suspendingNoValueFailure()
 			}
-			catch (ex: IllegalStateException) {
-			}
-
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
 	}
@@ -72,7 +73,7 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
 		runBlocking {
-			Assertions.assertThat(proxy.suspendingValueSuccess()).isEqualTo("foo")
+			assertThat(proxy.suspendingValueSuccess()).isEqualTo("foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
 	}
@@ -83,12 +84,9 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(TestWithCoroutines())
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				proxy.suspendingValueFailure()
-				Assertions.fail("No exception thrown as expected")
-			}
-			catch (ex: IllegalStateException) {
 			}
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
@@ -101,7 +99,7 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
 		runBlocking {
-			Assertions.assertThat(proxy.suspendingFlowSuccess().toList()).containsExactly("foo", "foo")
+			assertThat(proxy.suspendingFlowSuccess().toList()).containsExactly("foo", "foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
 	}
@@ -113,58 +111,110 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
 		runBlocking {
-			Assertions.assertThat(proxy.flowSuccess().toList()).containsExactly("foo", "foo")
+			assertThat(proxy.flowSuccess().toList()).containsExactly("foo", "foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
 	}
 
+	@Test
+	fun suspendingValueSuccessWithContext() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(TestWithCoroutines())
+		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
+		val proxy = proxyFactory.proxy as TestWithCoroutines
+		assertThat(runBlocking {
+			withExampleContext("context") {
+				proxy.suspendingValueSuccessWithContext()
+			}
+		}).isEqualTo("context")
+		assertReactiveGetTransactionAndCommitCount(1)
+	}
+
+	@Test
+	fun suspendingValueFailureWithContext() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(TestWithCoroutines())
+		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
+		val proxy = proxyFactory.proxy as TestWithCoroutines
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
+				withExampleContext("context") {
+					proxy.suspendingValueFailureWithContext()
+				}
+			}
+		}.withMessage("context")
+		assertReactiveGetTransactionAndRollbackCount(1)
+	}
+
 	private fun assertReactiveGetTransactionAndCommitCount(expectedCount: Int) {
-		Assertions.assertThat(rtm.begun).isEqualTo(expectedCount)
-		Assertions.assertThat(rtm.commits).isEqualTo(expectedCount)
+		assertThat(rtm.begun).isEqualTo(expectedCount)
+		assertThat(rtm.commits).isEqualTo(expectedCount)
 	}
 
 	private fun assertReactiveGetTransactionAndRollbackCount(expectedCount: Int) {
-		Assertions.assertThat(rtm.begun).isEqualTo(expectedCount)
-		Assertions.assertThat(rtm.rollbacks).isEqualTo(expectedCount)
+		assertThat(rtm.begun).isEqualTo(expectedCount)
+		assertThat(rtm.rollbacks).isEqualTo(expectedCount)
 	}
 
 	@Transactional
 	open class TestWithCoroutines {
 
 		open suspend fun suspendingNoValueSuccess() {
-			delay(10)
+			delay(1)
 		}
 
 		open suspend fun suspendingNoValueFailure() {
-			delay(10)
+			delay(1)
 			throw IllegalStateException()
 		}
 
 		open suspend fun suspendingValueSuccess(): String {
-			delay(10)
+			delay(1)
 			return "foo"
 		}
 
 		open suspend fun suspendingValueFailure(): String {
-			delay(10)
+			delay(1)
 			throw IllegalStateException()
 		}
 
 		open fun flowSuccess(): Flow<String> {
 			return flow {
 				emit("foo")
-				delay(10)
+				delay(1)
 				emit("foo")
 			}
 		}
 
 		open suspend fun suspendingFlowSuccess(): Flow<String> {
-			delay(10)
+			delay(1)
 			return flow {
 				emit("foo")
-				delay(10)
+				delay(1)
 				emit("foo")
 			}
 		}
+
+		open suspend fun suspendingValueSuccessWithContext(): String {
+			delay(1)
+			return coroutineContext[ExampleContext.Key].toString()
+		}
+
+		open suspend fun suspendingValueFailureWithContext(): String {
+			delay(1)
+			throw IllegalStateException(coroutineContext[ExampleContext.Key].toString())
+		}
 	}
 }
+
+data class ExampleContext(val value: String) : AbstractCoroutineContextElement(ExampleContext) {
+
+	companion object Key : CoroutineContext.Key<ExampleContext>
+
+	override fun toString(): String = value
+}
+
+private suspend fun withExampleContext(inputValue: String, f: suspend () -> String) =
+	withContext(ExampleContext(inputValue)) {
+		f()
+	}

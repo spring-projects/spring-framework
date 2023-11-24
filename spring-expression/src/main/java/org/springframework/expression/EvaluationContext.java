@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
 
@@ -24,12 +25,21 @@ import org.springframework.lang.Nullable;
  * Expressions are executed in an evaluation context. It is in this context that
  * references are resolved when encountered during expression evaluation.
  *
- * <p>There is a default implementation of this EvaluationContext interface:
- * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
- * which can be extended, rather than having to implement everything manually.
+ * <p>There are two default implementations of this interface.
+ * <ul>
+ * <li>{@link org.springframework.expression.spel.support.SimpleEvaluationContext
+ * SimpleEvaluationContext}: a simpler builder-style {@code EvaluationContext}
+ * variant for data-binding purposes, which allows for opting into several SpEL
+ * features as needed.</li>
+ * <li>{@link org.springframework.expression.spel.support.StandardEvaluationContext
+ * StandardEvaluationContext}: a powerful and highly configurable {@code EvaluationContext}
+ * implementation, which can be extended, rather than having to implement everything
+ * manually.</li>
+ * </ul>
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public interface EvaluationContext {
@@ -85,7 +95,30 @@ public interface EvaluationContext {
 	OperatorOverloader getOperatorOverloader();
 
 	/**
-	 * Set a named variable within this evaluation context to a specified value.
+	 * Assign the value created by the specified {@link Supplier} to a named variable
+	 * within this evaluation context.
+	 * <p>In contrast to {@link #setVariable(String, Object)}, this method should only
+	 * be invoked to support the assignment operator ({@code =}) within an expression.
+	 * <p>By default, this method delegates to {@code setVariable(String, Object)},
+	 * providing the value created by the {@code valueSupplier}. Concrete implementations
+	 * may override this <em>default</em> method to provide different semantics.
+	 * @param name the name of the variable to assign
+	 * @param valueSupplier the supplier of the value to be assigned to the variable
+	 * @return a {@link TypedValue} wrapping the assigned value
+	 * @since 5.2.24
+	 */
+	default TypedValue assignVariable(String name, Supplier<TypedValue> valueSupplier) {
+		TypedValue typedValue = valueSupplier.get();
+		setVariable(name, typedValue.getValue());
+		return typedValue;
+	}
+
+	/**
+	 * Set a named variable in this evaluation context to a specified value.
+	 * <p>In contrast to {@link #assignVariable(String, Supplier)}, this method
+	 * should only be invoked programmatically when interacting directly with the
+	 * {@code EvaluationContext} &mdash; for example, to provide initial
+	 * configuration for the context.
 	 * @param name the name of the variable to set
 	 * @param value the value to be placed in the variable
 	 */
@@ -93,7 +126,7 @@ public interface EvaluationContext {
 
 	/**
 	 * Look up a named variable within this evaluation context.
-	 * @param name variable to lookup
+	 * @param name the name of the variable to look up
 	 * @return the value of the variable, or {@code null} if not found
 	 */
 	@Nullable

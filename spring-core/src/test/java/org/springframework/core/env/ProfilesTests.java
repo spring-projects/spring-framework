@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,30 +40,30 @@ class ProfilesTests {
 
 	@Test
 	void ofWhenNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of((String[]) null))
-			.withMessageContaining("Must specify at least one profile");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> Profiles.of((String[]) null))
+			.withMessage("Must specify at least one profile expression");
 	}
 
 	@Test
 	void ofWhenEmptyThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of())
-			.withMessageContaining("Must specify at least one profile");
+		assertThatIllegalArgumentException()
+			.isThrownBy(Profiles::of)
+			.withMessage("Must specify at least one profile expression");
 	}
 
 	@Test
 	void ofNullElement() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of((String) null))
-			.withMessageContaining("must contain text");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> Profiles.of((String) null))
+			.withMessage("Invalid profile expression [null]: must contain text");
 	}
 
 	@Test
 	void ofEmptyElement() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of("  "))
-			.withMessageContaining("must contain text");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> Profiles.of("  "))
+			.withMessage("Invalid profile expression [  ]: must contain text");
 	}
 
 	@Test
@@ -272,6 +272,12 @@ class ProfilesTests {
 		assertComplexExpression(profiles);
 	}
 
+	@Test
+	void ofComplexExpressionEnclosedInParentheses() {
+		Profiles profiles = Profiles.of("((spring & framework) | (spring & java))");
+		assertComplexExpression(profiles);
+	}
+
 	private void assertComplexExpression(Profiles profiles) {
 		assertThat(profiles.matches(activeProfiles("spring"))).isFalse();
 		assertThat(profiles.matches(activeProfiles("spring", "framework"))).isTrue();
@@ -291,8 +297,27 @@ class ProfilesTests {
 		assertThat(Profiles.of("spring")).hasToString("spring");
 		assertThat(Profiles.of("(spring & framework) | (spring & java)")).hasToString("(spring & framework) | (spring & java)");
 		assertThat(Profiles.of("(spring&framework)|(spring&java)")).hasToString("(spring&framework)|(spring&java)");
-		assertThat(Profiles.of("spring & framework", "java | kotlin")).hasToString("spring & framework or java | kotlin");
-		assertThat(Profiles.of("java | kotlin", "spring & framework")).hasToString("java | kotlin or spring & framework");
+		assertThat(Profiles.of("spring & framework", "java | kotlin")).hasToString("(spring & framework) | (java | kotlin)");
+		assertThat(Profiles.of("java | kotlin", "spring & framework")).hasToString("(java | kotlin) | (spring & framework)");
+		assertThat(Profiles.of("java | kotlin", "spring & framework", "cat | dog")).hasToString("(java | kotlin) | (spring & framework) | (cat | dog)");
+	}
+
+	@Test
+	void toStringGeneratesValidCompositeProfileExpression() {
+		assertThatToStringGeneratesValidCompositeProfileExpression("spring");
+		assertThatToStringGeneratesValidCompositeProfileExpression("(spring & kotlin) | (spring & java)");
+		assertThatToStringGeneratesValidCompositeProfileExpression("spring & kotlin", "spring & java");
+		assertThatToStringGeneratesValidCompositeProfileExpression("spring & kotlin", "spring & java", "cat | dog");
+	}
+
+	private static void assertThatToStringGeneratesValidCompositeProfileExpression(String... profileExpressions) {
+		Profiles profiles = Profiles.of(profileExpressions);
+		assertThat(profiles.matches(activeProfiles("spring", "java"))).isTrue();
+		assertThat(profiles.matches(activeProfiles("kotlin"))).isFalse();
+
+		Profiles compositeProfiles = Profiles.of(profiles.toString());
+		assertThat(compositeProfiles.matches(activeProfiles("spring", "java"))).isTrue();
+		assertThat(compositeProfiles.matches(activeProfiles("kotlin"))).isFalse();
 	}
 
 	@Test
@@ -354,9 +379,9 @@ class ProfilesTests {
 
 
 	private static void assertMalformed(Supplier<Profiles> supplier) {
-		assertThatIllegalArgumentException().isThrownBy(
-				supplier::get)
-			.withMessageContaining("Malformed");
+		assertThatIllegalArgumentException()
+			.isThrownBy(supplier::get)
+			.withMessageStartingWith("Malformed profile expression");
 	}
 
 	private static Predicate<String> activeProfiles(String... profiles) {

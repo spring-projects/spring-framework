@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ class H2DatabasePopulatorIntegrationTests extends AbstractDatabasePopulatorTests
 
 	UUID databaseName = UUID.randomUUID();
 
-	ConnectionFactory connectionFactory = ConnectionFactories.get("r2dbc:h2:mem:///"
-			+ databaseName + "?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+	ConnectionFactory connectionFactory = ConnectionFactories.get(
+			"r2dbc:h2:mem:///" + databaseName + "?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
 
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link ConcurrentLruCache}.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 class ConcurrentLruCacheTests {
 
@@ -29,8 +32,31 @@ class ConcurrentLruCacheTests {
 
 
 	@Test
+	void zeroCapacity() {
+		ConcurrentLruCache<String, String> cache = new ConcurrentLruCache<>(0, key -> key + "value");
+
+		assertThat(cache.capacity()).isZero();
+		assertThat(cache.size()).isZero();
+
+		assertThat(cache.get("k1")).isEqualTo("k1value");
+		assertThat(cache.size()).isZero();
+		assertThat(cache.contains("k1")).isFalse();
+
+		assertThat(cache.get("k2")).isEqualTo("k2value");
+		assertThat(cache.size()).isZero();
+		assertThat(cache.contains("k1")).isFalse();
+		assertThat(cache.contains("k2")).isFalse();
+
+		assertThat(cache.get("k3")).isEqualTo("k3value");
+		assertThat(cache.size()).isZero();
+		assertThat(cache.contains("k1")).isFalse();
+		assertThat(cache.contains("k2")).isFalse();
+		assertThat(cache.contains("k3")).isFalse();
+	}
+
+	@Test
 	void getAndSize() {
-		assertThat(this.cache.sizeLimit()).isEqualTo(2);
+		assertThat(this.cache.capacity()).isEqualTo(2);
 		assertThat(this.cache.size()).isEqualTo(0);
 		assertThat(this.cache.get("k1")).isEqualTo("k1value");
 		assertThat(this.cache.size()).isEqualTo(1);

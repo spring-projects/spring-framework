@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -75,8 +74,7 @@ public class HandlerExecutionChain {
 	 * @since 5.3
 	 */
 	public HandlerExecutionChain(Object handler, List<HandlerInterceptor> interceptorList) {
-		if (handler instanceof HandlerExecutionChain) {
-			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
+		if (handler instanceof HandlerExecutionChain originalChain) {
 			this.handler = originalChain.getHandler();
 			this.interceptorList.addAll(originalChain.interceptorList);
 		}
@@ -189,9 +187,8 @@ public class HandlerExecutionChain {
 	void applyAfterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response) {
 		for (int i = this.interceptorList.size() - 1; i >= 0; i--) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
-			if (interceptor instanceof AsyncHandlerInterceptor) {
+			if (interceptor instanceof AsyncHandlerInterceptor asyncInterceptor) {
 				try {
-					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptor;
 					asyncInterceptor.afterConcurrentHandlingStarted(request, response, this.handler);
 				}
 				catch (Throwable ex) {

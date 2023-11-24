@@ -1,0 +1,119 @@
+plugins {
+	id 'java-platform'
+	id 'io.freefair.aggregate-javadoc' version '8.3'
+}
+
+description = "Spring Framework API Docs"
+
+apply from: "${rootDir}/gradle/publications.gradle"
+
+repositories {
+	maven {
+		url "https://repo.spring.io/release"
+	}
+}
+
+dependencies {
+	moduleProjects.each { moduleProject ->
+		javadoc moduleProject
+	}
+}
+
+javadoc {
+	title = "${rootProject.description} ${version} API"
+	options {
+		encoding = "UTF-8"
+		memberLevel = JavadocMemberLevel.PROTECTED
+		author = true
+		header = rootProject.description
+		use = true
+		overview = "$rootProject.rootDir/framework-docs/src/docs/api/overview.html"
+		destinationDir = file("${project.buildDir}/docs/javadoc-api")
+		splitIndex = true
+		links(rootProject.ext.javadocLinks)
+		addBooleanOption('Xdoclint:syntax,reference', true) // only check syntax and reference with doclint
+		addBooleanOption('Werror', true) // fail build on Javadoc warnings
+	}
+	maxMemory = "1024m"
+	doFirst {
+		classpath += files(
+				// ensure the javadoc process can resolve types compiled from .aj sources
+				project(":spring-aspects").sourceSets.main.output
+		)
+		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+	}
+}
+
+/**
+ * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
+ */
+rootProject.tasks.dokkaHtmlMultiModule.configure {
+	dependsOn {
+		tasks.named("javadoc")
+	}
+	moduleName.set("spring-framework")
+	outputDirectory.set(project.file("$buildDir/docs/kdoc-api"))
+	includes.from("$rootProject.rootDir/framework-docs/src/docs/api/dokka-overview.md")
+}
+
+/**
+ * Zip all Java docs (javadoc & kdoc) into a single archive
+ */
+tasks.register('docsZip', Zip) {
+	dependsOn = ['javadoc', rootProject.tasks.dokkaHtmlMultiModule]
+	group = "distribution"
+	description = "Builds -${archiveClassifier} archive containing api and reference " +
+			"for deployment at https://docs.spring.io/spring-framework/docs/."
+
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("docs")
+	from("src/dist") {
+		include "changelog.txt"
+	}
+	from(javadoc) {
+		into "javadoc-api"
+	}
+	from(rootProject.tasks.dokkaHtmlMultiModule.outputDirectory) {
+		into "kdoc-api"
+	}
+}
+
+/**
+ * Zip all Spring Framework schemas into a single archive
+ */
+tasks.register('schemaZip', Zip) {
+	group = "distribution"
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("schema")
+	description = "Builds -${archiveClassifier} archive containing all " +
+			"XSDs for deployment at https://springframework.org/schema."
+	duplicatesStrategy DuplicatesStrategy.EXCLUDE
+	moduleProjects.each { module ->
+		def Properties schemas = new Properties();
+
+		module.sourceSets.main.resources.find {
+			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
+		}?.withInputStream { schemas.load(it) }
+
+		for (def key : schemas.keySet()) {
+			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
+			assert shortName != key
+			File xsdFile = module.sourceSets.main.resources.find {
+				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/', '\\\\')))
+			}
+			assert xsdFile != null
+			into(shortName) {
+				from xsdFile.path
+			}
+		}
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact docsZip
+			artifact schemaZip
+		}
+	}
+}

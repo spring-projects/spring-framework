@@ -16,9 +16,9 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 
 import org.springframework.lang.Nullable;
 
@@ -51,7 +51,7 @@ public interface DestinationResolver {
 	 * @param destinationName the name of the destination
 	 * @param pubSubDomain {@code true} if the domain is pub-sub, {@code false} if P2P
 	 * @return the JMS destination (either a topic or a queue)
-	 * @throws javax.jms.JMSException if the JMS Session failed to resolve the destination
+	 * @throws jakarta.jms.JMSException if the JMS Session failed to resolve the destination
 	 * @throws DestinationResolutionException in case of general destination resolution failure
 	 */
 	Destination resolveDestinationName(@Nullable Session session, String destinationName, boolean pubSubDomain)

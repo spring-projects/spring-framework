@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 		insertPerson(firstName);
 
 		List<Person> people = sharedEntityManager.createQuery("select p from Person as p").getResultList();
-		assertThat(people.size()).isEqualTo(1);
+		assertThat(people).hasSize(1);
 		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
 		assertThat(people.get(0).postLoaded).isSameAs(applicationContext);
 	}
@@ -80,7 +80,7 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 
 		Query q = sessionFactory.getCurrentSession().createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(1);
+		assertThat(people).hasSize(1);
 		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
 		assertThat(people.get(0).postLoaded).isSameAs(applicationContext);
 	}

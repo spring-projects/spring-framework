@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ import static org.mockito.Mockito.verify;
  */
 public class DefaultLobHandlerTests {
 
-	private ResultSet rs = mock(ResultSet.class);
+	private ResultSet rs = mock();
 
-	private PreparedStatement ps = mock(PreparedStatement.class);
+	private PreparedStatement ps = mock();
 
 	private LobHandler lobHandler = new DefaultLobHandler();
 

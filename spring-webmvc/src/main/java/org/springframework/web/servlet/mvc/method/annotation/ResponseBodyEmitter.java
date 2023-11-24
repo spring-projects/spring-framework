@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class ResponseBodyEmitter {
 	 * that may come for example from an application try-catch block on the
 	 * thread of the I/O error.
 	 */
-	private boolean sendFailed;
+	private boolean ioErrorOnSend;
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
 
@@ -128,9 +128,7 @@ public class ResponseBodyEmitter {
 		this.handler = handler;
 
 		try {
-			for (DataWithMediaType sendAttempt : this.earlySendAttempts) {
-				sendInternal(sendAttempt.getData(), sendAttempt.getMediaType());
-			}
+			sendInternal(this.earlySendAttempts);
 		}
 		finally {
 			this.earlySendAttempts.clear();
@@ -193,28 +191,58 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		Assert.state(!this.complete,
-				"ResponseBodyEmitter has already completed" +
-						(this.failure != null ? " with error: " + this.failure : ""));
-		sendInternal(object, mediaType);
-	}
-
-	private void sendInternal(Object object, @Nullable MediaType mediaType) throws IOException {
+		Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
+				(this.failure != null ? " with error: " + this.failure : ""));
 		if (this.handler != null) {
 			try {
 				this.handler.send(object, mediaType);
 			}
 			catch (IOException ex) {
-				this.sendFailed = true;
+				this.ioErrorOnSend = true;
 				throw ex;
 			}
 			catch (Throwable ex) {
-				this.sendFailed = true;
 				throw new IllegalStateException("Failed to send " + object, ex);
 			}
 		}
 		else {
 			this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
+		}
+	}
+
+	/**
+	 * Write a set of data and MediaType pairs in a batch.
+	 * <p>Compared to {@link #send(Object, MediaType)}, this batches the write operations
+	 * and flushes to the network at the end.
+	 * @param items the object and media type pairs to write
+	 * @throws IOException raised when an I/O error occurs
+	 * @throws java.lang.IllegalStateException wraps any other errors
+	 * @since 6.0.12
+	 */
+	public synchronized void send(Set<DataWithMediaType> items) throws IOException {
+		Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
+				(this.failure != null ? " with error: " + this.failure : ""));
+		sendInternal(items);
+	}
+
+	private void sendInternal(Set<DataWithMediaType> items) throws IOException {
+		if (items.isEmpty()) {
+			return;
+		}
+		if (this.handler != null) {
+			try {
+				this.handler.send(items);
+			}
+			catch (IOException ex) {
+				this.ioErrorOnSend = true;
+				throw ex;
+			}
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to send " + items, ex);
+			}
+		}
+		else {
+			this.earlySendAttempts.addAll(items);
 		}
 	}
 
@@ -227,8 +255,8 @@ public class ResponseBodyEmitter {
 	 * related events such as an error while {@link #send(Object) sending}.
 	 */
 	public synchronized void complete() {
-		// Ignore, after send failure
-		if (this.sendFailed) {
+		// Ignore complete after IO failure on send
+		if (this.ioErrorOnSend) {
 			return;
 		}
 		this.complete = true;
@@ -249,8 +277,8 @@ public class ResponseBodyEmitter {
 	 * {@link #send(Object) sending}.
 	 */
 	public synchronized void completeWithError(Throwable ex) {
-		// Ignore, after send failure
-		if (this.sendFailed) {
+		// Ignore complete after IO failure on send
+		if (this.ioErrorOnSend) {
 			return;
 		}
 		this.complete = true;
@@ -303,7 +331,16 @@ public class ResponseBodyEmitter {
 	 */
 	interface Handler {
 
+		/**
+		 * Immediately write and flush the given data to the network.
+		 */
 		void send(Object data, @Nullable MediaType mediaType) throws IOException;
+
+		/**
+		 * Immediately write all data items then flush to the network.
+		 * @since 6.0.12
+		 */
+		void send(Set<DataWithMediaType> items) throws IOException;
 
 		void complete();
 

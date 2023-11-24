@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.cdi;
 
-import javax.annotation.ManagedBean;
+import jakarta.annotation.ManagedBean;
 
 /**
  * Test candidate for a CDI {@link ManagedBean}.

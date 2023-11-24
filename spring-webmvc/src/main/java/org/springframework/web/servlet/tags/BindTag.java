@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditor;
 
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -43,32 +43,32 @@ import org.springframework.web.servlet.support.BindStatus;
  * as the bean property that this errors object applies to. Nested tags
  * such as the {@link TransformTag} can access those exposed properties.
  *
+ * <h3>Attribute Summary</h3>
  * <table>
- * <caption>Attribute Summary</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Attribute</th>
- * <th class="colOne">Required?</th>
- * <th class="colOne">Runtime Expression?</th>
- * <th class="colLast">Description</th>
+ * <th class="table-header col-first">Attribute</th>
+ * <th class="table-header col-second">Required?</th>
+ * <th class="table-header col-second">Runtime Expression?</th>
+ * <th class="table-header col-last">Description</th>
  * </tr>
  * </thead>
  * <tbody>
- * <tr class="altColor">
+ * <tr class="even-row-color">
  * <td><p>htmlEscape</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
  * <td><p>Set HTML escaping for this tag, as boolean value. Overrides the default
  * HTML escaping setting for the current page.</p></td>
  * </tr>
- * <tr class="rowColor">
+ * <tr class="odd-row-color">
  * <td><p>ignoreNestedPath</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
  * <td><p>Set whether to ignore a nested path, if any.
  * Default is to not ignore.</p></td>
  * </tr>
- * <tr class="altColor">
+ * <tr class="even-row-color">
  * <td><p>path</p></td>
  * <td><p>true</p></td>
  * <td><p>true</p></td>

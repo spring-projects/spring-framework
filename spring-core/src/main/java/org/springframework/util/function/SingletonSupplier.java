@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.util.function;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
@@ -31,6 +33,7 @@ import org.springframework.util.Assert;
  * supplier for a method that returned {@code null} and caching the result.
  *
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 5.1
  * @param <T> the type of results supplied by this supplier
  */
@@ -44,6 +47,11 @@ public class SingletonSupplier<T> implements Supplier<T> {
 
 	@Nullable
 	private volatile T singletonInstance;
+
+	/**
+	 * Guards access to write operations on the {@code singletonInstance} field.
+	 */
+	private final Lock writeLock = new ReentrantLock();
 
 
 	/**
@@ -90,7 +98,8 @@ public class SingletonSupplier<T> implements Supplier<T> {
 	public T get() {
 		T instance = this.singletonInstance;
 		if (instance == null) {
-			synchronized (this) {
+			this.writeLock.lock();
+			try {
 				instance = this.singletonInstance;
 				if (instance == null) {
 					if (this.instanceSupplier != null) {
@@ -101,6 +110,9 @@ public class SingletonSupplier<T> implements Supplier<T> {
 					}
 					this.singletonInstance = instance;
 				}
+			}
+			finally {
+				this.writeLock.unlock();
 			}
 		}
 		return instance;

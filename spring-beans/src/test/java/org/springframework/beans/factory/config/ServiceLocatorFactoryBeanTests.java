@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class ServiceLocatorFactoryBeanTests {
 		assertThat(testBean4).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean3);
 
-		assertThat(factory.toString().contains("TestServiceLocator3")).isTrue();
+		assertThat(factory.toString()).contains("TestServiceLocator3");
 	}
 
 	@Disabled @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
@@ -198,14 +198,10 @@ public class ServiceLocatorFactoryBeanTests {
 		assertThat(testBean3).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean3);
-		boolean condition3 = testBean1 instanceof ExtendedTestService;
-		assertThat(condition3).isFalse();
-		boolean condition2 = testBean2 instanceof ExtendedTestService;
-		assertThat(condition2).isFalse();
-		boolean condition1 = testBean3 instanceof ExtendedTestService;
-		assertThat(condition1).isFalse();
-		boolean condition = testBean4 instanceof ExtendedTestService;
-		assertThat(condition).isTrue();
+		assertThat(testBean1 instanceof ExtendedTestService).isFalse();
+		assertThat(testBean2 instanceof ExtendedTestService).isFalse();
+		assertThat(testBean3 instanceof ExtendedTestService).isFalse();
+		assertThat(testBean4 instanceof ExtendedTestService).isTrue();
 	}
 
 	@Test
@@ -252,7 +248,7 @@ public class ServiceLocatorFactoryBeanTests {
 
 	@Test
 	public void testRequiresListableBeanFactoryAndChokesOnAnythingElse() throws Exception {
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		try {
 			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 			factory.setBeanFactory(beanFactory);
@@ -264,33 +260,30 @@ public class ServiceLocatorFactoryBeanTests {
 
 
 	public static class TestService {
-
 	}
 
 
 	public static class ExtendedTestService extends TestService {
-
 	}
 
 
 	public static class TestService2 {
-
 	}
 
 
-	public static interface TestServiceLocator {
+	public interface TestServiceLocator {
 
 		TestService getTestService();
 	}
 
 
-	public static interface TestServiceLocator2 {
+	public interface TestServiceLocator2 {
 
 		TestService getTestService(String id) throws CustomServiceLocatorException2;
 	}
 
 
-	public static interface TestServiceLocator3 {
+	public interface TestServiceLocator3 {
 
 		TestService getTestService();
 
@@ -302,13 +295,13 @@ public class ServiceLocatorFactoryBeanTests {
 	}
 
 
-	public static interface TestService2Locator {
+	public interface TestService2Locator {
 
 		TestService2 getTestService() throws CustomServiceLocatorException3;
 	}
 
 
-	public static interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
+	public interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
 
 		TestService2 getTestService();
 
@@ -345,7 +338,6 @@ public class ServiceLocatorFactoryBeanTests {
 
 	@SuppressWarnings("serial")
 	public static class ExceptionClassWithOnlyZeroArgCtor extends Exception {
-
 	}
 
 }

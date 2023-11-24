@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.expression.spel.testresources;
 
+import org.springframework.lang.Nullable;
+
 ///CLOVER:OFF
 public class PlaceOfBirth {
+
 	private String city;
 
 	public String Country;
@@ -29,11 +32,14 @@ public class PlaceOfBirth {
 	 * country - but as it is just a test object, it is ok.
 	 */
 	@Override
-	public String toString() {return city;}
+	public String toString() {
+		return city;
+	}
 
 	public String getCity() {
 		return city;
 	}
+
 	public void setCity(String s) {
 		this.city = s;
 	}
@@ -47,12 +53,11 @@ public class PlaceOfBirth {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof PlaceOfBirth)) {
+	public boolean equals(@Nullable Object o) {
+		if (!(o instanceof PlaceOfBirth otherPOB)) {
 			return false;
 		}
-		PlaceOfBirth oPOB = (PlaceOfBirth)o;
-		return (city.equals(oPOB.city));
+		return (city.equals(otherPOB.city));
 	}
 
 	@Override

@@ -1,0 +1,64 @@
+[[jms]]
+= JMS (Java Message Service)
+
+Spring provides a JMS integration framework that simplifies the use of the JMS API in much
+the same way as Spring's integration does for the JDBC API.
+
+JMS can be roughly divided into two areas of functionality, namely the production and
+consumption of messages. The `JmsTemplate` class is used for message production and
+synchronous message reception. For asynchronous reception similar to Jakarta EE's
+message-driven bean style, Spring provides a number of message-listener containers that
+you can use to create Message-Driven POJOs (MDPs). Spring also provides a declarative way
+to create message listeners.
+
+The `org.springframework.jms.core` package provides the core functionality for using
+JMS. It contains JMS template classes that simplify the use of the JMS by handling the
+creation and release of resources, much like the `JdbcTemplate` does for JDBC. The
+design principle common to Spring template classes is to provide helper methods to
+perform common operations and, for more sophisticated usage, delegate the essence of the
+processing task to user-implemented callback interfaces. The JMS template follows the
+same design. The classes offer various convenience methods for sending messages,
+consuming messages synchronously, and exposing the JMS session and message producer to
+the user.
+
+The `org.springframework.jms.support` package provides `JMSException` translation
+functionality. The translation converts the checked `JMSException` hierarchy to a
+mirrored hierarchy of unchecked exceptions. If any provider-specific subclasses
+of the checked `jakarta.jms.JMSException` exist, this exception is wrapped in the
+unchecked `UncategorizedJmsException`.
+
+The `org.springframework.jms.support.converter` package provides a `MessageConverter`
+abstraction to convert between Java objects and JMS messages.
+
+The `org.springframework.jms.support.destination` package provides various strategies
+for managing JMS destinations, such as providing a service locator for destinations
+stored in JNDI.
+
+The `org.springframework.jms.annotation` package provides the necessary infrastructure
+to support annotation-driven listener endpoints by using `@JmsListener`.
+
+The `org.springframework.jms.config` package provides the parser implementation for the
+`jms` namespace as well as the java config support to configure listener containers and
+create listener endpoints.
+
+Finally, the `org.springframework.jms.connection` package provides an implementation of
+the `ConnectionFactory` suitable for use in standalone applications. It also contains an
+implementation of Spring's `PlatformTransactionManager` for JMS (the cunningly named
+`JmsTransactionManager`). This allows for seamless integration of JMS as a transactional
+resource into Spring's transaction management mechanisms.
+
+[NOTE]
+====
+As of Spring Framework 5, Spring's JMS package fully supports JMS 2.0 and requires the
+JMS 2.0 API to be present at runtime. We recommend the use of a JMS 2.0 compatible provider.
+
+If you happen to use an older message broker in your system, you may try upgrading to a
+JMS 2.0 compatible driver for your existing broker generation. Alternatively, you may also
+try to run against a JMS 1.1 based driver, simply putting the JMS 2.0 API jar on the
+classpath but only using JMS 1.1 compatible API against your driver. Spring's JMS support
+adheres to JMS 1.1 conventions by default, so with corresponding configuration it does
+support such a scenario. However, please consider this for transition scenarios only.
+====
+
+
+

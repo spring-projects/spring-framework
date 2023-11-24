@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,10 @@ import org.springframework.lang.Nullable;
  * on a test class, the default <em>test constructor autowire mode</em> will be
  * used. See {@link #TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME} for details on
  * how to change the default mode. Note, however, that a local declaration of
- * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} on
- * a constructor takes precedence over both {@code @TestConstructor} and the default
- * mode.
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}
+ * {@link jakarta.inject.Inject @jakarta.inject.Inject}, or
+ * {@link javax.inject.Inject @javax.inject.Inject} on a constructor takes
+ * precedence over both {@code @TestConstructor} and the default mode.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
@@ -60,6 +61,8 @@ import org.springframework.lang.Nullable;
  * @author Sam Brannen
  * @since 5.2
  * @see org.springframework.beans.factory.annotation.Autowired @Autowired
+ * @see jakarta.inject.Inject @jakarta.inject.Inject
+ * @see javax.inject.Inject @javax.inject.Inject
  * @see org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig @SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig
@@ -76,7 +79,7 @@ public @interface TestConstructor {
 
 	/**
 	 * JVM system property used to change the default <em>test constructor
-	 * autowire mode</em>: {@value #TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME}.
+	 * autowire mode</em>: {@value}.
 	 * <p>Acceptable values include enum constants defined in {@link AutowireMode},
 	 * ignoring case. For example, the default may be changed to {@link AutowireMode#ALL}
 	 * by supplying the following JVM system property via the command line.
@@ -104,6 +107,8 @@ public @interface TestConstructor {
 	 * @return an {@link AutowireMode} to take precedence over the global default
 	 * @see #TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME
 	 * @see org.springframework.beans.factory.annotation.Autowired @Autowired
+	 * @see jakarta.inject.Inject @jakarta.inject.Inject
+	 * @see javax.inject.Inject @javax.inject.Inject
 	 * @see AutowireMode#ALL
 	 * @see AutowireMode#ANNOTATED
 	 */
@@ -120,7 +125,9 @@ public @interface TestConstructor {
 		/**
 		 * All test constructor parameters will be autowired as if the constructor
 		 * itself were annotated with
-		 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}.
+		 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+		 * {@link jakarta.inject.Inject @jakarta.inject.Inject}, or
+		 * {@link javax.inject.Inject @javax.inject.Inject}.
 		 * @see #ANNOTATED
 		 */
 		ALL,
@@ -131,7 +138,10 @@ public @interface TestConstructor {
 		 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
 		 * {@link org.springframework.beans.factory.annotation.Qualifier @Qualifier},
 		 * or {@link org.springframework.beans.factory.annotation.Value @Value},
-		 * or if the constructor itself is annotated with {@code @Autowired}.
+		 * or if the constructor itself is annotated with
+		 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+		 * {@link jakarta.inject.Inject @jakarta.inject.Inject}, or
+		 * {@link javax.inject.Inject @javax.inject.Inject}.
 		 * @see #ALL
 		 */
 		ANNOTATED;

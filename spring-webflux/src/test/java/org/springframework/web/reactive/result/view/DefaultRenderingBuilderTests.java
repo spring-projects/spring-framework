@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class DefaultRenderingBuilderTests {
 		assertThat(rendering.view()).isEqualTo("abc");
 		assertThat(rendering.modelAttributes()).isEqualTo(Collections.emptyMap());
 		assertThat(rendering.status()).isNull();
-		assertThat(rendering.headers().size()).isEqualTo(0);
+		assertThat(rendering.headers()).isEmpty();
 	}
 
 	@Test
@@ -95,7 +95,7 @@ public class DefaultRenderingBuilderTests {
 	public void header() throws Exception {
 		Rendering rendering = Rendering.view("foo").header("foo", "bar").build();
 
-		assertThat(rendering.headers().size()).isEqualTo(1);
+		assertThat(rendering.headers()).hasSize(1);
 		assertThat(rendering.headers().get("foo")).isEqualTo(Collections.singletonList("bar"));
 	}
 

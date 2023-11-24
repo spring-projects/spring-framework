@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * Shared configuration for tests that need an embedded database pre-loaded
+ * Shared configuration for tests that need an embedded database preloaded
  * with the schema for the 'person' table.
  *
  * @author Sam Brannen
@@ -41,10 +41,10 @@ public class EmbeddedPersonDatabaseTestsConfig {
 
 	@Bean
 	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder()//
-		.generateUniqueName(true)//
-		.addScript("classpath:/org/springframework/test/jdbc/schema.sql") //
-		.build();
+		return new EmbeddedDatabaseBuilder()
+				.generateUniqueName(true)
+				.addScript("classpath:/org/springframework/test/jdbc/schema.sql")
+				.build();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -136,6 +138,19 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 		assertThat(mapAll).isNotNull();
 		assertThat(mapAll.get("colors")).isEqualTo("red");
+	}
+
+	@Test
+	public void resolveMultiValueMapArgumentNoParams() {
+
+		MethodParameter param = this.testMethod.annot(matrixAttribute().noPathVar())
+				.arg(MultiValueMap.class, String.class, String.class);
+
+		Object result = this.resolver.resolveArgument(param,
+				new BindingContext(), this.exchange).block(Duration.ZERO);
+
+		assertThat(result).isInstanceOf(MultiValueMap.class)
+				.asInstanceOf(InstanceOfAssertFactories.MAP).isEmpty();
 	}
 
 	@Test

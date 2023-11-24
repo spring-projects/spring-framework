@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class ComposablePointcutTests {
 		pc1.intersection(GETTER_METHOD_MATCHER);
 
 		assertThat(pc1.equals(pc2)).isFalse();
-		assertThat(pc1.hashCode() == pc2.hashCode()).isFalse();
+		assertThat(pc1.hashCode()).isNotEqualTo(pc2.hashCode());
 
 		pc2.intersection(GETTER_METHOD_MATCHER);
 

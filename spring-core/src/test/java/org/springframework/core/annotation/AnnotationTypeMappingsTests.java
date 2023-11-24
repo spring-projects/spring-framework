@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core.annotation;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
-import org.springframework.lang.UsesSunMisc;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.toList;
@@ -61,12 +59,6 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void forAnnotationWhenHasSpringAnnotationReturnsFilteredMappings() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithSpringLangAnnotation.class);
-		assertThat(mappings.size()).isEqualTo(1);
-	}
-
-	@Test
 	void forAnnotationTypeWhenMetaAnnotationsReturnsMappings() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(MetaAnnotated.class);
 		assertThat(mappings.size()).isEqualTo(6);
@@ -88,7 +80,7 @@ class AnnotationTypeMappingsTests {
 	@Test
 	void forAnnotationTypeWhenRepeatableMetaAnnotationIsFiltered() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class,
-				Repeating.class.getName()::equals);
+				RepeatableContainers.standardRepeatables(), Repeating.class.getName()::equals);
 		assertThat(getAll(mappings)).flatExtracting(AnnotationTypeMapping::getAnnotationType)
 				.containsExactly(WithRepeatedMetaAnnotations.class);
 	}
@@ -524,12 +516,6 @@ class AnnotationTypeMappingsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface SimpleAnnotation {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Inherited
-	@UsesSunMisc
-	@interface WithSpringLangAnnotation {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

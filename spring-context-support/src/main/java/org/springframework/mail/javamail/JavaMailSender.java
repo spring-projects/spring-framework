@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,15 @@
 package org.springframework.mail.javamail;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailParseException;
+import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSender;
 
 /**
@@ -40,7 +45,7 @@ import org.springframework.mail.MailSender;
  * mechanism, possibly using a {@link MimeMessageHelper} for populating the message.
  * See {@link MimeMessageHelper MimeMessageHelper's javadoc} for an example.
  *
- * <p>The entire JavaMail {@link javax.mail.Session} management is abstracted
+ * <p>The entire JavaMail {@link jakarta.mail.Session} management is abstracted
  * by the JavaMailSender. Client code should not deal with a Session in any way,
  * rather leave the entire JavaMail configuration and resource handling to the
  * JavaMailSender implementation. This also increases testability.
@@ -54,8 +59,8 @@ import org.springframework.mail.MailSender;
  *
  * @author Juergen Hoeller
  * @since 07.10.2003
- * @see javax.mail.internet.MimeMessage
- * @see javax.mail.Session
+ * @see jakarta.mail.internet.MimeMessage
+ * @see jakarta.mail.Session
  * @see JavaMailSenderImpl
  * @see MimeMessagePreparator
  * @see MimeMessageHelper
@@ -92,7 +97,9 @@ public interface JavaMailSender extends MailSender {
 	 * in case of failure when sending the message
 	 * @see #createMimeMessage
 	 */
-	void send(MimeMessage mimeMessage) throws MailException;
+	default void send(MimeMessage mimeMessage) throws MailException {
+		send(new MimeMessage[] {mimeMessage});
+	}
 
 	/**
 	 * Send the given array of JavaMail MIME messages in batch.
@@ -121,7 +128,9 @@ public interface JavaMailSender extends MailSender {
 	 * @throws org.springframework.mail.MailSendException
 	 * in case of failure when sending the message
 	 */
-	void send(MimeMessagePreparator mimeMessagePreparator) throws MailException;
+	default void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
+		send(new MimeMessagePreparator[] {mimeMessagePreparator});
+	}
 
 	/**
 	 * Send the JavaMail MIME messages prepared by the given MimeMessagePreparators.
@@ -138,6 +147,25 @@ public interface JavaMailSender extends MailSender {
 	 * @throws org.springframework.mail.MailSendException
 	 * in case of failure when sending a message
 	 */
-	void send(MimeMessagePreparator... mimeMessagePreparators) throws MailException;
+	default void send(MimeMessagePreparator... mimeMessagePreparators) throws MailException {
+		try {
+			List<MimeMessage> mimeMessages = new ArrayList<>(mimeMessagePreparators.length);
+			for (MimeMessagePreparator preparator : mimeMessagePreparators) {
+				MimeMessage mimeMessage = createMimeMessage();
+				preparator.prepare(mimeMessage);
+				mimeMessages.add(mimeMessage);
+			}
+			send(mimeMessages.toArray(new MimeMessage[0]));
+		}
+		catch (MailException ex) {
+			throw ex;
+		}
+		catch (MessagingException ex) {
+			throw new MailParseException(ex);
+		}
+		catch (Exception ex) {
+			throw new MailPreparationException(ex);
+		}
+	}
 
 }

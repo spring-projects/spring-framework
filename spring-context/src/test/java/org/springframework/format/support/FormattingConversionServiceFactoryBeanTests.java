@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,24 +189,14 @@ public class FormattingConversionServiceFactoryBeanTests {
 		public Printer<?> getPrinter(SpecialInt annotation, Class<?> fieldType) {
 			assertThat(annotation.value()).isEqualTo("aliased");
 			assertThat(annotation.alias()).isEqualTo("aliased");
-			return new Printer<Integer>() {
-				@Override
-				public String print(Integer object, Locale locale) {
-					return ":" + object.toString();
-				}
-			};
+			return (object, locale) -> ":" + object.toString();
 		}
 
 		@Override
 		public Parser<?> getParser(SpecialInt annotation, Class<?> fieldType) {
 			assertThat(annotation.value()).isEqualTo("aliased");
 			assertThat(annotation.alias()).isEqualTo("aliased");
-			return new Parser<Integer>() {
-				@Override
-				public Integer parse(String text, Locale locale) throws ParseException {
-					return Integer.parseInt(text.substring(1));
-				}
-			};
+			return (text, locale) -> Integer.parseInt(text, 1, text.length(), 10);
 		}
 	}
 

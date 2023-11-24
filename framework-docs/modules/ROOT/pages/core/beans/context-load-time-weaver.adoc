@@ -1,0 +1,52 @@
+[[context-load-time-weaver]]
+= Registering a `LoadTimeWeaver`
+
+The `LoadTimeWeaver` is used by Spring to dynamically transform classes as they are
+loaded into the Java virtual machine (JVM).
+
+To enable load-time weaving, you can add the `@EnableLoadTimeWeaving` to one of your
+`@Configuration` classes, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	public class AppConfig {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	class AppConfig
+----
+======
+
+Alternatively, for XML configuration, you can use the `context:load-time-weaver` element:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<context:load-time-weaver/>
+	</beans>
+----
+
+Once configured for the `ApplicationContext`, any bean within that `ApplicationContext`
+may implement `LoadTimeWeaverAware`, thereby receiving a reference to the load-time
+weaver instance. This is particularly useful in combination with
+xref:data-access/orm/jpa.adoc[Spring's JPA support] where load-time weaving may be
+necessary for JPA class transformation.
+Consult the
+{spring-framework-api}/orm/jpa/LocalContainerEntityManagerFactoryBean.html[`LocalContainerEntityManagerFactoryBean`]
+javadoc for more detail. For more on AspectJ load-time weaving, see xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework].
+
+
+
+

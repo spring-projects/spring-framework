@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,17 @@ public class MockHttpInputMessage implements HttpInputMessage {
 	private final InputStream body;
 
 
-	public MockHttpInputMessage(byte[] content) {
-		Assert.notNull(content, "Byte array must not be null");
-		this.body = new ByteArrayInputStream(content);
+	/**
+	 * Create a {@code MockHttpInputMessage} with the supplied body.
+	 */
+	public MockHttpInputMessage(byte[] body) {
+		Assert.notNull(body, "Byte array must not be null");
+		this.body = new ByteArrayInputStream(body);
 	}
 
+	/**
+	 * Create a {@code MockHttpInputMessage} with the supplied body.
+	 */
 	public MockHttpInputMessage(InputStream body) {
 		Assert.notNull(body, "InputStream must not be null");
 		this.body = body;

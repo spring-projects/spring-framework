@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -48,7 +49,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Handler for return values of type {@link ResponseBodyEmitter} and sub-classes
+ * Handler for return values of type {@link ResponseBodyEmitter} and subclasses
  * such as {@link SseEmitter} including the same types wrapped with
  * {@link ResponseEntity}.
  *
@@ -130,9 +131,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
-		if (returnValue instanceof ResponseEntity) {
-			ResponseEntity<?> responseEntity = (ResponseEntity<?>) returnValue;
-			response.setStatus(responseEntity.getStatusCodeValue());
+		if (returnValue instanceof ResponseEntity<?> responseEntity) {
+			response.setStatus(responseEntity.getStatusCode().value());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
 			returnValue = responseEntity.getBody();
 			returnType = returnType.nested();
@@ -147,8 +147,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		Assert.state(request != null, "No ServletRequest");
 
 		ResponseBodyEmitter emitter;
-		if (returnValue instanceof ResponseBodyEmitter) {
-			emitter = (ResponseBodyEmitter) returnValue;
+		if (returnValue instanceof ResponseBodyEmitter responseBodyEmitter) {
+			emitter = responseBodyEmitter;
 		}
 		else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
@@ -203,6 +203,15 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		@Override
 		public void send(Object data, @Nullable MediaType mediaType) throws IOException {
 			sendInternal(data, mediaType);
+			this.outputMessage.flush();
+		}
+
+		@Override
+		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) throws IOException {
+			for (ResponseBodyEmitter.DataWithMediaType item : items) {
+				sendInternal(item.getData(), item.getMediaType());
+			}
+			this.outputMessage.flush();
 		}
 
 		@SuppressWarnings("unchecked")
@@ -210,7 +219,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.sseMessageConverters) {
 				if (converter.canWrite(data.getClass(), mediaType)) {
 					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);
-					this.outputMessage.flush();
 					return;
 				}
 			}

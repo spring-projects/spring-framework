@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
+import org.springframework.web.reactive.result.condition.MediaTypeExpression;
 import org.springframework.web.reactive.result.condition.PatternsRequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -56,8 +59,9 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link RequestMappingHandlerMapping}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
-public class RequestMappingHandlerMappingTests {
+class RequestMappingHandlerMappingTests {
 
 	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
@@ -65,13 +69,13 @@ public class RequestMappingHandlerMappingTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.handlerMapping.setApplicationContext(wac);
 	}
 
 
 	@Test
-	public void resolveEmbeddedValuesInPatterns() {
+	void resolveEmbeddedValuesInPatterns() {
 		this.handlerMapping.setEmbeddedValueResolver(value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value);
 
 		String[] patterns = new String[] { "/foo", "/${pattern}/bar" };
@@ -81,7 +85,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void pathPrefix() throws Exception {
+	void pathPrefix() throws Exception {
 		this.handlerMapping.setEmbeddedValueResolver(value -> "/${prefix}".equals(value) ? "/api" : value);
 		this.handlerMapping.setPathPrefixes(Collections.singletonMap(
 				"/${prefix}", HandlerTypePredicate.forAnnotation(RestController.class)));
@@ -94,7 +98,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
+	void resolveRequestMappingViaComposedAnnotation() {
 		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
 
 		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
@@ -102,7 +106,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // SPR-14988
-	public void getMappingOverridesConsumesFromTypeLevelAnnotation() throws Exception {
+	void getMappingOverridesConsumesFromTypeLevelAnnotation() {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
@@ -110,7 +114,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // gh-22010
-	public void consumesWithOptionalRequestBody() {
+	void consumesWithOptionalRequestBody() {
 		this.wac.registerSingleton("testController", ComposedAnnotationController.class);
 		this.wac.refresh();
 		this.handlerMapping.afterPropertiesSet();
@@ -126,40 +130,88 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void getMapping() throws Exception {
+	void getMapping() {
 		assertComposedAnnotationMapping(RequestMethod.GET);
 	}
 
 	@Test
-	public void postMapping() throws Exception {
+	void postMapping() {
 		assertComposedAnnotationMapping(RequestMethod.POST);
 	}
 
 	@Test
-	public void putMapping() throws Exception {
+	void putMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PUT);
 	}
 
 	@Test
-	public void deleteMapping() throws Exception {
+	void deleteMapping() {
 		assertComposedAnnotationMapping(RequestMethod.DELETE);
 	}
 
 	@Test
-	public void patchMapping() throws Exception {
+	void patchMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
 
-	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) throws Exception {
+		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(
+				HttpExchangeController.class.getMethod("defaultValuesExchange"),
+				HttpExchangeController.class);
+
+		assertThat(mappingInfo.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::toString)
+				.containsOnly("/exchange");
+
+		assertThat(mappingInfo.getMethodsCondition().getMethods()).isEmpty();
+		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getConsumesCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getProducesCondition().getExpressions()).isEmpty();
+	}
+
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void httpExchangeWithCustomValues() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(
+				HttpExchangeController.class.getMethod("customValuesExchange"),
+				HttpExchangeController.class);
+
+		assertThat(mappingInfo.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::toString)
+				.containsOnly("/exchange/custom");
+
+		assertThat(mappingInfo.getMethodsCondition().getMethods()).containsOnly(RequestMethod.POST);
+		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
+
+		assertThat(mappingInfo.getConsumesCondition().getExpressions())
+				.extracting(MediaTypeExpression::getMediaType)
+				.containsOnly(MediaType.APPLICATION_JSON);
+
+		assertThat(mappingInfo.getProducesCondition().getExpressions())
+				.extracting(MediaTypeExpression::getMediaType)
+				.containsOnly(MediaType.valueOf("text/plain;charset=UTF-8"));
+	}
+
+	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
-
 		return assertComposedAnnotationMapping(methodName, path, requestMethod);
 	}
 
-	private RequestMappingInfo assertComposedAnnotationMapping(String methodName, String path,
-			RequestMethod requestMethod) throws Exception {
+	private RequestMappingInfo assertComposedAnnotationMapping(
+			String methodName, String path, RequestMethod requestMethod) {
 
 		Class<?> clazz = ComposedAnnotationController.class;
 		Method method = ClassUtils.getMethod(clazz, methodName, (Class<?>[]) null);
@@ -168,11 +220,11 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(info).isNotNull();
 
 		Set<PathPattern> paths = info.getPatternsCondition().getPatterns();
-		assertThat(paths.size()).isEqualTo(1);
+		assertThat(paths).hasSize(1);
 		assertThat(paths.iterator().next().getPatternString()).isEqualTo(path);
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-		assertThat(methods.size()).isEqualTo(1);
+		assertThat(methods).hasSize(1);
 		assertThat(methods.iterator().next()).isEqualTo(requestMethod);
 
 		return info;
@@ -234,8 +286,20 @@ public class RequestMappingHandlerMappingTests {
 
 		@GetMapping("/{id}")
 		public Principal getUser() {
-			return mock(Principal.class);
+			return mock();
 		}
+	}
+
+
+	@RestController
+	@HttpExchange("/exchange")
+	static class HttpExchangeController {
+
+		@HttpExchange
+		public void defaultValuesExchange() {}
+
+		@PostExchange(url = "/custom", contentType = "application/json", accept = "text/plain;charset=UTF-8")
+		public void customValuesExchange(){}
 	}
 
 }

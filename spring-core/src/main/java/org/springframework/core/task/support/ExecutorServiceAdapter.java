@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.springframework.util.Assert;
  * <p>This is primarily for adapting to client components that communicate via the
  * {@code java.util.concurrent.ExecutorService} API. It can also be used as
  * common ground between a local Spring {@code TaskExecutor} backend and a
- * JNDI-located {@code ManagedExecutorService} in a Java EE 7 environment.
+ * JNDI-located {@code ManagedExecutorService} in a Jakarta EE environment.
  *
  * <p><b>NOTE:</b> This ExecutorService adapter does <em>not</em> support the
  * lifecycle methods in the {@code java.util.concurrent.ExecutorService} API
- * ("shutdown()" etc), similar to a server-wide {@code ManagedExecutorService}
- * in a Java EE 7 environment. The lifecycle is always up to the backend pool,
+ * ("shutdown()" etc.), similar to a server-wide {@code ManagedExecutorService}
+ * in a Jakarta EE environment. The lifecycle is always up to the backend pool,
  * with this adapter acting as an access-only proxy for that target pool.
  *
  * @author Juergen Hoeller
@@ -88,6 +88,11 @@ public class ExecutorServiceAdapter extends AbstractExecutorService {
 	@Override
 	public boolean isTerminated() {
 		return false;
+	}
+
+	// @Override on JDK 19
+	public void close() {
+		// no-op in order to avoid container-triggered shutdown call which would lead to exception logging
 	}
 
 }

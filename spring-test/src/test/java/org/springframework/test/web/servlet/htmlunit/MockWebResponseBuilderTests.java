@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.servlet.http.Cookie;
-
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -111,7 +110,7 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders.size()).isEqualTo(3);
+		assertThat(responseHeaders).hasSize(3);
 		NameValuePair header = responseHeaders.get(0);
 		assertThat(header.getName()).isEqualTo("Content-Type");
 		assertThat(header.getValue()).isEqualTo("text/html");
@@ -133,7 +132,7 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders.size()).isEqualTo(1);
+		assertThat(responseHeaders).hasSize(1);
 		NameValuePair header = responseHeaders.get(0);
 		assertThat(header.getName()).isEqualTo("Set-Cookie");
 		assertThat(header.getValue()).isEqualTo("cookieA=valueA");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.messaging.simp.user;
 
+import java.util.Objects;
+
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -57,21 +60,15 @@ public class TestSimpSubscription implements SimpSubscription {
 
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SimpSubscription)) {
-			return false;
-		}
-		SimpSubscription otherSubscription = (SimpSubscription) other;
-		return (ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()) &&
-				this.id.equals(otherSubscription.getId()));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof SimpSubscription that &&
+				ObjectUtils.nullSafeEquals(getSession(), that.getSession()) &&
+				this.id.equals(that.getId())));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.id.hashCode() * 31 + ObjectUtils.nullSafeHashCode(getSession());
+		return Objects.hash(this.id, getSession());
 	}
 
 	@Override

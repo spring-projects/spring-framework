@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,13 +67,13 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  *
  * @author Rossen Stoyanchev
  */
-public class ViewResolutionResultHandlerTests {
+class ViewResolutionResultHandlerTests {
 
 	private final BindingContext bindingContext = new BindingContext();
 
 
 	@Test
-	public void supports() {
+	void supports() {
 		testSupports(on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class));
 		testSupports(on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class));
 		testSupports(on(Handler.class).resolveReturnType(Mono.class, String.class));
@@ -122,7 +122,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void viewResolverOrder() {
+	void viewResolverOrder() {
 		TestViewResolver resolver1 = new TestViewResolver("account");
 		TestViewResolver resolver2 = new TestViewResolver("profile");
 		resolver1.setOrder(2);
@@ -133,7 +133,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void handleReturnValueTypes() {
+	void handleReturnValueTypes() {
 		Object returnValue;
 		MethodParameter returnType;
 		ViewResolver resolver = new TestViewResolver("account");
@@ -197,7 +197,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void handleWithMultipleResolvers() {
+	void handleWithMultipleResolvers() {
 		testHandle("/account",
 				on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class),
 				"profile", "profile: {id=123}",
@@ -205,7 +205,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void defaultViewName() {
+	void defaultViewName() {
 		testDefaultViewName(null, on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class));
 		testDefaultViewName(Mono.empty(), on(Handler.class).resolveReturnType(Mono.class, String.class));
 		testDefaultViewName(Mono.empty(), on(Handler.class).resolveReturnType(Mono.class, Void.class));
@@ -231,7 +231,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void unresolvedViewName() {
+	void unresolvedViewName() {
 		String returnValue = "account";
 		MethodParameter returnType = on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class);
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
@@ -246,7 +246,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void contentNegotiation() {
+	void contentNegotiation() {
 		TestBean value = new TestBean("Joe");
 		MethodParameter returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
@@ -268,7 +268,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	public void contentNegotiationWith406() {
+	void contentNegotiationWith406() {
 		TestBean value = new TestBean("Joe");
 		MethodParameter returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
@@ -284,7 +284,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	@Test  // SPR-15291
-	public void contentNegotiationWithRedirect() {
+	void contentNegotiationWithRedirect() {
 		HandlerResult handlerResult = new HandlerResult(new Object(), "redirect:/",
 				on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class),
 				this.bindingContext);

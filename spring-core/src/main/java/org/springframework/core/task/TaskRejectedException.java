@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.task;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
@@ -25,7 +27,6 @@ import java.util.concurrent.RejectedExecutionException;
  * @author Juergen Hoeller
  * @since 2.0.1
  * @see TaskExecutor#execute(Runnable)
- * @see TaskTimeoutException
  */
 @SuppressWarnings("serial")
 public class TaskRejectedException extends RejectedExecutionException {
@@ -49,6 +50,28 @@ public class TaskRejectedException extends RejectedExecutionException {
 	 */
 	public TaskRejectedException(String msg, Throwable cause) {
 		super(msg, cause);
+	}
+
+	/**
+	 * Create a new {@code TaskRejectedException}
+	 * with a default message for the given executor and task.
+	 * @param executor the {@code Executor} that rejected the task
+	 * @param task the task object that got rejected
+	 * @param cause the original {@link RejectedExecutionException}
+	 * @since 6.1
+	 * @see ExecutorService#isShutdown()
+	 * @see java.util.concurrent.RejectedExecutionException
+	 */
+	public TaskRejectedException(Executor executor, Object task, RejectedExecutionException cause) {
+		super(executorDescription(executor) + " did not accept task: " + task, cause);
+	}
+
+
+	private static String executorDescription(Executor executor) {
+		if (executor instanceof ExecutorService executorService) {
+			return "ExecutorService in " + (executorService.isShutdown() ? "shutdown" : "active") + " state";
+		}
+		return executor.toString();
 	}
 
 }

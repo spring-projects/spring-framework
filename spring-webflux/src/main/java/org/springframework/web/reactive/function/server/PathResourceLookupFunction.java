@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 
 		try {
 			Resource resource = this.location.createRelative(path);
-			if (resource.exists() && resource.isReadable() && isResourceUnderLocation(resource)) {
+			if (resource.isReadable() && isResourceUnderLocation(resource)) {
 				return Mono.just(resource);
 			}
 			else {
@@ -129,8 +129,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(this.location.getURL().toString());
 		}
-		else if (resource instanceof ClassPathResource) {
-			resourcePath = ((ClassPathResource) resource).getPath();
+		else if (resource instanceof ClassPathResource classPathResource) {
+			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) this.location).getPath());
 		}
 		else {

@@ -1,0 +1,35 @@
+[[websocket-stomp-handle-send]]
+= Sending Messages
+
+What if you want to send messages to connected clients from any part of the
+application? Any application component can send messages to the `brokerChannel`.
+The easiest way to do so is to inject a `SimpMessagingTemplate` and
+use it to send messages. Typically, you would inject it by
+type, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	public class GreetingController {
+
+		private SimpMessagingTemplate template;
+
+		@Autowired
+		public GreetingController(SimpMessagingTemplate template) {
+			this.template = template;
+		}
+
+		@RequestMapping(path="/greetings", method=POST)
+		public void greet(String greeting) {
+			String text = "[" + getTimestamp() + "]:" + greeting;
+			this.template.convertAndSend("/topic/greetings", text);
+		}
+
+	}
+----
+
+However, you can also qualify it by its name (`brokerMessagingTemplate`), if another
+bean of the same type exists.
+
+
+

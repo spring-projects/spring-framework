@@ -1,0 +1,57 @@
+[[null-safety]]
+= Null-safety
+
+Although Java does not let you express null-safety with its type system, the Spring Framework
+provides the following annotations in the `org.springframework.lang` package to let you
+declare nullability of APIs and fields:
+
+* {spring-framework-api}/lang/Nullable.html[`@Nullable`]: Annotation to indicate that a
+specific parameter, return value, or field can be `null`.
+* {spring-framework-api}/lang/NonNull.html[`@NonNull`]: Annotation to indicate that a specific
+parameter, return value, or field cannot be `null` (not needed on parameters, return values,
+and fields where `@NonNullApi` and `@NonNullFields` apply, respectively).
+* {spring-framework-api}/lang/NonNullApi.html[`@NonNullApi`]: Annotation at the package level
+that declares non-null as the default semantics for parameters and return values.
+* {spring-framework-api}/lang/NonNullFields.html[`@NonNullFields`]: Annotation at the package
+level that declares non-null as the default semantics for fields.
+
+The Spring Framework itself leverages these annotations, but they can also be used in any
+Spring-based Java project to declare null-safe APIs and optionally null-safe fields.
+Nullability declarations for generic type arguments, varargs, and array elements are not supported yet.
+Nullability declarations are expected to be fine-tuned between Spring Framework releases,
+including minor ones. Nullability of types used inside method bodies is outside the
+scope of this feature.
+
+NOTE: Other common libraries such as Reactor and Spring Data provide null-safe APIs that
+use a similar nullability arrangement, delivering a consistent overall experience for
+Spring application developers.
+
+
+
+
+[[use-cases]]
+== Use cases
+
+In addition to providing an explicit declaration for Spring Framework API nullability,
+these annotations can be used by an IDE (such as IDEA or Eclipse) to provide useful
+warnings related to null-safety in order to avoid `NullPointerException` at runtime.
+
+They are also used to make Spring APIs null-safe in Kotlin projects, since Kotlin natively
+supports {kotlin-docs}/null-safety.html[null-safety]. More details
+are available in the xref:languages/kotlin/null-safety.adoc[Kotlin support documentation].
+
+
+
+
+[[jsr-305-meta-annotations]]
+== JSR-305 meta-annotations
+
+Spring annotations are meta-annotated with {JSR}305[JSR 305]
+annotations (a dormant but widespread JSR). JSR-305 meta-annotations let tooling vendors
+like IDEA or Kotlin provide null-safety support in a generic way, without having to
+hard-code support for Spring annotations.
+
+It is neither necessary nor recommended to add a JSR-305 dependency to the project classpath to
+take advantage of Spring's null-safe APIs. Only projects such as Spring-based libraries that use
+null-safety annotations in their codebase should add `com.google.code.findbugs:jsr305:3.0.2`
+with `compileOnly` Gradle configuration or Maven `provided` scope to avoid compiler warnings.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.web.server.adapter;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -28,6 +28,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
@@ -41,6 +43,7 @@ import org.springframework.web.WebApplicationInitializer;
  * the {@link ServletHttpHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0.2
  */
 public abstract class AbstractReactiveWebInitializer implements WebApplicationInitializer {
@@ -54,10 +57,10 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return null or empty");
+		Assert.state(StringUtils.hasLength(servletName), "getServletName() must not return null or empty");
 
 		ApplicationContext applicationContext = createApplicationContext();
-		Assert.notNull(applicationContext, "createApplicationContext() must not return null");
+		Assert.state(applicationContext != null, "createApplicationContext() must not return null");
 
 		refreshApplicationContext(applicationContext);
 		registerCloseListener(servletContext, applicationContext);
@@ -91,7 +94,7 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	protected ApplicationContext createApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		Class<?>[] configClasses = getConfigClasses();
-		Assert.notEmpty(configClasses, "No Spring configuration provided through getConfigClasses()");
+		Assert.state(!ObjectUtils.isEmpty(configClasses), "No Spring configuration provided through getConfigClasses()");
 		context.register(configClasses);
 		return context;
 	}
@@ -108,11 +111,8 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	 * Refresh the given application context, if necessary.
 	 */
 	protected void refreshApplicationContext(ApplicationContext context) {
-		if (context instanceof ConfigurableApplicationContext) {
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-			if (!cac.isActive()) {
-				cac.refresh();
-			}
+		if (context instanceof ConfigurableApplicationContext cac && !cac.isActive()) {
+			cac.refresh();
 		}
 	}
 
@@ -124,10 +124,8 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	 * closed when {@code servletContext} is destroyed
 	 */
 	protected void registerCloseListener(ServletContext servletContext, ApplicationContext applicationContext) {
-		if (applicationContext instanceof ConfigurableApplicationContext) {
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
-			ServletContextDestroyedListener listener = new ServletContextDestroyedListener(cac);
-			servletContext.addListener(listener);
+		if (applicationContext instanceof ConfigurableApplicationContext cac) {
+			servletContext.addListener(new ServletContextDestroyedListener(cac));
 		}
 	}
 

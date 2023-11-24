@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import org.springframework.lang.Nullable;
 
 /**
  * An implementation of {@link CachingConfigurer} with empty methods allowing
- * sub-classes to override only the methods they're interested in.
+ * subclasses to override only the methods they're interested in.
  *
  * @author Stephane Nicoll
  * @since 4.1
  * @see CachingConfigurer
+ * @deprecated as of 6.0 in favor of implementing {@link CachingConfigurer} directly
  */
+@Deprecated(since = "6.0")
 public class CachingConfigurerSupport implements CachingConfigurer {
 
 	@Override

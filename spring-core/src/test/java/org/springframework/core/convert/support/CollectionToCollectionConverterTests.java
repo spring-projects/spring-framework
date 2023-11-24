@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,37 +49,29 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class CollectionToCollectionConverterTests {
 
-	private GenericConversionService conversionService = new GenericConversionService();
+	private final GenericConversionService conversionService = new GenericConversionService();
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 	}
 
 
 	@Test
 	void scalarList() throws Exception {
-		List<String> list = new ArrayList<>();
-		list.add("9");
-		list.add("37");
+		List<String> list = List.of("9", "37");
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("scalarListTarget"));
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
-		try {
-			conversionService.convert(list, sourceType, targetType);
-		}
-		catch (ConversionFailedException ex) {
-			boolean condition = ex.getCause() instanceof ConverterNotFoundException;
-			assertThat(condition).isTrue();
-		}
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(list, sourceType, targetType))
+				.withCauseInstanceOf(ConverterNotFoundException.class);
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		List<Integer> result = (List<Integer>) conversionService.convert(list, sourceType, targetType);
-		assertThat(list.equals(result)).isFalse();
-		assertThat(result.get(0).intValue()).isEqualTo(9);
-		assertThat(result.get(1).intValue()).isEqualTo(37);
+		assertThat(result).isNotEqualTo(list).containsExactly(9, 37);
 	}
 
 	@Test
@@ -195,13 +187,13 @@ class CollectionToCollectionConverterTests {
 				aSource, TypeDescriptor.forObject(aSource), TypeDescriptor.forObject(new ArrayList()));
 		boolean condition = myConverted instanceof ArrayList<?>;
 		assertThat(condition).isTrue();
-		assertThat(((ArrayList<?>) myConverted).size()).isEqualTo(aSource.size());
+		assertThat(((ArrayList<?>) myConverted)).hasSameSizeAs(aSource);
 	}
 
 	@Test
 	void listToCollectionNoCopyRequired() throws NoSuchFieldException {
 		List<?> input = new ArrayList<>(Arrays.asList("foo", "bar"));
-		assertThat(conversionService.convert(input, TypeDescriptor.forObject(input),
+		assertThat(conversionService.convert(input,
 				new TypeDescriptor(getClass().getField("wildcardCollection")))).isSameAs(input);
 	}
 
@@ -261,7 +253,7 @@ class CollectionToCollectionConverterTests {
 		List<String> list = new ArrayList<>();
 		list.add("A");
 		list.add("C");
-		assertThat(conversionService.convert(list, TypeDescriptor.forObject(list), new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(MyEnum.A, MyEnum.C));
+		assertThat(conversionService.convert(list, new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(MyEnum.A, MyEnum.C));
 	}
 
 
@@ -284,7 +276,7 @@ class CollectionToCollectionConverterTests {
 	public EnumSet<MyEnum> enumSet;
 
 
-	public static abstract class BaseResource implements Resource {
+	public abstract static class BaseResource implements Resource {
 
 		@Override
 		public InputStream getInputStream() throws IOException {

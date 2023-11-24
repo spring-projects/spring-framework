@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.EnumSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -42,34 +43,40 @@ import org.springframework.web.reactive.function.BodyInserters;
 class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
+			Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
 
 
 	private final Resource resource;
 
+	private final BiConsumer<Resource, HttpHeaders> headersConsumer;
 
-	public ResourceHandlerFunction(Resource resource) {
+
+	public ResourceHandlerFunction(Resource resource, BiConsumer<Resource, HttpHeaders> headersConsumer) {
 		this.resource = resource;
+		this.headersConsumer = headersConsumer;
 	}
 
 
 	@Override
 	public Mono<ServerResponse> handle(ServerRequest request) {
 		HttpMethod method = request.method();
-		if (method != null) {
-			switch (method) {
-				case GET:
-					return EntityResponse.fromObject(this.resource).build()
-							.map(response -> response);
-				case HEAD:
-					Resource headResource = new HeadMethodResource(this.resource);
-					return EntityResponse.fromObject(headResource).build()
-							.map(response -> response);
-				case OPTIONS:
-					return ServerResponse.ok()
-							.allow(SUPPORTED_METHODS)
-							.body(BodyInserters.empty());
-			}
+		if (HttpMethod.GET.equals(method)) {
+			return EntityResponse.fromObject(this.resource)
+					.headers(headers -> this.headersConsumer.accept(this.resource, headers))
+					.build()
+					.map(response -> response);
+		}
+		else if (HttpMethod.HEAD.equals(method)) {
+			Resource headResource = new HeadMethodResource(this.resource);
+			return EntityResponse.fromObject(headResource)
+					.headers(headers -> this.headersConsumer.accept(this.resource, headers))
+					.build()
+					.map(response -> response);
+		}
+		else if (HttpMethod.OPTIONS.equals(method)) {
+			return ServerResponse.ok()
+					.allow(SUPPORTED_METHODS)
+					.body(BodyInserters.empty());
 		}
 		return ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED)
 				.allow(SUPPORTED_METHODS)

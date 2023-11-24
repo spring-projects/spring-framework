@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,8 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	public MapSqlParameterSource addValue(String paramName, @Nullable Object value) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		this.values.put(paramName, value);
-		if (value instanceof SqlParameterValue) {
-			registerSqlType(paramName, ((SqlParameterValue) value).getSqlType());
+		if (value instanceof SqlParameterValue sqlParameterValue) {
+			registerSqlType(paramName, sqlParameterValue.getSqlType());
 		}
 		return this;
 	}
@@ -135,12 +135,20 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 		if (values != null) {
 			values.forEach((key, value) -> {
 				this.values.put(key, value);
-				if (value instanceof SqlParameterValue) {
-					registerSqlType(key, ((SqlParameterValue) value).getSqlType());
+				if (value instanceof SqlParameterValue sqlParameterValue) {
+					registerSqlType(key, sqlParameterValue.getSqlType());
 				}
 			});
 		}
 		return this;
+	}
+
+	/**
+	 * Return whether this parameter source has been configured with any values.
+	 * @since 6.1
+	 */
+	public boolean hasValues() {
+		return !this.values.isEmpty();
 	}
 
 	/**

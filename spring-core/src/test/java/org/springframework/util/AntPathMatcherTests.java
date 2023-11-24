@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,7 @@ class AntPathMatcherTests {
 
 		assertThat(pathMatcher.match("/{bla}.*", "/testing.html")).isTrue();
 		assertThat(pathMatcher.match("/{bla}", "//x\ny")).isTrue();
+		assertThat(pathMatcher.match("/{var:.*}", "/x\ny")).isTrue();
 	}
 
 	@Test
@@ -299,7 +300,7 @@ class AntPathMatcherTests {
 
 	@Test
 	void extractPathWithinPattern() throws Exception {
-		assertThat(pathMatcher.extractPathWithinPattern("/docs/commit.html", "/docs/commit.html")).isEqualTo("");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/commit.html", "/docs/commit.html")).isEmpty();
 
 		assertThat(pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit")).isEqualTo("cvs/commit");
 		assertThat(pathMatcher.extractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html")).isEqualTo("commit.html");
@@ -409,7 +410,7 @@ class AntPathMatcherTests {
 
 	@Test
 	void combine() {
-		assertThat(pathMatcher.combine(null, null)).isEqualTo("");
+		assertThat(pathMatcher.combine(null, null)).isEmpty();
 		assertThat(pathMatcher.combine("/hotels", null)).isEqualTo("/hotels");
 		assertThat(pathMatcher.combine(null, "/hotels")).isEqualTo("/hotels");
 		assertThat(pathMatcher.combine("/hotels/*", "booking")).isEqualTo("/hotels/booking");
@@ -621,7 +622,7 @@ class AntPathMatcherTests {
 	@Test
 	void defaultCacheSetting() {
 		match();
-		assertThat(pathMatcher.stringMatcherCache.size() > 20).isTrue();
+		assertThat(pathMatcher.stringMatcherCache).hasSizeGreaterThan(20);
 
 		for (int i = 0; i < 65536; i++) {
 			pathMatcher.match("test" + i, "test");
@@ -634,34 +635,34 @@ class AntPathMatcherTests {
 	void cachePatternsSetToTrue() {
 		pathMatcher.setCachePatterns(true);
 		match();
-		assertThat(pathMatcher.stringMatcherCache.size() > 20).isTrue();
+		assertThat(pathMatcher.stringMatcherCache).hasSizeGreaterThan(20);
 
 		for (int i = 0; i < 65536; i++) {
 			pathMatcher.match("test" + i, "test" + i);
 		}
 		// Cache keeps being alive due to the explicit cache setting
-		assertThat(pathMatcher.stringMatcherCache.size() > 65536).isTrue();
+		assertThat(pathMatcher.stringMatcherCache).hasSizeGreaterThan(65536);
 	}
 
 	@Test
 	void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
 		pathMatcher.setCachePatterns(true);
-		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(0);
+		assertThat(pathMatcher.stringMatcherCache).isEmpty();
 
 		pathMatcher.match("test?", "test");
-		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(1);
+		assertThat(pathMatcher.stringMatcherCache).hasSize(1);
 
 		pathMatcher.match("test?", "best");
 		pathMatcher.match("test/*", "view/test.jpg");
 		pathMatcher.match("test/**/test.jpg", "view/test.jpg");
 		pathMatcher.match("test/{name}.jpg", "view/test.jpg");
-		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(1);
+		assertThat(pathMatcher.stringMatcherCache).hasSize(1);
 	}
 
 	@Test
 	void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
 		pathMatcher.setCachePatterns(true);
-		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(0);
+		assertThat(pathMatcher.stringMatcherCache).isEmpty();
 
 		pathMatcher.match("test", "testian");
 		pathMatcher.match("test?", "testFf");
@@ -672,7 +673,7 @@ class AntPathMatcherTests {
 		pathMatcher.match("/**/{name}.jpg", "/test/lorem.jpg");
 		pathMatcher.match("/*/dir/{name}.jpg", "/*/dir/lorem.jpg");
 
-		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(7);
+		assertThat(pathMatcher.stringMatcherCache).hasSize(7);
 	}
 
 	@Test
@@ -704,4 +705,11 @@ class AntPathMatcherTests {
 		assertThat(pathMatcher.isPattern(null)).isFalse();
 	}
 
+	@Test // gh-27506
+	void consistentMatchWithWildcardsAndTrailingSlash() {
+		assertThat(pathMatcher.match("/*/foo", "/en/foo")).isTrue();
+		assertThat(pathMatcher.match("/*/foo", "/en/foo/")).isFalse();
+		assertThat(pathMatcher.match("/**/foo", "/en/foo")).isTrue();
+		assertThat(pathMatcher.match("/**/foo", "/en/foo/")).isFalse();
+	}
 }

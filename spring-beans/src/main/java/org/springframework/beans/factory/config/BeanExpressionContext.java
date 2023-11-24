@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,8 @@ public class BeanExpressionContext {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof BeanExpressionContext)) {
-			return false;
-		}
-		BeanExpressionContext otherContext = (BeanExpressionContext) other;
-		return (this.beanFactory == otherContext.beanFactory && this.scope == otherContext.scope);
+		return (this == other || (other instanceof BeanExpressionContext that &&
+				this.beanFactory == that.beanFactory && this.scope == that.scope));
 	}
 
 	@Override

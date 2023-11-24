@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,21 +47,18 @@ import static org.mockito.Mockito.verify;
  */
 public class CallMetaDataContextTests {
 
-	private DataSource dataSource;
+	private DataSource dataSource = mock();
 
-	private Connection connection;
+	private Connection connection = mock();
 
-	private DatabaseMetaData databaseMetaData;
+	private DatabaseMetaData databaseMetaData = mock();
 
 	private CallMetaDataContext context = new CallMetaDataContext();
 
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		connection = mock(Connection.class);
-		databaseMetaData = mock(DatabaseMetaData.class);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
-		dataSource = mock(DataSource.class);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 
@@ -94,17 +91,17 @@ public class CallMetaDataContextTests {
 		context.processParameters(parameters);
 
 		Map<String, Object> inParameters = context.matchInParameterValuesWithCallParameters(parameterSource);
-		assertThat(inParameters.size()).as("Wrong number of matched in parameter values").isEqualTo(2);
+		assertThat(inParameters).as("Wrong number of matched in parameter values").hasSize(2);
 		assertThat(inParameters.containsKey("id")).as("in parameter value missing").isTrue();
 		assertThat(inParameters.containsKey("name")).as("in out parameter value missing").isTrue();
 		boolean condition = !inParameters.containsKey("customer_no");
 		assertThat(condition).as("out parameter value matched").isTrue();
 
 		List<String> names = context.getOutParameterNames();
-		assertThat(names.size()).as("Wrong number of out parameters").isEqualTo(2);
+		assertThat(names).as("Wrong number of out parameters").hasSize(2);
 
 		List<SqlParameter> callParameters = context.getCallParameters();
-		assertThat(callParameters.size()).as("Wrong number of call parameters").isEqualTo(3);
+		assertThat(callParameters).as("Wrong number of call parameters").hasSize(3);
 	}
 
 }

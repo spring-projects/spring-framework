@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	public static class EmptyConfigSupportConfig extends JCacheConfigurerSupport {
+	public static class EmptyConfigSupportConfig implements JCacheConfigurer {
 		@Bean
 		public CacheManager cm() {
 			return new NoOpCacheManager();
@@ -190,7 +190,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class FullCachingConfigSupport extends JCacheConfigurerSupport {
+	static class FullCachingConfigSupport implements JCacheConfigurer {
 
 		@Override
 		@Bean
@@ -220,7 +220,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Configuration
 	@EnableCaching
-	static class NoExceptionCacheResolverConfig extends JCacheConfigurerSupport {
+	static class NoExceptionCacheResolverConfig implements JCacheConfigurer {
 
 		@Override
 		@Bean

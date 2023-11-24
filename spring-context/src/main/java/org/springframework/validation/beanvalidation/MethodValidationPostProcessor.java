@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Annotation;
+import java.util.function.Supplier;
 
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
@@ -28,10 +31,13 @@ import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvis
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationException;
+import org.springframework.validation.method.MethodValidationResult;
 
 /**
  * A convenient {@link BeanPostProcessor} implementation that delegates to a
@@ -45,6 +51,10 @@ import org.springframework.validation.annotation.Validated;
  * public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)
  * </pre>
  *
+ * <p>In case of validation errors, the interceptor can raise
+ * {@link ConstraintViolationException}, or adapt the violations to
+ * {@link MethodValidationResult} and raise {@link MethodValidationException}.
+ *
  * <p>Target classes with such annotated methods need to be annotated with Spring's
  * {@link Validated} annotation at the type level, for their methods to be searched for
  * inline constraint annotations. Validation groups can be specified through {@code @Validated}
@@ -55,7 +65,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationInterceptor
- * @see javax.validation.executable.ExecutableValidator
+ * @see jakarta.validation.executable.ExecutableValidator
  */
 @SuppressWarnings("serial")
 public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
@@ -63,8 +73,10 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
-	@Nullable
-	private Validator validator;
+	private Supplier<Validator> validator = SingletonSupplier.of(() ->
+			Validation.buildDefaultValidatorFactory().getValidator());
+
+	private boolean adaptConstraintViolations;
 
 
 	/**
@@ -81,30 +93,42 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	}
 
 	/**
+	 * Set the JSR-303 ValidatorFactory to delegate to for validating methods,
+	 * using its default Validator.
+	 * <p>Default is the default ValidatorFactory's default Validator.
+	 * @see jakarta.validation.ValidatorFactory#getValidator()
+	 */
+	public void setValidatorFactory(ValidatorFactory validatorFactory) {
+		this.validator = SingletonSupplier.of(validatorFactory::getValidator);
+	}
+
+	/**
 	 * Set the JSR-303 Validator to delegate to for validating methods.
 	 * <p>Default is the default ValidatorFactory's default Validator.
 	 */
 	public void setValidator(Validator validator) {
-		// Unwrap to the native Validator with forExecutables support
-		if (validator instanceof LocalValidatorFactoryBean) {
-			this.validator = ((LocalValidatorFactoryBean) validator).getValidator();
-		}
-		else if (validator instanceof SpringValidatorAdapter) {
-			this.validator = validator.unwrap(Validator.class);
-		}
-		else {
-			this.validator = validator;
-		}
+		this.validator = () -> validator;
 	}
 
 	/**
-	 * Set the JSR-303 ValidatorFactory to delegate to for validating methods,
-	 * using its default Validator.
-	 * <p>Default is the default ValidatorFactory's default Validator.
-	 * @see javax.validation.ValidatorFactory#getValidator()
+	 * Set a lazily initialized Validator to delegate to for validating methods.
+	 * @since 6.0
+	 * @see #setValidator
 	 */
-	public void setValidatorFactory(ValidatorFactory validatorFactory) {
-		this.validator = validatorFactory.getValidator();
+	public void setValidatorProvider(ObjectProvider<Validator> validatorProvider) {
+		this.validator = validatorProvider::getObject;
+	}
+
+	/**
+	 * Whether to adapt {@link ConstraintViolation}s to {@link MethodValidationResult}.
+	 * <p>By default {@code false} in which case
+	 * {@link jakarta.validation.ConstraintViolationException} is raised in case of
+	 * violations. When set to {@code true}, {@link MethodValidationException}
+	 * is raised instead with the method validation results.
+	 * @since 6.1
+	 */
+	public void setAdaptConstraintViolations(boolean adaptViolations) {
+		this.adaptConstraintViolations = adaptViolations;
 	}
 
 
@@ -117,13 +141,13 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	/**
 	 * Create AOP advice for method validation purposes, to be applied
 	 * with a pointcut for the specified 'validated' annotation.
-	 * @param validator the JSR-303 Validator to delegate to
+	 * @param validator a Supplier for the Validator to use
 	 * @return the interceptor to use (typically, but not necessarily,
 	 * a {@link MethodValidationInterceptor} or subclass thereof)
-	 * @since 4.2
+	 * @since 6.0
 	 */
-	protected Advice createMethodValidationAdvice(@Nullable Validator validator) {
-		return (validator != null ? new MethodValidationInterceptor(validator) : new MethodValidationInterceptor());
+	protected Advice createMethodValidationAdvice(Supplier<Validator> validator) {
+		return new MethodValidationInterceptor(validator, this.adaptConstraintViolations);
 	}
 
 }

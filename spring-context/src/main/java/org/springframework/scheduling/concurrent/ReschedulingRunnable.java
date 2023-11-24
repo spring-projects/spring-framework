@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package org.springframework.scheduling.concurrent;
 
 import java.time.Clock;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,7 +57,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	private ScheduledFuture<?> currentFuture;
 
 	@Nullable
-	private Date scheduledExecutionTime;
+	private Instant scheduledExecutionTime;
 
 	private final Object triggerContextMonitor = new Object();
 
@@ -74,12 +75,12 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	@Nullable
 	public ScheduledFuture<?> schedule() {
 		synchronized (this.triggerContextMonitor) {
-			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
+			this.scheduledExecutionTime = this.trigger.nextExecution(this.triggerContext);
 			if (this.scheduledExecutionTime == null) {
 				return null;
 			}
-			long initialDelay = this.scheduledExecutionTime.getTime() - this.triggerContext.getClock().millis();
-			this.currentFuture = this.executor.schedule(this, initialDelay, TimeUnit.MILLISECONDS);
+			Duration delay = Duration.between(this.triggerContext.getClock().instant(), this.scheduledExecutionTime);
+			this.currentFuture = this.executor.schedule(this, delay.toNanos(), TimeUnit.NANOSECONDS);
 			return this;
 		}
 	}
@@ -91,9 +92,9 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	@Override
 	public void run() {
-		Date actualExecutionTime = new Date(this.triggerContext.getClock().millis());
+		Instant actualExecutionTime = this.triggerContext.getClock().instant();
 		super.run();
-		Date completionTime = new Date(this.triggerContext.getClock().millis());
+		Instant completionTime = this.triggerContext.getClock().instant();
 		synchronized (this.triggerContextMonitor) {
 			Assert.state(this.scheduledExecutionTime != null, "No scheduled execution");
 			this.triggerContext.update(this.scheduledExecutionTime, actualExecutionTime, completionTime);
@@ -157,8 +158,8 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		if (this == other) {
 			return 0;
 		}
-		long diff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(TimeUnit.MILLISECONDS);
-		return (diff == 0 ? 0 : ((diff < 0)? -1 : 1));
+		long diff = getDelay(TimeUnit.NANOSECONDS) - other.getDelay(TimeUnit.NANOSECONDS);
+		return (diff == 0 ? 0 : (diff < 0 ? -1 : 1));
 	}
 
 }

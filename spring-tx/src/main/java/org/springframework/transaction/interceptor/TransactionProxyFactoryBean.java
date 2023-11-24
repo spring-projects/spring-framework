@@ -79,7 +79,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * deriving concrete child bean definitions for specific target objects.
  * This reduces the per-bean definition effort to a minimum.
  *
- * <pre code="class">
+ * <pre class="code">
  * &lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
  *     abstract="true"&gt;
  *   &lt;property name="transactionManager" ref="transactionManager"/&gt;

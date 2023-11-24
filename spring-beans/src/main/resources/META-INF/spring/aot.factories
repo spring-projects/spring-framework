@@ -1,0 +1,6 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+org.springframework.beans.factory.annotation.JakartaAnnotationsRuntimeHints,\
+org.springframework.beans.BeanUtilsRuntimeHints
+
+org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor=\
+org.springframework.beans.factory.aot.BeanRegistrationsAotProcessor

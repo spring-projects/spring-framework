@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HtmlUtilsTests {
 
 	@Test
-	public void testHtmlEscape() {
+	void testHtmlEscape() {
 		String unescaped = "\"This is a quote'";
 		String escaped = HtmlUtils.htmlEscape(unescaped);
 		assertThat(escaped).isEqualTo("&quot;This is a quote&#39;");
@@ -39,15 +39,15 @@ public class HtmlUtilsTests {
 	}
 
 	@Test
-	public void testHtmlUnescape() {
+	void testHtmlUnescape() {
 		String escaped = "&quot;This is a quote&#39;";
 		String unescaped = HtmlUtils.htmlUnescape(escaped);
 		assertThat(unescaped).isEqualTo("\"This is a quote'");
 	}
 
 	@Test
-	public void testEncodeIntoHtmlCharacterSet() {
-		assertThat(HtmlUtils.htmlEscape("")).as("An empty string should be converted to an empty string").isEqualTo("");
+	void testEncodeIntoHtmlCharacterSet() {
+		assertThat(HtmlUtils.htmlEscape("")).as("An empty string should be converted to an empty string").isEmpty();
 		assertThat(HtmlUtils.htmlEscape("A sentence containing no special characters.")).as("A string containing no special characters should not be affected").isEqualTo("A sentence containing no special characters.");
 
 		assertThat(HtmlUtils.htmlEscape("< >")).as("'< >' should be encoded to '&lt; &gt;'").isEqualTo("&lt; &gt;");
@@ -62,9 +62,10 @@ public class HtmlUtilsTests {
 
 	// SPR-9293
 	@Test
-	public void testEncodeIntoHtmlCharacterSetFromUtf8() {
+	void testEncodeIntoHtmlCharacterSetFromUtf8() {
 		String utf8 = ("UTF-8");
-		assertThat(HtmlUtils.htmlEscape("", utf8)).as("An empty string should be converted to an empty string").isEqualTo("");
+		assertThat(HtmlUtils.htmlEscape("", utf8)).as("An empty string should be converted to an empty string")
+				.isEmpty();
 		assertThat(HtmlUtils.htmlEscape("A sentence containing no special characters.")).as("A string containing no special characters should not be affected").isEqualTo("A sentence containing no special characters.");
 
 		assertThat(HtmlUtils.htmlEscape("< >", utf8)).as("'< >' should be encoded to '&lt; &gt;'").isEqualTo("&lt; &gt;");
@@ -74,8 +75,8 @@ public class HtmlUtilsTests {
 	}
 
 	@Test
-	public void testDecodeFromHtmlCharacterSet() {
-		assertThat(HtmlUtils.htmlUnescape("")).as("An empty string should be converted to an empty string").isEqualTo("");
+	void testDecodeFromHtmlCharacterSet() {
+		assertThat(HtmlUtils.htmlUnescape("")).as("An empty string should be converted to an empty string").isEmpty();
 		assertThat(HtmlUtils.htmlUnescape("This is a sentence containing no special characters.")).as("A string containing no special characters should not be affected").isEqualTo("This is a sentence containing no special characters.");
 
 		assertThat(HtmlUtils.htmlUnescape("A&nbsp;B")).as("'A&nbsp;B' should be decoded to 'A B'").isEqualTo(("A" + (char) 160 + "B"));

@@ -1,0 +1,175 @@
+[[testcontext-ctx-management-inheritance]]
+= Context Configuration Inheritance
+
+`@ContextConfiguration` supports boolean `inheritLocations` and `inheritInitializers`
+attributes that denote whether resource locations or component classes and context
+initializers declared by superclasses should be inherited. The default value for both
+flags is `true`. This means that a test class inherits the resource locations or
+component classes as well as the context initializers declared by any superclasses.
+Specifically, the resource locations or component classes for a test class are appended
+to the list of resource locations or annotated classes declared by superclasses.
+Similarly, the initializers for a given test class are added to the set of initializers
+defined by test superclasses. Thus, subclasses have the option of extending the resource
+locations, component classes, or context initializers.
+
+If the `inheritLocations` or `inheritInitializers` attribute in `@ContextConfiguration`
+is set to `false`, the resource locations or component classes and the context
+initializers, respectively, for the test class shadow and effectively replace the
+configuration defined by superclasses.
+
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
+
+In the next example, which uses XML resource locations, the `ApplicationContext` for
+`ExtendedTest` is loaded from `base-config.xml` and `extended-config.xml`, in that order.
+Beans defined in `extended-config.xml` can, therefore, override (that is, replace) those
+defined in `base-config.xml`. The following example shows how one class can extend
+another and use both its own configuration file and the superclass's configuration file:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// ApplicationContext will be loaded from "/base-config.xml"
+	// in the root of the classpath
+	@ContextConfiguration("/base-config.xml") <1>
+	class BaseTest {
+		// class body...
+	}
+
+	// ApplicationContext will be loaded from "/base-config.xml" and
+	// "/extended-config.xml" in the root of the classpath
+	@ContextConfiguration("/extended-config.xml") <2>
+	class ExtendedTest extends BaseTest {
+		// class body...
+	}
+----
+<1> Configuration file defined in the superclass.
+<2> Configuration file defined in the subclass.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// ApplicationContext will be loaded from "/base-config.xml"
+	// in the root of the classpath
+	@ContextConfiguration("/base-config.xml") // <1>
+	open class BaseTest {
+		// class body...
+	}
+
+	// ApplicationContext will be loaded from "/base-config.xml" and
+	// "/extended-config.xml" in the root of the classpath
+	@ContextConfiguration("/extended-config.xml") // <2>
+	class ExtendedTest : BaseTest() {
+		// class body...
+	}
+----
+<1> Configuration file defined in the superclass.
+<2> Configuration file defined in the subclass.
+======
+
+
+Similarly, in the next example, which uses component classes, the `ApplicationContext`
+for `ExtendedTest` is loaded from the `BaseConfig` and `ExtendedConfig` classes, in that
+order. Beans defined in `ExtendedConfig` can, therefore, override (that is, replace)
+those defined in `BaseConfig`. The following example shows how one class can extend
+another and use both its own configuration class and the superclass's configuration class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// ApplicationContext will be loaded from BaseConfig
+	@SpringJUnitConfig(BaseConfig.class) // <1>
+	class BaseTest {
+		// class body...
+	}
+
+	// ApplicationContext will be loaded from BaseConfig and ExtendedConfig
+	@SpringJUnitConfig(ExtendedConfig.class) // <2>
+	class ExtendedTest extends BaseTest {
+		// class body...
+	}
+----
+<1> Configuration class defined in the superclass.
+<2> Configuration class defined in the subclass.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// ApplicationContext will be loaded from BaseConfig
+	@SpringJUnitConfig(BaseConfig::class) // <1>
+	open class BaseTest {
+		// class body...
+	}
+
+	// ApplicationContext will be loaded from BaseConfig and ExtendedConfig
+	@SpringJUnitConfig(ExtendedConfig::class) // <2>
+	class ExtendedTest : BaseTest() {
+		// class body...
+	}
+----
+<1> Configuration class defined in the superclass.
+<2> Configuration class defined in the subclass.
+======
+
+
+In the next example, which uses context initializers, the `ApplicationContext` for
+`ExtendedTest` is initialized by using `BaseInitializer` and `ExtendedInitializer`. Note,
+however, that the order in which the initializers are invoked depends on whether they
+implement Spring's `Ordered` interface or are annotated with Spring's `@Order` annotation
+or the standard `@Priority` annotation. The following example shows how one class can
+extend another and use both its own initializer and the superclass's initializer:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// ApplicationContext will be initialized by BaseInitializer
+	@SpringJUnitConfig(initializers = BaseInitializer.class) // <1>
+	class BaseTest {
+		// class body...
+	}
+
+	// ApplicationContext will be initialized by BaseInitializer
+	// and ExtendedInitializer
+	@SpringJUnitConfig(initializers = ExtendedInitializer.class) // <2>
+	class ExtendedTest extends BaseTest {
+		// class body...
+	}
+----
+<1> Initializer defined in the superclass.
+<2> Initializer defined in the subclass.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// ApplicationContext will be initialized by BaseInitializer
+	@SpringJUnitConfig(initializers = [BaseInitializer::class]) // <1>
+	open class BaseTest {
+		// class body...
+	}
+
+	// ApplicationContext will be initialized by BaseInitializer
+	// and ExtendedInitializer
+	@SpringJUnitConfig(initializers = [ExtendedInitializer::class]) // <2>
+	class ExtendedTest : BaseTest() {
+		// class body...
+	}
+----
+<1> Initializer defined in the superclass.
+<2> Initializer defined in the subclass.
+======
+
+

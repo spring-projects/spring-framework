@@ -19,9 +19,8 @@ package org.springframework.web.context.request;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link RequestAttributes} adapter for a JSF {@link javax.faces.context.FacesContext}.
+ * {@link RequestAttributes} adapter for a JSF {@link jakarta.faces.context.FacesContext}.
  * Used as default in a JSF environment, wrapping the current FacesContext.
  *
  * <p><b>NOTE:</b> In contrast to {@link ServletRequestAttributes}, this variant does
@@ -44,9 +43,9 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @since 2.5.2
- * @see javax.faces.context.FacesContext#getExternalContext()
- * @see javax.faces.context.ExternalContext#getRequestMap()
- * @see javax.faces.context.ExternalContext#getSessionMap()
+ * @see jakarta.faces.context.FacesContext#getExternalContext()
+ * @see jakarta.faces.context.ExternalContext#getRequestMap()
+ * @see jakarta.faces.context.ExternalContext#getSessionMap()
  * @see RequestContextHolder#currentRequestAttributes()
  */
 public class FacesRequestAttributes implements RequestAttributes {
@@ -62,7 +61,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	/**
 	 * Create a new FacesRequestAttributes adapter for the given FacesContext.
 	 * @param facesContext the current FacesContext
-	 * @see javax.faces.context.FacesContext#getCurrentInstance()
+	 * @see jakarta.faces.context.FacesContext#getCurrentInstance()
 	 */
 	public FacesRequestAttributes(FacesContext facesContext) {
 		Assert.notNull(facesContext, "FacesContext must not be null");
@@ -79,7 +78,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 
 	/**
 	 * Return the JSF ExternalContext that this adapter operates on.
-	 * @see javax.faces.context.FacesContext#getExternalContext()
+	 * @see jakarta.faces.context.FacesContext#getExternalContext()
 	 */
 	protected final ExternalContext getExternalContext() {
 		return getFacesContext().getExternalContext();

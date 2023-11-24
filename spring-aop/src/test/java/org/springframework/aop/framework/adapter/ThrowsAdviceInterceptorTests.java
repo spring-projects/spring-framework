@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,26 @@ import java.rmi.RemoteException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.testfixture.advice.MyThrowsHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ThrowsAdviceInterceptorTests {
 
 	@Test
 	public void testNoHandlerMethods() {
 		// should require one handler method at least
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
 				new ThrowsAdviceInterceptor(new Object()));
 	}
 
@@ -49,7 +51,7 @@ public class ThrowsAdviceInterceptorTests {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		Object ret = new Object();
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willReturn(ret);
 		assertThat(ti.invoke(mi)).isEqualTo(ret);
 		assertThat(th.getCalls()).isEqualTo(0);
@@ -61,11 +63,9 @@ public class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		assertThat(ti.getHandlerMethodCount()).isEqualTo(2);
 		Exception ex = new Exception();
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willThrow(ex);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				ti.invoke(mi))
-			.isSameAs(ex);
+		assertThatException().isThrownBy(() -> ti.invoke(mi)).isSameAs(ex);
 		assertThat(th.getCalls()).isEqualTo(0);
 	}
 
@@ -74,13 +74,11 @@ public class ThrowsAdviceInterceptorTests {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		FileNotFoundException ex = new FileNotFoundException();
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(Object.class.getMethod("hashCode"));
 		given(mi.getThis()).willReturn(new Object());
 		given(mi.proceed()).willThrow(ex);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
-				ti.invoke(mi))
-			.isSameAs(ex);
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> ti.invoke(mi)).isSameAs(ex);
 		assertThat(th.getCalls()).isEqualTo(1);
 		assertThat(th.getCalls("ioException")).isEqualTo(1);
 	}
@@ -91,11 +89,9 @@ public class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		ConnectException ex = new ConnectException("");
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willThrow(ex);
-		assertThatExceptionOfType(ConnectException.class).isThrownBy(() ->
-				ti.invoke(mi))
-			.isSameAs(ex);
+		assertThatExceptionOfType(ConnectException.class).isThrownBy(() -> ti.invoke(mi)).isSameAs(ex);
 		assertThat(th.getCalls()).isEqualTo(1);
 		assertThat(th.getCalls("remoteException")).isEqualTo(1);
 	}
@@ -116,11 +112,9 @@ public class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		ConnectException ex = new ConnectException("");
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willThrow(ex);
-		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
-				ti.invoke(mi))
-			.isSameAs(t);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() -> ti.invoke(mi)).isSameAs(t);
 		assertThat(th.getCalls()).isEqualTo(1);
 		assertThat(th.getCalls("remoteException")).isEqualTo(1);
 	}

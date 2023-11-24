@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,10 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -233,7 +234,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (this.renderFunction == null && viewConfig.getRenderFunction() != null) {
 			this.renderFunction = viewConfig.getRenderFunction();
 		}
-		if (this.getContentType() == null) {
+		if (getContentType() == null) {
 			setContentType(viewConfig.getContentType() != null ? viewConfig.getContentType() : DEFAULT_CONTENT_TYPE);
 		}
 		if (this.charset == null) {
@@ -258,12 +259,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			engineCount++;
 		}
 		Assert.isTrue(engineCount == 1,
-				"You should define either 'engine', 'engineSupplier' or 'engineName'.");
+				"You should define either 'engine', 'engineSupplier', or 'engineName'.");
 
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Assert.isTrue(this.engine == null,
 					"When 'sharedEngine' is set to false, you should specify the " +
-					"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
+					"script engine using 'engineName' or 'engineSupplier', not 'engine'.");
 		}
 		else if (this.engine != null) {
 			loadScripts(this.engine);
@@ -466,19 +467,14 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof EngineKey)) {
-				return false;
-			}
-			EngineKey otherKey = (EngineKey) other;
-			return (this.engineName.equals(otherKey.engineName) && Arrays.equals(this.scripts, otherKey.scripts));
+			return (this == other || (other instanceof EngineKey that &&
+					this.engineName.equals(that.engineName) &&
+					Arrays.equals(this.scripts, that.scripts)));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.engineName.hashCode() * 29 + Arrays.hashCode(this.scripts));
+			return this.engineName.hashCode() * 29 + Arrays.hashCode(this.scripts);
 		}
 	}
 

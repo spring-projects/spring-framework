@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation6;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 @Named
 public class Jsr330NamedForScanning {

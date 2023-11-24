@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
@@ -37,6 +37,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -54,6 +55,7 @@ import org.springframework.lang.NonNull;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Named.named;
 
 /**
  * @author Arjen Poutsma
@@ -62,8 +64,8 @@ public class ClientHttpConnectorTests {
 
 	private static final int BUF_SIZE = 1024;
 
-	private static final EnumSet<HttpMethod> METHODS_WITH_BODY =
-			EnumSet.of(HttpMethod.PUT, HttpMethod.POST, HttpMethod.PATCH);
+	private static final Set<HttpMethod> METHODS_WITH_BODY =
+			Set.of(HttpMethod.PUT, HttpMethod.POST, HttpMethod.PATCH);
 
 	private final MockWebServer server = new MockWebServer();
 
@@ -77,7 +79,9 @@ public class ClientHttpConnectorTests {
 		server.shutdown();
 	}
 
-	@ParameterizedTest
+	// Do not auto-close arguments since HttpComponentsClientHttpConnector implements
+	// AutoCloseable and is shared between parameterized test invocations.
+	@ParameterizedTest(autoCloseArguments = false)
 	@MethodSource("org.springframework.http.client.reactive.ClientHttpConnectorTests#methodsWithConnectors")
 	void basic(ClientHttpConnector connector, HttpMethod method) throws Exception {
 		URI uri = this.server.url("/").uri();
@@ -198,23 +202,24 @@ public class ClientHttpConnectorTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest
+	// Do not auto-close arguments since HttpComponentsClientHttpConnector implements
+	// AutoCloseable and is shared between parameterized test invocations.
+	@ParameterizedTest(name = "{0}", autoCloseArguments = false)
 	@MethodSource("org.springframework.http.client.reactive.ClientHttpConnectorTests#connectors")
 	public @interface ParameterizedConnectorTest {
-
 	}
 
-	static List<ClientHttpConnector> connectors() {
+	static List<Named<ClientHttpConnector>> connectors() {
 		return Arrays.asList(
-				new ReactorClientHttpConnector(),
-				new JettyClientHttpConnector(),
-				new HttpComponentsClientHttpConnector()
+				named("Reactor Netty", new ReactorClientHttpConnector()),
+				named("Jetty", new JettyClientHttpConnector()),
+				named("HttpComponents", new HttpComponentsClientHttpConnector())
 		);
 	}
 
 	static List<Arguments> methodsWithConnectors() {
 		List<Arguments> result = new ArrayList<>();
-		for (ClientHttpConnector connector : connectors()) {
+		for (Named<ClientHttpConnector> connector : connectors()) {
 			for (HttpMethod method : HttpMethod.values()) {
 				result.add(Arguments.of(connector, method));
 			}

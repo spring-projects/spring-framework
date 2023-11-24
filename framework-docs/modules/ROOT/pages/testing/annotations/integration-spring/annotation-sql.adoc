@@ -1,0 +1,37 @@
+[[spring-testing-annotation-sql]]
+= `@Sql`
+
+`@Sql` is used to annotate a test class or test method to configure SQL scripts to be run
+against a given database during integration tests. The following example shows how to use
+it:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Test
+	@Sql({"/test-schema.sql", "/test-user-data.sql"}) // <1>
+	void userTest() {
+		// run code that relies on the test schema and test data
+	}
+----
+<1> Run two scripts for this test.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Test
+	@Sql("/test-schema.sql", "/test-user-data.sql") // <1>
+	fun userTest() {
+		// run code that relies on the test schema and test data
+	}
+----
+<1> Run two scripts for this test.
+======
+
+See xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively[Executing SQL scripts declaratively with @Sql] for further details.
+
+

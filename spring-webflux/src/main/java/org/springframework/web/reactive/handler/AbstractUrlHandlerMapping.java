@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Abstract base class for URL-mapped
@@ -78,7 +79,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Return a read-only view of registered path patterns and handlers which may
-	 * may be an actual handler instance or the bean name of lazily initialized
+	 * be an actual handler instance or the bean name of lazily initialized
 	 * handler.
 	 */
 	public final Map<PathPattern, Object> getHandlerMap() {
@@ -127,6 +128,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	@Nullable
+	@SuppressWarnings("removal")
 	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
 		List<PathPattern> matches = null;
 		for (PathPattern pattern : this.handlerMap.keySet()) {
@@ -153,8 +155,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		Object handler = this.handlerMap.get(pattern);
 
 		// Bean name or resolved handler?
-		if (handler instanceof String) {
-			String handlerName = (String) handler;
+		if (handler instanceof String handlerName) {
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
@@ -166,6 +167,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
+		org.springframework.web.filter.reactive.ServerHttpObservationFilter
+				.findObservationContext(exchange)
+				.ifPresent(context -> context.setPathPattern(pattern.toString()));
+		ServerRequestObservationContext.findCurrent(exchange.getAttributes())
+				.ifPresent(context -> context.setPathPattern(pattern.toString()));
 		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, matchInfo.getUriVariables());
 
@@ -211,8 +217,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		Object resolvedHandler = handler;
 
 		// Parse path pattern
-		urlPath = prependLeadingSlash(urlPath);
-		PathPattern pattern = getPathPatternParser().parse(urlPath);
+		PathPatternParser parser = getPathPatternParser();
+		urlPath = parser.initFullPathPattern(urlPath);
+		PathPattern pattern = parser.parse(urlPath);
 		if (this.handlerMap.containsKey(pattern)) {
 			Object existingHandler = this.handlerMap.get(pattern);
 			if (existingHandler != null && existingHandler != resolvedHandler) {
@@ -223,8 +230,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 
 		// Eagerly resolve handler if referencing singleton via name.
-		if (!this.lazyInitHandlers && handler instanceof String) {
-			String handlerName = (String) handler;
+		if (!this.lazyInitHandlers && handler instanceof String handlerName) {
 			if (obtainApplicationContext().isSingleton(handlerName)) {
 				resolvedHandler = obtainApplicationContext().getBean(handlerName);
 			}
@@ -239,16 +245,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private String getHandlerDescription(Object handler) {
 		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
-	}
-
-
-	private static String prependLeadingSlash(String pattern) {
-		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-			return "/" + pattern;
-		}
-		else {
-			return pattern;
-		}
 	}
 
 }

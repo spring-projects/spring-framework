@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.context.NoSuchMessageException;
  * Messages are looked up using the ApplicationContext's ThemeSource,
  * and thus should support internationalization.
  *
- * <p>Regards a HTML escaping setting, either on this tag instance,
+ * <p>Regards an HTML escaping setting, either on this tag instance,
  * the page level, or the web.xml level.
  *
  * <p>If "code" isn't set or cannot be resolved, "text" will be used
@@ -78,7 +78,7 @@ import org.springframework.context.NoSuchMessageException;
  * <td>false</td>
  * <td>true</td>
  * <td>Set JavaScript escaping for this tag, as boolean value.
- * Default is false.</td>
+ * Default is {@code false}.</td>
  * </tr>
  * <tr>
  * <td>message</td>
@@ -122,8 +122,10 @@ import org.springframework.context.NoSuchMessageException;
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  * @see ArgumentTag
+ * @deprecated as of 6.0, with no direct replacement
  */
 @SuppressWarnings("serial")
+@Deprecated(since = "6.0")
 public class ThemeTag extends MessageTag {
 
 	/**

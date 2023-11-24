@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ public abstract class PayloadUtils {
 	 */
 	public static DataBuffer retainDataAndReleasePayload(Payload payload, DataBufferFactory bufferFactory) {
 		try {
-			if (bufferFactory instanceof NettyDataBufferFactory) {
+			if (bufferFactory instanceof NettyDataBufferFactory nettyBufferFactory) {
 				ByteBuf byteBuf = payload.sliceData().retain();
-				return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
+				return nettyBufferFactory.wrap(byteBuf);
 			}
 			else {
 				return bufferFactory.wrap(payload.getData());
@@ -96,13 +96,18 @@ public abstract class PayloadUtils {
 
 
 	static ByteBuf asByteBuf(DataBuffer buffer) {
-		return buffer instanceof NettyDataBuffer ?
-				((NettyDataBuffer) buffer).getNativeBuffer() : Unpooled.wrappedBuffer(buffer.asByteBuffer());
+		return NettyDataBufferFactory.toByteBuf(buffer);
 	}
 
-	private static ByteBuffer asByteBuffer(DataBuffer buffer) {
-		return buffer instanceof DefaultDataBuffer ?
-				((DefaultDataBuffer) buffer).getNativeBuffer() : buffer.asByteBuffer();
+	private static ByteBuffer asByteBuffer(DataBuffer dataBuffer) {
+		if (dataBuffer instanceof DefaultDataBuffer defaultDataBuffer) {
+			return defaultDataBuffer.getNativeBuffer();
+		}
+		else {
+			ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+			dataBuffer.toByteBuffer(byteBuffer);
+			return byteBuffer;
+		}
 	}
 
 }

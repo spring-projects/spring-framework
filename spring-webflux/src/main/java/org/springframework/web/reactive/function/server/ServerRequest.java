@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -67,18 +69,15 @@ public interface ServerRequest {
 
 	/**
 	 * Get the HTTP method.
-	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
-	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
-	@Nullable
-	default HttpMethod method() {
-		return HttpMethod.resolve(methodName());
-	}
+	HttpMethod method();
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
+	 * @deprecated as of 6.0, in favor of {@link #method()}
 	 */
+	@Deprecated(since = "6.0")
 	String methodName();
 
 	/**
@@ -201,6 +200,31 @@ public interface ServerRequest {
 	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
 
 	/**
+	 * Bind to this request and return an instance of the given type.
+	 * @param bindType the type of class to bind this request to
+	 * @param <T> the type to bind to
+	 * @return a mono containing either a constructed and bound instance of
+	 * {@code bindType}, or a {@link BindException} in case of binding errors
+	 * @since 6.1
+	 */
+	default <T> Mono<T> bind(Class<T> bindType) {
+		return bind(bindType, dataBinder -> {});
+	}
+
+	/**
+	 * Bind to this request and return an instance of the given type.
+	 * @param bindType the type of class to bind this request to
+	 * @param dataBinderCustomizer used to customize the data binder, e.g. set
+	 * (dis)allowed fields
+	 * @param <T> the type to bind to
+	 * @return a mono containing either a constructed and bound instance of
+	 * {@code bindType}, or a {@link BindException} in case of binding errors
+	 * @since 6.1
+	 */
+	<T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer);
+
+
+	/**
 	 * Get the request attribute value if present.
 	 * @param name the attribute name
 	 * @return the attribute value
@@ -310,7 +334,7 @@ public interface ServerRequest {
 	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
 	 *   Instant lastModified = // application-specific calculation
 	 *	 return request.checkNotModified(lastModified)
-	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	   .switchIfEmpty(Mono.defer(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   }));
@@ -319,7 +343,7 @@ public interface ServerRequest {
 	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(Instant)} method; or
-	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * {@link #checkNotModified(String)}. If you want to enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(Instant, String)}.
@@ -344,7 +368,7 @@ public interface ServerRequest {
 	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
 	 *   String eTag = // application-specific calculation
 	 *	 return request.checkNotModified(eTag)
-	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	   .switchIfEmpty(Mono.defer(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   }));
@@ -353,13 +377,14 @@ public interface ServerRequest {
 	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@link #checkNotModified(Instant)} method; or
-	 * {@code #checkNotModified(String)}. If you want enforce both
+	 * {@code #checkNotModified(String)}. If you want to enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(Instant, String)}.
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary.
+	 * with quotes (") if necessary. Use an empty string {@code ""}
+	 * for no value.
 	 * @return a corresponding response if the request qualifies as not
 	 * modified, or an empty result otherwise
 	 * @since 5.2.5
@@ -381,7 +406,7 @@ public interface ServerRequest {
 	 *   Instant lastModified = // application-specific calculation
 	 *   String eTag = // application-specific calculation
 	 *	 return request.checkNotModified(lastModified, eTag)
-	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	   .switchIfEmpty(Mono.defer(() -&gt; {
 	 *	     // further request processing, actually building content
 	 *		 return ServerResponse.ok().body(...);
 	 *	   }));
@@ -392,7 +417,8 @@ public interface ServerRequest {
 	 * application determined for the underlying resource
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary.
+	 * with quotes (") if necessary. Use an empty string {@code ""}
+	 * for no value.
 	 * @return a corresponding response if the request qualifies as not
 	 * modified, or an empty result otherwise.
 	 * @since 5.2.5
@@ -526,6 +552,14 @@ public interface ServerRequest {
 		 * @return this builder
 		 */
 		Builder uri(URI uri);
+
+		/**
+		 * Set the context path of the request.
+		 * @param contextPath the new context path
+		 * @return this builder
+		 * @since 5.3.23
+		 */
+		Builder contextPath(@Nullable String contextPath);
 
 		/**
 		 * Add the given header value(s) under the given name.

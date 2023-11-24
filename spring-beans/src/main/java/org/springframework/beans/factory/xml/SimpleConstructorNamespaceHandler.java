@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * the bean that will be considered as a parameter.
  *
  * <b>Note</b>: This implementation supports only named parameters - there is no
- * support for indexes or types. Further more, the names are used as hints by
+ * support for indexes or types. Furthermore, the names are used as hints by
  * the container which, by default, does type introspection.
  *
  * @author Costin Leau
@@ -78,10 +78,9 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 
 	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
-		if (node instanceof Attr) {
-			Attr attr = (Attr) node;
-			String argName = StringUtils.trimWhitespace(parserContext.getDelegate().getLocalName(attr));
-			String argValue = StringUtils.trimWhitespace(attr.getValue());
+		if (node instanceof Attr attr) {
+			String argName = parserContext.getDelegate().getLocalName(attr).strip();
+			String argValue = attr.getValue().strip();
 
 			ConstructorArgumentValues cvs = definition.getBeanDefinition().getConstructorArgumentValues();
 			boolean ref = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.netty.ChannelOperationsId;
 import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
 import reactor.netty.http.client.HttpClientResponse;
@@ -34,10 +35,10 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.support.Netty4HeadersAdapter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -52,11 +53,6 @@ import org.springframework.util.ObjectUtils;
  * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
-
-	/** Reactor Netty 1.0.5+. */
-	static final boolean reactorNettyRequestChannelOperationsIdPresent = ClassUtils.isPresent(
-			"reactor.netty.ChannelOperationsId", ReactorClientHttpResponse.class.getClassLoader());
-
 
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpResponse.class);
 
@@ -79,7 +75,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	 */
 	public ReactorClientHttpResponse(HttpClientResponse response, Connection connection) {
 		this.response = response;
-		MultiValueMap<String, String> adapter = new NettyHeadersAdapter(response.responseHeaders());
+		MultiValueMap<String, String> adapter = new Netty4HeadersAdapter(response.responseHeaders());
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = connection.inbound();
 		this.bufferFactory = new NettyDataBufferFactory(connection.outbound().alloc());
@@ -92,7 +88,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Deprecated
 	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
 		this.response = response;
-		MultiValueMap<String, String> adapter = new NettyHeadersAdapter(response.responseHeaders());
+		MultiValueMap<String, String> adapter = new Netty4HeadersAdapter(response.responseHeaders());
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = inbound;
 		this.bufferFactory = new NettyDataBufferFactory(alloc);
@@ -102,11 +98,11 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public String getId() {
 		String id = null;
-		if (reactorNettyRequestChannelOperationsIdPresent) {
-			id = ChannelOperationsIdHelper.getId(this.response);
+		if (this.response instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
 		}
-		if (id == null && this.response instanceof Connection) {
-			id = ((Connection) this.response).channel().id().asShortText();
+		if (id == null && this.response instanceof Connection connection) {
+			id = connection.channel().id().asShortText();
 		}
 		return (id != null ? id : ObjectUtils.getIdentityHexString(this));
 	}
@@ -135,13 +131,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(getRawStatusCode());
-	}
-
-	@Override
-	public int getRawStatusCode() {
-		return this.response.status().code();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatusCode.valueOf(this.response.status().code());
 	}
 
 	@Override
@@ -163,11 +154,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie) {
-			DefaultCookie defaultCookie = (DefaultCookie) cookie;
-			if (defaultCookie.sameSite() != null) {
-				return defaultCookie.sameSite().name();
-			}
+		if (cookie instanceof DefaultCookie defaultCookie && defaultCookie.sameSite() != null) {
+			return defaultCookie.sameSite().name();
 		}
 		return null;
 	}
@@ -189,7 +177,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	private boolean mayHaveBody(HttpMethod method) {
-		int code = this.getRawStatusCode();
+		int code = getStatusCode().value();
 		return !((code >= 100 && code < 200) || code == 204 || code == 205 ||
 				method.equals(HttpMethod.HEAD) || getHeaders().getContentLength() == 0);
 	}
@@ -198,21 +186,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
-				"status=" + getRawStatusCode() + '}';
-	}
-
-
-	private static class ChannelOperationsIdHelper {
-
-		@Nullable
-		public static String getId(HttpClientResponse response) {
-			if (response instanceof reactor.netty.ChannelOperationsId) {
-				return (logger.isDebugEnabled() ?
-						((reactor.netty.ChannelOperationsId) response).asLongText() :
-						((reactor.netty.ChannelOperationsId) response).asShortText());
-			}
-			return null;
-		}
+				"status=" + getStatusCode() + '}';
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ class SingleConnectionFactoryUnitTests {
 
 		Connection c1 = cf1.block();
 		Connection c2 = cf2.block();
-
 		assertThat(c1).isSameAs(c2);
+
 		factory.destroy();
 	}
 
@@ -63,7 +63,6 @@ class SingleConnectionFactoryUnitTests {
 				.verifyComplete();
 
 		factory.setAutoCommit(true);
-
 		factory.create().as(StepVerifier::create)
 				.consumeNextWith(actual -> assertThat(actual.isAutoCommit()).isTrue())
 				.verifyComplete();
@@ -75,7 +74,6 @@ class SingleConnectionFactoryUnitTests {
 	@SuppressWarnings("rawtypes")
 	void shouldSuppressClose() {
 		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", true);
-
 		Connection connection = factory.create().block();
 
 		StepVerifier.create(connection.close()).verifyComplete();
@@ -85,29 +83,28 @@ class SingleConnectionFactoryUnitTests {
 		StepVerifier.create(
 				connection.setTransactionIsolationLevel(IsolationLevel.READ_COMMITTED))
 				.verifyComplete();
+
 		factory.destroy();
 	}
 
 	@Test
 	void shouldNotSuppressClose() {
 		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", false);
-
 		Connection connection = factory.create().block();
 
 		StepVerifier.create(connection.close()).verifyComplete();
-
 		StepVerifier.create(connection.setTransactionIsolationLevel(IsolationLevel.READ_COMMITTED))
 			.verifyError(R2dbcNonTransientResourceException.class);
+
 		factory.destroy();
 	}
 
 	@Test
 	void releaseConnectionShouldNotCloseConnection() {
-		Connection connectionMock = mock(Connection.class);
-		ConnectionFactoryMetadata metadata = mock(ConnectionFactoryMetadata.class);
+		Connection connectionMock = mock();
+		ConnectionFactoryMetadata metadata = mock();
 
 		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, true);
-
 		Connection connection = factory.create().block();
 
 		ConnectionFactoryUtils.releaseConnection(connection, factory)
@@ -119,13 +116,12 @@ class SingleConnectionFactoryUnitTests {
 
 	@Test
 	void releaseConnectionShouldCloseUnrelatedConnection() {
-		Connection connectionMock = mock(Connection.class);
-		Connection otherConnection = mock(Connection.class);
-		ConnectionFactoryMetadata metadata = mock(ConnectionFactoryMetadata.class);
+		Connection connectionMock = mock();
+		Connection otherConnection = mock();
+		ConnectionFactoryMetadata metadata = mock();
 		when(otherConnection.close()).thenReturn(Mono.empty());
 
 		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, false);
-
 		factory.create().as(StepVerifier::create).expectNextCount(1).verifyComplete();
 
 		ConnectionFactoryUtils.releaseConnection(otherConnection, factory)

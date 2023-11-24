@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void createWhenAnnotationIsNotDirectlyPresentThrowsException() {
-		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
+		MergedAnnotation<?> annotation = mock();
 		given(annotation.isDirectlyPresent()).willReturn(false);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				MergedAnnotationsCollection.of(Collections.singleton(annotation)))
@@ -62,7 +62,7 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void createWhenAnnotationAggregateIndexIsNotZeroThrowsException() {
-		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
+		MergedAnnotation<?> annotation = mock();
 		given(annotation.isDirectlyPresent()).willReturn(true);
 		given(annotation.getAggregateIndex()).willReturn(1);
 		assertThatIllegalArgumentException().isThrownBy(() ->

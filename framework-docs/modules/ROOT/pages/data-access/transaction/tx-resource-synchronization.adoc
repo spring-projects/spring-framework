@@ -1,0 +1,83 @@
+[[tx-resource-synchronization]]
+= Synchronizing Resources with Transactions
+
+How to create different transaction managers and how they are linked to related resources
+that need to be synchronized to transactions (for example `DataSourceTransactionManager`
+to a JDBC `DataSource`, `HibernateTransactionManager` to a Hibernate `SessionFactory`,
+and so forth) should now be clear. This section describes how the application code
+(directly or indirectly, by using a persistence API such as JDBC, Hibernate, or JPA)
+ensures that these resources are created, reused, and cleaned up properly. The section
+also discusses how transaction synchronization is (optionally) triggered through the
+relevant `TransactionManager`.
+
+
+[[tx-resource-synchronization-high]]
+== High-level Synchronization Approach
+
+The preferred approach is to use Spring's highest-level template-based persistence
+integration APIs or to use native ORM APIs with transaction-aware factory beans or
+proxies for managing the native resource factories. These transaction-aware solutions
+internally handle resource creation and reuse, cleanup, optional transaction
+synchronization of the resources, and exception mapping. Thus, user data access code does
+not have to address these tasks but can focus purely on non-boilerplate
+persistence logic. Generally, you use the native ORM API or take a template approach
+for JDBC access by using the `JdbcTemplate`. These solutions are detailed in subsequent
+sections of this reference documentation.
+
+
+[[tx-resource-synchronization-low]]
+== Low-level Synchronization Approach
+
+Classes such as `DataSourceUtils` (for JDBC), `EntityManagerFactoryUtils` (for JPA),
+`SessionFactoryUtils` (for Hibernate), and so on exist at a lower level. When you want the
+application code to deal directly with the resource types of the native persistence APIs,
+you use these classes to ensure that proper Spring Framework-managed instances are obtained,
+transactions are (optionally) synchronized, and exceptions that occur in the process are
+properly mapped to a consistent API.
+
+For example, in the case of JDBC, instead of the traditional JDBC approach of calling
+the `getConnection()` method on the `DataSource`, you can instead use Spring's
+`org.springframework.jdbc.datasource.DataSourceUtils` class, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	Connection conn = DataSourceUtils.getConnection(dataSource);
+----
+
+If an existing transaction already has a connection synchronized (linked) to it, that
+instance is returned. Otherwise, the method call triggers the creation of a new
+connection, which is (optionally) synchronized to any existing transaction and made
+available for subsequent reuse in that same transaction. As mentioned earlier, any
+`SQLException` is wrapped in a Spring Framework `CannotGetJdbcConnectionException`, one
+of the Spring Framework's hierarchy of unchecked `DataAccessException` types. This approach
+gives you more information than can be obtained easily from the `SQLException` and
+ensures portability across databases and even across different persistence technologies.
+
+This approach also works without Spring transaction management (transaction
+synchronization is optional), so you can use it whether or not you use Spring for
+transaction management.
+
+Of course, once you have used Spring's JDBC support, JPA support, or Hibernate support,
+you generally prefer not to use `DataSourceUtils` or the other helper classes,
+because you are much happier working through the Spring abstraction than directly
+with the relevant APIs. For example, if you use the Spring `JdbcTemplate` or
+`jdbc.object` package to simplify your use of JDBC, correct connection retrieval occurs
+behind the scenes and you need not write any special code.
+
+
+[[tx-resource-synchronization-tadsp]]
+== `TransactionAwareDataSourceProxy`
+
+At the very lowest level exists the `TransactionAwareDataSourceProxy` class. This is a
+proxy for a target `DataSource`, which wraps the target `DataSource` to add awareness of
+Spring-managed transactions. In this respect, it is similar to a transactional JNDI
+`DataSource`, as provided by a Jakarta EE server.
+
+You should almost never need or want to use this class, except when existing
+code must be called and passed a standard JDBC `DataSource` interface implementation. In
+that case, it is possible that this code is usable but is participating in Spring-managed
+transactions. You can write your new code by using the higher-level
+abstractions mentioned earlier.
+
+
+

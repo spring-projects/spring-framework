@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -37,7 +39,7 @@ import static org.mockito.Mockito.mock;
  */
 public class InvocableHandlerMethodTests {
 
-	private final Message<?> message = mock(Message.class);
+	private final Message<?> message = mock();
 
 	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -49,8 +51,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invoke(new Handler(), method);
 
-		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
-		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(0).getResolvedParameters()).hasSize(1);
+		assertThat(getStubResolver(1).getResolvedParameters()).hasSize(1);
 		assertThat(value).isEqualTo("99-value");
 		assertThat(getStubResolver(0).getResolvedParameters().get(0).getParameterName()).isEqualTo("intArg");
 		assertThat(getStubResolver(1).getResolvedParameters().get(0).getParameterName()).isEqualTo("stringArg");
@@ -63,16 +65,16 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invoke(new Handler(), method);
 
-		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
-		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(0).getResolvedParameters()).hasSize(1);
+		assertThat(getStubResolver(1).getResolvedParameters()).hasSize(1);
 		assertThat(value).isEqualTo("null-null");
 	}
 
 	@Test
 	public void cannotResolveArg() throws Exception {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-		assertThatExceptionOfType(MethodArgumentResolutionException.class).isThrownBy(() ->
-				invoke(new Handler(), method))
+		assertThatExceptionOfType(MethodArgumentResolutionException.class)
+			.isThrownBy(() -> invoke(new Handler(), method))
 			.withMessageContaining("Could not resolve parameter [0]");
 	}
 
@@ -125,20 +127,20 @@ public class InvocableHandlerMethodTests {
 		Handler handler = new Handler();
 		Method method = ResolvableMethod.on(Handler.class).argTypes(Throwable.class).resolveMethod();
 		RuntimeException runtimeException = new RuntimeException("error");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				invoke(handler, method, runtimeException))
+		assertThatRuntimeException()
+			.isThrownBy(() -> invoke(handler, method, runtimeException))
 			.isSameAs(runtimeException);
 		Error error = new Error("error");
-		assertThatExceptionOfType(Error.class).isThrownBy(() ->
-				invoke(handler, method, error))
+		assertThatExceptionOfType(Error.class)
+			.isThrownBy(() -> invoke(handler, method, error))
 			.isSameAs(error);
 		Exception exception = new Exception("error");
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				invoke(handler, method, exception))
+		assertThatException()
+			.isThrownBy(() -> invoke(handler, method, exception))
 			.isSameAs(exception);
 		Throwable throwable = new Throwable("error", exception);
-		assertThatIllegalStateException().isThrownBy(() ->
-				invoke(handler, method, throwable))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invoke(handler, method, throwable))
 			.withCause(throwable)
 			.withMessageContaining("Invocation failure");
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,10 @@ public interface ApplicationEventMulticaster {
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>Consider using {@link #multicastEvent(ApplicationEvent, ResolvableType)}
 	 * if possible as it provides better support for generics-based events.
+	 * <p>If a matching {@code ApplicationListener} does not support asynchronous
+	 * execution, it must be run within the calling thread of this multicast call.
 	 * @param event the event to multicast
+	 * @see ApplicationListener#supportsAsyncExecution()
 	 */
 	void multicastEvent(ApplicationEvent event);
 
@@ -118,9 +121,12 @@ public interface ApplicationEventMulticaster {
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>If the {@code eventType} is {@code null}, a default type is built
 	 * based on the {@code event} instance.
+	 * <p>If a matching {@code ApplicationListener} does not support asynchronous
+	 * execution, it must be run within the calling thread of this multicast call.
 	 * @param event the event to multicast
 	 * @param eventType the type of event (can be {@code null})
 	 * @since 4.2
+	 * @see ApplicationListener#supportsAsyncExecution()
 	 */
 	void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType);
 

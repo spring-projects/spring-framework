@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,10 @@ import org.springframework.core.type.filter.TypeFilter;
  * {@code @ComponentScan} level would be ignored.
  *
  * <p>See {@link Configuration @Configuration}'s Javadoc for usage examples.
+ *
+ * <p>{@code @ComponentScan} can be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation. {@code @ComponentScan} may also be used as a <em>meta-annotation</em>
+ * to create custom <em>composed annotations</em> with attribute overrides.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

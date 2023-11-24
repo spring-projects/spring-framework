@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -35,7 +36,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>This handler is intended to be used with a "/*" mapping when the
  * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
- * is mapped to "/", thus  overriding the Servlet container's default handling of static resources.
+ * is mapped to "/", thus overriding the Servlet container's default handling of static resources.
  * The mapping to this handler should generally be ordered as the last in the chain so that it will
  * only execute when no other more specific mappings (i.e., to controllers) can be matched.
  *
@@ -45,7 +46,7 @@ import org.springframework.web.context.ServletContextAware;
  * handler checks at initialization time for the presence of the default Servlet of well-known
  * containers such as Tomcat, Jetty, Resin, WebLogic and WebSphere. However, when running in a
  * container where the default Servlet's name is not known, or where it has been customized
- * via server configuration, the  {@code defaultServletName} will need to be set explicitly.
+ * via server configuration, the {@code defaultServletName} will need to be set explicitly.
  *
  * @author Jeremy Grelle
  * @author Juergen Hoeller
@@ -125,7 +126,12 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +
 					this.defaultServletName + "'");
 		}
-		rd.forward(request, response);
+		if (request.getDispatcherType() != DispatcherType.INCLUDE) {
+			rd.forward(request, response);
+		}
+		else {
+			rd.include(request, response);
+		}
 	}
 
 }

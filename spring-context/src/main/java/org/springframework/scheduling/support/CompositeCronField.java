@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,14 +77,13 @@ final class CompositeCronField extends CronField {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof CompositeCronField)) {
+		if (!(o instanceof CompositeCronField other)) {
 			return false;
 		}
-		CompositeCronField other = (CompositeCronField) o;
 		return type() == other.type() &&
 				this.value.equals(other.value);
 	}

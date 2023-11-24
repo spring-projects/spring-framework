@@ -1,0 +1,240 @@
+[[testcontext-ctx-management-ctx-hierarchies]]
+= Context Hierarchies
+
+When writing integration tests that rely on a loaded Spring `ApplicationContext`, it is
+often sufficient to test against a single context. However, there are times when it is
+beneficial or even necessary to test against a hierarchy of `ApplicationContext`
+instances. For example, if you are developing a Spring MVC web application, you typically
+have a root `WebApplicationContext` loaded by Spring's `ContextLoaderListener` and a
+child `WebApplicationContext` loaded by Spring's `DispatcherServlet`. This results in a
+parent-child context hierarchy where shared components and infrastructure configuration
+are declared in the root context and consumed in the child context by web-specific
+components. Another use case can be found in Spring Batch applications, where you often
+have a parent context that provides configuration for shared batch infrastructure and a
+child context for the configuration of a specific batch job.
+
+You can write integration tests that use context hierarchies by declaring context
+configuration with the `@ContextHierarchy` annotation, either on an individual test class
+or within a test class hierarchy. If a context hierarchy is declared on multiple classes
+within a test class hierarchy, you can also merge or override the context configuration
+for a specific, named level in the context hierarchy. When merging configuration for a
+given level in the hierarchy, the configuration resource type (that is, XML configuration
+files or component classes) must be consistent. Otherwise, it is perfectly acceptable to
+have different levels in a context hierarchy configured using different resource types.
+
+The remaining JUnit Jupiter based examples in this section show common configuration
+scenarios for integration tests that require the use of context hierarchies.
+
+**Single test class with context hierarchy**
+--
+`ControllerIntegrationTests` represents a typical integration testing scenario for a
+Spring MVC web application by declaring a context hierarchy that consists of two levels,
+one for the root `WebApplicationContext` (loaded by using the `TestAppConfig`
+`@Configuration` class) and one for the dispatcher servlet `WebApplicationContext`
+(loaded by using the `WebConfig` `@Configuration` class). The `WebApplicationContext`
+that is autowired into the test instance is the one for the child context (that is, the
+lowest context in the hierarchy). The following listing shows this configuration scenario:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	@WebAppConfiguration
+	@ContextHierarchy({
+		@ContextConfiguration(classes = TestAppConfig.class),
+		@ContextConfiguration(classes = WebConfig.class)
+	})
+	class ControllerIntegrationTests {
+
+		@Autowired
+		WebApplicationContext wac;
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	@WebAppConfiguration
+	@ContextHierarchy(
+		ContextConfiguration(classes = [TestAppConfig::class]),
+		ContextConfiguration(classes = [WebConfig::class]))
+	class ControllerIntegrationTests {
+
+		@Autowired
+		lateinit var wac: WebApplicationContext
+
+		// ...
+	}
+----
+======
+--
+
+**Class hierarchy with implicit parent context**
+--
+The test classes in this example define a context hierarchy within a test class
+hierarchy. `AbstractWebTests` declares the configuration for a root
+`WebApplicationContext` in a Spring-powered web application. Note, however, that
+`AbstractWebTests` does not declare `@ContextHierarchy`. Consequently, subclasses of
+`AbstractWebTests` can optionally participate in a context hierarchy or follow the
+standard semantics for `@ContextConfiguration`. `SoapWebServiceTests` and
+`RestWebServiceTests` both extend `AbstractWebTests` and define a context hierarchy by
+using `@ContextHierarchy`. The result is that three application contexts are loaded (one
+for each declaration of `@ContextConfiguration`), and the application context loaded
+based on the configuration in `AbstractWebTests` is set as the parent context for each of
+the contexts loaded for the concrete subclasses. The following listing shows this
+configuration scenario:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	@WebAppConfiguration
+	@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
+	public abstract class AbstractWebTests {}
+
+	@ContextHierarchy(@ContextConfiguration("/spring/soap-ws-config.xml"))
+	public class SoapWebServiceTests extends AbstractWebTests {}
+
+	@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml"))
+	public class RestWebServiceTests extends AbstractWebTests {}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	@WebAppConfiguration
+	@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
+	abstract class AbstractWebTests
+
+	@ContextHierarchy(ContextConfiguration("/spring/soap-ws-config.xml"))
+	class SoapWebServiceTests : AbstractWebTests()
+
+	@ContextHierarchy(ContextConfiguration("/spring/rest-ws-config.xml"))
+	class RestWebServiceTests : AbstractWebTests()
+
+----
+======
+--
+
+**Class hierarchy with merged context hierarchy configuration**
+--
+The classes in this example show the use of named hierarchy levels in order to merge the
+configuration for specific levels in a context hierarchy. `BaseTests` defines two levels
+in the hierarchy, `parent` and `child`. `ExtendedTests` extends `BaseTests` and instructs
+the Spring TestContext Framework to merge the context configuration for the `child`
+hierarchy level, by ensuring that the names declared in the `name` attribute in
+`@ContextConfiguration` are both `child`. The result is that three application contexts
+are loaded: one for `/app-config.xml`, one for `/user-config.xml`, and one for
+`{"/user-config.xml", "/order-config.xml"}`. As with the previous example, the
+application context loaded from `/app-config.xml` is set as the parent context for the
+contexts loaded from `/user-config.xml` and `{"/user-config.xml", "/order-config.xml"}`.
+The following listing shows this configuration scenario:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	@ContextHierarchy({
+		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
+		@ContextConfiguration(name = "child", locations = "/user-config.xml")
+	})
+	class BaseTests {}
+
+	@ContextHierarchy(
+		@ContextConfiguration(name = "child", locations = "/order-config.xml")
+	)
+	class ExtendedTests extends BaseTests {}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	@ContextHierarchy(
+		ContextConfiguration(name = "parent", locations = ["/app-config.xml"]),
+		ContextConfiguration(name = "child", locations = ["/user-config.xml"]))
+	open class BaseTests {}
+
+	@ContextHierarchy(
+		ContextConfiguration(name = "child", locations = ["/order-config.xml"])
+	)
+	class ExtendedTests : BaseTests() {}
+----
+======
+--
+
+**Class hierarchy with overridden context hierarchy configuration**
+--
+In contrast to the previous example, this example demonstrates how to override the
+configuration for a given named level in a context hierarchy by setting the
+`inheritLocations` flag in `@ContextConfiguration` to `false`. Consequently, the
+application context for `ExtendedTests` is loaded only from `/test-user-config.xml` and
+has its parent set to the context loaded from `/app-config.xml`. The following listing
+shows this configuration scenario:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	@ContextHierarchy({
+		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
+		@ContextConfiguration(name = "child", locations = "/user-config.xml")
+	})
+	class BaseTests {}
+
+	@ContextHierarchy(
+		@ContextConfiguration(
+			name = "child",
+			locations = "/test-user-config.xml",
+			inheritLocations = false
+	))
+	class ExtendedTests extends BaseTests {}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	@ContextHierarchy(
+		ContextConfiguration(name = "parent", locations = ["/app-config.xml"]),
+		ContextConfiguration(name = "child", locations = ["/user-config.xml"]))
+	open class BaseTests {}
+
+	@ContextHierarchy(
+			ContextConfiguration(
+					name = "child",
+					locations = ["/test-user-config.xml"],
+					inheritLocations = false
+			))
+	class ExtendedTests : BaseTests() {}
+----
+======
+
+.Dirtying a context within a context hierarchy
+NOTE: If you use `@DirtiesContext` in a test whose context is configured as part of a
+context hierarchy, you can use the `hierarchyMode` flag to control how the context cache
+is cleared. For further details, see the discussion of `@DirtiesContext` in
+xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations] and the
+{spring-framework-api}/test/annotation/DirtiesContext.html[`@DirtiesContext`] javadoc.
+--
+

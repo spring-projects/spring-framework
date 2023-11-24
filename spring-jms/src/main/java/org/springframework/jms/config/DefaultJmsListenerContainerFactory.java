@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.util.backoff.BackOff;
  * A {@link JmsListenerContainerFactory} implementation to build a regular
  * {@link DefaultMessageListenerContainer}.
  *
- * <p>This should be the default for most users and a good transition paths
- * for those that are used to build such container definition manually.
+ * <p>This should be the default for most users and a good transition path
+ * for those who are used to building such a container definition manually.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -67,63 +67,63 @@ public class DefaultJmsListenerContainerFactory
 	/**
 	 * @see DefaultMessageListenerContainer#setTaskExecutor
 	 */
-	public void setTaskExecutor(Executor taskExecutor) {
+	public void setTaskExecutor(@Nullable Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setTransactionManager
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setCacheLevel
 	 */
-	public void setCacheLevel(Integer cacheLevel) {
+	public void setCacheLevel(@Nullable Integer cacheLevel) {
 		this.cacheLevel = cacheLevel;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setCacheLevelName
 	 */
-	public void setCacheLevelName(String cacheLevelName) {
+	public void setCacheLevelName(@Nullable String cacheLevelName) {
 		this.cacheLevelName = cacheLevelName;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setConcurrency
 	 */
-	public void setConcurrency(String concurrency) {
+	public void setConcurrency(@Nullable String concurrency) {
 		this.concurrency = concurrency;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setMaxMessagesPerTask
 	 */
-	public void setMaxMessagesPerTask(Integer maxMessagesPerTask) {
+	public void setMaxMessagesPerTask(@Nullable Integer maxMessagesPerTask) {
 		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setReceiveTimeout
 	 */
-	public void setReceiveTimeout(Long receiveTimeout) {
+	public void setReceiveTimeout(@Nullable Long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setRecoveryInterval
 	 */
-	public void setRecoveryInterval(Long recoveryInterval) {
+	public void setRecoveryInterval(@Nullable Long recoveryInterval) {
 		this.recoveryInterval = recoveryInterval;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setBackOff
 	 */
-	public void setBackOff(BackOff backOff) {
+	public void setBackOff(@Nullable BackOff backOff) {
 		this.backOff = backOff;
 	}
 

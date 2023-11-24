@@ -1,0 +1,590 @@
+[[beans-java-bean-annotation]]
+= Using the `@Bean` Annotation
+
+`@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element.
+The annotation supports some of the attributes offered by `<bean/>`, such as:
+
+* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[init-method]
+* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[destroy-method]
+* xref:core/beans/dependencies/factory-autowire.adoc[autowiring]
+* `name`.
+
+You can use the `@Bean` annotation in a `@Configuration`-annotated or in a
+`@Component`-annotated class.
+
+
+[[beans-java-declaring-a-bean]]
+== Declaring a Bean
+
+To declare a bean, you can annotate a method with the `@Bean` annotation. You use this
+method to register a bean definition within an `ApplicationContext` of the type
+specified as the method's return value. By default, the bean name is the same as
+the method name. The following example shows a `@Bean` method declaration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public TransferServiceImpl transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun transferService() = TransferServiceImpl()
+	}
+----
+======
+
+The preceding configuration is exactly equivalent to the following Spring XML:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="transferService" class="com.acme.TransferServiceImpl"/>
+	</beans>
+----
+
+Both declarations make a bean named `transferService` available in the
+`ApplicationContext`, bound to an object instance of type `TransferServiceImpl`, as the
+following text image shows:
+
+[literal,subs="verbatim,quotes"]
+----
+transferService -> com.acme.TransferServiceImpl
+----
+
+You can also use default methods to define beans. This allows composition of bean
+configurations by implementing interfaces with bean definitions on default methods.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public interface BaseConfig {
+
+		@Bean
+		default TransferServiceImpl transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+
+	@Configuration
+	public class AppConfig implements BaseConfig {
+
+	}
+----
+======
+
+You can also declare your `@Bean` method with an interface (or base class)
+return type, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public TransferService transferService() {
+			return new TransferServiceImpl();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun transferService(): TransferService {
+			return TransferServiceImpl()
+		}
+	}
+----
+======
+
+However, this limits the visibility for advance type prediction to the specified
+interface type (`TransferService`). Then, with the full type (`TransferServiceImpl`)
+known to the container only once the affected singleton bean has been instantiated.
+Non-lazy singleton beans get instantiated according to their declaration order,
+so you may see different type matching results depending on when another component
+tries to match by a non-declared type (such as `@Autowired TransferServiceImpl`,
+which resolves only once the `transferService` bean has been instantiated).
+
+TIP: If you consistently refer to your types by a declared service interface, your
+`@Bean` return types may safely join that design decision. However, for components
+that implement several interfaces or for components potentially referred to by their
+implementation type, it is safer to declare the most specific return type possible
+(at least as specific as required by the injection points that refer to your bean).
+
+
+[[beans-java-dependencies]]
+== Bean Dependencies
+
+A `@Bean`-annotated method can have an arbitrary number of parameters that describe the
+dependencies required to build that bean. For instance, if our `TransferService`
+requires an `AccountRepository`, we can materialize that dependency with a method
+parameter, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public TransferService transferService(AccountRepository accountRepository) {
+			return new TransferServiceImpl(accountRepository);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun transferService(accountRepository: AccountRepository): TransferService {
+			return TransferServiceImpl(accountRepository)
+		}
+	}
+----
+======
+
+The resolution mechanism is pretty much identical to constructor-based dependency
+injection. See
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[the relevant section]
+for more details.
+
+
+[[beans-java-lifecycle-callbacks]]
+== Receiving Lifecycle Callbacks
+
+Any classes defined with the `@Bean` annotation support the regular lifecycle callbacks
+and can use the `@PostConstruct` and `@PreDestroy` annotations from JSR-250. See
+xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[JSR-250 annotations] for further
+details.
+
+The regular Spring xref:core/beans/factory-nature.adoc[lifecycle] callbacks are fully supported as
+well. If a bean implements `InitializingBean`, `DisposableBean`, or `Lifecycle`, their
+respective methods are called by the container.
+
+The standard set of `*Aware` interfaces (such as xref:core/beans/beanfactory.adoc[BeanFactoryAware],
+xref:core/beans/factory-nature.adoc#beans-factory-aware[BeanNameAware],
+xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSourceAware],
+xref:core/beans/factory-nature.adoc#beans-factory-aware[ApplicationContextAware], and so on) are also fully supported.
+
+The `@Bean` annotation supports specifying arbitrary initialization and destruction
+callback methods, much like Spring XML's `init-method` and `destroy-method` attributes
+on the `bean` element, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class BeanOne {
+
+		public void init() {
+			// initialization logic
+		}
+	}
+
+	public class BeanTwo {
+
+		public void cleanup() {
+			// destruction logic
+		}
+	}
+
+	@Configuration
+	public class AppConfig {
+
+		@Bean(initMethod = "init")
+		public BeanOne beanOne() {
+			return new BeanOne();
+		}
+
+		@Bean(destroyMethod = "cleanup")
+		public BeanTwo beanTwo() {
+			return new BeanTwo();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+class BeanOne {
+
+	fun init() {
+		// initialization logic
+	}
+}
+
+class BeanTwo {
+
+	fun cleanup() {
+		// destruction logic
+	}
+}
+
+@Configuration
+class AppConfig {
+
+	@Bean(initMethod = "init")
+	fun beanOne() = BeanOne()
+
+	@Bean(destroyMethod = "cleanup")
+	fun beanTwo() = BeanTwo()
+}
+----
+======
+
+[NOTE]
+=====
+By default, beans defined with Java configuration that have a public `close` or `shutdown`
+method are automatically enlisted with a destruction callback. If you have a public
+`close` or `shutdown` method and you do not wish for it to be called when the container
+shuts down, you can add `@Bean(destroyMethod = "")` to your bean definition to disable the
+default `(inferred)` mode.
+
+You may want to do that by default for a resource that you acquire with JNDI, as its
+lifecycle is managed outside the application. In particular, make sure to always do it
+for a `DataSource`, as it is known to be problematic on Jakarta EE application servers.
+
+The following example shows how to prevent an automatic destruction callback for a
+`DataSource`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean(destroyMethod = "")
+	public DataSource dataSource() throws NamingException {
+		return (DataSource) jndiTemplate.lookup("MyDS");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Bean(destroyMethod = "")
+	fun dataSource(): DataSource {
+		return jndiTemplate.lookup("MyDS") as DataSource
+	}
+----
+======
+
+Also, with `@Bean` methods, you typically use programmatic JNDI lookups, either by
+using Spring's `JndiTemplate` or `JndiLocatorDelegate` helpers or straight JNDI
+`InitialContext` usage but not the `JndiObjectFactoryBean` variant (which would force
+you to declare the return type as the `FactoryBean` type instead of the actual target
+type, making it harder to use for cross-reference calls in other `@Bean` methods that
+intend to refer to the provided resource here).
+=====
+
+In the case of `BeanOne` from the example above the preceding note, it would be
+equally valid to call the `init()` method directly during construction, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public BeanOne beanOne() {
+			BeanOne beanOne = new BeanOne();
+			beanOne.init();
+			return beanOne;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun beanOne() = BeanOne().apply {
+			init()
+		}
+
+		// ...
+	}
+----
+======
+
+TIP: When you work directly in Java, you can do anything you like with your objects and do
+not always need to rely on the container lifecycle.
+
+
+[[beans-java-specifying-bean-scope]]
+== Specifying Bean Scope
+
+Spring includes the `@Scope` annotation so that you can specify the scope of a bean.
+
+[[beans-java-available-scopes]]
+=== Using the `@Scope` Annotation
+
+You can specify that your beans defined with the `@Bean` annotation should have a
+specific scope. You can use any of the standard scopes specified in the
+xref:core/beans/factory-scopes.adoc[Bean Scopes] section.
+
+The default scope is `singleton`, but you can override this with the `@Scope` annotation,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class MyConfiguration {
+
+		@Bean
+		@Scope("prototype")
+		public Encryptor encryptor() {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class MyConfiguration {
+
+		@Bean
+		@Scope("prototype")
+		fun encryptor(): Encryptor {
+			// ...
+		}
+	}
+----
+======
+
+[[beans-java-scoped-proxy]]
+=== `@Scope` and `scoped-proxy`
+
+Spring offers a convenient way of working with scoped dependencies through
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[scoped proxies]. The easiest way to create
+such a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
+Configuring your beans in Java with a `@Scope` annotation offers equivalent support
+with the `proxyMode` attribute. The default is `ScopedProxyMode.DEFAULT`, which
+typically indicates that no scoped proxy should be created unless a different default
+has been configured at the component-scan instruction level. You can specify
+`ScopedProxyMode.TARGET_CLASS`, `ScopedProxyMode.INTERFACES` or `ScopedProxyMode.NO`.
+
+If you port the scoped proxy example from the XML reference documentation (see
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[scoped proxies]) to our `@Bean` using Java,
+it resembles the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// an HTTP Session-scoped bean exposed as a proxy
+	@Bean
+	@SessionScope
+	public UserPreferences userPreferences() {
+		return new UserPreferences();
+	}
+
+	@Bean
+	public Service userService() {
+		UserService service = new SimpleUserService();
+		// a reference to the proxied userPreferences bean
+		service.setUserPreferences(userPreferences());
+		return service;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// an HTTP Session-scoped bean exposed as a proxy
+	@Bean
+	@SessionScope
+	fun userPreferences() = UserPreferences()
+
+	@Bean
+	fun userService(): Service {
+		return SimpleUserService().apply {
+			// a reference to the proxied userPreferences bean
+			setUserPreferences(userPreferences())
+		}
+	}
+----
+======
+
+[[beans-java-customizing-bean-naming]]
+== Customizing Bean Naming
+
+By default, configuration classes use a `@Bean` method's name as the name of the
+resulting bean. This functionality can be overridden, however, with the `name` attribute,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean("myThing")
+		public Thing thing() {
+			return new Thing();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean("myThing")
+		fun thing() = Thing()
+	}
+----
+======
+
+
+[[beans-java-bean-aliasing]]
+== Bean Aliasing
+
+As discussed in xref:core/beans/definition.adoc#beans-beanname[Naming Beans], it is
+sometimes desirable to give a single bean multiple names, otherwise known as bean aliasing.
+The `name` attribute of the `@Bean` annotation accepts a String array for this purpose.
+The following example shows how to set a number of aliases for a bean:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean({"dataSource", "subsystemA-dataSource", "subsystemB-dataSource"})
+		public DataSource dataSource() {
+			// instantiate, configure and return DataSource bean...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean("dataSource", "subsystemA-dataSource", "subsystemB-dataSource")
+		fun dataSource(): DataSource {
+			// instantiate, configure and return DataSource bean...
+		}
+	}
+----
+======
+
+
+[[beans-java-bean-description]]
+== Bean Description
+
+Sometimes, it is helpful to provide a more detailed textual description of a bean. This can
+be particularly useful when beans are exposed (perhaps through JMX) for monitoring purposes.
+
+To add a description to a `@Bean`, you can use the
+{spring-framework-api}/context/annotation/Description.html[`@Description`]
+annotation, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		@Description("Provides a basic example of a bean")
+		public Thing thing() {
+			return new Thing();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		@Description("Provides a basic example of a bean")
+		fun thing() = Thing()
+	}
+----
+======
+
+
+

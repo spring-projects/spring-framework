@@ -19,12 +19,13 @@ package org.springframework.jms.support.destination;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
 import javax.naming.NamingException;
+
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
 
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.lang.Nullable;

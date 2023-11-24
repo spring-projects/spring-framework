@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,11 @@ package org.springframework.core;
 
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
- * using the Java 8 standard reflection mechanism (if available), and falling back
- * to the ASM-based {@link LocalVariableTableParameterNameDiscoverer} for checking
- * debug information in the class file.
+ * delegating to the Java 8 standard reflection mechanism.
  *
  * <p>If a Kotlin reflection implementation is present,
  * {@link KotlinReflectionParameterNameDiscoverer} is added first in the list and
- * used for Kotlin classes and interfaces. When compiling or running as a GraalVM
- * native image, the {@code KotlinReflectionParameterNameDiscoverer} is not used.
+ * used for Kotlin classes and interfaces.
  *
  * <p>Further discoverers may be added through {@link #addDiscoverer(ParameterNameDiscoverer)}.
  *
@@ -34,18 +31,17 @@ package org.springframework.core;
  * @author Sam Brannen
  * @since 4.0
  * @see StandardReflectionParameterNameDiscoverer
- * @see LocalVariableTableParameterNameDiscoverer
  * @see KotlinReflectionParameterNameDiscoverer
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
 	public DefaultParameterNameDiscoverer() {
-		// TODO Remove this conditional inclusion when upgrading to Kotlin 1.5, see https://youtrack.jetbrains.com/issue/KT-44594
-		if (KotlinDetector.isKotlinReflectPresent() && !NativeDetector.inNativeImage()) {
+		if (KotlinDetector.isKotlinReflectPresent()) {
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 		}
+
+		// Recommended approach on Java 8+: compilation with -parameters.
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-		addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 	}
 
 }

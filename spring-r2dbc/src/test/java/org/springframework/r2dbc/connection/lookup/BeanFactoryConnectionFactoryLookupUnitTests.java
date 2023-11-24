@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,45 +44,39 @@ public class BeanFactoryConnectionFactoryLookupUnitTests {
 	@Mock
 	BeanFactory beanFactory;
 
+
 	@Test
 	public void shouldLookupConnectionFactory() {
 		DummyConnectionFactory expectedConnectionFactory = new DummyConnectionFactory();
-		when(beanFactory.getBean(CONNECTION_FACTORY_BEAN_NAME,
-				ConnectionFactory.class)).thenReturn(expectedConnectionFactory);
+		when(beanFactory.getBean(CONNECTION_FACTORY_BEAN_NAME, ConnectionFactory.class))
+				.thenReturn(expectedConnectionFactory);
 
 		BeanFactoryConnectionFactoryLookup lookup = new BeanFactoryConnectionFactoryLookup();
 		lookup.setBeanFactory(beanFactory);
 
-		ConnectionFactory connectionFactory = lookup.getConnectionFactory(
-				CONNECTION_FACTORY_BEAN_NAME);
-
+		ConnectionFactory connectionFactory = lookup.getConnectionFactory(CONNECTION_FACTORY_BEAN_NAME);
 		assertThat(connectionFactory).isNotNull();
 		assertThat(connectionFactory).isSameAs(expectedConnectionFactory);
 	}
 
 	@Test
 	public void shouldLookupWhereBeanFactoryYieldsNonConnectionFactoryType() {
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
+		when(beanFactory.getBean(CONNECTION_FACTORY_BEAN_NAME, ConnectionFactory.class))
+				.thenThrow(new BeanNotOfRequiredTypeException(
+						CONNECTION_FACTORY_BEAN_NAME, ConnectionFactory.class, String.class));
 
-		when(beanFactory.getBean(CONNECTION_FACTORY_BEAN_NAME,
-				ConnectionFactory.class)).thenThrow(
-						new BeanNotOfRequiredTypeException(CONNECTION_FACTORY_BEAN_NAME,
-								ConnectionFactory.class, String.class));
-
-		BeanFactoryConnectionFactoryLookup lookup = new BeanFactoryConnectionFactoryLookup(
-				beanFactory);
-
-		assertThatExceptionOfType(
-				ConnectionFactoryLookupFailureException.class).isThrownBy(
-						() -> lookup.getConnectionFactory(CONNECTION_FACTORY_BEAN_NAME));
+		BeanFactoryConnectionFactoryLookup lookup = new BeanFactoryConnectionFactoryLookup(beanFactory);
+		assertThatExceptionOfType(ConnectionFactoryLookupFailureException.class)
+				.isThrownBy(() -> lookup.getConnectionFactory(CONNECTION_FACTORY_BEAN_NAME));
 	}
 
 	@Test
 	public void shouldLookupWhereBeanFactoryHasNotBeenSupplied() {
 		BeanFactoryConnectionFactoryLookup lookup = new BeanFactoryConnectionFactoryLookup();
 
-		assertThatThrownBy(() -> lookup.getConnectionFactory(
-				CONNECTION_FACTORY_BEAN_NAME)).isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(() -> lookup.getConnectionFactory(CONNECTION_FACTORY_BEAN_NAME))
+				.isInstanceOf(IllegalStateException.class);
 	}
 
 }

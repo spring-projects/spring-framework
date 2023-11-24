@@ -1,0 +1,15 @@
+[[mvc-view]]
+= View Technologies
+:page-section-summary-toc: 1
+[.small]#xref:web/webflux-view.adoc[See equivalent in the Reactive stack]#
+
+The use of view technologies in Spring MVC is pluggable. Whether you decide to use
+Thymeleaf, Groovy Markup Templates, JSPs, or other technologies is primarily a matter of
+a configuration change. This chapter covers view technologies integrated with Spring MVC.
+We assume you are already familiar with xref:web/webmvc/mvc-servlet/viewresolver.adoc[View Resolution].
+
+WARNING: The views of a Spring MVC application live within the internal trust boundaries
+of that application. Views have access to all the beans of your application context. As
+such, it is not recommended to use Spring MVC's template support in applications where
+the templates are editable by external sources, since this can have security implications.
+

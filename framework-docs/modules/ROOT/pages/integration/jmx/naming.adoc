@@ -1,0 +1,175 @@
+[[jmx-naming]]
+= Controlling  `ObjectName` Instances for Your Beans
+
+Behind the scenes, the `MBeanExporter` delegates to an implementation of the
+`ObjectNamingStrategy` to obtain an `ObjectName` instance for each of the beans it registers.
+By default, the default implementation, `KeyNamingStrategy` uses the key of the
+`beans` `Map` as the `ObjectName`. In addition, the `KeyNamingStrategy` can map the key
+of the `beans` `Map` to an entry in a `Properties` file (or files) to resolve the
+`ObjectName`. In addition to the `KeyNamingStrategy`, Spring provides two additional
+`ObjectNamingStrategy` implementations: the `IdentityNamingStrategy` (which builds an
+`ObjectName` based on the JVM identity of the bean) and the `MetadataNamingStrategy` (which
+uses source-level metadata to obtain the `ObjectName`).
+
+
+[[jmx-naming-properties]]
+== Reading `ObjectName` Instances from Properties
+
+You can configure your own `KeyNamingStrategy` instance and configure it to read
+`ObjectName` instances from a `Properties` instance rather than use a bean key. The
+`KeyNamingStrategy` tries to locate an entry in the `Properties` with a key
+that corresponds to the bean key. If no entry is found or if the `Properties` instance is
+`null`, the bean key itself is used.
+
+The following code shows a sample configuration for the `KeyNamingStrategy`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+			<property name="beans">
+				<map>
+					<entry key="testBean" value-ref="testBean"/>
+				</map>
+			</property>
+			<property name="namingStrategy" ref="namingStrategy"/>
+		</bean>
+
+		<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+			<property name="name" value="TEST"/>
+			<property name="age" value="100"/>
+		</bean>
+
+		<bean id="namingStrategy" class="org.springframework.jmx.export.naming.KeyNamingStrategy">
+			<property name="mappings">
+				<props>
+					<prop key="testBean">bean:name=testBean1</prop>
+				</props>
+			</property>
+			<property name="mappingLocations">
+				<value>names1.properties,names2.properties</value>
+			</property>
+		</bean>
+
+	</beans>
+----
+
+The preceding example configures an instance of `KeyNamingStrategy` with a `Properties` instance that
+is merged from the `Properties` instance defined by the mapping property and the
+properties files located in the paths defined by the mappings property. In this
+configuration, the `testBean` bean is given an `ObjectName` of `bean:name=testBean1`,
+since this is the entry in the `Properties` instance that has a key corresponding to the
+bean key.
+
+If no entry in the `Properties` instance can be found, the bean key name is used as
+the `ObjectName`.
+
+
+[[jmx-naming-metadata]]
+== Using `MetadataNamingStrategy`
+
+`MetadataNamingStrategy` uses the `objectName` property of the `ManagedResource`
+attribute on each bean to create the `ObjectName`. The following code shows the
+configuration for the `MetadataNamingStrategy`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+			<property name="beans">
+				<map>
+					<entry key="testBean" value-ref="testBean"/>
+				</map>
+			</property>
+			<property name="namingStrategy" ref="namingStrategy"/>
+		</bean>
+
+		<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+			<property name="name" value="TEST"/>
+			<property name="age" value="100"/>
+		</bean>
+
+		<bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+			<property name="attributeSource" ref="attributeSource"/>
+		</bean>
+
+		<bean id="attributeSource"
+				class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+	</beans>
+----
+
+If no `objectName` has been provided for the `ManagedResource` attribute, an
+`ObjectName` is created with the following
+format: _[fully-qualified-package-name]:type=[short-classname],name=[bean-name]_. For
+example, the generated `ObjectName` for the following bean would be
+`com.example:type=MyClass,name=myBean`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myBean" class="com.example.MyClass"/>
+----
+
+
+[[jmx-context-mbeanexport]]
+== Configuring Annotation-based MBean Export
+
+If you prefer to use xref:integration/jmx/interface.adoc#jmx-interface-metadata[the annotation-based approach] to define
+your management interfaces, a convenience subclass of `MBeanExporter` is available:
+`AnnotationMBeanExporter`. When defining an instance of this subclass, you no longer need the
+`namingStrategy`, `assembler`, and `attributeSource` configuration,
+since it always uses standard Java annotation-based metadata (autodetection is
+always enabled as well). In fact, rather than defining an `MBeanExporter` bean, an even
+simpler syntax is supported by the `@EnableMBeanExport` `@Configuration` annotation,
+as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableMBeanExport
+	public class AppConfig {
+
+	}
+----
+
+If you prefer XML-based configuration, the `<context:mbean-export/>` element serves the
+same purpose and is shown in the following listing:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context:mbean-export/>
+----
+
+If necessary, you can provide a reference to a particular MBean `server`, and the
+`defaultDomain` attribute (a property of `AnnotationMBeanExporter`) accepts an alternate
+value for the generated MBean `ObjectName` domains. This is used in place of the
+fully qualified package name as described in the previous section on
+xref:integration/jmx/naming.adoc#jmx-naming-metadata[MetadataNamingStrategy], as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@EnableMBeanExport(server="myMBeanServer", defaultDomain="myDomain")
+	@Configuration
+	ContextConfiguration {
+
+	}
+----
+
+The following example shows the XML equivalent of the preceding annotation-based example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>
+----
+
+CAUTION: Do not use interface-based AOP proxies in combination with autodetection of JMX
+annotations in your bean classes. Interface-based proxies "`hide`" the target class, which
+also hides the JMX-managed resource annotations. Hence, you should use target-class proxies in that
+case (through setting the 'proxy-target-class' flag on `<aop:config/>`,
+`<tx:annotation-driven/>` and so on). Otherwise, your JMX beans might be silently ignored at
+startup.
+
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,12 +61,12 @@ public abstract class AspectJAopUtils {
 	 */
 	@Nullable
 	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
-		if (anAdvisor instanceof AspectJPrecedenceInformation) {
-			return (AspectJPrecedenceInformation) anAdvisor;
+		if (anAdvisor instanceof AspectJPrecedenceInformation ajpi) {
+			return ajpi;
 		}
 		Advice advice = anAdvisor.getAdvice();
-		if (advice instanceof AspectJPrecedenceInformation) {
-			return (AspectJPrecedenceInformation) advice;
+		if (advice instanceof AspectJPrecedenceInformation ajpi) {
+			return ajpi;
 		}
 		return null;
 	}

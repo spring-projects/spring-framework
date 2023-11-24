@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * <p>Customizers are created by {@link ContextCustomizerFactory} implementations.
  *
- * <p>Implementations must implement correct {@code equals} and {@code hashCode}
+ * <p><strong>WARNING</strong>: implementations must implement correct
+ * {@link Object#equals(Object) equals} and {@link Object#hashCode() hashCode}
  * methods since customizers form part of the {@link MergedContextConfiguration}
  * which is used as a cache key.
  *
@@ -33,6 +34,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author Sam Brannen
  * @since 4.3
  * @see ContextCustomizerFactory
+ * @see ContextCustomizerFactories @ContextCustomizerFactories
  * @see org.springframework.test.context.support.AbstractContextLoader#customizeContext
  */
 @FunctionalInterface

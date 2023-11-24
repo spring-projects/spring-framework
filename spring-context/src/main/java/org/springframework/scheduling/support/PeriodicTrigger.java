@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A trigger for periodic task execution. The period may be applied as either
@@ -46,18 +49,22 @@ import org.springframework.util.Assert;
  */
 public class PeriodicTrigger implements Trigger {
 
-	private final long period;
+	private final Duration period;
 
-	private final TimeUnit timeUnit;
+	@Nullable
+	private final ChronoUnit chronoUnit;
 
-	private volatile long initialDelay;
+	@Nullable
+	private volatile Duration initialDelay;
 
 	private volatile boolean fixedRate;
 
 
 	/**
 	 * Create a trigger with the given period in milliseconds.
+	 * @deprecated as of 6.0, in favor on {@link #PeriodicTrigger(Duration)}
 	 */
+	@Deprecated(since = "6.0")
 	public PeriodicTrigger(long period) {
 		this(period, null);
 	}
@@ -66,44 +73,132 @@ public class PeriodicTrigger implements Trigger {
 	 * Create a trigger with the given period and time unit. The time unit will
 	 * apply not only to the period but also to any 'initialDelay' value, if
 	 * configured on this Trigger later via {@link #setInitialDelay(long)}.
+	 * @deprecated as of 6.0, in favor on {@link #PeriodicTrigger(Duration)}
 	 */
+	@Deprecated(since = "6.0")
 	public PeriodicTrigger(long period, @Nullable TimeUnit timeUnit) {
-		Assert.isTrue(period >= 0, "period must not be negative");
-		this.timeUnit = (timeUnit != null ? timeUnit : TimeUnit.MILLISECONDS);
-		this.period = this.timeUnit.toMillis(period);
+		this(toDuration(period, timeUnit), timeUnit);
+	}
+
+	private static Duration toDuration(long amount, @Nullable TimeUnit timeUnit) {
+		if (timeUnit != null) {
+			return Duration.of(amount, timeUnit.toChronoUnit());
+		}
+		else {
+			return Duration.ofMillis(amount);
+		}
+	}
+
+	/**
+	 * Create a trigger with the given period as a duration.
+	 * @since 6.0
+	 */
+	public PeriodicTrigger(Duration period) {
+		this(period, null);
+	}
+
+	private PeriodicTrigger(Duration period, @Nullable TimeUnit timeUnit) {
+		Assert.notNull(period, "Period must not be null");
+		Assert.isTrue(!period.isNegative(), "Period must not be negative");
+		this.period = period;
+		if (timeUnit != null) {
+			this.chronoUnit = timeUnit.toChronoUnit();
+		}
+		else {
+			this.chronoUnit = null;
+		}
 	}
 
 
 	/**
 	 * Return this trigger's period.
 	 * @since 5.0.2
+	 * @deprecated as of 6.0, in favor on {@link #getPeriodDuration()}
 	 */
+	@Deprecated(since = "6.0")
 	public long getPeriod() {
+		if (this.chronoUnit != null) {
+			return this.period.get(this.chronoUnit);
+		}
+		else {
+			return this.period.toMillis();
+		}
+	}
+
+	/**
+	 * Return this trigger's period.
+	 * @since 6.0
+	 */
+	public Duration getPeriodDuration() {
 		return this.period;
 	}
 
 	/**
 	 * Return this trigger's time unit (milliseconds by default).
 	 * @since 5.0.2
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
+	@Deprecated(since = "6.0")
 	public TimeUnit getTimeUnit() {
-		return this.timeUnit;
+		if (this.chronoUnit != null) {
+			return TimeUnit.of(this.chronoUnit);
+		}
+		else {
+			return TimeUnit.MILLISECONDS;
+		}
 	}
 
 	/**
 	 * Specify the delay for the initial execution. It will be evaluated in
 	 * terms of this trigger's {@link TimeUnit}. If no time unit was explicitly
 	 * provided upon instantiation, the default is milliseconds.
+	 * @deprecated as of 6.0, in favor of {@link #setInitialDelay(Duration)}
 	 */
+	@Deprecated(since = "6.0")
 	public void setInitialDelay(long initialDelay) {
-		this.initialDelay = this.timeUnit.toMillis(initialDelay);
+		if (this.chronoUnit != null) {
+			this.initialDelay = Duration.of(initialDelay, this.chronoUnit);
+		}
+		else {
+			this.initialDelay = Duration.ofMillis(initialDelay);
+		}
+	}
+
+	/**
+	 * Specify the delay for the initial execution.
+	 * @since 6.0
+	 */
+	public void setInitialDelay(Duration initialDelay) {
+		this.initialDelay = initialDelay;
 	}
 
 	/**
 	 * Return the initial delay, or 0 if none.
 	 * @since 5.0.2
+	 * @deprecated as of 6.0, in favor on {@link #getInitialDelayDuration()}
 	 */
+	@Deprecated(since = "6.0")
 	public long getInitialDelay() {
+		Duration initialDelay = this.initialDelay;
+		if (initialDelay != null) {
+			if (this.chronoUnit != null) {
+				return initialDelay.get(this.chronoUnit);
+			}
+			else {
+				return initialDelay.toMillis();
+			}
+		}
+		else {
+			return 0;
+		}
+	}
+
+	/**
+	 * Return the initial delay, or {@code null} if none.
+	 * @since 6.0
+	 */
+	@Nullable
+	public Duration getInitialDelayDuration() {
 		return this.initialDelay;
 	}
 
@@ -130,35 +225,37 @@ public class PeriodicTrigger implements Trigger {
 	 * Returns the time after which a task should run again.
 	 */
 	@Override
-	public Date nextExecutionTime(TriggerContext triggerContext) {
-		Date lastExecution = triggerContext.lastScheduledExecutionTime();
-		Date lastCompletion = triggerContext.lastCompletionTime();
+	public Instant nextExecution(TriggerContext triggerContext) {
+		Instant lastExecution = triggerContext.lastScheduledExecution();
+		Instant lastCompletion = triggerContext.lastCompletion();
 		if (lastExecution == null || lastCompletion == null) {
-			return new Date(triggerContext.getClock().millis() + this.initialDelay);
+			Instant instant = triggerContext.getClock().instant();
+			Duration initialDelay = this.initialDelay;
+			if (initialDelay == null) {
+				return instant;
+			}
+			else {
+				return instant.plus(initialDelay);
+			}
 		}
 		if (this.fixedRate) {
-			return new Date(lastExecution.getTime() + this.period);
+			return lastExecution.plus(this.period);
 		}
-		return new Date(lastCompletion.getTime() + this.period);
+		return lastCompletion.plus(this.period);
 	}
 
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof PeriodicTrigger)) {
-			return false;
-		}
-		PeriodicTrigger otherTrigger = (PeriodicTrigger) other;
-		return (this.fixedRate == otherTrigger.fixedRate && this.initialDelay == otherTrigger.initialDelay &&
-				this.period == otherTrigger.period);
+		return (this == other || (other instanceof PeriodicTrigger that &&
+				this.fixedRate == that.fixedRate &&
+				this.period.equals(that.period) &&
+				ObjectUtils.nullSafeEquals(this.initialDelay, that.initialDelay)));
 	}
 
 	@Override
 	public int hashCode() {
-		return (this.fixedRate ? 17 : 29) + (int) (37 * this.period) + (int) (41 * this.initialDelay);
+		return this.period.hashCode();
 	}
 
 }

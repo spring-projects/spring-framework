@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,8 @@ class CharSequenceEncoderTests extends AbstractEncoderTests<CharSequenceEncoder>
 				.forEach(charset -> {
 					int capacity = this.encoder.calculateCapacity(sequence, charset);
 					int length = sequence.length();
-					assertThat(capacity >= length).as(String.format("%s has capacity %d; length %d", charset, capacity, length)).isTrue();
+					assertThat(capacity).as(String.format("%s has capacity %d; length %d", charset, capacity, length))
+							.isGreaterThanOrEqualTo(length);
 				});
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ class YamlPropertiesFactoryBeanTests {
 		factory.setResources(new ByteArrayResource("foo: bar\nspam:".getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo")).isEqualTo("bar");
-		assertThat(properties.getProperty("spam")).isEqualTo("");
+		assertThat(properties.getProperty("spam")).isEmpty();
 	}
 
 	@Test
@@ -189,7 +189,7 @@ class YamlPropertiesFactoryBeanTests {
 		factory.setResources(new ByteArrayResource("a: alpha\ntest: []".getBytes()));
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("a")).isEqualTo("alpha");
-		assertThat(properties.getProperty("test")).isEqualTo("");
+		assertThat(properties.getProperty("test")).isEmpty();
 	}
 
 	@Test

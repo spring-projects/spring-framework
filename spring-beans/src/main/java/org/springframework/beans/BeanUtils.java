@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,23 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URI;
-import java.net.URL;
-import java.time.temporal.Temporal;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
+import kotlin.jvm.JvmInline;
+import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.full.KAnnotatedElements;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -64,7 +61,7 @@ import org.springframework.util.StringUtils;
  * <p>Mainly for internal use within the framework, but to some degree also
  * useful for application classes. Consider
  * <a href="https://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
- * <a href="https://hotelsdotcom.github.io/bull/">BULL - Bean Utils Light Library</a>,
+ * <a href="https://github.com/ExpediaGroup/bull">BULL - Bean Utils Light Library</a>,
  * or similar third-party frameworks for more comprehensive bean utilities.
  *
  * @author Rod Johnson
@@ -75,25 +72,21 @@ import org.springframework.util.StringUtils;
  */
 public abstract class BeanUtils {
 
-	private static final Log logger = LogFactory.getLog(BeanUtils.class);
-
 	private static final ParameterNameDiscoverer parameterNameDiscoverer =
 			new DefaultParameterNameDiscoverer();
 
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
-	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES;
-
-	static {
-		Map<Class<?>, Object> values = new HashMap<>();
-		values.put(boolean.class, false);
-		values.put(byte.class, (byte) 0);
-		values.put(short.class, (short) 0);
-		values.put(int.class, 0);
-		values.put(long.class, (long) 0);
-		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
-	}
+	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES = Map.of(
+			boolean.class, false,
+			byte.class, (byte) 0,
+			short.class, (short) 0,
+			int.class, 0,
+			long.class, 0L,
+			float.class, 0F,
+			double.class, 0D,
+			char.class, '\0');
 
 
 	/**
@@ -101,9 +94,9 @@ public abstract class BeanUtils {
 	 * @param clazz class to instantiate
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 * @see Class#newInstance()
 	 * @deprecated as of Spring 5.0, following the deprecation of
 	 * {@link Class#newInstance()} in JDK 9
-	 * @see Class#newInstance()
 	 */
 	@Deprecated
 	public static <T> T instantiate(Class<T> clazz) throws BeanInstantiationException {
@@ -143,19 +136,20 @@ public abstract class BeanUtils {
 		if (clazz.isInterface()) {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
+		Constructor<T> ctor;
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor());
+			ctor = clazz.getDeclaredConstructor();
 		}
 		catch (NoSuchMethodException ex) {
-			Constructor<T> ctor = findPrimaryConstructor(clazz);
-			if (ctor != null) {
-				return instantiateClass(ctor);
+			ctor = findPrimaryConstructor(clazz);
+			if (ctor == null) {
+				throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 			}
-			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 		catch (LinkageError err) {
 			throw new BeanInstantiationException(clazz, "Unresolvable class definition", err);
 		}
+		return instantiateClass(ctor);
 	}
 
 	/**
@@ -197,8 +191,12 @@ public abstract class BeanUtils {
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
+				int parameterCount = ctor.getParameterCount();
+				Assert.isTrue(args.length <= parameterCount, "Can't specify more arguments than constructor parameters");
+				if (parameterCount == 0) {
+					return ctor.newInstance();
+				}
 				Class<?>[] parameterTypes = ctor.getParameterTypes();
-				Assert.isTrue(args.length <= parameterTypes.length, "Can't specify more arguments than constructor parameters");
 				Object[] argsWithDefaultValues = new Object[args.length];
 				for (int i = 0 ; i < args.length; i++) {
 					if (args[i] == null) {
@@ -227,32 +225,46 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Return a resolvable constructor for the provided class, either a primary constructor
-	 * or single public constructor or simply a default constructor. Callers have to be
-	 * prepared to resolve arguments for the returned constructor's parameters, if any.
+	 * Return a resolvable constructor for the provided class, either a primary or single
+	 * public constructor with arguments, or a single non-public constructor with arguments,
+	 * or simply a default constructor. Callers have to be prepared to resolve arguments
+	 * for the returned constructor's parameters, if any.
 	 * @param clazz the class to check
+	 * @throws IllegalStateException in case of no unique constructor found at all
 	 * @since 5.3
 	 * @see #findPrimaryConstructor
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Constructor<T> getResolvableConstructor(Class<T> clazz) {
 		Constructor<T> ctor = findPrimaryConstructor(clazz);
-		if (ctor == null) {
-			Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctor != null) {
+			return ctor;
+		}
+
+		Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctors.length == 1) {
+			// A single public constructor
+			return (Constructor<T>) ctors[0];
+		}
+		else if (ctors.length == 0) {
+			// No public constructors -> check non-public
+			ctors = clazz.getDeclaredConstructors();
 			if (ctors.length == 1) {
-				ctor = (Constructor<T>) ctors[0];
-			}
-			else {
-				try {
-					ctor = clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or single public constructor found for " +
-							clazz + " - and no default constructor found either");
-				}
+				// A single non-public constructor, e.g. from a non-public record type
+				return (Constructor<T>) ctors[0];
 			}
 		}
-		return ctor;
+
+		// Several constructors -> let's try to take the default constructor
+		try {
+			return clazz.getDeclaredConstructor();
+		}
+		catch (NoSuchMethodException ex) {
+			// Giving up...
+		}
+
+		// No unique constructor at all
+		throw new IllegalStateException("No primary or single unique constructor found for " + clazz);
 	}
 
 	/**
@@ -528,7 +540,7 @@ public abstract class BeanUtils {
 
 	/**
 	 * Find a JavaBeans PropertyEditor following the 'Editor' suffix convention
-	 * (e.g. "mypackage.MyDomainClass" -> "mypackage.MyDomainClassEditor").
+	 * (e.g. "mypackage.MyDomainClass" &rarr; "mypackage.MyDomainClassEditor").
 	 * <p>Compatible to the standard JavaBeans convention as implemented by
 	 * {@link java.beans.PropertyEditorManager} but isolated from the latter's
 	 * registered default editors for primitive types.
@@ -551,9 +563,6 @@ public abstract class BeanUtils {
 			}
 			catch (Throwable ex) {
 				// e.g. AccessControlException on Google App Engine
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not access system ClassLoader: " + ex);
-				}
 				return null;
 			}
 		}
@@ -564,10 +573,6 @@ public abstract class BeanUtils {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (editorClass != null) {
 				if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
-					if (logger.isInfoEnabled()) {
-						logger.info("Editor class [" + editorName +
-								"] does not implement [java.beans.PropertyEditor] interface");
-					}
 					unknownEditorTypes.add(targetType);
 					return null;
 				}
@@ -578,10 +583,6 @@ public abstract class BeanUtils {
 		}
 		catch (ClassNotFoundException ex) {
 			// Ignore - fall back to unknown editor type registration below
-		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("No property editor [" + editorName + "] found for type " +
-					targetTypeName + " according to 'Editor' suffix convention");
 		}
 		unknownEditorTypes.add(targetType);
 		return null;
@@ -613,8 +614,8 @@ public abstract class BeanUtils {
 	 * @return a corresponding MethodParameter object
 	 */
 	public static MethodParameter getWriteMethodParameter(PropertyDescriptor pd) {
-		if (pd instanceof GenericTypeAwarePropertyDescriptor) {
-			return new MethodParameter(((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
+		if (pd instanceof GenericTypeAwarePropertyDescriptor gpd) {
+			return new MethodParameter(gpd.getWriteMethodParameter());
 		}
 		else {
 			Method writeMethod = pd.getWriteMethod();
@@ -657,30 +658,26 @@ public abstract class BeanUtils {
 	 */
 	public static boolean isSimpleProperty(Class<?> type) {
 		Assert.notNull(type, "'type' must not be null");
-		return isSimpleValueType(type) || (type.isArray() && isSimpleValueType(type.getComponentType()));
+		return isSimpleValueType(type) || (type.isArray() && isSimpleValueType(type.componentType()));
 	}
 
 	/**
-	 * Check if the given type represents a "simple" value type: a primitive or
-	 * primitive wrapper, an enum, a String or other CharSequence, a Number, a
-	 * Date, a Temporal, a URI, a URL, a Locale, or a Class.
+	 * Check if the given type represents a "simple" value type for
+	 * bean property and data binding purposes:
+	 * a primitive or primitive wrapper, an {@code Enum}, a {@code String}
+	 * or other {@code CharSequence}, a {@code Number}, a {@code Date},
+	 * a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
+	 * a {@code Locale}, or a {@code Class}.
 	 * <p>{@code Void} and {@code void} are not considered simple value types.
+	 * <p>As of 6.1, this method delegates to {@link ClassUtils#isSimpleValueType}
+	 * as-is but could potentially add further rules for bean property purposes.
 	 * @param type the type to check
 	 * @return whether the given type represents a "simple" value type
 	 * @see #isSimpleProperty(Class)
+	 * @see ClassUtils#isSimpleValueType(Class)
 	 */
 	public static boolean isSimpleValueType(Class<?> type) {
-		return (Void.class != type && void.class != type &&
-				(ClassUtils.isPrimitiveOrWrapper(type) ||
-				Enum.class.isAssignableFrom(type) ||
-				CharSequence.class.isAssignableFrom(type) ||
-				Number.class.isAssignableFrom(type) ||
-				Date.class.isAssignableFrom(type) ||
-				Temporal.class.isAssignableFrom(type) ||
-				URI.class == type ||
-				URL.class == type ||
-				Locale.class == type ||
-				Class.class == type));
+		return ClassUtils.isSimpleValueType(type);
 	}
 
 
@@ -690,7 +687,25 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>This is just a convenience method. For more complex transfer needs,
-	 * consider using a full BeanWrapper.
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects.
+	 * <p>The following table provides a non-exhaustive set of examples of source
+	 * and target property types that can be copied as well as source and target
+	 * property types that cannot be copied.
+	 * <table border="1">
+	 * <tr><th>source property type</th><th>target property type</th><th>copy supported</th></tr>
+	 * <tr><td>{@code Integer}</td><td>{@code Integer}</td><td>yes</td></tr>
+	 * <tr><td>{@code Integer}</td><td>{@code Number}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<Integer>}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<?>}</td><td>{@code List<?>}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<?>}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<? extends Number>}</td><td>yes</td></tr>
+	 * <tr><td>{@code String}</td><td>{@code Integer}</td><td>no</td></tr>
+	 * <tr><td>{@code Number}</td><td>{@code Integer}</td><td>no</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<Long>}</td><td>no</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<Number>}</td><td>no</td></tr>
+	 * </table>
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @throws BeansException if the copying failed
@@ -707,7 +722,10 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>This is just a convenience method. For more complex transfer needs,
-	 * consider using a full BeanWrapper.
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to
@@ -725,7 +743,10 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>This is just a convenience method. For more complex transfer needs,
-	 * consider using a full BeanWrapper.
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param ignoreProperties array of property names to ignore
@@ -742,7 +763,8 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>As of Spring Framework 5.3, this method honors generic type information
-	 * when matching properties in the source and target objects.
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to
@@ -760,38 +782,28 @@ public abstract class BeanUtils {
 		if (editable != null) {
 			if (!editable.isInstance(target)) {
 				throw new IllegalArgumentException("Target class [" + target.getClass().getName() +
-						"] not assignable to Editable class [" + editable.getName() + "]");
+						"] not assignable to editable class [" + editable.getName() + "]");
 			}
 			actualEditable = editable;
 		}
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
-		List<String> ignoreList = (ignoreProperties != null ? Arrays.asList(ignoreProperties) : null);
+		Set<String> ignoredProps = (ignoreProperties != null ? new HashSet<>(Arrays.asList(ignoreProperties)) : null);
+		CachedIntrospectionResults sourceResults = (actualEditable != source.getClass() ?
+				CachedIntrospectionResults.forClass(source.getClass()) : null);
 
 		for (PropertyDescriptor targetPd : targetPds) {
 			Method writeMethod = targetPd.getWriteMethod();
-			if (writeMethod != null && (ignoreList == null || !ignoreList.contains(targetPd.getName()))) {
-				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
+			if (writeMethod != null && (ignoredProps == null || !ignoredProps.contains(targetPd.getName()))) {
+				PropertyDescriptor sourcePd = (sourceResults != null ?
+						sourceResults.getPropertyDescriptor(targetPd.getName()) : targetPd);
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
 					if (readMethod != null) {
-						ResolvableType sourceResolvableType = ResolvableType.forMethodReturnType(readMethod);
-						ResolvableType targetResolvableType = ResolvableType.forMethodParameter(writeMethod, 0);
-
-						// Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
-						boolean isAssignable =
-								(sourceResolvableType.hasUnresolvableGenerics() || targetResolvableType.hasUnresolvableGenerics() ?
-										ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :
-										targetResolvableType.isAssignableFrom(sourceResolvableType));
-
-						if (isAssignable) {
+						if (isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
 							try {
-								if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-									readMethod.setAccessible(true);
-								}
+								ReflectionUtils.makeAccessible(readMethod);
 								Object value = readMethod.invoke(source);
-								if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-									writeMethod.setAccessible(true);
-								}
+								ReflectionUtils.makeAccessible(writeMethod);
 								writeMethod.invoke(target, value);
 							}
 							catch (Throwable ex) {
@@ -802,6 +814,26 @@ public abstract class BeanUtils {
 					}
 				}
 			}
+		}
+	}
+
+	private static boolean isAssignable(Method writeMethod, Method readMethod,
+			PropertyDescriptor sourcePd, PropertyDescriptor targetPd) {
+
+		Type paramType = writeMethod.getGenericParameterTypes()[0];
+		if (paramType instanceof Class<?> clazz) {
+			return ClassUtils.isAssignable(clazz, readMethod.getReturnType());
+		}
+		else if (paramType.equals(readMethod.getGenericReturnType())) {
+			return true;
+		}
+		else {
+			ResolvableType sourceType = ((GenericTypeAwarePropertyDescriptor) sourcePd).getReadMethodType();
+			ResolvableType targetType = ((GenericTypeAwarePropertyDescriptor) targetPd).getWriteMethodType();
+			// Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
+			return (sourceType.hasUnresolvableGenerics() || targetType.hasUnresolvableGenerics() ?
+					ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :
+					targetType.isAssignableFrom(sourceType));
 		}
 	}
 
@@ -817,12 +849,21 @@ public abstract class BeanUtils {
 		 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">
 		 * https://kotlinlang.org/docs/reference/classes.html#constructors</a>
 		 */
+		@SuppressWarnings("unchecked")
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 			try {
-				KFunction<T> primaryCtor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
+				KClass<T> kClass = JvmClassMappingKt.getKotlinClass(clazz);
+				KFunction<T> primaryCtor = KClasses.getPrimaryConstructor(kClass);
 				if (primaryCtor == null) {
 					return null;
+				}
+				if (kClass.isValue() && !KAnnotatedElements
+						.findAnnotations(kClass, JvmClassMappingKt.getKotlinClass(JvmInline.class)).isEmpty()) {
+					Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+					Assert.state(constructors.length == 1,
+							"Kotlin value classes annotated with @JvmInline are expected to have a single JVM constructor");
+					return (Constructor<T>) constructors[0];
 				}
 				Constructor<T> constructor = ReflectJvmMapping.getJavaConstructor(primaryCtor);
 				if (constructor == null) {
@@ -855,9 +896,13 @@ public abstract class BeanUtils {
 			}
 
 			List<KParameter> parameters = kotlinConstructor.getParameters();
-			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
+
 			Assert.isTrue(args.length <= parameters.size(),
-					"Number of provided arguments should be less of equals than number of constructor parameters");
+					"Number of provided arguments must be less than or equal to the number of constructor parameters");
+			if (parameters.isEmpty()) {
+				return kotlinConstructor.call();
+			}
+			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
 			for (int i = 0 ; i < args.length ; i++) {
 				if (!(parameters.get(i).isOptional() && args[i] == null)) {
 					argParameters.put(parameters.get(i), args[i]);
@@ -865,7 +910,6 @@ public abstract class BeanUtils {
 			}
 			return kotlinConstructor.callBy(argParameters);
 		}
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Extension of {@link HttpEntity} that adds an {@link HttpStatus} status code.
+ * Extension of {@link HttpEntity} that adds an {@link HttpStatusCode} status code.
  * Used in {@code RestTemplate} as well as in {@code @Controller} methods.
  *
  * <p>In {@code RestTemplate}, this class is returned by
@@ -68,6 +68,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 3.0.2
  * @param <T> the body type
  * @see #getStatusCode()
@@ -78,14 +79,14 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
 
-	private final Object status;
+	private final HttpStatusCode status;
 
 
 	/**
 	 * Create a {@code ResponseEntity} with a status code only.
 	 * @param status the status code
 	 */
-	public ResponseEntity(HttpStatus status) {
+	public ResponseEntity(HttpStatusCode status) {
 		this(null, null, status);
 	}
 
@@ -94,7 +95,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param body the entity body
 	 * @param status the status code
 	 */
-	public ResponseEntity(@Nullable T body, HttpStatus status) {
+	public ResponseEntity(@Nullable T body, HttpStatusCode status) {
 		this(body, null, status);
 	}
 
@@ -103,18 +104,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @param status the status code
 	 */
-	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatus status) {
+	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatusCode status) {
 		this(null, headers, status);
-	}
-
-	/**
-	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
-	 * @param body the entity body
-	 * @param headers the entity headers
-	 * @param status the status code
-	 */
-	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatus status) {
-		this(body, headers, (Object) status);
 	}
 
 	/**
@@ -125,16 +116,20 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 5.3.2
 	 */
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
-		this(body, headers, (Object) rawStatus);
+		this(body, headers, HttpStatusCode.valueOf(rawStatus));
 	}
 
 	/**
-	 * Private constructor.
+	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param statusCode the status code
 	 */
-	private ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, Object status) {
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode statusCode) {
 		super(body, headers);
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.status = status;
+		Assert.notNull(statusCode, "HttpStatusCode must not be null");
+
+		this.status = statusCode;
 	}
 
 
@@ -142,27 +137,20 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum entry
 	 */
-	public HttpStatus getStatusCode() {
-		if (this.status instanceof HttpStatus) {
-			return (HttpStatus) this.status;
-		}
-		else {
-			return HttpStatus.valueOf((Integer) this.status);
-		}
+	public HttpStatusCode getStatusCode() {
+		return this.status;
 	}
 
 	/**
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an int value
 	 * @since 4.3
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}; scheduled
+	 * for removal in 7.0
 	 */
+	@Deprecated(since = "6.0")
 	public int getStatusCodeValue() {
-		if (this.status instanceof HttpStatus) {
-			return ((HttpStatus) this.status).value();
-		}
-		else {
-			return (Integer) this.status;
-		}
+		return getStatusCode().value();
 	}
 
 
@@ -187,9 +175,9 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
 		builder.append(this.status);
-		if (this.status instanceof HttpStatus) {
+		if (this.status instanceof HttpStatus httpStatus) {
 			builder.append(' ');
-			builder.append(((HttpStatus) this.status).getReasonPhrase());
+			builder.append(httpStatus.getReasonPhrase());
 		}
 		builder.append(',');
 		T body = getBody();
@@ -212,8 +200,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 4.1
 	 */
-	public static BodyBuilder status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
+	public static BodyBuilder status(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode must not be null");
 		return new DefaultBuilder(status);
 	}
 
@@ -258,6 +246,43 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	public static <T> ResponseEntity<T> of(Optional<T> body) {
 		Assert.notNull(body, "Body must not be null");
 		return body.map(ResponseEntity::ok).orElseGet(() -> notFound().build());
+	}
+
+	/**
+	 * Create a new {@link HeadersBuilder} with its status set to
+	 * {@link ProblemDetail#getStatus()} and its body is set to
+	 * {@link ProblemDetail}.
+	 * <p><strong>Note:</strong> If there are no headers to add, there is usually
+	 * no need to create a {@link ResponseEntity} since {@code ProblemDetail}
+	 * is also supported as a return value from controller methods.
+	 * @param body the problem detail to use
+	 * @return the created builder
+	 * @since 6.0
+	 */
+	public static HeadersBuilder<?> of(ProblemDetail body) {
+		return new DefaultBuilder(body.getStatus()) {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public <T> ResponseEntity<T> build() {
+				return (ResponseEntity<T>) body(body);
+			}
+		};
+	}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of a
+	 * {@code null} parameter.
+	 * @return the created {@code ResponseEntity}
+	 * @since 6.0.5
+	 */
+	public static <T> ResponseEntity<T> ofNullable(@Nullable T body) {
+		if (body == null) {
+			return notFound().build();
+		}
+		return ResponseEntity.ok(body);
 	}
 
 	/**
@@ -380,7 +405,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		B eTag(String etag);
+		B eTag(@Nullable String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -489,13 +514,19 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	private static class DefaultBuilder implements BodyBuilder {
 
-		private final Object statusCode;
+		private final HttpStatusCode statusCode;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		public DefaultBuilder(Object statusCode) {
+
+		public DefaultBuilder(int statusCode) {
+			this(HttpStatusCode.valueOf(statusCode));
+		}
+
+		public DefaultBuilder(HttpStatusCode statusCode) {
 			this.statusCode = statusCode;
 		}
+
 
 		@Override
 		public BodyBuilder header(String headerName, String... headerValues) {
@@ -538,12 +569,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder eTag(String etag) {
-			if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-				etag = "\"" + etag;
-			}
-			if (!etag.endsWith("\"")) {
-				etag = etag + "\"";
+		public BodyBuilder eTag(@Nullable String etag) {
+			if (etag != null) {
+				if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+					etag = "\"" + etag;
+				}
+				if (!etag.endsWith("\"")) {
+					etag = etag + "\"";
+				}
 			}
 			this.headers.setETag(etag);
 			return this;

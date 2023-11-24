@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,12 @@ public class DefaultControllerSpecTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("Success");
+
+		new DefaultControllerSpec(new MyController()).build()
+				.get().uri("")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class).isEqualTo("Success");
 	}
 
 	@Test
@@ -75,7 +81,7 @@ public class DefaultControllerSpecTests {
 	@Test
 	public void configurerConsumers() {
 		TestConsumer<ArgumentResolverConfigurer> argumentResolverConsumer = new TestConsumer<>();
-		TestConsumer<RequestedContentTypeResolverBuilder> contenTypeResolverConsumer = new TestConsumer<>();
+		TestConsumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer = new TestConsumer<>();
 		TestConsumer<CorsRegistry> corsRegistryConsumer = new TestConsumer<>();
 		TestConsumer<FormatterRegistry> formatterConsumer = new TestConsumer<>();
 		TestConsumer<ServerCodecConfigurer> codecsConsumer = new TestConsumer<>();
@@ -84,7 +90,7 @@ public class DefaultControllerSpecTests {
 
 		new DefaultControllerSpec(new MyController())
 				.argumentResolvers(argumentResolverConsumer)
-				.contentTypeResolver(contenTypeResolverConsumer)
+				.contentTypeResolver(contentTypeResolverConsumer)
 				.corsMappings(corsRegistryConsumer)
 				.formatters(formatterConsumer)
 				.httpMessageCodecs(codecsConsumer)
@@ -93,7 +99,7 @@ public class DefaultControllerSpecTests {
 				.build();
 
 		assertThat(argumentResolverConsumer.getValue()).isNotNull();
-		assertThat(contenTypeResolverConsumer.getValue()).isNotNull();
+		assertThat(contentTypeResolverConsumer.getValue()).isNotNull();
 		assertThat(corsRegistryConsumer.getValue()).isNotNull();
 		assertThat(formatterConsumer.getValue()).isNotNull();
 		assertThat(codecsConsumer.getValue()).isNotNull();
@@ -112,11 +118,12 @@ public class DefaultControllerSpecTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	@RestController
 	private static class MyController {
 
-		@GetMapping("/")
-		public String handle() {
+		@GetMapping
+		public String handleRootPath() {
 			return "Success";
 		}
 

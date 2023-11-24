@@ -19,13 +19,13 @@ package org.springframework.web.socket.adapter.standard;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.websocket.Extension;
+import jakarta.websocket.Extension;
 
 import org.springframework.web.socket.WebSocketExtension;
 
 /**
  * Adapt an instance of {@link org.springframework.web.socket.WebSocketExtension} to
- * the {@link javax.websocket.Extension} interface.
+ * the {@link jakarta.websocket.Extension} interface.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

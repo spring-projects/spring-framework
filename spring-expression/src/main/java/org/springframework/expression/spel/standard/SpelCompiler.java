@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,8 @@ public final class SpelCompiler implements Opcodes {
 					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 				}
 				catch (Throwable ex) {
-					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);
+					throw new IllegalStateException("Failed to instantiate CompiledExpression for expression: " +
+							expression.toStringAST(), ex);
 				}
 			}
 		}
@@ -183,8 +184,9 @@ public final class SpelCompiler implements Opcodes {
 		cf.finish();
 
 		byte[] data = cw.toByteArray();
-		// TODO need to make this conditionally occur based on a debug flag
-		// dump(expressionToCompile.toStringAST(), clazzName, data);
+		// TODO Save generated class files conditionally based on a debug flag.
+		// Source code for the following method resides in SpelCompilationCoverageTests.
+		// saveGeneratedClassFile(expressionToCompile.toStringAST(), className, data);
 		return loadClass(StringUtils.replace(className, "/", "."), data);
 	}
 
@@ -232,11 +234,7 @@ public final class SpelCompiler implements Opcodes {
 		if (compiler == null) {
 			// Full lock now since we're creating a child ClassLoader
 			synchronized (compilers) {
-				compiler = compilers.get(clToUse);
-				if (compiler == null) {
-					compiler = new SpelCompiler(clToUse);
-					compilers.put(clToUse, compiler);
-				}
+				return compilers.computeIfAbsent(clToUse, SpelCompiler::new);
 			}
 		}
 		return compiler;
@@ -251,7 +249,7 @@ public final class SpelCompiler implements Opcodes {
 	 * {@code false} otherwise
 	 */
 	public static boolean compile(Expression expression) {
-		return (expression instanceof SpelExpression && ((SpelExpression) expression).compileExpression());
+		return (expression instanceof SpelExpression spelExpression && spelExpression.compileExpression());
 	}
 
 	/**
@@ -260,8 +258,8 @@ public final class SpelCompiler implements Opcodes {
 	 * @param expression the expression
 	 */
 	public static void revertToInterpreted(Expression expression) {
-		if (expression instanceof SpelExpression) {
-			((SpelExpression) expression).revertToInterpreted();
+		if (expression instanceof SpelExpression spelExpression) {
+			spelExpression.revertToInterpreted();
 		}
 	}
 
@@ -273,7 +271,7 @@ public final class SpelCompiler implements Opcodes {
 
 		private static final URL[] NO_URLS = new URL[0];
 
-		private final AtomicInteger classesDefinedCount = new AtomicInteger(0);
+		private final AtomicInteger classesDefinedCount = new AtomicInteger();
 
 		public ChildClassLoader(@Nullable ClassLoader classLoader) {
 			super(NO_URLS, classLoader);

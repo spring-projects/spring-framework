@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,17 +39,17 @@ class FileSystemUtilsTests {
 		File bar = new File(child, "bar.txt");
 		bar.createNewFile();
 
-		assertThat(root.exists()).isTrue();
-		assertThat(child.exists()).isTrue();
-		assertThat(grandchild.exists()).isTrue();
-		assertThat(bar.exists()).isTrue();
+		assertThat(root).exists();
+		assertThat(child).exists();
+		assertThat(grandchild).exists();
+		assertThat(bar).exists();
 
 		FileSystemUtils.deleteRecursively(root);
 
-		assertThat(root.exists()).isFalse();
-		assertThat(child.exists()).isFalse();
-		assertThat(grandchild.exists()).isFalse();
-		assertThat(bar.exists()).isFalse();
+		assertThat(root).doesNotExist();
+		assertThat(child).doesNotExist();
+		assertThat(grandchild).doesNotExist();
+		assertThat(bar).doesNotExist();
 	}
 
 	@Test
@@ -63,19 +63,19 @@ class FileSystemUtilsTests {
 		File bar = new File(child, "bar.txt");
 		bar.createNewFile();
 
-		assertThat(src.exists()).isTrue();
-		assertThat(child.exists()).isTrue();
-		assertThat(grandchild.exists()).isTrue();
-		assertThat(bar.exists()).isTrue();
+		assertThat(src).exists();
+		assertThat(child).exists();
+		assertThat(grandchild).exists();
+		assertThat(bar).exists();
 
 		File dest = new File("./dest");
 		FileSystemUtils.copyRecursively(src, dest);
 
-		assertThat(dest.exists()).isTrue();
-		assertThat(new File(dest, child.getName()).exists()).isTrue();
+		assertThat(dest).exists();
+		assertThat(new File(dest, child.getName())).exists();
 
 		FileSystemUtils.deleteRecursively(src);
-		assertThat(src.exists()).isFalse();
+		assertThat(src).doesNotExist();
 	}
 
 

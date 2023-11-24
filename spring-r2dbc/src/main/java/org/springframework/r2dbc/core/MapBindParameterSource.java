@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.r2dbc.core;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import io.r2dbc.spi.Parameter;
+import io.r2dbc.spi.Parameters;
 
 import org.springframework.util.Assert;
 
@@ -61,7 +64,7 @@ class MapBindParameterSource implements BindParameterSource {
 	MapBindParameterSource addValue(String paramName, Object value) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		Assert.notNull(value, "Value must not be null");
-		this.values.put(paramName, Parameter.fromOrEmpty(value, value.getClass()));
+		this.values.put(paramName, Parameters.in(value));
 		return this;
 	}
 
@@ -72,21 +75,11 @@ class MapBindParameterSource implements BindParameterSource {
 	}
 
 	@Override
-	public Class<?> getType(String paramName) {
-		Assert.notNull(paramName, "Parameter name must not be null");
-		Parameter parameter = this.values.get(paramName);
-		if (parameter != null) {
-			return parameter.getType();
-		}
-		return Object.class;
-	}
-
-	@Override
-	public Object getValue(String paramName) throws IllegalArgumentException {
+	public Parameter getValue(String paramName) throws IllegalArgumentException {
 		if (!hasValue(paramName)) {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
 		}
-		return this.values.get(paramName).getValue();
+		return this.values.get(paramName);
 	}
 
 	@Override

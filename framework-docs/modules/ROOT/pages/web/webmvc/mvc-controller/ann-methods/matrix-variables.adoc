@@ -1,0 +1,165 @@
+[[mvc-ann-matrix-variables]]
+= Matrix Variables
+
+[.small]#xref:web/webflux/controller/ann-methods/matrix-variables.adoc[See equivalent in the Reactive stack]#
+
+{rfc-site}/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+path segments. In Spring MVC, we refer to those as "`matrix variables`" based on an
+https://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
+can be also be referred to as URI path parameters.
+
+Matrix variables can appear in any path segment, with each variable separated by a semicolon and
+multiple values separated by comma (for example, `/cars;color=red,green;year=2012`). Multiple
+values can also be specified through repeated variable names (for example,
+`color=red;color=green;color=blue`).
+
+If a URL is expected to contain matrix variables, the request mapping for a controller
+method must use a URI variable to mask that variable content and ensure the request can
+be matched successfully independent of matrix variable order and presence.
+The following example uses a matrix variable:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// GET /pets/42;q=11;r=22
+
+	@GetMapping("/pets/{petId}")
+	public void findPet(@PathVariable String petId, @MatrixVariable int q) {
+
+		// petId == 42
+		// q == 11
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// GET /pets/42;q=11;r=22
+
+	@GetMapping("/pets/{petId}")
+	fun findPet(@PathVariable petId: String, @MatrixVariable q: Int) {
+
+		// petId == 42
+		// q == 11
+	}
+----
+======
+
+Given that all path segments may contain matrix variables, you may sometimes need to
+disambiguate which path variable the matrix variable is expected to be in.
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// GET /owners/42;q=11/pets/21;q=22
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public void findPet(
+			@MatrixVariable(name="q", pathVar="ownerId") int q1,
+			@MatrixVariable(name="q", pathVar="petId") int q2) {
+
+		// q1 == 11
+		// q2 == 22
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// GET /owners/42;q=11/pets/21;q=22
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	fun findPet(
+			@MatrixVariable(name = "q", pathVar = "ownerId") q1: Int,
+			@MatrixVariable(name = "q", pathVar = "petId") q2: Int) {
+
+		// q1 == 11
+		// q2 == 22
+	}
+----
+======
+
+A matrix variable may be defined as optional and a default value specified, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// GET /pets/42
+
+	@GetMapping("/pets/{petId}")
+	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
+
+		// q == 1
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// GET /pets/42
+
+	@GetMapping("/pets/{petId}")
+	fun findPet(@MatrixVariable(required = false, defaultValue = "1") q: Int) {
+
+		// q == 1
+	}
+----
+======
+
+To get all matrix variables, you can use a `MultiValueMap`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public void findPet(
+			@MatrixVariable MultiValueMap<String, String> matrixVars,
+			@MatrixVariable(pathVar="petId") MultiValueMap<String, String> petMatrixVars) {
+
+		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
+		// petMatrixVars: ["q" : 22, "s" : 23]
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	fun findPet(
+			@MatrixVariable matrixVars: MultiValueMap<String, String>,
+			@MatrixVariable(pathVar="petId") petMatrixVars: MultiValueMap<String, String>) {
+
+		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
+		// petMatrixVars: ["q" : 22, "s" : 23]
+	}
+----
+======
+
+Note that you need to enable the use of matrix variables. In the MVC Java configuration,
+you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through
+xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching]. In the MVC XML namespace, you can set
+`<mvc:annotation-driven enable-matrix-variables="true"/>`.
+
+

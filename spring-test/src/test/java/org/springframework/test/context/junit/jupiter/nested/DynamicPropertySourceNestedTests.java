@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * {@link SpringExtension} in a JUnit Jupiter environment.
  *
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 5.3.2
  */
 @SpringJUnitConfig
@@ -125,8 +126,24 @@ class DynamicPropertySourceNestedTests {
 		}
 	}
 
+	@Nested
+	class DynamicPropertySourceOverridesEnclosingClassTests {
 
-	static abstract class DynamicPropertySourceSuperclass {
+		@DynamicPropertySource
+		static void overrideDynamicPropertyFromEnclosingClass(DynamicPropertyRegistry registry) {
+			registry.add(TEST_CONTAINER_PORT, () -> -999);
+		}
+
+		@Test
+		@DisplayName("@Service has values injected from @DynamicPropertySource in enclosing class and nested class")
+		void serviceHasInjectedValues(@Autowired Service service) {
+			assertThat(service.getIp()).isEqualTo("127.0.0.1");
+			assertThat(service.getPort()).isEqualTo(-999);
+		}
+
+	}
+
+	abstract static class DynamicPropertySourceSuperclass {
 
 		@DynamicPropertySource
 		static void containerProperties(DynamicPropertyRegistry registry) {

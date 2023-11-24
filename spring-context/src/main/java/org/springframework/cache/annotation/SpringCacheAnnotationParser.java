@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.cache.interceptor.CacheEvictOperation;
@@ -49,14 +48,8 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class SpringCacheAnnotationParser implements CacheAnnotationParser, Serializable {
 
-	private static final Set<Class<? extends Annotation>> CACHE_OPERATION_ANNOTATIONS = new LinkedHashSet<>(8);
-
-	static {
-		CACHE_OPERATION_ANNOTATIONS.add(Cacheable.class);
-		CACHE_OPERATION_ANNOTATIONS.add(CacheEvict.class);
-		CACHE_OPERATION_ANNOTATIONS.add(CachePut.class);
-		CACHE_OPERATION_ANNOTATIONS.add(Caching.class);
-	}
+	private static final Set<Class<? extends Annotation>> CACHE_OPERATION_ANNOTATIONS =
+			Set.of(Cacheable.class, CacheEvict.class, CachePut.class, Caching.class);
 
 
 	@Override
@@ -95,22 +88,22 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	private Collection<CacheOperation> parseCacheAnnotations(
 			DefaultCacheConfig cachingConfig, AnnotatedElement ae, boolean localOnly) {
 
-		Collection<? extends Annotation> anns = (localOnly ?
+		Collection<? extends Annotation> annotations = (localOnly ?
 				AnnotatedElementUtils.getAllMergedAnnotations(ae, CACHE_OPERATION_ANNOTATIONS) :
 				AnnotatedElementUtils.findAllMergedAnnotations(ae, CACHE_OPERATION_ANNOTATIONS));
-		if (anns.isEmpty()) {
+		if (annotations.isEmpty()) {
 			return null;
 		}
 
-		final Collection<CacheOperation> ops = new ArrayList<>(1);
-		anns.stream().filter(ann -> ann instanceof Cacheable).forEach(
-				ann -> ops.add(parseCacheableAnnotation(ae, cachingConfig, (Cacheable) ann)));
-		anns.stream().filter(ann -> ann instanceof CacheEvict).forEach(
-				ann -> ops.add(parseEvictAnnotation(ae, cachingConfig, (CacheEvict) ann)));
-		anns.stream().filter(ann -> ann instanceof CachePut).forEach(
-				ann -> ops.add(parsePutAnnotation(ae, cachingConfig, (CachePut) ann)));
-		anns.stream().filter(ann -> ann instanceof Caching).forEach(
-				ann -> parseCachingAnnotation(ae, cachingConfig, (Caching) ann, ops));
+		Collection<CacheOperation> ops = new ArrayList<>(1);
+		annotations.stream().filter(Cacheable.class::isInstance).map(Cacheable.class::cast).forEach(
+				cacheable -> ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable)));
+		annotations.stream().filter(CacheEvict.class::isInstance).map(CacheEvict.class::cast).forEach(
+				cacheEvict -> ops.add(parseEvictAnnotation(ae, cachingConfig, cacheEvict)));
+		annotations.stream().filter(CachePut.class::isInstance).map(CachePut.class::cast).forEach(
+				cachePut -> ops.add(parsePutAnnotation(ae, cachingConfig, cachePut)));
+		annotations.stream().filter(Caching.class::isInstance).map(Caching.class::cast).forEach(
+				caching -> parseCachingAnnotation(ae, cachingConfig, caching, ops));
 		return ops;
 	}
 
@@ -200,7 +193,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	/**
 	 * Validates the specified {@link CacheOperation}.
 	 * <p>Throws an {@link IllegalStateException} if the state of the operation is
-	 * invalid. As there might be multiple sources for default values, this ensure
+	 * invalid. As there might be multiple sources for default values, this ensures
 	 * that the operation is in a proper state before being returned.
 	 * @param ae the annotated element of the cache operation
 	 * @param operation the {@link CacheOperation} to validate

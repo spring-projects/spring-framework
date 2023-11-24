@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,17 +82,11 @@ public class TypedValue {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof TypedValue)) {
-			return false;
-		}
-		TypedValue otherTv = (TypedValue) other;
 		// Avoid TypeDescriptor initialization if not necessary
-		return (ObjectUtils.nullSafeEquals(this.value, otherTv.value) &&
-				((this.typeDescriptor == null && otherTv.typeDescriptor == null) ||
-						ObjectUtils.nullSafeEquals(getTypeDescriptor(), otherTv.getTypeDescriptor())));
+		return (this == other || (other instanceof TypedValue that &&
+				ObjectUtils.nullSafeEquals(this.value, that.value) &&
+				((this.typeDescriptor == null && that.typeDescriptor == null) ||
+						ObjectUtils.nullSafeEquals(getTypeDescriptor(), that.getTypeDescriptor()))));
 	}
 
 	@Override

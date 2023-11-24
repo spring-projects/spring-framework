@@ -1,0 +1,188 @@
+[[webflux-caching]]
+= HTTP Caching
+
+[.small]#xref:web/webmvc/mvc-caching.adoc[See equivalent in the Servlet stack]#
+
+HTTP caching can significantly improve the performance of a web application. HTTP caching
+revolves around the `Cache-Control` response header and subsequent conditional request
+headers, such as `Last-Modified` and `ETag`. `Cache-Control` advises private (for example, browser)
+and public (for example, proxy) caches how to cache and re-use responses. An `ETag` header is used
+to make a conditional request that may result in a 304 (NOT_MODIFIED) without a body,
+if the content has not changed. `ETag` can be seen as a more sophisticated successor to
+the `Last-Modified` header.
+
+This section describes the HTTP caching related options available in Spring WebFlux.
+
+
+
+[[webflux-caching-cachecontrol]]
+== `CacheControl`
+[.small]#xref:web/webmvc/mvc-caching.adoc#mvc-caching-cachecontrol[See equivalent in the Servlet stack]#
+
+{spring-framework-api}/http/CacheControl.html[`CacheControl`] provides support for
+configuring settings related to the `Cache-Control` header and is accepted as an argument
+in a number of places:
+
+* xref:web/webflux/caching.adoc#webflux-caching-etag-lastmodified[Controllers]
+* xref:web/webflux/caching.adoc#webflux-caching-static-resources[Static Resources]
+
+While {rfc-site}/rfc7234#section-5.2.2[RFC 7234] describes all possible
+directives for the `Cache-Control` response header, the `CacheControl` type takes a
+use case-oriented approach that focuses on the common scenarios, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	val ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS)
+
+	// Prevent caching - "Cache-Control: no-store"
+	val ccNoStore = CacheControl.noStore()
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	val ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic()
+
+----
+======
+
+
+
+[[webflux-caching-etag-lastmodified]]
+== Controllers
+[.small]#xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[See equivalent in the Servlet stack]#
+
+Controllers can add explicit support for HTTP caching. We recommend doing so, since the
+`lastModified` or `ETag` value for a resource needs to be calculated before it can be compared
+against conditional request headers. A controller can add an `ETag` and `Cache-Control`
+settings to a `ResponseEntity`, as the following example shows:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping("/book/{id}")
+	public ResponseEntity<Book> showBook(@PathVariable Long id) {
+
+		Book book = findBook(id);
+		String version = book.getVersion();
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@GetMapping("/book/{id}")
+	fun showBook(@PathVariable id: Long): ResponseEntity<Book> {
+
+		val book = findBook(id)
+		val version = book.getVersion()
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book)
+	}
+----
+======
+--
+
+The preceding example sends a 304 (NOT_MODIFIED) response with an empty body if the comparison
+to the conditional request headers indicates the content has not changed. Otherwise, the
+`ETag` and `Cache-Control` headers are added to the response.
+
+You can also make the check against conditional request headers in the controller,
+as the following example shows:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@RequestMapping
+	public String myHandleMethod(ServerWebExchange exchange, Model model) {
+
+		long eTag = ... // <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null; // <2>
+		}
+
+		model.addAttribute(...); // <3>
+		return "myViewName";
+	}
+----
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED). No further processing.
+<3> Continue with request processing.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@RequestMapping
+	fun myHandleMethod(exchange: ServerWebExchange, model: Model): String? {
+
+		val eTag: Long = ... // <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null// <2>
+		}
+
+		model.addAttribute(...) // <3>
+		return "myViewName"
+	}
+----
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED). No further processing.
+<3> Continue with request processing.
+======
+--
+
+There are three variants for checking conditional requests against `eTag` values, `lastModified`
+values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
+304 (NOT_MODIFIED). For conditional `POST`, `PUT`, and `DELETE`, you can instead set the response
+to 412 (PRECONDITION_FAILED) to prevent concurrent modification.
+
+
+
+[[webflux-caching-static-resources]]
+== Static Resources
+[.small]#xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[See equivalent in the Servlet stack]#
+
+You should serve static resources with a `Cache-Control` and conditional response headers
+for optimal performance. See the section on configuring xref:web/webflux/config.adoc#webflux-config-static-resources[Static Resources].
+

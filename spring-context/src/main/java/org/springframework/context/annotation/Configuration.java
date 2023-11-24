@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,12 +83,13 @@ import org.springframework.stereotype.Component;
  *
  * <h3>Via component scanning</h3>
  *
- * <p>{@code @Configuration} is meta-annotated with {@link Component @Component}, therefore
- * {@code @Configuration} classes are candidates for component scanning (typically using
- * Spring XML's {@code <context:component-scan/>} element) and therefore may also take
- * advantage of {@link Autowired @Autowired}/{@link javax.inject.Inject @Inject}
- * like any regular {@code @Component}. In particular, if a single constructor is present
- * autowiring semantics will be applied transparently for that constructor:
+ * <p>Since {@code @Configuration} is meta-annotated with {@link Component @Component},
+ * {@code @Configuration} classes are candidates for component scanning &mdash;
+ * for example, using {@link ComponentScan @ComponentScan} or Spring XML's
+ * {@code <context:component-scan/>} element &mdash; and therefore may also take
+ * advantage of {@link Autowired @Autowired}/{@link jakarta.inject.Inject @Inject}
+ * like any regular {@code @Component}. In particular, if a single constructor is
+ * present, autowiring semantics will be applied transparently for that constructor:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -104,8 +105,8 @@ import org.springframework.stereotype.Component;
  *
  * }</pre>
  *
- * <p>{@code @Configuration} classes may not only be bootstrapped using
- * component scanning, but may also themselves <em>configure</em> component scanning using
+ * <p>{@code @Configuration} classes may not only be bootstrapped using component
+ * scanning, but may also themselves <em>configure</em> component scanning using
  * the {@link ComponentScan @ComponentScan} annotation:
  *
  * <pre class="code">
@@ -129,7 +130,7 @@ import org.springframework.stereotype.Component;
  * &#064;Configuration
  * public class AppConfig {
  *
- *     &#064Autowired Environment env;
+ *     &#064;Autowired Environment env;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -149,7 +150,7 @@ import org.springframework.stereotype.Component;
  * &#064;PropertySource("classpath:/com/acme/app.properties")
  * public class AppConfig {
  *
- *     &#064Inject Environment env;
+ *     &#064;Inject Environment env;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -170,7 +171,7 @@ import org.springframework.stereotype.Component;
  * &#064;PropertySource("classpath:/com/acme/app.properties")
  * public class AppConfig {
  *
- *     &#064Value("${bean.name}") String beanName;
+ *     &#064;Value("${bean.name}") String beanName;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -297,7 +298,7 @@ import org.springframework.stereotype.Component;
  * &#064;ImportResource("classpath:/com/acme/database-config.xml")
  * public class AppConfig {
  *
- *     &#064Inject DataSource dataSource; // from XML
+ *     &#064;Inject DataSource dataSource; // from XML
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -356,16 +357,16 @@ import org.springframework.stereotype.Component;
  * {@code @Component} classes.
  *
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;ExtendWith(SpringExtension.class)
  * &#064;ContextConfiguration(classes = {AppConfig.class, DatabaseConfig.class})
- * public class MyTests {
+ * class MyTests {
  *
  *     &#064;Autowired MyBean myBean;
  *
  *     &#064;Autowired DataSource dataSource;
  *
  *     &#064;Test
- *     public void test() {
+ *     void test() {
  *         // assertions against myBean ...
  *     }
  * }</pre>
@@ -433,6 +434,7 @@ public @interface Configuration {
 	 * {@link AnnotationConfigApplicationContext}. If the {@code @Configuration} class
 	 * is registered as a traditional XML bean definition, the name/id of the bean
 	 * element will take precedence.
+	 * <p>Alias for {@link Component#value}.
 	 * @return the explicit component name, if any (or empty String otherwise)
 	 * @see AnnotationBeanNameGenerator
 	 */
@@ -459,5 +461,17 @@ public @interface Configuration {
 	 * @since 5.2
 	 */
 	boolean proxyBeanMethods() default true;
+
+	/**
+	 * Specify whether {@code @Bean} methods need to have unique method names,
+	 * raising an exception otherwise in order to prevent accidental overloading.
+	 * <p>The default is {@code true}, preventing accidental method overloads which
+	 * get interpreted as overloaded factory methods for the same bean definition
+	 * (as opposed to separate bean definitions with individual conditions etc).
+	 * Switch this flag to {@code false} in order to allow for method overloading
+	 * according to those semantics, accepting the risk for accidental overlaps.
+	 * @since 6.0
+	 */
+	boolean enforceUniqueMethods() default true;
 
 }

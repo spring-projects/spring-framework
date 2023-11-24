@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
  * this class which {@link RequestAttributes} scope to read attributes from.
  *
  * <p>Subclasses may wish to override the {@link #get} and {@link #remove}
- * methods to add synchronization around the call back into this super class.
+ * methods to add synchronization around the call back into this superclass.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

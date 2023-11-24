@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,8 +162,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.embeddedValueResolver = new EmbeddedValueResolver(cbf);
 		}
 		this.registrar.setBeanFactory(beanFactory);
 	}
@@ -174,10 +174,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 		// Remove resolved singleton classes from cache
 		this.nonAnnotatedClasses.clear();
 
-		if (this.beanFactory instanceof ListableBeanFactory) {
+		if (this.beanFactory instanceof ListableBeanFactory lbf) {
 			// Apply JmsListenerConfigurer beans from the BeanFactory, if any
-			Map<String, JmsListenerConfigurer> beans =
-					((ListableBeanFactory) this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
+			Map<String, JmsListenerConfigurer> beans = lbf.getBeansOfType(JmsListenerConfigurer.class);
 			List<JmsListenerConfigurer> configurers = new ArrayList<>(beans.values());
 			AnnotationAwareOrderComparator.sort(configurers);
 			for (JmsListenerConfigurer configurer : configurers) {

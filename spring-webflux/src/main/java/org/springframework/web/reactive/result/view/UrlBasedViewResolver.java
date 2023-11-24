@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.util.PatternMatchUtils;
  * specified prefix and/or suffix. Exporting an attribute that holds the
  * RequestContext to all views is explicitly supported.
  *
- * <p>Example: prefix="templates/", suffix=".ftl", viewname="test" ->
+ * <p>Example: prefix="templates/", suffix=".ftl", viewname="test" &rarr;
  * "templates/test.ftl"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
@@ -238,16 +238,12 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 		}
 
 		View view = applyLifecycleMethods(viewName, urlBasedView);
-		try {
-			return (urlBasedView.checkResourceExists(locale) ? Mono.just(view) : Mono.empty());
-		}
-		catch (Exception ex) {
-			return Mono.error(ex);
-		}
+		return urlBasedView.resourceExists(locale)
+				.flatMap(exists -> exists ? Mono.just(view) : Mono.empty());
 	}
 
 	/**
-	 * Indicates whether or not this {@link ViewResolver} can handle the supplied
+	 * Indicates whether this {@link ViewResolver} can handle the supplied
 	 * view name. If not, an empty result is returned. The default implementation
 	 * checks against the configured {@link #setViewNames view names}.
 	 * @param viewName the name of the view to retrieve
@@ -324,8 +320,8 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 		ApplicationContext context = getApplicationContext();
 		if (context != null) {
 			Object initialized = context.getAutowireCapableBeanFactory().initializeBean(view, viewName);
-			if (initialized instanceof View) {
-				return (View) initialized;
+			if (initialized instanceof View initializedView) {
+				return initializedView;
 			}
 		}
 		return view;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -43,8 +42,7 @@ class PatternsRequestConditionTests {
 	@Test
 	void prependNonEmptyPatternsOnly() {
 		assertThat(new PatternsRequestCondition("").getPatterns().iterator().next())
-				.as("Do not prepend empty patterns (SPR-8255)")
-				.isEqualTo("");
+				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
 	@Test
@@ -59,8 +57,8 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition c2 = new PatternsRequestCondition();
 		PatternsRequestCondition c3 = c1.combine(c2);
 
-		assertThat(c3).isSameAs(c1);
 		assertThat(c1.getPatterns()).isSameAs(c2.getPatterns()).containsExactly("");
+		assertThat(c3.getPatterns()).containsExactly("", "/");
 	}
 
 	@Test

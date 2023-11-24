@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,7 @@ public class OperatorPower extends Operator {
 		Object leftOperand = leftOp.getValueInternal(state).getValue();
 		Object rightOperand = rightOp.getValueInternal(state).getValue();
 
-		if (leftOperand instanceof Number && rightOperand instanceof Number) {
-			Number leftNumber = (Number) leftOperand;
-			Number rightNumber = (Number) rightOperand;
-
+		if (leftOperand instanceof Number leftNumber && rightOperand instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				return new TypedValue(leftBigDecimal.pow(rightNumber.intValue()));

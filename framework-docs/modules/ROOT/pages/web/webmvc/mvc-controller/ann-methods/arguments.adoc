@@ -1,0 +1,142 @@
+[[mvc-ann-arguments]]
+= Method Arguments
+
+[.small]#xref:web/webflux/controller/ann-methods/arguments.adoc[See equivalent in the Reactive stack]#
+
+The next table describes the supported controller method arguments. Reactive types are not supported
+for any arguments.
+
+JDK 8's `java.util.Optional` is supported as a method argument in combination with
+annotations that have a `required` attribute (for example, `@RequestParam`, `@RequestHeader`,
+and others) and is equivalent to `required=false`.
+
+[cols="1,2", options="header"]
+|===
+| Controller method argument | Description
+
+| `WebRequest`, `NativeWebRequest`
+| Generic access to request parameters and request and session attributes, without direct
+  use of the Servlet API.
+
+| `jakarta.servlet.ServletRequest`, `jakarta.servlet.ServletResponse`
+| Choose any specific request or response type -- for example, `ServletRequest`, `HttpServletRequest`,
+  or Spring's `MultipartRequest`, `MultipartHttpServletRequest`.
+
+| `jakarta.servlet.http.HttpSession`
+| Enforces the presence of a session. As a consequence, such an argument is never `null`.
+  Note that session access is not thread-safe. Consider setting the
+  `RequestMappingHandlerAdapter` instance's `synchronizeOnSession` flag to `true` if multiple
+  requests are allowed to concurrently access a session.
+
+| `jakarta.servlet.http.PushBuilder`
+| Servlet 4.0 push builder API for programmatic HTTP/2 resource pushes.
+  Note that, per the Servlet specification, the injected `PushBuilder` instance can be null if the client
+  does not support that HTTP/2 feature.
+
+| `java.security.Principal`
+| Currently authenticated user -- possibly a specific `Principal` implementation class if known.
+
+  Note that this argument is not resolved eagerly, if it is annotated in order to allow a custom resolver to resolve it
+  before falling back on default resolution via `HttpServletRequest#getUserPrincipal`.
+  For example, the Spring Security `Authentication` implements `Principal` and would be injected as such via
+  `HttpServletRequest#getUserPrincipal`, unless it is also annotated with `@AuthenticationPrincipal` in which case it
+  is resolved by a custom Spring Security resolver through `Authentication#getPrincipal`.
+
+| `HttpMethod`
+| The HTTP method of the request.
+
+| `java.util.Locale`
+| The current request locale, determined by the most specific `LocaleResolver` available (in
+  effect, the configured `LocaleResolver` or `LocaleContextResolver`).
+
+| `java.util.TimeZone` + `java.time.ZoneId`
+| The time zone associated with the current request, as determined by a `LocaleContextResolver`.
+
+| `java.io.InputStream`, `java.io.Reader`
+| For access to the raw request body as exposed by the Servlet API.
+
+| `java.io.OutputStream`, `java.io.Writer`
+| For access to the raw response body as exposed by the Servlet API.
+
+| `@PathVariable`
+| For access to URI template variables. See xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-uri-templates[URI patterns].
+
+| `@MatrixVariable`
+| For access to name-value pairs in URI path segments. See xref:web/webmvc/mvc-controller/ann-methods/matrix-variables.adoc[Matrix Variables].
+
+| `@RequestParam`
+| For access to the Servlet request parameters, including multipart files. Parameter values
+  are converted to the declared method argument type. See xref:web/webmvc/mvc-controller/ann-methods/requestparam.adoc[`@RequestParam`] as well
+  as xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[Multipart].
+
+  Note that use of `@RequestParam` is optional for simple parameter values.
+  See "`Any other argument`", at the end of this table.
+
+| `@RequestHeader`
+| For access to request headers. Header values are converted to the declared method argument
+  type. See xref:web/webmvc/mvc-controller/ann-methods/requestheader.adoc[`@RequestHeader`].
+
+| `@CookieValue`
+| For access to cookies. Cookies values are converted to the declared method argument
+  type. See xref:web/webmvc/mvc-controller/ann-methods/cookievalue.adoc[`@CookieValue`].
+
+| `@RequestBody`
+| For access to the HTTP request body. Body content is converted to the declared method
+  argument type by using `HttpMessageConverter` implementations. See xref:web/webmvc/mvc-controller/ann-methods/requestbody.adoc[`@RequestBody`].
+
+| `HttpEntity<B>`
+| For access to request headers and body. The body is converted with an `HttpMessageConverter`.
+  See xref:web/webmvc/mvc-controller/ann-methods/httpentity.adoc[HttpEntity].
+
+| `@RequestPart`
+| For access to a part in a `multipart/form-data` request, converting the part's body
+  with an `HttpMessageConverter`. See xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[Multipart].
+
+| `java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
+| For access to the model that is used in HTML controllers and exposed to templates as
+  part of view rendering.
+
+| `RedirectAttributes`
+| Specify attributes to use in case of a redirect (that is, to be appended to the query
+  string) and flash attributes to be stored temporarily until the request after redirect.
+  See xref:web/webmvc/mvc-controller/ann-methods/redirecting-passing-data.adoc[Redirect Attributes] and xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes].
+
+| `@ModelAttribute`
+| For access to an existing attribute in the model (instantiated if not present) with
+  data binding and validation applied. See xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[`@ModelAttribute`] as well as
+  xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[Model] and xref:web/webmvc/mvc-controller/ann-initbinder.adoc[`DataBinder`].
+
+  Note that use of `@ModelAttribute` is optional (for example, to set its attributes).
+  See "`Any other argument`" at the end of this table.
+
+| `Errors`, `BindingResult`
+| For access to errors from validation and data binding for a command object
+  (that is, a `@ModelAttribute` argument) or errors from the validation of a `@RequestBody` or
+  `@RequestPart` arguments. You must declare an `Errors`, or `BindingResult` argument
+  immediately after the validated method argument.
+
+| `SessionStatus` + class-level `@SessionAttributes`
+| For marking form processing complete, which triggers cleanup of session attributes
+  declared through a class-level `@SessionAttributes` annotation. See
+  xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`] for more details.
+
+| `UriComponentsBuilder`
+| For preparing a URL relative to the current request's host, port, scheme, context path, and
+  the literal part of the servlet mapping. See xref:web/webmvc/mvc-uri-building.adoc[URI Links].
+
+| `@SessionAttribute`
+| For access to any session attribute, in contrast to model attributes stored in the session
+  as a result of a class-level `@SessionAttributes` declaration. See
+  xref:web/webmvc/mvc-controller/ann-methods/sessionattribute.adoc[`@SessionAttribute`] for more details.
+
+| `@RequestAttribute`
+| For access to request attributes. See xref:web/webmvc/mvc-controller/ann-methods/requestattrib.adoc[`@RequestAttribute`] for more details.
+
+| Any other argument
+| If a method argument is not matched to any of the earlier values in this table and it is
+  a simple type (as determined by
+	{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
+  it is resolved as a `@RequestParam`. Otherwise, it is resolved as a `@ModelAttribute`.
+|===
+
+

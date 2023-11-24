@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,12 @@
 package org.springframework.test.context.event;
 
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}
- * that publishes test execution events to the
+ * {@code TestExecutionListener} that publishes test execution events to the
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * for the currently executing test. Events are only published if the
- * {@code ApplicationContext} {@linkplain TestContext#hasApplicationContext()
- * has already been loaded}.
+ * for the currently executing test.
  *
  * <h3>Supported Events</h3>
  * <ul>
@@ -41,11 +37,36 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  *
  * <p>These events may be consumed for various reasons, such as resetting <em>mock</em>
  * beans or tracing test execution. One advantage of consuming test events rather
- * than implementing a custom {@link TestExecutionListener} is that test events
- * may be consumed by any Spring bean registered in the test {@code ApplicationContext},
- * and such beans may benefit directly from dependency injection and other features
- * of the {@code ApplicationContext}. In contrast, a {@link TestExecutionListener}
- * is not a bean in the {@code ApplicationContext}.
+ * than implementing a custom {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListener} is that test events may be consumed by any Spring bean
+ * registered in the test {@code ApplicationContext}, and such beans may benefit
+ * directly from dependency injection and other features of the {@code ApplicationContext}.
+ * In contrast, a {@code TestExecutionListener} is not a bean in the {@code ApplicationContext}.
+ *
+ * <p>Note that the {@code EventPublishingTestExecutionListener} is registered by
+ * default; however, it only publishes events if the {@code ApplicationContext}
+ * {@linkplain TestContext#hasApplicationContext() has already been loaded}. This
+ * prevents the {@code ApplicationContext} from being loaded unnecessarily or too
+ * early. Consequently, a {@code BeforeTestClassEvent} will not be published until
+ * after the {@code ApplicationContext} has been loaded by another
+ * {@code TestExecutionListener}. For example, with the default set of
+ * {@code TestExecutionListeners} registered, a {@code BeforeTestClassEvent} will
+ * not be published for the first test class that uses a particular test
+ * {@code ApplicationContext}, but a {@code BeforeTestClassEvent} will be published
+ * for any subsequent test class in the same test suite that uses the same test
+ * {@code ApplicationContext} since the context will already have been loaded
+ * when subsequent test classes run (as long as the context has not been removed
+ * from the {@link org.springframework.test.context.cache.ContextCache ContextCache}
+ * via {@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}
+ * or the max-size eviction policy). If you wish to ensure that a
+ * {@code BeforeTestClassEvent} is published for every test class, you need to
+ * register a {@code TestExecutionListener} that loads the {@code ApplicationContext}
+ * in the {@link org.springframework.test.context.TestExecutionListener#beforeTestClass
+ * beforeTestClass} callback, and that {@code TestExecutionListener} must be registered
+ * before the {@code EventPublishingTestExecutionListener}. Similarly, if
+ * {@code @DirtiesContext} is used to remove the {@code ApplicationContext} from
+ * the context cache after the last test method in a given test class, the
+ * {@code AfterTestClassEvent} will not be published for that test class.
  *
  * <h3>Exception Handling</h3>
  * <p>By default, if a test event listener throws an exception while consuming

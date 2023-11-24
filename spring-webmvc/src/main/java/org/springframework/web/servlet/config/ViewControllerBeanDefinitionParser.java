@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -74,30 +74,29 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition controller = new RootBeanDefinition(ParameterizableViewController.class);
 		controller.setSource(source);
 
-		HttpStatus statusCode = null;
+		HttpStatusCode statusCode = null;
 		if (element.hasAttribute("status-code")) {
 			int statusValue = Integer.parseInt(element.getAttribute("status-code"));
-			statusCode = HttpStatus.valueOf(statusValue);
+			statusCode = HttpStatusCode.valueOf(statusValue);
 		}
 
 		String name = element.getLocalName();
 		switch (name) {
-			case "view-controller":
+			case "view-controller" -> {
 				if (element.hasAttribute("view-name")) {
 					controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
 				}
 				if (statusCode != null) {
 					controller.getPropertyValues().add("statusCode", statusCode);
 				}
-				break;
-			case "redirect-view-controller":
+			}
+			case "redirect-view-controller" ->
 				controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
-				break;
-			case "status-controller":
+			case "status-controller" -> {
 				controller.getPropertyValues().add("statusCode", statusCode);
 				controller.getPropertyValues().add("statusOnly", true);
-				break;
-			default:
+			}
+			default ->
 				// Should never happen...
 				throw new IllegalStateException("Unexpected tag name: " + name);
 		}
@@ -131,7 +130,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		return beanDef;
 	}
 
-	private RootBeanDefinition getRedirectView(Element element, @Nullable HttpStatus status, @Nullable Object source) {
+	private RootBeanDefinition getRedirectView(Element element, @Nullable HttpStatusCode status, @Nullable Object source) {
 		RootBeanDefinition redirectView = new RootBeanDefinition(RedirectView.class);
 		redirectView.setSource(source);
 		redirectView.getConstructorArgumentValues().addIndexedArgumentValue(0, element.getAttribute("redirect-url"));

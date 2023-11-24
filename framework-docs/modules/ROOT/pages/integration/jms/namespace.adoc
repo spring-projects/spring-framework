@@ -1,0 +1,301 @@
+[[jms-namespace]]
+= JMS Namespace Support
+
+Spring provides an XML namespace for simplifying JMS configuration. To use the JMS
+namespace elements, you need to reference the JMS schema, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jms="http://www.springframework.org/schema/jms" <1>
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jms
+			https://www.springframework.org/schema/jms/spring-jms.xsd">
+
+		<!-- bean definitions here -->
+
+	</beans>
+----
+<1> Referencing the JMS schema.
+
+
+The namespace consists of three top-level elements: `<annotation-driven/>`, `<listener-container/>`
+and `<jca-listener-container/>`. `<annotation-driven/>` enables the use of xref:integration/jms/annotated.adoc[annotation-driven listener endpoints]
+. `<listener-container/>` and `<jca-listener-container/>`
+define shared listener container configuration and can contain `<listener/>` child elements.
+The following example shows a basic configuration for two listeners:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jms:listener-container>
+
+		<jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+
+		<jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
+	</jms:listener-container>
+----
+
+The preceding example is equivalent to creating two distinct listener container bean
+definitions and two distinct `MessageListenerAdapter` bean definitions, as shown
+in xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[Using `MessageListenerAdapter`]. In addition to the attributes shown
+in the preceding example, the `listener` element can contain several optional ones.
+The following table describes all of the available attributes:
+
+[[jms-namespace-listener-tbl]]
+.Attributes of the JMS <listener> element
+[cols="1,6"]
+|===
+| Attribute | Description
+
+| `id`
+| A bean name for the hosting listener container. If not specified, a bean name is
+  automatically generated.
+
+| `destination` (required)
+| The destination name for this listener, resolved through the `DestinationResolver`
+  strategy.
+
+| `ref` (required)
+| The bean name of the handler object.
+
+| `method`
+| The name of the handler method to invoke. If the `ref` attribute points to a `MessageListener`
+  or Spring `SessionAwareMessageListener`, you can omit this attribute.
+
+| `response-destination`
+| The name of the default response destination to which to send response messages. This is
+  applied in case of a request message that does not carry a `JMSReplyTo` field. The
+  type of this destination is determined by the listener-container's
+  `response-destination-type` attribute. Note that this applies only to a listener method with a
+  return value, for which each result object is converted into a response message.
+
+| `subscription`
+| The name of the durable subscription, if any.
+
+| `selector`
+| An optional message selector for this listener.
+
+| `concurrency`
+| The number of concurrent sessions or consumers to start for this listener. This value can either be
+  a simple number indicating the maximum number (for example, `5`) or a range indicating the lower
+  as well as the upper limit (for example, `3-5`). Note that a specified minimum is only a hint
+  and might be ignored at runtime. The default is the value provided by the container.
+|===
+
+The `<listener-container/>` element also accepts several optional attributes. This
+allows for customization of the various strategies (for example, `taskExecutor` and
+`destinationResolver`) as well as basic JMS settings and resource references. By using
+these attributes, you can define highly-customized listener containers while
+still benefiting from the convenience of the namespace.
+
+You can automatically expose such settings as a `JmsListenerContainerFactory` by
+specifying the `id` of the bean to expose through the `factory-id` attribute,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jms:listener-container connection-factory="myConnectionFactory"
+			task-executor="myTaskExecutor"
+			destination-resolver="myDestinationResolver"
+			transaction-manager="myTransactionManager"
+			concurrency="10">
+
+		<jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+
+		<jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
+	</jms:listener-container>
+----
+
+The following table describes all available attributes. See the class-level javadoc
+of the {spring-framework-api}/jms/listener/AbstractMessageListenerContainer.html[`AbstractMessageListenerContainer`]
+and its concrete subclasses for more details on the individual properties. The javadoc
+also provides a discussion of transaction choices and message redelivery scenarios.
+
+[[jms-namespace-listener-container-tbl]]
+.Attributes of the JMS <listener-container> element
+[cols="1,6"]
+|===
+| Attribute | Description
+
+| `container-type`
+| The type of this listener container. The available options are `default`, `simple`,
+  `default102`, or `simple102` (the default option is `default`).
+
+| `container-class`
+| A custom listener container implementation class as a fully qualified class name.
+  The default is Spring's standard `DefaultMessageListenerContainer` or
+  `SimpleMessageListenerContainer`, according to the `container-type` attribute.
+
+| `factory-id`
+| Exposes the settings defined by this element as a `JmsListenerContainerFactory`
+  with the specified `id` so that they can be reused with other endpoints.
+
+| `connection-factory`
+| A reference to the JMS `ConnectionFactory` bean (the default bean name is
+  `connectionFactory`).
+
+| `task-executor`
+| A reference to the Spring `TaskExecutor` for the JMS listener invokers.
+
+| `destination-resolver`
+| A reference to the `DestinationResolver` strategy for resolving JMS `Destination` instances.
+
+| `message-converter`
+| A reference to the `MessageConverter` strategy for converting JMS Messages to listener
+  method arguments. The default is a `SimpleMessageConverter`.
+
+| `error-handler`
+| A reference to an `ErrorHandler` strategy for handling any uncaught exceptions that
+  may occur during the execution of the `MessageListener`.
+
+| `destination-type`
+| The JMS destination type for this listener: `queue`, `topic`, `durableTopic`, `sharedTopic`,
+  or `sharedDurableTopic`. This potentially enables the `pubSubDomain`, `subscriptionDurable`
+  and `subscriptionShared` properties of the container. The default is `queue` (which disables
+  those three properties).
+
+| `response-destination-type`
+| The JMS destination type for responses: `queue` or `topic`. The default is the value of the
+  `destination-type` attribute.
+
+| `client-id`
+| The JMS client ID for this listener container. You must specify it when you use
+  durable subscriptions.
+
+| `cache`
+| The cache level for JMS resources: `none`, `connection`, `session`, `consumer`, or
+  `auto`. By default (`auto`), the cache level is effectively `consumer`, unless
+  an external transaction manager has been specified -- in which case, the effective
+  default will be `none` (assuming Jakarta EE-style transaction management, where the given
+  ConnectionFactory is an XA-aware pool).
+
+| `acknowledge`
+| The native JMS acknowledge mode: `auto`, `client`, `dups-ok`, or `transacted`. A value
+  of `transacted` activates a locally transacted `Session`. As an alternative, you can specify
+  the `transaction-manager` attribute, described later in table. The default is `auto`.
+
+| `transaction-manager`
+| A reference to an external `PlatformTransactionManager` (typically an XA-based
+  transaction coordinator, such as Spring's `JtaTransactionManager`). If not specified,
+  native acknowledging is used (see the `acknowledge` attribute).
+
+| `concurrency`
+| The number of concurrent sessions or consumers to start for each listener. It can either be
+  a simple number indicating the maximum number (for example, `5`) or a range indicating the
+  lower as well as the upper limit (for example, `3-5`). Note that a specified minimum is just a
+  hint and might be ignored at runtime. The default is `1`. You should keep concurrency limited to `1` in
+  case of a topic listener or if queue ordering is important. Consider raising it for
+  general queues.
+
+| `prefetch`
+| The maximum number of messages to load into a single session. Note that raising this
+  number might lead to starvation of concurrent consumers.
+
+| `receive-timeout`
+| The timeout (in milliseconds) to use for receive calls. The default is `1000` (one
+  second). `-1` indicates no timeout.
+
+| `back-off`
+| Specifies the `BackOff` instance to use to compute the interval between recovery
+  attempts. If the `BackOffExecution` implementation returns `BackOffExecution#STOP`,
+  the listener container does not further try to recover. The `recovery-interval`
+  value is ignored when this property is set. The default is a `FixedBackOff` with
+  an interval of 5000 milliseconds (that is, five seconds).
+
+| `recovery-interval`
+| Specifies the interval between recovery attempts, in milliseconds. It offers a convenient
+  way to create a `FixedBackOff` with the specified interval. For more recovery
+  options, consider specifying a `BackOff` instance instead. The default is 5000 milliseconds
+  (that is, five seconds).
+
+| `phase`
+| The lifecycle phase within which this container should start and stop. The lower the
+  value, the earlier this container starts and the later it stops. The default is
+  `Integer.MAX_VALUE`, meaning that the container starts as late as possible and stops as
+  soon as possible.
+|===
+
+Configuring a JCA-based listener container with the `jms` schema support is very similar,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jms:jca-listener-container resource-adapter="myResourceAdapter"
+			destination-resolver="myDestinationResolver"
+			transaction-manager="myTransactionManager"
+			concurrency="10">
+
+		<jms:listener destination="queue.orders" ref="myMessageListener"/>
+
+	</jms:jca-listener-container>
+----
+
+The following table describes the available configuration options for the JCA variant:
+
+[[jms-namespace-jca-listener-container-tbl]]
+.Attributes of the JMS <jca-listener-container/> element
+[cols="1,6"]
+|===
+| Attribute | Description
+
+| `factory-id`
+| Exposes the settings defined by this element as a `JmsListenerContainerFactory`
+  with the specified `id` so that they can be reused with other endpoints.
+
+| `resource-adapter`
+| A reference to the JCA `ResourceAdapter` bean (the default bean name is
+  `resourceAdapter`).
+
+| `activation-spec-factory`
+| A reference to the `JmsActivationSpecFactory`. The default is to autodetect the JMS
+  provider and its `ActivationSpec` class (see {spring-framework-api}/jms/listener/endpoint/DefaultJmsActivationSpecFactory.html[`DefaultJmsActivationSpecFactory`]).
+
+| `destination-resolver`
+| A reference to the `DestinationResolver` strategy for resolving JMS `Destinations`.
+
+| `message-converter`
+| A reference to the `MessageConverter` strategy for converting JMS Messages to listener
+  method arguments. The default is `SimpleMessageConverter`.
+
+| `destination-type`
+| The JMS destination type for this listener: `queue`, `topic`, `durableTopic`, `sharedTopic`.
+  or `sharedDurableTopic`. This potentially enables the `pubSubDomain`, `subscriptionDurable`,
+  and `subscriptionShared` properties of the container. The default is `queue` (which disables
+  those three properties).
+
+| `response-destination-type`
+| The JMS destination type for responses: `queue` or `topic`. The default is the value of the
+  `destination-type` attribute.
+
+| `client-id`
+| The JMS client ID for this listener container. It needs to be specified when using
+  durable subscriptions.
+
+| `acknowledge`
+| The native JMS acknowledge mode: `auto`, `client`, `dups-ok`, or `transacted`. A value
+  of `transacted` activates a locally transacted `Session`. As an alternative, you can specify
+  the `transaction-manager` attribute described later. The default is `auto`.
+
+| `transaction-manager`
+| A reference to a Spring `JtaTransactionManager` or a
+  `jakarta.transaction.TransactionManager` for kicking off an XA transaction for each
+  incoming message. If not specified, native acknowledging is used (see the
+  `acknowledge` attribute).
+
+| `concurrency`
+| The number of concurrent sessions or consumers to start for each listener. It can either be
+  a simple number indicating the maximum number (for example `5`) or a range indicating the
+  lower as well as the upper limit (for example, `3-5`). Note that a specified minimum is only a
+  hint and is typically ignored at runtime when you use a JCA listener container.
+  The default is 1.
+
+| `prefetch`
+| The maximum number of messages to load into a single session. Note that raising this
+  number might lead to starvation of concurrent consumers.
+|===

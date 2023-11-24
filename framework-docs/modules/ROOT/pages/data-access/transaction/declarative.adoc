@@ -1,0 +1,53 @@
+[[transaction-declarative]]
+= Declarative Transaction Management
+
+NOTE: Most Spring Framework users choose declarative transaction management. This option has
+the least impact on application code and, hence, is most consistent with the ideals of a
+non-invasive lightweight container.
+
+The Spring Framework's declarative transaction management is made possible with Spring
+aspect-oriented programming (AOP). However, as the transactional aspects code comes
+with the Spring Framework distribution and may be used in a boilerplate fashion, AOP
+concepts do not generally have to be understood to make effective use of this code.
+
+The Spring Framework's declarative transaction management is similar to EJB CMT, in that
+you can specify transaction behavior (or lack of it) down to the individual method level.
+You can make a `setRollbackOnly()` call within a transaction context, if
+necessary. The differences between the two types of transaction management are:
+
+* Unlike EJB CMT, which is tied to JTA, the Spring Framework's declarative transaction
+  management works in any environment. It can work with JTA transactions or local
+  transactions by using JDBC, JPA, or Hibernate by adjusting the configuration
+  files.
+* You can apply the Spring Framework declarative transaction management to any class,
+  not merely special classes such as EJBs.
+* The Spring Framework offers declarative
+  xref:data-access/transaction/declarative/rolling-back.adoc[rollback rules], a feature with no EJB
+  equivalent. Both programmatic and declarative support for rollback rules is provided.
+* The Spring Framework lets you customize transactional behavior by using AOP.
+  For example, you can insert custom behavior in the case of transaction rollback. You
+  can also add arbitrary advice, along with transactional advice. With EJB CMT, you
+  cannot influence the container's transaction management, except with
+  `setRollbackOnly()`.
+* The Spring Framework does not support propagation of transaction contexts across
+  remote calls, as high-end application servers do. If you need this feature, we
+  recommend that you use EJB. However, consider carefully before using such a feature,
+  because, normally, one does not want transactions to span remote calls.
+
+The concept of rollback rules is important. They let you specify which exceptions
+(and throwables) should cause automatic rollback. You can specify this declaratively, in
+configuration, not in Java code. So, although you can still call `setRollbackOnly()` on
+the `TransactionStatus` object to roll back the current transaction back, most often you
+can specify a rule that `MyApplicationException` must always result in rollback. The
+significant advantage to this option is that business objects do not depend on the
+transaction infrastructure. For example, they typically do not need to import Spring
+transaction APIs or other Spring APIs.
+
+Although EJB container default behavior automatically rolls back the transaction on a
+system exception (usually a runtime exception), EJB CMT does not roll back the
+transaction automatically on an application exception (that is, a checked exception
+other than `java.rmi.RemoteException`). While the Spring default behavior for
+declarative transaction management follows EJB convention (roll back is automatic only
+on unchecked exceptions), it is often useful to customize this behavior.
+
+

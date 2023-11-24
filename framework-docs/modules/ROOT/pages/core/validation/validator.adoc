@@ -1,0 +1,206 @@
+[[validator]]
+= Validation by Using Spring's Validator Interface
+
+Spring features a `Validator` interface that you can use to validate objects. The
+`Validator` interface works by using an `Errors` object so that, while validating,
+validators can report validation failures to the `Errors` object.
+
+Consider the following example of a small data object:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class Person {
+
+		private String name;
+		private int age;
+
+		// the usual getters and setters...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Person(val name: String, val age: Int)
+----
+======
+
+The next example provides validation behavior for the `Person` class by implementing the
+following two methods of the `org.springframework.validation.Validator` interface:
+
+* `supports(Class)`: Can this `Validator` validate instances of the supplied `Class`?
+* `validate(Object, org.springframework.validation.Errors)`: Validates the given object
+  and, in case of validation errors, registers those with the given `Errors` object.
+
+Implementing a `Validator` is fairly straightforward, especially when you know of the
+`ValidationUtils` helper class that the Spring Framework also provides. The following
+example implements `Validator` for `Person` instances:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class PersonValidator implements Validator {
+
+		/**
+		 * This Validator validates only Person instances
+		 */
+		public boolean supports(Class clazz) {
+			return Person.class.equals(clazz);
+		}
+
+		public void validate(Object obj, Errors e) {
+			ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
+			Person p = (Person) obj;
+			if (p.getAge() < 0) {
+				e.rejectValue("age", "negativevalue");
+			} else if (p.getAge() > 110) {
+				e.rejectValue("age", "too.darn.old");
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class PersonValidator : Validator {
+
+		/\**
+		 * This Validator validates only Person instances
+		 */
+		override fun supports(clazz: Class<*>): Boolean {
+			return Person::class.java == clazz
+		}
+
+		override fun validate(obj: Any, e: Errors) {
+			ValidationUtils.rejectIfEmpty(e, "name", "name.empty")
+			val p = obj as Person
+			if (p.age < 0) {
+				e.rejectValue("age", "negativevalue")
+			} else if (p.age > 110) {
+				e.rejectValue("age", "too.darn.old")
+			}
+		}
+	}
+----
+======
+
+The `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class is used to
+reject the `name` property if it is `null` or the empty string. Have a look at the
+{spring-framework-api}/validation/ValidationUtils.html[`ValidationUtils`] javadoc
+to see what functionality it provides besides the example shown previously.
+
+While it is certainly possible to implement a single `Validator` class to validate each
+of the nested objects in a rich object, it may be better to encapsulate the validation
+logic for each nested class of object in its own `Validator` implementation. A simple
+example of a "`rich`" object would be a `Customer` that is composed of two `String`
+properties (a first and a second name) and a complex `Address` object. `Address` objects
+may be used independently of `Customer` objects, so a distinct `AddressValidator`
+has been implemented. If you want your `CustomerValidator` to reuse the logic contained
+within the `AddressValidator` class without resorting to copy-and-paste, you can
+dependency-inject or instantiate an `AddressValidator` within your `CustomerValidator`,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class CustomerValidator implements Validator {
+
+		private final Validator addressValidator;
+
+		public CustomerValidator(Validator addressValidator) {
+			if (addressValidator == null) {
+				throw new IllegalArgumentException("The supplied [Validator] is " +
+					"required and must not be null.");
+			}
+			if (!addressValidator.supports(Address.class)) {
+				throw new IllegalArgumentException("The supplied [Validator] must " +
+					"support the validation of [Address] instances.");
+			}
+			this.addressValidator = addressValidator;
+		}
+
+		/**
+		 * This Validator validates Customer instances, and any subclasses of Customer too
+		 */
+		public boolean supports(Class clazz) {
+			return Customer.class.isAssignableFrom(clazz);
+		}
+
+		public void validate(Object target, Errors errors) {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "field.required");
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "surname", "field.required");
+			Customer customer = (Customer) target;
+			try {
+				errors.pushNestedPath("address");
+				ValidationUtils.invokeValidator(this.addressValidator, customer.getAddress(), errors);
+			} finally {
+				errors.popNestedPath();
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class CustomerValidator(private val addressValidator: Validator) : Validator {
+
+		init {
+			if (addressValidator == null) {
+				throw IllegalArgumentException("The supplied [Validator] is required and must not be null.")
+			}
+			if (!addressValidator.supports(Address::class.java)) {
+				throw IllegalArgumentException("The supplied [Validator] must support the validation of [Address] instances.")
+			}
+		}
+
+		/**
+		* This Validator validates Customer instances, and any subclasses of Customer too
+		*/
+		override fun supports(clazz: Class<*>): Boolean {
+			return Customer::class.java.isAssignableFrom(clazz)
+		}
+
+		override fun validate(target: Any, errors: Errors) {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "field.required")
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "surname", "field.required")
+			val customer = target as Customer
+			try {
+				errors.pushNestedPath("address")
+				ValidationUtils.invokeValidator(this.addressValidator, customer.address, errors)
+			} finally {
+				errors.popNestedPath()
+			}
+		}
+	}
+----
+======
+
+Validation errors are reported to the `Errors` object passed to the validator. In the case
+of Spring Web MVC, you can use the `<spring:bind/>` tag to inspect the error messages, but
+you can also inspect the `Errors` object yourself. More information about the
+methods it offers can be found in the {spring-framework-api}/validation/Errors.html[javadoc].
+
+Validators may also get locally invoked for the immediate validation of a given object,
+not involving a binding process. As of 6.1, this has been simplified through a new
+`Validator.validateObject(Object)` method which is available by default now, returning
+a simple ´Errors` representation which can be inspected: typically calling `hasErrors()`
+or the new `failOnError` method for turning the error summary message into an exception
+(e.g. `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
+
+
+

@@ -1,0 +1,349 @@
+[[jdbc-parameter-handling]]
+= Common Problems with Parameter and Data Value Handling
+
+Common problems with parameters and data values exist in the different approaches
+provided by Spring Framework's JDBC support. This section covers how to address them.
+
+
+[[jdbc-type-information]]
+== Providing SQL Type Information for Parameters
+
+Usually, Spring determines the SQL type of the parameters based on the type of parameter
+passed in. It is possible to explicitly provide the SQL type to be used when setting
+parameter values. This is sometimes necessary to correctly set `NULL` values.
+
+You can provide SQL type information in several ways:
+
+* Many update and query methods of the `JdbcTemplate` take an additional parameter in
+  the form of an `int` array. This array is used to indicate the SQL type of the
+  corresponding parameter by using constant values from the `java.sql.Types` class. Provide
+  one entry for each parameter.
+* You can use the `SqlParameterValue` class to wrap the parameter value that needs this
+  additional information. To do so, create a new instance for each value and pass in the SQL type
+  and the parameter value in the constructor. You can also provide an optional scale
+  parameter for numeric values.
+* For methods that work with named parameters, you can use the `SqlParameterSource` classes,
+  `BeanPropertySqlParameterSource` or `MapSqlParameterSource`. They both have methods
+  for registering the SQL type for any of the named parameter values.
+
+
+[[jdbc-lob]]
+== Handling BLOB and CLOB objects
+
+You can store images, other binary data, and large chunks of text in the database. These
+large objects are called BLOBs (Binary Large OBject) for binary data and CLOBs (Character
+Large OBject) for character data. In Spring, you can handle these large objects by using
+the `JdbcTemplate` directly and also when using the higher abstractions provided by RDBMS
+Objects and the `SimpleJdbc` classes. All of these approaches use an implementation of
+the `LobHandler` interface for the actual management of the LOB (Large OBject) data.
+`LobHandler` provides access to a `LobCreator` class, through the `getLobCreator` method,
+that is used for creating new LOB objects to be inserted.
+
+`LobCreator` and `LobHandler` provide the following support for LOB input and output:
+
+* BLOB
+** `byte[]`: `getBlobAsBytes` and `setBlobAsBytes`
+** `InputStream`: `getBlobAsBinaryStream` and `setBlobAsBinaryStream`
+* CLOB
+** `String`: `getClobAsString` and `setClobAsString`
+** `InputStream`: `getClobAsAsciiStream` and `setClobAsAsciiStream`
+** `Reader`: `getClobAsCharacterStream` and `setClobAsCharacterStream`
+
+The next example shows how to create and insert a BLOB. Later we show how to read
+it back from the database.
+
+This example uses a `JdbcTemplate` and an implementation of the
+`AbstractLobCreatingPreparedStatementCallback`. It implements one method,
+`setValues`. This method provides a `LobCreator` that we use to set the values for the
+LOB columns in your SQL insert statement.
+
+For this example, we assume that there is a variable, `lobHandler`, that is already
+set to an instance of a `DefaultLobHandler`. You typically set this value through
+dependency injection.
+
+The following example shows how to create and insert a BLOB:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	final File blobIn = new File("spring2004.jpg");
+	final InputStream blobIs = new FileInputStream(blobIn);
+	final File clobIn = new File("large.txt");
+	final InputStream clobIs = new FileInputStream(clobIn);
+	final InputStreamReader clobReader = new InputStreamReader(clobIs);
+
+	jdbcTemplate.execute(
+		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
+		new AbstractLobCreatingPreparedStatementCallback(lobHandler) {  // <1>
+			protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+				ps.setLong(1, 1L);
+				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());  // <2>
+				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());  // <3>
+			}
+		}
+	);
+
+	blobIs.close();
+	clobReader.close();
+----
+<1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
+<2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
+<3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val blobIn = File("spring2004.jpg")
+	val blobIs = FileInputStream(blobIn)
+	val clobIn = File("large.txt")
+	val clobIs = FileInputStream(clobIn)
+	val clobReader = InputStreamReader(clobIs)
+
+	jdbcTemplate.execute(
+			"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
+			object: AbstractLobCreatingPreparedStatementCallback(lobHandler) {  // <1>
+				override fun setValues(ps: PreparedStatement, lobCreator: LobCreator) {
+					ps.setLong(1, 1L)
+					lobCreator.setClobAsCharacterStream(ps, 2, clobReader, clobIn.length().toInt())  // <2>
+					lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, blobIn.length().toInt())  // <3>
+				}
+			}
+	)
+	blobIs.close()
+	clobReader.close()
+----
+<1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
+<2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
+<3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
+======
+
+[NOTE]
+====
+If you invoke the `setBlobAsBinaryStream`, `setClobAsAsciiStream`, or
+`setClobAsCharacterStream` method on the `LobCreator` returned from
+`DefaultLobHandler.getLobCreator()`, you can optionally specify a negative value
+for the `contentLength` argument. If the specified content length is negative, the
+`DefaultLobHandler` uses the JDBC 4.0 variants of the set-stream methods without a
+length parameter. Otherwise, it passes the specified length on to the driver.
+
+See the documentation for the JDBC driver you use to verify that it supports streaming
+a LOB without providing the content length.
+====
+
+Now it is time to read the LOB data from the database. Again, you use a `JdbcTemplate`
+with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
+		new RowMapper<Map<String, Object>>() {
+			public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
+				Map<String, Object> results = new HashMap<String, Object>();
+				String clobText = lobHandler.getClobAsString(rs, "a_clob");  // <1>
+				results.put("CLOB", clobText);
+				byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");  // <2>
+				results.put("BLOB", blobBytes);
+				return results;
+			}
+		});
+----
+<1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
+<2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table") { rs, _ ->
+		val clobText = lobHandler.getClobAsString(rs, "a_clob")  // <1>
+		val blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob")  // <2>
+		mapOf("CLOB" to clobText, "BLOB" to blobBytes)
+	}
+----
+<1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
+<2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
+======
+
+
+[[jdbc-in-clause]]
+== Passing in Lists of Values for IN Clause
+
+The SQL standard allows for selecting rows based on an expression that includes a
+variable list of values. A typical example would be `select * from T_ACTOR where id in
+(1, 2, 3)`. This variable list is not directly supported for prepared statements by the
+JDBC standard. You cannot declare a variable number of placeholders. You need a number
+of variations with the desired number of placeholders prepared, or you need to generate
+the SQL string dynamically once you know how many placeholders are required. The named
+parameter support provided in the `NamedParameterJdbcTemplate` takes the latter approach.
+You can pass in the values as a `java.util.List` (or any `Iterable`) of simple values.
+This list is used to insert the required placeholders into the actual SQL statement
+and pass in the values during statement execution.
+
+NOTE: Be careful when passing in many values. The JDBC standard does not guarantee that
+you can use more than 100 values for an `IN` expression list. Various databases exceed
+this number, but they usually have a hard limit for how many values are allowed.
+For example, Oracle's limit is 1000.
+
+In addition to the primitive values in the value list, you can create a `java.util.List`
+of object arrays. This list can support multiple expressions being defined for the `in`
+clause, such as `+++select * from T_ACTOR where (id, last_name) in ((1, 'Johnson'), (2,
+'Harrop'))+++`. This, of course, requires that your database supports this syntax.
+
+
+[[jdbc-complex-types]]
+== Handling Complex Types for Stored Procedure Calls
+
+When you call stored procedures, you can sometimes use complex types specific to the
+database. To accommodate these types, Spring provides a `SqlReturnType` for handling
+them when they are returned from the stored procedure call and `SqlTypeValue` when they
+are passed in as a parameter to the stored procedure.
+
+The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
+implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
+The following example shows returning the value of an Oracle `STRUCT` object of the user
+declared type `ITEM_TYPE`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class TestItemStoredProcedure extends StoredProcedure {
+
+		public TestItemStoredProcedure(DataSource dataSource) {
+			// ...
+			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+				(CallableStatement cs, int colIndx, int sqlType, String typeName) -> {
+					STRUCT struct = (STRUCT) cs.getObject(colIndx);
+					Object[] attr = struct.getAttributes();
+					TestItem item = new TestItem();
+					item.setId(((Number) attr[0]).longValue());
+					item.setDescription((String) attr[1]);
+					item.setExpirationDate((java.util.Date) attr[2]);
+					return item;
+				}));
+			// ...
+		}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
+
+		init {
+			// ...
+			declareParameter(SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE") { cs, colIndx, sqlType, typeName ->
+				val struct = cs.getObject(colIndx) as STRUCT
+				val attr = struct.getAttributes()
+				TestItem((attr[0] as Long, attr[1] as String, attr[2] as Date)
+			})
+			// ...
+		}
+	}
+----
+======
+
+You can use `SqlTypeValue` to pass the value of a Java object (such as `TestItem`) to a
+stored procedure. The `SqlTypeValue` interface has a single method (named
+`createTypeValue`) that you must implement. The active connection is passed in, and you
+can use it to create database-specific objects, such as `StructDescriptor` instances
+or `ArrayDescriptor` instances. The following example creates a `StructDescriptor` instance:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	final TestItem testItem = new TestItem(123L, "A test item",
+			new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
+
+	SqlTypeValue value = new AbstractSqlTypeValue() {
+		protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
+			StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
+			Struct item = new STRUCT(itemDescriptor, conn,
+			new Object[] {
+				testItem.getId(),
+				testItem.getDescription(),
+				new java.sql.Date(testItem.getExpirationDate().getTime())
+			});
+			return item;
+		}
+	};
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val (id, description, expirationDate) = TestItem(123L, "A test item",
+			SimpleDateFormat("yyyy-M-d").parse("2010-12-31"))
+
+	val value = object : AbstractSqlTypeValue() {
+		override fun createTypeValue(conn: Connection, sqlType: Int, typeName: String?): Any {
+			val itemDescriptor = StructDescriptor(typeName, conn)
+			return STRUCT(itemDescriptor, conn,
+					arrayOf(id, description, java.sql.Date(expirationDate.time)))
+		}
+	}
+----
+======
+
+You can now add this `SqlTypeValue` to the `Map` that contains the input parameters for the
+`execute` call of the stored procedure.
+
+Another use for the `SqlTypeValue` is passing in an array of values to an Oracle stored
+procedure. Oracle has its own internal `ARRAY` class that must be used in this case, and
+you can use the `SqlTypeValue` to create an instance of the Oracle `ARRAY` and populate
+it with values from the Java `ARRAY`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	final Long[] ids = new Long[] {1L, 2L};
+
+	SqlTypeValue value = new AbstractSqlTypeValue() {
+		protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
+			ArrayDescriptor arrayDescriptor = new ArrayDescriptor(typeName, conn);
+			ARRAY idArray = new ARRAY(arrayDescriptor, conn, ids);
+			return idArray;
+		}
+	};
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
+
+		init {
+			val ids = arrayOf(1L, 2L)
+			val value = object : AbstractSqlTypeValue() {
+				override fun createTypeValue(conn: Connection, sqlType: Int, typeName: String?): Any {
+					val arrayDescriptor = ArrayDescriptor(typeName, conn)
+					return ARRAY(arrayDescriptor, conn, ids)
+				}
+			}
+		}
+	}
+----
+======
+
+
+

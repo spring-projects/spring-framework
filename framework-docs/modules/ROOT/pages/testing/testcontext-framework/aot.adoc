@@ -1,0 +1,82 @@
+[[testcontext-aot]]
+= Ahead of Time Support for Tests
+
+This chapter covers Spring's Ahead of Time (AOT) support for integration tests using the
+Spring TestContext Framework.
+
+The testing support extends Spring's xref:core/aot.adoc[core AOT support] with the
+following features.
+
+* Build-time detection of all integration tests in the current project that use the
+  TestContext framework to load an `ApplicationContext`.
+  - Provides explicit support for test classes based on JUnit Jupiter and JUnit 4 as well
+    as implicit support for TestNG and other testing frameworks that use Spring's core
+    testing annotations -- as long as the tests are run using a JUnit Platform
+    `TestEngine` that is registered for the current project.
+* Build-time AOT processing: each unique test `ApplicationContext` in the current project
+  will be xref:core/aot.adoc#aot.refresh[refreshed for AOT processing].
+* Runtime AOT support: when executing in AOT runtime mode, a Spring integration test will
+  use an AOT-optimized `ApplicationContext` that participates transparently with the
+  xref:testing/testcontext-framework/ctx-management/caching.adoc[context cache].
+
+All tests are enabled in AOT mode by default. However, you can selectively disable an
+entire test class or individual test method in AOT mode by annotating it with
+xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`].
+When using JUnit Jupiter, you may selectively enable or disable tests in a GraalVM native
+image via Jupiter's `@EnabledInNativeImage` and `@DisabledInNativeImage` annotations.
+Note that `@DisabledInAotMode` also disables the annotated test class or test method when
+running within a GraalVM native image, analogous to JUnit Jupiter's
+`@DisabledInNativeImage` annotation.
+
+[TIP]
+====
+By default, if an error is encountered during build-time AOT processing, an exception
+will be thrown, and the overall process will fail immediately.
+
+If you would prefer that build-time AOT processing continue after errors are encountered,
+you can disable the `failOnError` mode which results in errors being logged at `WARN`
+level or with greater detail at `DEBUG` level.
+
+The `failOnError` mode can be disabled from the command line or a build script by setting
+a JVM system property named `spring.test.aot.processing.failOnError` to `false`. As an
+alternative, you can set the same property via the
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
+====
+
+[NOTE]
+====
+The `@ContextHierarchy` annotation is currently not supported in AOT mode.
+====
+
+To provide test-specific runtime hints for use within a GraalVM native image, you have
+the following options.
+
+* Implement a custom
+  {spring-framework-api}/test/context/aot/TestRuntimeHintsRegistrar.html[`TestRuntimeHintsRegistrar`]
+  and register it globally via `META-INF/spring/aot.factories`.
+* Implement a custom {spring-framework-api}/aot/hint/RuntimeHintsRegistrar.html[`RuntimeHintsRegistrar`]
+  and register it globally via `META-INF/spring/aot.factories` or locally on a test class
+  via {spring-framework-api}/context/annotation/ImportRuntimeHints.html[`@ImportRuntimeHints`].
+* Annotate a test class with {spring-framework-api}/aot/hint/annotation/Reflective.html[`@Reflective`] or
+  {spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`].
+* See xref:core/aot.adoc#aot.hints[Runtime Hints] for details on Spring's core runtime hints
+  and annotation support.
+
+[TIP]
+====
+The `TestRuntimeHintsRegistrar` API serves as a companion to the core
+`RuntimeHintsRegistrar` API. If you need to register global hints for testing support
+that are not specific to particular test classes, favor implementing
+`RuntimeHintsRegistrar` over the test-specific API.
+====
+
+If you implement a custom `ContextLoader`, it must implement
+{spring-framework-api}/test/context/aot/AotContextLoader.html[`AotContextLoader`] in
+order to provide AOT build-time processing and AOT runtime execution support. Note,
+however, that all context loader implementations provided by the Spring Framework and
+Spring Boot already implement `AotContextLoader`.
+
+If you implement a custom `TestExecutionListener`, it must implement
+{spring-framework-api}/test/context/aot/AotTestExecutionListener.html[`AotTestExecutionListener`]
+in order to participate in AOT processing. See the `SqlScriptsTestExecutionListener` in
+the `spring-test` module for an example.

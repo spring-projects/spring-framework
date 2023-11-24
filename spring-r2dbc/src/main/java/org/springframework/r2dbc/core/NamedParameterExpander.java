@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.util.ConcurrentLruCache;
-
 
 /**
  * SQL translation support allowing the use of named parameters
@@ -74,7 +73,7 @@ class NamedParameterExpander {
 	 * placeholders to be used for a select list. Select lists should be limited
 	 * to 100 or fewer elements. A larger number of elements is not guaranteed to be
 	 * supported by the database and is strictly vendor-dependent.
-	 * @param sql sql the original SQL statement
+	 * @param sql the original SQL statement
 	 * @param bindMarkersFactory the bind marker factory
 	 * @param paramSource the source for named parameters
 	 * @return the expanded sql that accepts bind parameters and allows for execution

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
-import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
 import org.springframework.core.testfixture.env.MockPropertySource
 import java.util.stream.Collectors
@@ -90,7 +89,7 @@ class BeanDefinitionDslTests {
 		}
 
 		val context = GenericApplicationContext().apply {
-			environment.propertySources.addFirst(SimpleCommandLinePropertySource("--name=foofoo"))
+			environment.propertySources.addFirst(org.springframework.core.env.SimpleCommandLinePropertySource("--name=foofoo"))
 			beans.initialize(this)
 			refresh()
 		}

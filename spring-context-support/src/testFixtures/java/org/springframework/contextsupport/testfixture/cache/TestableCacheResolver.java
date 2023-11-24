@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class TestableCacheResolver implements CacheResolver {
 	public <K, V> Cache<K, V> resolveCache(CacheInvocationContext<? extends Annotation> cacheInvocationContext) {
 		String cacheName = cacheInvocationContext.getCacheName();
 		@SuppressWarnings("unchecked")
-		Cache<K, V> mock = mock(Cache.class);
+		Cache<K, V> mock = mock();
 		given(mock.getName()).willReturn(cacheName);
 		return mock;
 	}

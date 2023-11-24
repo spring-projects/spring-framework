@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,16 @@ import org.springframework.context.annotation.Configuration;
  * @author Chris Beams
  * @since 3.1
  */
-public class Spr8808Tests {
+class Spr8808Tests {
 
 	/**
 	 * This test failed with ConflictingBeanDefinitionException prior to fixes for
 	 * SPR-8808.
 	 */
 	@Test
-	public void repro() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class);
-		ctx.refresh();
+	void repro() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
+		ctx.close();
 	}
 
 }

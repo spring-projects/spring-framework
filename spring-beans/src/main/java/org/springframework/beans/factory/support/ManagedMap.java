@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
@@ -55,6 +56,26 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 		super(initialCapacity);
 	}
 
+
+	/**
+	 * Return a new instance containing keys and values extracted from the
+	 * given entries. The entries themselves are not stored in the map.
+	 * @param entries {@code Map.Entry}s containing the keys and values
+	 * from which the map is populated
+	 * @param <K> the {@code Map}'s key type
+	 * @param <V> the {@code Map}'s value type
+	 * @return a {@code Map} containing the specified mappings
+	 * @since 5.3.16
+	 */
+	@SafeVarargs
+	@SuppressWarnings("unchecked")
+	public static <K,V> ManagedMap<K,V> ofEntries(Entry<? extends K, ? extends V>... entries) {
+		ManagedMap<K,V > map = new ManagedMap<>();
+		for (Entry<? extends K, ? extends V> entry : entries) {
+			map.put(entry.getKey(), entry.getValue());
+		}
+		return map;
+	}
 
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.

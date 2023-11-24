@@ -1,0 +1,62 @@
+[[expressions-collection-selection]]
+= Collection Selection
+
+Selection is a powerful expression language feature that lets you transform a
+source collection into another collection by selecting from its entries.
+
+Selection uses a syntax of `.?[selectionExpression]`. It filters the collection and
+returns a new collection that contains a subset of the original elements. For example,
+selection lets us easily get a list of Serbian inventors, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	List<Inventor> list = (List<Inventor>) parser.parseExpression(
+			"members.?[nationality == 'Serbian']").getValue(societyContext);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val list = parser.parseExpression(
+			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
+----
+======
+
+Selection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. For a list or array, the selection criteria is evaluated against each
+individual element. Against a map, the selection criteria is evaluated against each map
+entry (objects of the Java type `Map.Entry`). Each map entry has its `key` and `value`
+accessible as properties for use in the selection.
+
+The following expression returns a new map that consists of those elements of the
+original map where the entry's value is less than 27:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Map newMap = parser.parseExpression("map.?[value<27]").getValue();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val newMap = parser.parseExpression("map.?[value<27]").getValue()
+----
+======
+
+In addition to returning all the selected elements, you can retrieve only the first or
+the last element. To obtain the first element matching the selection, the syntax is
+`.^[selectionExpression]`. To obtain the last matching selection, the syntax is
+`.$[selectionExpression]`.
+
+
+

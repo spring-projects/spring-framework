@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 
 
 	/**
-	 * Set the name of the session header to use for the session id.
-	 * The name is used to extract the session id from the request headers as
-	 * well to set the session id on the response headers.
+	 * Set the name of the session header to use for the session ID.
+	 * <p>The name is used to extract the session ID from the request headers as
+	 * well to set the session ID on the response headers.
 	 * <p>By default set to {@code DEFAULT_HEADER_NAME}
 	 * @param headerName the header name
 	 */
@@ -52,7 +52,7 @@ public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	/**
-	 * Return the configured header name.
+	 * Get the configured header name.
 	 * @return the configured header name
 	 */
 	public String getHeaderName() {
@@ -74,7 +74,7 @@ public class HeaderWebSessionIdResolver implements WebSessionIdResolver {
 
 	@Override
 	public void expireSession(ServerWebExchange exchange) {
-		this.setSessionId(exchange, "");
+		setSessionId(exchange, "");
 	}
 
 }

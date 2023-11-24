@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -40,7 +40,7 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 	private Model model;
 
 	@Nullable
-	private HttpStatus status;
+	private HttpStatusCode status;
 
 	@Nullable
 	private HttpHeaders headers;
@@ -83,7 +83,7 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 	}
 
 	@Override
-	public DefaultRenderingBuilder status(HttpStatus status) {
+	public DefaultRenderingBuilder status(HttpStatusCode status) {
 		this.status = status;
 		return this;
 	}

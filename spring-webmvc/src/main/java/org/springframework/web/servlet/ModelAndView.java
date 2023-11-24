@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
@@ -56,9 +56,9 @@ public class ModelAndView {
 
 	/** Optional HTTP status for the response. */
 	@Nullable
-	private HttpStatus status;
+	private HttpStatusCode status;
 
-	/** Indicates whether or not this instance has been cleared with a call to {@link #clear()}. */
+	/** Indicates whether this instance has been cleared with a call to {@link #clear()}. */
 	private boolean cleared = false;
 
 
@@ -132,7 +132,7 @@ public class ModelAndView {
 	 * (to be set just prior to View rendering)
 	 * @since 4.3.8
 	 */
-	public ModelAndView(String viewName, HttpStatus status) {
+	public ModelAndView(String viewName, HttpStatusCode status) {
 		this.view = viewName;
 		this.status = status;
 	}
@@ -148,7 +148,7 @@ public class ModelAndView {
 	 * (to be set just prior to View rendering)
 	 * @since 4.3
 	 */
-	public ModelAndView(@Nullable String viewName, @Nullable Map<String, ?> model, @Nullable HttpStatus status) {
+	public ModelAndView(@Nullable String viewName, @Nullable Map<String, ?> model, @Nullable HttpStatusCode status) {
 		this.view = viewName;
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
@@ -195,7 +195,7 @@ public class ModelAndView {
 	 */
 	@Nullable
 	public String getViewName() {
-		return (this.view instanceof String ? (String) this.view : null);
+		return (this.view instanceof String name ? name : null);
 	}
 
 	/**
@@ -212,11 +212,11 @@ public class ModelAndView {
 	 */
 	@Nullable
 	public View getView() {
-		return (this.view instanceof View ? (View) this.view : null);
+		return (this.view instanceof View v ? v : null);
 	}
 
 	/**
-	 * Indicate whether or not this {@code ModelAndView} has a view, either
+	 * Indicate whether this {@code ModelAndView} has a view, either
 	 * as a view name or as a direct {@link View} instance.
 	 */
 	public boolean hasView() {
@@ -264,7 +264,7 @@ public class ModelAndView {
 	 * <p>The response status is set just prior to View rendering.
 	 * @since 4.3
 	 */
-	public void setStatus(@Nullable HttpStatus status) {
+	public void setStatus(@Nullable HttpStatusCode status) {
 		this.status = status;
 	}
 
@@ -273,7 +273,7 @@ public class ModelAndView {
 	 * @since 4.3
 	 */
 	@Nullable
-	public HttpStatus getStatus() {
+	public HttpStatusCode getStatus() {
 		return this.status;
 	}
 
@@ -303,7 +303,7 @@ public class ModelAndView {
 
 	/**
 	 * Add all attributes contained in the provided Map to the model.
-	 * @param modelMap a Map of attributeName -> attributeValue pairs
+	 * @param modelMap a Map of attributeName &rarr; attributeValue pairs
 	 * @see ModelMap#addAllAttributes(Map)
 	 * @see #getModelMap()
 	 */

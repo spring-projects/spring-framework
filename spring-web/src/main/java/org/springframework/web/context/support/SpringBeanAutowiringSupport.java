@@ -16,8 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,7 +87,7 @@ public abstract class SpringBeanAutowiringSupport {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Current WebApplicationContext is not available for processing of " +
 						ClassUtils.getShortName(target.getClass()) + ": " +
-						"Make sure this class gets constructed in a Spring web application after the" +
+						"Make sure this class gets constructed in a Spring web application after the " +
 						"Spring WebApplicationContext has been initialized. Proceeding without injection.");
 			}
 		}
@@ -101,7 +100,7 @@ public abstract class SpringBeanAutowiringSupport {
 	 * <p>Intended for use as a delegate.
 	 * @param target the target object to process
 	 * @param servletContext the ServletContext to find the Spring web application context in
-	 * @see WebApplicationContextUtils#getWebApplicationContext(javax.servlet.ServletContext)
+	 * @see WebApplicationContextUtils#getWebApplicationContext(jakarta.servlet.ServletContext)
 	 */
 	public static void processInjectionBasedOnServletContext(Object target, ServletContext servletContext) {
 		Assert.notNull(target, "Target object must not be null");

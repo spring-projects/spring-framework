@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,51 +150,65 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
 				.switchIfEmpty(createNotFoundError())
-				.flatMap(handler -> invokeHandler(exchange, handler))
-				.flatMap(result -> handleResult(exchange, result));
+				.onErrorResume(ex -> handleResultMono(exchange, Mono.error(ex)))
+				.flatMap(handler -> handleRequestWith(exchange, handler));
 	}
 
 	private <R> Mono<R> createNotFoundError() {
 		return Mono.defer(() -> {
-			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND);
 			return Mono.error(ex);
 		});
 	}
 
-	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
+	private Mono<Void> handleResultMono(ServerWebExchange exchange, Mono<HandlerResult> resultMono) {
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter instanceof DispatchExceptionHandler exceptionHandler) {
+					resultMono = resultMono.onErrorResume(ex2 -> exceptionHandler.handleError(exchange, ex2));
+				}
+			}
+		}
+		return resultMono.flatMap(result -> {
+			Mono<Void> voidMono = handleResult(exchange, result, "Handler " + result.getHandler());
+			if (result.getExceptionHandler() != null) {
+				voidMono = voidMono.onErrorResume(ex ->
+						result.getExceptionHandler().handleError(exchange, ex).flatMap(result2 ->
+								handleResult(exchange, result2, "Exception handler " +
+										result2.getHandler() + ", error=\"" + ex.getMessage() + "\"")));
+			}
+			return voidMono;
+		});
+	}
+
+	private Mono<Void> handleResult(
+			ServerWebExchange exchange, HandlerResult handlerResult, String description) {
+
+		if (this.resultHandlers != null) {
+			for (HandlerResultHandler resultHandler : this.resultHandlers) {
+				if (resultHandler.supports(handlerResult)) {
+					description += " [DispatcherHandler]";
+					return resultHandler.handleResult(exchange, handlerResult).checkpoint(description);
+				}
+			}
+		}
+		return Mono.error(new IllegalStateException(
+				"No HandlerResultHandler for " + handlerResult.getReturnValue()));
+	}
+
+	private Mono<Void> handleRequestWith(ServerWebExchange exchange, Object handler) {
 		if (ObjectUtils.nullSafeEquals(exchange.getResponse().getStatusCode(), HttpStatus.FORBIDDEN)) {
 			return Mono.empty();  // CORS rejection
 		}
 		if (this.handlerAdapters != null) {
-			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
-				if (handlerAdapter.supports(handler)) {
-					return handlerAdapter.handle(exchange, handler);
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter.supports(handler)) {
+					Mono<HandlerResult> resultMono = adapter.handle(exchange, handler);
+					return handleResultMono(exchange, resultMono);
 				}
 			}
 		}
 		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
-	}
-
-	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		return getResultHandler(result).handleResult(exchange, result)
-				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
-				.onErrorResume(ex ->
-						result.applyExceptionHandler(ex).flatMap(exResult -> {
-							String text = "Exception handler " + exResult.getHandler() +
-									", error=\"" + ex.getMessage() + "\" [DispatcherHandler]";
-							return getResultHandler(exResult).handleResult(exchange, exResult).checkpoint(text);
-						}));
-	}
-
-	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
-		if (this.resultHandlers != null) {
-			for (HandlerResultHandler resultHandler : this.resultHandlers) {
-				if (resultHandler.supports(handlerResult)) {
-					return resultHandler;
-				}
-			}
-		}
-		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
 	}
 
 	@Override

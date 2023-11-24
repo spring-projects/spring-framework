@@ -1,0 +1,24 @@
+[[spring-mvc-test-server]]
+= Overview
+:page-section-summary-toc: 1
+
+You can write plain unit tests for Spring MVC by instantiating a controller, injecting it
+with dependencies, and calling its methods. However such tests do not verify request
+mappings, data binding, message conversion, type conversion, validation, and nor
+do they involve any of the supporting `@InitBinder`, `@ModelAttribute`, or
+`@ExceptionHandler` methods.
+
+The Spring MVC Test framework, also known as `MockMvc`, aims to provide more complete
+testing for Spring MVC controllers without a running server. It does that by invoking
+the `DispatcherServlet` and passing
+xref:testing/unit.adoc#mock-objects-servlet["`mock`" implementations of the Servlet API] from the
+`spring-test` module which replicates the full Spring MVC request handling without
+a running server.
+
+MockMvc is a server side test framework that lets you verify most of the functionality
+of a Spring MVC application using lightweight and targeted tests. You can use it on
+its own to perform requests and to verify responses, or you can also use it through
+the xref:testing/webtestclient.adoc[WebTestClient] API with MockMvc plugged in as the server to handle requests
+with.
+
+

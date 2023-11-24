@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
@@ -35,6 +35,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -49,7 +50,9 @@ import org.springframework.web.util.pattern.PathPattern;
  */
 public class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
-	private final static Set<String> EMPTY_PATH_PATTERN = Collections.singleton("");
+	private static final Set<String> EMPTY_PATH_PATTERN = Collections.singleton("");
+
+	private static final String[] ROOT_PATH_PATTERNS = new String[] {"", "/"};
 
 
 	private final Set<String> patterns;
@@ -77,7 +80,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * {@link PathMatcher} and flag for matching trailing slashes.
 	 * @since 5.3
 	 */
-	public PatternsRequestCondition(String[] patterns,  boolean useTrailingSlashMatch,
+	public PatternsRequestCondition(String[] patterns, boolean useTrailingSlashMatch,
 			@Nullable PathMatcher pathMatcher) {
 
 		this(patterns, null, pathMatcher, useTrailingSlashMatch);
@@ -87,7 +90,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and whether to match
 	 * trailing slashes.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @since 5.2.4
@@ -105,7 +108,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in
@@ -123,7 +126,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes, along with specific extensions.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in
@@ -156,9 +159,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 		}
 		Set<String> result = new LinkedHashSet<>(patterns.length);
 		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-				pattern = "/" + pattern;
-			}
+			pattern = PathPatternParser.defaultInstance.initFullPathPattern(pattern);
 			result.add(pattern);
 		}
 		return result;
@@ -227,19 +228,18 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	}
 
 	/**
-	 * Returns a new instance with URL patterns from the current instance ("this") and
-	 * the "other" instance as follows:
+	 * Combine the patterns of the current and of the other instances as follows:
 	 * <ul>
-	 * <li>If there are patterns in both instances, combine the patterns in "this" with
-	 * the patterns in "other" using {@link PathMatcher#combine(String, String)}.
-	 * <li>If only one instance has patterns, use them.
-	 * <li>If neither instance has patterns, use an empty String (i.e. "").
+	 * <li>If only one instance has patterns, use those.
+	 * <li>If both have patterns, combine patterns from "this" instance with
+	 * patterns from the other instance via {@link PathMatcher#combine(String, String)}.
+	 * <li>If neither has patterns, use {@code ""} and {@code "/"} as root path patterns.
 	 * </ul>
 	 */
 	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
 		if (isEmptyPathMapping() && other.isEmptyPathMapping()) {
-			return this;
+			return new PatternsRequestCondition(ROOT_PATH_PATTERNS);
 		}
 		else if (other.isEmptyPathMapping()) {
 			return this;

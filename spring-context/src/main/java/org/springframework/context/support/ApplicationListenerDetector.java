@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 
 /**
  * {@code BeanPostProcessor} that detects beans which implement the {@code ApplicationListener}
@@ -71,12 +71,12 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (bean instanceof ApplicationListener) {
+		if (bean instanceof ApplicationListener<?> applicationListener) {
 			// potentially not detected as a listener by getBeanNamesForType retrieval
 			Boolean flag = this.singletonNames.get(beanName);
 			if (Boolean.TRUE.equals(flag)) {
 				// singleton bean (top-level or inner): register on the fly
-				this.applicationContext.addApplicationListener((ApplicationListener<?>) bean);
+				this.applicationContext.addApplicationListener(applicationListener);
 			}
 			else if (Boolean.FALSE.equals(flag)) {
 				if (logger.isWarnEnabled() && !this.applicationContext.containsBean(beanName)) {
@@ -94,10 +94,10 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
-		if (bean instanceof ApplicationListener) {
+		if (bean instanceof ApplicationListener<?> applicationListener) {
 			try {
 				ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
-				multicaster.removeApplicationListener((ApplicationListener<?>) bean);
+				multicaster.removeApplicationListener(applicationListener);
 				multicaster.removeApplicationListenerBean(beanName);
 			}
 			catch (IllegalStateException ex) {
@@ -114,13 +114,13 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof ApplicationListenerDetector &&
-				this.applicationContext == ((ApplicationListenerDetector) other).applicationContext));
+		return (this == other || (other instanceof ApplicationListenerDetector that &&
+				this.applicationContext == that.applicationContext));
 	}
 
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.applicationContext);
+		return Objects.hashCode(this.applicationContext);
 	}
 
 }

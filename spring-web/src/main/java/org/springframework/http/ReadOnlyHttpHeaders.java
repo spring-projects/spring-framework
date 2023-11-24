@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -43,6 +44,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	private MediaType cachedContentType;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private List<MediaType> cachedAccept;
 
 
@@ -152,6 +154,11 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 				.collect(Collectors.collectingAndThen(
 						Collectors.toCollection(LinkedHashSet::new), // Retain original ordering of entries
 						Collections::unmodifiableSet));
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
+		this.headers.forEach((k, vs) -> action.accept(k, Collections.unmodifiableList(vs)));
 	}
 
 }

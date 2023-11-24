@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.ClassUtils;
  */
 public class WebSocketNamespaceHandler extends NamespaceHandlerSupport {
 
-	private static boolean isSpringMessagingPresent = ClassUtils.isPresent(
+	private static final boolean isSpringMessagingPresent = ClassUtils.isPresent(
 			"org.springframework.messaging.Message", WebSocketNamespaceHandler.class.getClassLoader());
 
 

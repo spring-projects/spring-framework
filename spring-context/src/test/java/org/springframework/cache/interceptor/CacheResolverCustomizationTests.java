@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +30,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +52,9 @@ import static org.springframework.context.testfixture.cache.CacheTestUtils.asser
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class CacheResolverCustomizationTests {
+class CacheResolverCustomizationTests {
+
+	private ConfigurableApplicationContext context;
 
 	private CacheManager cacheManager;
 
@@ -61,16 +64,21 @@ public class CacheResolverCustomizationTests {
 
 
 	@BeforeEach
-	public void setup() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+	void setup() {
+		this.context = new AnnotationConfigApplicationContext(Config.class);
 		this.cacheManager = context.getBean("cacheManager", CacheManager.class);
 		this.anotherCacheManager = context.getBean("anotherCacheManager", CacheManager.class);
 		this.simpleService = context.getBean(SimpleService.class);
 	}
 
+	@AfterEach
+	void closeContext() {
+		this.context.close();
+	}
+
 
 	@Test
-	public void noCustomization() {
+	void noCustomization() {
 		Cache cache = this.cacheManager.getCache("default");
 
 		Object key = new Object();
@@ -81,7 +89,7 @@ public class CacheResolverCustomizationTests {
 	}
 
 	@Test
-	public void customCacheResolver() {
+	void customCacheResolver() {
 		Cache cache = this.cacheManager.getCache("primary");
 
 		Object key = new Object();
@@ -92,7 +100,7 @@ public class CacheResolverCustomizationTests {
 	}
 
 	@Test
-	public void customCacheManager() {
+	void customCacheManager() {
 		Cache cache = this.anotherCacheManager.getCache("default");
 
 		Object key = new Object();
@@ -103,7 +111,7 @@ public class CacheResolverCustomizationTests {
 	}
 
 	@Test
-	public void runtimeResolution() {
+	void runtimeResolution() {
 		Cache defaultCache = this.cacheManager.getCache("default");
 		Cache primaryCache = this.cacheManager.getCache("primary");
 
@@ -121,7 +129,7 @@ public class CacheResolverCustomizationTests {
 	}
 
 	@Test
-	public void namedResolution() {
+	void namedResolution() {
 		Cache cache = this.cacheManager.getCache("secondary");
 
 		Object key = new Object();
@@ -132,24 +140,25 @@ public class CacheResolverCustomizationTests {
 	}
 
 	@Test
-	public void noCacheResolved() {
+	void noCacheResolved() {
 		Method method = ReflectionUtils.findMethod(SimpleService.class, "noCacheResolved", Object.class);
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.simpleService.noCacheResolved(new Object()))
-			.withMessageContaining(method.toString());
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.simpleService.noCacheResolved(new Object()))
+				.withMessageContaining(method.toString());
 	}
 
 	@Test
-	public void unknownCacheResolver() {
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				this.simpleService.unknownCacheResolver(new Object()))
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("unknownCacheResolver"));
+	void unknownCacheResolver() {
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> this.simpleService.unknownCacheResolver(new Object()))
+				.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("unknownCacheResolver"));
 	}
 
 
 	@Configuration
 	@EnableCaching
-	static class Config extends CachingConfigurerSupport {
+	static class Config implements CachingConfigurer {
 
 		@Override
 		@Bean

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.springframework.util.ReflectionUtils.findMethod;
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 class GenericTypeResolverTests {
@@ -71,8 +72,8 @@ class GenericTypeResolverTests {
 	void methodReturnTypes() {
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class)).isEqualTo(Integer.class);
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class)).isEqualTo(String.class);
-		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class)).isEqualTo(null);
-		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class)).isEqualTo(null);
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class)).isNull();
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class)).isNull();
 	}
 
 	@Test
@@ -121,7 +122,7 @@ class GenericTypeResolverTests {
 		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
 
 		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
-		assertThat(map.size()).isEqualTo(2);
+		assertThat(map).hasSize(2);
 		Type t = null;
 		Type x = null;
 		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
@@ -168,11 +169,67 @@ class GenericTypeResolverTests {
 	void resolveIncompleteTypeVariables() {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
 		assertThat(resolved).isNotNull();
-		assertThat(resolved.length).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved[0]).isEqualTo(Object.class);
 		assertThat(resolved[1]).isEqualTo(Long.class);
 	}
 
+	@Test
+	public void resolvePartiallySpecializedTypeVariables() {
+		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[0], TypeFixedBiGenericClass.class);
+		assertThat(resolved).isEqualTo(D.class);
+	}
+
+	@Test
+	public void resolveTransitiveTypeVariableWithDifferentName() {
+		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[1], TypeFixedBiGenericClass.class);
+		assertThat(resolved).isEqualTo(E.class);
+	}
+
+	@Test
+	void resolveWildcardTypeWithUpperBound() {
+		Method method = findMethod(MySimpleSuperclassType.class, "upperBound", List.class);
+		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
+		ResolvableType resolvableType = ResolvableType.forType(resolved);
+		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
+		assertThat(resolvableType.resolveGenerics()).containsExactly(String.class);
+	}
+
+	@Test
+	void resolveWildcardTypeWithUpperBoundWithResolvedType() {
+		Method method = findMethod(MySimpleSuperclassType.class, "upperBoundWithResolvedType", List.class);
+		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
+		ResolvableType resolvableType = ResolvableType.forType(resolved);
+		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
+		assertThat(resolvableType.resolveGenerics()).containsExactly(Integer.class);
+	}
+
+	@Test
+	void resolveWildcardTypeWithLowerBound() {
+		Method method = findMethod(MySimpleSuperclassType.class, "lowerBound", List.class);
+		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
+		ResolvableType resolvableType = ResolvableType.forType(resolved);
+		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
+		assertThat(resolvableType.resolveGenerics()).containsExactly(String.class);
+	}
+
+	@Test
+	void resolveWildcardTypeWithLowerBoundWithResolvedType() {
+		Method method = findMethod(MySimpleSuperclassType.class, "lowerBoundWithResolvedType", List.class);
+		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
+		ResolvableType resolvableType = ResolvableType.forType(resolved);
+		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
+		assertThat(resolvableType.resolveGenerics()).containsExactly(Integer.class);
+	}
+
+	@Test
+	void resolveWildcardTypeWithUnbounded() {
+		Method method = findMethod(MySimpleSuperclassType.class, "unbounded", List.class);
+		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
+		ResolvableType resolvableType = ResolvableType.forType(resolved);
+		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
+		assertThat(resolvableType.resolveGenerics()).containsExactly(Object.class);
+	}
 
 	public interface MyInterfaceType<T> {
 	}
@@ -184,6 +241,21 @@ class GenericTypeResolverTests {
 	}
 
 	public abstract class MySuperclassType<T> {
+
+		public void upperBound(List<? extends T> list) {
+		}
+
+		public void upperBoundWithResolvedType(List<? extends Integer> list) {
+		}
+
+		public void lowerBound(List<? extends T> list) {
+		}
+
+		public void lowerBoundWithResolvedType(List<? super Integer> list) {
+		}
+
+		public void unbounded(List<?> list) {
+		}
 	}
 
 	public class MySimpleSuperclassType extends MySuperclassType<String> {
@@ -293,10 +365,22 @@ class GenericTypeResolverTests {
 
 	class B<T>{}
 
+	class C extends A {}
+
+	class D extends B<Long> {}
+
+	class E extends C {}
+
 	class TestIfc<T>{}
 
 	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
 	}
+
+	abstract static class BiGenericClass<T extends B<?>, V extends A> {}
+
+	abstract static class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U>{}
+
+	static class TypeFixedBiGenericClass extends SpecializedBiGenericClass<E> {}
 
 	static class TopLevelClass<T> {
 		class Nested<X> {
@@ -308,12 +392,12 @@ class GenericTypeResolverTests {
 		}
 	}
 
-	static abstract class WithArrayBase<T> {
+	abstract static class WithArrayBase<T> {
 
 		public abstract T[] array(T... args);
 	}
 
-	static abstract class WithArray<T> extends WithArrayBase<T> {
+	abstract static class WithArray<T> extends WithArrayBase<T> {
 	}
 
 	interface Repository<T, ID extends Serializable> {

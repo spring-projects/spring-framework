@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.web.servlet.handler;
 import java.util.Collections;
 import java.util.Enumeration;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -34,7 +34,7 @@ import org.springframework.web.context.ServletContextAware;
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
  * that applies initialization and destruction callbacks to beans that
- * implement the {@link javax.servlet.Servlet} interface.
+ * implement the {@link jakarta.servlet.Servlet} interface.
  *
  * <p>After initialization of the bean instance, the Servlet {@code init}
  * method will be called with a ServletConfig that contains the bean name
@@ -61,8 +61,8 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author Juergen Hoeller
  * @since 1.1.5
- * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
- * @see javax.servlet.Servlet#destroy()
+ * @see jakarta.servlet.Servlet#init(jakarta.servlet.ServletConfig)
+ * @see jakarta.servlet.Servlet#destroy()
  * @see SimpleServletHandlerAdapter
  */
 public class SimpleServletPostProcessor implements
@@ -107,13 +107,13 @@ public class SimpleServletPostProcessor implements
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof Servlet) {
+		if (bean instanceof Servlet servlet) {
 			ServletConfig config = this.servletConfig;
 			if (config == null || !this.useSharedServletConfig) {
 				config = new DelegatingServletConfig(beanName, this.servletContext);
 			}
 			try {
-				((Servlet) bean).init(config);
+				servlet.init(config);
 			}
 			catch (ServletException ex) {
 				throw new BeanInitializationException("Servlet.init threw exception", ex);
@@ -124,8 +124,8 @@ public class SimpleServletPostProcessor implements
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-		if (bean instanceof Servlet) {
-			((Servlet) bean).destroy();
+		if (bean instanceof Servlet servlet) {
+			servlet.destroy();
 		}
 	}
 
@@ -170,7 +170,7 @@ public class SimpleServletPostProcessor implements
 
 		@Override
 		public Enumeration<String> getInitParameterNames() {
-			return Collections.enumeration(Collections.emptySet());
+			return Collections.emptyEnumeration();
 		}
 	}
 

@@ -1,0 +1,26 @@
+[[testcontext-bootstrapping]]
+= Bootstrapping the TestContext Framework
+
+The default configuration for the internals of the Spring TestContext Framework is
+sufficient for all common use cases. However, there are times when a development team or
+third party framework would like to change the default `ContextLoader`, implement a
+custom `TestContext` or `ContextCache`, augment the default sets of
+`ContextCustomizerFactory` and `TestExecutionListener` implementations, and so on. For
+such low-level control over how the TestContext framework operates, Spring provides a
+bootstrapping strategy.
+
+`TestContextBootstrapper` defines the SPI for bootstrapping the TestContext framework. A
+`TestContextBootstrapper` is used by the `TestContextManager` to load the
+`TestExecutionListener` implementations for the current test and to build the
+`TestContext` that it manages. You can configure a custom bootstrapping strategy for a
+test class (or test class hierarchy) by using `@BootstrapWith`, either directly or as a
+meta-annotation. If a bootstrapper is not explicitly configured by using
+`@BootstrapWith`, either the `DefaultTestContextBootstrapper` or the
+`WebTestContextBootstrapper` is used, depending on the presence of `@WebAppConfiguration`.
+
+Since the `TestContextBootstrapper` SPI is likely to change in the future (to accommodate
+new requirements), we strongly encourage implementers not to implement this interface
+directly but rather to extend `AbstractTestContextBootstrapper` or one of its concrete
+subclasses instead.
+
+

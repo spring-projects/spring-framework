@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,10 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Freeze all bean definitions, signalling that the registered bean definitions
 	 * will not be modified or post-processed any further.
-	 * <p>This allows the factory to aggressively cache bean definition metadata.
+	 * <p>This allows the factory to aggressively cache bean definition metadata
+	 * going forward, after clearing the initial temporary metadata cache.
+	 * @see #clearMetadataCache()
+	 * @see #isConfigurationFrozen()
 	 */
 	void freezeConfiguration();
 
@@ -145,6 +148,7 @@ public interface ConfigurableListableBeanFactory
 	 * Return whether this factory's bean definitions are frozen,
 	 * i.e. are not supposed to be modified or post-processed any further.
 	 * @return {@code true} if the factory's configuration is considered frozen
+	 * @see #freezeConfiguration()
 	 */
 	boolean isConfigurationFrozen();
 

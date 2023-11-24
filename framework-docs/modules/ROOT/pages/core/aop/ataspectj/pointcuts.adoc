@@ -1,0 +1,586 @@
+[[aop-pointcuts]]
+= Declaring a Pointcut
+
+Pointcuts determine join points of interest and thus enable us to control
+when advice runs. Spring AOP only supports method execution join points for Spring
+beans, so you can think of a pointcut as matching the execution of methods on Spring
+beans. A pointcut declaration has two parts: a signature comprising a name and any
+parameters and a pointcut expression that determines exactly which method
+executions we are interested in. In the @AspectJ annotation-style of AOP, a pointcut
+signature is provided by a regular method definition, and the pointcut expression is
+indicated by using the `@Pointcut` annotation (the method serving as the pointcut signature
+must have a `void` return type).
+
+An example may help make this distinction between a pointcut signature and a pointcut
+expression clear. The following example defines a pointcut named `anyOldTransfer` that
+matches the execution of any method named `transfer`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Pointcut("execution(* transfer(..))") // the pointcut expression
+	private void anyOldTransfer() {} // the pointcut signature
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Pointcut("execution(* transfer(..))") // the pointcut expression
+	private fun anyOldTransfer() {} // the pointcut signature
+----
+======
+
+The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
+AspectJ pointcut expression. For a full discussion of AspectJ's pointcut language, see
+the {aspectj-docs-progguide}/index.html[AspectJ
+Programming Guide] (and, for extensions, the
+{aspectj-docs}/adk15notebook/index.html[AspectJ 5
+Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
+et al., or _AspectJ in Action_, by Ramnivas Laddad).
+
+
+[[aop-pointcuts-designators]]
+== Supported Pointcut Designators
+
+Spring AOP supports the following AspectJ pointcut designators (PCD) for use in pointcut
+expressions:
+
+* `execution`: For matching method execution join points. This is the primary
+  pointcut designator to use when working with Spring AOP.
+* `within`: Limits matching to join points within certain types (the execution
+  of a method declared within a matching type when using Spring AOP).
+* `this`: Limits matching to join points (the execution of methods when using Spring
+  AOP) where the bean reference (Spring AOP proxy) is an instance of the given type.
+* `target`: Limits matching to join points (the execution of methods when using
+  Spring AOP) where the target object (application object being proxied) is an instance
+  of the given type.
+* `args`: Limits matching to join points (the execution of methods when using Spring
+  AOP) where the arguments are instances of the given types.
+* `@target`: Limits matching to join points (the execution of methods when using
+  Spring AOP) where the class of the executing object has an annotation of the given type.
+* `@args`: Limits matching to join points (the execution of methods when using Spring
+  AOP) where the runtime type of the actual arguments passed have annotations of the
+  given types.
+* `@within`: Limits matching to join points within types that have the given
+  annotation (the execution of methods declared in types with the given annotation when
+  using Spring AOP).
+* `@annotation`: Limits matching to join points where the subject of the join point
+  (the method being run in Spring AOP) has the given annotation.
+
+.Other pointcut types
+****
+The full AspectJ pointcut language supports additional pointcut designators that are not
+supported in Spring: `call`, `get`, `set`, `preinitialization`,
+`staticinitialization`, `initialization`, `handler`, `adviceexecution`, `withincode`, `cflow`,
+`cflowbelow`, `if`, `@this`, and `@withincode`. Use of these pointcut designators in pointcut
+expressions interpreted by Spring AOP results in an `IllegalArgumentException` being
+thrown.
+
+The set of pointcut designators supported by Spring AOP may be extended in future
+releases to support more of the AspectJ pointcut designators.
+****
+
+Because Spring AOP limits matching to only method execution join points, the preceding discussion
+of the pointcut designators gives a narrower definition than you can find in the
+AspectJ programming guide. In addition, AspectJ itself has type-based semantics and, at
+an execution join point, both `this` and `target` refer to the same object: the
+object executing the method. Spring AOP is a proxy-based system and differentiates
+between the proxy object itself (which is bound to `this`) and the target object behind the
+proxy (which is bound to `target`).
+
+[NOTE]
+====
+Due to the proxy-based nature of Spring's AOP framework, calls within the target object
+are, by definition, not intercepted. For JDK proxies, only public interface method
+calls on the proxy can be intercepted. With CGLIB, public and protected method calls on
+the proxy are intercepted (and even package-visible methods, if necessary). However,
+common interactions through proxies should always be designed through public signatures.
+
+Note that pointcut definitions are generally matched against any intercepted method.
+If a pointcut is strictly meant to be public-only, even in a CGLIB proxy scenario with
+potential non-public interactions through proxies, it needs to be defined accordingly.
+
+If your interception needs include method calls or even constructors within the target
+class, consider the use of Spring-driven xref:core/aop/using-aspectj.adoc#aop-aj-ltw[native AspectJ weaving] instead
+of Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage
+with different characteristics, so be sure to make yourself familiar with weaving
+before making a decision.
+====
+
+Spring AOP also supports an additional PCD named `bean`. This PCD lets you limit
+the matching of join points to a particular named Spring bean or to a set of named
+Spring beans (when using wildcards). The `bean` PCD has the following form:
+
+[source,indent=0,subs="verbatim"]
+----
+	bean(idOrNameOfBean)
+----
+
+The `idOrNameOfBean` token can be the name of any Spring bean. Limited wildcard
+support that uses the `*` character is provided, so, if you establish some naming
+conventions for your Spring beans, you can write a `bean` PCD expression
+to select them. As is the case with other pointcut designators, the `bean` PCD can
+be used with the `&&` (and), `||` (or), and `!` (negation) operators, too.
+
+[NOTE]
+====
+The `bean` PCD is supported only in Spring AOP and not in
+native AspectJ weaving. It is a Spring-specific extension to the standard PCDs that
+AspectJ defines and is, therefore, not available for aspects declared in the `@Aspect` model.
+
+The `bean` PCD operates at the instance level (building on the Spring bean name
+concept) rather than at the type level only (to which weaving-based AOP is limited).
+Instance-based pointcut designators are a special capability of Spring's
+proxy-based AOP framework and its close integration with the Spring bean factory, where
+it is natural and straightforward to identify specific beans by name.
+====
+
+
+[[aop-pointcuts-combining]]
+== Combining Pointcut Expressions
+
+You can combine pointcut expressions by using `&&,` `||` and `!`. You can also refer to
+pointcut expressions by name. The following example shows three pointcut expressions:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz;
+
+	public class Pointcuts {
+
+		@Pointcut("execution(public * *(..))")
+		public void publicMethod() {} // <1>
+
+		@Pointcut("within(com.xyz.trading..*)")
+		public void inTrading() {} // <2>
+
+		@Pointcut("publicMethod() && inTrading()")
+		public void tradingOperation() {} // <3>
+	}
+----
+<1> `publicMethod` matches if a method execution join point represents the execution
+of any public method.
+<2> `inTrading` matches if a method execution is in the trading module.
+<3> `tradingOperation` matches if a method execution represents any public method in the
+trading module.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz
+
+	class Pointcuts {
+
+		@Pointcut("execution(public * *(..))")
+		fun publicMethod() {} // <1>
+
+		@Pointcut("within(com.xyz.trading..*)")
+		fun inTrading() {} // <2>
+
+		@Pointcut("publicMethod() && inTrading()")
+		fun tradingOperation() {} // <3>
+	}
+----
+<1> `publicMethod` matches if a method execution join point represents the execution
+of any public method.
+<2> `inTrading` matches if a method execution is in the trading module.
+<3> `tradingOperation` matches if a method execution represents any public method in the
+trading module.
+======
+
+It is a best practice to build more complex pointcut expressions out of smaller _named
+pointcuts_, as shown above. When referring to pointcuts by name, normal Java visibility
+rules apply (you can see `private` pointcuts in the same type, `protected` pointcuts in
+the hierarchy, `public` pointcuts anywhere, and so on). Visibility does not affect
+pointcut matching.
+
+
+[[aop-common-pointcuts]]
+== Sharing Named Pointcut Definitions
+
+When working with enterprise applications, developers often have the need to refer to
+modules of the application and particular sets of operations from within several aspects.
+We recommend defining a dedicated class that captures commonly used _named pointcut_
+expressions for this purpose. Such a class typically resembles the following
+`CommonPointcuts` example (though what you name the class is up to you):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages",fold="none"]
+----
+	package com.xyz;
+
+	import org.aspectj.lang.annotation.Pointcut;
+
+	public class CommonPointcuts {
+
+		/**
+		 * A join point is in the web layer if the method is defined
+		 * in a type in the com.xyz.web package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.web..*)")
+		public void inWebLayer() {}
+
+		/**
+		 * A join point is in the service layer if the method is defined
+		 * in a type in the com.xyz.service package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.service..*)")
+		public void inServiceLayer() {}
+
+		/**
+		 * A join point is in the data access layer if the method is defined
+		 * in a type in the com.xyz.dao package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.dao..*)")
+		public void inDataAccessLayer() {}
+
+		/**
+		 * A business service is the execution of any method defined on a service
+		 * interface. This definition assumes that interfaces are placed in the
+		 * "service" package, and that implementation types are in sub-packages.
+		 *
+		 * If you group service interfaces by functional area (for example,
+		 * in packages com.xyz.abc.service and com.xyz.def.service) then
+		 * the pointcut expression "execution(* com.xyz..service.*.*(..))"
+		 * could be used instead.
+		 *
+		 * Alternatively, you can write the expression using the 'bean'
+		 * PCD, like so "bean(*Service)". (This assumes that you have
+		 * named your Spring service beans in a consistent fashion.)
+		 */
+		@Pointcut("execution(* com.xyz..service.*.*(..))")
+		public void businessService() {}
+
+		/**
+		 * A data access operation is the execution of any method defined on a
+		 * DAO interface. This definition assumes that interfaces are placed in the
+		 * "dao" package, and that implementation types are in sub-packages.
+		 */
+		@Pointcut("execution(* com.xyz.dao.*.*(..))")
+		public void dataAccessOperation() {}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages",fold="none"]
+----
+	package com.xyz
+
+	import org.aspectj.lang.annotation.Pointcut
+
+	class CommonPointcuts {
+
+		/**
+		 * A join point is in the web layer if the method is defined
+		 * in a type in the com.xyz.web package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.web..*)")
+		fun inWebLayer() {}
+
+		/**
+		 * A join point is in the service layer if the method is defined
+		 * in a type in the com.xyz.service package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.service..*)")
+		fun inServiceLayer() {}
+
+		/**
+		 * A join point is in the data access layer if the method is defined
+		 * in a type in the com.xyz.dao package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.dao..*)")
+		fun inDataAccessLayer() {}
+
+		/**
+		 * A business service is the execution of any method defined on a service
+		 * interface. This definition assumes that interfaces are placed in the
+		 * "service" package, and that implementation types are in sub-packages.
+		 *
+		 * If you group service interfaces by functional area (for example,
+		 * in packages com.xyz.abc.service and com.xyz.def.service) then
+		 * the pointcut expression "execution(* com.xyz..service.*.*(..))"
+		 * could be used instead.
+		 *
+		 * Alternatively, you can write the expression using the 'bean'
+		 * PCD, like so "bean(*Service)". (This assumes that you have
+		 * named your Spring service beans in a consistent fashion.)
+		 */
+		@Pointcut("execution(* com.xyz..service.*.*(..))")
+		fun businessService() {}
+
+		/**
+		 * A data access operation is the execution of any method defined on a
+		 * DAO interface. This definition assumes that interfaces are placed in the
+		 * "dao" package, and that implementation types are in sub-packages.
+		 */
+		@Pointcut("execution(* com.xyz.dao.*.*(..))")
+		fun dataAccessOperation() {}
+
+	}
+----
+======
+
+You can refer to the pointcuts defined in such a class anywhere you need a pointcut
+expression by referencing the fully-qualified name of the class combined with the
+`@Pointcut` method's name. For example, to make the service layer transactional, you
+could write the following which references the
+`com.xyz.CommonPointcuts.businessService()` _named pointcut_:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+		<aop:advisor
+			pointcut="com.xyz.CommonPointcuts.businessService()"
+			advice-ref="tx-advice"/>
+	</aop:config>
+
+	<tx:advice id="tx-advice">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+The `<aop:config>` and `<aop:advisor>` elements are discussed in xref:core/aop/schema.adoc[Schema-based AOP Support]. The
+transaction elements are discussed in xref:data-access/transaction.adoc[Transaction Management].
+
+
+[[aop-pointcuts-examples]]
+== Examples
+
+Spring AOP users are likely to use the `execution` pointcut designator the most often.
+The format of an execution expression follows:
+
+[literal,indent=0,subs="verbatim"]
+----
+	execution(modifiers-pattern?
+				ret-type-pattern
+				declaring-type-pattern?name-pattern(param-pattern)
+				throws-pattern?)
+----
+
+All parts except the returning type pattern (`ret-type-pattern` in the preceding snippet),
+the name pattern, and the parameters pattern are optional. The returning type pattern determines
+what the return type of the method must be in order for a join point to be matched.
+`{asterisk}` is most frequently used as the returning type pattern. It matches any return
+type. A fully-qualified type name matches only when the method returns the given
+type. The name pattern matches the method name. You can use the `{asterisk}` wildcard as all or
+part of a name pattern. If you specify a declaring type pattern,
+include a trailing `.` to join it to the name pattern component.
+The parameters pattern is slightly more complex: `()` matches a
+method that takes no parameters, whereas `(..)` matches any number (zero or more) of parameters.
+The `({asterisk})` pattern matches a method that takes one parameter of any type.
+`(*,String)` matches a method that takes two parameters. The first can be of any type, while the
+second must be a `String`. Consult the
+{aspectj-docs-progguide}/semantics-pointcuts.html[Language
+Semantics] section of the AspectJ Programming Guide for more information.
+
+The following examples show some common pointcut expressions:
+
+* The execution of any public method:
++
+[literal,indent=0,subs="verbatim"]
+----
+	execution(public * *(..))
+----
+
+* The execution of any method with a name that begins with `set`:
++
+[literal,indent=0,subs="verbatim"]
+----
+	execution(* set*(..))
+----
+
+* The execution of any method defined by the `AccountService` interface:
++
+[literal,indent=0,subs="verbatim"]
+----
+	execution(* com.xyz.service.AccountService.*(..))
+----
+
+* The execution of any method defined in the `service` package:
++
+[literal,indent=0,subs="verbatim"]
+----
+	execution(* com.xyz.service.*.*(..))
+----
+
+* The execution of any method defined in the service package or one of its sub-packages:
++
+[literal,indent=0,subs="verbatim"]
+----
+	execution(* com.xyz.service..*.*(..))
+----
+
+* Any join point (method execution only in Spring AOP) within the service package:
++
+[literal,indent=0,subs="verbatim"]
+----
+	within(com.xyz.service.*)
+----
+
+* Any join point (method execution only in Spring AOP) within the service package or one of its
+sub-packages:
++
+[literal,indent=0,subs="verbatim"]
+----
+	within(com.xyz.service..*)
+----
+
+* Any join point (method execution only in Spring AOP) where the proxy implements the
+`AccountService` interface:
++
+[literal,indent=0,subs="verbatim"]
+----
+	this(com.xyz.service.AccountService)
+----
++
+NOTE: `this` is more commonly used in a binding form. See the section on xref:core/aop/ataspectj/advice.adoc[Declaring Advice]
+for how to make the proxy object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) where the target object
+implements the `AccountService` interface:
++
+[literal,indent=0,subs="verbatim"]
+----
+	target(com.xyz.service.AccountService)
+----
++
+NOTE: `target` is more commonly used in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
+for how to make the target object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) that takes a single parameter
+and where the argument passed at runtime is `Serializable`:
++
+[literal,indent=0,subs="verbatim"]
+----
+	args(java.io.Serializable)
+----
++
+NOTE: `args` is more commonly used in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
+for how to make the method arguments available in the advice body.
++
+Note that the pointcut given in this example is different from `execution(*
+*(java.io.Serializable))`. The args version matches if the argument passed at runtime is
+`Serializable`, and the execution version matches if the method signature declares a single
+parameter of type `Serializable`.
+
+* Any join point (method execution only in Spring AOP) where the target object has a
+`@Transactional` annotation:
++
+[literal,indent=0,subs="verbatim"]
+----
+	@target(org.springframework.transaction.annotation.Transactional)
+----
++
+NOTE: You can also use `@target` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section for
+how to make the annotation object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) where the declared type of the
+target object has an `@Transactional` annotation:
++
+[literal,indent=0,subs="verbatim"]
+----
+	@within(org.springframework.transaction.annotation.Transactional)
+----
++
+NOTE: You can also use `@within` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section for
+how to make the annotation object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) where the executing method has an
+`@Transactional` annotation:
++
+[literal,indent=0,subs="verbatim"]
+----
+	@annotation(org.springframework.transaction.annotation.Transactional)
+----
++
+NOTE: You can also use `@annotation` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
+for how to make the annotation object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) which takes a single parameter,
+and where the runtime type of the argument passed has the `@Classified` annotation:
++
+[literal,indent=0,subs="verbatim"]
+----
+	@args(com.xyz.security.Classified)
+----
++
+NOTE: You can also use `@args` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
+how to make the annotation object(s) available in the advice body.
+
+* Any join point (method execution only in Spring AOP) on a Spring bean named
+`tradeService`:
++
+[literal,indent=0,subs="verbatim"]
+----
+	bean(tradeService)
+----
+
+* Any join point (method execution only in Spring AOP) on Spring beans having names that
+match the wildcard expression `*Service`:
++
+[literal,indent=0,subs="verbatim"]
+----
+	bean(*Service)
+----
+
+
+[[writing-good-pointcuts]]
+== Writing Good Pointcuts
+
+During compilation, AspectJ processes pointcuts in order to optimize matching
+performance. Examining code and determining if each join point matches (statically or
+dynamically) a given pointcut is a costly process. (A dynamic match means the match
+cannot be fully determined from static analysis and that a test is placed in the code to
+determine if there is an actual match when the code is running). On first encountering a
+pointcut declaration, AspectJ rewrites it into an optimal form for the matching
+process. What does this mean? Basically, pointcuts are rewritten in DNF (Disjunctive
+Normal Form) and the components of the pointcut are sorted such that those components
+that are cheaper to evaluate are checked first. This means you do not have to worry
+about understanding the performance of various pointcut designators and may supply them
+in any order in a pointcut declaration.
+
+However, AspectJ can work only with what it is told. For optimal performance of
+matching, you should think about what you are trying to achieve and narrow the search
+space for matches as much as possible in the definition. The existing designators
+naturally fall into one of three groups: kinded, scoping, and contextual:
+
+* Kinded designators select a particular kind of join point:
+`execution`, `get`, `set`, `call`, and `handler`.
+* Scoping designators select a group of join points of interest
+(probably of many kinds): `within` and `withincode`
+* Contextual designators match (and optionally bind) based on context:
+`this`, `target`, and `@annotation`
+
+A well written pointcut should include at least the first two types (kinded and
+scoping). You can include the contextual designators to match based on
+join point context or bind that context for use in the advice. Supplying only a
+kinded designator or only a contextual designator works but could affect weaving
+performance (time and memory used), due to extra processing and analysis. Scoping
+designators are very fast to match, and using them means AspectJ can very quickly
+dismiss groups of join points that should not be further processed. A good
+pointcut should always include one if possible.
+
+
+

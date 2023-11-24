@@ -1,0 +1,180 @@
+[[transaction-declarative-rolling-back]]
+= Rolling Back a Declarative Transaction
+
+The previous section outlined the basics of how to specify transactional settings for
+classes, typically service layer classes, declaratively in your application. This section
+describes how you can control the rollback of transactions in a simple, declarative
+fashion in XML configuration. For details on controlling rollback semantics declaratively
+with the `@Transactional` annotation, see
+xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-attransactional-settings[`@Transactional` Settings].
+
+The recommended way to indicate to the Spring Framework's transaction infrastructure
+that a transaction's work is to be rolled back is to throw an `Exception` from code that
+is currently executing in the context of a transaction. The Spring Framework's
+transaction infrastructure code catches any unhandled `Exception` as it bubbles up
+the call stack and makes a determination whether to mark the transaction for rollback.
+
+In its default configuration, the Spring Framework's transaction infrastructure code
+marks a transaction for rollback only in the case of runtime, unchecked exceptions.
+That is, when the thrown exception is an instance or subclass of `RuntimeException`.
+(`Error` instances also, by default, result in a rollback).
+
+As of Spring Framework 5.2, the default configuration also provides support for
+Vavr's `Try` method to trigger transaction rollbacks when it returns a 'Failure'.
+This allows you to handle functional-style errors using Try and have the transaction
+automatically rolled back in case of a failure. For more information on Vavr's Try,
+refer to the [official Vavr documentation](https://www.vavr.io/vavr-docs/#_try).
+
+Here's an example of how to use Vavr's Try with a transactional method:
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Transactional
+	public Try<String> myTransactionalMethod() {
+		// If myDataAccessOperation throws an exception, it will be caught by the
+		// Try instance created with Try.of() and wrapped inside the Failure class
+		// which can be checked using the isFailure() method on the Try instance.
+		return Try.of(delegate::myDataAccessOperation);
+	}
+----
+======
+
+Checked exceptions that are thrown from a transactional method do not result in a rollback
+in the default configuration. You can configure exactly which `Exception` types mark a
+transaction for rollback, including checked exceptions by specifying _rollback rules_.
+
+.Rollback rules
+[[transaction-declarative-rollback-rules]]
+[NOTE]
+====
+Rollback rules determine if a transaction should be rolled back when a given exception is
+thrown, and the rules are based on exception types or exception patterns.
+
+Rollback rules may be configured in XML via the `rollback-for` and `no-rollback-for`
+attributes, which allow rules to be defined as patterns. When using
+xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-attransactional-settings[`@Transactional`], rollback rules may
+be configured via the `rollbackFor`/`noRollbackFor` and
+`rollbackForClassName`/`noRollbackForClassName` attributes, which allow rules to be
+defined based on exception types or patterns, respectively.
+
+When a rollback rule is defined with an exception type, that type will be used to match
+against the type of a thrown exception and its super types, providing type safety and
+avoiding any unintentional matches that may occur when using a pattern. For example, a
+value of `jakarta.servlet.ServletException.class` will only match thrown exceptions of
+type `jakarta.servlet.ServletException` and its subclasses.
+
+When a rollback rule is defined with an exception pattern, the pattern can be a fully
+qualified class name or a substring of a fully qualified class name for an exception type
+(which must be a subclass of `Throwable`), with no wildcard support at present. For
+example, a value of `"jakarta.servlet.ServletException"` or `"ServletException"` will
+match `jakarta.servlet.ServletException` and its subclasses.
+
+[WARNING]
+=====
+You must carefully consider how specific a pattern is and whether to include package
+information (which isn't mandatory). For example, `"Exception"` will match nearly
+anything and will probably hide other rules. `"java.lang.Exception"` would be correct if
+`"Exception"` were meant to define a rule for all checked exceptions. With more unique
+exception names such as `"BaseBusinessException"` there is likely no need to use the
+fully qualified class name for the exception pattern.
+
+Furthermore, pattern-based rollback rules may result in unintentional matches for
+similarly named exceptions and nested classes. This is due to the fact that a thrown
+exception is considered to be a match for a given pattern-based rollback rule if the name
+of the thrown exception contains the exception pattern configured for the rollback rule.
+For example, given a rule configured to match on `"com.example.CustomException"`, that
+rule will match against an exception named `com.example.CustomExceptionV2` (an exception
+in the same package as `CustomException` but with an additional suffix) or an exception
+named `com.example.CustomException$AnotherException` (an exception declared as a nested
+class in `CustomException`).
+=====
+====
+
+The following XML snippet demonstrates how to configure rollback for a checked,
+application-specific `Exception` type by supplying an _exception pattern_ via the
+`rollback-for` attribute:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+			<tx:method name="*"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+If you do not want a transaction rolled back when an exception is thrown, you can also
+specify 'no rollback' rules. The following example tells the Spring Framework's
+transaction infrastructure to commit the attendant transaction even in the face of an
+unhandled `InstrumentNotFoundException`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
+			<tx:method name="*"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+When the Spring Framework's transaction infrastructure catches an exception and consults
+the configured rollback rules to determine whether to mark the transaction for rollback,
+the strongest matching rule wins. So, in the case of the following configuration, any
+exception other than an `InstrumentNotFoundException` results in a rollback of the
+attendant transaction:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+You can also indicate a required rollback programmatically. Although simple, this process
+is quite invasive and tightly couples your code to the Spring Framework's transaction
+infrastructure. The following example shows how to programmatically indicate a required
+rollback:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public void resolvePosition() {
+		try {
+			// some business logic...
+		} catch (NoProductInStockException ex) {
+			// trigger rollback programmatically
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun resolvePosition() {
+		try {
+			// some business logic...
+		} catch (ex: NoProductInStockException) {
+			// trigger rollback programmatically
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+		}
+	}
+----
+======
+
+You are strongly encouraged to use the declarative approach to rollback, if at all
+possible. Programmatic rollback is available should you absolutely need it, but its
+usage flies in the face of achieving a clean POJO-based architecture.
+
+

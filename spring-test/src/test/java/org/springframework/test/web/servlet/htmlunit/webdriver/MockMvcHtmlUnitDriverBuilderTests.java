@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
@@ -101,7 +100,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
-		assertThat(get("http://localhost/")).isEqualTo("");
+		assertThat(get("http://localhost/")).isEmpty();
 		Cookie cookie = new Cookie("localhost", "cookie", "cookieManagerShared");
 		otherDriver.getWebClient().getCookieManager().addCookie(cookie);
 		assertThat(get("http://localhost/")).isEqualTo("cookieManagerShared");

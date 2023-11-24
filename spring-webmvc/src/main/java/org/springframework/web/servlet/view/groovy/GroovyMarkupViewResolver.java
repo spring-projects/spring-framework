@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
- * Convenience subclass of @link AbstractTemplateViewResolver} that supports
+ * Convenience subclass of {@link AbstractTemplateViewResolver} that supports
  * {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates) and
  * custom subclasses of it.
  *
  * <p>The view class for all views created by this resolver can be specified
- * via the {@link #setViewClass(Class)} property.
+ * via {@link #setViewClass(Class)}.
  *
  * <p><b>Note:</b> When chaining ViewResolvers this resolver will check for the
  * existence of the specified template resources and only return a non-null
- * View object if a template is actually found.
+ * {@code View} object if a template is actually found.
  *
  * @author Brian Clozel
  * @since 4.1
@@ -48,7 +48,7 @@ public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 	}
 
 	/**
-	 * A convenience constructor that allows for specifying {@link #setPrefix prefix}
+	 * A convenience constructor that allows for specifying the {@link #setPrefix prefix}
 	 * and {@link #setSuffix suffix} as constructor arguments.
 	 * @param prefix the prefix that gets prepended to view names when building a URL
 	 * @param suffix the suffix that gets appended to view names when building a URL
