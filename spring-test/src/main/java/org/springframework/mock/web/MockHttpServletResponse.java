@@ -780,6 +780,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.status;
 	}
 
+	/**
+	 * Return the error message used when calling {@link HttpServletResponse#sendError(int, String)}.
+	 */
 	@Nullable
 	public String getErrorMessage() {
 		return this.errorMessage;
