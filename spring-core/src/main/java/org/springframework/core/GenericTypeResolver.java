@@ -83,7 +83,7 @@ public final class GenericTypeResolver {
 
 	/**
 	 * Resolve the single type argument of the given generic type against the given
-	 * target method which is assumed to return the given interface or an implementation
+	 * target method which is assumed to return the given type or an implementation
 	 * of it.
 	 * @param method the target method to check the return type of
 	 * @param genericType the generic interface or superclass to resolve the type argument from
@@ -102,7 +102,7 @@ public final class GenericTypeResolver {
 
 	/**
 	 * Resolve the single type argument of the given generic type against
-	 * the given target class which is assumed to implement the generic interface
+	 * the given target class which is assumed to implement the given type
 	 * and possibly declare a concrete type for its type variable.
 	 * @param clazz the target class to check against
 	 * @param genericType the generic interface or superclass to resolve the type argument from
@@ -128,8 +128,8 @@ public final class GenericTypeResolver {
 
 	/**
 	 * Resolve the type arguments of the given generic type against the given
-	 * target class which is assumed to implement the generic interface and possibly
-	 * declare concrete types for its type variables.
+	 * target class which is assumed to implement or extend from the given type
+	 * and possibly declare concrete types for its type variables.
 	 * @param clazz the target class to check against
 	 * @param genericType the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of each argument, with the array size matching the

@@ -72,6 +72,7 @@ class GenericTypeResolverTests {
 	void methodReturnTypes() {
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class)).isEqualTo(Integer.class);
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class)).isEqualTo(String.class);
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "character"), MyAbstractType.class)).isEqualTo(Character.class);
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class)).isNull();
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class)).isNull();
 	}
@@ -135,6 +136,12 @@ class GenericTypeResolverTests {
 		}
 		assertThat(t).isEqualTo(Integer.class);
 		assertThat(x).isEqualTo(Long.class);
+	}
+
+	@Test
+	void resolveTypeArgumentsOfAbstractType() {
+		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(MyConcreteType.class, MyAbstractType.class);
+		assertThat(resolved).containsExactly(Character.class);
 	}
 
 	@Test  // SPR-11030
@@ -240,6 +247,12 @@ class GenericTypeResolverTests {
 	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
 	}
 
+	public abstract class MyAbstractType<T> implements MyInterfaceType<T> {
+	}
+
+	public class MyConcreteType extends MyAbstractType<Character> {
+	}
+
 	public abstract class MySuperclassType<T> {
 
 		public void upperBound(List<? extends T> list) {
@@ -273,6 +286,8 @@ class GenericTypeResolverTests {
 		public MySimpleInterfaceType string() {
 			return null;
 		}
+
+		public MyConcreteType character() { return null; }
 
 		public Object object() {
 			return null;
