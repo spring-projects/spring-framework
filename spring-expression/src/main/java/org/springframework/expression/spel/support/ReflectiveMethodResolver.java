@@ -117,6 +117,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class<?> clazz ? clazz : targetObject.getClass());
 			ArrayList<Method> methods = new ArrayList<>(getMethods(type, targetObject));
+			methods.removeIf(method -> !method.getName().equals(name));
 
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
@@ -160,47 +161,45 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			boolean multipleOptions = false;
 
 			for (Method method : methodsToIterate) {
-				if (method.getName().equals(name)) {
-					int paramCount = method.getParameterCount();
-					List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
-					for (int i = 0; i < paramCount; i++) {
-						paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
+				int paramCount = method.getParameterCount();
+				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
+				for (int i = 0; i < paramCount; i++) {
+					paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
+				}
+				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
+				if (method.isVarArgs() && argumentTypes.size() >= (paramCount - 1)) {
+					// *sigh* complicated
+					matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
+				}
+				else if (paramCount == argumentTypes.size()) {
+					// Name and parameter number match, check the arguments
+					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
+				}
+				if (matchInfo != null) {
+					if (matchInfo.isExactMatch()) {
+						return new ReflectiveMethodExecutor(method, type);
 					}
-					ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-					if (method.isVarArgs() && argumentTypes.size() >= (paramCount - 1)) {
-						// *sigh* complicated
-						matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
-					}
-					else if (paramCount == argumentTypes.size()) {
-						// Name and parameter number match, check the arguments
-						matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
-					}
-					if (matchInfo != null) {
-						if (matchInfo.isExactMatch()) {
-							return new ReflectiveMethodExecutor(method, type);
-						}
-						else if (matchInfo.isCloseMatch()) {
-							if (this.useDistance) {
-								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
-								if (closeMatch == null || matchDistance < closeMatchDistance) {
-									// This is a better match...
-									closeMatch = method;
-									closeMatchDistance = matchDistance;
-								}
-							}
-							else {
-								// Take this as a close match if there isn't one already
-								if (closeMatch == null) {
-									closeMatch = method;
-								}
+					else if (matchInfo.isCloseMatch()) {
+						if (this.useDistance) {
+							int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
+							if (closeMatch == null || matchDistance < closeMatchDistance) {
+								// This is a better match...
+								closeMatch = method;
+								closeMatchDistance = matchDistance;
 							}
 						}
-						else if (matchInfo.isMatchRequiringConversion()) {
-							if (matchRequiringConversion != null) {
-								multipleOptions = true;
+						else {
+							// Take this as a close match if there isn't one already
+							if (closeMatch == null) {
+								closeMatch = method;
 							}
-							matchRequiringConversion = method;
 						}
+					}
+					else if (matchInfo.isMatchRequiringConversion()) {
+						if (matchRequiringConversion != null) {
+							multipleOptions = true;
+						}
+						matchRequiringConversion = method;
 					}
 				}
 			}
