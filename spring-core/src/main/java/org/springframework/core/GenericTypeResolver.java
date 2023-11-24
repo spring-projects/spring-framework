@@ -82,18 +82,18 @@ public final class GenericTypeResolver {
 	}
 
 	/**
-	 * Resolve the single type argument of the given generic interface against the given
-	 * target method which is assumed to return the given interface or an implementation
+	 * Resolve the single type argument of the given generic type against the given
+	 * target method which is assumed to return the given type or an implementation
 	 * of it.
 	 * @param method the target method to check the return type of
-	 * @param genericIfc the generic interface or superclass to resolve the type argument from
+	 * @param genericType the generic interface or superclass to resolve the type argument from
 	 * @return the resolved parameter type of the method return type, or {@code null}
 	 * if not resolvable or if the single argument is of type {@link WildcardType}.
 	 */
 	@Nullable
-	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
+	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericType) {
 		Assert.notNull(method, "Method must not be null");
-		ResolvableType resolvableType = ResolvableType.forMethodReturnType(method).as(genericIfc);
+		ResolvableType resolvableType = ResolvableType.forMethodReturnType(method).as(genericType);
 		if (!resolvableType.hasGenerics() || resolvableType.getType() instanceof WildcardType) {
 			return null;
 		}
@@ -101,16 +101,16 @@ public final class GenericTypeResolver {
 	}
 
 	/**
-	 * Resolve the single type argument of the given generic interface against
-	 * the given target class which is assumed to implement the generic interface
+	 * Resolve the single type argument of the given generic type against
+	 * the given target class which is assumed to implement the given type
 	 * and possibly declare a concrete type for its type variable.
 	 * @param clazz the target class to check against
-	 * @param genericIfc the generic interface or superclass to resolve the type argument from
+	 * @param genericType the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
 	@Nullable
-	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericIfc) {
-		ResolvableType resolvableType = ResolvableType.forClass(clazz).as(genericIfc);
+	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericType) {
+		ResolvableType resolvableType = ResolvableType.forClass(clazz).as(genericType);
 		if (!resolvableType.hasGenerics()) {
 			return null;
 		}
@@ -127,17 +127,17 @@ public final class GenericTypeResolver {
 
 
 	/**
-	 * Resolve the type arguments of the given generic interface against the given
-	 * target class which is assumed to implement the generic interface and possibly
-	 * declare concrete types for its type variables.
+	 * Resolve the type arguments of the given generic type against the given
+	 * target class which is assumed to implement or extend from the given type
+	 * and possibly declare concrete types for its type variables.
 	 * @param clazz the target class to check against
-	 * @param genericIfc the generic interface or superclass to resolve the type argument from
+	 * @param genericType the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
 	@Nullable
-	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
-		ResolvableType type = ResolvableType.forClass(clazz).as(genericIfc);
+	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericType) {
+		ResolvableType type = ResolvableType.forClass(clazz).as(genericType);
 		if (!type.hasGenerics() || type.isEntirelyUnresolvable()) {
 			return null;
 		}
