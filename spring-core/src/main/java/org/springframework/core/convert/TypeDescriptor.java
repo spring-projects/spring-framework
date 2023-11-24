@@ -510,7 +510,7 @@ public class TypeDescriptor implements Serializable {
 					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), otherDesc.getMapValueTypeDescriptor()));
 		}
 		else {
-			return true;
+			return Arrays.equals(getResolvableType().getGenerics(), otherDesc.getResolvableType().getGenerics());
 		}
 	}
 
