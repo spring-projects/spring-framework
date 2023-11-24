@@ -34,11 +34,13 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -663,12 +665,12 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void upCast() throws Exception {
+	void upcast() throws Exception {
 		Property property = new Property(getClass(), getClass().getMethod("getProperty"),
 				getClass().getMethod("setProperty", Map.class));
 		TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-		TypeDescriptor upCast = typeDescriptor.upcast(Object.class);
-		assertThat(upCast.getAnnotation(MethodAnnotation1.class)).isNotNull();
+		TypeDescriptor upcast = typeDescriptor.upcast(Object.class);
+		assertThat(upcast.getAnnotation(MethodAnnotation1.class)).isNotNull();
 	}
 
 	@Test
@@ -682,7 +684,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void elementTypeForCollectionSubclass() throws Exception {
+	void elementTypeForCollectionSubclass() {
 		@SuppressWarnings("serial")
 		class CustomSet extends HashSet<String> {
 		}
@@ -692,7 +694,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void elementTypeForMapSubclass() throws Exception {
+	void elementTypeForMapSubclass() {
 		@SuppressWarnings("serial")
 		class CustomMap extends HashMap<String, Integer> {
 		}
@@ -704,7 +706,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void createMapArray() throws Exception {
+	void createMapArray() {
 		TypeDescriptor mapType = TypeDescriptor.map(
 				LinkedHashMap.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
 		TypeDescriptor arrayType = TypeDescriptor.array(mapType);
@@ -713,13 +715,13 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void createStringArray() throws Exception {
+	void createStringArray() {
 		TypeDescriptor arrayType = TypeDescriptor.array(TypeDescriptor.valueOf(String.class));
 		assertThat(TypeDescriptor.valueOf(String[].class)).isEqualTo(arrayType);
 	}
 
 	@Test
-	void createNullArray() throws Exception {
+	void createNullArray() {
 		assertThat((Object) TypeDescriptor.array(null)).isNull();
 	}
 
@@ -736,13 +738,13 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void createCollectionWithNullElement() throws Exception {
+	void createCollectionWithNullElement() {
 		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
 		assertThat(typeDescriptor.getElementTypeDescriptor()).isNull();
 	}
 
 	@Test
-	void createMapWithNullElements() throws Exception {
+	void createMapWithNullElements() {
 		TypeDescriptor typeDescriptor = TypeDescriptor.map(LinkedHashMap.class, null, null);
 		assertThat(typeDescriptor.getMapKeyTypeDescriptor()).isNull();
 		assertThat(typeDescriptor.getMapValueTypeDescriptor()).isNull();
@@ -755,6 +757,17 @@ class TypeDescriptorTests {
 		assertThat(new TypeDescriptor(field).getSource()).isEqualTo(field);
 		assertThat(new TypeDescriptor(methodParameter).getSource()).isEqualTo(methodParameter);
 		assertThat(TypeDescriptor.valueOf(Integer.class).getSource()).isEqualTo(Integer.class);
+	}
+
+	@Test  // gh-31672
+	void equalityWithGenerics() {
+		ResolvableType rt1 = ResolvableType.forClassWithGenerics(Optional.class, Integer.class);
+		ResolvableType rt2 = ResolvableType.forClassWithGenerics(Optional.class, String.class);
+
+		TypeDescriptor td1 = new TypeDescriptor(rt1, null, null);
+		TypeDescriptor td2 = new TypeDescriptor(rt2, null, null);
+
+		assertThat(td1).isNotEqualTo(td2);
 	}
 
 
