@@ -37,7 +37,7 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	/**
 	 * Name of the request attribute holding the {@link ClientRequestObservationContext context}
 	 * for the current observation.
-	 * @since 6.1.1
+	 * @since 6.1.2
 	 */
 	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ClientRequestObservationContext.class.getName();
 
