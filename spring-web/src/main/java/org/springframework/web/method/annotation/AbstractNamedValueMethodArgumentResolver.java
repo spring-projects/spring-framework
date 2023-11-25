@@ -179,9 +179,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		if (info.name.isEmpty()) {
 			name = parameter.getParameterName();
 			if (name == null) {
-				throw new IllegalArgumentException(
-						"Name for argument of type [" + parameter.getNestedParameterType().getName() +
-						"] not specified, and parameter name information not found in class file either.");
+				throw new IllegalArgumentException("""
+						Name for argument of type [%s] not specified, and parameter name information not \
+						available via reflection. Ensure that the compiler uses the '-parameters' flag."""
+							.formatted(parameter.getNestedParameterType().getName()));
 			}
 		}
 		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);

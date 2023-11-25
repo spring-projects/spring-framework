@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,9 +127,10 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		if (info.name.isEmpty()) {
 			name = parameter.getParameterName();
 			if (name == null) {
-				throw new IllegalArgumentException(
-						"Name for argument of type [" + parameter.getParameterType().getName() + "] " +
-								"not specified, and parameter name information not found in class file either.");
+				throw new IllegalArgumentException("""
+						Name for argument of type [%s] not specified, and parameter name information not \
+						available via reflection. Ensure that the compiler uses the '-parameters' flag."""
+							.formatted(parameter.getNestedParameterType().getName()));
 			}
 		}
 		boolean required = (info.required && !parameter.getParameterType().equals(Optional.class));
