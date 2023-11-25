@@ -1,47 +1,58 @@
-/*
- * Copyright 2002-2007 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.core.type.filter;
-
-import java.util.regex.Pattern;
 
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.util.Assert;
+import java.util.regex.Pattern;
 
 /**
- * A simple filter for matching a fully-qualified class name with a regex {@link Pattern}.
- *
- * @author Mark Fisher
- * @author Juergen Hoeller
- * @since 2.5
+ * Abstract base class for type filters that perform class testing.
+ */
+public abstract class AbstractClassTestingTypeFilter implements TypeFilter {
+
+    // Other existing methods and fields...
+
+    /**
+     * Checks if the class metadata matches the given regex pattern.
+     * 
+     * @param metadata the class metadata to be checked
+     * @param pattern the regex pattern against which the class name is checked
+     * @return true if the class name matches the pattern
+     */
+    protected boolean matchesPattern(ClassMetadata metadata, Pattern pattern) {
+        Assert.notNull(metadata, "ClassMetadata must not be null");
+        Assert.notNull(pattern, "Pattern must not be null");
+        return pattern.matcher(metadata.getClassName()).matches();
+    }
+
+    // Rest of the class...
+}
+
+/**
+ * A type filter that uses a regex pattern to match class names.
  */
 public class RegexPatternTypeFilter extends AbstractClassTestingTypeFilter {
 
-	private final Pattern pattern;
+    private final Pattern pattern;
 
+    /**
+     * Creates a new RegexPatternTypeFilter with the given pattern.
+     * 
+     * @param pattern the regex pattern to be used for matching class names
+     */
+    public RegexPatternTypeFilter(Pattern pattern) {
+        Assert.notNull(pattern, "Pattern must not be null");
+        this.pattern = pattern;
+    }
 
-	public RegexPatternTypeFilter(Pattern pattern) {
-		Assert.notNull(pattern, "Pattern must not be null");
-		this.pattern = pattern;
-	}
-
-
-	@Override
-	protected boolean match(ClassMetadata metadata) {
-		return this.pattern.matcher(metadata.getClassName()).matches();
-	}
+    /**
+     * Checks if the given class metadata matches the regex pattern.
+     * 
+     * @param metadata the class metadata to be checked
+     * @return true if the class name matches the pattern
+     */
+    @Override
+    protected boolean match(ClassMetadata metadata) {
+        return matchesPattern(metadata, this.pattern);
+    }
 
 }

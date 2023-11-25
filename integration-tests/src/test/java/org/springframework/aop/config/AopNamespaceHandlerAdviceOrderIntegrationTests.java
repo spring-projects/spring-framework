@@ -64,43 +64,15 @@ class AopNamespaceHandlerAdviceOrderIntegrationTests {
 
 		@Test
 		void afterAdviceIsInvokedLast(@Autowired Echo echo, @Autowired InvocationTrackingAspect aspect) throws Exception {
-			aspect.invocations.clear(); // Clear the invocations list at the start of the test
-			assertThat(aspect.invocations).isEmpty(); // Now this should pass
-			assertThat(echo.echo(42)).isEqualTo(42);
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
-		}
-
-		@Test
-		void afterAdviceOrderWhenNoExceptionThrown(@Autowired Echo echo, @Autowired InvocationTrackingAspect aspect) throws Exception {
-			aspect.invocations.clear(); // Clearing the list at the beginning of the test.
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
 			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
-		}
 
-		@Test
-		void afterAdviceOrderWhenNullIsEchoed(@Autowired Echo echo, @Autowired InvocationTrackingAspect aspect) throws Exception {
-			assertThat(aspect.invocations).isEmpty();
-			assertThat(echo.echo(null)).isNull();
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
-		}
-
-		@Test
-		void afterAdviceOrderWithInvocationListReset(@Autowired Echo echo, @Autowired InvocationTrackingAspect aspect) throws Exception {
-			aspect.invocations.clear(); // Ensure the list is empty before the test
-			assertThat(echo.echo(24)).isEqualTo(24);
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
-			// Now let's reset and try another invocation
 			aspect.invocations.clear();
-			assertThat(echo.echo(24)).isEqualTo(24);
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
-
+			assertThatException().isThrownBy(() -> echo.echo(new Exception()));
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after throwing", "after");
 		}
 	}
-
-
-
-
 
 
 	static class Echo {

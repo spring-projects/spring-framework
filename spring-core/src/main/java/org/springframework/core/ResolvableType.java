@@ -32,6 +32,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.MethodParameterTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.TypeProvider;
@@ -41,6 +42,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType.Object;
 
 /**
  * Encapsulates a Java {@link java.lang.reflect.Type}, providing access to
@@ -1565,63 +1568,85 @@ public class ResolvableType implements Serializable {
 	}
 
 
-	private static final class SyntheticParameterizedType implements ParameterizedType, Serializable {
+	
 
-		private final Type rawType;
+    private static final class SyntheticParameterizedType implements ParameterizedType, Serializable {
 
-		private final Type[] typeArguments;
+        private final Type rawType;
+        private final Type[] typeArguments;
+        private final TypeNameFormatter typeNameFormatter;
 
-		public SyntheticParameterizedType(Type rawType, Type[] typeArguments) {
-			this.rawType = rawType;
-			this.typeArguments = typeArguments;
-		}
+        public SyntheticParameterizedType(Type rawType, Type[] typeArguments) {
+            this.rawType = rawType;
+            this.typeArguments = typeArguments;
+            this.typeNameFormatter = new TypeNameFormatter(rawType, typeArguments);
+        }
 
-		@Override
-		public String getTypeName() {
-			String typeName = this.rawType.getTypeName();
-			if (this.typeArguments.length > 0) {
-				StringJoiner stringJoiner = new StringJoiner(", ", "<", ">");
-				for (Type argument : this.typeArguments) {
-					stringJoiner.add(argument.getTypeName());
-				}
-				return typeName + stringJoiner;
-			}
-			return typeName;
-		}
+        @Override
+        public String getTypeName() {
+            return typeNameFormatter.format();
+        }
 
-		@Override
-		@Nullable
-		public Type getOwnerType() {
-			return null;
-		}
+        @Override
+        @Nullable
+        public Type getOwnerType() {
+            return null;
+        }
 
-		@Override
-		public Type getRawType() {
-			return this.rawType;
-		}
+        @Override
+        public Type getRawType() {
+            return this.rawType;
+        }
 
-		@Override
-		public Type[] getActualTypeArguments() {
-			return this.typeArguments;
-		}
+        @Override
+        public Type[] getActualTypeArguments() {
+            return this.typeArguments;
+        }
 
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof ParameterizedType that &&
-					that.getOwnerType() == null && this.rawType.equals(that.getRawType()) &&
-					Arrays.equals(this.typeArguments, that.getActualTypeArguments())));
-		}
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return (this == other || (other instanceof ParameterizedType that &&
+                    that.getOwnerType() == null && this.rawType.equals(that.getRawType()) &&
+                    Arrays.equals(this.typeArguments, that.getActualTypeArguments())));
+        }
 
-		@Override
-		public int hashCode() {
-			return (this.rawType.hashCode() * 31 + Arrays.hashCode(this.typeArguments));
-		}
+        @Override
+        public int hashCode() {
+            return (this.rawType.hashCode() * 31 + Arrays.hashCode(this.typeArguments));
+        }
 
-		@Override
-		public String toString() {
-			return getTypeName();
-		}
-	}
+        @Override
+        public String toString() {
+            return getTypeName();
+        }
+    }
+
+    private static class TypeNameFormatter {
+        private final Type rawType;
+        private final Type[] typeArguments;
+
+        public TypeNameFormatter(Type rawType, Type[] typeArguments) {
+            this.rawType = rawType;
+            this.typeArguments = typeArguments;
+        }
+
+        public String format() {
+            String typeName = this.rawType.getTypeName();
+            if (this.typeArguments.length > 0) {
+                StringJoiner stringJoiner = new StringJoiner(", ", "<", ">");
+                for (Type argument : this.typeArguments) {
+                    stringJoiner.add(argument.getTypeName());
+                }
+                return typeName + stringJoiner;
+            }
+            return typeName;
+        }
+    }
+
+    // Additional methods or main method to demonstrate or test the functionality...
+
+}
+
 
 
 	/**

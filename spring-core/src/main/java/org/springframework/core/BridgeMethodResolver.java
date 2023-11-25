@@ -29,6 +29,8 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType.Object;
+
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
  * {@link Method} being bridged.
@@ -98,10 +100,13 @@ public final class BridgeMethodResolver {
 	 * checks and can be used to quickly filter for a set of possible matches.
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
-		return (!candidateMethod.isBridge() &&
-				candidateMethod.getName().equals(bridgeMethod.getName()) &&
-				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
-	}
+    boolean isNotBridge = !candidateMethod.isBridge();
+    boolean hasSameName = candidateMethod.getName().equals(bridgeMethod.getName());
+    boolean hasSameParameterCount = candidateMethod.getParameterCount() == bridgeMethod.getParameterCount();
+
+    return isNotBridge && hasSameName && hasSameParameterCount;
+}
+
 
 	/**
 	 * Searches for the bridged method in the given candidates.

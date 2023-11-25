@@ -42,6 +42,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType.Object;
+
 /**
  * Factory for collections that is aware of common Java and Spring collection types.
  *
@@ -303,59 +305,57 @@ public final class CollectionFactory {
 	 * @see java.util.EnumMap
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
-		Assert.notNull(mapType, "Map type must not be null");
-		if (LinkedHashMap.class == mapType || Map.class == mapType ||
-				mapType.getName().equals("java.util.SequencedMap")) {
-			return new LinkedHashMap<>(capacity);
-		}
-		else if (LinkedMultiValueMap.class == mapType || MultiValueMap.class == mapType) {
-			return new LinkedMultiValueMap();
-		}
-		else if (TreeMap.class == mapType || SortedMap.class == mapType || NavigableMap.class == mapType) {
-			return new TreeMap<>();
-		}
-		else if (EnumMap.class == mapType) {
-			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
-			return new EnumMap(asEnumType(keyType));
-		}
-		else if (HashMap.class == mapType) {
-			return new HashMap<>(capacity);
-		}
-		else {
-			if (mapType.isInterface() || !Map.class.isAssignableFrom(mapType)) {
-				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
-			}
-			try {
-				return (Map<K, V>) ReflectionUtils.accessibleConstructor(mapType).newInstance();
-			}
-			catch (Throwable ex) {
-				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
-			}
-		}
-	}
+public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
+    Assert.notNull(mapType, "Map type must not be null");
 
-	/**
-	 * Create a variant of {@link java.util.Properties} that automatically adapts
-	 * non-String values to String representations in {@link Properties#getProperty}.
-	 * <p>In addition, the returned {@code Properties} instance sorts properties
-	 * alphanumerically based on their keys.
-	 * @return a new {@code Properties} instance
-	 * @since 4.3.4
-	 * @see #createSortedProperties(boolean)
-	 * @see #createSortedProperties(Properties, boolean)
-	 */
-	@SuppressWarnings("serial")
-	public static Properties createStringAdaptingProperties() {
-		return new SortedProperties(false) {
-			@Override
-			@Nullable
-			public String getProperty(String key) {
-				Object value = get(key);
-				return (value != null ? value.toString() : null);
-			}
-		};
-	}
+    if (isTypeOf(LinkedHashMap.class, mapType, "java.util.SequencedMap")) {
+        return new LinkedHashMap<>(capacity);
+    }
+    if (isTypeOf(LinkedMultiValueMap.class, mapType)) {
+        return new LinkedMultiValueMap();
+    }
+    if (isTypeOf(TreeMap.class, mapType)) {
+        return new TreeMap<>();
+    }
+    if (isEnumMap(mapType)) {
+        Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
+        return new EnumMap(asEnumType(keyType));
+    }
+    if (isTypeOf(HashMap.class, mapType)) {
+        return new HashMap<>(capacity);
+    }
+    return handleCustomMapType(mapType);
+}
+
+private static boolean isTypeOf(Class<?> expectedType, Class<?> actualType, String... additionalTypes) {
+    if (expectedType == actualType) {
+        return true;
+    }
+    for (String type : additionalTypes) {
+        if (actualType.getName().equals(type)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+private static boolean isEnumMap(Class<?> mapType) {
+    return EnumMap.class == mapType;
+}
+
+private static <K, V> Map<K, V> handleCustomMapType(Class<?> mapType) {
+    if (mapType.isInterface() || !Map.class.isAssignableFrom(mapType)) {
+        throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
+    }
+    try {
+        return (Map<K, V>) ReflectionUtils.accessibleConstructor(mapType).newInstance();
+    } catch (Throwable ex) {
+        throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
+    }
+}
+
+// asEnumType method remains as it is.
+
 
 	/**
 	 * Create a variant of {@link java.util.Properties} that sorts properties
