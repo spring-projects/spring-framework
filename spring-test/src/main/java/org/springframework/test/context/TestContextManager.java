@@ -20,7 +20,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,6 +91,17 @@ import org.springframework.util.ReflectionUtils;
 public class TestContextManager {
 
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
+
+	private static final Set<Class<? extends Throwable>> skippedExceptionTypes = new LinkedHashSet<>(4);
+
+	static {
+		// JUnit Jupiter
+		loadSkippedExceptionType("org.opentest4j.TestAbortedException");
+		// JUnit 4
+		loadSkippedExceptionType("org.junit.AssumptionViolatedException");
+		// TestNG
+		loadSkippedExceptionType("org.testng.SkipException");
+	}
 
 	private final TestContext testContext;
 
@@ -247,11 +260,19 @@ public class TestContextManager {
 					testExecutionListener.prepareTestInstance(getTestContext());
 				}
 				catch (Throwable ex) {
-					if (logger.isErrorEnabled()) {
+					if (isSkippedException(ex)) {
+						if (logger.isInfoEnabled()) {
+							logger.info("""
+									Caught exception while allowing TestExecutionListener [%s] to \
+									prepare test instance [%s]"""
+										.formatted(typeName(testExecutionListener), testInstance), ex);
+						}
+					}
+					else if (logger.isErrorEnabled()) {
 						logger.error("""
 							Caught exception while allowing TestExecutionListener [%s] to \
 							prepare test instance [%s]"""
-							.formatted(typeName(testExecutionListener), testInstance), ex);
+								.formatted(typeName(testExecutionListener), testInstance), ex);
 					}
 					ReflectionUtils.rethrowException(ex);
 				}
@@ -570,7 +591,15 @@ public class TestContextManager {
 	private void logException(
 			Throwable ex, String callbackName, TestExecutionListener testExecutionListener, Class<?> testClass) {
 
-		if (logger.isWarnEnabled()) {
+		if (isSkippedException(ex)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("""
+						Caught exception while invoking '%s' callback on TestExecutionListener [%s] \
+						for test class [%s]"""
+							.formatted(callbackName, typeName(testExecutionListener), typeName(testClass)), ex);
+			}
+		}
+		else if (logger.isWarnEnabled()) {
 			logger.warn("""
 					Caught exception while invoking '%s' callback on TestExecutionListener [%s] \
 					for test class [%s]"""
@@ -581,7 +610,15 @@ public class TestContextManager {
 	private void logException(Throwable ex, String callbackName, TestExecutionListener testExecutionListener,
 			Object testInstance, Method testMethod) {
 
-		if (logger.isWarnEnabled()) {
+		if (isSkippedException(ex)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("""
+						Caught exception while invoking '%s' callback on TestExecutionListener [%s] for \
+						test method [%s] and test instance [%s]"""
+							.formatted(callbackName, typeName(testExecutionListener), testMethod, testInstance), ex);
+			}
+		}
+		else if (logger.isWarnEnabled()) {
 			logger.warn("""
 					Caught exception while invoking '%s' callback on TestExecutionListener [%s] for \
 					test method [%s] and test instance [%s]"""
@@ -624,6 +661,28 @@ public class TestContextManager {
 			return type.getName();
 		}
 		return obj.getClass().getName();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static void loadSkippedExceptionType(String name) {
+		try {
+			Class<? extends Throwable> exceptionType = (Class<? extends Throwable>)
+					ClassUtils.forName(name, TestContextManager.class.getClassLoader());
+			skippedExceptionTypes.add(exceptionType);
+		}
+		catch (ClassNotFoundException | LinkageError ex) {
+			// ignore
+		}
+	}
+
+	private static boolean isSkippedException(Throwable ex) {
+		for (Class<? extends Throwable> skippedExceptionType : skippedExceptionTypes) {
+			if (skippedExceptionType.isInstance(ex)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
