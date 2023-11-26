@@ -96,11 +96,11 @@ public class TestContextManager {
 
 	static {
 		// JUnit Jupiter
-		loadSkippedExceptionType("org.opentest4j.TestAbortedException");
+		registerSkippedExceptionType("org.opentest4j.TestAbortedException");
 		// JUnit 4
-		loadSkippedExceptionType("org.junit.AssumptionViolatedException");
+		registerSkippedExceptionType("org.junit.AssumptionViolatedException");
 		// TestNG
-		loadSkippedExceptionType("org.testng.SkipException");
+		registerSkippedExceptionType("org.testng.SkipException");
 	}
 
 	private final TestContext testContext;
@@ -664,8 +664,7 @@ public class TestContextManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private static void loadSkippedExceptionType(String name) {
+	private static void registerSkippedExceptionType(String name) {
 		try {
 			Class<? extends Throwable> exceptionType = (Class<? extends Throwable>)
 					ClassUtils.forName(name, TestContextManager.class.getClassLoader());
