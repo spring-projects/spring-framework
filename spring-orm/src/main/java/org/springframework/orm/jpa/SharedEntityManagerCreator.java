@@ -77,7 +77,7 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Set<String> transactionRequiringMethods = new HashSet<>(6);
 
-	private static final Set<String> queryTerminatingMethods = new HashSet<>(9);
+	private static final Set<String> queryTerminatingMethods = new HashSet<>(10);
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -93,6 +93,7 @@ public abstract class SharedEntityManagerCreator {
 		queryTerminatingMethods.add("getResultStream");  // javax.persistence.Query.getResultStream()
 		queryTerminatingMethods.add("getResultList");  // javax.persistence.Query.getResultList()
 		queryTerminatingMethods.add("list");  // org.hibernate.query.Query.list()
+		queryTerminatingMethods.add("scroll");  // org.hibernate.query.Query.scroll()
 		queryTerminatingMethods.add("stream");  // org.hibernate.query.Query.stream()
 		queryTerminatingMethods.add("uniqueResult");  // org.hibernate.query.Query.uniqueResult()
 		queryTerminatingMethods.add("uniqueResultOptional");  // org.hibernate.query.Query.uniqueResultOptional()
