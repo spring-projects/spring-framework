@@ -268,8 +268,8 @@ public class TestContextManager {
 										.formatted(typeName(testExecutionListener), testInstance), ex);
 						}
 					}
-					else if (logger.isErrorEnabled()) {
-						logger.error("""
+					else if (logger.isWarnEnabled()) {
+						logger.warn("""
 							Caught exception while allowing TestExecutionListener [%s] to \
 							prepare test instance [%s]"""
 								.formatted(typeName(testExecutionListener), testInstance), ex);
