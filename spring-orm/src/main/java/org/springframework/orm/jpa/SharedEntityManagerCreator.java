@@ -88,6 +88,7 @@ public abstract class SharedEntityManagerCreator {
 			"getResultStream",  // jakarta.persistence.Query.getResultStream()
 			"getResultList",  // jakarta.persistence.Query.getResultList()
 			"list",  // org.hibernate.query.Query.list()
+			"scroll",  // org.hibernate.query.Query.scroll()
 			"stream",  // org.hibernate.query.Query.stream()
 			"uniqueResult",  // org.hibernate.query.Query.uniqueResult()
 			"uniqueResultOptional"  // org.hibernate.query.Query.uniqueResultOptional()
