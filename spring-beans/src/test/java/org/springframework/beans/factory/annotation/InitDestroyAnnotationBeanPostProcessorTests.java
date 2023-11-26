@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -57,10 +58,11 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	@Test
 	void processAheadOfTimeWhenHasInitDestroyAnnotationsAddsMethodNames() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyBean.class);
-		processAheadOfTime(beanDefinition);
+		BeanRegistrationAotContribution beanRegistrationAotContribution = processAheadOfTime(beanDefinition);
+		assertThat(beanRegistrationAotContribution).isNotNull();
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
-		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("initMethod");
-		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("destroyMethod");
+		assertThat(mergedBeanDefinition.getInitMethodNames()).isNull();
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).isNull();
 	}
 
 	@Test
@@ -68,10 +70,11 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyBean.class);
 		beanDefinition.setInitMethodName("customInitMethod");
 		beanDefinition.setDestroyMethodNames("customDestroyMethod");
-		processAheadOfTime(beanDefinition);
+		BeanRegistrationAotContribution beanRegistrationAotContribution = processAheadOfTime(beanDefinition);
+		assertThat(beanRegistrationAotContribution).isNotNull();
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
-		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("initMethod", "customInitMethod");
-		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("destroyMethod", "customDestroyMethod");
+		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("customInitMethod");
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("customDestroyMethod");
 	}
 
 	@Test
@@ -108,10 +111,11 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	@Test
 	void processAheadOfTimeWhenHasMultipleInitDestroyAnnotationsAddsAllMethodNames() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(MultiInitDestroyBean.class);
-		processAheadOfTime(beanDefinition);
+		BeanRegistrationAotContribution beanRegistrationAotContribution = processAheadOfTime(beanDefinition);
+		assertThat(beanRegistrationAotContribution).isNotNull();
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
-		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("initMethod", "anotherInitMethod");
-		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("anotherDestroyMethod", "destroyMethod");
+		assertThat(mergedBeanDefinition.getInitMethodNames()).isNull();
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).isNull();
 	}
 
 	@Test
@@ -125,27 +129,24 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 		// to ensure that it will be tracked as such even though it has the same
 		// name as DisposableBean#destroy().
 		beanDefinition.setDestroyMethodNames("destroy", "customDestroy");
-		processAheadOfTime(beanDefinition);
+		BeanRegistrationAotContribution beanRegistrationAotContribution = processAheadOfTime(beanDefinition);
+		assertThat(beanRegistrationAotContribution).isNotNull();
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
 		assertSoftly(softly -> {
 			softly.assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly(
-					CustomAnnotatedPrivateInitDestroyBean.class.getName() + ".privateInit", // fully-qualified private method
-					CustomAnnotatedPrivateSameNameInitDestroyBean.class.getName() + ".privateInit", // fully-qualified private method
 					"afterPropertiesSet",
 					"customInit"
 				);
 			softly.assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly(
-					CustomAnnotatedPrivateSameNameInitDestroyBean.class.getName() + ".privateDestroy", // fully-qualified private method
-					CustomAnnotatedPrivateInitDestroyBean.class.getName() + ".privateDestroy", // fully-qualified private method
 					"destroy",
 					"customDestroy"
 				);
 		});
 	}
 
-	private void processAheadOfTime(RootBeanDefinition beanDefinition) {
+	private BeanRegistrationAotContribution processAheadOfTime(RootBeanDefinition beanDefinition) {
 		RegisteredBean registeredBean = registerBean(beanDefinition);
-		assertThat(createAotBeanPostProcessor().processAheadOfTime(registeredBean)).isNull();
+		return createAotBeanPostProcessor().processAheadOfTime(registeredBean);
 	}
 
 	private RegisteredBean registerBean(RootBeanDefinition beanDefinition) {

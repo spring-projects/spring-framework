@@ -31,25 +31,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
+import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
+import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.javapoet.ClassName;
+import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.MethodSpec;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -85,7 +94,7 @@ import org.springframework.util.ReflectionUtils;
  */
 @SuppressWarnings("serial")
 public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, Serializable {
+		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, BeanFactoryInitializationAotProcessor, PriorityOrdered, Serializable {
 
 	private final transient LifecycleMetadata emptyLifecycleMetadata =
 			new LifecycleMetadata(Object.class, Collections.emptyList(), Collections.emptyList()) {
@@ -188,28 +197,28 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		beanDefinition.resolveDestroyMethodIfNecessary();
 		LifecycleMetadata metadata = findLifecycleMetadata(beanDefinition, registeredBean.getBeanClass());
-		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
-			String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);
-			beanDefinition.setInitMethodNames(initMethodNames);
+		return (generationContext, beanRegistrationCode) -> {
+			metadata.initMethods.forEach(lm -> registerLifecycleMethodForInvoke(generationContext, lm));
+			metadata.destroyMethods.forEach(lm -> registerLifecycleMethodForInvoke(generationContext, lm));
+		};
+	}
+
+	private void registerLifecycleMethodForInvoke(GenerationContext generationContext, LifecycleMethod lm) {
+		generationContext.getRuntimeHints().reflection().registerMethod(lm.getMethod(), ExecutableMode.INVOKE);
+	}
+
+	@Override
+	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+		if (this.initAnnotationTypes.isEmpty() && this.destroyAnnotationTypes.isEmpty()) {
+			return null;
 		}
-		if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
-			String[] destroyMethodNames = safeMerge(beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
-			beanDefinition.setDestroyMethodNames(destroyMethodNames);
-		}
-		return null;
+		return new BeanFactoryAotContribution(this.initAnnotationTypes, this.destroyAnnotationTypes);
 	}
 
 	private LifecycleMetadata findLifecycleMetadata(RootBeanDefinition beanDefinition, Class<?> beanClass) {
 		LifecycleMetadata metadata = findLifecycleMetadata(beanClass);
 		metadata.checkInitDestroyMethods(beanDefinition);
 		return metadata;
-	}
-
-	private static String[] safeMerge(@Nullable String[] existingNames, Collection<LifecycleMethod> detectedMethods) {
-		Stream<String> detectedNames = detectedMethods.stream().map(LifecycleMethod::getIdentifier);
-		Stream<String> mergedNames = (existingNames != null ?
-				Stream.concat(detectedNames, Stream.of(existingNames)) : detectedNames);
-		return mergedNames.distinct().toArray(String[]::new);
 	}
 
 	@Override
@@ -486,4 +495,33 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	}
 
+	private record BeanFactoryAotContribution(
+			Set<Class<? extends Annotation>> initAnnotationTypes,
+			Set<Class<? extends Annotation>> destroyAnnotationTypes) implements BeanFactoryInitializationAotContribution {
+		private static final String BEAN_FACTORY_PARAMETER_NAME = "beanFactory";
+		private static final String POST_PROCESSOR_PARAMETER_NAME = "postProcessor";
+
+		@Override
+		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
+			// to generate a unique name in case there are multiple InitDestroyAnnotationBeanPostProcessor-s
+			String[] methodNameParts = {"addInitDestroyBeanPostProcessorMethod"};
+			GeneratedMethod generatedMethod = beanFactoryInitializationCode.getMethods()
+					.add(methodNameParts, this::generateAddInitDestroyBeanPostProcessorMethod);
+			beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
+		}
+
+		private void generateAddInitDestroyBeanPostProcessorMethod(MethodSpec.Builder method) {
+			method.addJavadoc("Apply known externally managed init/destroy annotation bean post processors");
+			method.addModifiers(javax.lang.model.element.Modifier.PRIVATE);
+			method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
+
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.addStatement("$T $L = new $T()",
+					InitDestroyAnnotationBeanPostProcessor.class, POST_PROCESSOR_PARAMETER_NAME, InitDestroyAnnotationBeanPostProcessor.class);
+			this.initAnnotationTypes.forEach(type -> code.addStatement("$L.addInitAnnotationType($T.class)", POST_PROCESSOR_PARAMETER_NAME, ClassName.get(type)));
+			this.destroyAnnotationTypes.forEach(type -> code.addStatement("$L.addDestroyAnnotationType($T.class)", POST_PROCESSOR_PARAMETER_NAME, ClassName.get(type)));
+			code.addStatement("$L.addBeanPostProcessor($L)", BEAN_FACTORY_PARAMETER_NAME, POST_PROCESSOR_PARAMETER_NAME);
+			method.addCode(code.build());
+		}
+	}
 }

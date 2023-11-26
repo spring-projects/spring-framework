@@ -185,17 +185,17 @@ class InitDestroyMethodLifecycleTests {
 			CustomAnnotatedPrivateSameNameInitDestroyBean bean = aotApplicationContext.getBean("lifecycleTestBean", beanClass);
 
 			assertThat(bean.initMethods).as("init-methods").containsExactly(
-					"afterPropertiesSet",
 					"@PostConstruct.privateCustomInit1",
 					"@PostConstruct.sameNameCustomInit1",
+					"afterPropertiesSet",
 					"customInit"
 				);
 
 			aotApplicationContext.close();
 			assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
-					"destroy",
 					"@PreDestroy.sameNameCustomDestroy1",
 					"@PreDestroy.privateCustomDestroy1",
+					"destroy",
 					"customDestroy"
 				);
 		});
@@ -220,17 +220,17 @@ class InitDestroyMethodLifecycleTests {
 			SubPackagePrivateInitDestroyBean bean = aotApplicationContext.getBean("lifecycleTestBean", beanClass);
 
 			assertThat(bean.initMethods).as("init-methods").containsExactly(
-					"InitializingBean.afterPropertiesSet",
 					"PackagePrivateInitDestroyBean.postConstruct",
 					"SubPackagePrivateInitDestroyBean.postConstruct",
+					"InitializingBean.afterPropertiesSet",
 					"initMethod"
 				);
 
 			aotApplicationContext.close();
 			assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
-					"DisposableBean.destroy",
 					"SubPackagePrivateInitDestroyBean.preDestroy",
 					"PackagePrivateInitDestroyBean.preDestroy",
+					"DisposableBean.destroy",
 					"destroyMethod"
 				);
 		});
