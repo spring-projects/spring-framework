@@ -22,8 +22,11 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -89,16 +92,15 @@ class InputStreamSubscriberTests {
 		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
-		try (InputStreamSubscriber<String> is = new InputStreamSubscriber<>((s) -> s.getBytes(StandardCharsets.UTF_8), (ignore) -> {}, 1)) {
+		try (InputStream is = InputStreamSubscriber.subscribeTo(FlowAdapters.toFlowPublisher(flux), (s) -> s.getBytes(StandardCharsets.UTF_8), (ignore) -> {}, 1)) {
 			byte[] chunk = new byte[3];
-			flux.subscribe(FlowAdapters.toSubscriber(is));
 
 			assertThat(is.read(chunk)).isEqualTo(3);
-			assertThat(chunk).containsAnyOf(FOO);
+			assertThat(chunk).containsExactly(FOO);
 			assertThat(is.read(chunk)).isEqualTo(3);
-			assertThat(chunk).containsAnyOf(BAR);
+			assertThat(chunk).containsExactly(BAR);
 			assertThat(is.read(chunk)).isEqualTo(3);
-			assertThat(chunk).containsAnyOf(BAZ);
+			assertThat(chunk).containsExactly(BAZ);
 			assertThat(is.read(chunk)).isEqualTo(-1);
 		}
 		catch (IOException e) {
@@ -112,14 +114,32 @@ class InputStreamSubscriberTests {
 			outputStream.write(FOO);
 			outputStream.write(BAR);
 			outputStream.write(BAZ);
-		}, this.byteMapper, this.executor, 3);
+		}, this.byteMapper, this.executor, 2);
 		Flux<String> flux = toString(flowPublisher);
 
-		StepVerifier.create(flux)
-				.assertNext(s -> assertThat(s).isEqualTo("foo"))
-				.assertNext(s -> assertThat(s).isEqualTo("bar"))
-				.assertNext(s -> assertThat(s).isEqualTo("baz"))
-				.verifyComplete();
+		try (InputStream is = InputStreamSubscriber.subscribeTo(FlowAdapters.toFlowPublisher(flux), (s) -> s.getBytes(StandardCharsets.UTF_8), (ignore) -> {}, 1)) {
+			StringBuilder stringBuilder = new StringBuilder();
+			byte[] chunk = new byte[3];
+
+
+			stringBuilder
+					.append(new String(new byte[]{(byte)is.read()}, StandardCharsets.UTF_8));
+			assertThat(is.read(chunk)).isEqualTo(3);
+			stringBuilder
+					.append(new String(chunk, StandardCharsets.UTF_8));
+			assertThat(is.read(chunk)).isEqualTo(3);
+			stringBuilder
+					.append(new String(chunk, StandardCharsets.UTF_8));
+			assertThat(is.read(chunk)).isEqualTo(2);
+			stringBuilder
+					.append(new String(chunk,0, 2, StandardCharsets.UTF_8));
+			assertThat(is.read()).isEqualTo(-1);
+
+			assertThat(stringBuilder.toString()).isEqualTo("foobarbaz");
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Test
@@ -133,19 +153,29 @@ class InputStreamSubscriberTests {
 						outputStream.flush();
 						outputStream.write(BAR);
 						outputStream.flush();
+						outputStream.write(BAZ);
+						outputStream.flush();
 					})
 					.withMessage("Subscription has been terminated");
 			latch.countDown();
 
 		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
+		List<String> discarded = new ArrayList<>();
 
-		StepVerifier.create(flux, 1)
-				.assertNext(s -> assertThat(s).isEqualTo("foo"))
-				.thenCancel()
-				.verify();
+		try (InputStream is = InputStreamSubscriber.subscribeTo(FlowAdapters.toFlowPublisher(flux), (s) -> s.getBytes(StandardCharsets.UTF_8), discarded::add, 1)) {
+			byte[] chunk = new byte[3];
+
+			assertThat(is.read(chunk)).isEqualTo(3);
+			assertThat(chunk).containsExactly(FOO);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
 		latch.await();
+
+		assertThat(discarded).containsExactly("bar");
 	}
 
 	@Test
@@ -162,59 +192,63 @@ class InputStreamSubscriberTests {
 		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
-		StepVerifier.create(flux)
-				.assertNext(s -> assertThat(s).isEqualTo("foo"))
-				.verifyComplete();
+		try (InputStream is = InputStreamSubscriber.subscribeTo(FlowAdapters.toFlowPublisher(flux), (s) -> s.getBytes(StandardCharsets.UTF_8), ig -> {}, 1)) {
+			byte[] chunk = new byte[3];
+
+			assertThat(is.read(chunk)).isEqualTo(3);
+			assertThat(chunk).containsExactly(FOO);
+
+			assertThat(is.read(chunk)).isEqualTo(-1);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
 		latch.await();
 	}
 
 	@Test
-	void negativeRequestN() throws InterruptedException {
+	void mapperThrowsException() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
-			try (outputStream) {
 				outputStream.write(FOO);
 				outputStream.flush();
-				outputStream.write(BAR);
-				outputStream.flush();
-			}
-			finally {
+				assertThatIOException().isThrownBy(() -> {
+					outputStream.write(BAR);
+					outputStream.flush();
+				}).withMessage("Subscription has been terminated");
 				latch.countDown();
-			}
 		}, this.byteMapper, this.executor);
-		Flow.Subscription[] subscriptions = new Flow.Subscription[1];
-		Flux<String> flux = toString(a-> flowPublisher.subscribe(new Flow.Subscriber<>() {
-			@Override
-			public void onSubscribe(Flow.Subscription subscription) {
-				subscriptions[0] = subscription;
-				a.onSubscribe(subscription);
-			}
+		Throwable ex = null;
 
-			@Override
-			public void onNext(byte[] item) {
-				a.onNext(item);
-			}
+		StringBuilder stringBuilder = new StringBuilder();
+		try (InputStream is = InputStreamSubscriber.subscribeTo(flowPublisher, (s) -> {
+			throw new NullPointerException("boom");
+		}, ig -> {}, 1)) {
+			byte[] chunk = new byte[3];
 
-			@Override
-			public void onError(Throwable throwable) {
-				a.onError(throwable);
-			}
+			stringBuilder
+					.append(new String(new byte[]{(byte)is.read()}, StandardCharsets.UTF_8));
+			assertThat(is.read(chunk)).isEqualTo(3);
+			stringBuilder
+					.append(new String(chunk, StandardCharsets.UTF_8));
+			assertThat(is.read(chunk)).isEqualTo(3);
+			stringBuilder
+					.append(new String(chunk, StandardCharsets.UTF_8));
+			assertThat(is.read(chunk)).isEqualTo(2);
+			stringBuilder
+					.append(new String(chunk,0, 2, StandardCharsets.UTF_8));
+			assertThat(is.read()).isEqualTo(-1);
+		}
+		catch (Throwable e) {
+			ex = e;
+        }
 
-			@Override
-			public void onComplete() {
-				a.onComplete();
-			}
-		}));
+        latch.await();
 
-		StepVerifier.create(flux, 1)
-				.assertNext(s -> assertThat(s).isEqualTo("foo"))
-				.then(() -> subscriptions[0].request(-1))
-				.expectErrorMessage("request should be a positive number")
-				.verify();
-
-		latch.await();
+		assertThat(stringBuilder.toString()).isEqualTo("");
+		assertThat(ex).hasMessage("boom");
 	}
 
 	private static Flux<String> toString(Flow.Publisher<byte[]> flowPublisher) {

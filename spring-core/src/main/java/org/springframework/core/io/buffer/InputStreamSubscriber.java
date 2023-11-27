@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Oleh Dokuka
  * @since 6.1
  */
-class InputStreamSubscriber extends InputStream implements Subscriber<DataBuffer> {
+final class InputStreamSubscriber extends InputStream implements Subscriber<DataBuffer> {
 
 	static final Object READY = new Object();
 	static final DataBuffer DONE = DefaultDataBuffer.fromEmptyByteBuffer(DefaultDataBufferFactory.sharedInstance, ByteBuffer.allocate(0));
