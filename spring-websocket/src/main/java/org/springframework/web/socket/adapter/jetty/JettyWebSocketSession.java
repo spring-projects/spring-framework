@@ -45,7 +45,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.AbstractWebSocketSession;
 
 /**
- * A {@link WebSocketSession} for use with the Jetty 9.4 WebSocket API.
+ * A {@link WebSocketSession} for use with the Jetty WebSocket API.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
