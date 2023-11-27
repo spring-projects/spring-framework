@@ -243,7 +243,7 @@ public class HandlersBeanDefinitionParserTests {
 		if (handler instanceof WebSocketHandlerDecorator) {
 			handler = ((WebSocketHandlerDecorator) handler).getLastHandler();
 		}
-		assertThat(handlerClass.isInstance(handler)).isTrue();
+		assertThat(handler).isInstanceOf(handlerClass);
 	}
 }
 
