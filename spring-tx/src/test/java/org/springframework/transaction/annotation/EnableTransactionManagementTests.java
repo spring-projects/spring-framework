@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
@@ -288,6 +289,22 @@ public class EnableTransactionManagementTests {
 		ctx.close();
 	}
 
+	@Test
+	@Disabled("gh-24502")
+	public void gh24502AppliesTransactionOnlyOnAnnotatedInterface() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24502ConfigA.class);
+		Object bean = ctx.getBean("testBean");
+		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
+
+		((TransactionalInterface)bean).methodOne();
+		((NonTransactionalInterface)bean).methodTwo();
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
 
 	@Service
 	public static class TransactionalTestBean {
@@ -546,6 +563,45 @@ public class EnableTransactionManagementTests {
 		public PlatformTransactionManager txManager() {
 			return new CallCountingTransactionManager();
 		}
+	}
+
+	@Transactional
+	interface TransactionalInterface {
+
+		void methodOne();
+
+	}
+
+	interface NonTransactionalInterface {
+
+		void methodTwo();
+	}
+
+	static class MixedTransactionalTestService implements TransactionalInterface, NonTransactionalInterface {
+
+		@Override
+		public void methodOne() {
+		}
+
+		@Override
+		public void methodTwo() {
+		}
+	}
+
+	@Configuration
+	@EnableTransactionManagement(proxyTargetClass = false)
+	static class Gh24502ConfigA {
+
+		@Bean
+		public MixedTransactionalTestService testBean() {
+			return new MixedTransactionalTestService();
+		}
+
+		@Bean
+		public PlatformTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+
 	}
 
 }
