@@ -308,40 +308,42 @@ public final class CollectionFactory {
 public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
     Assert.notNull(mapType, "Map type must not be null");
 
-    if (isTypeOf(LinkedHashMap.class, mapType, "java.util.SequencedMap")) {
-        return new LinkedHashMap<>(capacity);
+    if (LinkedHashMap.class == mapType || Map.class == mapType) {
+        return createLinkedHashMap(capacity);
+    } else if (LinkedMultiValueMap.class == mapType || MultiValueMap.class == mapType) {
+        return createLinkedMultiValueMap();
+    } else if (TreeMap.class == mapType || SortedMap.class == mapType || NavigableMap.class == mapType) {
+        return createTreeMap();
+    } else if (EnumMap.class == mapType) {
+        return createEnumMap(keyType);
+    } else if (HashMap.class == mapType) {
+        return createHashMap(capacity);
+    } else {
+        return handleCustomMapType(mapType);
     }
-    if (isTypeOf(LinkedMultiValueMap.class, mapType)) {
-        return new LinkedMultiValueMap();
-    }
-    if (isTypeOf(TreeMap.class, mapType)) {
-        return new TreeMap<>();
-    }
-    if (isEnumMap(mapType)) {
-        Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
-        return new EnumMap(asEnumType(keyType));
-    }
-    if (isTypeOf(HashMap.class, mapType)) {
-        return new HashMap<>(capacity);
-    }
-    return handleCustomMapType(mapType);
 }
 
-private static boolean isTypeOf(Class<?> expectedType, Class<?> actualType, String... additionalTypes) {
-    if (expectedType == actualType) {
-        return true;
-    }
-    for (String type : additionalTypes) {
-        if (actualType.getName().equals(type)) {
-            return true;
-        }
-    }
-    return false;
+private static <K, V> Map<K, V> createLinkedHashMap(int capacity) {
+    return new LinkedHashMap<>(capacity);
 }
 
-private static boolean isEnumMap(Class<?> mapType) {
-    return EnumMap.class == mapType;
+private static <K, V> Map<K, V> createLinkedMultiValueMap() {
+    return new LinkedMultiValueMap<>();
 }
+
+private static <K, V> Map<K, V> createTreeMap() {
+    return new TreeMap<>();
+}
+
+private static <K, V> Map<K, V> createEnumMap(Class<?> keyType) {
+    Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
+    return new EnumMap(asEnumType(keyType));
+}
+
+private static <K, V> Map<K, V> createHashMap(int capacity) {
+    return new HashMap<>(capacity);
+}
+
 
 private static <K, V> Map<K, V> handleCustomMapType(Class<?> mapType) {
     if (mapType.isInterface() || !Map.class.isAssignableFrom(mapType)) {
@@ -353,9 +355,6 @@ private static <K, V> Map<K, V> handleCustomMapType(Class<?> mapType) {
         throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
     }
 }
-
-// asEnumType method remains as it is.
-
 
 	/**
 	 * Create a variant of {@link java.util.Properties} that sorts properties

@@ -2,7 +2,21 @@ package org.springframework.core.io.buffer;
 
 /**
  * Extension of {@link DataBuffer} that allows for buffers that share
- * a memory pool. Introduces methods for reference counting, excluding the touch method.
+ * a memory pool. Introduces methods for reference counting.
+ */
+public interface TouchableDataBuffer {
+    /**
+     * Associate a hint with the data buffer for debugging purposes.
+     * 
+     * @param hint The hint to associate with the buffer.
+     * @return this buffer
+     */
+    TouchableDataBuffer touch(Object hint);
+}
+
+/**
+ * Extension of {@link TouchableDataBuffer} that allows for buffers that share
+ * a memory pool. Introduces methods for reference counting.
  */
 public interface PooledDataBuffer extends TouchableDataBuffer {
 
@@ -35,28 +49,25 @@ class CustomPooledDataBuffer implements PooledDataBuffer {
 
     @Override
     public boolean isAllocated() {
-        // Implementation specific to CustomPooledDataBuffer
-        return false;
+        // Actual implementation specific to CustomPooledDataBuffer
+        return false; // Placeholder implementation
     }
 
     @Override
-    public CustomPooledDataBuffer retain() {
-        // Implementation specific to CustomPooledDataBuffer
-        return this;
+    public PooledDataBuffer retain() {
+        // Actual implementation specific to CustomPooledDataBuffer
+        return this; // Placeholder implementation
     }
 
     @Override
     public boolean release() {
-        // Implementation specific to CustomPooledDataBuffer
-        return false;
+        // Actual implementation specific to CustomPooledDataBuffer
+        return false; // Placeholder implementation
     }
 
-    /**
-     * Associate the given hint with the data buffer for debugging purposes.
-     * @return this buffer
-     */
+    @Override
     public CustomPooledDataBuffer touch(Object hint) {
-        // Implementation specific to CustomPooledDataBuffer
-        return this;
+        // Actual implementation specific to CustomPooledDataBuffer
+        return this; // Placeholder implementation
     }
 }
