@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 public class ClassPathXmlApplicationContextTests {
 
@@ -223,6 +224,10 @@ public class ClassPathXmlApplicationContextTests {
 		Service service = ctx.getBean("service", Service.class);
 		assertThat(service.getResources()).containsExactlyInAnyOrder(contextA, contextB, contextC);
 		assertThat(service.getResourceSet()).containsExactlyInAnyOrder(contextA, contextB, contextC);
+
+		Service service3 = ctx.getBean("service3", Service.class);
+		assertThat(service3.getResources()).containsOnly(new ClassPathResource(FQ_CONTEXT_A));
+		assertThat(service3.getResourceSet()).containsOnly(new ClassPathResource(FQ_CONTEXT_A));
 		ctx.close();
 	}
 
