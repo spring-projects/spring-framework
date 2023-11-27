@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer
+ * @author Yanming Zhou
  * @since 2.0
  * @see BeanWrapperImpl
  * @see SimpleTypeConverter
@@ -178,13 +179,13 @@ class TypeConverterDelegate {
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.componentType());
 				}
 				else if (convertedValue.getClass().isArray()) {
-					if (Array.getLength(convertedValue) == 1) {
-						convertedValue = Array.get(convertedValue, 0);
-						standardConversion = true;
-					}
-					else if (Collection.class.isAssignableFrom(requiredType)) {
+					if (Collection.class.isAssignableFrom(requiredType)) {
 						convertedValue = convertToTypedCollection(CollectionUtils.arrayToList(convertedValue),
 								propertyName, requiredType, typeDescriptor);
+						standardConversion = true;
+					}
+					else if (Array.getLength(convertedValue) == 1) {
+						convertedValue = Array.get(convertedValue, 0);
 						standardConversion = true;
 					}
 				}
