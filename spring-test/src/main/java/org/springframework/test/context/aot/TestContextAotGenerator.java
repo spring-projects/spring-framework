@@ -205,6 +205,7 @@ public class TestContextAotGenerator {
 			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 			generateAotTestContextInitializerMappings(initializerClassMappings);
 			generateAotTestAttributeMappings();
+			registerSkippedExceptionTypes();
 		}
 		finally {
 			resetAotFactories();
@@ -420,6 +421,20 @@ public class TestContextAotGenerator {
 
 	private void registerDeclaredConstructors(Class<?> type) {
 		this.runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
+	}
+
+	/**
+	 * Register hints for skipped exception types loaded via reflection in
+	 * {@link org.springframework.test.context.TestContextManager}.
+	 * @since 6.1.2
+	 */
+	private void registerSkippedExceptionTypes() {
+		Stream.of(
+				"org.opentest4j.TestAbortedException",
+				"org.junit.AssumptionViolatedException",
+				"org.testng.SkipException")
+			.map(TypeReference::of)
+			.forEach(this.runtimeHints.reflection()::registerType);
 	}
 
 	private static boolean getFailOnErrorFlag() {

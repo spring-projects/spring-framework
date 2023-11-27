@@ -159,6 +159,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertReflectionRegistered(runtimeHints, AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 
 		Stream.of(
+			"org.opentest4j.TestAbortedException",
+			"org.junit.AssumptionViolatedException",
+			"org.testng.SkipException"
+		).forEach(type -> assertReflectionRegistered(runtimeHints, type));
+
+		Stream.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
 			org.springframework.test.context.support.DefaultBootstrapContext.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_PUBLIC_CONSTRUCTORS));
@@ -236,6 +242,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertThat(resource().forResource("org/springframework/test/context/jdbc/schema.sql"))
 			.accepts(runtimeHints);
 		assertThat(resource().forResource("org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests.test.sql"))
+			.accepts(runtimeHints);
+	}
+
+	private static void assertReflectionRegistered(RuntimeHints runtimeHints, String type) {
+		assertThat(reflection().onType(TypeReference.of(type)))
+			.as("Reflection hint for %s", type)
 			.accepts(runtimeHints);
 	}
 
