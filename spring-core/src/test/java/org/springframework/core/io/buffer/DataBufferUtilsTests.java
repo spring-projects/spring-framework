@@ -820,7 +820,6 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		}, super.bufferFactory, Executors.newSingleThreadExecutor(), 1);
 
 
-		RuntimeException error = null;
 		byte[] chunk = new byte[3];
 		ArrayList<String> words = new ArrayList<>();
 

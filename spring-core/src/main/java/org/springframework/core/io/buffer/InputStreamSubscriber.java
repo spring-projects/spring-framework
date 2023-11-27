@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -36,7 +36,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 	final int prefetch;
 	final int limit;
 	final ReentrantLock       lock;
-	final Queue<DataBuffer> queue = new ConcurrentLinkedQueue<>();
+	final Queue<DataBuffer> queue;
 
 	final AtomicReference<Object> parkedThread = new AtomicReference<>();
 	final AtomicInteger workAmount = new AtomicInteger();
@@ -56,6 +56,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 	InputStreamSubscriber(int prefetch) {
 		this.prefetch = prefetch;
 		this.limit = prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : prefetch - (prefetch >> 2);
+		this.queue = new ArrayBlockingQueue<>(prefetch);
 		this.lock = new ReentrantLock(false);
 	}
 
@@ -77,7 +78,11 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 			return;
 		}
 
-		queue.offer(t);
+		if (!queue.offer(t)) {
+			discard(t);
+			error = new RuntimeException("Buffer overflow");
+			done = true;
+		}
 
 		int previousWorkState = addWork();
 		if (previousWorkState == Integer.MIN_VALUE) {

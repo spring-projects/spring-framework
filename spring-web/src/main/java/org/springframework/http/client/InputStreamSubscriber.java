@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,7 +46,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 	final Function<T, byte[]> mapper;
 	final Consumer<T>         onDiscardHandler;
 	final ReentrantLock       lock;
-	final Queue<T> queue = new ConcurrentLinkedQueue<>();
+	final Queue<T> queue;
 
 	final AtomicReference<Object> parkedThread = new AtomicReference<>();
 	final AtomicInteger workAmount = new AtomicInteger();
@@ -69,6 +69,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		this.limit = prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : prefetch - (prefetch >> 2);
 		this.mapper = mapper;
 		this.onDiscardHandler = onDiscardHandler;
+		this.queue = new ArrayBlockingQueue<>(prefetch);
 		this.lock = new ReentrantLock(false);
 	}
 
@@ -119,12 +120,18 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 
 	@Override
 	public void onNext(T t) {
+		Assert.notNull(t, "T value must not be null");
+
 		if (this.done) {
 			discard(t);
 			return;
 		}
 
-		queue.offer(t);
+		if (!queue.offer(t)) {
+			discard(t);
+			error = new RuntimeException("Buffer overflow");
+			done = true;
+		}
 
 		int previousWorkState = addWork();
 		if (previousWorkState == Integer.MIN_VALUE) {
@@ -329,11 +336,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 	}
 
-	void discard(@Nullable T value) {
-		if (value == null) {
-			return;
-		}
-
+	void discard(T value) {
 		try {
 			this.onDiscardHandler.accept(value);
 		} catch (Throwable t) {
