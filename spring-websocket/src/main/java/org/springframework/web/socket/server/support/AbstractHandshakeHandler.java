@@ -64,8 +64,7 @@ import org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStr
  *
  * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
  * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update
- * the response as necessary and initialize the WebSocket. Currently, supported servers are
- * Jetty 9.0-9.3, Tomcat 7.0.47+ and 8.x, Undertow 1.0-1.3, GlassFish 4.1+, WebLogic 12.1.3+.
+ * the response as necessary and initialize the WebSocket.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
