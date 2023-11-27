@@ -632,9 +632,73 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	void outputStreamPublisherCancel(DataBufferFactory bufferFactory) throws InterruptedException {
+		super.bufferFactory = bufferFactory;
+
+		byte[] foo = "foo".getBytes(StandardCharsets.UTF_8);
+		byte[] bar = "bar".getBytes(StandardCharsets.UTF_8);
+
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Publisher<DataBuffer> publisher = DataBufferUtils.outputStreamPublisher(outputStream -> {
+			try {
+				assertThatIOException()
+						.isThrownBy(() -> {
+							outputStream.write(foo);
+							outputStream.flush();
+							outputStream.write(bar);
+							outputStream.flush();
+						})
+						.withMessage("Subscription has been terminated");
+			}
+			finally {
+				latch.countDown();
+			}
+		}, super.bufferFactory, Executors.newSingleThreadExecutor());
+
+		StepVerifier.create(publisher, 1)
+				.consumeNextWith(stringConsumer("foo"))
+				.thenCancel()
+				.verify();
+
+		latch.await();
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void outputStreamPublisherClosed(DataBufferFactory bufferFactory) throws InterruptedException {
+		super.bufferFactory = bufferFactory;
+
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Publisher<DataBuffer> publisher = DataBufferUtils.outputStreamPublisher(outputStream -> {
+			try {
+				OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+				writer.write("foo");
+				writer.close();
+				assertThatIOException().isThrownBy(() -> writer.write("bar"))
+						.withMessage("Stream closed");
+			}
+			catch (IOException ex) {
+				fail(ex.getMessage(), ex);
+			}
+			finally {
+				latch.countDown();
+			}
+		}, super.bufferFactory, Executors.newSingleThreadExecutor());
+
+		StepVerifier.create(publisher)
+				.consumeNextWith(stringConsumer("foo"))
+				.verifyComplete();
+
+		latch.await();
+	}
+
+
+
+	@ParameterizedDataBufferAllocatingTest
 	void inputStreamSubscriberChunkSize(DataBufferFactory bufferFactory) {
 		genericInputStreamSubscriberTest(bufferFactory, 3, 3, 64, List.of("foo", "bar", "baz"), List.of("foo", "bar", "baz"));
-    }
+	}
 
 	@ParameterizedDataBufferAllocatingTest
 	void inputStreamSubscriberChunkSize2(DataBufferFactory bufferFactory) {
@@ -702,7 +766,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void inputStreamSubscriberError(DataBufferFactory bufferFactory) throws InterruptedException {
 		super.bufferFactory = bufferFactory;
 
-		var input = List.of("foo", "bar", "baz");
+		var input = List.of("foo ", "bar ", "baz");
 
 		Publisher<DataBuffer> publisher = DataBufferUtils.outputStreamPublisher(outputStream -> {
 			try {
@@ -718,7 +782,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
 
 		RuntimeException error = null;
-		byte[] chunk = new byte[3];
+		byte[] chunk = new byte[4];
 		ArrayList<String> words = new ArrayList<>();
 
 		try (InputStream inputStream = DataBufferUtils.subscribeAsInputStream(publisher, 1)) {
@@ -734,11 +798,45 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		catch (RuntimeException e) {
 			error = e;
 		}
-		assertThat(words).containsExactlyElementsOf(List.of("foo", "bar", "baz"));
+		assertThat(words).containsExactlyElementsOf(List.of("foo ", "bar ", "baz"));
 		assertThat(error).hasMessage("boom");
 	}
 
+	@ParameterizedDataBufferAllocatingTest
+	void inputStreamSubscriberMixedReadMode(DataBufferFactory bufferFactory) throws InterruptedException {
+		super.bufferFactory = bufferFactory;
 
+		var input = List.of("foo ", "bar ", "baz");
+
+		Publisher<DataBuffer> publisher = DataBufferUtils.outputStreamPublisher(outputStream -> {
+			try {
+				for (String word : input) {
+					outputStream.write(word.getBytes(StandardCharsets.UTF_8));
+				}
+			}
+			catch (IOException ex) {
+				fail(ex.getMessage(), ex);
+			}
+		}, super.bufferFactory, Executors.newSingleThreadExecutor(), 1);
+
+
+		RuntimeException error = null;
+		byte[] chunk = new byte[3];
+		ArrayList<String> words = new ArrayList<>();
+
+		try (InputStream inputStream = DataBufferUtils.subscribeAsInputStream(publisher, 1)) {
+			words.add(new String(chunk,0, inputStream.read(chunk), StandardCharsets.UTF_8));
+			assertThat(inputStream.read()).isEqualTo(' ' & 0xFF);
+			words.add(new String(chunk,0, inputStream.read(chunk), StandardCharsets.UTF_8));
+			assertThat(inputStream.read()).isEqualTo(' ' & 0xFF);
+			words.add(new String(chunk,0, inputStream.read(chunk), StandardCharsets.UTF_8));
+			assertThat(inputStream.read()).isEqualTo(-1);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		assertThat(words).containsExactlyElementsOf(List.of("foo", "bar", "baz"));
+	}
 
 	@ParameterizedDataBufferAllocatingTest
 	void inputStreamSubscriberClose(DataBufferFactory bufferFactory) throws InterruptedException {
@@ -777,68 +875,6 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 			assertThat(words).containsExactlyElementsOf(List.of("foo"));
 			latch.await();
 		}
-	}
-
-	@ParameterizedDataBufferAllocatingTest
-	void outputStreamPublisherCancel(DataBufferFactory bufferFactory) throws InterruptedException {
-		super.bufferFactory = bufferFactory;
-
-		byte[] foo = "foo".getBytes(StandardCharsets.UTF_8);
-		byte[] bar = "bar".getBytes(StandardCharsets.UTF_8);
-
-		CountDownLatch latch = new CountDownLatch(1);
-
-		Publisher<DataBuffer> publisher = DataBufferUtils.outputStreamPublisher(outputStream -> {
-			try {
-				assertThatIOException()
-						.isThrownBy(() -> {
-							outputStream.write(foo);
-							outputStream.flush();
-							outputStream.write(bar);
-							outputStream.flush();
-						})
-						.withMessage("Subscription has been terminated");
-			}
-			finally {
-				latch.countDown();
-			}
-		}, super.bufferFactory, Executors.newSingleThreadExecutor());
-
-		StepVerifier.create(publisher, 1)
-				.consumeNextWith(stringConsumer("foo"))
-				.thenCancel()
-				.verify();
-
-		latch.await();
-	}
-
-	@ParameterizedDataBufferAllocatingTest
-	void outputStreamPublisherClosed(DataBufferFactory bufferFactory) throws InterruptedException {
-		super.bufferFactory = bufferFactory;
-
-		CountDownLatch latch = new CountDownLatch(1);
-
-		Publisher<DataBuffer> publisher = DataBufferUtils.outputStreamPublisher(outputStream -> {
-			try {
-				OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
-				writer.write("foo");
-				writer.close();
-				assertThatIOException().isThrownBy(() -> writer.write("bar"))
-						.withMessage("Stream closed");
-			}
-			catch (IOException ex) {
-				fail(ex.getMessage(), ex);
-			}
-			finally {
-				latch.countDown();
-			}
-		}, super.bufferFactory, Executors.newSingleThreadExecutor());
-
-		StepVerifier.create(publisher)
-				.consumeNextWith(stringConsumer("foo"))
-				.verifyComplete();
-
-		latch.await();
 	}
 
 	@ParameterizedDataBufferAllocatingTest

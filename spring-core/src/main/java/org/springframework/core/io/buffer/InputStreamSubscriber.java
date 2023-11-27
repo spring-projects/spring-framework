@@ -149,6 +149,7 @@ class InputStreamSubscriber extends InputStream implements Subscriber<DataBuffer
 			DataBuffer bytes = getBytesOrAwait();
 
 			if (bytes == DONE) {
+				this.closed = true;
 				cleanAndFinalize();
 				if (this.error == null) {
 					return -1;
@@ -193,13 +194,18 @@ class InputStreamSubscriber extends InputStream implements Subscriber<DataBuffer
 				DataBuffer bytes = getBytesOrAwait();
 
 				if (bytes == DONE) {
-					this.closed = true;
 					cleanAndFinalize();
 					if (this.error == null) {
+						this.closed = true;
 						return j == 0 ? -1 : j;
 					}
 					else {
-						throw Exceptions.propagate(error);
+						if (j == 0) {
+							this.closed = true;
+							throw Exceptions.propagate(error);
+						}
+
+						return j;
 					}
 				} else if (bytes == CLOSED) {
 					this.s.cancel();

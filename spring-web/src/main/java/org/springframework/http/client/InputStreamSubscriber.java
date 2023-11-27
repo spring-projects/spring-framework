@@ -1,18 +1,12 @@
 package org.springframework.http.client;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.DefaultDataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 import reactor.core.Exceptions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
@@ -22,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Bridges between {@link Flow.Publisher Flow.Publisher&lt;T&gt;} and {@link InputStream}.
@@ -34,12 +30,16 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T> {
 
+	private static final Log logger = LogFactory.getLog(InputStreamSubscriber.class);
+
 	static final Object READY = new Object();
 	static final byte[] DONE = new byte[0];
 	static final byte[] CLOSED = new byte[0];
 
 	final int prefetch;
 	final int limit;
+	final Function<T, byte[]> mapper;
+	final Consumer<T>         onDiscardHandler;
 	final ReentrantLock       lock;
 	final Queue<T> queue = new ConcurrentLinkedQueue<>();
 
@@ -54,19 +54,21 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 	int position;
 
 	@Nullable
-	Subscription s;
+	Flow.Subscription s;
 	boolean done;
 	@Nullable
 	Throwable error;
 
-	InputStreamSubscriber(ByteMapper<T> byteMapper, int prefetch) {
+	InputStreamSubscriber(Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int prefetch) {
 		this.prefetch = prefetch;
 		this.limit = prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : prefetch - (prefetch >> 2);
+		this.mapper = mapper;
+		this.onDiscardHandler = onDiscardHandler;
 		this.lock = new ReentrantLock(false);
 	}
 
 	@Override
-	public void onSubscribe(Subscription subscription) {
+	public void onSubscribe(Flow.Subscription subscription) {
 		if (this.s != null) {
 			subscription.cancel();
 			return;
@@ -77,7 +79,7 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 	}
 
 	@Override
-	public void onNext(DataBuffer t) {
+	public void onNext(T t) {
 		if (this.done) {
 			discard(t);
 			return;
@@ -87,7 +89,7 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 
 		int previousWorkState = addWork();
 		if (previousWorkState == Integer.MIN_VALUE) {
-			DataBuffer value = queue.poll();
+			T value = queue.poll();
 			if (value != null) {
 				discard(value);
 			}
@@ -152,9 +154,10 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 		}
 
 		try {
-			DataBuffer bytes = getBytesOrAwait();
+			byte[] bytes = getBytesOrAwait();
 
 			if (bytes == DONE) {
+				this.closed = true;
 				cleanAndFinalize();
 				if (this.error == null) {
 					return -1;
@@ -167,7 +170,7 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 				return -1;
 			}
 
-			return bytes.read() & 0xFF;
+			return bytes[this.position++] & 0xFF;
 		}
 		catch (Throwable t) {
 			this.closed = true;
@@ -196,7 +199,7 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 
 		try {
 			for (int j = 0; j < len;) {
-				DataBuffer bytes = getBytesOrAwait();
+				byte[] bytes = getBytesOrAwait();
 
 				if (bytes == DONE) {
 					this.closed = true;
@@ -212,9 +215,12 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 					cleanAndFinalize();
 					return -1;
 				}
-				int initialReadPosition = bytes.readPosition();
-				bytes.read(b, off + j, Math.min(len - j, bytes.readableByteCount()));
-				j += bytes.readPosition() - initialReadPosition;
+
+				int i = this.position;
+				for (; i < bytes.length && j < len; i++, j++) {
+					b[off + j] = bytes[i];
+				}
+				this.position = i;
 			}
 
 			return len;
@@ -232,7 +238,6 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 
 	byte[] getBytesOrAwait() {
 		if (this.available == null || this.available.length - this.position == 0) {
-			discard(this.available);
 			this.available = null;
 
 			int actualWorkAmount = this.workAmount.getAcquire();
@@ -242,10 +247,11 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 				}
 
 				boolean d = this.done;
-				DataBuffer t = this.queue.poll();
+				T t = this.queue.poll();
 				if (t != null) {
 					int consumed = ++this.consumed;
-					this.available = t;
+					this.position = 0;
+					this.available = Objects.requireNonNull(this.mapper.apply(t));
 					if (consumed == this.limit) {
 						this.consumed = 0;
 						this.s.request(this.limit);
@@ -268,12 +274,11 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 	}
 
 	void cleanAndFinalize() {
-		discard(this.available);
 		this.available = null;
 
 		for (;;) {
 			int workAmount = this.workAmount.getPlain();
-			DataBuffer value;
+			T value;
 
 			while((value = queue.poll()) != null) {
 				discard(value);
@@ -286,7 +291,17 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 	}
 
 	void discard(@Nullable T value) {
-		try
+		if (value == null) {
+			return;
+		}
+
+		try {
+			this.onDiscardHandler.accept(value);
+		} catch (Throwable t) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to release " + value.getClass().getSimpleName() + ": " + value, t);
+			}
+		}
 	}
 
 	@Override
@@ -343,14 +358,6 @@ class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T>
 				LockSupport.unpark((Thread)old);
 			}
 		}
-	}
-
-	public interface ByteMapper<T> {
-
-		/**
-		 * Maps {@code T} to a byte array.
-		 */
-		byte[] map(T t);
 	}
 
 }
