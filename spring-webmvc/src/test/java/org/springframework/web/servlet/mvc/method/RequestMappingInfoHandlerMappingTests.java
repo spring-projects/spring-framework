@@ -38,6 +38,7 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -258,10 +259,13 @@ class RequestMappingInfoHandlerMappingTests {
 	@SuppressWarnings("unchecked")
 	@PathPatternsParameterizedTest
 	void handleMatchUriTemplateVariables(TestRequestMappingInfoHandlerMapping mapping) {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{path1}/{path2}").build();
+		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
+		config.setPathMatcher(new AntPathMatcher());
+
+		RequestMappingInfo info = RequestMappingInfo.paths("/{path1}/{path2}").options(config).build();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-		mapping.handleMatch(key, lookupPath, request);
+		mapping.handleMatch(info, lookupPath, request);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVariables = (Map<String, String>) request.getAttribute(name);
@@ -274,7 +278,10 @@ class RequestMappingInfoHandlerMappingTests {
 	@SuppressWarnings("unchecked")
 	@PathPatternsParameterizedTest // SPR-9098
 	void handleMatchUriTemplateVariablesDecode(TestRequestMappingInfoHandlerMapping mapping) {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{group}/{identifier}").build();
+		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
+		config.setPathMatcher(new AntPathMatcher());
+
+		RequestMappingInfo info = RequestMappingInfo.paths("/{group}/{identifier}").options(config).build();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/group/a%2Fb");
 
 		UrlPathHelper pathHelper = new UrlPathHelper();
@@ -282,7 +289,7 @@ class RequestMappingInfoHandlerMappingTests {
 		String lookupPath = pathHelper.getLookupPathForRequest(request);
 
 		mapping.setUrlPathHelper(pathHelper);
-		mapping.handleMatch(key, lookupPath, request);
+		mapping.handleMatch(info, lookupPath, request);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVariables = (Map<String, String>) request.getAttribute(name);
@@ -294,20 +301,26 @@ class RequestMappingInfoHandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void handleMatchBestMatchingPatternAttribute(TestRequestMappingInfoHandlerMapping mapping) {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{path1}/2", "/**").build();
+		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
+		config.setPathMatcher(new AntPathMatcher());
+
+		RequestMappingInfo info = RequestMappingInfo.paths("/{path1}/2", "/**").options(config).build();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
-		mapping.handleMatch(key, "/1/2", request);
+		mapping.handleMatch(info, "/1/2", request);
 
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
 	}
 
 	@PathPatternsParameterizedTest
 	void handleMatchBestMatchingPatternAttributeInObservationContext(TestRequestMappingInfoHandlerMapping mapping) {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{path1}/2", "/**").build();
+		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
+		config.setPathMatcher(new AntPathMatcher());
+
+		RequestMappingInfo info = RequestMappingInfo.paths("/{path1}/2", "/**").options(config).build();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(request, new MockHttpServletResponse());
 		request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
-		mapping.handleMatch(key, "/1/2", request);
+		mapping.handleMatch(info, "/1/2", request);
 
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
 		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");

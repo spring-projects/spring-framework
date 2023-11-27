@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -595,8 +596,8 @@ class CrossOriginTests {
 			RequestMapping annotation = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annotation != null) {
 				RequestMappingInfo.BuilderConfiguration options = new RequestMappingInfo.BuilderConfiguration();
-				if (getPatternParser() != null) {
-					options.setPatternParser(getPatternParser());
+				if (getPatternParser() == null) {
+					options.setPathMatcher(new AntPathMatcher());
 				}
 				return RequestMappingInfo.paths(annotation.value())
 						.methods(annotation.method())
