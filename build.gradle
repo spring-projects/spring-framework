@@ -17,7 +17,7 @@ antora {
 			'@antora/collector-extension': '1.0.0-alpha.3',
 			'@asciidoctor/tabs': '1.0.0-beta.3',
 			'@opendevise/antora-release-line-extension': '1.0.0',
-			'@springio/antora-extensions': '1.6.0',
+			'@springio/antora-extensions': '1.7.0',
 			'@springio/asciidoctor-extensions': '1.0.0-alpha.9',
 	]
 }
