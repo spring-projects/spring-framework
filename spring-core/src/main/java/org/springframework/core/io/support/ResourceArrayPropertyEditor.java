@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.core.io.support;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +35,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Editor for {@link org.springframework.core.io.Resource} arrays, to
@@ -50,6 +53,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
  * @since 1.1.2
  * @see org.springframework.core.io.Resource
  * @see ResourcePatternResolver
@@ -108,17 +112,33 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Treat the given text as a location pattern and convert it to a Resource array.
+	 * Treat the given text as a location pattern or comma delimited location patterns and convert it to a Resource array.
 	 */
 	@Override
 	public void setAsText(String text) {
 		String pattern = resolvePath(text).trim();
-		try {
-			setValue(this.resourcePatternResolver.getResources(pattern));
+		if (pattern.indexOf(',') > 0) {
+			List<Resource> resources = new ArrayList<>();
+			for (String locationPattern : StringUtils.commaDelimitedListToStringArray(pattern)) {
+				try {
+					for (Resource resource : this.resourcePatternResolver.getResources(locationPattern)) {
+						resources.add(resource);
+					}
+				}
+				catch (IOException ex) {
+					throw new IllegalArgumentException(
+								"Could not resolve resource location pattern [" + locationPattern + "]: " + ex.getMessage());
+				}
+			}
+			setValue(resources.toArray());
 		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException(
-					"Could not resolve resource location pattern [" + pattern + "]: " + ex.getMessage());
+		else {
+			try {
+				setValue(this.resourcePatternResolver.getResources(pattern));
+			} catch (IOException ex) {
+				throw new IllegalArgumentException(
+						"Could not resolve resource location pattern [" + pattern + "]: " + ex.getMessage());
+			}
 		}
 	}
 
