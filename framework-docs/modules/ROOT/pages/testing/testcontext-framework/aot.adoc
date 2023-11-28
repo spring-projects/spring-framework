@@ -45,7 +45,7 @@ xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
 [NOTE]
 ====
-The `@ContextHierarchy` annotation is currently not supported in AOT mode.
+The `@ContextHierarchy` annotation is not supported in AOT mode.
 ====
 
 To provide test-specific runtime hints for use within a GraalVM native image, you have
