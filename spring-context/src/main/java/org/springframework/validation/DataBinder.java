@@ -948,7 +948,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				Class<?> paramType = paramTypes[i];
 				Object value = valueResolver.resolveValue(paramPath, paramType);
 
-				if (value == null && shouldCreateObject(param)) {
+				if (value == null && shouldConstructArgument(param)) {
 					ResolvableType type = ResolvableType.forMethodParameter(param);
 					args[i] = createObject(type, paramPath + ".", valueResolver);
 				}
@@ -1008,7 +1008,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return (isOptional && !nestedPath.isEmpty() ? Optional.ofNullable(result) : result);
 	}
 
-	private static boolean shouldCreateObject(MethodParameter param) {
+	/**
+	 * Whether to instantiate the constructor argument of the given type,
+	 * matching its own constructor arguments to bind values.
+	 * <p>By default, simple value types, maps, collections, and arrays are
+	 * excluded from nested constructor binding initialization.
+	 * @since 6.1.2
+	 */
+	protected boolean shouldConstructArgument(MethodParameter param) {
 		Class<?> type = param.nestedIfOptional().getNestedParameterType();
 		return !(BeanUtils.isSimpleValueType(type) ||
 				Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || type.isArray());

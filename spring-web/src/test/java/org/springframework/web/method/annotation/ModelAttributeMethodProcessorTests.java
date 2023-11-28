@@ -29,6 +29,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +42,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -298,6 +300,7 @@ public class ModelAttributeMethodProcessorTests {
 		Object resolved = this.processor.resolveArgument(this.beanWithConstructorArgs, this.container, requestWithParam, factory);
 		assertThat(resolved).isInstanceOf(TestBeanWithConstructorArgs.class);
 		assertThat(((TestBeanWithConstructorArgs) resolved).listOfStrings).containsExactly("1", "2");
+		assertThat(((TestBeanWithConstructorArgs) resolved).file).isNull();
 	}
 
 	private void testGetAttributeFromModel(String expectedAttrName, MethodParameter param) throws Exception {
@@ -375,8 +378,11 @@ public class ModelAttributeMethodProcessorTests {
 
 		final List<String> listOfStrings;
 
-		public TestBeanWithConstructorArgs(List<String> listOfStrings) {
+		final MultipartFile file;
+
+		public TestBeanWithConstructorArgs(List<String> listOfStrings, @Nullable MultipartFile file) {
 			this.listOfStrings = listOfStrings;
+			this.file = file;
 		}
 	}
 
