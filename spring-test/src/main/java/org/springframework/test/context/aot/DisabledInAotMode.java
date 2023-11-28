@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.condition.DisabledIf;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * {@code @DisabledInAotMode} signals that an annotated test class is <em>disabled</em>
@@ -48,6 +48,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
  * annotation.
  *
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 6.1
  * @see org.springframework.aot.AotDetector#useGeneratedArtifacts() AotDetector.useGeneratedArtifacts()
  * @see org.junit.jupiter.api.condition.EnabledInNativeImage @EnabledInNativeImage
@@ -56,7 +57,6 @@ import org.junit.jupiter.api.condition.DisabledIf;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@DisabledIf(value = "org.springframework.aot.AotDetector#useGeneratedArtifacts",
-		disabledReason = "Disabled in Spring AOT mode")
+@ExtendWith(DisabledInAotModeCondition.class)
 public @interface DisabledInAotMode {
 }
