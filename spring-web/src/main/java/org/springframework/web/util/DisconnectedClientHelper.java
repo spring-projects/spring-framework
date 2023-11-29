@@ -39,8 +39,7 @@ public class DisconnectedClientHelper {
 			Set.of("broken pipe", "connection reset by peer");
 
 	private static final Set<String> EXCEPTION_TYPE_NAMES =
-			Set.of("ClientAbortException", "EOFException", "EofException");
-
+			Set.of("AbortedException", "ClientAbortException", "EOFException", "EofException");
 
 	private final Log logger;
 
@@ -50,28 +49,6 @@ public class DisconnectedClientHelper {
 		this.logger = LogFactory.getLog(logCategory);
 	}
 
-
-	/**
-	 * Whether the given exception indicates the client has gone away.
-	 * Known cases covered:
-	 * <ul>
-	 * <li>ClientAbortException or EOFException for Tomcat
-	 * <li>EofException for Jetty
-	 * <li>IOException "Broken pipe" or "connection reset by peer"
-	 * </ul>
-	 */
-	public boolean isClientDisconnectedException(Throwable ex) {
-		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
-		if (message != null) {
-			String text = message.toLowerCase();
-			for (String phrase : EXCEPTION_PHRASES) {
-				if (text.contains(phrase)) {
-					return true;
-				}
-			}
-		}
-		return EXCEPTION_TYPE_NAMES.contains(ex.getClass().getSimpleName());
-	}
 
 	/**
 	 * Check via  {@link #isClientDisconnectedException} if the exception
@@ -91,6 +68,28 @@ public class DisconnectedClientHelper {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Whether the given exception indicates the client has gone away.
+	 * Known cases covered:
+	 * <ul>
+	 * <li>ClientAbortException or EOFException for Tomcat
+	 * <li>EofException for Jetty
+	 * <li>IOException "Broken pipe" or "connection reset by peer"
+	 * </ul>
+	 */
+	public static boolean isClientDisconnectedException(Throwable ex) {
+		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
+		if (message != null) {
+			String text = message.toLowerCase();
+			for (String phrase : EXCEPTION_PHRASES) {
+				if (text.contains(phrase)) {
+					return true;
+				}
+			}
+		}
+		return EXCEPTION_TYPE_NAMES.contains(ex.getClass().getSimpleName());
 	}
 
 }
