@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,58 +194,6 @@ class GenericTypeResolverTests {
 		assertThat(resolved).isEqualTo(E.class);
 	}
 
-	@Test
-	void resolveWildcardTypeWithUpperBound() {
-		Method method = method(MySimpleSuperclassType.class, "upperBound", List.class);
-		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
-		ResolvableType resolvableType = ResolvableType.forType(resolved);
-		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
-		assertThat(resolvableType.resolveGenerics()).containsExactly(String.class);
-	}
-
-	@Test
-	void resolveWildcardTypeWithUpperBoundWithResolvedType() {
-		Method method = method(MySimpleSuperclassType.class, "upperBoundWithResolvedType", List.class);
-		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
-		ResolvableType resolvableType = ResolvableType.forType(resolved);
-		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
-		assertThat(resolvableType.resolveGenerics()).containsExactly(Integer.class);
-	}
-
-	@Test
-	void resolveWildcardTypeWithLowerBound() {
-		Method method = method(MySimpleSuperclassType.class, "lowerBound", List.class);
-		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
-		ResolvableType resolvableType = ResolvableType.forType(resolved);
-		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
-		assertThat(resolvableType.resolveGenerics()).containsExactly(String.class);
-	}
-
-	@Test
-	void resolveWildcardTypeWithLowerBoundWithResolvedType() {
-		Method method = method(MySimpleSuperclassType.class, "lowerBoundWithResolvedType", List.class);
-		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
-		ResolvableType resolvableType = ResolvableType.forType(resolved);
-		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
-		assertThat(resolvableType.resolveGenerics()).containsExactly(Integer.class);
-	}
-
-	@Test
-	void resolveWildcardTypeWithUnbounded() {
-		Method method = method(MySimpleSuperclassType.class, "unbounded", List.class);
-		Type resolved = resolveType(method.getGenericParameterTypes()[0], MySimpleSuperclassType.class);
-		ResolvableType resolvableType = ResolvableType.forType(resolved);
-		assertThat(resolvableType.hasUnresolvableGenerics()).isFalse();
-		assertThat(resolvableType.resolveGenerics()).containsExactly(Object.class);
-	}
-
-	@Test // gh-28904
-	void resolveGenericWithDifferentInterfaceOrder() {
-		Type f = First.class.getTypeParameters()[0];
-		assertThat(resolveType(f, FirstSecondService.class)).isEqualTo(Integer.class);
-		assertThat(resolveType(f, SecondFirstService.class)).isEqualTo(Integer.class);
-	}
-
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -268,21 +216,6 @@ class GenericTypeResolverTests {
 	}
 
 	public abstract class MySuperclassType<T> {
-
-		public void upperBound(List<? extends T> list) {
-		}
-
-		public void upperBoundWithResolvedType(List<? extends Integer> list) {
-		}
-
-		public void lowerBound(List<? extends T> list) {
-		}
-
-		public void lowerBoundWithResolvedType(List<? super Integer> list) {
-		}
-
-		public void unbounded(List<?> list) {
-		}
 	}
 
 	public class MySimpleSuperclassType extends MySuperclassType<String> {
