@@ -516,8 +516,8 @@ as the following example shows:
 [[beans-definition-profiles-default]]
 === Default Profile
 
-The default profile represents the profile that is enabled by default. Consider the
-following example:
+The default profile represents the profile that is enabled if no profile is active. Consider
+the following example:
 
 [tabs]
 ======
@@ -558,9 +558,9 @@ Kotlin::
 ----
 ======
 
-If no profile is active, the `dataSource` is created. You can see this
-as a way to provide a default definition for one or more beans. If any
-profile is enabled, the default profile does not apply.
+If xref:#beans-definition-profiles-enable[no profile is active], the `dataSource` is
+created. You can see this as a way to provide a default definition for one or more
+beans. If any profile is enabled, the default profile does not apply.
 
 The name of the default profile is `default`. You can change the name of
 the default profile by using `setDefaultProfiles()` on the `Environment` or,
