@@ -121,14 +121,15 @@ public class ServerHttpObservationFilter implements WebFilter {
 					DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
 		}
 
-		@Override
-		public void doOnSubscription() throws Throwable {
-			this.observation.start();
-		}
 
 		@Override
 		public Context addToContext(Context originalContext) {
 			return originalContext.put(ObservationThreadLocalAccessor.KEY, this.observation);
+		}
+
+		@Override
+		public void doFirst() throws Throwable {
+			this.observation.start();
 		}
 
 		@Override
@@ -142,16 +143,7 @@ public class ServerHttpObservationFilter implements WebFilter {
 		@Override
 		public void doOnComplete() throws Throwable {
 			if (this.observationRecorded.compareAndSet(false, true)) {
-				ServerHttpResponse response = this.observationContext.getResponse();
-				if (response.isCommitted()) {
-					this.observation.stop();
-				}
-				else {
-					response.beforeCommit(() -> {
-						this.observation.stop();
-						return Mono.empty();
-					});
-				}
+				doOnTerminate(this.observationContext);
 			}
 		}
 
@@ -162,7 +154,20 @@ public class ServerHttpObservationFilter implements WebFilter {
 					this.observationContext.setConnectionAborted(true);
 				}
 				this.observationContext.setError(error);
+				doOnTerminate(this.observationContext);
+			}
+		}
+
+		private void doOnTerminate(ServerRequestObservationContext context) {
+			ServerHttpResponse response = context.getResponse();
+			if (response.isCommitted()) {
 				this.observation.stop();
+			}
+			else {
+				response.beforeCommit(() -> {
+					this.observation.stop();
+					return Mono.empty();
+				});
 			}
 		}
 	}

@@ -374,13 +374,13 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		}
 
 		@Override
-		public void doOnSubscription() throws Throwable {
-			this.observation.start();
+		public Context addToContext(Context originalContext) {
+			return originalContext.put(ObservationThreadLocalAccessor.KEY, this.observation);
 		}
 
 		@Override
-		public Context addToContext(Context originalContext) {
-			return originalContext.put(ObservationThreadLocalAccessor.KEY, this.observation);
+		public void doFirst() throws Throwable {
+			this.observation.start();
 		}
 
 		@Override
@@ -394,21 +394,12 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		@Override
 		public void doOnComplete() throws Throwable {
 			if (this.observationRecorded.compareAndSet(false, true)) {
-				ServerHttpResponse response = this.observationContext.getResponse();
 				Throwable throwable = (Throwable) this.observationContext.getAttributes()
 						.get(ExceptionHandlingWebHandler.HANDLED_WEB_EXCEPTION);
 				if (throwable != null) {
 					this.observation.error(throwable);
 				}
-				if (response.isCommitted()) {
-					this.observation.stop();
-				}
-				else {
-					response.beforeCommit(() -> {
-						this.observation.stop();
-						return Mono.empty();
-					});
-				}
+				doOnTerminate(this.observationContext);
 			}
 		}
 
@@ -416,7 +407,21 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		public void doOnError(Throwable error) throws Throwable {
 			if (this.observationRecorded.compareAndSet(false, true)) {
 				this.observationContext.setError(error);
+				doOnTerminate(this.observationContext);
+			}
+		}
+
+
+		private void doOnTerminate(ServerRequestObservationContext context) {
+			ServerHttpResponse response = context.getResponse();
+			if (response.isCommitted()) {
 				this.observation.stop();
+			}
+			else {
+				response.beforeCommit(() -> {
+					this.observation.stop();
+					return Mono.empty();
+				});
 			}
 		}
 	}
