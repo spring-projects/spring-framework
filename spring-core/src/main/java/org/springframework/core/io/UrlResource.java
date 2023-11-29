@@ -332,13 +332,15 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Nullable
 	public String getFilename() {
 		if (this.uri != null) {
-			// URI path is decoded and has standard separators
-			return StringUtils.getFilename(this.uri.getPath());
+			String path = this.uri.getPath();
+			if (path != null) {
+				// Prefer URI path: decoded and has standard separators
+				return StringUtils.getFilename(this.uri.getPath());
+			}
 		}
-		else {
-			String filename = StringUtils.getFilename(StringUtils.cleanPath(this.url.getPath()));
-			return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
-		}
+		// Otherwise, process URL path
+		String filename = StringUtils.getFilename(StringUtils.cleanPath(this.url.getPath()));
+		return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
 	}
 
 	/**

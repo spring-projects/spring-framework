@@ -302,9 +302,26 @@ class ResourceTests {
 
 		@Test
 		void filenameIsExtractedFromFilePath() throws Exception {
+			assertThat(new UrlResource("file:test?argh").getFilename()).isEqualTo("test");
+			assertThat(new UrlResource("file:/test?argh").getFilename()).isEqualTo("test");
+			assertThat(new UrlResource("file:test.txt?argh").getFilename()).isEqualTo("test.txt");
+			assertThat(new UrlResource("file:/test.txt?argh").getFilename()).isEqualTo("test.txt");
+			assertThat(new UrlResource("file:/dir/test?argh").getFilename()).isEqualTo("test");
 			assertThat(new UrlResource("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
 			assertThat(new UrlResource("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
 			assertThat(new UrlResource("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+		}
+
+		@Test
+		void filenameIsExtractedFromURL() throws Exception {
+			assertThat(new UrlResource(new URL("file:test?argh")).getFilename()).isEqualTo("test");
+			assertThat(new UrlResource(new URL("file:/test?argh")).getFilename()).isEqualTo("test");
+			assertThat(new UrlResource(new URL("file:test.txt?argh")).getFilename()).isEqualTo("test.txt");
+			assertThat(new UrlResource(new URL("file:/test.txt?argh")).getFilename()).isEqualTo("test.txt");
+			assertThat(new UrlResource(new URL("file:/dir/test?argh")).getFilename()).isEqualTo("test");
+			assertThat(new UrlResource(new URL("file:/dir/test.txt?argh")).getFilename()).isEqualTo("test.txt");
+			assertThat(new UrlResource(new URL("file:\\dir\\test.txt?argh")).getFilename()).isEqualTo("test.txt");
+			assertThat(new UrlResource(new URL("file:\\dir/test.txt?argh")).getFilename()).isEqualTo("test.txt");
 		}
 
 		@Test
