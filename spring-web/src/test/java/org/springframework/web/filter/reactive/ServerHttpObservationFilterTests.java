@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.filter.reactive;
 
 import java.util.Optional;
 
+import io.micrometer.observation.Observation;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
@@ -65,7 +67,10 @@ class ServerHttpObservationFilterTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
 		exchange.getResponse().setRawStatusCode(200);
 		WebFilterChain filterChain = webExchange -> Mono.deferContextual(contextView -> {
-			assertThat(contextView.getOrEmpty(ObservationThreadLocalAccessor.KEY)).isPresent();
+			Observation observation = contextView.get(ObservationThreadLocalAccessor.KEY);
+			assertThat(observation).isNotNull();
+			// check that the observation was started
+			assertThat(observation.getContext().getLowCardinalityKeyValue("outcome")).isNotNull();
 			return Mono.empty();
 		});
 		this.filter.filter(exchange, filterChain).block();
@@ -98,6 +103,25 @@ class ServerHttpObservationFilterTests {
 				.verify();
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN");
 	}
+
+	@Test
+	void filterShouldStopObservationOnResponseCommit() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
+		WebFilterChain filterChain = createFilterChain(filterExchange -> {
+			throw new IllegalArgumentException("server error");
+		});
+		StepVerifier.create(this.filter.filter(exchange, filterChain).doOnError(throwable -> {
+					ServerHttpResponse response = exchange.getResponse();
+					response.setRawStatusCode(500);
+					response.setComplete().block();
+				}))
+				.expectError(IllegalArgumentException.class)
+				.verify();
+		Optional<ServerRequestObservationContext> observationContext = ServerHttpObservationFilter.findObservationContext(exchange);
+		assertThat(observationContext.get().getError()).isInstanceOf(IllegalArgumentException.class);
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
+	}
+
 
 	private WebFilterChain createFilterChain(ThrowingConsumer<ServerWebExchange> exchangeConsumer) {
 		return filterExchange -> {
