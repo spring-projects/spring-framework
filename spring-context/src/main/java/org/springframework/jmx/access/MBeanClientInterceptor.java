@@ -348,7 +348,7 @@ public class MBeanClientInterceptor
 
 
 	/**
-	 * Route the invocation to the configured managed resource..
+	 * Route the invocation to the configured managed resource.
 	 * @param invocation the {@code MethodInvocation} to re-route
 	 * @return the value returned as a result of the re-routed invocation
 	 * @throws Throwable an invocation error propagated to the user

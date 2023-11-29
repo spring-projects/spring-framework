@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	}
 
 	/**
-	 * Used for autodetection of beans. Checks to see if the bean's class has a
+	 * Used for auto-detection of beans. Checks to see if the bean's class has a
 	 * {@code ManagedResource} attribute. If so, it will add it to the list of included beans.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean in the bean factory
@@ -417,7 +417,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the int associated with the setter for this attribute
 	 */
 	private int resolveIntDescriptor(int getter, int setter) {
-		return (getter >= setter ? getter : setter);
+		return Math.max(getter, setter);
 	}
 
 	/**

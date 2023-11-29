@@ -117,7 +117,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 		pvs.removePropertyValue("defaultValue");
 		PropertyAccessorFactory.forBeanPropertyAccess(bean).setPropertyValues(pvs);
 		String defaultValue = (String) map.get("defaultValue");
-		if (defaultValue.length() > 0) {
+		if (!defaultValue.isEmpty()) {
 			bean.setDefaultValue(defaultValue);
 		}
 		return bean;
