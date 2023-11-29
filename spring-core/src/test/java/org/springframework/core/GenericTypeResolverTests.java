@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +194,15 @@ class GenericTypeResolverTests {
 		assertThat(resolved).isEqualTo(E.class);
 	}
 
+	@Test
+	public void resolveMethodParameterWithNestedGenerics() {
+		Method method = method(WithMethodParameter.class, "nestedGenerics", List.class);
+		MethodParameter methodParameter = new MethodParameter(method, 0);
+		Type resolvedType = resolveType(methodParameter.getGenericParameterType(), WithMethodParameter.class);
+		ParameterizedTypeReference<List<Map<String, Integer>>> reference = new ParameterizedTypeReference<>() {};
+		assertThat(resolvedType).isEqualTo(reference.getType());
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -386,6 +395,11 @@ class GenericTypeResolverTests {
 	}
 
 	static class SecondFirstService implements Second<String>, First<Integer> {
+	}
+
+	static class WithMethodParameter {
+		public void nestedGenerics(List<Map<String, Integer>> input) {
+		}
 	}
 
 
