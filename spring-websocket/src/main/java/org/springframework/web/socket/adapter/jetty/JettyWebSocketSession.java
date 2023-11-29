@@ -142,11 +142,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return (InetSocketAddress) getNativeSession().getRemoteSocketAddress();
 	}
 
-	/**
-	 * This method is a no-op for Jetty.
-	 */
 	@Override
 	public void setTextMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().setMaxTextMessageSize(messageSizeLimit);
 	}
 
 	@Override
@@ -155,11 +154,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return (int) getNativeSession().getMaxTextMessageSize();
 	}
 
-	/**
-	 * This method is a no-op for Jetty.
-	 */
 	@Override
 	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().setMaxBinaryMessageSize(messageSizeLimit);
 	}
 
 	@Override
