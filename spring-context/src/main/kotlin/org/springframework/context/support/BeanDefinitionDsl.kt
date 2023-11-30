@@ -189,7 +189,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			initMethodName?.let { bd.initMethodName = initMethodName }
 			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
 			description?.let { bd.description = description }
-			role?. let { bd.role = role.ordinal }
+			role?.let { bd.role = role.ordinal }
 			order?.let { bd.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, order) }
 		}
 
@@ -235,7 +235,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			initMethodName?.let { bd.initMethodName = initMethodName }
 			destroyMethodName?.let { bd.destroyMethodName = destroyMethodName }
 			description?.let { bd.description = description }
-			role?. let { bd.role = role.ordinal }
+			role?.let { bd.role = role.ordinal }
 			order?.let { bd.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, order) }
 		}
 
@@ -267,14 +267,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any>
 			bean(crossinline f: () -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -305,14 +305,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any, reified A: Any>
 			bean(crossinline f: (A) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -343,14 +343,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any, reified A: Any, reified B: Any>
 			bean(crossinline f: (A, B) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -381,14 +381,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any, reified A: Any, reified B: Any, reified C: Any>
 			bean(crossinline f: (A, B, C) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -419,14 +419,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any, reified A: Any, reified B: Any, reified C: Any, reified D: Any>
 			bean(crossinline f: (A, B, C, D) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -457,14 +457,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any, reified A: Any, reified B: Any, reified C: Any, reified D: Any, reified E: Any>
 			bean(crossinline f: (A, B, C, D, E) -> T,
 				 name: String? = null,
-								   scope: BeanDefinitionDsl.Scope? = null,
-								   isLazyInit: Boolean? = null,
-								   isPrimary: Boolean? = null,
-								   isAutowireCandidate: Boolean? = null,
-								   initMethodName: String? = null,
-								   destroyMethodName: String? = null,
-								   description: String? = null,
-								   role: BeanDefinitionDsl.Role? = null,
+				 scope: Scope? = null,
+				 isLazyInit: Boolean? = null,
+				 isPrimary: Boolean? = null,
+				 isAutowireCandidate: Boolean? = null,
+				 initMethodName: String? = null,
+				 destroyMethodName: String? = null,
+				 description: String? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -495,14 +495,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	inline fun <reified T: Any, reified A: Any, reified B: Any, reified C: Any, reified D: Any, reified E: Any, reified F: Any>
 			bean(crossinline f: (A, B, C, D, E, F) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -534,14 +534,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -573,14 +573,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any, reified H: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -612,14 +612,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any, reified H: Any, reified I: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -651,14 +651,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any, reified H: Any, reified I: Any, reified J: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -690,14 +690,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any, reified H: Any, reified I: Any, reified J: Any, reified K: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -729,14 +729,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any, reified H: Any, reified I: Any, reified J: Any, reified K: Any, reified L: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -768,14 +768,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified G: Any, reified H: Any, reified I: Any, reified J: Any, reified K: Any, reified L: Any, reified M: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -808,14 +808,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -848,14 +848,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any, reified O: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -888,14 +888,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any, reified O: Any, reified P: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -928,14 +928,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any, reified O: Any, reified P: Any, reified Q: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -968,14 +968,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any, reified O: Any, reified P: Any, reified Q: Any, reified R: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -1008,14 +1008,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any, reified O: Any, reified P: Any, reified Q: Any, reified R: Any, reified S: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -1048,14 +1048,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified N: Any, reified O: Any, reified P: Any, reified Q: Any, reified R: Any, reified S: Any, reified U: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -1089,14 +1089,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified V: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U, V) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
@@ -1130,14 +1130,14 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			reified V: Any, reified W: Any>
 			bean(crossinline f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U, V, W) -> T,
 				 name: String? = null,
-				 scope: BeanDefinitionDsl.Scope? = null,
+				 scope: Scope? = null,
 				 isLazyInit: Boolean? = null,
 				 isPrimary: Boolean? = null,
 				 isAutowireCandidate: Boolean? = null,
 				 initMethodName: String? = null,
 				 destroyMethodName: String? = null,
 				 description: String? = null,
-				 role: BeanDefinitionDsl.Role? = null,
+				 role: Role? = null,
 				 order: Int? = null) {
 
 		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role, order) {
