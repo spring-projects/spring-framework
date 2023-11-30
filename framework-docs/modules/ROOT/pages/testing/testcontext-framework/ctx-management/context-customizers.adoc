@@ -45,10 +45,10 @@ issue is addressed through support for automatic discovery of default
 Specifically, the modules that make up the testing support in Spring Framework and Spring
 Boot declare all core default `ContextCustomizerFactory` implementations under the
 `org.springframework.test.context.ContextCustomizerFactory` key in their
-`META-INF/spring.factories` properties files. Third-party frameworks and developers can
-contribute their own `ContextCustomizerFactory` implementations to the list of default
-factories in the same manner through their own `META-INF/spring.factories` properties
-files.
+{spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[`META-INF/spring.factories`]
+properties files. Third-party frameworks and developers can contribute their own
+`ContextCustomizerFactory` implementations to the list of default factories in the same
+manner through their own `META-INF/spring.factories` properties files.
 
 
 [[testcontext-context-customizers-merging]]

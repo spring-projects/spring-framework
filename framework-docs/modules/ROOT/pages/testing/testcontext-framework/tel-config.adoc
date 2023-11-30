@@ -82,8 +82,9 @@ issue is addressed through support for automatic discovery of default
 
 Specifically, the `spring-test` module declares all core default `TestExecutionListener`
 implementations under the `org.springframework.test.context.TestExecutionListener` key in
-its `META-INF/spring.factories` properties file. Third-party frameworks and developers
-can contribute their own `TestExecutionListener` implementations to the list of default
+{spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[its
+`META-INF/spring.factories` properties file]. Third-party frameworks and developers can
+contribute their own `TestExecutionListener` implementations to the list of default
 listeners in the same manner through their own `META-INF/spring.factories` properties
 file.
 
@@ -207,4 +208,3 @@ Kotlin::
 	}
 ----
 ======
-
