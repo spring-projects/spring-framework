@@ -30,10 +30,11 @@ import static org.mockito.Mockito.mock;
  */
 public class DriverManagerDataSourceTests {
 
-	private Connection connection = mock();
+	private final Connection connection = mock();
+
 
 	@Test
-	public void testStandardUsage() throws Exception {
+	public void standardUsage() throws Exception {
 		final String jdbcUrl = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
@@ -63,7 +64,7 @@ public class DriverManagerDataSourceTests {
 	}
 
 	@Test
-	public void testUsageWithConnectionProperties() throws Exception {
+	public void usageWithConnectionProperties() throws Exception {
 		final String jdbcUrl = "url";
 
 		final Properties connProps = new Properties();
@@ -96,7 +97,7 @@ public class DriverManagerDataSourceTests {
 	}
 
 	@Test
-	public void testUsageWithConnectionPropertiesAndUserCredentials() throws Exception {
+	public void usageWithConnectionPropertiesAndUserCredentials() throws Exception {
 		final String jdbcUrl = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
@@ -135,12 +136,12 @@ public class DriverManagerDataSourceTests {
 	}
 
 	@Test
-	public void testInvalidClassName() throws Exception {
+	public void invalidClassName() {
 		String bogusClassName = "foobar";
 		DriverManagerDataSource ds = new DriverManagerDataSource();
-		assertThatIllegalStateException().isThrownBy(() ->
-				ds.setDriverClassName(bogusClassName))
-			.withCauseInstanceOf(ClassNotFoundException.class);
+		assertThatIllegalStateException().isThrownBy(
+				() -> ds.setDriverClassName(bogusClassName))
+				.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 }

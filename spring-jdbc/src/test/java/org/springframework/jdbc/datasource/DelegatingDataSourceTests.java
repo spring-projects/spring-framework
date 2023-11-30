@@ -40,6 +40,7 @@ public class DelegatingDataSourceTests {
 
 	private DelegatingDataSource dataSource = new DelegatingDataSource(delegate);
 
+
 	@Test
 	public void shouldDelegateGetConnection() throws Exception {
 		Connection connection = mock();
@@ -109,10 +110,12 @@ public class DelegatingDataSourceTests {
 		assertThat(dataSource.isWrapperFor(ExampleWrapper.class)).isTrue();
 	}
 
+
 	public interface ExampleWrapper {
 	}
 
 	private static class DelegatingDataSourceWithWrapper extends DelegatingDataSource
 			implements ExampleWrapper {
 	}
+
 }
