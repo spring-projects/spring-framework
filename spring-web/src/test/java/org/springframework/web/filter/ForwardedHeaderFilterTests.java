@@ -35,6 +35,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -187,7 +188,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test // SPR-16983
-	public void forwardedRequestWithServletForward() throws Exception {
+	public void forwardedRequestWithForwardDispatch() throws Exception {
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
 		this.request.addHeader(X_FORWARDED_HOST, "www.mycompany.example");
@@ -206,6 +207,26 @@ public class ForwardedHeaderFilterTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual.getRequestURI()).isEqualTo("/bar");
 		assertThat(actual.getRequestURL().toString()).isEqualTo("https://www.mycompany.example/bar");
+	}
+
+	@Test // gh-30828
+	public void forwardedRequestWithErrorDispatch() throws Exception {
+		this.request.setRequestURI("/foo");
+		this.request.setDispatcherType(DispatcherType.ERROR);
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "www.mycompany.example");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/app");
+		this.request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/foo");
+
+		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+
+		HttpServletRequest wrappedRequest = (HttpServletRequest) this.filterChain.getRequest();
+
+		assertThat(wrappedRequest).isNotNull();
+		assertThat(wrappedRequest.getRequestURI()).isEqualTo("/app/foo");
+		assertThat(wrappedRequest.getRequestURL().toString()).isEqualTo("https://www.mycompany.example/app/foo");
+		assertThat(wrappedRequest.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).isEqualTo("/app/foo");
 	}
 
 	@Nested

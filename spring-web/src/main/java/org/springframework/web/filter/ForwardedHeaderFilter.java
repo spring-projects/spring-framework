@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,12 +38,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ForwardedHeaderUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Extract values from "Forwarded" and "X-Forwarded-*" headers, wrap the request
@@ -312,6 +315,15 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		public int getRemotePort() {
 			return (this.remoteAddress != null ? this.remoteAddress.getPort() : super.getRemotePort());
 		}
+
+		@SuppressWarnings("DataFlowIssue")
+		@Override
+		public Object getAttribute(String name) {
+			if (name.equals(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)) {
+				return this.forwardedPrefixExtractor.getErrorRequestUri();
+			}
+			return super.getAttribute(name);
+		}
 	}
 
 
@@ -419,6 +431,17 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 				this.requestUrl = initRequestUrl();
 			}
 		}
+
+		@Nullable
+		public String getErrorRequestUri() {
+			HttpServletRequest request = this.delegate.get();
+			String requestUri = (String) request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE);
+			if (this.forwardedPrefix == null || requestUri == null) {
+				return requestUri;
+			}
+			ErrorPathRequest errorRequest = new ErrorPathRequest(request);
+			return this.forwardedPrefix + UrlPathHelper.rawPathInstance.getPathWithinApplication(errorRequest);
+		}
 	}
 
 
@@ -470,6 +493,21 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 					.build().normalize().toUriString();
 
 			super.sendRedirect(result);
+		}
+	}
+
+
+	private static class ErrorPathRequest extends HttpServletRequestWrapper {
+
+		ErrorPathRequest(ServletRequest request) {
+			super((HttpServletRequest) request);
+		}
+
+		@Override
+		public String getRequestURI() {
+			String requestUri = (String) getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE);
+			Assert.isTrue(requestUri != null, "Expected ERROR requestUri attribute");
+			return requestUri;
 		}
 	}
 
