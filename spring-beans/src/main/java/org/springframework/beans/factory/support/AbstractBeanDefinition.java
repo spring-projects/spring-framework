@@ -51,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Mark Fisher
+ * @author Sebastien Deleuze
  * @see GenericBeanDefinition
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
@@ -138,6 +139,18 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#getPreferredConstructors()
 	 */
 	public static final String PREFERRED_CONSTRUCTORS_ATTRIBUTE = "preferredConstructors";
+
+	/**
+	 * The name of an attribute that can be
+	 * {@link org.springframework.core.AttributeAccessor#setAttribute set} on a
+	 * {@link org.springframework.beans.factory.config.BeanDefinition} so that
+	 * bean definitions can indicate the sort order for the targeted bean.
+	 * This is analogous to the {@code @Order} annotation.
+	 * @since 6.1.2
+	 * @see org.springframework.core.annotation.Order
+	 * @see org.springframework.core.Ordered
+	 */
+	public static final String ORDER_ATTRIBUTE = "order";
 
 	/**
 	 * Constant that indicates the container should attempt to infer the

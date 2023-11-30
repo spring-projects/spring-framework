@@ -79,9 +79,11 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
@@ -1482,6 +1484,55 @@ class DefaultListableBeanFactoryTests {
 		Object spouse = lbf.getBean("spouse1");
 		assertThat(bean.getSpouse1()).isSameAs(spouse);
 		assertThat(bean.getSpouse2()).isNull();
+	}
+
+	@Test
+	void orderFromAttribute() {
+		GenericBeanDefinition bd1 = new GenericBeanDefinition();
+		bd1.setBeanClass(TestBean.class);
+		bd1.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "lowest"))));
+		bd1.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
+		lbf.registerBeanDefinition("bean1", bd1);
+		GenericBeanDefinition bd2 = new GenericBeanDefinition();
+		bd2.setBeanClass(TestBean.class);
+		bd2.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "highest"))));
+		bd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
+		lbf.registerBeanDefinition("bean2", bd2);
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
+				.containsExactly("highest", "lowest");
+	}
+
+	@Test
+	void orderFromAttributeOverrideAnnotation() {
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		RootBeanDefinition rbd1 = new RootBeanDefinition(LowestPrecedenceTestBeanFactoryBean.class);
+		rbd1.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
+		lbf.registerBeanDefinition("lowestPrecedenceFactory", rbd1);
+		RootBeanDefinition rbd2 = new RootBeanDefinition(HighestPrecedenceTestBeanFactoryBean.class);
+		rbd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
+		lbf.registerBeanDefinition("highestPrecedenceFactory", rbd2);
+		GenericBeanDefinition bd1 = new GenericBeanDefinition();
+		bd1.setFactoryBeanName("highestPrecedenceFactory");
+		lbf.registerBeanDefinition("bean1", bd1);
+		GenericBeanDefinition bd2 = new GenericBeanDefinition();
+		bd2.setFactoryBeanName("lowestPrecedenceFactory");
+		lbf.registerBeanDefinition("bean2", bd2);
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
+				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
+	}
+
+	@Test
+	void invalidOrderAttribute() {
+		GenericBeanDefinition bd1 = new GenericBeanDefinition();
+		bd1.setBeanClass(TestBean.class);
+		bd1.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Boolean.TRUE);
+		lbf.registerBeanDefinition("bean1", bd1);
+		GenericBeanDefinition bd2 = new GenericBeanDefinition();
+		bd2.setBeanClass(TestBean.class);
+		lbf.registerBeanDefinition("bean", bd2);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> lbf.getBeanProvider(TestBean.class).orderedStream().collect(Collectors.toList()))
+				.withMessageContaining("Invalid value type for attribute");
 	}
 
 	@Test
@@ -3424,6 +3475,36 @@ class DefaultListableBeanFactoryTests {
 		public NonPublicEnum getNonPublicEnum() {
 			return nonPublicEnum;
 		}
+	}
+
+	@Order
+	private static class LowestPrecedenceTestBeanFactoryBean implements FactoryBean<TestBean> {
+
+		@Override
+		public TestBean getObject() {
+			return new TestBean("fromLowestPrecedenceTestBeanFactoryBean");
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return TestBean.class;
+		}
+
+	}
+
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	private static class HighestPrecedenceTestBeanFactoryBean implements FactoryBean<TestBean> {
+
+		@Override
+		public TestBean getObject() {
+			return new TestBean("fromHighestPrecedenceTestBeanFactoryBean");
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return TestBean.class;
+		}
+
 	}
 
 }

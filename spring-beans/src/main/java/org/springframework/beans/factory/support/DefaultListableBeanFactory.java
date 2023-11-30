@@ -70,6 +70,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -110,6 +111,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 16 April 2001
  * @see #registerBeanDefinition
  * @see #addBeanPostProcessor
@@ -2230,7 +2232,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * that is aware of the bean metadata of the instances to sort.
 	 * <p>Lookup for the method factory of an instance to sort, if any, and let the
 	 * comparator retrieve the {@link org.springframework.core.annotation.Order}
-	 * value defined on it. This essentially allows for the following construct:
+	 * value defined on it.
+	 * <p>As of 6.1.2, this class takes the {@link AbstractBeanDefinition#ORDER_ATTRIBUTE}
+	 * attribute into account.
 	 */
 	private class FactoryAwareOrderSourceProvider implements OrderComparator.OrderSourceProvider {
 
@@ -2249,7 +2253,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			try {
 				RootBeanDefinition beanDefinition = (RootBeanDefinition) getMergedBeanDefinition(beanName);
-				List<Object> sources = new ArrayList<>(2);
+				List<Object> sources = new ArrayList<>(3);
+				Object orderAttribute = beanDefinition.getAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE);
+				if (orderAttribute != null) {
+					if (orderAttribute instanceof Integer order) {
+						sources.add((Ordered) () -> order);
+					}
+					else {
+						throw new IllegalStateException("Invalid value type for attribute '" +
+								AbstractBeanDefinition.ORDER_ATTRIBUTE + "': " + orderAttribute.getClass().getName());
+					}
+				}
 				Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
 				if (factoryMethod != null) {
 					sources.add(factoryMethod);
