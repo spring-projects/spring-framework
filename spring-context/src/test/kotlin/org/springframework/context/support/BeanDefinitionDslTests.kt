@@ -18,11 +18,13 @@ package org.springframework.context.support
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
-import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
+import org.springframework.beans.factory.getBeanProvider
 import org.springframework.context.support.BeanDefinitionDsl.*
+import org.springframework.core.Ordered
 import org.springframework.core.env.get
 import org.springframework.core.testfixture.env.MockPropertySource
 import java.util.stream.Collectors
@@ -195,6 +197,25 @@ class BeanDefinitionDslTests {
 			fail("should have thrown an Exception")
 		} catch (ignored: Exception) {
 		}
+	}
+
+	@Test
+	fun `Declare beans with ordering`() {
+		val beans = beans {
+			bean<FooFoo>(order = Ordered.LOWEST_PRECEDENCE) {
+				FooFoo("lowest")
+			}
+			bean<FooFoo>(order = Ordered.HIGHEST_PRECEDENCE) {
+				FooFoo("highest")
+			}
+		}
+
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+
+		assertThat(context.getBeanProvider<FooFoo>().orderedStream().map { it.name }).containsExactly("highest", "lowest")
 	}
 }
 
