@@ -29,6 +29,11 @@ startup during the `LifecycleProcessor.onRefresh` phase. After this phase has co
 `InitializingBean#afterPropertiesSet` callbacks have been invoked; but the lifecycle has not started, and the 
 `ContextRefreshedEvent` has not yet been published.
 
+For testing purpose, it is also possible to leverage the `-Dspring.context.exit=onRefresh` JVM system property which
+triggers a similar behavior, but instead of creating a checkpoint, it exits your Spring application at the same lifecycle
+phase without requiring the Project CraC dependency/JVM or Linux. This can be useful to check if connections to remote
+services are required when the beans are not started, and potentially refine the configuration to avoid that.
+
 WARNING: As mentioned above, and especially in use cases where the CRaC files are shipped as part of a deployable artifact (a container image for example), operate with the assumption that any sensitive data "seen" by the JVM ends up in the CRaC files, and assess carefully the related security implications.
 
 NOTE: Automatic checkpoint/restore is a way to "fast-forward" the startup of the application to a phase where the application context is about to start, but it does not allow to have a fully warmed-up JVM.
