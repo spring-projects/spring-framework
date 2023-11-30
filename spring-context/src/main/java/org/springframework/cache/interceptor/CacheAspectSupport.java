@@ -1068,13 +1068,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				if (adapter.isMultiValue()) {
 					return adapter.fromPublisher(Flux.from(
 							Mono.fromFuture(cachedFuture)
-									.flatMap(value -> (Mono<?>) evaluate(Mono.just(unwrapCacheValue(value)), invoker, method, contexts)))
+									.flatMap(value -> (Mono<?>) evaluate(Mono.justOrEmpty(unwrapCacheValue(value)), invoker, method, contexts)))
 							.flatMap(v -> (v instanceof Iterable<?> iv ? Flux.fromIterable(iv) : Flux.just(v)))
 							.switchIfEmpty(Flux.defer(() -> (Flux<?>) evaluate(null, invoker, method, contexts))));
 				}
 				else {
 					return adapter.fromPublisher(Mono.fromFuture(cachedFuture)
-							.flatMap(value -> (Mono<?>) evaluate(Mono.just(unwrapCacheValue(value)), invoker, method, contexts))
+							.flatMap(value -> (Mono<?>) evaluate(Mono.justOrEmpty(unwrapCacheValue(value)), invoker, method, contexts))
 							.switchIfEmpty(Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts))));
 				}
 			}
