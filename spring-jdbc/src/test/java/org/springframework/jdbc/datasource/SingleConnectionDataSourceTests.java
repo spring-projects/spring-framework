@@ -33,13 +33,14 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @since 6.1.2
  */
-public class SingleConnectionDataSourceTests {
+class SingleConnectionDataSourceTests {
 
 	private final Connection connection = mock();
 
 
 	@Test
-	public void plainConnection() throws Exception {
+	@SuppressWarnings("resource")
+	void plainConnection() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, false);
 
 		ds.getConnection().close();
@@ -47,7 +48,7 @@ public class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	public void withAutoCloseable() throws Exception {
+	void withAutoCloseable() throws Exception {
 		try (SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, false)) {
 			ds.getConnection();
 		}
@@ -56,7 +57,8 @@ public class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	public void withSuppressClose() throws Exception {
+	@SuppressWarnings("resource")
+	void withSuppressClose() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, true);
 
 		ds.getConnection().close();
@@ -70,7 +72,8 @@ public class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	public void withRollbackBeforeClose() throws Exception {
+	@SuppressWarnings("resource")
+	void withRollbackBeforeClose() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, true);
 		ds.setRollbackBeforeClose(true);
 
@@ -80,7 +83,8 @@ public class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	public void withEnforcedAutoCommit() throws Exception {
+	@SuppressWarnings("resource")
+	void withEnforcedAutoCommit() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource() {
 			@Override
 			protected Connection getConnectionFromDriverManager(String url, Properties props) {

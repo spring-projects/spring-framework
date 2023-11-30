@@ -45,12 +45,13 @@ public class DelegatingPhaseListenerTests {
 		}
 	};
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void beforeAndAfterPhaseWithSingleTarget() {
 		TestListener target = new TestListener();
 		beanFactory.addBean("testListener", target);
 
-		assertThat((Object) delPhaseListener.getPhaseId()).isEqualTo(PhaseId.ANY_PHASE);
+		assertThat(delPhaseListener.getPhaseId()).isEqualTo(PhaseId.ANY_PHASE);
 		PhaseEvent event = new PhaseEvent(facesContext, PhaseId.INVOKE_APPLICATION, new MockLifecycle());
 
 		delPhaseListener.beforePhase(event);
@@ -60,6 +61,7 @@ public class DelegatingPhaseListenerTests {
 		assertThat(target.afterCalled).isTrue();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void beforeAndAfterPhaseWithMultipleTargets() {
 		TestListener target1 = new TestListener();
@@ -67,7 +69,7 @@ public class DelegatingPhaseListenerTests {
 		beanFactory.addBean("testListener1", target1);
 		beanFactory.addBean("testListener2", target2);
 
-		assertThat((Object) delPhaseListener.getPhaseId()).isEqualTo(PhaseId.ANY_PHASE);
+		assertThat(delPhaseListener.getPhaseId()).isEqualTo(PhaseId.ANY_PHASE);
 		PhaseEvent event = new PhaseEvent(facesContext, PhaseId.INVOKE_APPLICATION, new MockLifecycle());
 
 		delPhaseListener.beforePhase(event);

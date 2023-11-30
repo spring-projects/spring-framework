@@ -265,7 +265,7 @@ public class MessageHeaderAccessorTests {
 	@Test
 	public void timestampDefaultBehavior() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		assertThat((Object) accessor.getMessageHeaders().getTimestamp()).isNull();
+		assertThat(accessor.getMessageHeaders().getTimestamp()).isNull();
 	}
 
 	@Test
@@ -291,8 +291,8 @@ public class MessageHeaderAccessorTests {
 		accessor.setLeaveMutable(true);
 		MessageHeaders headers = accessor.getMessageHeaders();
 
-		assertThat((Object) headers.getId()).isNull();
-		assertThat((Object) headers.getTimestamp()).isNull();
+		assertThat(headers.getId()).isNull();
+		assertThat(headers.getTimestamp()).isNull();
 
 		final UUID id = new UUID(0L, 23L);
 		accessor.setIdGenerator(() -> id);

@@ -66,7 +66,7 @@ class GenericTypeResolverTests {
 	@Test
 	void nullIfNotResolvable() {
 		GenericClass<String> obj = new GenericClass<>();
-		assertThat((Object) resolveTypeArgument(obj.getClass(), GenericClass.class)).isNull();
+		assertThat(resolveTypeArgument(obj.getClass(), GenericClass.class)).isNull();
 	}
 
 	@Test
@@ -148,13 +148,13 @@ class GenericTypeResolverTests {
 	@Test  // SPR-11030
 	void getGenericsCannotBeResolved() {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
-		assertThat((Object) resolved).isNull();
+		assertThat(resolved).isNull();
 	}
 
 	@Test  // SPR-11052
 	void getRawMapTypeCannotBeResolved() {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
-		assertThat((Object) resolved).isNull();
+		assertThat(resolved).isNull();
 	}
 
 	@Test  // SPR-11044
@@ -377,16 +377,16 @@ class GenericTypeResolverTests {
 	interface IdFixingRepository<T> extends Repository<T, Long> {
 	}
 
-	interface First<F extends Number> {
+	interface First<N extends Number> {
 
-		default void foo(F f) {
+		default void foo(N f) {
 			// ...
 		}
 	}
 
-	interface Second<B> {
+	interface Second<T> {
 
-		default void bar(B b) {
+		default void bar(T b) {
 			// ...
 		}
 	}

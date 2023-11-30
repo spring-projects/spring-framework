@@ -522,10 +522,6 @@ class ConcurrentReferenceHashMapTests {
 			super(initialCapacity, loadFactor, concurrencyLevel);
 		}
 
-		public TestWeakConcurrentCache(int initialCapacity, int concurrencyLevel) {
-			super(initialCapacity, concurrencyLevel);
-		}
-
 		@Override
 		protected int getHash(@Nullable Object o) {
 			// For testing we want more control of the hash

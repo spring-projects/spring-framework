@@ -253,6 +253,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 				createEntityManagerFactoryBean("org/springframework/orm/jpa/domain/persistence.xml", null, "call me Bob"));
 	}
 
+	@SuppressWarnings("unchecked")
 	protected LocalContainerEntityManagerFactoryBean createEntityManagerFactoryBean(
 			String persistenceXml, Properties props, String entityManagerName) throws Exception {
 
@@ -273,7 +274,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		assertThat(actualPui.getPersistenceUnitName()).isEqualTo(entityManagerName);
 		if (props != null) {
-			assertThat((Object) actualProps).isEqualTo(props);
+			assertThat(actualProps).isEqualTo(props);
 		}
 		//checkInvariants(containerEmfb);
 

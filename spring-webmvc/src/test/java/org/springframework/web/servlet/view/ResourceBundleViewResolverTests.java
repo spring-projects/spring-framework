@@ -133,7 +133,7 @@ public class ResourceBundleViewResolverTests {
 
 	@Test
 	public void noSuchViewEnglish() throws Exception {
-		assertThat((Object) rb.resolveViewName("xxxxxxweorqiwuopeir", Locale.ENGLISH)).isNull();
+		assertThat(rb.resolveViewName("xxxxxxweorqiwuopeir", Locale.ENGLISH)).isNull();
 	}
 
 	@Test

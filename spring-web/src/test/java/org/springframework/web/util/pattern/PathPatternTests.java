@@ -361,10 +361,10 @@ public class PathPatternTests {
 	@Test
 	public void pathRemainingCornerCases_spr15336() {
 		// No match when the literal path element is a longer form of the segment in the pattern
-		assertThat((Object) parse("/foo").matchStartOfPath(toPathContainer("/footastic/bar"))).isNull();
-		assertThat((Object) parse("/f?o").matchStartOfPath(toPathContainer("/footastic/bar"))).isNull();
-		assertThat((Object) parse("/f*o*p").matchStartOfPath(toPathContainer("/flooptastic/bar"))).isNull();
-		assertThat((Object) parse("/{abc}abc").matchStartOfPath(toPathContainer("/xyzabcbar/bar"))).isNull();
+		assertThat(parse("/foo").matchStartOfPath(toPathContainer("/footastic/bar"))).isNull();
+		assertThat(parse("/f?o").matchStartOfPath(toPathContainer("/footastic/bar"))).isNull();
+		assertThat(parse("/f*o*p").matchStartOfPath(toPathContainer("/flooptastic/bar"))).isNull();
+		assertThat(parse("/{abc}abc").matchStartOfPath(toPathContainer("/xyzabcbar/bar"))).isNull();
 
 		// With a /** on the end have to check if there is any more data post
 		// 'the match' it starts with a separator
@@ -614,7 +614,7 @@ public class PathPatternTests {
 
 		pp = parse("/*/{foo}/b*");
 		pri = getPathRemaining(pp, "/foo");
-		assertThat((Object) pri).isNull();
+		assertThat(pri).isNull();
 		pri = getPathRemaining(pp, "/abc/def/bhi");
 		assertThat(pri.getPathRemaining().value()).isEmpty();
 		assertThat(pri.getUriVariables()).containsEntry("foo", "def");
@@ -838,8 +838,8 @@ public class PathPatternTests {
 		checkCapture("/A-{B}-C", "/A-b-C", "B", "b");
 		checkCapture("/{name}.{extension}", "/test.html", "name", "test", "extension", "html");
 
-		assertThat((Object) checkCapture("/{one}/", "//")).isNull();
-		assertThat((Object) checkCapture("", "/abc")).isNull();
+		assertThat(checkCapture("/{one}/", "//")).isNull();
+		assertThat(checkCapture("", "/abc")).isNull();
 
 		assertThat(checkCapture("", "").getUriVariables()).isEmpty();
 		checkCapture("{id}", "99", "id", "99");
@@ -1043,8 +1043,8 @@ public class PathPatternTests {
 		paths.add(null);
 		paths.add(null);
 		paths.sort(comparator);
-		assertThat((Object) paths.get(0)).isNull();
-		assertThat((Object) paths.get(1)).isNull();
+		assertThat(paths.get(0)).isNull();
+		assertThat(paths.get(1)).isNull();
 		paths.clear();
 
 		paths.add(null);

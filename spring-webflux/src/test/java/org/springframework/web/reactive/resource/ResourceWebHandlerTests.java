@@ -495,7 +495,7 @@ class ResourceWebHandlerTests {
 			setBestMachingPattern(exchange, "/**");
 			this.handler.handle(exchange).block(TIMEOUT);
 
-			assertThat((Object) exchange.getResponse().getStatusCode()).isNull();
+			assertThat(exchange.getResponse().getStatusCode()).isNull();
 			assertResponseBody(exchange, "h1 { color:red; }");
 		}
 
@@ -522,7 +522,7 @@ class ResourceWebHandlerTests {
 			setPathWithinHandlerMapping(exchange, "foo.css");
 			setBestMachingPattern(exchange, "/**");
 			this.handler.handle(exchange).block(TIMEOUT);
-			assertThat((Object) exchange.getResponse().getStatusCode()).isNull();
+			assertThat(exchange.getResponse().getStatusCode()).isNull();
 			assertResponseBody(exchange, "h1 { color:red; }");
 		}
 

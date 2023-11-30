@@ -209,7 +209,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	public void undefinedObjectType() {
-		assertThat((Object) this.factory.getObjectType()).isNull();
+		assertThat(this.factory.getObjectType()).isNull();
 	}
 
 	private static SerializerFactoryConfig getSerializerFactoryConfig(ObjectMapper objectMapper) {

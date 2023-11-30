@@ -57,6 +57,7 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 		testValidUsage(new Properties());
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void testValidUsage(Properties props) throws Exception {
 		// This will be set by DummyPersistenceProvider
 		actualName = null;
@@ -74,7 +75,7 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 
 		assertThat(actualName).isSameAs(entityManagerName);
 		if (props != null) {
-			assertThat((Object) actualProps).isEqualTo(props);
+			assertThat(actualProps).isEqualTo(props);
 		}
 		checkInvariants(lemfb);
 

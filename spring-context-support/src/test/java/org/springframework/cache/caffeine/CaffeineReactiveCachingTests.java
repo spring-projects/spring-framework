@@ -29,7 +29,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +46,7 @@ public class CaffeineReactiveCachingTests {
 	@ParameterizedTest
 	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
 	void cacheHitDetermination(Class<?> configClass) {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
 		Object key = new Object();
@@ -103,6 +102,8 @@ public class CaffeineReactiveCachingTests {
 
 		assertThat(r1).isNotNull();
 		assertThat(r1).isSameAs(r2).isSameAs(r3);
+
+		ctx.close();
 	}
 
 

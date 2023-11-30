@@ -126,7 +126,7 @@ public class MappingJackson2JsonViewTests {
 
 		view.render(model, request, response);
 
-		assertThat((Object) response.getHeader("Cache-Control")).isNull();
+		assertThat(response.getHeader("Cache-Control")).isNull();
 	}
 
 	@Test

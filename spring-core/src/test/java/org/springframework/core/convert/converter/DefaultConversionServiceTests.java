@@ -862,7 +862,7 @@ class DefaultConversionServiceTests {
 	void convertObjectToObjectFinderMethodWithNull() {
 		TestEntity entity = (TestEntity) conversionService.convert(null,
 				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(TestEntity.class));
-		assertThat((Object) entity).isNull();
+		assertThat(entity).isNull();
 	}
 
 	@Test

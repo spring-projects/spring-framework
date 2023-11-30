@@ -686,7 +686,7 @@ public class DispatcherServletTests {
 		assertThat(myServlet.getServletConfig().getServletName()).isEqualTo("complex");
 		assertThat(myServlet.getServletConfig().getServletContext()).isEqualTo(getServletContext());
 		complexDispatcherServlet.destroy();
-		assertThat((Object) myServlet.getServletConfig()).isNull();
+		assertThat(myServlet.getServletConfig()).isNull();
 	}
 
 	@Test

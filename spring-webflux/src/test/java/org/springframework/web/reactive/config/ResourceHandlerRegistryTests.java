@@ -75,7 +75,7 @@ class ResourceHandlerRegistryTests {
 	@Test
 	void noResourceHandlers() {
 		this.registry = new ResourceHandlerRegistry(new GenericApplicationContext());
-		assertThat((Object) this.registry.getHandlerMapping()).isNull();
+		assertThat(this.registry.getHandlerMapping()).isNull();
 	}
 
 	@Test

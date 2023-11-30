@@ -586,7 +586,7 @@ public class DefaultStompSessionTests {
 			receivedHeaders.set(receiptHeaders);
 		});
 
-		assertThat((Object) received.get()).isNull();
+		assertThat(received.get()).isNull();
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
 		accessor.setReceiptId("my-receipt");
@@ -656,7 +656,7 @@ public class DefaultStompSessionTests {
 		Runnable scheduledTask = taskCaptor.getValue();
 		assertThat(scheduledTask).isNotNull();
 
-		assertThat((Object) notReceived.get()).isNull();
+		assertThat(notReceived.get()).isNull();
 
 		scheduledTask.run();
 		assertThat(notReceived.get()).isTrue();
