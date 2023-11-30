@@ -27,7 +27,7 @@ javadoc {
 		author = true
 		header = rootProject.description
 		use = true
-		overview = "$rootProject.rootDir/framework-docs/src/docs/api/overview.html"
+		overview = project.relativePath("$rootProject.rootDir/framework-docs/src/docs/api/overview.html")
 		destinationDir = file("${project.buildDir}/docs/javadoc-api")
 		splitIndex = true
 		links(rootProject.ext.javadocLinks)
