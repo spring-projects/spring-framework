@@ -28,10 +28,12 @@ public class DeprecatedMemberConfiguration {
 		return "deprecated";
 	}
 
+	@SuppressWarnings("deprecation")
 	public String deprecatedParameter(DeprecatedBean bean) {
 		return bean.toString();
 	}
 
+	@SuppressWarnings("deprecation")
 	public DeprecatedBean deprecatedReturnType() {
 		return new DeprecatedBean();
 	}
