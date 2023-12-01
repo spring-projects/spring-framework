@@ -399,6 +399,7 @@ public class HandlerMappingIntrospectorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class TestServlet extends HttpServlet {
 
 		@Override
