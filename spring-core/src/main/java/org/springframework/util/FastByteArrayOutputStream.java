@@ -19,6 +19,7 @@ package org.springframework.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -162,9 +163,26 @@ public class FastByteArrayOutputStream extends OutputStream {
 	 */
 	@Override
 	public String toString() {
-		return new String(toByteArrayUnsafe());
+		return toString(Charset.defaultCharset());
 	}
 
+	/**
+	 * Converts the buffer's contents into a string by decoding the bytes using
+	 * the specified {@link java.nio.charset.Charset charset}.
+	 *
+	 * @param      charset  the {@linkplain java.nio.charset.Charset charset}
+	 *             to be used to decode the {@code bytes}
+	 * @return     a String decoded from the buffer's contents
+	 */
+	public String toString(Charset charset) {
+		if (size() == 0) {
+			return "";
+		}
+		if (buffers.size() == 1) {
+			return new String(buffers.getFirst(), 0, index, charset);
+		}
+		return new String(toByteArrayUnsafe(), charset);
+	}
 
 	// Custom methods
 
