@@ -1018,7 +1018,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected boolean shouldConstructArgument(MethodParameter param) {
 		Class<?> type = param.nestedIfOptional().getNestedParameterType();
 		return !(BeanUtils.isSimpleValueType(type) ||
-				Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || type.isArray());
+				Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || type.isArray() ||
+				type.getPackageName().startsWith("java."));
 	}
 
 	private void validateConstructorArgument(
