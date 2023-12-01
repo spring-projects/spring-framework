@@ -58,6 +58,24 @@ class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
+	void stringConversion() throws Exception {
+		this.os.write(this.helloBytes);
+		assertThat(this.os.toString()).isEqualTo("Hello World");
+		assertThat(this.os.toString(StandardCharsets.UTF_8)).isEqualTo("Hello World");
+
+		FastByteArrayOutputStream empty = new FastByteArrayOutputStream();
+		assertThat(empty.toString()).isEqualTo("");
+		assertThat(empty.toString(StandardCharsets.US_ASCII)).isEqualTo("");
+
+		FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream(5);
+		// Add bytes in multiple writes to ensure we get more than one buffer internally
+		outputStream.write(this.helloBytes, 0, 5);
+		outputStream.write(this.helloBytes, 5, 6);
+		assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo("Hello World");
+		assertThat(outputStream.toString()).isEqualTo("Hello World");
+	}
+
+	@Test
 	void autoGrow() throws IOException {
 		this.os.resize(1);
 		for (int i = 0; i < 10; i++) {
