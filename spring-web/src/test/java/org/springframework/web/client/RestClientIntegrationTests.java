@@ -349,6 +349,23 @@ class RestClientIntegrationTests {
 	}
 
 	@ParameterizedRestClientTest
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void retrieveJsonEmpty(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response
+				.setResponseCode(200)
+				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+		Pojo result = this.restClient.get()
+				.uri("/null")
+				.retrieve()
+				.body(Pojo.class);
+
+		assertThat(result).isNull();
+	}
+
+	@ParameterizedRestClientTest
 	void retrieve404(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 

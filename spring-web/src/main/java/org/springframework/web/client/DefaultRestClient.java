@@ -184,12 +184,20 @@ final class DefaultRestClient implements RestClient {
 		return new DefaultRestClientBuilder(this.builder);
 	}
 
+	@Nullable
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private <T> T readWithMessageConverters(ClientHttpResponse clientResponse, Runnable callback, Type bodyType, Class<T> bodyClass) {
+	private <T> T readWithMessageConverters(ClientHttpResponse clientResponse, Runnable callback, Type bodyType,
+			Class<T> bodyClass) {
+
 		MediaType contentType = getContentType(clientResponse);
 
 		try (clientResponse) {
 			callback.run();
+
+			IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(clientResponse);
+			if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
+				return null;
+			}
 
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter instanceof GenericHttpMessageConverter genericHttpMessageConverter) {
@@ -197,19 +205,19 @@ final class DefaultRestClient implements RestClient {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Reading to [" + ResolvableType.forType(bodyType) + "]");
 						}
-						return (T) genericHttpMessageConverter.read(bodyType, null, clientResponse);
+						return (T) genericHttpMessageConverter.read(bodyType, null, responseWrapper);
 					}
 				}
 				if (messageConverter.canRead(bodyClass, contentType)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reading to [" + bodyClass.getName() + "] as \"" + contentType + "\"");
 					}
-					return (T) messageConverter.read((Class)bodyClass, clientResponse);
+					return (T) messageConverter.read((Class)bodyClass, responseWrapper);
 				}
 			}
 			throw new UnknownContentTypeException(bodyType, contentType,
-					clientResponse.getStatusCode(), clientResponse.getStatusText(),
-					clientResponse.getHeaders(), RestClientUtils.getBody(clientResponse));
+					responseWrapper.getStatusCode(), responseWrapper.getStatusText(),
+					responseWrapper.getHeaders(), RestClientUtils.getBody(responseWrapper));
 		}
 		catch (UncheckedIOException | IOException | HttpMessageNotReadableException ex) {
 			throw new RestClientException("Error while extracting response for type [" +
@@ -585,11 +593,13 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
+		@Nullable
 		public <T> T body(Class<T> bodyType) {
 			return readBody(bodyType, bodyType);
 		}
 
 		@Override
+		@Nullable
 		public <T> T body(ParameterizedTypeReference<T> bodyType) {
 			Type type = bodyType.getType();
 			Class<T> bodyClass = bodyClass(type);
@@ -637,6 +647,7 @@ final class DefaultRestClient implements RestClient {
 		}
 
 
+		@Nullable
 		private <T> T readBody(Type bodyType, Class<T> bodyClass) {
 			return DefaultRestClient.this.readWithMessageConverters(this.clientResponse, this::applyStatusHandlers,
 					bodyType, bodyClass);
