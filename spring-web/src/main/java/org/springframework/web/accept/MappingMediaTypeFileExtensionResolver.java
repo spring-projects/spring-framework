@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
  * lookups between file extensions and MediaTypes in both directions.
  *
  * <p>Initially created with a map of file extensions and media types.
- * Subsequently subclasses can use {@link #addMapping} to add more mappings.
+ * Subsequently, subclasses can use {@link #addMapping} to add more mappings.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
