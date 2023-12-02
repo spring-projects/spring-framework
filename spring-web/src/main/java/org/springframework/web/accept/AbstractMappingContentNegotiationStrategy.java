@@ -69,7 +69,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 
 	/**
 	 * Whether to only use the registered mappings to look up file extensions,
-	 * or also to use dynamic resolution (e.g. via {@link MediaTypeFactory}.
+	 * or also to use dynamic resolution (e.g. via {@link MediaTypeFactory}).
 	 * <p>By default this is set to {@code false}.
 	 */
 	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
