@@ -117,7 +117,7 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		@Override
-		public final void request(long n) {
+		public void request(long n) {
 			if (rsWriteResultLogger.isTraceEnabled()) {
 				rsWriteResultLogger.trace(this.publisher.logPrefix +
 						"request " + (n != Long.MAX_VALUE ? n : "Long.MAX_VALUE"));
@@ -126,7 +126,7 @@ class WriteResultPublisher implements Publisher<Void> {
 		}
 
 		@Override
-		public final void cancel() {
+		public void cancel() {
 			State state = getState();
 			if (rsWriteResultLogger.isTraceEnabled()) {
 				rsWriteResultLogger.trace(this.publisher.logPrefix + "cancel [" + state + "]");
