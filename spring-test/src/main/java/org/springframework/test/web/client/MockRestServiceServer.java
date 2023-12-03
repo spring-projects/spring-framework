@@ -140,7 +140,7 @@ public final class MockRestServiceServer {
 
 	/**
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
-	 * to reply to the given {@code RestTemplate}.
+	 * to reply to the given {@code RestClient.Builder}.
 	 * @since 6.1
 	 */
 	public static MockRestServiceServerBuilder bindTo(RestClient.Builder restClientBuilder) {
