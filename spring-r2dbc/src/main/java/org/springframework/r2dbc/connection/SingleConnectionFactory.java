@@ -252,16 +252,16 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
 				case "equals" -> proxy == args[0];
-					// Only consider equal when proxies are identical.
+				// Use hashCode of PersistenceManager proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
-					// Use hashCode of PersistenceManager proxy.
 				case "unwrap" -> this.target;
+				// Handle close method: suppress, not valid.
 				case "close" -> Mono.empty();
-					// Handle close method: suppress, not valid.
 				default -> {
-					// Invoke method on target Connection.
 					try {
+						// Invoke method on target Connection.
 						yield method.invoke(this.target, args);
 					}
 					catch (InvocationTargetException ex) {

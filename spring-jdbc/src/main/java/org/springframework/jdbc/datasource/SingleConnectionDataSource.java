@@ -350,20 +350,20 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 			// Invocation on ConnectionProxy interface coming in...
 
 			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
 				case "equals" -> (proxy == args[0]);
-					// Only consider equal when proxies are identical.
+				// Use hashCode of Connection proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
-					// Use hashCode of Connection proxy.
+				// Handle close method: don't pass the call on.
 				case "close" -> null;
-					// Handle close method: don't pass the call on.
 				case "isClosed" -> this.target.isClosed();
+				// Handle getTargetConnection method: return underlying Connection.
 				case "getTargetConnection" -> this.target;
-					// Handle getTargetConnection method: return underlying Connection.
 				case "unwrap" -> (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
 				case "isWrapperFor" -> (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
 				default -> {
-					// Invoke method on target Connection.
 					try {
+						// Invoke method on target Connection.
 						yield method.invoke(this.target, args);
 					}
 					catch (InvocationTargetException ex) {

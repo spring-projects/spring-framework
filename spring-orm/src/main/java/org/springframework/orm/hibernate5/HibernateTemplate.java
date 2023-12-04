@@ -1151,15 +1151,15 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			// Invocation on Session interface coming in...
 
 			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
 				case "equals" -> (proxy == args[0]);
-					// Only consider equal when proxies are identical.
+				// Use hashCode of Session proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
-					// Use hashCode of Session proxy.
+				// Handle close method: suppress, not valid.
 				case "close" -> null;
-					// Handle close method: suppress, not valid.
 				default -> {
-					// Invoke method on target Session.
 					try {
+						// Invoke method on target Session.
 						Object retVal = method.invoke(this.target, args);
 
 						// If return value is a Query or Criteria, apply transaction timeout.

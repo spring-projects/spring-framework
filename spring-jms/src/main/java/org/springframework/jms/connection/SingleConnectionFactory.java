@@ -625,7 +625,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 					else {
 						throw new jakarta.jms.IllegalStateException(
 								"setClientID call not supported on proxy for shared Connection. " +
-										"Set the 'clientId' property on the SingleConnectionFactory instead.");
+								"Set the 'clientId' property on the SingleConnectionFactory instead.");
 					}
 				}
 				case "setExceptionListener" -> {
@@ -647,9 +647,9 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 						else {
 							throw new jakarta.jms.IllegalStateException(
 									"setExceptionListener call not supported on proxy for shared Connection. " +
-											"Set the 'exceptionListener' property on the SingleConnectionFactory instead. " +
-											"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
-											"which will allow for registering further ExceptionListeners to the recovery chain.");
+									"Set the 'exceptionListener' property on the SingleConnectionFactory instead. " +
+									"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
+									"which will allow for registering further ExceptionListeners to the recovery chain.");
 						}
 					}
 				}

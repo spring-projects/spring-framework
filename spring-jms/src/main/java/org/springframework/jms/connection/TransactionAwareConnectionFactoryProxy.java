@@ -332,21 +332,21 @@ public class TransactionAwareConnectionFactoryProxy
 			// Invocation on SessionProxy interface coming in...
 
 			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
 				case "equals" -> (proxy == args[0]);
-					// Only consider equal when proxies are identical.
+				// Use hashCode of Connection proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
-					// Use hashCode of Connection proxy.
 				case "commit" ->
 					throw new TransactionInProgressException("Commit call not allowed within a managed transaction");
 				case "rollback" ->
 					throw new TransactionInProgressException("Rollback call not allowed within a managed transaction");
+				// Handle close method: not to be closed within a transaction.
 				case "close" -> null;
-					// Handle close method: not to be closed within a transaction.
+				// Handle getTargetSession method: return underlying Session.
 				case "getTargetSession" -> this.target;
-					// Handle getTargetSession method: return underlying Session.
 				default -> {
-					// Invoke method on target Session.
 					try {
+						// Invoke method on target Session.
 						yield method.invoke(this.target, args);
 					}
 					catch (InvocationTargetException ex) {

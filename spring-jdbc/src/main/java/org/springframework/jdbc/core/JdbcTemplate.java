@@ -1656,20 +1656,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			// Invocation on ConnectionProxy interface coming in...
 
 			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
 				case "equals" -> (proxy == args[0]);
-					// Only consider equal when proxies are identical.
+				// Use hashCode of PersistenceManager proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
-					// Use hashCode of PersistenceManager proxy.
+				// Handle close method: suppress, not valid.
 				case "close" -> null;
-					// Handle close method: suppress, not valid.
 				case "isClosed" -> false;
+				// Handle getTargetConnection method: return underlying Connection.
 				case "getTargetConnection" -> this.target;
-					// Handle getTargetConnection method: return underlying Connection.
 				case "unwrap" -> (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
 				case "isWrapperFor" -> (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
 				default -> {
-					// Invoke method on target Connection.
 					try {
+						// Invoke method on target Connection.
 						Object retVal = method.invoke(this.target, args);
 
 						// If return value is a JDBC Statement, apply statement settings

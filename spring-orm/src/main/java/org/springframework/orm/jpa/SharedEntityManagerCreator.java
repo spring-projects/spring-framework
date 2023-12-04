@@ -264,7 +264,7 @@ public abstract class SharedEntityManagerCreator {
 				case "getTransaction" -> {
 					throw new IllegalStateException(
 							"Not allowed to create transaction on shared EntityManager - " +
-									"use Spring transactions or EJB CMT instead");
+							"use Spring transactions or EJB CMT instead");
 				}
 			}
 

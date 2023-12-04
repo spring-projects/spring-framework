@@ -269,7 +269,7 @@ public class DateFormatter implements Formatter<Date> {
 			if (timeStyle != -1) {
 				return DateFormat.getTimeInstance(timeStyle, locale);
 			}
-			throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
+			throw unsupportedStylePatternException();
 
 		}
 		return DateFormat.getDateInstance(this.style, locale);
@@ -284,10 +284,14 @@ public class DateFormatter implements Formatter<Date> {
 				case 'L' -> DateFormat.LONG;
 				case 'F' -> DateFormat.FULL;
 				case '-' -> -1;
-				default -> throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
+				default -> throw unsupportedStylePatternException();
 			};
 		}
-		throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
+		throw unsupportedStylePatternException();
+	}
+
+	private IllegalStateException unsupportedStylePatternException() {
+		return new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 	}
 
 }
