@@ -76,6 +76,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
+	private boolean lazyTransactionalConnections = true;
+
 	private boolean reobtainTransactionalConnections = false;
 
 
@@ -92,6 +94,18 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	public TransactionAwareDataSourceProxy(DataSource targetDataSource) {
 		super(targetDataSource);
+	}
+
+
+	/**
+	 * Specify whether to obtain the transactional target Connection lazily on
+	 * actual data access.
+	 * <p>The default is "true". Specify "false" to immediately obtain a target
+	 * Connection when a transaction-aware Connection handle is retrieved.
+	 * @since 6.1.2
+	 */
+	public void setLazyTransactionalConnections(boolean lazyTransactionalConnections) {
+		this.lazyTransactionalConnections = lazyTransactionalConnections;
 	}
 
 	/**
@@ -119,7 +133,12 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return getTransactionAwareConnectionProxy(obtainTargetDataSource());
+		DataSource ds = obtainTargetDataSource();
+		Connection con = getTransactionAwareConnectionProxy(ds);
+		if (!this.lazyTransactionalConnections && shouldObtainFixedConnection(ds)) {
+			((ConnectionProxy) con).getTargetConnection();
+		}
+		return con;
 	}
 
 	/**

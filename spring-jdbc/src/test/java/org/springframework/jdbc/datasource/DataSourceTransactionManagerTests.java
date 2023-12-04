@@ -67,18 +67,23 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  * @since 04.07.2003
  * @see org.springframework.jdbc.support.JdbcTransactionManagerTests
  */
-public class DataSourceTransactionManagerTests {
+public class DataSourceTransactionManagerTests<T extends DataSourceTransactionManager> {
 
-	private DataSource ds = mock();
+	protected DataSource ds = mock();
 
-	private Connection con = mock();
+	protected Connection con = mock();
 
-	private DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+	protected DataSourceTransactionManager tm;
 
 
 	@BeforeEach
 	public void setup() throws Exception {
+		tm = createTransactionManager(ds);
 		given(ds.getConnection()).willReturn(con);
+	}
+
+	protected DataSourceTransactionManager createTransactionManager(DataSource ds) {
+		return new DataSourceTransactionManager(ds);
 	}
 
 	@AfterEach
@@ -123,18 +128,15 @@ public class DataSourceTransactionManagerTests {
 	private void doTestTransactionCommitRestoringAutoCommit(
 			boolean autoCommit, boolean lazyConnection, final boolean createStatement) throws Exception {
 
+		given(con.getAutoCommit()).willReturn(autoCommit);
+
 		if (lazyConnection) {
-			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
 			given(con.getWarnings()).willThrow(new SQLException());
 		}
 
-		if (!lazyConnection || createStatement) {
-			given(con.getAutoCommit()).willReturn(autoCommit);
-		}
-
 		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
-		tm = new DataSourceTransactionManager(dsToUse);
+		tm = createTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -213,17 +215,14 @@ public class DataSourceTransactionManagerTests {
 	private void doTestTransactionRollbackRestoringAutoCommit(
 			boolean autoCommit, boolean lazyConnection, final boolean createStatement) throws Exception {
 
+		given(con.getAutoCommit()).willReturn(autoCommit);
+
 		if (lazyConnection) {
-			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
 		}
 
-		if (!lazyConnection || createStatement) {
-			given(con.getAutoCommit()).willReturn(autoCommit);
-		}
-
 		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
-		tm = new DataSourceTransactionManager(dsToUse);
+		tm = createTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
@@ -522,7 +521,7 @@ public class DataSourceTransactionManagerTests {
 	@Test
 	public void testParticipatingTransactionWithRollbackOnlyAndInnerSynch() throws Exception {
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
-		DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds);
+		DataSourceTransactionManager tm2 = createTransactionManager(ds);
 		// tm has no synch enabled (used at outer level), tm2 has synch enabled (inner level)
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -613,7 +612,7 @@ public class DataSourceTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		PlatformTransactionManager tm2 = new DataSourceTransactionManager(ds2);
+		PlatformTransactionManager tm2 = createTransactionManager(ds2);
 		final TransactionTemplate tt2 = new TransactionTemplate(tm2);
 		tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -662,7 +661,7 @@ public class DataSourceTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds2);
+		DataSourceTransactionManager tm2 = createTransactionManager(ds2);
 		tm2.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
 		final TransactionTemplate tt2 = new TransactionTemplate(tm2);
 		tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -1004,6 +1003,42 @@ public class DataSourceTransactionManagerTests {
 				try {
 					Connection tCon = dsProxy.getConnection();
 					tCon.getWarnings();
+					tCon.clearWarnings();
+					assertThat(((ConnectionProxy) dsProxy.getConnection()).getTargetConnection()).isEqualTo(con);
+					// should be ignored
+					dsProxy.getConnection().close();
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
+			}
+		});
+
+		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(con).commit();
+		ordered.verify(con).setAutoCommit(true);
+		verify(con).close();
+	}
+
+	@Test
+	public void testTransactionAwareDataSourceProxyWithLazyFalse() throws Exception {
+		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				// something transactional
+				assertThat(DataSourceUtils.getConnection(ds)).isEqualTo(con);
+				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
+				dsProxy.setLazyTransactionalConnections(false);
+				try {
+					Connection tCon = dsProxy.getConnection();
+					assertThatExceptionOfType(SQLException.class).isThrownBy(tCon::getWarnings);
 					tCon.clearWarnings();
 					assertThat(((ConnectionProxy) dsProxy.getConnection()).getTargetConnection()).isEqualTo(con);
 					// should be ignored
