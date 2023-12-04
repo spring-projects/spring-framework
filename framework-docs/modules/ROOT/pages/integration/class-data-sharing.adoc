@@ -19,7 +19,7 @@ been published.
 
 To create the archive, two additional JVM flags must be specified:
 
-* `-XX:ArchiveClassesAtExit=app-cds.jsa`: creates the CDS archive on exit
+* `-XX:ArchiveClassesAtExit=application.jsa`: creates the CDS archive on exit
 * `-Dspring.context.exit=onRefresh`: starts and then immediately exits your Spring
   application as described above
 
@@ -40,8 +40,8 @@ The base CDS archive can be created by issuing the following command:
 
 == Using the Archive
 
-Once the archive is available, add `-XX:SharedArchiveFile=app-cds.jsa` to your startup
-script to use it, assuming a `app-cds.jsa` file in the working directory.
+Once the archive is available, add `-XX:SharedArchiveFile=application.jsa` to your startup
+script to use it, assuming a `application.jsa` file in the working directory.
 
 To figure out how effective the cache is, you can enable class loading logs by adding
 an extra attribute: `-Xlog:class+load:file=cds.log`. This creates a `cds.log` with every
