@@ -1658,7 +1658,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return switch (method.getName()) {
 				// Only consider equal when proxies are identical.
 				case "equals" -> (proxy == args[0]);
-				// Use hashCode of PersistenceManager proxy.
+				// Use hashCode of Connection proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
 				// Handle close method: suppress, not valid.
 				case "close" -> null;

@@ -522,7 +522,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			return switch (method.getName()) {
 				// Only consider equal when proxies are identical.
 				case "equals" -> proxy == args[0];
-				// Use hashCode of PersistenceManager proxy.
+				// Use hashCode of Connection proxy.
 				case "hashCode" -> System.identityHashCode(proxy);
 				case "unwrap" -> this.target;
 				// Handle close method: suppress, not valid.
