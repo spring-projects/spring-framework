@@ -41,7 +41,7 @@ The base CDS archive can be created by issuing the following command:
 == Using the Archive
 
 Once the archive is available, add `-XX:SharedArchiveFile=application.jsa` to your startup
-script to use it, assuming a `application.jsa` file in the working directory.
+script to use it, assuming an `application.jsa` file in the working directory.
 
 To figure out how effective the cache is, you can enable class loading logs by adding
 an extra attribute: `-Xlog:class+load:file=cds.log`. This creates a `cds.log` with every
