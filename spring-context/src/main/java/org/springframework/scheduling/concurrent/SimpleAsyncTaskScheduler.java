@@ -37,6 +37,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.ErrorHandler;
 
@@ -186,6 +187,10 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 		return () -> execute(task);
 	}
 
+	private Runnable taskOnSchedulerThread(Runnable task) {
+		return new DelegatingErrorHandlingRunnable(task, TaskUtils.getDefaultErrorHandler(true));
+	}
+
 
 	@Override
 	@Nullable
@@ -240,7 +245,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
 			// Blocking task on scheduler thread for fixed delay semantics
-			return this.scheduledExecutor.scheduleWithFixedDelay(task,
+			return this.scheduledExecutor.scheduleWithFixedDelay(taskOnSchedulerThread(task),
 					NANO.convert(initialDelay), NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
@@ -252,7 +257,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
 		try {
 			// Blocking task on scheduler thread for fixed delay semantics
-			return this.scheduledExecutor.scheduleWithFixedDelay(task,
+			return this.scheduledExecutor.scheduleWithFixedDelay(taskOnSchedulerThread(task),
 					0, NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
