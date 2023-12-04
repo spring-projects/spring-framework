@@ -80,13 +80,12 @@ become cumbersome if a custom listener needs to be used across an entire test su
 issue is addressed through support for automatic discovery of default
 `TestExecutionListener` implementations through the `SpringFactoriesLoader` mechanism.
 
-Specifically, the `spring-test` module declares all core default `TestExecutionListener`
+For example, the `spring-test` module declares all core default `TestExecutionListener`
 implementations under the `org.springframework.test.context.TestExecutionListener` key in
-{spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[its
-`META-INF/spring.factories` properties file]. Third-party frameworks and developers can
-contribute their own `TestExecutionListener` implementations to the list of default
-listeners in the same manner through their own `META-INF/spring.factories` properties
-file.
+its {spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[`META-INF/spring.factories`
+properties file]. Third-party frameworks and developers can contribute their own
+`TestExecutionListener` implementations to the list of default listeners in the same
+manner through their own `spring.factories` files.
 
 [[testcontext-tel-config-ordering]]
 == Ordering `TestExecutionListener` Implementations
