@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,20 @@ public class ServletCookieValueMethodArgumentResolverTests {
 		assertThat(result).as("Invalid result").isEqualTo(cookie.getValue());
 	}
 
+	@Test // gh-26989
+	public void resolveCookieWithEncodingTurnedOff() throws Exception {
+		Cookie cookie = new Cookie("name", "Tl=Q/0AUSOx[n)2z4(t]20FZv#?[Ge%H");
+		request.setCookies(cookie);
 
-	public void params(@CookieValue("name") Cookie cookie,
+		this.resolver.setUrlDecode(false);
+		String result = (String) resolver.resolveArgument(cookieStringParameter, null, webRequest, null);
+
+		assertThat(result).as("Invalid result").isEqualTo(cookie.getValue());
+	}
+
+
+	public void params(
+			@CookieValue("name") Cookie cookie,
 			@CookieValue(name = "name", defaultValue = "bar") String cookieString) {
 	}
 
