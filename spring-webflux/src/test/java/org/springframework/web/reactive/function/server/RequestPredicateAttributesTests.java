@@ -200,7 +200,7 @@ public class RequestPredicateAttributesTests {
 
 		@Override
 		protected Result testInternal(ServerRequest request) {
-			return Result.of(this.result, serverRequest -> serverRequest.attributes().put(this.key, this.value));
+			return Result.of(this.result, attributes -> attributes.put(this.key, this.value));
 		}
 	}
 

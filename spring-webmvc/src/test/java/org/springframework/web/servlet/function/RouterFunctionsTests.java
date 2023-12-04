@@ -114,4 +114,18 @@ public class RouterFunctionsTests {
 		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
+	@Test
+	public void composedPathVariable() {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RequestPredicate requestPredicate = RequestPredicates.path("/{foo}").and(
+				request -> request.pathVariable("foo").equals("bar"));
+		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route(requestPredicate, handlerFunction);
+
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/bar");
+		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
+		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = routerFunction.route(request);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
+	}
+
 }

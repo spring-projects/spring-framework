@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -315,7 +314,28 @@ public abstract class RequestPredicates {
 		else {
 			return newPattern;
 		}
+	}
 
+	private static <K, V> Map<K, V> mergeMaps(Map<K, V> left, Map<K, V> right) {
+		if (left.isEmpty()) {
+			if (right.isEmpty()) {
+				return Collections.emptyMap();
+			}
+			else {
+				return right;
+			}
+		}
+		else {
+			if (right.isEmpty()) {
+				return left;
+			}
+			else {
+				Map<K, V> result = new LinkedHashMap<>(left.size() + right.size());
+				result.putAll(left);
+				result.putAll(right);
+				return result;
+			}
+		}
 	}
 
 
@@ -452,7 +472,7 @@ public abstract class RequestPredicates {
 			Result result = testInternal(request);
 			boolean value = result.value();
 			if (value) {
-				result.modify(request);
+				result.modifyAttributes(request.attributes());
 			}
 			return value;
 		}
@@ -470,12 +490,12 @@ public abstract class RequestPredicates {
 			private final boolean value;
 
 			@Nullable
-			private final Consumer<ServerRequest> modify;
+			private final Consumer<Map<String, Object>> modifyAttributes;
 
 
-			private Result(boolean value, @Nullable Consumer<ServerRequest> modify) {
+			private Result(boolean value, @Nullable Consumer<Map<String, Object>> modifyAttributes) {
 				this.value = value;
-				this.modify = modify;
+				this.modifyAttributes = modifyAttributes;
 			}
 
 
@@ -483,12 +503,12 @@ public abstract class RequestPredicates {
 				return of(value, null);
 			}
 
-			public static Result of(boolean value, @Nullable Consumer<ServerRequest> commit) {
-				if (commit == null) {
+			public static Result of(boolean value, @Nullable Consumer<Map<String, Object>> modifyAttributes) {
+				if (modifyAttributes == null) {
 					return value ? TRUE : FALSE;
 				}
 				else {
-					return new Result(value, commit);
+					return new Result(value, modifyAttributes);
 				}
 			}
 
@@ -497,10 +517,14 @@ public abstract class RequestPredicates {
 				return this.value;
 			}
 
-			public void modify(ServerRequest request) {
-				if (this.modify != null) {
-					this.modify.accept(request);
+			public void modifyAttributes(Map<String, Object> attributes) {
+				if (this.modifyAttributes != null) {
+					this.modifyAttributes.accept(attributes);
 				}
+			}
+
+			public boolean modifiesAttributes() {
+				return this.modifyAttributes != null;
 			}
 		}
 
@@ -575,29 +599,32 @@ public abstract class RequestPredicates {
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
 			if (info != null) {
-				return Result.of(true, serverRequest -> mergeAttributes(serverRequest, info.getUriVariables()));
+				return Result.of(true, attributes -> modifyAttributes(attributes, request, info.getUriVariables()));
 			}
 			else {
 				return Result.of(false);
 			}
 		}
 
-		private void mergeAttributes(ServerRequest request, Map<String, String> variables) {
-			Map<String, Object> attributes = request.attributes();
-			Map<String, String> pathVariables = mergePathVariables(request.pathVariables(), variables);
+		private void modifyAttributes(Map<String, Object> attributes, ServerRequest request,
+				Map<String, String> variables) {
+
+			Map<String, String> pathVariables = mergeMaps(request.pathVariables(), variables);
+
 			attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
 					Collections.unmodifiableMap(pathVariables));
 
 			PathPattern pattern = mergePatterns(
 					(PathPattern) attributes.get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
 					this.pattern);
+
 			attributes.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
 		}
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.matchStartOfPath(request.requestPath().pathWithinApplication()))
-					.map(info -> new SubPathServerRequestWrapper(request, info, this.pattern));
+					.map(info -> new NestedPathPatternServerRequestWrapper(request, info, this.pattern));
 		}
 
 		@Override
@@ -861,13 +888,23 @@ public abstract class RequestPredicates {
 			if (!leftResult.value()) {
 				return leftResult;
 			}
-			Result rightResult = this.rightModifying.testInternal(request);
+			// ensure that attributes (and uri variables) set in left and available in right
+			ServerRequest rightRequest;
+			if (leftResult.modifiesAttributes()) {
+				Map<String, Object> leftAttributes = new LinkedHashMap<>(2);
+				leftResult.modifyAttributes(leftAttributes);
+				rightRequest = new ExtendedAttributesServerRequestWrapper(request, leftAttributes);
+			}
+			else {
+				rightRequest = request;
+			}
+			Result rightResult = this.rightModifying.testInternal(rightRequest);
 			if (!rightResult.value()) {
 				return rightResult;
 			}
-			return Result.of(true, serverRequest -> {
-				leftResult.modify(serverRequest);
-				rightResult.modify(serverRequest);
+			return Result.of(true, attributes -> {
+				leftResult.modifyAttributes(attributes);
+				rightResult.modifyAttributes(attributes);
 			});
 		}
 
@@ -923,7 +960,7 @@ public abstract class RequestPredicates {
 		@Override
 		protected Result testInternal(ServerRequest request) {
 			Result result = this.delegateModifying.testInternal(request);
-			return Result.of(!result.value(), result::modify);
+			return Result.of(!result.value(), result::modifyAttributes);
 		}
 
 		@Override
@@ -1020,19 +1057,194 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class SubPathServerRequestWrapper implements ServerRequest {
 
-		private final ServerRequest request;
+	private abstract static class DelegatingServerRequest implements ServerRequest {
 
-		private final RequestPath requestPath;
+		private final ServerRequest delegate;
+
+
+		protected DelegatingServerRequest(ServerRequest delegate) {
+			Assert.notNull(delegate, "Delegate must not be null");
+			this.delegate = delegate;
+		}
+
+		@Override
+		public HttpMethod method() {
+			return this.delegate.method();
+		}
+
+		@Override
+		@Deprecated
+		public String methodName() {
+			return this.delegate.methodName();
+		}
+
+		@Override
+		public URI uri() {
+			return this.delegate.uri();
+		}
+
+		@Override
+		public UriBuilder uriBuilder() {
+			return this.delegate.uriBuilder();
+		}
+
+		@Override
+		public Headers headers() {
+			return this.delegate.headers();
+		}
+
+		@Override
+		public MultiValueMap<String, HttpCookie> cookies() {
+			return this.delegate.cookies();
+		}
+
+		@Override
+		public Optional<InetSocketAddress> remoteAddress() {
+			return this.delegate.remoteAddress();
+		}
+
+		@Override
+		public Optional<InetSocketAddress> localAddress() {
+			return this.delegate.localAddress();
+		}
+
+		@Override
+		public List<HttpMessageReader<?>> messageReaders() {
+			return this.delegate.messageReaders();
+		}
+
+		@Override
+		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
+			return this.delegate.body(extractor);
+		}
+
+		@Override
+		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
+			return this.delegate.body(extractor, hints);
+		}
+
+		@Override
+		public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
+			return this.delegate.bodyToMono(elementClass);
+		}
+
+		@Override
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
+			return this.delegate.bodyToMono(typeReference);
+		}
+
+		@Override
+		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
+			return this.delegate.bodyToFlux(elementClass);
+		}
+
+		@Override
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
+			return this.delegate.bodyToFlux(typeReference);
+		}
+
+		@Override
+		public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
+			return this.delegate.bind(bindType, dataBinderCustomizer);
+		}
+
+		@Override
+		public Map<String, Object> attributes() {
+			return this.delegate.attributes();
+		}
+
+		@Override
+		public MultiValueMap<String, String> queryParams() {
+			return this.delegate.queryParams();
+		}
+
+		@Override
+		public Map<String, String> pathVariables() {
+			return this.delegate.pathVariables();
+		}
+
+		@Override
+		public Mono<WebSession> session() {
+			return this.delegate.session();
+		}
+
+		@Override
+		public Mono<? extends Principal> principal() {
+			return this.delegate.principal();
+		}
+
+		@Override
+		public Mono<MultiValueMap<String, String>> formData() {
+			return this.delegate.formData();
+		}
+
+		@Override
+		public Mono<MultiValueMap<String, Part>> multipartData() {
+			return this.delegate.multipartData();
+		}
+
+		@Override
+		public ServerWebExchange exchange() {
+			return this.delegate.exchange();
+		}
+
+		@Override
+		public String toString() {
+			return this.delegate.toString();
+		}
+	}
+
+
+	private static class ExtendedAttributesServerRequestWrapper extends DelegatingServerRequest {
 
 		private final Map<String, Object> attributes;
 
-		public SubPathServerRequestWrapper(ServerRequest request,
+
+		public ExtendedAttributesServerRequestWrapper(ServerRequest delegate, Map<String, Object> newAttributes) {
+			super(delegate);
+			Assert.notNull(newAttributes, "NewAttributes must not be null");
+			this.attributes = mergeMaps(delegate.attributes(), newAttributes);
+		}
+
+
+		@Override
+		public Map<String, Object> attributes() {
+			return this.attributes;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Map<String, String> pathVariables() {
+			return (Map<String, String>) this.attributes.getOrDefault(
+					RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
+		}
+	}
+
+
+	private static class NestedPathPatternServerRequestWrapper extends ExtendedAttributesServerRequestWrapper {
+
+		private final RequestPath requestPath;
+
+
+		public NestedPathPatternServerRequestWrapper(ServerRequest request,
 				PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
-			this.request = request;
+			super(request, mergeAttributes(request, info.getUriVariables(), pattern));
 			this.requestPath = requestPath(request.requestPath(), info);
-			this.attributes = mergeAttributes(request, info.getUriVariables(), pattern);
+		}
+
+		private static Map<String, Object> mergeAttributes(ServerRequest request, Map<String, String> newPathVariables,
+				PathPattern newPathPattern) {
+
+
+			Map<String, String> oldPathVariables = request.pathVariables();
+			PathPattern oldPathPattern = (PathPattern) request.attribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE)
+					.orElse(null);
+
+			Map<String, Object> result = new LinkedHashMap<>(2);
+			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, mergeMaps(oldPathVariables, newPathVariables));
+			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, mergePatterns(oldPathPattern, newPathPattern));
+			return result;
 		}
 
 		private static RequestPath requestPath(RequestPath original, PathPattern.PathRemainingMatchInfo info) {
@@ -1045,163 +1257,10 @@ public abstract class RequestPredicates {
 			return original.modifyContextPath(contextPath.toString());
 		}
 
-		private static Map<String, Object> mergeAttributes(ServerRequest request,
-		Map<String, String> pathVariables, PathPattern pattern) {
-			Map<String, Object> result = new ConcurrentHashMap<>(request.attributes());
-
-			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-					mergePathVariables(request.pathVariables(), pathVariables));
-
-			pattern = mergePatterns(
-					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
-					pattern);
-			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
-			return result;
-		}
-
-		@Override
-		public HttpMethod method() {
-			return this.request.method();
-		}
-
-		@Override
-		@Deprecated
-		public String methodName() {
-			return this.request.methodName();
-		}
-
-		@Override
-		public URI uri() {
-			return this.request.uri();
-		}
-
-		@Override
-		public UriBuilder uriBuilder() {
-			return this.request.uriBuilder();
-		}
 
 		@Override
 		public RequestPath requestPath() {
 			return this.requestPath;
 		}
-
-		@Override
-		public Headers headers() {
-			return this.request.headers();
-		}
-
-		@Override
-		public MultiValueMap<String, HttpCookie> cookies() {
-			return this.request.cookies();
-		}
-
-		@Override
-		public Optional<InetSocketAddress> remoteAddress() {
-			return this.request.remoteAddress();
-		}
-
-		@Override
-		public Optional<InetSocketAddress> localAddress() {
-			return this.request.localAddress();
-		}
-
-		@Override
-		public List<HttpMessageReader<?>> messageReaders() {
-			return this.request.messageReaders();
-		}
-
-		@Override
-		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
-			return this.request.body(extractor);
-		}
-
-		@Override
-		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
-			return this.request.body(extractor, hints);
-		}
-
-		@Override
-		public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-			return this.request.bodyToMono(elementClass);
-		}
-
-		@Override
-		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-			return this.request.bodyToMono(typeReference);
-		}
-
-		@Override
-		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-			return this.request.bodyToFlux(elementClass);
-		}
-
-		@Override
-		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-			return this.request.bodyToFlux(typeReference);
-		}
-
-		@Override
-		public <T> Mono<T> bind(Class<T> bindType) {
-			return this.request.bind(bindType);
-		}
-
-		@Override
-		public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
-			return this.request.bind(bindType, dataBinderCustomizer);
-		}
-
-		@Override
-		public Map<String, Object> attributes() {
-			return this.attributes;
-		}
-
-		@Override
-		public Optional<String> queryParam(String name) {
-			return this.request.queryParam(name);
-		}
-
-		@Override
-		public MultiValueMap<String, String> queryParams() {
-			return this.request.queryParams();
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public Map<String, String> pathVariables() {
-			return (Map<String, String>) this.attributes.getOrDefault(
-					RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
-
-		}
-
-		@Override
-		public Mono<WebSession> session() {
-			return this.request.session();
-		}
-
-		@Override
-		public Mono<? extends Principal> principal() {
-			return this.request.principal();
-		}
-
-		@Override
-		public Mono<MultiValueMap<String, String>> formData() {
-			return this.request.formData();
-		}
-
-		@Override
-		public Mono<MultiValueMap<String, Part>> multipartData() {
-			return this.request.multipartData();
-		}
-
-		@Override
-		public ServerWebExchange exchange() {
-			return this.request.exchange();
-		}
-
-		@Override
-		public String toString() {
-			return method() + " " + path();
-		}
 	}
-
 }
