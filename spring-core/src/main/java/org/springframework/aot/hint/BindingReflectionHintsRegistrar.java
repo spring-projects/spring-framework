@@ -94,6 +94,11 @@ public class BindingReflectionHintsRegistrar {
 							registerRecordHints(hints, seen, recordComponent.getAccessor());
 						}
 					}
+					if (clazz.isEnum()) {
+						typeHint.withMembers(
+								MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+								MemberCategory.INVOKE_PUBLIC_METHODS);
+					}
 					typeHint.withMembers(
 							MemberCategory.DECLARED_FIELDS,
 							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);

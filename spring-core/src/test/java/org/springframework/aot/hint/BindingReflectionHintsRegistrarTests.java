@@ -229,8 +229,8 @@ class BindingReflectionHintsRegistrarTests {
 	@Test
 	void registerTypeForSerializationWithEnum() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleEnum.class);
-		assertThat(this.hints.reflection().typeHints()).singleElement()
-				.satisfies(typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleEnum.class)));
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleEnum.class).withMemberCategories(
+				MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS)).accepts(this.hints);
 	}
 
 	@Test
