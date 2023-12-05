@@ -78,8 +78,8 @@ class BshScriptFactoryTests {
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
 
-		assertThat(ctx.getBeansOfType(Calculator.class).values().contains(calc)).isTrue();
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Calculator.class)).containsValue(calc);
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 		ctx.close();
 	}
 
@@ -91,7 +91,7 @@ class BshScriptFactoryTests {
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerWithConfig");
 		messenger.setMessage(null);
 		assertThat(messenger.getMessage()).isNull();
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 		ctx.close();
 	}
 
@@ -103,7 +103,7 @@ class BshScriptFactoryTests {
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerWithConfigExtra");
 		messenger.setMessage(null);
 		assertThat(messenger.getMessage()).isNull();
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 
 		ctx.close();
 		assertThat(messenger.getMessage()).isNull();
@@ -117,7 +117,7 @@ class BshScriptFactoryTests {
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 
 		ctx.close();
 		assertThat(messenger.getMessage()).isNull();
@@ -131,7 +131,7 @@ class BshScriptFactoryTests {
 		Messenger messenger = (Messenger) ctx.getBean("messengerImpl");
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 
 		ctx.close();
 		assertThat(messenger.getMessage()).isNull();

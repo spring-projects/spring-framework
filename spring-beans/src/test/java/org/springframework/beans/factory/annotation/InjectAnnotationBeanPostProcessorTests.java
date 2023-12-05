@@ -222,17 +222,17 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBeanMap()).hasSize(2);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean1")).isTrue();
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean2")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb1)).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb2)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
+		assertThat(bean.getTestBeanMap()).containsValue(tb1);
+		assertThat(bean.getTestBeanMap()).containsValue(tb2);
 
 		bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBeanMap()).hasSize(2);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean1")).isTrue();
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean2")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb1)).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb2)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
+		assertThat(bean.getTestBeanMap()).containsValue(tb1);
+		assertThat(bean.getTestBeanMap()).containsValue(tb2);
 	}
 
 	@Test
@@ -247,17 +247,17 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		MapFieldInjectionBean bean = (MapFieldInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBeanMap()).hasSize(2);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean1")).isTrue();
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean2")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb1)).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb2)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
+		assertThat(bean.getTestBeanMap()).containsValue(tb1);
+		assertThat(bean.getTestBeanMap()).containsValue(tb2);
 
 		bean = (MapFieldInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBeanMap()).hasSize(2);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean1")).isTrue();
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean2")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb1)).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb2)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
+		assertThat(bean.getTestBeanMap()).containsValue(tb1);
+		assertThat(bean.getTestBeanMap()).containsValue(tb2);
 	}
 
 	@Test
@@ -270,14 +270,14 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBeanMap()).hasSize(1);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean");
+		assertThat(bean.getTestBeanMap()).containsValue(tb);
 		assertThat(bean.getTestBean()).isSameAs(tb);
 
 		bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBeanMap()).hasSize(1);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean");
+		assertThat(bean.getTestBeanMap()).containsValue(tb);
 		assertThat(bean.getTestBean()).isSameAs(tb);
 	}
 
@@ -301,8 +301,8 @@ public class InjectAnnotationBeanPostProcessorTests {
 		MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
 		TestBean tb = (TestBean) bf.getBean("testBean1");
 		assertThat(bean.getTestBeanMap()).hasSize(1);
-		assertThat(bean.getTestBeanMap().keySet().contains("testBean1")).isTrue();
-		assertThat(bean.getTestBeanMap().values().contains(tb)).isTrue();
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsValue(tb);
 		assertThat(bean.getTestBean()).isSameAs(tb);
 	}
 
