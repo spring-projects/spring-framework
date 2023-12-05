@@ -74,7 +74,7 @@ public class MockPart implements Part {
 	 * Constructor for a part with a filename, byte[] content and MediaType mediaType.
 	 * @see #getHeaders()
 	 */
-	public MockPart(String name, @Nullable String filename, @Nullable byte[] content, @Nullable MediaType) {
+	public MockPart(String name, @Nullable String filename, @Nullable byte[] content, @Nullable MediaType mediaType) {
 		Assert.hasLength(name, "'name' must not be empty");
 		this.name = name;
 		this.filename = filename;
