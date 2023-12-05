@@ -268,7 +268,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * returning a {@link ModelAndView} that represents a specific error page if appropriate.
 	 * <p>May be overridden in subclasses, in order to apply specific exception checks.
 	 * Note that this template method will be invoked <i>after</i> checking whether this
-	 * resolved applies ("mappedHandlers" etc), so an implementation may simply proceed
+	 * resolver applies ("mappedHandlers" etc), so an implementation may simply proceed
 	 * with its actual exception handling.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
