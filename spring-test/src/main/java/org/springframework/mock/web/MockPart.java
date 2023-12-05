@@ -51,7 +51,7 @@ public class MockPart implements Part {
 
 
 	/**
-	 * Constructor for a part with byte[] content only.
+	 * Constructor for a part with a name and content only.
 	 * @see #getHeaders()
 	 */
 	public MockPart(String name, @Nullable byte[] content) {
@@ -59,7 +59,7 @@ public class MockPart implements Part {
 	}
 
 	/**
-	 * Constructor for a part with a filename and byte[] content.
+	 * Constructor for a part with a name, filename, and content.
 	 * @see #getHeaders()
 	 */
 	public MockPart(String name, @Nullable String filename, @Nullable byte[] content) {
@@ -67,7 +67,7 @@ public class MockPart implements Part {
 	}
 
 	/**
-	 * Constructor for a part with a filename, byte[] content, and content type.
+	 * Constructor for a part with a name, filename, content, and content type.
 	 * @since 6.1.2
 	 * @see #getHeaders()
 	 */

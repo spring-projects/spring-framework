@@ -28,13 +28,15 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 /**
  * @author Juergen Hoeller
@@ -50,7 +52,7 @@ class MockMultipartHttpServletRequestTests {
 		assertThat(request.getFileMap().isEmpty()).isTrue();
 
 		request.addFile(new MockMultipartFile("file1", "myContent1".getBytes()));
-		request.addFile(new MockMultipartFile("file2", "myOrigFilename", "text/plain", "myContent2".getBytes()));
+		request.addFile(new MockMultipartFile("file2", "myOrigFilename", TEXT_PLAIN_VALUE, "myContent2".getBytes()));
 		doTestMultipartHttpServletRequest(request);
 	}
 
@@ -58,7 +60,7 @@ class MockMultipartHttpServletRequestTests {
 	void mockMultipartHttpServletRequestWithInputStream() throws IOException {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.addFile(new MockMultipartFile("file1", new ByteArrayInputStream("myContent1".getBytes())));
-		request.addFile(new MockMultipartFile("file2", "myOrigFilename", "text/plain", new ByteArrayInputStream(
+		request.addFile(new MockMultipartFile("file2", "myOrigFilename", TEXT_PLAIN_VALUE, new ByteArrayInputStream(
 			"myContent2".getBytes())));
 		doTestMultipartHttpServletRequest(request);
 	}
@@ -66,18 +68,18 @@ class MockMultipartHttpServletRequestTests {
 	@Test
 	void mockMultiPartHttpServletRequestWithMixedData() {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
-		request.addFile(new MockMultipartFile("file", "myOrigFilename", MediaType.TEXT_PLAIN_VALUE, "myContent2".getBytes()));
+		request.addFile(new MockMultipartFile("file", "myOrigFilename", TEXT_PLAIN_VALUE, "myContent2".getBytes()));
 
-		MockPart metadataPart = new MockPart("metadata", null, "{\"foo\": \"bar\"}".getBytes(), MediaType.APPLICATION_JSON);
+		MockPart metadataPart = new MockPart("metadata", null, "{\"foo\": \"bar\"}".getBytes(), APPLICATION_JSON);
 		request.addPart(metadataPart);
 
 		HttpHeaders fileHttpHeaders = request.getMultipartHeaders("file");
 		assertThat(fileHttpHeaders).isNotNull();
-		assertThat(fileHttpHeaders.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(fileHttpHeaders.getContentType()).isEqualTo(TEXT_PLAIN);
 
 		HttpHeaders dataHttpHeaders = request.getMultipartHeaders("metadata");
 		assertThat(dataHttpHeaders).isNotNull();
-		assertThat(dataHttpHeaders.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(dataHttpHeaders.getContentType()).isEqualTo(APPLICATION_JSON);
 	}
 
 	private void doTestMultipartHttpServletRequest(MultipartHttpServletRequest request) throws IOException {
@@ -105,7 +107,7 @@ class MockMultipartHttpServletRequestTests {
 			FileCopyUtils.copyToByteArray(file1.getInputStream()))).isTrue();
 		assertThat(file2.getName()).isEqualTo("file2");
 		assertThat(file2.getOriginalFilename()).isEqualTo("myOrigFilename");
-		assertThat(file2.getContentType()).isEqualTo("text/plain");
+		assertThat(file2.getContentType()).isEqualTo(TEXT_PLAIN_VALUE);
 		assertThat(ObjectUtils.nullSafeEquals("myContent2".getBytes(), file2.getBytes())).isTrue();
 		assertThat(ObjectUtils.nullSafeEquals("myContent2".getBytes(),
 			FileCopyUtils.copyToByteArray(file2.getInputStream()))).isTrue();
