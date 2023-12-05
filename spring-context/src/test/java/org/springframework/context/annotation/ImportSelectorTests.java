@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -141,10 +140,8 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
-		assertThat(TestImportGroup.imports).hasSize(2);
-		Iterator<AnnotationMetadata> iterator = TestImportGroup.imports.keySet().iterator();
-		assertThat(iterator.next().getClassName()).isEqualTo(GroupedConfig2.class.getName());
-		assertThat(iterator.next().getClassName()).isEqualTo(GroupedConfig1.class.getName());
+		assertThat(TestImportGroup.imports.keySet().stream().map(AnnotationMetadata::getClassName))
+				.containsExactly(GroupedConfig2.class.getName(),GroupedConfig1.class.getName());
 	}
 
 	@Test

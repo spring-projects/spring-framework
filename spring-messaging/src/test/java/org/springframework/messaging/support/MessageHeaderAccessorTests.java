@@ -157,8 +157,7 @@ public class MessageHeaderAccessorTests {
 		headers.copyHeaders(null);
 		headers.copyHeadersIfAbsent(null);
 
-		assertThat(headers.getMessageHeaders()).hasSize(1);
-		assertThat(headers.getMessageHeaders().keySet()).isEqualTo(Collections.singleton("id"));
+		assertThat(headers.getMessageHeaders()).containsOnlyKeys(Collections.singleton("id"));
 	}
 
 	@Test

@@ -57,12 +57,10 @@ public class Spr8954Tests {
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(fbBeans.size()).isEqualTo(1);
-		assertThat(fbBeans.keySet().iterator().next()).isEqualTo("&foo");
+		assertThat(fbBeans).containsOnlyKeys("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(aiBeans.size()).isEqualTo(1);
-		assertThat(aiBeans.keySet().iterator().next()).isEqualTo("&foo");
+		assertThat(aiBeans).containsOnlyKeys("&foo");
 	}
 
 	@Test
@@ -76,12 +74,10 @@ public class Spr8954Tests {
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(fbBeans.size()).isEqualTo(1);
-		assertThat(fbBeans.keySet().iterator().next()).isEqualTo("&foo");
+		assertThat(fbBeans).containsOnlyKeys("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(aiBeans.size()).isEqualTo(1);
-		assertThat(aiBeans.keySet().iterator().next()).isEqualTo("&foo");
+		assertThat(aiBeans).containsOnlyKeys("&foo");
 	}
 
 

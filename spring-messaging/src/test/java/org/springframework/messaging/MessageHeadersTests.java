@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.messaging;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -153,9 +152,7 @@ public class MessageHeadersTests {
 		map.put("key1", "val1");
 		map.put("key2", 123);
 		MessageHeaders headers = new MessageHeaders(map);
-		Set<String> keys = headers.keySet();
-		assertThat(keys.contains("key1")).isTrue();
-		assertThat(keys.contains("key2")).isTrue();
+		assertThat(headers).containsKeys("key1", "key2");
 	}
 
 	@Test

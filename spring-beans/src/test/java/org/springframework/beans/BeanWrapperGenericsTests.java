@@ -39,6 +39,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -384,8 +385,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericMap", inputMap);
 
-		assertThat(holder.getGenericMap().keySet().iterator().next().get(0)).isEqualTo(1);
-		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getGenericMap()).containsOnly(entry(List.of(1), List.of(10L)));
 	}
 
 	@Test
@@ -401,8 +401,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericMap", inputMap);
 
-		assertThat(holder.getGenericMap().keySet().iterator().next().get(0)).isEqualTo(1);
-		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getGenericMap()).containsOnly(entry(List.of(1), List.of(10L)));
 	}
 
 	@Test
@@ -414,8 +413,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
-		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getGenericIndexedMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -427,8 +425,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
-		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getGenericIndexedMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -439,8 +436,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
-		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getGenericIndexedMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -452,8 +448,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
-		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getDerivedIndexedMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -465,8 +460,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
-		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getDerivedIndexedMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -477,8 +471,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
-		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getDerivedIndexedMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -490,8 +483,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("multiValueMap[1]", inputValue);
 
-		assertThat(holder.getMultiValueMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getMultiValueMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getMultiValueMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -503,8 +495,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("multiValueMap[1]", inputValue);
 
-		assertThat(holder.getMultiValueMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getMultiValueMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getMultiValueMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
@@ -515,8 +506,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("multiValueMap[1]", inputValue);
 
-		assertThat(holder.getMultiValueMap().keySet().iterator().next()).isEqualTo(1);
-		assertThat(holder.getMultiValueMap().values().iterator().next().get(0)).isEqualTo(Long.valueOf(10));
+		assertThat(holder.getMultiValueMap()).containsOnly(entry(1, List.of(10L)));
 	}
 
 	@Test
