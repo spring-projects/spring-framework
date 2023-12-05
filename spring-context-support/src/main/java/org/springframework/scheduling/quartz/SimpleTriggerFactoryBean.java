@@ -285,9 +285,4 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		return SimpleTrigger.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

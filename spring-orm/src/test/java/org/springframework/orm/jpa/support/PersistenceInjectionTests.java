@@ -720,11 +720,6 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		public Class getObjectType() {
 			return null;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 

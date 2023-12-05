@@ -644,11 +644,6 @@ class AnnotationConfigApplicationContextTests {
 		public Class<?> getObjectType() {
 			return String.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 	static class TypedFactoryBean implements FactoryBean<String> {
@@ -661,11 +656,6 @@ class AnnotationConfigApplicationContextTests {
 		@Override
 		public Class<?> getObjectType() {
 			return String.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
 		}
 	}
 
@@ -699,11 +689,6 @@ class AnnotationConfigApplicationContextTests {
 		@Override
 		public Class<?> getObjectType() {
 			return GenericHolder.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
 		}
 	}
 

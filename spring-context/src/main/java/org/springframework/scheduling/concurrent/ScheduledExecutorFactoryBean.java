@@ -251,9 +251,4 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		return (this.exposedExecutor != null ? this.exposedExecutor.getClass() : ScheduledExecutorService.class);
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

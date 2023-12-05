@@ -80,10 +80,4 @@ public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, 
 	public Class<?> getObjectType() {
 		return (this.attribute != null ? this.attribute.getClass() : null);
 	}
-
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

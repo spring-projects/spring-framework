@@ -686,11 +686,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		public Class<?> getObjectType() {
 			return CompositeUriComponentsContributor.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 }

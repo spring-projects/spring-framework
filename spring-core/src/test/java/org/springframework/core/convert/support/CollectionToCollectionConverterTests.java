@@ -294,16 +294,6 @@ class CollectionToCollectionConverterTests {
 		}
 
 		@Override
-		public boolean isOpen() {
-			return false;
-		}
-
-		@Override
-		public boolean isFile() {
-			return false;
-		}
-
-		@Override
 		public URL getURL() throws IOException {
 			return null;
 		}

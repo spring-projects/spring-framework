@@ -234,9 +234,4 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 		return (this.exposedExecutor != null ? this.exposedExecutor.getClass() : ExecutorService.class);
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

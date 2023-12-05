@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,12 +138,6 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	public Class<? extends ResourceAdapter> getObjectType() {
 		return (this.resourceAdapter != null ? this.resourceAdapter.getClass() : ResourceAdapter.class);
 	}
-
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 
 	/**
 	 * Stops the ResourceAdapter.

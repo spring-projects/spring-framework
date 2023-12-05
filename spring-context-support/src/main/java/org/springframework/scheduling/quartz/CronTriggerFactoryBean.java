@@ -291,9 +291,4 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		return CronTrigger.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

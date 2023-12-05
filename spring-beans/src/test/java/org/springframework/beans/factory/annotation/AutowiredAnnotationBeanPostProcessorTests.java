@@ -3471,11 +3471,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public Class<String> getObjectType() {
 			return String.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 
@@ -4193,11 +4188,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public Class<?> getObjectType() {
 			return NestedTestBean.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 
@@ -4341,11 +4331,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Override
 		public Class<?> getObjectType() {
 			return TestBean.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
 		}
 
 		public static SelfInjectingFactoryBean create() {

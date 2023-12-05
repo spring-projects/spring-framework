@@ -290,11 +290,6 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 		}
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 
 	/**
 	 * Create a composite interface Class for the given interfaces,

@@ -106,11 +106,6 @@ public class Spr8954Tests {
 		public Class<?> getObjectType() {
 			return Foo.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 	interface AnInterface {

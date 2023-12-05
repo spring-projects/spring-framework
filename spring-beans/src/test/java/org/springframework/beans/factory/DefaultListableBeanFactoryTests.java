@@ -3034,11 +3034,6 @@ class DefaultListableBeanFactoryTests {
 		public Class<?> getObjectType() {
 			return String.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 
@@ -3240,11 +3235,6 @@ class DefaultListableBeanFactoryTests {
 		public Class<?> getObjectType() {
 			return String.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 
@@ -3261,16 +3251,6 @@ class DefaultListableBeanFactoryTests {
 		@Override
 		public Class<?> getObjectType() {
 			return String.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
-
-		@Override
-		public boolean isPrototype() {
-			return false;
 		}
 
 		@Override
@@ -3438,11 +3418,6 @@ class DefaultListableBeanFactoryTests {
 		@Override
 		public Class<?> getObjectType() {
 			return TestBean.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
 		}
 	}
 

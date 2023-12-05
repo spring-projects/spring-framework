@@ -641,12 +641,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
-
-	@Override
 	public void destroy() {
 		if (this.sessionFactory != null) {
 			this.sessionFactory.close();

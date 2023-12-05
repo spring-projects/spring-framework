@@ -75,31 +75,6 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always returns {@code true} for a resource
-	 * that {@link #exists() exists} (revised as of 5.1).
-	 */
-	@Override
-	public boolean isReadable() {
-		return exists();
-	}
-
-	/**
-	 * This implementation always returns {@code false}.
-	 */
-	@Override
-	public boolean isOpen() {
-		return false;
-	}
-
-	/**
-	 * This implementation always returns {@code false}.
-	 */
-	@Override
-	public boolean isFile() {
-		return false;
-	}
-
-	/**
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to a URL.
 	 */

@@ -233,11 +233,6 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		return (this.jobDetail != null ? this.jobDetail.getClass() : JobDetail.class);
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 
 	/**
 	 * Quartz Job implementation that invokes a specified method.

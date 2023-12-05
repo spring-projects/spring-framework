@@ -207,9 +207,4 @@ class CreatesTestBean implements FactoryBean<Object> {
 		return TestBean.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

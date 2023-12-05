@@ -177,9 +177,4 @@ public class FormattingConversionServiceFactoryBean
 		return FormattingConversionService.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

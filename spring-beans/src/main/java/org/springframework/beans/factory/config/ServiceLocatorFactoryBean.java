@@ -339,11 +339,6 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		return this.serviceLocatorInterface;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
 
 	/**
 	 * Invocation handler that delegates service locator calls to the bean factory.

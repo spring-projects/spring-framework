@@ -634,12 +634,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		return (this.entityManagerFactory != null ? this.entityManagerFactory.getClass() : EntityManagerFactory.class);
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
-
 	/**
 	 * Close the EntityManagerFactory on bean factory shutdown.
 	 */

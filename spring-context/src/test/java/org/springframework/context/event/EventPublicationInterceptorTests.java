@@ -139,11 +139,6 @@ class EventPublicationInterceptorTests {
 		public Class<String> getObjectType() {
 			return String.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
 	}
 
 }

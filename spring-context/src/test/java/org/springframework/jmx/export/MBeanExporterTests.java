@@ -847,10 +847,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		@Override public Class<?> getObjectType() {
 			return Something.class;
 		}
-
-		@Override public boolean isSingleton() {
-			return true;
-		}
 	}
 
 
@@ -862,10 +858,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		@Override public Class<?> getObjectType() {
 			return Something.class;
-		}
-
-		@Override public boolean isSingleton() {
-			return true;
 		}
 	}
 

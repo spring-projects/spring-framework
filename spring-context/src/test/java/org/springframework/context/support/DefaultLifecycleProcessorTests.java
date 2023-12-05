@@ -768,11 +768,6 @@ class DefaultLifecycleProcessorTests {
 		public boolean running = false;
 
 		@Override
-		public boolean isAutoStartup() {
-			return true;
-		}
-
-		@Override
 		public void stop(Runnable callback) {
 			this.running = false;
 			callback.run();
@@ -814,16 +809,6 @@ class DefaultLifecycleProcessorTests {
 		@Override
 		public Class<?> getObjectType() {
 			return DummySmartLifecycleBean.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
-
-		@Override
-		public boolean isAutoStartup() {
-			return true;
 		}
 
 		@Override
