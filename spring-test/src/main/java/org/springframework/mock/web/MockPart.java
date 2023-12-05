@@ -70,6 +70,19 @@ public class MockPart implements Part {
 		this.headers.setContentDispositionFormData(name, filename);
 	}
 
+	/**
+	 * Constructor for a part with a filename, byte[] content and MediaType mediaType.
+	 * @see #getHeaders()
+	 */
+	public MockPart(String name, @Nullable String filename, @Nullable byte[] content, @Nullable MediaType) {
+		Assert.hasLength(name, "'name' must not be empty");
+		this.name = name;
+		this.filename = filename;
+		this.content = (content != null ? content : new byte[0]);
+		this.headers.setContentDispositionFormData(name, filename);
+		this.headers.setContentType(mediaType);
+	}
+
 
 	@Override
 	public String getName() {
