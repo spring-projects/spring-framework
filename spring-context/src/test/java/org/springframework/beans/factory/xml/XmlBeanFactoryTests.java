@@ -725,7 +725,7 @@ class XmlBeanFactoryTests {
 		InitAndIB iib = (InitAndIB) xbf.getBean("init-and-ib");
 		assertThat(InitAndIB.constructed).isTrue();
 		assertThat(iib.afterPropertiesSetInvoked && iib.initMethodInvoked).isTrue();
-		assertThat(!iib.destroyed && !iib.customDestroyed).isTrue();
+		assertThat(iib.destroyed && !iib.customDestroyed).isFalse();
 		xbf.destroySingletons();
 		assertThat(iib.destroyed && iib.customDestroyed).isTrue();
 		xbf.destroySingletons();
@@ -746,7 +746,7 @@ class XmlBeanFactoryTests {
 		InitAndIB iib = (InitAndIB) xbf.getBean("ib-same-init");
 		assertThat(InitAndIB.constructed).isTrue();
 		assertThat(iib.afterPropertiesSetInvoked && !iib.initMethodInvoked).isTrue();
-		assertThat(!iib.destroyed && !iib.customDestroyed).isTrue();
+		assertThat(iib.destroyed && !iib.customDestroyed).isFalse();
 		xbf.destroySingletons();
 		assertThat(iib.destroyed && !iib.customDestroyed).isTrue();
 		xbf.destroySingletons();

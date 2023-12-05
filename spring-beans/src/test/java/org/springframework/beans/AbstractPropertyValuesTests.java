@@ -35,7 +35,7 @@ public abstract class AbstractPropertyValuesTests {
 		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
 		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
 		assertThat(pvs.contains("age")).as("Contains age").isTrue();
-		assertThat(!pvs.contains("tory")).as("Doesn't contain tory").isTrue();
+		assertThat(pvs.contains("tory")).as("Doesn't contain tory").isFalse();
 
 		PropertyValue[] ps = pvs.getPropertyValues();
 		Map<String, String> m = new HashMap<>();

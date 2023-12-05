@@ -112,13 +112,13 @@ public class DataSourceJtaTransactionTests {
 
 		JtaTransactionManager ptm = new JtaTransactionManager(userTransaction);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertThat(!TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-				assertThat(!TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
+				assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 				assertThat(status.isNewTransaction()).isTrue();
 
@@ -136,8 +136,8 @@ public class DataSourceJtaTransactionTests {
 			}
 		});
 
-		assertThat(!TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		verify(userTransaction).begin();
 		if (rollback) {
 			verify(userTransaction).rollback();
@@ -217,13 +217,13 @@ public class DataSourceJtaTransactionTests {
 		JtaTransactionManager ptm = new JtaTransactionManager(userTransaction, transactionManager);
 		final TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-				assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
+				assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
 				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 				assertThat(status.isNewTransaction()).isTrue();
 
@@ -247,7 +247,7 @@ public class DataSourceJtaTransactionTests {
 					tt.execute(new TransactionCallbackWithoutResult() {
 						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-							assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
+							assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
 							assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 							assertThat(status.isNewTransaction()).isTrue();
 
@@ -297,8 +297,8 @@ public class DataSourceJtaTransactionTests {
 			}
 		});
 
-		assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		verify(userTransaction, times(6)).begin();
 		verify(transactionManager, times(5)).resume(transaction);
 		if (rollback) {
@@ -471,15 +471,15 @@ public class DataSourceJtaTransactionTests {
 		JtaTransactionManager ptm = new JtaTransactionManager(userTransaction, transactionManager);
 		final TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
 		assertThatExceptionOfType(TransactionException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallbackWithoutResult() {
 
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-					assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
+					assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
 					assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 					assertThat(status.isNewTransaction()).isTrue();
 
@@ -502,7 +502,7 @@ public class DataSourceJtaTransactionTests {
 						tt.execute(new TransactionCallbackWithoutResult() {
 							@Override
 							protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-								assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
+								assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
 								assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 								assertThat(status.isNewTransaction()).isTrue();
 
@@ -529,8 +529,8 @@ public class DataSourceJtaTransactionTests {
 				}
 			}));
 
-		assertThat(!TransactionSynchronizationManager.hasResource(dsToUse)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
 		verify(userTransaction).begin();
 		if (suspendException) {
@@ -571,8 +571,8 @@ public class DataSourceJtaTransactionTests {
 			}
 		};
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertThat(!TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
-		assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+		assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
 		given(userTransaction.getStatus()).willReturn(Status.STATUS_ACTIVE);
 		for (int i = 0; i < 3; i++) {
@@ -582,7 +582,7 @@ public class DataSourceJtaTransactionTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
-					assertThat(!status.isNewTransaction()).isTrue();
+					assertThat(status.isNewTransaction()).isFalse();
 
 					Connection con = DataSourceUtils.getConnection(dataSource);
 					assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
@@ -600,9 +600,9 @@ public class DataSourceJtaTransactionTests {
 				assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
 			}
 			else {
-				assertThat(!TransactionSynchronizationManager.hasResource(dataSource)).isTrue();
+				assertThat(TransactionSynchronizationManager.hasResource(dataSource)).isFalse();
 			}
-			assertThat(!TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+			assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		}
 		verify(connection, times(3)).close();
 	}
