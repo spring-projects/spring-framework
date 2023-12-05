@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Set;
+import java.util.function.Predicate;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,6 +55,9 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	@Nullable
+	private Predicate<Object> mappedHandlerPredicate;
+
+	@Nullable
 	private Set<?> mappedHandlers;
 
 	@Nullable
@@ -75,12 +79,23 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
+	 * Use a {@code Predicate} to determine which handlers this exception
+	 * resolver applies to, including when the request was not mapped in which
+	 * case the handler is {@code null}.
+	 * <p>If no handler predicate, nor handlers, nor handler classes are set,
+	 * the exception resolver applies to all handlers.
+	 * @since 6.1.2
+	 */
+	public void setMappedHandlerPredicate(Predicate<Object> predicate) {
+		this.mappedHandlerPredicate =
+				(this.mappedHandlerPredicate != null ? this.mappedHandlerPredicate.and(predicate) : predicate);
+	}
+
+	/**
 	 * Specify the set of handlers that this exception resolver should apply to.
-	 * <p>The exception mappings and the default error view will only apply to the specified handlers.
-	 * <p>If no handlers or handler classes are set, the exception mappings and the default error
-	 * view will apply to all handlers. This means that a specified default error view will be used
-	 * as a fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
-	 * ignored in this case.
+	 * <p>If no handler predicate, nor handlers, nor handler classes are set,
+	 * the exception resolver applies to all handlers.
+	 * @see #setMappedHandlerPredicate(Predicate)
 	 */
 	public void setMappedHandlers(Set<?> mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
@@ -88,19 +103,18 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Specify the set of classes that this exception resolver should apply to.
-	 * <p>The exception mappings and the default error view will only apply to handlers of the
-	 * specified types; the specified types may be interfaces or superclasses of handlers as well.
-	 * <p>If no handlers or handler classes are set, the exception mappings and the default error
-	 * view will apply to all handlers. This means that a specified default error view will be used
-	 * as a fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
-	 * ignored in this case.
+	 * The resolver will only apply to handlers of the specified types; the
+	 * specified types may be interfaces or superclasses of handlers as well.
+	 * <p>If no handler predicate, nor handlers, nor handler classes are set,
+	 * the exception resolver applies to all handlers.
+	 * @see #setMappedHandlerPredicate(Predicate)
 	 */
 	public void setMappedHandlerClasses(Class<?>... mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
 	/**
-	 * Add a mapped handler class.
+	 * Alternative to {@link #setMappedHandlerClasses(Class[])}.
 	 * @since 6.1
 	 */
 	public void addMappedHandlerClass(Class<?> mappedHandlerClass) {
@@ -177,6 +191,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/**
 	 * Check whether this resolver is supposed to apply to the given handler.
 	 * <p>The default implementation checks against the configured
+	 * {@linkplain #setMappedHandlerPredicate(Predicate) handlerPredicate}
 	 * {@linkplain #setMappedHandlers handlers} and
 	 * {@linkplain #setMappedHandlerClasses handler classes}, if any.
 	 * @param request current HTTP request
@@ -188,6 +203,9 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @see #setMappedHandlerClasses
 	 */
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
+		if (this.mappedHandlerPredicate != null) {
+			return this.mappedHandlerPredicate.test(handler);
+		}
 		if (handler != null) {
 			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
 				return true;
@@ -205,11 +223,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Whether there are any handler mappings registered via
-	 * {@link #setMappedHandlers(Set)} or {@link #setMappedHandlerClasses(Class[])}.
+	 * {@link #setMappedHandlers(Set)}, {@link #setMappedHandlerClasses(Class[])}, or
+	 * {@link #setMappedHandlerPredicate(Predicate)}.
 	 * @since 5.3
 	 */
 	protected boolean hasHandlerMappings() {
-		return (this.mappedHandlers != null || this.mappedHandlerClasses != null);
+		return (this.mappedHandlers != null || this.mappedHandlerClasses != null ||
+				this.mappedHandlerPredicate != null);
 	}
 
 	/**

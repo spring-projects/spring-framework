@@ -385,6 +385,21 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertExceptionHandledAsBody(mav, "DefaultTestExceptionResolver: IllegalStateException");
 	}
 
+	@Test // gh-26772
+	void resolveExceptionViaMappedHandlerPredicate() throws Exception {
+		Object handler = new Object();
+
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setMappedHandlerPredicate(h -> h == handler);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		ModelAndView mav = this.resolver.resolveException(
+				this.request, this.response, handler, new IllegalStateException());
+
+		assertExceptionHandledAsBody(mav, "DefaultTestExceptionResolver: IllegalStateException");
+	}
+
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertThat(this.resolver.getArgumentResolvers().getResolvers()).hasSize(resolverCount);
