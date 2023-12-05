@@ -28,7 +28,7 @@ import org.springframework.core.NestedRuntimeException;
 @SuppressWarnings("serial")
 public class JmxException extends NestedRuntimeException {
 
-	/**
+	/***
 	 * Constructor for JmxException.
 	 * @param msg the detail message
 	 */
