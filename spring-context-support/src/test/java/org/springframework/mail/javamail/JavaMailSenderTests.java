@@ -386,9 +386,9 @@ class JavaMailSenderTests {
 			assertThat(sender.transport.isCloseCalled()).isTrue();
 			assertThat(sender.transport.getSentMessages()).hasSize(1);
 			assertThat(sender.transport.getSentMessage(0).getAllRecipients()[0]).isEqualTo(new InternetAddress("she@mail.org"));
-			assertThat(ex.getFailedMessages().keySet()).containsExactly(simpleMessage1);
-			Exception subEx = ex.getFailedMessages().values().iterator().next();
-			assertThat(subEx).isInstanceOf(MessagingException.class).hasMessage("failed");
+			assertThat(ex.getFailedMessages()).containsOnlyKeys(simpleMessage1);
+			assertThat(ex.getFailedMessages().get(simpleMessage1))
+					.isInstanceOf(MessagingException.class).hasMessage("failed");
 		}
 	}
 
@@ -413,9 +413,9 @@ class JavaMailSenderTests {
 			assertThat(sender.transport.getConnectedPassword()).isEqualTo("password");
 			assertThat(sender.transport.isCloseCalled()).isTrue();
 			assertThat(sender.transport.getSentMessages()).containsExactly(mimeMessage2);
-			assertThat(ex.getFailedMessages().keySet()).containsExactly(mimeMessage1);
-			Exception subEx = ex.getFailedMessages().values().iterator().next();
-			assertThat(subEx).isInstanceOf(MessagingException.class).hasMessage("failed");
+			assertThat(ex.getFailedMessages()).containsOnlyKeys(mimeMessage1);
+			assertThat(ex.getFailedMessages().get(mimeMessage1))
+					.isInstanceOf(MessagingException.class).hasMessage("failed");
 		}
 	}
 

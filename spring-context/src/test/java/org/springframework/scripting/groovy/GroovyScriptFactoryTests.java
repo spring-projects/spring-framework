@@ -94,8 +94,8 @@ public class GroovyScriptFactoryTests {
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
 
-		assertThat(ctx.getBeansOfType(Calculator.class).values().contains(calc)).isTrue();
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Calculator.class)).containsValue(calc);
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test
@@ -127,8 +127,8 @@ public class GroovyScriptFactoryTests {
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
 
-		assertThat(ctx.getBeansOfType(Calculator.class).values().contains(calc)).isTrue();
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Calculator.class)).containsValue(calc);
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class GroovyScriptFactoryTests {
 
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class GroovyScriptFactoryTests {
 
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test
@@ -213,7 +213,7 @@ public class GroovyScriptFactoryTests {
 
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test
@@ -228,7 +228,7 @@ public class GroovyScriptFactoryTests {
 
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test
@@ -427,7 +427,7 @@ public class GroovyScriptFactoryTests {
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
 		assertThat(countingAspect.getCalls()).isEqualTo(1);
 
-		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class)).containsValue(messenger);
 	}
 
 	@Test  // SPR-6268
@@ -443,7 +443,7 @@ public class GroovyScriptFactoryTests {
 		assertThat(condition).isTrue();
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
 
-		assertThat(ctx.getBeansOfType(ConcreteMessenger.class).values().contains(messenger)).isTrue();
+		assertThat(ctx.getBeansOfType(ConcreteMessenger.class)).containsValue((ConcreteMessenger) messenger);
 
 		// Check that AnnotationUtils works with concrete proxied script classes
 		assertThat(AnnotationUtils.findAnnotation(messenger.getClass(), Component.class)).isNotNull();
