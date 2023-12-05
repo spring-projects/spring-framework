@@ -68,8 +68,7 @@ class MockMultipartHttpServletRequestTests {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.addFile(new MockMultipartFile("file", "myOrigFilename", MediaType.TEXT_PLAIN_VALUE, "myContent2".getBytes()));
 
-		MockPart metadataPart = new MockPart("metadata", "{\"foo\": \"bar\"}".getBytes());
-		metadataPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		MockPart metadataPart = new MockPart("metadata", null, "{\"foo\": \"bar\"}".getBytes(), MediaType.APPLICATION_JSON);
 		request.addPart(metadataPart);
 
 		HttpHeaders fileHttpHeaders = request.getMultipartHeaders("file");
