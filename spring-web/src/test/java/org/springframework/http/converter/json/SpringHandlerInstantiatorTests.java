@@ -98,8 +98,8 @@ public class SpringHandlerInstantiatorTests {
 	public void autowiredKeyDeserializer() throws IOException {
 		String json = "{\"credentials\":{\"bob\":\"admin\"}}";
 		SecurityRegistry registry = this.objectMapper.readValue(json, SecurityRegistry.class);
-		assertThat(registry.getCredentials().keySet().contains("BOB")).isTrue();
-		assertThat(registry.getCredentials().keySet().contains("bob")).isFalse();
+		assertThat(registry.getCredentials()).containsKey("BOB");
+		assertThat(registry.getCredentials()).doesNotContainKey("bob");
 	}
 
 	@Test
