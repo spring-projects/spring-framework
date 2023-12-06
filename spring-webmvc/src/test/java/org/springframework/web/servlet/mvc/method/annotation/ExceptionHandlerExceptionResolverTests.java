@@ -120,7 +120,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver.setCustomArgumentResolvers(Collections.singletonList(argumentResolver));
 		this.resolver.afterPropertiesSet();
 
-		assertThat(this.resolver.getArgumentResolvers().getResolvers().contains(argumentResolver)).isTrue();
+		assertThat(this.resolver.getArgumentResolvers().getResolvers()).contains(argumentResolver);
 		assertMethodProcessorCount(DEFAULT_RESOLVER_COUNT + 1, DEFAULT_HANDLER_COUNT);
 	}
 
@@ -139,7 +139,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
 
-		assertThat(this.resolver.getReturnValueHandlers().getHandlers().contains(handler)).isTrue();
+		assertThat(this.resolver.getReturnValueHandlers().getHandlers()).contains(handler);
 		assertMethodProcessorCount(DEFAULT_RESOLVER_COUNT, DEFAULT_HANDLER_COUNT + 1);
 	}
 

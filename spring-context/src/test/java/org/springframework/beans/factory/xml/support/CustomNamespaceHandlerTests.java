@@ -122,7 +122,7 @@ public class CustomNamespaceHandlerTests {
 	@Test
 	public void testProxyingDecoratorNoInstance() throws Exception {
 		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
-		assertThat(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance")).isTrue();
+		assertThat(Arrays.asList(beanNames)).contains("debuggingTestBeanNoInstance");
 		assertThat(this.beanFactory.getType("debuggingTestBeanNoInstance")).isEqualTo(ApplicationListener.class);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				this.beanFactory.getBean("debuggingTestBeanNoInstance"))

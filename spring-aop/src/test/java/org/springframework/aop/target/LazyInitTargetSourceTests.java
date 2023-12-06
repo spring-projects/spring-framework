@@ -72,14 +72,14 @@ public class LazyInitTargetSourceTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(FACTORY_BEAN_CONTEXT);
 		bf.preInstantiateSingletons();
 
-		Set<?> set1 = (Set<?>) bf.getBean("proxy1");
+		Set<Object> set1 = (Set<Object>) bf.getBean("proxy1");
 		assertThat(bf.containsSingleton("target1")).isFalse();
-		assertThat(set1.contains("10")).isTrue();
+		assertThat(set1).contains("10");
 		assertThat(bf.containsSingleton("target1")).isTrue();
 
-		Set<?> set2 = (Set<?>) bf.getBean("proxy2");
+		Set<Object> set2 = (Set<Object>) bf.getBean("proxy2");
 		assertThat(bf.containsSingleton("target2")).isFalse();
-		assertThat(set2.contains("20")).isTrue();
+		assertThat(set2).contains("20");
 		assertThat(bf.containsSingleton("target2")).isTrue();
 	}
 

@@ -154,7 +154,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
 
-		assertThat(this.handlerAdapter.getArgumentResolvers().contains(resolver)).isTrue();
+		assertThat(this.handlerAdapter.getArgumentResolvers()).contains(resolver);
 		assertMethodProcessorCount(RESOLVER_COUNT + 1, INIT_BINDER_RESOLVER_COUNT + 1, HANDLER_COUNT);
 	}
 
@@ -182,7 +182,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.handlerAdapter.afterPropertiesSet();
 
-		assertThat(this.handlerAdapter.getReturnValueHandlers().contains(handler)).isTrue();
+		assertThat(this.handlerAdapter.getReturnValueHandlers()).contains(handler);
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT + 1);
 	}
 

@@ -154,7 +154,7 @@ public class XmlBeanCollectionTests {
 		TestBean loner = (TestBean) this.beanFactory.getBean("loner");
 		TestBean dave = (TestBean) this.beanFactory.getBean("david");
 		assertThat(loner.getFriends().size()).isEqualTo(1);
-		assertThat(loner.getFriends().contains(dave)).isTrue();
+		assertThat(loner.getFriends()).contains(dave);
 	}
 
 	@Test
@@ -296,8 +296,8 @@ public class XmlBeanCollectionTests {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("identityMap");
 		assertThat(hasMap.getIdentityMap().size()).isEqualTo(2);
 		HashSet set = new HashSet(hasMap.getIdentityMap().keySet());
-		assertThat(set.contains("foo")).isTrue();
-		assertThat(set.contains("jenny")).isTrue();
+		assertThat(set).contains("foo");
+		assertThat(set).contains("jenny");
 	}
 
 	@Test
@@ -384,8 +384,8 @@ public class XmlBeanCollectionTests {
 		Set set = (Set) this.beanFactory.getBean("setFactory");
 		assertThat(set).isInstanceOf(TreeSet.class);
 		assertThat(set.size()).isEqualTo(2);
-		assertThat(set.contains("bar")).isTrue();
-		assertThat(set.contains("jenny")).isTrue();
+		assertThat(set).contains("bar");
+		assertThat(set).contains("jenny");
 	}
 
 	@Test
@@ -393,8 +393,8 @@ public class XmlBeanCollectionTests {
 		Set set = (Set) this.beanFactory.getBean("pSetFactory");
 		assertThat(set).isInstanceOf(TreeSet.class);
 		assertThat(set.size()).isEqualTo(2);
-		assertThat(set.contains("bar")).isTrue();
-		assertThat(set.contains("jenny")).isTrue();
+		assertThat(set).contains("bar");
+		assertThat(set).contains("jenny");
 	}
 
 	@Test
@@ -430,8 +430,8 @@ public class XmlBeanCollectionTests {
 	public void testEnumSetFactory() {
 		Set set = (Set) this.beanFactory.getBean("enumSetFactory");
 		assertThat(set.size()).isEqualTo(2);
-		assertThat(set.contains("ONE")).isTrue();
-		assertThat(set.contains("TWO")).isTrue();
+		assertThat(set).contains("ONE");
+		assertThat(set).contains("TWO");
 	}
 
 

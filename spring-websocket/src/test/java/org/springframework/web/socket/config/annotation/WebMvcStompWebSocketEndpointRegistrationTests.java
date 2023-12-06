@@ -109,7 +109,7 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		SockJsHttpRequestHandler requestHandler = (SockJsHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
 		assertThat(requestHandler.getSockJsService()).isNotNull();
 		DefaultSockJsService sockJsService = (DefaultSockJsService)requestHandler.getSockJsService();
-		assertThat(sockJsService.getAllowedOrigins().contains(origin)).isTrue();
+		assertThat(sockJsService.getAllowedOrigins()).contains(origin);
 		assertThat(sockJsService.shouldSuppressCors()).isFalse();
 
 		registration =
@@ -120,7 +120,7 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		requestHandler = (SockJsHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
 		assertThat(requestHandler.getSockJsService()).isNotNull();
 		sockJsService = (DefaultSockJsService)requestHandler.getSockJsService();
-		assertThat(sockJsService.getAllowedOrigins().contains(origin)).isTrue();
+		assertThat(sockJsService.getAllowedOrigins()).contains(origin);
 		assertThat(sockJsService.shouldSuppressCors()).isFalse();
 	}
 
@@ -137,7 +137,7 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		SockJsHttpRequestHandler requestHandler = (SockJsHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
 		assertThat(requestHandler.getSockJsService()).isNotNull();
 		DefaultSockJsService sockJsService = (DefaultSockJsService)requestHandler.getSockJsService();
-		assertThat(sockJsService.getAllowedOriginPatterns().contains(origin)).isTrue();
+		assertThat(sockJsService.getAllowedOriginPatterns()).contains(origin);
 
 		registration =
 				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
@@ -147,7 +147,7 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		requestHandler = (SockJsHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
 		assertThat(requestHandler.getSockJsService()).isNotNull();
 		sockJsService = (DefaultSockJsService)requestHandler.getSockJsService();
-		assertThat(sockJsService.getAllowedOriginPatterns().contains(origin)).isTrue();
+		assertThat(sockJsService.getAllowedOriginPatterns()).contains(origin);
 	}
 
 	@Test  // SPR-12283
@@ -273,7 +273,7 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(sockJsService.getHandshakeInterceptors()).hasSize(2);
 		assertThat(sockJsService.getHandshakeInterceptors()).element(0).isEqualTo(interceptor);
 		assertThat(sockJsService.getHandshakeInterceptors().get(1).getClass()).isEqualTo(OriginHandshakeInterceptor.class);
-		assertThat(sockJsService.getAllowedOrigins().contains(origin)).isTrue();
+		assertThat(sockJsService.getAllowedOrigins()).contains(origin);
 	}
 
 }

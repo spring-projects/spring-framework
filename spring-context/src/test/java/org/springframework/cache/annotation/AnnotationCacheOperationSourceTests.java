@@ -299,7 +299,7 @@ public class AnnotationCacheOperationSourceTests {
 		assertThat(actual.getCacheManager()).as("Wrong cache manager").isEqualTo(cacheManager);
 		assertThat(actual.getCacheResolver()).as("Wrong cache resolver").isEqualTo(cacheResolver);
 		assertThat(actual.getCacheNames()).as("Wrong number of cache names").hasSameSizeAs(cacheNames);
-		Arrays.stream(cacheNames).forEach(cacheName -> assertThat(actual.getCacheNames().contains(cacheName)).as("Cache '" + cacheName + "' not found in " + actual.getCacheNames()).isTrue());
+		Arrays.stream(cacheNames).forEach(cacheName -> assertThat(actual.getCacheNames()).as("Cache '" + cacheName + "' not found in " + actual.getCacheNames()).contains(cacheName));
 	}
 
 

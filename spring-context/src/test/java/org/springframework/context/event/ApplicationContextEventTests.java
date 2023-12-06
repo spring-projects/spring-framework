@@ -637,7 +637,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		@Override
 		public void onApplicationEvent(MyEvent event) {
-			assertThat(this.otherListener.seenEvents.contains(event)).isTrue();
+			assertThat(this.otherListener.seenEvents).contains(event);
 		}
 	}
 
@@ -689,7 +689,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		@Override
 		public void onApplicationEvent(MyEvent event) {
-			assertThat(this.otherListener.seenEvents.contains(event)).isTrue();
+			assertThat(this.otherListener.seenEvents).contains(event);
 		}
 	}
 

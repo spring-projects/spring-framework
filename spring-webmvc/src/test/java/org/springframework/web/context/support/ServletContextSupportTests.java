@@ -160,8 +160,8 @@ public class ServletContextSupportTests {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertThat(foundPaths).hasSize(2);
-		assertThat(foundPaths.contains("/WEB-INF/context1.xml")).isTrue();
-		assertThat(foundPaths.contains("/WEB-INF/context2.xml")).isTrue();
+		assertThat(foundPaths).contains("/WEB-INF/context1.xml");
+		assertThat(foundPaths).contains("/WEB-INF/context2.xml");
 	}
 
 	@Test
@@ -193,8 +193,8 @@ public class ServletContextSupportTests {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertThat(foundPaths).hasSize(2);
-		assertThat(foundPaths.contains("/WEB-INF/mydir1/context1.xml")).isTrue();
-		assertThat(foundPaths.contains("/WEB-INF/mydir2/context2.xml")).isTrue();
+		assertThat(foundPaths).contains("/WEB-INF/mydir1/context1.xml");
+		assertThat(foundPaths).contains("/WEB-INF/mydir2/context2.xml");
 	}
 
 	@Test
@@ -233,9 +233,9 @@ public class ServletContextSupportTests {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertThat(foundPaths).hasSize(3);
-		assertThat(foundPaths.contains("/WEB-INF/mydir1/context1.xml")).isTrue();
-		assertThat(foundPaths.contains("/WEB-INF/mydir2/context2.xml")).isTrue();
-		assertThat(foundPaths.contains("/WEB-INF/mydir2/mydir3/context3.xml")).isTrue();
+		assertThat(foundPaths).contains("/WEB-INF/mydir1/context1.xml");
+		assertThat(foundPaths).contains("/WEB-INF/mydir2/context2.xml");
+		assertThat(foundPaths).contains("/WEB-INF/mydir2/mydir3/context3.xml");
 	}
 
 	@Test
@@ -262,8 +262,8 @@ public class ServletContextSupportTests {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
 		assertThat(foundPaths).hasSize(2);
-		assertThat(foundPaths.contains("/WEB-INF/context1.xml")).isTrue();
-		assertThat(foundPaths.contains("/WEB-INF/context2.xml")).isTrue();
+		assertThat(foundPaths).contains("/WEB-INF/context1.xml");
+		assertThat(foundPaths).contains("/WEB-INF/context2.xml");
 	}
 
 }

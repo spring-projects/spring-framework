@@ -50,8 +50,8 @@ public class BeanPropertySqlParameterSourceTests {
 	@Test
 	public void successfulPropertyAccess() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
-		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("name")).isTrue();
-		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("age")).isTrue();
+		assertThat(Arrays.asList(source.getReadablePropertyNames())).contains("name");
+		assertThat(Arrays.asList(source.getReadablePropertyNames())).contains("age");
 		assertThat(source.getValue("name")).isEqualTo("tb");
 		assertThat(source.getValue("age")).isEqualTo(99);
 		assertThat(source.getSqlType("name")).isEqualTo(Types.VARCHAR);

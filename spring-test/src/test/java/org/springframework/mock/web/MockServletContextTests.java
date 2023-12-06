@@ -55,14 +55,14 @@ class MockServletContextTests {
 		void getResourcePaths() {
 			Set<String> paths = servletContext.getResourcePaths("/web");
 			assertThat(paths).isNotNull();
-			assertThat(paths.contains("/web/MockServletContextTests.class")).isTrue();
+			assertThat(paths).contains("/web/MockServletContextTests.class");
 		}
 
 		@Test
 		void getResourcePathsWithSubdirectories() {
 			Set<String> paths = servletContext.getResourcePaths("/");
 			assertThat(paths).isNotNull();
-			assertThat(paths.contains("/web/")).isTrue();
+			assertThat(paths).contains("/web/");
 		}
 
 		@Test

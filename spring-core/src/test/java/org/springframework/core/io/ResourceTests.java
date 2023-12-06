@@ -172,7 +172,7 @@ class ResourceTests {
 		@Test
 		void hasDescription() {
 			Resource resource = new ByteArrayResource("testString".getBytes(), "my description");
-			assertThat(resource.getDescription().contains("my description")).isTrue();
+			assertThat(resource.getDescription()).contains("my description");
 		}
 	}
 
@@ -212,7 +212,7 @@ class ResourceTests {
 		void hasDescription() {
 			InputStream is = new ByteArrayInputStream("testString".getBytes());
 			Resource resource = new InputStreamResource(is, "my description");
-			assertThat(resource.getDescription().contains("my description")).isTrue();
+			assertThat(resource.getDescription()).contains("my description");
 		}
 	}
 
