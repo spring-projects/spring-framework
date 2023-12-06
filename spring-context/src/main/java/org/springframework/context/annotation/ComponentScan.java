@@ -53,6 +53,12 @@ import org.springframework.core.type.filter.TypeFilter;
  * annotation. {@code @ComponentScan} may also be used as a <em>meta-annotation</em>
  * to create custom <em>composed annotations</em> with attribute overrides.
  *
+ * <p>Locally declared {@code @ComponentScan} annotations always take precedence
+ * over and effectively <em>hide</em> {@code @ComponentScan} meta-annotations,
+ * which allows explicit local configuration to override configuration that is
+ * <em>meta-present</em> (including composed annotations meta-annotated with
+ * {@code @ComponentScan}).
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
