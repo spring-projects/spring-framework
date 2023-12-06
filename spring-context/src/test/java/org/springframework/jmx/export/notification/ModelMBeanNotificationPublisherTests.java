@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ public class ModelMBeanNotificationPublisherTests {
 				publisher.sendNotification(null));
 	}
 
+	@Test
 	public void testSendVanillaNotification() throws Exception {
 		StubSpringModelMBean mbean = new StubSpringModelMBean();
 		Notification notification = new Notification("network.alarm.router", mbean, 1872);
@@ -75,6 +76,7 @@ public class ModelMBeanNotificationPublisherTests {
 		assertThat(mbean.getActualNotification().getSource()).as("The 'source' property of the Notification is not being set to the ObjectName of the associated MBean.").isSameAs(objectName);
 	}
 
+	@Test
 	public void testSendAttributeChangeNotification() throws Exception {
 		StubSpringModelMBean mbean = new StubSpringModelMBean();
 		Notification notification = new AttributeChangeNotification(mbean, 1872, System.currentTimeMillis(), "Shall we break for some tea?", "agree", "java.lang.Boolean", Boolean.FALSE, Boolean.TRUE);
@@ -90,6 +92,7 @@ public class ModelMBeanNotificationPublisherTests {
 		assertThat(mbean.getActualNotification().getSource()).as("The 'source' property of the Notification is not being set to the ObjectName of the associated MBean.").isSameAs(objectName);
 	}
 
+	@Test
 	public void testSendAttributeChangeNotificationWhereSourceIsNotTheManagedResource() throws Exception {
 		StubSpringModelMBean mbean = new StubSpringModelMBean();
 		Notification notification = new AttributeChangeNotification(this, 1872, System.currentTimeMillis(), "Shall we break for some tea?", "agree", "java.lang.Boolean", Boolean.FALSE, Boolean.TRUE);
