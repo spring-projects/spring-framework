@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
  * @since 5.3
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManagerTests
  */
-public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTests {
+public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTests<JdbcTransactionManager> {
 
 	@Override
 	protected JdbcTransactionManager createTransactionManager(DataSource ds) {
@@ -51,6 +51,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 	}
 
 
+	@Override
 	@Test
 	public void testTransactionWithExceptionOnCommit() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
@@ -106,6 +107,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 		verify(con).close();
 	}
 
+	@Override
 	@Test
 	public void testTransactionWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
@@ -127,6 +129,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 		verify(con).close();
 	}
 
+	@Override
 	@Test
 	public void testTransactionWithExceptionOnRollback() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
