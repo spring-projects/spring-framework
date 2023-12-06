@@ -488,17 +488,17 @@ class ConcurrentReferenceHashMapTests {
 		this.map.put(3, "3");
 		Set<Map.Entry<Integer, String>> entrySet = this.map.entrySet();
 		Set<Map.Entry<Integer, String>> copy = new HashMap<>(this.map).entrySet();
-		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isTrue());
+		copy.forEach(entry -> assertThat(entrySet).contains(entry));
 		this.map.put(1, "A");
 		this.map.put(2, "B");
 		this.map.put(3, "C");
-		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isFalse());
+		copy.forEach(entry -> assertThat(entrySet).doesNotContain(entry));
 		this.map.put(1, "1");
 		this.map.put(2, "2");
 		this.map.put(3, "3");
-		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isTrue());
+		copy.forEach(entry -> assertThat(entrySet).contains(entry));
 		entrySet.clear();
-		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isFalse());
+		copy.forEach(entry -> assertThat(entrySet).doesNotContain(entry));
 	}
 
 	@Test

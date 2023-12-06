@@ -112,7 +112,7 @@ public class BeanFactoryUtilsTests {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertThat(names).hasSize(1);
-		assertThat(names.contains("indexedBean")).isTrue();
+		assertThat(names).contains("indexedBean");
 		// Distinguish from default ListableBeanFactory behavior
 		assertThat(listableBeanFactory.getBeanNamesForType(IndexedTestBean.class)).isEmpty();
 	}
@@ -123,10 +123,10 @@ public class BeanFactoryUtilsTests {
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
 		assertThat(names).hasSize(4);
-		assertThat(names.contains("test")).isTrue();
-		assertThat(names.contains("test3")).isTrue();
-		assertThat(names.contains("testFactory1")).isTrue();
-		assertThat(names.contains("testFactory2")).isTrue();
+		assertThat(names).contains("test");
+		assertThat(names).contains("test3");
+		assertThat(names).contains("testFactory1");
+		assertThat(names).contains("testFactory2");
 	}
 
 	@Test
@@ -282,7 +282,7 @@ public class BeanFactoryUtilsTests {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
 		assertThat(names).hasSize(1);
-		assertThat(names.contains("annotatedBean")).isTrue();
+		assertThat(names).contains("annotatedBean");
 		// Distinguish from default ListableBeanFactory behavior
 		assertThat(listableBeanFactory.getBeanNamesForAnnotation(TestAnnotation.class)).isEmpty();
 	}
@@ -294,8 +294,8 @@ public class BeanFactoryUtilsTests {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
 		assertThat(names).hasSize(2);
-		assertThat(names.contains("annotatedBean")).isTrue();
-		assertThat(names.contains("anotherAnnotatedBean")).isTrue();
+		assertThat(names).contains("annotatedBean");
+		assertThat(names).contains("anotherAnnotatedBean");
 	}
 
 	@Test

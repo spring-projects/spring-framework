@@ -89,8 +89,8 @@ class MockMultipartHttpServletRequestTests {
 			fileNames.add(fileIter.next());
 		}
 		assertThat(fileNames).hasSize(2);
-		assertThat(fileNames.contains("file1")).isTrue();
-		assertThat(fileNames.contains("file2")).isTrue();
+		assertThat(fileNames).contains("file1");
+		assertThat(fileNames).contains("file2");
 		MultipartFile file1 = request.getFile("file1");
 		MultipartFile file2 = request.getFile("file2");
 		Map<String, MultipartFile> fileMap = request.getFileMap();

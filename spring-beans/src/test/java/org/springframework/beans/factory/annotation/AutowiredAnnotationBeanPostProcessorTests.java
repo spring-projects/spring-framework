@@ -1610,18 +1610,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getUniqueTestBeanWithDefault()).isEqualTo(bf.getBean("testBean"));
 		assertThat(bean.consumeUniqueTestBean()).isEqualTo(bf.getBean("testBean"));
 
-		List<?> testBeans = bean.iterateTestBeans();
+		List<TestBean> testBeans = bean.iterateTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 		testBeans = bean.forEachTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 		testBeans = bean.streamTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 		testBeans = bean.sortedTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 	}
 
 	@Test
@@ -1638,18 +1638,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getUniqueTestBeanWithDefault()).isSameAs(bf.getBean("testBean"));
 		assertThat(bean.consumeUniqueTestBean()).isEqualTo(bf.getBean("testBean"));
 
-		List<?> testBeans = bean.iterateTestBeans();
+		List<TestBean> testBeans = bean.iterateTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 		testBeans = bean.forEachTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 		testBeans = bean.streamTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 		testBeans = bean.sortedTestBeans();
 		assertThat(testBeans).hasSize(1);
-		assertThat(testBeans.contains(bf.getBean("testBean"))).isTrue();
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 	}
 
 	@Test

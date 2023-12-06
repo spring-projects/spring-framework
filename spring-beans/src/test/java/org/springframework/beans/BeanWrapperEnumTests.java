@@ -92,7 +92,7 @@ public class BeanWrapperEnumTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", "VALUE_1");
 		assertThat(gb.getCustomEnumSet()).hasSize(1);
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1)).isTrue();
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_1);
 	}
 
 	@Test
@@ -101,8 +101,8 @@ public class BeanWrapperEnumTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", new String[] {"VALUE_1", "VALUE_2"});
 		assertThat(gb.getCustomEnumSet()).hasSize(2);
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1)).isTrue();
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_2)).isTrue();
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_1);
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_2);
 	}
 
 	@Test
@@ -111,8 +111,8 @@ public class BeanWrapperEnumTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", "VALUE_1,VALUE_2");
 		assertThat(gb.getCustomEnumSet()).hasSize(2);
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1)).isTrue();
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_2)).isTrue();
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_1);
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_2);
 	}
 
 	@Test
@@ -121,8 +121,8 @@ public class BeanWrapperEnumTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSetMismatch", new String[] {"VALUE_1", "VALUE_2"});
 		assertThat(gb.getCustomEnumSet()).hasSize(2);
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1)).isTrue();
-		assertThat(gb.getCustomEnumSet().contains(CustomEnum.VALUE_2)).isTrue();
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_1);
+		assertThat(gb.getCustomEnumSet()).contains(CustomEnum.VALUE_2);
 	}
 
 	@Test
@@ -133,8 +133,8 @@ public class BeanWrapperEnumTests {
 		assertThat(gb.getStandardEnumSet()).isNull();
 		bw.setPropertyValue("standardEnumSet", new String[] {"VALUE_1", "VALUE_2"});
 		assertThat(gb.getStandardEnumSet()).hasSize(2);
-		assertThat(gb.getStandardEnumSet().contains(CustomEnum.VALUE_1)).isTrue();
-		assertThat(gb.getStandardEnumSet().contains(CustomEnum.VALUE_2)).isTrue();
+		assertThat(gb.getStandardEnumSet()).contains(CustomEnum.VALUE_1);
+		assertThat(gb.getStandardEnumSet()).contains(CustomEnum.VALUE_2);
 	}
 
 	@Test

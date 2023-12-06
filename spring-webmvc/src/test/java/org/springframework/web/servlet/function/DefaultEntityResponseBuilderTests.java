@@ -160,7 +160,7 @@ class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result =
 				EntityResponse.fromObject("foo").cookie(cookie)
 						.build();
-		assertThat(result.cookies().get("name").contains(cookie)).isTrue();
+		assertThat(result.cookies().get("name")).contains(cookie);
 	}
 
 	@Test

@@ -199,8 +199,8 @@ public class FactoryMethodTests {
 		assertThat(xbf.getType("externalFactoryMethodWithoutArgs")).isEqualTo(TestBean.class);
 		assertThat(xbf.getType("externalFactoryMethodWithArgs")).isEqualTo(TestBean.class);
 		String[] names = xbf.getBeanNamesForType(TestBean.class);
-		assertThat(Arrays.asList(names).contains("externalFactoryMethodWithoutArgs")).isTrue();
-		assertThat(Arrays.asList(names).contains("externalFactoryMethodWithArgs")).isTrue();
+		assertThat(Arrays.asList(names)).contains("externalFactoryMethodWithoutArgs");
+		assertThat(Arrays.asList(names)).contains("externalFactoryMethodWithArgs");
 
 		TestBean tb = (TestBean) xbf.getBean("externalFactoryMethodWithoutArgs");
 		assertThat(tb.getAge()).isEqualTo(2);
@@ -212,8 +212,8 @@ public class FactoryMethodTests {
 		assertThat(xbf.getType("externalFactoryMethodWithoutArgs")).isEqualTo(TestBean.class);
 		assertThat(xbf.getType("externalFactoryMethodWithArgs")).isEqualTo(TestBean.class);
 		names = xbf.getBeanNamesForType(TestBean.class);
-		assertThat(Arrays.asList(names).contains("externalFactoryMethodWithoutArgs")).isTrue();
-		assertThat(Arrays.asList(names).contains("externalFactoryMethodWithArgs")).isTrue();
+		assertThat(Arrays.asList(names)).contains("externalFactoryMethodWithoutArgs");
+		assertThat(Arrays.asList(names)).contains("externalFactoryMethodWithArgs");
 	}
 
 	@Test
@@ -337,16 +337,16 @@ public class FactoryMethodTests {
 		// Check that listInstance is not considered a bean of type FactoryMethods.
 		assertThat(List.class.isAssignableFrom(xbf.getType("listInstance"))).isTrue();
 		String[] names = xbf.getBeanNamesForType(FactoryMethods.class);
-		assertThat(Arrays.asList(names).contains("listInstance")).isFalse();
+		assertThat(Arrays.asList(names)).doesNotContain("listInstance");
 		names = xbf.getBeanNamesForType(List.class);
-		assertThat(Arrays.asList(names).contains("listInstance")).isTrue();
+		assertThat(Arrays.asList(names)).contains("listInstance");
 
 		xbf.preInstantiateSingletons();
 		assertThat(List.class.isAssignableFrom(xbf.getType("listInstance"))).isTrue();
 		names = xbf.getBeanNamesForType(FactoryMethods.class);
-		assertThat(Arrays.asList(names).contains("listInstance")).isFalse();
+		assertThat(Arrays.asList(names)).doesNotContain("listInstance");
 		names = xbf.getBeanNamesForType(List.class);
-		assertThat(Arrays.asList(names).contains("listInstance")).isTrue();
+		assertThat(Arrays.asList(names)).contains("listInstance");
 		List<?> list = (List<?>) xbf.getBean("listInstance");
 		assertThat(list).isEqualTo(Collections.EMPTY_LIST);
 	}

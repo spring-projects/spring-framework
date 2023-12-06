@@ -66,7 +66,7 @@ public class GroovyScriptEvaluatorTests {
 		evaluator.getCompilerConfiguration().setBytecodePostprocessor(processor);
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
 		assertThat(result).isEqualTo(6);
-		assertThat(processor.processed.contains("Script1")).isTrue();
+		assertThat(processor.processed).contains("Script1");
 	}
 
 	@Test

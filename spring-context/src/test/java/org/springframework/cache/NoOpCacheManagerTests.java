@@ -56,9 +56,9 @@ public class NoOpCacheManagerTests {
 	@Test
 	public void testCacheName() throws Exception {
 		String name = "bucket";
-		assertThat(this.manager.getCacheNames().contains(name)).isFalse();
+		assertThat(this.manager.getCacheNames()).doesNotContain(name);
 		this.manager.getCache(name);
-		assertThat(this.manager.getCacheNames().contains(name)).isTrue();
+		assertThat(this.manager.getCacheNames()).contains(name);
 	}
 
 	@Test

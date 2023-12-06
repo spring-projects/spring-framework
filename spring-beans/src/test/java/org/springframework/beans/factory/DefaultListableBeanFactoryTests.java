@@ -1845,19 +1845,19 @@ class DefaultListableBeanFactoryTests {
 			resolved.add(instance);
 		}
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.contains(lbf.getBean("bd1"))).isTrue();
-		assertThat(resolved.contains(lbf.getBean("bd2"))).isTrue();
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 
 		resolved = new HashSet<>();
 		provider.forEach(resolved::add);
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.contains(lbf.getBean("bd1"))).isTrue();
-		assertThat(resolved.contains(lbf.getBean("bd2"))).isTrue();
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 
 		resolved = provider.stream().collect(Collectors.toSet());
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.contains(lbf.getBean("bd1"))).isTrue();
-		assertThat(resolved.contains(lbf.getBean("bd2"))).isTrue();
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 	}
 
 	@Test
@@ -1894,19 +1894,19 @@ class DefaultListableBeanFactoryTests {
 			resolved.add(instance);
 		}
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.contains(lbf.getBean("bd1"))).isTrue();
-		assertThat(resolved.contains(lbf.getBean("bd2"))).isTrue();
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 
 		resolved = new HashSet<>();
 		provider.forEach(resolved::add);
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.contains(lbf.getBean("bd1"))).isTrue();
-		assertThat(resolved.contains(lbf.getBean("bd2"))).isTrue();
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 
 		resolved = provider.stream().collect(Collectors.toSet());
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.contains(lbf.getBean("bd1"))).isTrue();
-		assertThat(resolved.contains(lbf.getBean("bd2"))).isTrue();
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 	}
 
 	@Test

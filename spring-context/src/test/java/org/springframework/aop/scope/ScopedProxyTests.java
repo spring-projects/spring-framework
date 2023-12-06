@@ -137,10 +137,10 @@ public class ScopedProxyTests {
 		assertThat(scope.getMap().containsKey("scopedTarget.scopedList")).isTrue();
 		assertThat(scope.getMap().get("scopedTarget.scopedList").getClass()).isEqualTo(ArrayList.class);
 
-		ArrayList<?> deserialized = (ArrayList<?>) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
+		ArrayList<Object> deserialized = (ArrayList<Object>) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
 		assertThat(deserialized).isNotNull();
 		assertThat(AopUtils.isCglibProxy(deserialized)).isTrue();
-		assertThat(deserialized.contains("myFriend")).isTrue();
+		assertThat(deserialized).contains("myFriend");
 		boolean condition = deserialized instanceof ScopedObject;
 		assertThat(condition).isTrue();
 		ScopedObject scopedDeserialized = (ScopedObject) deserialized;

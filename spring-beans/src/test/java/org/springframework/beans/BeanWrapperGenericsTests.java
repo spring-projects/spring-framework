@@ -58,8 +58,8 @@ class BeanWrapperGenericsTests {
 		input.add("4");
 		input.add("5");
 		bw.setPropertyValue("integerSet", input);
-		assertThat(gb.getIntegerSet().contains(4)).isTrue();
-		assertThat(gb.getIntegerSet().contains(5)).isTrue();
+		assertThat(gb.getIntegerSet()).contains(4);
+		assertThat(gb.getIntegerSet()).contains(5);
 	}
 
 	@Test

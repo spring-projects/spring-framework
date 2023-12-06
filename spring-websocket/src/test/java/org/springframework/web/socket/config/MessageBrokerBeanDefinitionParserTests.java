@@ -400,13 +400,13 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		List<HandlerMethodArgumentResolver> customResolvers = handler.getCustomArgumentResolvers();
 		assertThat(customResolvers).hasSize(2);
-		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(0))).isTrue();
-		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(1))).isTrue();
+		assertThat(handler.getArgumentResolvers()).contains(customResolvers.get(0));
+		assertThat(handler.getArgumentResolvers()).contains(customResolvers.get(1));
 
 		List<HandlerMethodReturnValueHandler> customHandlers = handler.getCustomReturnValueHandlers();
 		assertThat(customHandlers).hasSize(2);
-		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(0))).isTrue();
-		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(1))).isTrue();
+		assertThat(handler.getReturnValueHandlers()).contains(customHandlers.get(0));
+		assertThat(handler.getReturnValueHandlers()).contains(customHandlers.get(1));
 	}
 
 	@Test
