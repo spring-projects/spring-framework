@@ -540,7 +540,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 					while ((prev = this.queue.pollLast()) != null) {
 						int prevByteCount = prev.readableByteCount();
 						int prevLen = prevByteCount + len;
-						if (prevLen > 0) {
+						if (prevLen >= 0) {
 							// slice body part of previous buffer, and flush it
 							DataBuffer body = prev.split(prevLen + prev.readPosition());
 							DataBufferUtils.release(prev);
