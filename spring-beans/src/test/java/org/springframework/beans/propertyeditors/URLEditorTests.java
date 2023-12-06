@@ -43,7 +43,7 @@ public class URLEditorTests {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("mailto:juergen.hoeller@interface21.com");
 		Object value = urlEditor.getValue();
-		assertThat(value instanceof URL).isTrue();
+		assertThat(value).isInstanceOf(URL.class);
 		URL url = (URL) value;
 		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
 	}
@@ -53,7 +53,7 @@ public class URLEditorTests {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("https://www.springframework.org");
 		Object value = urlEditor.getValue();
-		assertThat(value instanceof URL).isTrue();
+		assertThat(value).isInstanceOf(URL.class);
 		URL url = (URL) value;
 		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
 	}
@@ -64,7 +64,7 @@ public class URLEditorTests {
 		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
 		Object value = urlEditor.getValue();
-		assertThat(value instanceof URL).isTrue();
+		assertThat(value).isInstanceOf(URL.class);
 		URL url = (URL) value;
 		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
 		assertThat(url.getProtocol()).doesNotStartWith("classpath");

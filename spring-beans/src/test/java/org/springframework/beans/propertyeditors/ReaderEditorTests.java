@@ -50,7 +50,7 @@ public class ReaderEditorTests {
 			editor.setAsText(resource);
 			Object value = editor.getValue();
 			assertThat(value).isNotNull();
-			assertThat(value instanceof Reader).isTrue();
+			assertThat(value).isInstanceOf(Reader.class);
 			reader = (Reader) value;
 			assertThat(reader.ready()).isTrue();
 		}

@@ -49,12 +49,12 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 	@Test
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		assertThat(emfi.getNativeEntityManagerFactory() instanceof SessionFactory).isTrue();
+		assertThat(emfi.getNativeEntityManagerFactory()).isInstanceOf(SessionFactory.class);
 	}
 
 	@Test
 	public void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
-		assertThat(((EntityManagerProxy) sharedEntityManager).getTargetEntityManager() instanceof Session).isTrue();
+		assertThat(((EntityManagerProxy) sharedEntityManager).getTargetEntityManager()).isInstanceOf(Session.class);
 	}
 
 	@Test

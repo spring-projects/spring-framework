@@ -160,7 +160,7 @@ public class PropertiesEditorTests {
 		pe.setValue(map);
 		Object value = pe.getValue();
 		assertThat(value).isNotNull();
-		assertThat(value instanceof Properties).isTrue();
+		assertThat(value).isInstanceOf(Properties.class);
 		Properties props = (Properties) value;
 		assertThat(props).hasSize(3);
 		assertThat(props.getProperty("one")).isEqualTo("1");

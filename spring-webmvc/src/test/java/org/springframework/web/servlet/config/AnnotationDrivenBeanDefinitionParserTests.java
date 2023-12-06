@@ -199,8 +199,8 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(value).isNotNull();
 		assertThat(value).isInstanceOf(List.class);
 		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
-		assertThat(converters.get(0) instanceof JsonViewRequestBodyAdvice).isTrue();
-		assertThat(converters.get(1) instanceof JsonViewResponseBodyAdvice).isTrue();
+		assertThat(converters).element(0).isInstanceOf(JsonViewRequestBodyAdvice.class);
+		assertThat(converters).element(1).isInstanceOf(JsonViewResponseBodyAdvice.class);
 	}
 
 }

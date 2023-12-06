@@ -66,7 +66,7 @@ public class CustomScopeConfigurerTests {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		assertThat(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope).isTrue();
+		assertThat(factory.getRegisteredScope(FOO_SCOPE)).isInstanceOf(NoOpScope.class);
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class CustomScopeConfigurerTests {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		assertThat(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope).isTrue();
+		assertThat(factory.getRegisteredScope(FOO_SCOPE)).isInstanceOf(NoOpScope.class);
 	}
 
 	@Test

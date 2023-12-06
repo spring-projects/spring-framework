@@ -99,7 +99,7 @@ public class YamlMapFactoryBeanTests {
 		assertThat(map).hasSize(1);
 		assertThat(map.containsKey("foo")).isTrue();
 		Object object = map.get("foo");
-		assertThat(object instanceof LinkedHashMap).isTrue();
+		assertThat(object).isInstanceOf(LinkedHashMap.class);
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertThat(sub.containsKey("key1.key2")).isTrue();
@@ -114,7 +114,7 @@ public class YamlMapFactoryBeanTests {
 		assertThat(map).hasSize(1);
 		assertThat(map.containsKey("foo")).isTrue();
 		Object object = map.get("foo");
-		assertThat(object instanceof LinkedHashMap).isTrue();
+		assertThat(object).isInstanceOf(LinkedHashMap.class);
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertThat(sub).hasSize(1);
