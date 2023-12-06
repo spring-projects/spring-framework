@@ -196,7 +196,7 @@ class ApplicationContextExpressionTests {
 			assertThat(tb6.tb).isSameAs(tb0);
 		}
 		finally {
-			System.getProperties().remove("country");
+			System.clearProperty("country");
 		}
 	}
 
@@ -230,8 +230,8 @@ class ApplicationContextExpressionTests {
 			assertThat(tb.getCountry2()).isEqualTo("-UK2-");
 		}
 		finally {
-			System.getProperties().remove("name");
-			System.getProperties().remove("country");
+			System.clearProperty("name");
+			System.clearProperty("country");
 		}
 	}
 
@@ -264,7 +264,7 @@ class ApplicationContextExpressionTests {
 			assertThat(FileCopyUtils.copyToString(resourceInjectionBean.reader)).isEqualTo(FileCopyUtils.copyToString(new EncodedResource(resource).getReader()));
 		}
 		finally {
-			System.getProperties().remove("logfile");
+			System.clearProperty("logfile");
 		}
 	}
 

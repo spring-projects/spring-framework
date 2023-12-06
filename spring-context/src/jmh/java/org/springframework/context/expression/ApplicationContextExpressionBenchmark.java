@@ -57,8 +57,8 @@ public class ApplicationContextExpressionBenchmark {
 
 		@TearDown
 		public void teardown() {
-			System.getProperties().remove("country");
-			System.getProperties().remove("name");
+			System.clearProperty("country");
+			System.clearProperty("name");
 		}
 	}
 

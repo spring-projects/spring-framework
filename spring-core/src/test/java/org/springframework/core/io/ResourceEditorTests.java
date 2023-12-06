@@ -73,7 +73,7 @@ class ResourceEditorTests {
 			assertThat(resolved.getFilename()).isEqualTo("foo");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -87,7 +87,7 @@ class ResourceEditorTests {
 			assertThat(resolved.getFilename()).isEqualTo("foo-${bar}");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -102,7 +102,7 @@ class ResourceEditorTests {
 			});
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 

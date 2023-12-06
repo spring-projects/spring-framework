@@ -37,7 +37,7 @@ class SystemPropertyUtilsTests {
 			assertThat(resolved).isEqualTo("bar");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -49,7 +49,7 @@ class SystemPropertyUtilsTests {
 			assertThat(resolved).isEqualTo("bar");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -61,7 +61,7 @@ class SystemPropertyUtilsTests {
 			assertThat(resolved).isEqualTo("bar");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -73,7 +73,7 @@ class SystemPropertyUtilsTests {
 			assertThat(resolved).isEqualTo("bar");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -122,8 +122,8 @@ class SystemPropertyUtilsTests {
 			assertThat(resolved).isEqualTo("foo=baz");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
-			System.getProperties().remove("bar");
+			System.clearProperty("test.prop");
+			System.clearProperty("bar");
 		}
 	}
 

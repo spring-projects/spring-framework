@@ -264,7 +264,7 @@ public abstract class WebUtils {
 		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
-		System.getProperties().remove(key);
+		System.clearProperty(key);
 	}
 
 	/**

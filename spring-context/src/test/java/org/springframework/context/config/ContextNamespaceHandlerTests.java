@@ -43,7 +43,7 @@ class ContextNamespaceHandlerTests {
 
 	@AfterEach
 	void tearDown() {
-		System.getProperties().remove("foo");
+		System.clearProperty("foo");
 	}
 
 

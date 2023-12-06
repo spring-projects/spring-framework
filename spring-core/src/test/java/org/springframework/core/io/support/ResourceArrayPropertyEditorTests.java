@@ -70,7 +70,7 @@ class ResourceArrayPropertyEditorTests {
 			assertThat(resources[0].getFilename()).isEqualTo("foo");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -85,7 +85,7 @@ class ResourceArrayPropertyEditorTests {
 					editor.setAsText("${test.prop}-${bar}"));
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
