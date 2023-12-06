@@ -89,7 +89,7 @@ public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<Con
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();
 		assertThat(entry).hasSize(3);
-		assertThat(entry.get(0)).isEqualTo("one");
+		assertThat(entry).element(0).isEqualTo("one");
 	}
 
 	@Test

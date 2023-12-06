@@ -51,7 +51,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		decorator.sendMessage(textMessage);
 
 		assertThat(session.getSentMessages()).hasSize(1);
-		assertThat(session.getSentMessages().get(0)).isEqualTo(textMessage);
+		assertThat(session.getSentMessages()).element(0).isEqualTo(textMessage);
 
 		assertThat(decorator.getBufferSize()).isEqualTo(0);
 		assertThat(decorator.getTimeSinceSendStarted()).isEqualTo(0);

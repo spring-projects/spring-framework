@@ -62,9 +62,9 @@ public class CustomCollectionEditorTests {
 		assertThat(value instanceof ArrayList).isTrue();
 		List<?> list = (List<?>) value;
 		assertThat(list).as("There must be 3 elements in the converted collection").hasSize(3);
-		assertThat(list.get(0)).isEqualTo(0);
-		assertThat(list.get(1)).isEqualTo(1);
-		assertThat(list.get(2)).isEqualTo(2);
+		assertThat(list).element(0).isEqualTo(0);
+		assertThat(list).element(1).isEqualTo(1);
+		assertThat(list).element(2).isEqualTo(2);
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class CustomCollectionEditorTests {
 		assertThat(value instanceof ArrayList).isTrue();
 		List<?> list = (List<?>) value;
 		assertThat(list).as("There must be 1 element in the converted collection").hasSize(1);
-		assertThat(list.get(0)).isEqualTo("0, 1, 2");
+		assertThat(list).element(0).isEqualTo("0, 1, 2");
 	}
 
 

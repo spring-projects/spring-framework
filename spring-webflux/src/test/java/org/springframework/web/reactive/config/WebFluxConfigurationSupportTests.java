@@ -263,7 +263,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(views).hasSize(1);
 
 		MimeType type = MimeTypeUtils.parseMimeType("application/json");
-		assertThat(views.get(0).getSupportedMediaTypes().get(0)).isEqualTo(type);
+		assertThat(views.get(0).getSupportedMediaTypes()).element(0).isEqualTo(type);
 	}
 
 	@Test

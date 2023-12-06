@@ -126,7 +126,7 @@ public class BeanWrapperAutoGrowingTests {
 	public void getPropertyValueAutoGrowList() {
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
 		assertThat(bean.getList()).hasSize(1);
-		assertThat(bean.getList().get(0)).isInstanceOf(Bean.class);
+		assertThat(bean.getList()).element(0).isInstanceOf(Bean.class);
 	}
 
 	@Test
@@ -139,11 +139,11 @@ public class BeanWrapperAutoGrowingTests {
 	public void getPropertyValueAutoGrowListBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("list[4]"));
 		assertThat(bean.getList()).hasSize(5);
-		assertThat(bean.getList().get(0)).isInstanceOf(Bean.class);
-		assertThat(bean.getList().get(1)).isInstanceOf(Bean.class);
-		assertThat(bean.getList().get(2)).isInstanceOf(Bean.class);
-		assertThat(bean.getList().get(3)).isInstanceOf(Bean.class);
-		assertThat(bean.getList().get(4)).isInstanceOf(Bean.class);
+		assertThat(bean.getList()).element(0).isInstanceOf(Bean.class);
+		assertThat(bean.getList()).element(1).isInstanceOf(Bean.class);
+		assertThat(bean.getList()).element(2).isInstanceOf(Bean.class);
+		assertThat(bean.getList()).element(3).isInstanceOf(Bean.class);
+		assertThat(bean.getList()).element(4).isInstanceOf(Bean.class);
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
 		assertNotNull(wrapper.getPropertyValue("list[1]"));
 		assertNotNull(wrapper.getPropertyValue("list[2]"));
@@ -161,8 +161,8 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowMultiDimensionalList() {
 		assertNotNull(wrapper.getPropertyValue("multiList[0][0]"));
-		assertThat(bean.getMultiList().get(0)).hasSize(1);
-		assertThat(bean.getMultiList().get(0).get(0)).isInstanceOf(Bean.class);
+		assertThat(bean.getMultiList()).element(0).asList().hasSize(1);
+		assertThat(bean.getMultiList().get(0)).element(0).isInstanceOf(Bean.class);
 	}
 
 	@Test

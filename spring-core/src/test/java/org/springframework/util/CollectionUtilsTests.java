@@ -66,9 +66,9 @@ class CollectionUtilsTests {
 		list.add("value3");
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertThat(list.get(0)).isEqualTo("value3");
-		assertThat(list.get(1)).isEqualTo("value1");
-		assertThat(list.get(2)).isEqualTo("value2");
+		assertThat(list).element(0).isEqualTo("value3");
+		assertThat(list).element(1).isEqualTo("value1");
+		assertThat(list).element(2).isEqualTo("value2");
 	}
 
 	@Test
@@ -78,9 +78,9 @@ class CollectionUtilsTests {
 		list.add(3);
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertThat(list.get(0)).isEqualTo(3);
-		assertThat(list.get(1)).isEqualTo(1);
-		assertThat(list.get(2)).isEqualTo(2);
+		assertThat(list).element(0).isEqualTo(3);
+		assertThat(list).element(1).isEqualTo(1);
+		assertThat(list).element(2).isEqualTo(2);
 	}
 
 	@Test

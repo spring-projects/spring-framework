@@ -122,8 +122,8 @@ class SimpleCommandLinePropertySourceTests {
 
 		@SuppressWarnings("unchecked")
 		List<String> nonOptionArgsList = env.getProperty("nonOptionArgs", List.class);
-		assertThat(nonOptionArgsList.get(0)).isEqualTo("noa1");
-		assertThat(nonOptionArgsList.get(1)).isEqualTo("noa2");
+		assertThat(nonOptionArgsList).element(0).isEqualTo("noa1");
+		assertThat(nonOptionArgsList).element(1).isEqualTo("noa2");
 	}
 
 }

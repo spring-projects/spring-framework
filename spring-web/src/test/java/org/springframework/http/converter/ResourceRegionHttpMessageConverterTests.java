@@ -86,7 +86,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(headers.getContentLength()).isEqualTo(6L);
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).hasSize(1);
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0)).isEqualTo("bytes 0-5/39");
+		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).element(0).isEqualTo("bytes 0-5/39");
 		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo("Spring");
 	}
 
@@ -101,7 +101,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(headers.getContentLength()).isEqualTo(32L);
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).hasSize(1);
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0)).isEqualTo("bytes 7-38/39");
+		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).element(0).isEqualTo("bytes 7-38/39");
 		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo("Framework test resource content.");
 	}
 

@@ -426,8 +426,8 @@ public class ProxyFactoryBeanTests {
 		tb.setName("Tristan");
 		tb.toString();
 		assertThat(PointcutForVoid.methodNames).as("Recorded wrong number of invocations").hasSize(2);
-		assertThat(PointcutForVoid.methodNames.get(0)).isEqualTo("setAge");
-		assertThat(PointcutForVoid.methodNames.get(1)).isEqualTo("setName");
+		assertThat(PointcutForVoid.methodNames).element(0).isEqualTo("setAge");
+		assertThat(PointcutForVoid.methodNames).element(1).isEqualTo("setName");
 	}
 
 	@Test

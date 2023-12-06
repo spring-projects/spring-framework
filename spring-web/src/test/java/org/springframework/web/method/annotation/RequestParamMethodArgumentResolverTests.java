@@ -380,7 +380,7 @@ public class RequestParamMethodArgumentResolverTests {
 		Object actual = resolver.resolveArgument(param, null, webRequest, null);
 		boolean condition = actual instanceof List;
 		assertThat(condition).isTrue();
-		assertThat(((List<?>) actual).get(0)).isEqualTo(expected);
+		assertThat(((List<?>) actual)).element(0).isEqualTo(expected);
 	}
 
 	@Test

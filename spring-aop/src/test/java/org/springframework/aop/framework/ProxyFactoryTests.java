@@ -354,8 +354,8 @@ public class ProxyFactoryTests {
 		list.add(proxy1);
 		list.add(proxy2);
 		AnnotationAwareOrderComparator.sort(list);
-		assertThat(list.get(0)).isSameAs(proxy2);
-		assertThat(list.get(1)).isSameAs(proxy1);
+		assertThat(list).element(0).isSameAs(proxy2);
+		assertThat(list).element(1).isSameAs(proxy1);
 	}
 
 	@Test
@@ -370,8 +370,8 @@ public class ProxyFactoryTests {
 		list.add(proxy1);
 		list.add(proxy2);
 		AnnotationAwareOrderComparator.sort(list);
-		assertThat(list.get(0)).isSameAs(proxy2);
-		assertThat(list.get(1)).isSameAs(proxy1);
+		assertThat(list).element(0).isSameAs(proxy2);
+		assertThat(list).element(1).isSameAs(proxy1);
 	}
 
 	@Test

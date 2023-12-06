@@ -525,8 +525,8 @@ class RestTemplateTests {
 					.toList();
 
 			assertThat(accepts).hasSize(1);
-			assertThat(accepts.get(0)).hasSize(1);
-			assertThat(accepts.get(0).get(0)).isEqualTo("application/json");
+			assertThat(accepts).element(0).asList().hasSize(1);
+			assertThat(accepts.get(0)).element(0).isEqualTo("application/json");
 		}
 	}
 

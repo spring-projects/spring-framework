@@ -104,8 +104,8 @@ class InterceptingClientHttpRequestFactoryTests {
 			protected ClientHttpResponse executeInternal() throws IOException {
 				List<String> headerValues = getHeaders().get(headerName);
 				assertThat(headerValues).hasSize(2);
-				assertThat(headerValues.get(0)).isEqualTo(headerValue);
-				assertThat(headerValues.get(1)).isEqualTo(otherValue);
+				assertThat(headerValues).element(0).isEqualTo(headerValue);
+				assertThat(headerValues).element(1).isEqualTo(otherValue);
 				return responseMock;
 			}
 		};

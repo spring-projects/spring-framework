@@ -1376,8 +1376,8 @@ class SpelReproTests extends AbstractExpressionTests {
 		assertThat(value).isInstanceOf(ArrayList.class);
 		@SuppressWarnings("rawtypes")
 		ArrayList list = (ArrayList) value;
-		assertThat(list.get(0)).isEqualTo("one");
-		assertThat(list.get(1)).isEqualTo("two");
+		assertThat(list).element(0).isEqualTo("one");
+		assertThat(list).element(1).isEqualTo("two");
 	}
 
 	@Test

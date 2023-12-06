@@ -45,7 +45,7 @@ public class MappingMediaTypeFileExtensionResolverTests {
 				.resolveFileExtensions(MediaType.APPLICATION_JSON);
 
 		assertThat(extensions).hasSize(1);
-		assertThat(extensions.get(0)).isEqualTo("json");
+		assertThat(extensions).element(0).isEqualTo("json");
 	}
 
 	@Test

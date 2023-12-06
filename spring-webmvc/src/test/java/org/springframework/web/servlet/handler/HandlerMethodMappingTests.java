@@ -217,7 +217,7 @@ public class HandlerMethodMappingTests {
 		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByDirectPath(key1);
 		assertThat(directUrlMatches).isNotNull();
 		assertThat(directUrlMatches).hasSize(1);
-		assertThat(directUrlMatches.get(0)).isEqualTo(key1);
+		assertThat(directUrlMatches).element(0).isEqualTo(key1);
 
 		// Mapping name lookup
 
@@ -228,13 +228,13 @@ public class HandlerMethodMappingTests {
 		List<HandlerMethod> handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name1);
 		assertThat(handlerMethods).isNotNull();
 		assertThat(handlerMethods).hasSize(1);
-		assertThat(handlerMethods.get(0)).isEqualTo(handlerMethod1);
+		assertThat(handlerMethods).element(0).isEqualTo(handlerMethod1);
 
 		String name2 = this.method2.getName();
 		handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name2);
 		assertThat(handlerMethods).isNotNull();
 		assertThat(handlerMethods).hasSize(1);
-		assertThat(handlerMethods.get(0)).isEqualTo(handlerMethod2);
+		assertThat(handlerMethods).element(0).isEqualTo(handlerMethod2);
 	}
 
 	@Test
@@ -256,7 +256,7 @@ public class HandlerMethodMappingTests {
 		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByDirectPath(key1);
 		assertThat(directUrlMatches).isNotNull();
 		assertThat(directUrlMatches).hasSize(1);
-		assertThat(directUrlMatches.get(0)).isEqualTo(key1);
+		assertThat(directUrlMatches).element(0).isEqualTo(key1);
 
 		// Mapping name lookup
 
@@ -264,8 +264,8 @@ public class HandlerMethodMappingTests {
 		List<HandlerMethod> handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name);
 		assertThat(handlerMethods).isNotNull();
 		assertThat(handlerMethods).hasSize(2);
-		assertThat(handlerMethods.get(0)).isEqualTo(handlerMethod1);
-		assertThat(handlerMethods.get(1)).isEqualTo(handlerMethod2);
+		assertThat(handlerMethods).element(0).isEqualTo(handlerMethod1);
+		assertThat(handlerMethods).element(1).isEqualTo(handlerMethod2);
 	}
 
 	@Test

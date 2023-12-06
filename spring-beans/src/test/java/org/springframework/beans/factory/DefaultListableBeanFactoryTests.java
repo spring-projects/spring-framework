@@ -2238,9 +2238,9 @@ class DefaultListableBeanFactoryTests {
 		ObjectProvider<TestBean> testBeanProvider = lbf.getBeanProvider(ResolvableType.forClass(TestBean.class));
 		List<TestBean> resolved = testBeanProvider.orderedStream().toList();
 		assertThat(resolved.size()).isEqualTo(3);
-		assertThat(resolved.get(0)).isSameAs(lbf.getBean("highPriorityTestBean"));
-		assertThat(resolved.get(1)).isSameAs(lbf.getBean("lowPriorityTestBean"));
-		assertThat(resolved.get(2)).isSameAs(lbf.getBean("plainTestBean"));
+		assertThat(resolved).element(0).isSameAs(lbf.getBean("highPriorityTestBean"));
+		assertThat(resolved).element(1).isSameAs(lbf.getBean("lowPriorityTestBean"));
+		assertThat(resolved).element(2).isSameAs(lbf.getBean("plainTestBean"));
 	}
 
 	@Test

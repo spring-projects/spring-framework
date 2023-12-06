@@ -376,7 +376,7 @@ class DefaultLifecycleProcessorTests {
 		context.stop();
 		assertThat(stoppedBeans).hasSize(1);
 		assertThat(bean.isRunning()).isFalse();
-		assertThat(stoppedBeans.get(0)).isEqualTo(bean);
+		assertThat(stoppedBeans).element(0).isEqualTo(bean);
 		context.close();
 	}
 
@@ -393,7 +393,7 @@ class DefaultLifecycleProcessorTests {
 		context.stop();
 		assertThat(stoppedBeans).hasSize(1);
 		assertThat(bean.isRunning()).isFalse();
-		assertThat(stoppedBeans.get(0)).isEqualTo(bean);
+		assertThat(stoppedBeans).element(0).isEqualTo(bean);
 		context.close();
 	}
 
@@ -467,9 +467,9 @@ class DefaultLifecycleProcessorTests {
 		assertThat(startedBeans).hasSize(4);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(Integer.MIN_VALUE);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(99);
-		assertThat(startedBeans.get(1)).isEqualTo(bean99);
+		assertThat(startedBeans).element(1).isEqualTo(bean99);
 		assertThat(getPhase(startedBeans.get(2))).isEqualTo(2);
-		assertThat(startedBeans.get(2)).isEqualTo(bean2);
+		assertThat(startedBeans).element(2).isEqualTo(bean2);
 		assertThat(getPhase(startedBeans.get(3))).isEqualTo(Integer.MAX_VALUE);
 		context.stop();
 		context.close();
@@ -510,9 +510,9 @@ class DefaultLifecycleProcessorTests {
 		assertThat(stoppedBeans).hasSize(6);
 		assertThat(getPhase(stoppedBeans.get(0))).isEqualTo(Integer.MAX_VALUE);
 		assertThat(getPhase(stoppedBeans.get(1))).isEqualTo(2);
-		assertThat(stoppedBeans.get(1)).isEqualTo(bean2);
+		assertThat(stoppedBeans).element(1).isEqualTo(bean2);
 		assertThat(getPhase(stoppedBeans.get(2))).isEqualTo(99);
-		assertThat(stoppedBeans.get(2)).isEqualTo(bean99);
+		assertThat(stoppedBeans).element(2).isEqualTo(bean99);
 		assertThat(getPhase(stoppedBeans.get(3))).isEqualTo(7);
 		assertThat(getPhase(stoppedBeans.get(4))).isEqualTo(1);
 		assertThat(getPhase(stoppedBeans.get(5))).isEqualTo(Integer.MIN_VALUE);

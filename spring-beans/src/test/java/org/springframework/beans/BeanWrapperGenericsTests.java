@@ -94,8 +94,8 @@ class BeanWrapperGenericsTests {
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
 		bw.setPropertyValue("resourceList", input);
-		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
-		assertThat(gb.getResourceList().get(1)).isEqualTo(new UrlResource("http://localhost:9090"));
+		assertThat(gb.getResourceList()).element(0).isEqualTo(new UrlResource("http://localhost:8080"));
+		assertThat(gb.getResourceList()).element(1).isEqualTo(new UrlResource("http://localhost:9090"));
 	}
 
 	@Test
@@ -104,7 +104,7 @@ class BeanWrapperGenericsTests {
 		gb.setResourceList(new ArrayList<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("resourceList[0]", "http://localhost:8080");
-		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
+		assertThat(gb.getResourceList()).element(0).isEqualTo(new UrlResource("http://localhost:8080"));
 	}
 
 	@Test
@@ -201,7 +201,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", 5);
 		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(5);
-		assertThat(gb.getListOfLists().get(0).get(0)).isEqualTo(5);
+		assertThat(gb.getListOfLists().get(0)).element(0).isEqualTo(5);
 	}
 
 	@Test
@@ -213,7 +213,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
 		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(5);
-		assertThat(gb.getListOfLists().get(0).get(0)).isEqualTo(5);
+		assertThat(gb.getListOfLists().get(0)).element(0).isEqualTo(5);
 	}
 
 	@Test
@@ -298,7 +298,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", 5);
 		assertThat(bw.getPropertyValue("mapOfLists[1][0]")).isEqualTo(5);
-		assertThat(gb.getMapOfLists().get(1).get(0)).isEqualTo(5);
+		assertThat(gb.getMapOfLists().get(1)).element(0).isEqualTo(5);
 	}
 
 	@Test
@@ -310,7 +310,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", "5");
 		assertThat(bw.getPropertyValue("mapOfLists[1][0]")).isEqualTo(5);
-		assertThat(gb.getMapOfLists().get(1).get(0)).isEqualTo(5);
+		assertThat(gb.getMapOfLists().get(1)).element(0).isEqualTo(5);
 	}
 
 	@Test
@@ -516,8 +516,8 @@ class BeanWrapperGenericsTests {
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
 		assertThat(gb.getGenericProperty()).isEqualTo(10);
-		assertThat(gb.getGenericListProperty().get(0)).isEqualTo(20);
-		assertThat(gb.getGenericListProperty().get(1)).isEqualTo(30);
+		assertThat(gb.getGenericListProperty()).element(0).isEqualTo(20);
+		assertThat(gb.getGenericListProperty()).element(1).isEqualTo(30);
 	}
 
 	@Test

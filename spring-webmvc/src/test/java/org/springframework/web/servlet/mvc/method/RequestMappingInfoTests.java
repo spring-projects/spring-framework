@@ -204,9 +204,9 @@ class RequestMappingInfoTests {
 		Collections.shuffle(list);
 		list.sort(comparator);
 
-		assertThat(list.get(0)).isEqualTo(oneMethodOneParam);
-		assertThat(list.get(1)).isEqualTo(oneMethod);
-		assertThat(list.get(2)).isEqualTo(noMethods);
+		assertThat(list).element(0).isEqualTo(oneMethodOneParam);
+		assertThat(list).element(1).isEqualTo(oneMethod);
+		assertThat(list).element(2).isEqualTo(noMethods);
 	}
 
 	@Test
@@ -226,9 +226,9 @@ class RequestMappingInfoTests {
 		Collections.shuffle(list);
 		list.sort(comparator);
 
-		assertThat(list.get(0)).isEqualTo(headMethod);
-		assertThat(list.get(1)).isEqualTo(getMethod);
-		assertThat(list.get(2)).isEqualTo(noMethods);
+		assertThat(list).element(0).isEqualTo(headMethod);
+		assertThat(list).element(1).isEqualTo(getMethod);
+		assertThat(list).element(2).isEqualTo(noMethods);
 	}
 
 	@PathPatternsParameterizedTest

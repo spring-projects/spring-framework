@@ -1086,8 +1086,8 @@ public abstract class AbstractAopProxyTests {
 		// NameReverter saved it back
 		assertThat(it.getName()).isEqualTo(name1);
 		assertThat(saver.names).hasSize(2);
-		assertThat(saver.names.get(0)).isEqualTo(name2);
-		assertThat(saver.names.get(1)).isEqualTo(name1);
+		assertThat(saver.names).element(0).isEqualTo(name2);
+		assertThat(saver.names).element(1).isEqualTo(name1);
 	}
 
 	@SuppressWarnings("serial")

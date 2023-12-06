@@ -1050,7 +1050,7 @@ class ConfigurationClassPostProcessorTests {
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans).hasSize(1);
-		assertThat(bean.testBeans.get(0)).isSameAs(ctx.getBean(TestBean.class));
+		assertThat(bean.testBeans).element(0).isSameAs(ctx.getBean(TestBean.class));
 		ctx.close();
 	}
 
@@ -1088,7 +1088,7 @@ class ConfigurationClassPostProcessorTests {
 		CollectionInjectionConfiguration bean = ctx.getBean(CollectionInjectionConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans).hasSize(1);
-		assertThat(bean.testBeans.get(0)).isSameAs(ctx.getBean(TestBean.class));
+		assertThat(bean.testBeans).element(0).isSameAs(ctx.getBean(TestBean.class));
 		ctx.close();
 	}
 

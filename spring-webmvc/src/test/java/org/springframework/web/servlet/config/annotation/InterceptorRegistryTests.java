@@ -161,8 +161,8 @@ public class InterceptorRegistryTests {
 		List<Object> interceptors = this.registry.getInterceptors();
 		assertThat(interceptors).hasSize(2);
 
-		assertThat(interceptors.get(0)).isSameAs(this.interceptor2);
-		assertThat(interceptors.get(1)).isSameAs(this.interceptor1);
+		assertThat(interceptors).element(0).isSameAs(this.interceptor2);
+		assertThat(interceptors).element(1).isSameAs(this.interceptor1);
 	}
 
 	@Test
@@ -173,8 +173,8 @@ public class InterceptorRegistryTests {
 		List<Object> interceptors = this.registry.getInterceptors();
 		assertThat(interceptors).hasSize(2);
 
-		assertThat(interceptors.get(0)).isSameAs(this.interceptor1);
-		assertThat(interceptors.get(1)).isSameAs(this.interceptor2);
+		assertThat(interceptors).element(0).isSameAs(this.interceptor1);
+		assertThat(interceptors).element(1).isSameAs(this.interceptor2);
 	}
 
 

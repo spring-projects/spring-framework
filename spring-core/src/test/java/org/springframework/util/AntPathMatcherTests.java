@@ -513,74 +513,74 @@ class AntPathMatcherTests {
 		paths.add(null);
 		paths.add("/hotels/new");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isNull();
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isNull();
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add(null);
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isNull();
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isNull();
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/new");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isEqualTo("/hotels/*");
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add("/hotels/*");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isEqualTo("/hotels/*");
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/**");
 		paths.add("/hotels/*");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/*");
-		assertThat(paths.get(1)).isEqualTo("/hotels/**");
+		assertThat(paths).element(0).isEqualTo("/hotels/*");
+		assertThat(paths).element(1).isEqualTo("/hotels/**");
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/**");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/*");
-		assertThat(paths.get(1)).isEqualTo("/hotels/**");
+		assertThat(paths).element(0).isEqualTo("/hotels/*");
+		assertThat(paths).element(1).isEqualTo("/hotels/**");
 		paths.clear();
 
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add("/hotels/{hotel}");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
-		assertThat(paths.get(2)).isEqualTo("/hotels/*");
+		assertThat(paths).element(0).isEqualTo("/hotels/new");
+		assertThat(paths).element(1).isEqualTo("/hotels/{hotel}");
+		assertThat(paths).element(2).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/ne*");
 		paths.add("/hotels/n*");
 		Collections.shuffle(paths);
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/ne*");
-		assertThat(paths.get(1)).isEqualTo("/hotels/n*");
+		assertThat(paths).element(0).isEqualTo("/hotels/ne*");
+		assertThat(paths).element(1).isEqualTo("/hotels/n*");
 		paths.clear();
 
 		comparator = pathMatcher.getPatternComparator("/hotels/new.html");
@@ -588,16 +588,16 @@ class AntPathMatcherTests {
 		paths.add("/hotels/{hotel}");
 		Collections.shuffle(paths);
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/hotels/new.*");
-		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
+		assertThat(paths).element(0).isEqualTo("/hotels/new.*");
+		assertThat(paths).element(1).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		comparator = pathMatcher.getPatternComparator("/web/endUser/action/login.html");
 		paths.add("/**/login.*");
 		paths.add("/**/endUser/action/login.*");
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isEqualTo("/**/endUser/action/login.*");
-		assertThat(paths.get(1)).isEqualTo("/**/login.*");
+		assertThat(paths).element(0).isEqualTo("/**/endUser/action/login.*");
+		assertThat(paths).element(1).isEqualTo("/**/login.*");
 		paths.clear();
 	}
 

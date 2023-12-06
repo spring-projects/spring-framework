@@ -336,7 +336,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	public void crossOrigin() {
 		Map<String, CorsConfiguration> configs = this.config.getCorsConfigurations();
 		assertThat(configs).hasSize(1);
-		assertThat(configs.get("/resources/**").getAllowedOrigins().get(0)).isEqualTo("*");
+		assertThat(configs.get("/resources/**").getAllowedOrigins()).element(0).isEqualTo("*");
 	}
 
 

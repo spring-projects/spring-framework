@@ -491,8 +491,8 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertThat(fooService.lookupFoo(123)).isEqualTo("bar");
 		assertThat(fooService.beanFactory).isSameAs(context.getDefaultListableBeanFactory());
 		assertThat(fooService.listableBeanFactory).hasSize(2);
-		assertThat(fooService.listableBeanFactory.get(0)).isSameAs(context.getDefaultListableBeanFactory());
-		assertThat(fooService.listableBeanFactory.get(1)).isSameAs(myBf);
+		assertThat(fooService.listableBeanFactory).element(0).isSameAs(context.getDefaultListableBeanFactory());
+		assertThat(fooService.listableBeanFactory).element(1).isSameAs(myBf);
 		assertThat(fooService.resourceLoader).isSameAs(context);
 		assertThat(fooService.resourcePatternResolver).isSameAs(context);
 		assertThat(fooService.eventPublisher).isSameAs(context);

@@ -113,8 +113,8 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 				.uri("/message-stream")
 				.exchangeToFlux(response -> {
 					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
-					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
-					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
+					assertThat(response.headers().header("X-Protobuf-Schema")).element(0).isEqualTo("sample.proto");
+					assertThat(response.headers().header("X-Protobuf-Message")).element(0).isEqualTo("Msg");
 					return response.bodyToFlux(Msg.class);
 				});
 

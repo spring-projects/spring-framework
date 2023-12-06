@@ -402,28 +402,28 @@ class ResourceBundleMessageSourceTests {
 
 		List<String> filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
 		assertThat(filenames).hasSize(1);
-		assertThat(filenames.get(0)).isEqualTo("messages_en");
+		assertThat(filenames).element(0).isEqualTo("messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", Locale.UK);
 		assertThat(filenames).hasSize(2);
-		assertThat(filenames.get(1)).isEqualTo("messages_en");
-		assertThat(filenames.get(0)).isEqualTo("messages_en_GB");
+		assertThat(filenames).element(1).isEqualTo("messages_en");
+		assertThat(filenames).element(0).isEqualTo("messages_en_GB");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "GB", "POSIX"));
 		assertThat(filenames).hasSize(3);
-		assertThat(filenames.get(2)).isEqualTo("messages_en");
-		assertThat(filenames.get(1)).isEqualTo("messages_en_GB");
-		assertThat(filenames.get(0)).isEqualTo("messages_en_GB_POSIX");
+		assertThat(filenames).element(2).isEqualTo("messages_en");
+		assertThat(filenames).element(1).isEqualTo("messages_en_GB");
+		assertThat(filenames).element(0).isEqualTo("messages_en_GB_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "", "POSIX"));
 		assertThat(filenames).hasSize(2);
-		assertThat(filenames.get(1)).isEqualTo("messages_en");
-		assertThat(filenames.get(0)).isEqualTo("messages_en__POSIX");
+		assertThat(filenames).element(1).isEqualTo("messages_en");
+		assertThat(filenames).element(0).isEqualTo("messages_en__POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "UK", "POSIX"));
 		assertThat(filenames).hasSize(2);
-		assertThat(filenames.get(1)).isEqualTo("messages__UK");
-		assertThat(filenames.get(0)).isEqualTo("messages__UK_POSIX");
+		assertThat(filenames).element(1).isEqualTo("messages__UK");
+		assertThat(filenames).element(0).isEqualTo("messages__UK_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
 		assertThat(filenames).isEmpty();

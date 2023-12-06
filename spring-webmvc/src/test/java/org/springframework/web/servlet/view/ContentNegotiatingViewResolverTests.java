@@ -80,7 +80,7 @@ public class ContentNegotiatingViewResolverTests {
 		request.addHeader("Accept", "text/html,application/xml;q=0.9,application/xhtml+xml,*/*;q=0.8");
 		viewResolver.afterPropertiesSet();
 		List<MediaType> result = viewResolver.getMediaTypes(request);
-		assertThat(result.get(0)).as("Invalid content type").isEqualTo(new MediaType("application", "xhtml+xml"));
+		assertThat(result).element(0).as("Invalid content type").isEqualTo(new MediaType("application", "xhtml+xml"));
 	}
 
 	@Test

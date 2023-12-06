@@ -564,8 +564,8 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
 		assertThat(gb.getGenericProperty()).isEqualTo(10);
-		assertThat(gb.getGenericListProperty().get(0)).isEqualTo(20);
-		assertThat(gb.getGenericListProperty().get(1)).isEqualTo(30);
+		assertThat(gb.getGenericListProperty()).element(0).isEqualTo(20);
+		assertThat(gb.getGenericListProperty()).element(1).isEqualTo(30);
 	}
 
 	@Test
@@ -811,18 +811,18 @@ class BeanFactoryGenericsTests {
 			resolved.add(instance);
 		}
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.get(0)).isSameAs(bf.getBean("store1"));
-		assertThat(resolved.get(1)).isSameAs(bf.getBean("store2"));
+		assertThat(resolved).element(0).isSameAs(bf.getBean("store1"));
+		assertThat(resolved).element(1).isSameAs(bf.getBean("store2"));
 
 		resolved = numberStoreProvider.stream().toList();
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.get(0)).isSameAs(bf.getBean("store1"));
-		assertThat(resolved.get(1)).isSameAs(bf.getBean("store2"));
+		assertThat(resolved).element(0).isSameAs(bf.getBean("store1"));
+		assertThat(resolved).element(1).isSameAs(bf.getBean("store2"));
 
 		resolved = numberStoreProvider.orderedStream().toList();
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
-		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
+		assertThat(resolved).element(0).isSameAs(bf.getBean("store2"));
+		assertThat(resolved).element(1).isSameAs(bf.getBean("store1"));
 
 		resolved = new ArrayList<>();
 		for (NumberStore<Double> instance : doubleStoreProvider) {
@@ -865,8 +865,8 @@ class BeanFactoryGenericsTests {
 		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
 		List<NumberStore<?>> resolved = numberStoreProvider.orderedStream().toList();
 		assertThat(resolved).hasSize(2);
-		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
-		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
+		assertThat(resolved).element(0).isSameAs(bf.getBean("store2"));
+		assertThat(resolved).element(1).isSameAs(bf.getBean("store1"));
 	}
 
 

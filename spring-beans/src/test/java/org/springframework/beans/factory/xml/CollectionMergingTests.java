@@ -55,9 +55,9 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithList");
 		List<?> list = bean.getSomeList();
 		assertThat(list).as("Incorrect size").hasSize(3);
-		assertThat(list.get(0)).isEqualTo("Rob Harrop");
-		assertThat(list.get(1)).isEqualTo("Rod Johnson");
-		assertThat(list.get(2)).isEqualTo("Juergen Hoeller");
+		assertThat(list).element(0).isEqualTo("Rob Harrop");
+		assertThat(list).element(1).isEqualTo("Rod Johnson");
+		assertThat(list).element(2).isEqualTo("Juergen Hoeller");
 	}
 
 	@Test
@@ -127,9 +127,9 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListInConstructor");
 		List<?> list = bean.getSomeList();
 		assertThat(list).as("Incorrect size").hasSize(3);
-		assertThat(list.get(0)).isEqualTo("Rob Harrop");
-		assertThat(list.get(1)).isEqualTo("Rod Johnson");
-		assertThat(list.get(2)).isEqualTo("Juergen Hoeller");
+		assertThat(list).element(0).isEqualTo("Rob Harrop");
+		assertThat(list).element(1).isEqualTo("Rod Johnson");
+		assertThat(list).element(2).isEqualTo("Juergen Hoeller");
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class CollectionMergingTests {
 		List<?> list = bean.getSomeList();
 		assertThat(list).isNotNull();
 		assertThat(list).hasSize(3);
-		assertThat(list.get(2)).isNotNull();
+		assertThat(list).element(2).isNotNull();
 		assertThat(list.get(2) instanceof TestBean).isTrue();
 	}
 

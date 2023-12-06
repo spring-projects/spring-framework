@@ -195,8 +195,8 @@ public class InjectAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean3()).isNull();
 		assertThat(bean.getTestBean4()).isSameAs(tb);
 		assertThat(bean.getNestedTestBeans()).hasSize(2);
-		assertThat(bean.getNestedTestBeans().get(0)).isSameAs(ntb1);
-		assertThat(bean.getNestedTestBeans().get(1)).isSameAs(ntb2);
+		assertThat(bean.getNestedTestBeans()).element(0).isSameAs(ntb1);
+		assertThat(bean.getNestedTestBeans()).element(1).isSameAs(ntb2);
 	}
 
 	@Test
@@ -530,7 +530,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		OptionalListFieldInjectionBean bean = (OptionalListFieldInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isPresent();
-		assertThat(bean.getTestBean().get().get(0)).isSameAs(bf.getBean("testBean"));
+		assertThat(bean.getTestBean().get()).element(0).isSameAs(bf.getBean("testBean"));
 	}
 
 	@Test
@@ -548,7 +548,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		OptionalListMethodInjectionBean bean = (OptionalListMethodInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isPresent();
-		assertThat(bean.getTestBean().get().get(0)).isSameAs(bf.getBean("testBean"));
+		assertThat(bean.getTestBean().get()).element(0).isSameAs(bf.getBean("testBean"));
 	}
 
 	@Test

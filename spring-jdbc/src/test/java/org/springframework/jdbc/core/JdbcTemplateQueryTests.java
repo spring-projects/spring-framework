@@ -125,7 +125,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.getInt(1)).willReturn(11);
 		List<Integer> li = this.template.queryForList(sql, Integer.class);
 		assertThat(li).as("All rows returned").hasSize(1);
-		assertThat(li.get(0)).as("Element is Integer").isEqualTo(11);
+		assertThat(li).element(0).as("Element is Integer").isEqualTo(11);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 		verify(this.connection).close();
@@ -345,7 +345,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.getInt(1)).willReturn(11);
 		List<Integer> li = this.template.queryForList(sql, Integer.class, 3);
 		assertThat(li).as("All rows returned").hasSize(1);
-		assertThat(li.get(0)).as("First row is Integer").isEqualTo(11);
+		assertThat(li).element(0).as("First row is Integer").isEqualTo(11);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
