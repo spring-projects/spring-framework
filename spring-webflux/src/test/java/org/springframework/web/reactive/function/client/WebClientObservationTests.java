@@ -82,7 +82,7 @@ class WebClientObservationTests {
 		ClientRequest clientRequest = verifyAndGetRequest();
 
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
-				.hasLowCardinalityKeyValue("uri", "/resource/{id}");
+				.hasLowCardinalityKeyValue("uri", "/base/resource/{id}");
 		assertThat(clientRequest.headers()).containsEntry("foo", Collections.singletonList("bar"));
 	}
 

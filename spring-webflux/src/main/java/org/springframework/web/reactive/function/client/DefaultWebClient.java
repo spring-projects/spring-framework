@@ -226,8 +226,9 @@ final class DefaultWebClient implements WebClient {
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
-			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
+			UriBuilder uriBuilder = uriBuilderFactory.uriString(uriTemplate);
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriBuilder.toUriString());
+			return uri(uriBuilder.build(uriVariables));
 		}
 
 		@Override
