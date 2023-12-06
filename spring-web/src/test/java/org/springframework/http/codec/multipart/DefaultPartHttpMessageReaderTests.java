@@ -301,6 +301,23 @@ class DefaultPartHttpMessageReaderTests {
 		latch.await();
 	}
 
+	@ParameterizedDefaultPartHttpMessageReaderTest
+	void emptyLastPart(DefaultPartHttpMessageReader reader) throws InterruptedException {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("empty-part.multipart", getClass()), "LiG0chJ0k7YtLt-FzTklYFgz50i88xJCW5jD");
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		CountDownLatch latch = new CountDownLatch(2);
+		StepVerifier.create(result)
+				.consumeNextWith(part -> testPart(part, null, "", latch))
+				.consumeNextWith(part -> testPart(part, null, "", latch))
+				.verifyComplete();
+
+		latch.await();
+	}
+
+
 	private void testBrowser(DefaultPartHttpMessageReader reader, Resource resource, String boundary)
 			throws InterruptedException {
 
