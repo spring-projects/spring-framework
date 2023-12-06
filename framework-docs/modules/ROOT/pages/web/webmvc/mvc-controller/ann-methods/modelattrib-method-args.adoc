@@ -244,3 +244,8 @@ TIP: Using `@ModelAttribute` is optional. By default, any parameter that is not 
 value type as determined by
 {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
 _AND_ that is not resolved by any other argument resolver is treated as an `@ModelAttribute`.
+
+WARNING: When compiling to native images, implicit `@ModelAttribute` as described above does
+not allow proper ahead-of-time inference of related data binding reflection hints. As a consequence,
+it is recommended to annotate explicitly with `@ModelAttribute` method parameters for such use case
+with GraalVM.
