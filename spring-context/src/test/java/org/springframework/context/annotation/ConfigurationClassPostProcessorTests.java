@@ -1069,7 +1069,7 @@ class ConfigurationClassPostProcessorTests {
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans).hasSize(1);
-		assertThat(bean.testBeans.values().iterator().next()).isSameAs(ctx.getBean(Runnable.class));
+		assertThat(bean.testBeans.values()).element(0).isSameAs(ctx.getBean(Runnable.class));
 		ctx.close();
 	}
 

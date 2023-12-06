@@ -115,7 +115,7 @@ class AotServicesTests {
 		AotServices<?> loaded = AotServices
 				.factories(new TestSpringFactoriesClassLoader("aot-services.factories"))
 				.load(TestService.class);
-		assertThat(loaded.iterator().next()).isInstanceOf(TestServiceImpl.class);
+		assertThat(loaded).element(0).isInstanceOf(TestServiceImpl.class);
 	}
 
 	@Test

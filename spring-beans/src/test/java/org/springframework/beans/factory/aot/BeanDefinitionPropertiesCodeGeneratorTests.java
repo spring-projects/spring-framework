@@ -335,7 +335,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile((actual, compiled) -> {
 			Object value = actual.getPropertyValues().get("value");
 			assertThat(value).isInstanceOf(ManagedSet.class);
-			assertThat(((Set<?>) value).iterator().next()).isInstanceOf(BeanReference.class);
+			assertThat(((Set<?>) value)).element(0).isInstanceOf(BeanReference.class);
 		});
 	}
 

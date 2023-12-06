@@ -74,7 +74,7 @@ public class CustomCollectionEditorTests {
 		Collection<?> value = (Collection<?>) editor.getValue();
 		assertThat(value).isNotNull();
 		assertThat(value).as("There must be 1 element in the converted collection").hasSize(1);
-		assertThat(value.iterator().next()).isEqualTo("0, 1, 2");
+		assertThat(value).element(0).isEqualTo("0, 1, 2");
 	}
 
 	@Test

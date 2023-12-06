@@ -112,7 +112,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setPropertySources(propertySources);
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("foo");
-		assertThat(propertySources.iterator().next()).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
+		assertThat(propertySources).element(0).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
 	}
 
 	@Test
@@ -132,7 +132,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${my.name}");
-		assertThat(propertySources.iterator().next()).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
+		assertThat(propertySources).element(0).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
 	}
 
 	@Test

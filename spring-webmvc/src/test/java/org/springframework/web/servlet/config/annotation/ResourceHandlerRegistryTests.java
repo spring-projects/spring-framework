@@ -232,7 +232,7 @@ public class ResourceHandlerRegistryTests {
 		PathResourceResolver resolver = (PathResourceResolver) resolvers.get(resolvers.size()-1);
 		Map<Resource, Charset> locationCharsets = resolver.getLocationCharsets();
 		assertThat(locationCharsets).hasSize(1);
-		assertThat(locationCharsets.values().iterator().next()).isEqualTo(StandardCharsets.ISO_8859_1);
+		assertThat(locationCharsets.values()).element(0).isEqualTo(StandardCharsets.ISO_8859_1);
 	}
 
 	@Test

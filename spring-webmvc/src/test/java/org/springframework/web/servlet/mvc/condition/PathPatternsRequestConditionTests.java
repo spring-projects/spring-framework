@@ -36,13 +36,13 @@ public class PathPatternsRequestConditionTests {
 
 	@Test
 	void prependSlash() {
-		assertThat(createCondition("foo").getPatternValues().iterator().next())
+		assertThat(createCondition("foo").getPatternValues()).element(0)
 				.isEqualTo("/foo");
 	}
 
 	@Test
 	void prependNonEmptyPatternsOnly() {
-		assertThat(createCondition("").getPatternValues().iterator().next())
+		assertThat(createCondition("").getPatternValues()).element(0).asString()
 				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
@@ -137,7 +137,7 @@ public class PathPatternsRequestConditionTests {
 		PathPatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatternValues().iterator().next()).as("Should match by default").isEqualTo("/foo");
+		assertThat(match.getPatternValues()).element(0).as("Should match by default").isEqualTo("/foo");
 
 		PathPatternParser strictParser = new PathPatternParser();
 		strictParser.setMatchOptionalTrailingSeparator(false);

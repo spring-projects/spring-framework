@@ -472,7 +472,7 @@ public class MvcNamespaceTests {
 		PathResourceResolver pathResolver = (PathResourceResolver) resolvers.get(3);
 		Map<Resource, Charset> locationCharsets = pathResolver.getLocationCharsets();
 		assertThat(locationCharsets).hasSize(1);
-		assertThat(locationCharsets.values().iterator().next()).isEqualTo(StandardCharsets.ISO_8859_1);
+		assertThat(locationCharsets.values()).element(0).isEqualTo(StandardCharsets.ISO_8859_1);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).hasSize(2);

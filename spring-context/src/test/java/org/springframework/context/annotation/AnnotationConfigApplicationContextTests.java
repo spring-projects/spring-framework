@@ -307,8 +307,8 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(ObjectUtils.containsElement(context.getBeanNamesForType(BeanC.class), "c")).isTrue();
 
 		assertThat(context.getBeansOfType(BeanA.class)).isEmpty();
-		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next()).isSameAs(context.getBean(BeanB.class));
-		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next()).isSameAs(context.getBean(BeanC.class));
+		assertThat(context.getBeansOfType(BeanB.class).values()).element(0).isSameAs(context.getBean(BeanB.class));
+		assertThat(context.getBeansOfType(BeanC.class).values()).element(0).isSameAs(context.getBean(BeanC.class));
 
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
 				.isThrownBy(() -> context.getBeanFactory().resolveNamedBean(BeanA.class));

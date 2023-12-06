@@ -242,9 +242,9 @@ class GenericApplicationContextTests {
 		assertThat(context.getBeanNamesForType(BeanB.class)).containsExactly("b");
 		assertThat(context.getBeanNamesForType(BeanC.class)).containsExactly("c");
 		assertThat(context.getBeansOfType(BeanA.class)).isEmpty();
-		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next())
+		assertThat(context.getBeansOfType(BeanB.class).values()).element(0)
 			.isSameAs(context.getBean(BeanB.class));
-		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next())
+		assertThat(context.getBeansOfType(BeanC.class).values()).element(0)
 			.isSameAs(context.getBean(BeanC.class));
 	}
 

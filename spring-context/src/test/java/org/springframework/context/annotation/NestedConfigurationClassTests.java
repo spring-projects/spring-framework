@@ -123,7 +123,7 @@ class NestedConfigurationClassTests {
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
 		TestBean pb2 = ctx.getBean("prototypeBean", TestBean.class);
 		assertThat(pb1).isNotSameAs(pb2);
-		assertThat(pb1.getFriends().iterator().next()).isNotSameAs(pb2.getFriends().iterator().next());
+		assertThat(pb1.getFriends()).element(0).isNotSameAs(pb2.getFriends());
 		ctx.close();
 	}
 
@@ -152,7 +152,7 @@ class NestedConfigurationClassTests {
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
 		TestBean pb2 = ctx.getBean("prototypeBean", TestBean.class);
 		assertThat(pb1).isNotSameAs(pb2);
-		assertThat(pb1.getFriends().iterator().next()).isNotSameAs(pb2.getFriends().iterator().next());
+		assertThat(pb1.getFriends()).element(0).isNotSameAs(pb2.getFriends());
 		ctx.close();
 	}
 
@@ -181,7 +181,7 @@ class NestedConfigurationClassTests {
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
 		TestBean pb2 = ctx.getBean("prototypeBean", TestBean.class);
 		assertThat(pb1).isNotSameAs(pb2);
-		assertThat(pb1.getFriends().iterator().next()).isNotSameAs(pb2.getFriends().iterator().next());
+		assertThat(pb1.getFriends()).element(0).isNotSameAs(pb2.getFriends());
 		ctx.close();
 	}
 

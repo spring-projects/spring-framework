@@ -63,7 +63,7 @@ public class DefaultUserDestinationResolverTests {
 
 		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-user123");
 		assertThat(actual.getSubscribeDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getUser()).isEqualTo(user.getName());
 	}
@@ -78,7 +78,7 @@ public class DefaultUserDestinationResolverTests {
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("jms.queue.call-user123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("jms.queue.call-user123");
 		assertThat(actual.getSubscribeDestination()).isEqualTo(destination);
 	}
 
@@ -94,7 +94,7 @@ public class DefaultUserDestinationResolverTests {
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user456");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-user456");
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class DefaultUserDestinationResolverTests {
 
 		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo(("/queue/foo-user" + "123"));
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo(("/queue/foo-user" + "123"));
 		assertThat(actual.getSubscribeDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getUser()).isNull();
 	}
@@ -126,7 +126,7 @@ public class DefaultUserDestinationResolverTests {
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-user123");
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class DefaultUserDestinationResolverTests {
 
 		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-user123");
 		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/queue/foo");
 		assertThat(actual.getUser()).isEqualTo(user.getName());
 	}
@@ -153,7 +153,7 @@ public class DefaultUserDestinationResolverTests {
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("jms.queue.call-user123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("jms.queue.call-user123");
 		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/jms.queue.call");
 	}
 
@@ -173,7 +173,7 @@ public class DefaultUserDestinationResolverTests {
 
 		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user456");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-user456");
 		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/queue/foo");
 		assertThat(actual.getUser()).isEqualTo(otherUser.getName());
 	}
@@ -192,7 +192,7 @@ public class DefaultUserDestinationResolverTests {
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-useropenid123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-useropenid123");
 	}
 
 	@Test
@@ -203,7 +203,7 @@ public class DefaultUserDestinationResolverTests {
 
 		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getTargetDestinations()).hasSize(1);
-		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getTargetDestinations()).element(0).isEqualTo("/queue/foo-user123");
 		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/queue/foo");
 		assertThat(actual.getUser()).isNull();
 	}

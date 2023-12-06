@@ -354,11 +354,11 @@ public class RequestMappingHandlerMappingTests {
 
 		Set<String> paths = info.getPatternValues();
 		assertThat(paths).hasSize(1);
-		assertThat(paths.iterator().next()).isEqualTo(path);
+		assertThat(paths).element(0).isEqualTo(path);
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
 		assertThat(methods).hasSize(1);
-		assertThat(methods.iterator().next()).isEqualTo(requestMethod);
+		assertThat(methods).element(0).isEqualTo(requestMethod);
 
 		return info;
 	}

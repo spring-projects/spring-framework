@@ -47,7 +47,7 @@ public class AsyncResultTests {
 				throw new AssertionError("Failure callback not expected: " + ex, ex);
 			}
 		});
-		assertThat(values.iterator().next()).isSameAs(value);
+		assertThat(values).element(0).isSameAs(value);
 		assertThat(future.get()).isSameAs(value);
 		assertThat(future.completable().get()).isSameAs(value);
 		future.completable().thenAccept(v -> assertThat(v).isSameAs(value));
@@ -69,7 +69,7 @@ public class AsyncResultTests {
 				values.add(ex);
 			}
 		});
-		assertThat(values.iterator().next()).isSameAs(ex);
+		assertThat(values).element(0).isSameAs(ex);
 		assertThatExceptionOfType(ExecutionException.class)
 			.isThrownBy(future::get)
 			.withCause(ex);
@@ -85,7 +85,7 @@ public class AsyncResultTests {
 		final Set<String> values = new HashSet<>(1);
 		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forValue(value);
 		future.addCallback(values::add, ex -> new AssertionError("Failure callback not expected: " + ex));
-		assertThat(values.iterator().next()).isSameAs(value);
+		assertThat(values).element(0).isSameAs(value);
 		assertThat(future.get()).isSameAs(value);
 		assertThat(future.completable().get()).isSameAs(value);
 		future.completable().thenAccept(v -> assertThat(v).isSameAs(value));
@@ -98,7 +98,7 @@ public class AsyncResultTests {
 		final Set<Throwable> values = new HashSet<>(1);
 		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
 		future.addCallback(result -> new AssertionError("Success callback not expected: " + result), values::add);
-		assertThat(values.iterator().next()).isSameAs(ex);
+		assertThat(values).element(0).isSameAs(ex);
 		assertThatExceptionOfType(ExecutionException.class)
 			.isThrownBy(future::get)
 			.withCause(ex);

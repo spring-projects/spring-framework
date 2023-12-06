@@ -35,13 +35,13 @@ class PatternsRequestConditionTests {
 
 	@Test
 	void prependSlash() {
-		assertThat(new PatternsRequestCondition("foo").getPatterns().iterator().next())
+		assertThat(new PatternsRequestCondition("foo").getPatterns()).element(0)
 				.isEqualTo("/foo");
 	}
 
 	@Test
 	void prependNonEmptyPatternsOnly() {
-		assertThat(new PatternsRequestCondition("").getPatterns().iterator().next())
+		assertThat(new PatternsRequestCondition("").getPatterns()).element(0).asString()
 				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
@@ -122,7 +122,7 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next()).isEqualTo("/{foo}.*");
+		assertThat(match.getPatterns()).element(0).isEqualTo("/{foo}.*");
 
 		useSuffixPatternMatch = false;
 		condition = new PatternsRequestCondition(
@@ -130,7 +130,7 @@ class PatternsRequestConditionTests {
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next()).isEqualTo("/{foo}");
+		assertThat(match.getPatterns()).element(0).isEqualTo("/{foo}");
 	}
 
 	@Test // SPR-8410
@@ -143,13 +143,13 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next()).isEqualTo("/jobs/{jobName}");
+		assertThat(match.getPatterns()).element(0).isEqualTo("/jobs/{jobName}");
 
 		request = initRequest("/jobs/my.job.json");
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next()).isEqualTo("/jobs/{jobName}.json");
+		assertThat(match.getPatterns()).element(0).isEqualTo("/jobs/{jobName}.json");
 	}
 
 	@Test
@@ -177,13 +177,13 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next()).as("Should match by default").isEqualTo("/foo/");
+		assertThat(match.getPatterns()).element(0).as("Should match by default").isEqualTo("/foo/");
 
 		condition = new PatternsRequestCondition(new String[] {"/foo"}, true, null);
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next())
+		assertThat(match.getPatterns()).element(0)
 				.as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)")
 				.isEqualTo("/foo/");
 

@@ -225,7 +225,7 @@ class RequestMappingHandlerMappingTests {
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
 		assertThat(methods).hasSize(1);
-		assertThat(methods.iterator().next()).isEqualTo(requestMethod);
+		assertThat(methods).element(0).isEqualTo(requestMethod);
 
 		return info;
 	}

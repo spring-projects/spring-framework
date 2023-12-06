@@ -526,9 +526,9 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
-		assertThat(gb.getGenericProperty().iterator().next()).isEqualTo(10);
-		assertThat(gb.getGenericListProperty().get(0).iterator().next()).isEqualTo(20);
-		assertThat(gb.getGenericListProperty().get(1).iterator().next()).isEqualTo(30);
+		assertThat(gb.getGenericProperty()).element(0).isEqualTo(10);
+		assertThat(gb.getGenericListProperty().get(0)).element(0).isEqualTo(20);
+		assertThat(gb.getGenericListProperty().get(1)).element(0).isEqualTo(30);
 	}
 
 	@Test

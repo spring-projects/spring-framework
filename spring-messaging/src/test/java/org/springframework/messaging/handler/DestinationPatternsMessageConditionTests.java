@@ -34,7 +34,7 @@ public class DestinationPatternsMessageConditionTests {
 	@Test
 	public void prependSlash() {
 		DestinationPatternsMessageCondition c = condition("foo");
-		assertThat(c.getPatterns().iterator().next()).isEqualTo("/foo");
+		assertThat(c.getPatterns()).element(0).isEqualTo("/foo");
 	}
 
 	@Test
@@ -42,7 +42,7 @@ public class DestinationPatternsMessageConditionTests {
 		DestinationPatternsMessageCondition c =
 				new DestinationPatternsMessageCondition(new String[] {"foo"}, new AntPathMatcher("."));
 
-		assertThat(c.getPatterns().iterator().next()).as("Pre-pending should be disabled when not using '/' as path separator").isEqualTo("foo");
+		assertThat(c.getPatterns()).element(0).as("Pre-pending should be disabled when not using '/' as path separator").isEqualTo("foo");
 	}
 
 	// SPR-8255
@@ -50,7 +50,7 @@ public class DestinationPatternsMessageConditionTests {
 	@Test
 	public void prependNonEmptyPatternsOnly() {
 		DestinationPatternsMessageCondition c = condition("");
-		assertThat(c.getPatterns().iterator().next()).isEmpty();
+		assertThat(c.getPatterns()).element(0).asString().isEmpty();
 	}
 
 	@Test

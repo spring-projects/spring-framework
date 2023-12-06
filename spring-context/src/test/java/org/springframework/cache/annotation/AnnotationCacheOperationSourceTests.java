@@ -49,7 +49,7 @@ public class AnnotationCacheOperationSourceTests {
 	@Test
 	public void singularAnnotation() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singular", 1);
-		assertThat(ops.iterator().next()).isInstanceOf(CacheableOperation.class);
+		assertThat(ops).element(0).isInstanceOf(CacheableOperation.class);
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class AnnotationCacheOperationSourceTests {
 	@Test
 	public void singularStereotype() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleStereotype", 1);
-		assertThat(ops.iterator().next()).isInstanceOf(CacheEvictOperation.class);
+		assertThat(ops).element(0).isInstanceOf(CacheEvictOperation.class);
 	}
 
 	@Test

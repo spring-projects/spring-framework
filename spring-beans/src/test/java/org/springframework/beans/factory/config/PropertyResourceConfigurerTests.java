@@ -405,7 +405,7 @@ public class PropertyResourceConfigurerTests {
 		assertThat(tb2.getStringArray()[0]).isEqualTo(System.getProperty("os.name"));
 		assertThat(tb2.getStringArray()[1]).isEqualTo("98");
 		assertThat(tb2.getFriends()).hasSize(2);
-		assertThat(tb2.getFriends().iterator().next()).isEqualTo("na98me");
+		assertThat(tb2.getFriends()).element(0).isEqualTo("na98me");
 		assertThat(tb2.getFriends().toArray()[1]).isEqualTo(tb2);
 		assertThat(tb2.getSomeSet()).hasSize(3);
 		assertThat(tb2.getSomeSet().contains("na98me")).isTrue();

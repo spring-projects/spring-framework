@@ -318,16 +318,16 @@ public class ClassPathXmlApplicationContextTests {
 
 		Map<?, StaticMessageSource> beansOfType = ctx.getBeansOfType(StaticMessageSource.class);
 		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).element(0).isSameAs(myMessageSource);
 		beansOfType = ctx.getBeansOfType(StaticMessageSource.class, true, true);
 		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).element(0).isSameAs(myMessageSource);
 		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class);
 		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).element(0).isSameAs(myMessageSource);
 		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class, true, true);
 		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).element(0).isSameAs(myMessageSource);
 	}
 
 	@Test
