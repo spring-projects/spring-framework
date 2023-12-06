@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class ClassFilesTests {
 	void noneReturnsNone() {
 		ClassFiles none = ClassFiles.none();
 		assertThat(none).isNotNull();
-		assertThat(none.isEmpty()).isTrue();
+		assertThat(none).isEmpty();
 	}
 
 	@Test
@@ -83,13 +83,13 @@ class ClassFilesTests {
 	@Test
 	void isEmptyWhenEmptyReturnsTrue() {
 		ClassFiles classFiles = ClassFiles.of();
-		assertThat(classFiles.isEmpty()).isTrue();
+		assertThat(classFiles).isEmpty();
 	}
 
 	@Test
 	void isEmptyWhenNotEmptyReturnsFalse() {
 		ClassFiles classFiles = ClassFiles.of(CLASS_FILE_1);
-		assertThat(classFiles.isEmpty()).isFalse();
+		assertThat(classFiles).isNotEmpty();
 	}
 
 	@Test

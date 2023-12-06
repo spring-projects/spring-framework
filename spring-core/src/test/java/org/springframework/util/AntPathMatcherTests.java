@@ -628,7 +628,7 @@ class AntPathMatcherTests {
 			pathMatcher.match("test" + i, "test");
 		}
 		// Cache turned off because it went beyond the threshold
-		assertThat(pathMatcher.stringMatcherCache.isEmpty()).isTrue();
+		assertThat(pathMatcher.stringMatcherCache).isEmpty();
 	}
 
 	@Test
@@ -680,7 +680,7 @@ class AntPathMatcherTests {
 	void cachePatternsSetToFalse() {
 		pathMatcher.setCachePatterns(false);
 		match();
-		assertThat(pathMatcher.stringMatcherCache.isEmpty()).isTrue();
+		assertThat(pathMatcher.stringMatcherCache).isEmpty();
 	}
 
 	@Test

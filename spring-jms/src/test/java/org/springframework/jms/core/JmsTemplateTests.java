@@ -241,7 +241,7 @@ class JmsTemplateTests {
 			TransactionSynchronizationManager.clearSynchronization();
 			scf.destroy();
 		}
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 
 		verify(this.connection).start();
 		if (useTransactedTemplate()) {

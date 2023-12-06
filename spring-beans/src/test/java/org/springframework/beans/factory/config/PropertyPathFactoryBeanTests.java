@@ -89,8 +89,8 @@ public class PropertyPathFactoryBeanTests {
 		TestBean spouse = (TestBean) xbf.getBean("otb.spouse");
 		TestBean tbWithInner = (TestBean) xbf.getBean("tbWithInner");
 		assertThat(tbWithInner.getSpouse()).isSameAs(spouse);
-		assertThat(tbWithInner.getFriends().isEmpty()).isFalse();
-		assertThat(tbWithInner.getFriends()).element(0).isSameAs(spouse);
+		assertThat(tbWithInner.getFriends()).isNotEmpty();
+		assertThat(tbWithInner.getFriends().iterator().next()).isSameAs(spouse);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class FlashMapTests {
 		flashMap.addTargetRequestParam(" ", "abc");
 		flashMap.addTargetRequestParam(null, "abc");
 
-		assertThat(flashMap.getTargetRequestParams().isEmpty()).isTrue();
+		assertThat(flashMap.getTargetRequestParams()).isEmpty();
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class FlashMapTests {
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParams(params);
 
-		assertThat(flashMap.getTargetRequestParams().isEmpty()).isTrue();
+		assertThat(flashMap.getTargetRequestParams()).isEmpty();
 	}
 
 }

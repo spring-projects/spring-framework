@@ -52,7 +52,7 @@ public class JmsTransactionManagerTests {
 
 	@AfterEach
 	public void verifyTransactionSynchronizationManagerState() {
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 	}
 

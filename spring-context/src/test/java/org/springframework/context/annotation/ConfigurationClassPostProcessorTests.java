@@ -1059,7 +1059,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans.isEmpty()).isTrue();
+		assertThat(bean.testBeans).isEmpty();
 		ctx.close();
 	}
 
@@ -1078,7 +1078,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class);
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans.isEmpty()).isTrue();
+		assertThat(bean.testBeans).isEmpty();
 		ctx.close();
 	}
 

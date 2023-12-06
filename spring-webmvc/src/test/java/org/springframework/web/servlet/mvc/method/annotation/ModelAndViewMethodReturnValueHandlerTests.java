@@ -140,7 +140,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 		ModelMap model = mavContainer.getModel();
 		assertThat(mavContainer.getView()).isNull();
-		assertThat(mavContainer.getModel().isEmpty()).isTrue();
+		assertThat(mavContainer.getModel()).isEmpty();
 		assertThat(model).as("RedirectAttributes should not be used if controller doesn't redirect").isNotSameAs(redirectAttributes);
 	}
 

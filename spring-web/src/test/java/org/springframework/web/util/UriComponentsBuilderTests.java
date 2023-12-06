@@ -772,8 +772,8 @@ class UriComponentsBuilderTests {
 		UriComponents uri1 = UriComponentsBuilder.fromUriString("http://test.com").build().normalize();
 		UriComponents uri2 = UriComponentsBuilder.fromUriString("http://test.com/").build();
 
-		assertThat(uri1.getPathSegments().isEmpty()).isTrue();
-		assertThat(uri2.getPathSegments().isEmpty()).isTrue();
+		assertThat(uri1.getPathSegments()).isEmpty();
+		assertThat(uri2.getPathSegments()).isEmpty();
 		assertThat(uri2).isNotEqualTo(uri1);
 	}
 

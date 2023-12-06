@@ -97,7 +97,7 @@ public class HandlersBeanDefinitionParserTests {
 				assertThat(handshakeHandler).isNotNull();
 				boolean condition1 = handshakeHandler instanceof DefaultHandshakeHandler;
 				assertThat(condition1).isTrue();
-				assertThat(handler.getHandshakeInterceptors().isEmpty()).isFalse();
+				assertThat(handler.getHandshakeInterceptors()).isNotEmpty();
 				boolean condition = handler.getHandshakeInterceptors().get(0) instanceof OriginHandshakeInterceptor;
 				assertThat(condition).isTrue();
 			}
@@ -110,7 +110,7 @@ public class HandlersBeanDefinitionParserTests {
 				assertThat(handshakeHandler).isNotNull();
 				boolean condition1 = handshakeHandler instanceof DefaultHandshakeHandler;
 				assertThat(condition1).isTrue();
-				assertThat(handler.getHandshakeInterceptors().isEmpty()).isFalse();
+				assertThat(handler.getHandshakeInterceptors()).isNotEmpty();
 				boolean condition = handler.getHandshakeInterceptors().get(0) instanceof OriginHandshakeInterceptor;
 				assertThat(condition).isTrue();
 			}

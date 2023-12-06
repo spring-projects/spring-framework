@@ -1143,7 +1143,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		SingleConstructorVarargBean bean = bf.getBean("annotatedBean", SingleConstructorVarargBean.class);
 		assertThat(bean.getTestBean()).isSameAs(tb);
 		assertThat(bean.getNestedTestBeans()).isNotNull();
-		assertThat(bean.getNestedTestBeans().isEmpty()).isTrue();
+		assertThat(bean.getNestedTestBeans()).isEmpty();
 	}
 
 	@Test
@@ -1172,7 +1172,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		SingleConstructorRequiredCollectionBean bean = bf.getBean("annotatedBean", SingleConstructorRequiredCollectionBean.class);
 		assertThat(bean.getTestBean()).isSameAs(tb);
 		assertThat(bean.getNestedTestBeans()).isNotNull();
-		assertThat(bean.getNestedTestBeans().isEmpty()).isTrue();
+		assertThat(bean.getNestedTestBeans()).isEmpty();
 	}
 
 	@Test
@@ -1666,13 +1666,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.consumeUniqueTestBean()).isNull();
 
 		List<?> testBeans = bean.iterateTestBeans();
-		assertThat(testBeans.isEmpty()).isTrue();
+		assertThat(testBeans).isEmpty();
 		testBeans = bean.forEachTestBeans();
-		assertThat(testBeans.isEmpty()).isTrue();
+		assertThat(testBeans).isEmpty();
 		testBeans = bean.streamTestBeans();
-		assertThat(testBeans.isEmpty()).isTrue();
+		assertThat(testBeans).isEmpty();
 		testBeans = bean.sortedTestBeans();
-		assertThat(testBeans.isEmpty()).isTrue();
+		assertThat(testBeans).isEmpty();
 	}
 
 	@Test

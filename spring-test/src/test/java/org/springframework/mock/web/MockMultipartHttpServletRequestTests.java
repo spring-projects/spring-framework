@@ -49,7 +49,7 @@ class MockMultipartHttpServletRequestTests {
 		assertThat(request.getFileNames().hasNext()).isFalse();
 		assertThat(request.getFile("file1")).isNull();
 		assertThat(request.getFile("file2")).isNull();
-		assertThat(request.getFileMap().isEmpty()).isTrue();
+		assertThat(request.getFileMap()).isEmpty();
 
 		request.addFile(new MockMultipartFile("file1", "myContent1".getBytes()));
 		request.addFile(new MockMultipartFile("file2", "myOrigFilename", TEXT_PLAIN_VALUE, "myContent2".getBytes()));

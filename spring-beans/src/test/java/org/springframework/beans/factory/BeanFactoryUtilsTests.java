@@ -134,7 +134,7 @@ public class BeanFactoryUtilsTests {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("foo", new Object());
 		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
-		assertThat(beans.isEmpty()).isTrue();
+		assertThat(beans).isEmpty();
 	}
 
 	@Test

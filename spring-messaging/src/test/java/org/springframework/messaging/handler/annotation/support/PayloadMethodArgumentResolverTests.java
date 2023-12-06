@@ -133,7 +133,7 @@ public class PayloadMethodArgumentResolverTests {
 
 		Message<?> emptyStringMessage = MessageBuilder.withPayload(" 	").build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyStringMessage)).isNull();
-		assertThat(((Optional<?>) this.resolver.resolveArgument(this.paramOptional, emptyStringMessage)).isEmpty()).isTrue();
+		assertThat(((Optional<?>) this.resolver.resolveArgument(this.paramOptional, emptyStringMessage))).isEmpty();
 
 		Message<?> emptyOptionalMessage = MessageBuilder.withPayload(Optional.empty()).build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyOptionalMessage)).isNull();

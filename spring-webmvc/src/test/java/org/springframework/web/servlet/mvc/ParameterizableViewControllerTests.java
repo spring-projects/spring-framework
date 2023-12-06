@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,14 +52,14 @@ public class ParameterizableViewControllerTests {
 		this.controller.setViewName(viewName);
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
 		assertThat(mav.getViewName()).isEqualTo(viewName);
-		assertThat(mav.getModel().isEmpty()).isTrue();
+		assertThat(mav.getModel()).isEmpty();
 	}
 
 	@Test
 	public void handleRequestWithoutViewName() throws Exception {
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
 		assertThat(mav.getViewName()).isNull();
-		assertThat(mav.getModel().isEmpty()).isTrue();
+		assertThat(mav.getModel()).isEmpty();
 	}
 
 	@Test

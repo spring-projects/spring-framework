@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,8 @@ public class QualifierAnnotationTests {
 		QualifiedByBeanNameTestBean testBean = (QualifiedByBeanNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
 		assertThat(person.getName()).isEqualTo("LarryBean");
-		assertThat(testBean.myProps != null && testBean.myProps.isEmpty()).isTrue();
+		assertThat(testBean.myProps).isNotNull();
+		assertThat(testBean.myProps).isEmpty();
 	}
 
 	@Test

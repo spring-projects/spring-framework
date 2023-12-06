@@ -1671,7 +1671,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getForwardedUrl()).isEqualTo("messages/new");
-		assertThat(RequestContextUtils.getOutputFlashMap(request).isEmpty()).isTrue();
+		assertThat((Map<?, ?>) RequestContextUtils.getOutputFlashMap(request)).isEmpty();
 
 		// POST -> success
 		request = new MockHttpServletRequest("POST", "/messages");
@@ -1693,7 +1693,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getContentAsString()).isEqualTo("Got: yay!");
-		assertThat(RequestContextUtils.getOutputFlashMap(request).isEmpty()).isTrue();
+		assertThat((Map<?, ?>) RequestContextUtils.getOutputFlashMap(request)).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest  // SPR-15176
@@ -1719,7 +1719,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getContentAsString()).isEqualTo("Got: yay!");
-		assertThat(RequestContextUtils.getOutputFlashMap(request).isEmpty()).isTrue();
+		assertThat((Map<?, ?>) RequestContextUtils.getOutputFlashMap(request)).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest

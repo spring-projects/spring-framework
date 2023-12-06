@@ -587,7 +587,7 @@ public class HttpHeadersTests {
 		// here to check the behavior of the entire contract.
 
 		// isEmpty() and size()
-		assertThat(keySet.isEmpty()).isFalse();
+		assertThat(keySet).isNotEmpty();
 		assertThat(keySet).hasSize(2);
 
 		// contains()
@@ -618,9 +618,9 @@ public class HttpHeadersTests {
 
 		// clear()
 		keySet.clear();
-		assertThat(keySet.isEmpty()).isTrue();
 		assertThat(keySet).isEmpty();
-		assertThat(headers.isEmpty()).isTrue();
+		assertThat(keySet).isEmpty();
+		assertThat(headers).isEmpty();
 		assertThat(headers).isEmpty();
 
 		// Unsupported operations
@@ -665,11 +665,11 @@ public class HttpHeadersTests {
 		String headerName = "MyHeader";
 		String headerValue = "value";
 
-		assertThat(headers.isEmpty()).isTrue();
+		assertThat(headers).isEmpty();
 		headers.add(headerName, headerValue);
 		assertThat(headers.containsKey(headerName)).isTrue();
 		headers.keySet().removeIf(key -> key.equals(headerName));
-		assertThat(headers.isEmpty()).isTrue();
+		assertThat(headers).isEmpty();
 		headers.add(headerName, headerValue);
 		assertThat(headers.get(headerName)).element(0).isEqualTo(headerValue);
 	}
@@ -679,11 +679,11 @@ public class HttpHeadersTests {
 		String headerName = "MyHeader";
 		String headerValue = "value";
 
-		assertThat(headers.isEmpty()).isTrue();
+		assertThat(headers).isEmpty();
 		headers.add(headerName, headerValue);
 		assertThat(headers.containsKey(headerName)).isTrue();
 		headers.entrySet().removeIf(entry -> entry.getKey().equals(headerName));
-		assertThat(headers.isEmpty()).isTrue();
+		assertThat(headers).isEmpty();
 		headers.add(headerName, headerValue);
 		assertThat(headers.get(headerName)).element(0).isEqualTo(headerValue);
 	}

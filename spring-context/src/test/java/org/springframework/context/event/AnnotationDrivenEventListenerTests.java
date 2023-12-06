@@ -644,7 +644,7 @@ class AnnotationDrivenEventListenerTests {
 		load(OrderedTestListener.class);
 		OrderedTestListener listener = this.context.getBean(OrderedTestListener.class);
 
-		assertThat(listener.order.isEmpty()).isTrue();
+		assertThat(listener.order).isEmpty();
 		this.context.publishEvent("whatever");
 		assertThat(listener.order).contains("first", "second", "third");
 	}
