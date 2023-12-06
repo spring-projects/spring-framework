@@ -330,10 +330,10 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Return a string representation of the given list of {@code MimeType} objects.
-	 * @param mimeTypes the string to parse
-	 * @return the list of mime types
-	 * @throws IllegalArgumentException if the String cannot be parsed
+	 * Generate a string representation of the given collection of {@link MimeType}
+	 * objects.
+	 * @param mimeTypes the {@code MimeType} objects
+	 * @return a string representation of the {@code MimeType} objects
 	 */
 	public static String toString(Collection<? extends MimeType> mimeTypes) {
 		StringBuilder builder = new StringBuilder();
@@ -348,14 +348,12 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Sorts the given list of {@code MimeType} objects by
+	 * Sort the given list of {@code MimeType} objects by
 	 * {@linkplain MimeType#isMoreSpecific(MimeType) specificity}.
-	 *
-	 * <p>Because of the computational cost, this method throws an exception
-	 * when the given list contains too many elements.
+	 * <p>Because of the computational cost, this method throws an exception if
+	 * the given list contains too many elements.
 	 * @param mimeTypes the list of mime types to be sorted
-	 * @throws IllegalArgumentException if {@code mimeTypes} contains more
-	 * than 50 elements
+	 * @throws InvalidMimeTypeException if {@code mimeTypes} contains more than 50 elements
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
 	 * and Content, section 5.3.2</a>
 	 * @see MimeType#isMoreSpecific(MimeType)
