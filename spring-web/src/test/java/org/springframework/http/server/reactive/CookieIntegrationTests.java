@@ -62,14 +62,8 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 
 		Map<String, List<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
 		assertThat(requestCookies).hasSize(2);
-
-		List<HttpCookie> list = requestCookies.get("SID");
-		assertThat(list).hasSize(1);
-		assertThat(list.iterator().next().getValue()).isEqualTo("31d4d96e407aad42");
-
-		list = requestCookies.get("lang");
-		assertThat(list).hasSize(1);
-		assertThat(list.iterator().next().getValue()).isEqualTo("en-US");
+		assertThat(requestCookies.get("SID")).extracting(HttpCookie::getValue).containsExactly("31d4d96e407aad42");
+		assertThat(requestCookies.get("lang")).extracting(HttpCookie::getValue).containsExactly("en-US");
 
 		List<String> headerValues = response.getHeaders().get("Set-Cookie");
 		assertThat(headerValues).hasSize(2);
