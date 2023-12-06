@@ -96,7 +96,7 @@ class CollectionToCollectionConverterTests {
 		@SuppressWarnings("unchecked")
 		ArrayList<Integer> result = (ArrayList<Integer>) conversionService.convert(list, sourceType, targetType);
 		assertThat(result.getClass()).isEqualTo(ArrayList.class);
-		assertThat(result.isEmpty()).isTrue();
+		assertThat(result).isEmpty();
 	}
 
 	@Test

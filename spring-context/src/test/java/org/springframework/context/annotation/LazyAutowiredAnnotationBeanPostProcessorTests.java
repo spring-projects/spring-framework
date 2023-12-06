@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		FieldResourceInjectionBean bean = ac.getBean("annotatedBean", FieldResourceInjectionBean.class);
 		assertThat(ac.getBeanFactory().containsSingleton("testBean")).isFalse();
-		assertThat(bean.getTestBeans().isEmpty()).isFalse();
+		assertThat(bean.getTestBeans()).isNotEmpty();
 		assertThat(bean.getTestBeans().get(0).getName()).isNull();
 		assertThat(ac.getBeanFactory().containsSingleton("testBean")).isTrue();
 		TestBean tb = (TestBean) ac.getBean("testBean");
@@ -156,7 +156,7 @@ class LazyAutowiredAnnotationBeanPostProcessorTests {
 		OptionalFieldResourceInjectionBean bean = (OptionalFieldResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isNotNull();
 		assertThat(bean.getTestBeans()).isNotNull();
-		assertThat(bean.getTestBeans().isEmpty()).isTrue();
+		assertThat(bean.getTestBeans()).isEmpty();
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
 				bean.getTestBean().getName());
 	}

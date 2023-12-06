@@ -217,7 +217,7 @@ class CollectionUtilsTests {
 	@Test
 	void conversionOfEmptyMap() {
 		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(new HashMap<>());
-		assertThat(asMultiValueMap.isEmpty()).isTrue();
+		assertThat(asMultiValueMap).isEmpty();
 		assertThat(asMultiValueMap).isEmpty();
 	}
 

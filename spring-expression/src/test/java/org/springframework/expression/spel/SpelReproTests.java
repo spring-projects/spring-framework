@@ -1449,7 +1449,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
 		Object value = expression.getValue();
 		assertThat(value).isInstanceOf(List.class);
-		assertThat(((List) value).isEmpty()).isTrue();
+		assertThat(((List) value)).isEmpty();
 	}
 
 	@Test

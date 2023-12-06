@@ -74,7 +74,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		assertThat(Proxy.isProxyClass(em.getClass())).isTrue();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertThat(people.isEmpty()).isTrue();
+		assertThat(people).isEmpty();
 
 		assertThat(em.isOpen()).as("Should be open to start with").isTrue();
 		assertThatIllegalStateException().as("Close should not work on container managed EM").isThrownBy(

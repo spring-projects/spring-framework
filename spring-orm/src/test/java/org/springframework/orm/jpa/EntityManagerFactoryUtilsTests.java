@@ -60,7 +60,7 @@ public class EntityManagerFactoryUtilsTests {
 
 		// no tx active
 		assertThat(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null)).isNull();
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class EntityManagerFactoryUtilsTests {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
 
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 	}
 
 	@Test

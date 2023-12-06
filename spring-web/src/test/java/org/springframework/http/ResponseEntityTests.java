@@ -250,7 +250,7 @@ class ResponseEntityTests {
 				ResponseEntity.ok().headers((HttpHeaders) null).build();
 
 		assertThat(responseEntityWithEmptyHeaders.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntityWithEmptyHeaders.getHeaders().isEmpty()).isTrue();
+		assertThat(responseEntityWithEmptyHeaders.getHeaders()).isEmpty();
 		assertThat(responseEntityWithNullHeaders.toString()).isEqualTo(responseEntityWithEmptyHeaders.toString());
 	}
 

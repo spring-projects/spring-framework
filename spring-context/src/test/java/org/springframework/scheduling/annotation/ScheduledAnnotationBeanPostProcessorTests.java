@@ -542,7 +542,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		context.refresh();
 
 		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
-		assertThat(postProcessor.getScheduledTasks().isEmpty()).isTrue();
+		assertThat(postProcessor.getScheduledTasks()).isEmpty();
 	}
 
 	@ParameterizedTest

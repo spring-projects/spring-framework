@@ -272,7 +272,7 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.get(123)).isEqualTo("123");
 		assertThat(this.map.remove(123, "123")).isTrue();
 		assertThat(this.map.containsKey(123)).isFalse();
-		assertThat(this.map.isEmpty()).isTrue();
+		assertThat(this.map).isEmpty();
 	}
 
 	@Test
@@ -282,7 +282,7 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.get(123)).isNull();
 		assertThat(this.map.remove(123, null)).isTrue();
 		assertThat(this.map.containsKey(123)).isFalse();
-		assertThat(this.map.isEmpty()).isTrue();
+		assertThat(this.map).isEmpty();
 	}
 
 	@Test
@@ -328,11 +328,11 @@ class ConcurrentReferenceHashMapTests {
 
 	@Test
 	void shouldSupportIsEmpty() {
-		assertThat(this.map.isEmpty()).isTrue();
+		assertThat(this.map).isEmpty();
 		this.map.put(123, "123");
 		this.map.put(123, null);
 		this.map.put(456, "456");
-		assertThat(this.map.isEmpty()).isFalse();
+		assertThat(this.map).isNotEmpty();
 	}
 
 	@Test
@@ -363,14 +363,14 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.remove(123)).isNull();
 		assertThat(this.map.remove(456)).isEqualTo("456");
 		assertThat(this.map.remove(null)).isEqualTo("789");
-		assertThat(this.map.isEmpty()).isTrue();
+		assertThat(this.map).isEmpty();
 	}
 
 	@Test
 	void shouldRemoveWhenKeyIsNotInMap() {
 		assertThat(this.map.remove(123)).isNull();
 		assertThat(this.map.remove(null)).isNull();
-		assertThat(this.map.isEmpty()).isTrue();
+		assertThat(this.map).isEmpty();
 	}
 
 	@Test

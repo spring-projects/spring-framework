@@ -50,7 +50,7 @@ class UnmodifiableMultiValueMapTests {
 		assertThat(map).hasSize(1);
 
 		given(mock.isEmpty()).willReturn(false);
-		assertThat(map.isEmpty()).isFalse();
+		assertThat(map).isNotEmpty();
 
 		given(mock.containsKey("foo")).willReturn(true);
 		assertThat(map.containsKey("foo")).isTrue();
