@@ -166,7 +166,7 @@ By default, any argument that is not a simple value type (as determined by
 and is not resolved by any other argument resolver is treated as if it were annotated
 with `@ModelAttribute`.
 
-WARNING: When compiling to native images, implicit `@ModelAttribute` as described above does
-not allow proper ahead-of-time inference of related data binding reflection hints. As a consequence,
-it is recommended to annotate explicitly with `@ModelAttribute` method parameters for such use case
-with GraalVM.
+WARNING: When compiling to a native image with GraalVM, the implicit `@ModelAttribute`
+support described above does not allow proper ahead-of-time inference of related data
+binding reflection hints. As a consequence, it is recommended to explicitly annotate
+method parameters with `@ModelAttribute` for use in a GraalVM native image.
