@@ -70,17 +70,17 @@ public class XmlBeanCollectionTests {
 		ListFactoryBean listFactory = new ListFactoryBean();
 		listFactory.setSourceList(new LinkedList());
 		listFactory.afterPropertiesSet();
-		assertThat(listFactory.getObject() instanceof ArrayList).isTrue();
+		assertThat(listFactory.getObject()).isInstanceOf(ArrayList.class);
 
 		SetFactoryBean setFactory = new SetFactoryBean();
 		setFactory.setSourceSet(new TreeSet());
 		setFactory.afterPropertiesSet();
-		assertThat(setFactory.getObject() instanceof LinkedHashSet).isTrue();
+		assertThat(setFactory.getObject()).isInstanceOf(LinkedHashSet.class);
 
 		MapFactoryBean mapFactory = new MapFactoryBean();
 		mapFactory.setSourceMap(new TreeMap());
 		mapFactory.afterPropertiesSet();
-		assertThat(mapFactory.getObject() instanceof LinkedHashMap).isTrue();
+		assertThat(mapFactory.getObject()).isInstanceOf(LinkedHashMap.class);
 	}
 
 	@Test
@@ -202,9 +202,9 @@ public class XmlBeanCollectionTests {
 		TestBean jenny = (TestBean) this.beanFactory.getBean("jenny");
 		assertThat(hasMap.getMap().get("jenny")).isSameAs(jenny);
 		assertThat(hasMap.getMap().get(5).equals("david")).isTrue();
-		assertThat(hasMap.getMap().get("bar") instanceof Long).isTrue();
+		assertThat(hasMap.getMap().get("bar")).isInstanceOf(Long.class);
 		assertThat(hasMap.getMap().get("bar").equals(100L)).isTrue();
-		assertThat(hasMap.getMap().get("baz") instanceof Integer).isTrue();
+		assertThat(hasMap.getMap().get("baz")).isInstanceOf(Integer.class);
 		assertThat(hasMap.getMap().get("baz").equals(200)).isTrue();
 	}
 
@@ -364,7 +364,7 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testListFactory() {
 		List list = (List) this.beanFactory.getBean("listFactory");
-		assertThat(list instanceof LinkedList).isTrue();
+		assertThat(list).isInstanceOf(LinkedList.class);
 		assertThat(list.size()).isEqualTo(2);
 		assertThat(list.get(0)).isEqualTo("bar");
 		assertThat(list.get(1)).isEqualTo("jenny");
@@ -373,7 +373,7 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testPrototypeListFactory() {
 		List list = (List) this.beanFactory.getBean("pListFactory");
-		assertThat(list instanceof LinkedList).isTrue();
+		assertThat(list).isInstanceOf(LinkedList.class);
 		assertThat(list.size()).isEqualTo(2);
 		assertThat(list.get(0)).isEqualTo("bar");
 		assertThat(list.get(1)).isEqualTo("jenny");
@@ -382,7 +382,7 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testSetFactory() {
 		Set set = (Set) this.beanFactory.getBean("setFactory");
-		assertThat(set instanceof TreeSet).isTrue();
+		assertThat(set).isInstanceOf(TreeSet.class);
 		assertThat(set.size()).isEqualTo(2);
 		assertThat(set.contains("bar")).isTrue();
 		assertThat(set.contains("jenny")).isTrue();
@@ -391,7 +391,7 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testPrototypeSetFactory() {
 		Set set = (Set) this.beanFactory.getBean("pSetFactory");
-		assertThat(set instanceof TreeSet).isTrue();
+		assertThat(set).isInstanceOf(TreeSet.class);
 		assertThat(set.size()).isEqualTo(2);
 		assertThat(set.contains("bar")).isTrue();
 		assertThat(set.contains("jenny")).isTrue();
@@ -400,7 +400,7 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testMapFactory() {
 		Map map = (Map) this.beanFactory.getBean("mapFactory");
-		assertThat(map instanceof TreeMap).isTrue();
+		assertThat(map).isInstanceOf(TreeMap.class);
 		assertThat(map.size()).isEqualTo(2);
 		assertThat(map.get("foo")).isEqualTo("bar");
 		assertThat(map.get("jen")).isEqualTo("jenny");
@@ -409,7 +409,7 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testPrototypeMapFactory() {
 		Map map = (Map) this.beanFactory.getBean("pMapFactory");
-		assertThat(map instanceof TreeMap).isTrue();
+		assertThat(map).isInstanceOf(TreeMap.class);
 		assertThat(map.size()).isEqualTo(2);
 		assertThat(map.get("foo")).isEqualTo("bar");
 		assertThat(map.get("jen")).isEqualTo("jenny");

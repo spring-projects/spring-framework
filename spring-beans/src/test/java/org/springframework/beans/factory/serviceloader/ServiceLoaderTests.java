@@ -48,7 +48,7 @@ class ServiceLoaderTests {
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
 		ServiceLoader<?> serviceLoader = (ServiceLoader<?>) bf.getBean("service");
-		assertThat(serviceLoader.iterator().next() instanceof DocumentBuilderFactory).isTrue();
+		assertThat(serviceLoader).element(0).isInstanceOf(DocumentBuilderFactory.class);
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class ServiceLoaderTests {
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceFactoryBean.class);
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
-		assertThat(bf.getBean("service") instanceof DocumentBuilderFactory).isTrue();
+		assertThat(bf.getBean("service")).isInstanceOf(DocumentBuilderFactory.class);
 	}
 
 	@Test
@@ -67,7 +67,7 @@ class ServiceLoaderTests {
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
 		List<?> serviceList = (List<?>) bf.getBean("service");
-		assertThat(serviceList.get(0) instanceof DocumentBuilderFactory).isTrue();
+		assertThat(serviceList).element(0).isInstanceOf(DocumentBuilderFactory.class);
 	}
 
 }

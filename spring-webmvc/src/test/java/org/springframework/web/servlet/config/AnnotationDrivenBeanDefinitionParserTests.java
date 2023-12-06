@@ -124,10 +124,10 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		@SuppressWarnings("unchecked")
 		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
 		assertThat(resolvers).hasSize(3);
-		assertThat(resolvers.get(0)).isInstanceOf(ServletWebArgumentResolverAdapter.class);
-		assertThat(resolvers.get(1)).isInstanceOf(TestHandlerMethodArgumentResolver.class);
-		assertThat(resolvers.get(2)).isInstanceOf(TestHandlerMethodArgumentResolver.class);
-		assertThat(resolvers.get(2)).isNotSameAs(resolvers.get(1));
+		assertThat(resolvers).element(0).isInstanceOf(ServletWebArgumentResolverAdapter.class);
+		assertThat(resolvers).element(1).isInstanceOf(TestHandlerMethodArgumentResolver.class);
+		assertThat(resolvers).element(2).isInstanceOf(TestHandlerMethodArgumentResolver.class);
+		assertThat(resolvers).element(2).isNotSameAs(resolvers.get(1));
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(handlers).hasSize(2);
 		assertThat(handlers.get(0).getClass()).isEqualTo(TestHandlerMethodReturnValueHandler.class);
 		assertThat(handlers.get(1).getClass()).isEqualTo(TestHandlerMethodReturnValueHandler.class);
-		assertThat(handlers.get(1)).isNotSameAs(handlers.get(0));
+		assertThat(handlers).element(1).isNotSameAs(handlers.get(0));
 	}
 
 	@Test
@@ -178,8 +178,8 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		else {
 			assertThat(converters.size()).as("Only custom converters expected").isEqualTo(2);
 		}
-		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
-		assertThat(converters.get(1)).isInstanceOf(ResourceHttpMessageConverter.class);
+		assertThat(converters).element(0).isInstanceOf(StringHttpMessageConverter.class);
+		assertThat(converters).element(1).isInstanceOf(ResourceHttpMessageConverter.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -189,7 +189,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(value).isNotNull();
 		assertThat(value).isInstanceOf(List.class);
 		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
-		assertThat(converters.get(0)).isInstanceOf(JsonViewResponseBodyAdvice.class);
+		assertThat(converters).element(0).isInstanceOf(JsonViewResponseBodyAdvice.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -199,8 +199,8 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(value).isNotNull();
 		assertThat(value).isInstanceOf(List.class);
 		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
-		assertThat(converters.get(0) instanceof JsonViewRequestBodyAdvice).isTrue();
-		assertThat(converters.get(1) instanceof JsonViewResponseBodyAdvice).isTrue();
+		assertThat(converters).element(0).isInstanceOf(JsonViewRequestBodyAdvice.class);
+		assertThat(converters).element(1).isInstanceOf(JsonViewResponseBodyAdvice.class);
 	}
 
 }

@@ -56,7 +56,7 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("  https://www.springframework.org  ");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uri.toString()).isEqualTo("https://www.springframework.org");
 	}
@@ -67,7 +67,7 @@ public class URIEditorTests {
 		uriEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.getScheme()).doesNotStartWith("classpath");
@@ -79,7 +79,7 @@ public class URIEditorTests {
 		uriEditor.setAsText("  classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class  ");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.getScheme()).doesNotStartWith("classpath");
@@ -90,7 +90,7 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("classpath:test.txt");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.getScheme()).startsWith("classpath");
@@ -115,7 +115,7 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("https://example.com/spaces and \u20AC");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.toASCIIString()).isEqualTo("https://example.com/spaces%20and%20%E2%82%AC");
@@ -126,7 +126,7 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor(false);
 		uriEditor.setAsText("https://example.com/spaces%20and%20%E2%82%AC");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.toASCIIString()).isEqualTo("https://example.com/spaces%20and%20%E2%82%AC");
@@ -137,7 +137,7 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText(uriSpec);
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uri.toString()).isEqualTo(uriSpec);
 	}

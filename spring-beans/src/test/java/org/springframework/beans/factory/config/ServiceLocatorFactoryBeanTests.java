@@ -198,10 +198,10 @@ public class ServiceLocatorFactoryBeanTests {
 		assertThat(testBean3).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean3);
-		assertThat(testBean1 instanceof ExtendedTestService).isFalse();
-		assertThat(testBean2 instanceof ExtendedTestService).isFalse();
-		assertThat(testBean3 instanceof ExtendedTestService).isFalse();
-		assertThat(testBean4 instanceof ExtendedTestService).isTrue();
+		assertThat(testBean1).isNotInstanceOf(ExtendedTestService.class);
+		assertThat(testBean2).isNotInstanceOf(ExtendedTestService.class);
+		assertThat(testBean3).isNotInstanceOf(ExtendedTestService.class);
+		assertThat(testBean4).isInstanceOf(ExtendedTestService.class);
 	}
 
 	@Test

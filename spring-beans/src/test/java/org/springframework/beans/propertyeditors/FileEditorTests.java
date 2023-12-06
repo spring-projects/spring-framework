@@ -39,7 +39,7 @@ public class FileEditorTests {
 		fileEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class");
 		Object value = fileEditor.getValue();
-		assertThat(value instanceof File).isTrue();
+		assertThat(value).isInstanceOf(File.class);
 		File file = (File) value;
 		assertThat(file).exists();
 	}
@@ -56,7 +56,7 @@ public class FileEditorTests {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("file:no_way_this_file_is_found.doc");
 		Object value = fileEditor.getValue();
-		assertThat(value instanceof File).isTrue();
+		assertThat(value).isInstanceOf(File.class);
 		File file = (File) value;
 		assertThat(file).doesNotExist();
 	}
@@ -66,7 +66,7 @@ public class FileEditorTests {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("/no_way_this_file_is_found.doc");
 		Object value = fileEditor.getValue();
-		assertThat(value instanceof File).isTrue();
+		assertThat(value).isInstanceOf(File.class);
 		File file = (File) value;
 		assertThat(file).doesNotExist();
 	}
@@ -78,7 +78,7 @@ public class FileEditorTests {
 				ClassUtils.getShortName(getClass()) + ".class";
 		fileEditor.setAsText(fileName);
 		Object value = fileEditor.getValue();
-		assertThat(value instanceof File).isTrue();
+		assertThat(value).isInstanceOf(File.class);
 		File file = (File) value;
 		assertThat(file).exists();
 		String absolutePath = file.getAbsolutePath().replace('\\', '/');
@@ -92,7 +92,7 @@ public class FileEditorTests {
 				ClassUtils.getShortName(getClass()) + ".clazz";
 		fileEditor.setAsText(fileName);
 		Object value = fileEditor.getValue();
-		assertThat(value instanceof File).isTrue();
+		assertThat(value).isInstanceOf(File.class);
 		File file = (File) value;
 		assertThat(file).doesNotExist();
 		String absolutePath = file.getAbsolutePath().replace('\\', '/');

@@ -50,7 +50,7 @@ public class InputStreamEditorTests {
 			editor.setAsText(resource);
 			Object value = editor.getValue();
 			assertThat(value).isNotNull();
-			assertThat(value instanceof InputStream).isTrue();
+			assertThat(value).isInstanceOf(InputStream.class);
 			stream = (InputStream) value;
 			assertThat(stream.available()).isGreaterThan(0);
 		}
