@@ -91,7 +91,7 @@ class HttpServiceMethodTests {
 		assertThat(voidEntity.getBody()).isNull();
 
 		List<String> list = service.getList();
-		assertThat(list.get(0)).isEqualTo("exchangeForBody");
+		assertThat(list).element(0).isEqualTo("exchangeForBody");
 	}
 
 	@Test

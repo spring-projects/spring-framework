@@ -243,11 +243,11 @@ class ContentNegotiationManagerFactoryBeanTests {
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 
 		// SPR-10513
 		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test // SPR-15367

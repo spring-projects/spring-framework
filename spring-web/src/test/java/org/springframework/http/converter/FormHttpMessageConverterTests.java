@@ -128,8 +128,8 @@ public class FormHttpMessageConverterTests {
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
 		assertThat(values).as("Invalid result").hasSize(2);
-		assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
-		assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
+		assertThat(values).element(0).as("Invalid result").isEqualTo("value 2+1");
+		assertThat(values).element(1).as("Invalid result").isEqualTo("value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
 	}
 

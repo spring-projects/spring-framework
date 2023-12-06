@@ -258,10 +258,10 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile((actual, compiled) -> {
 			ConstructorArgumentValues argumentValues = actual.getConstructorArgumentValues();
 			List<ValueHolder> values = argumentValues.getGenericArgumentValues();
-			assertThat(values.get(0)).satisfies(assertValueHolder(String.class, null, null));
-			assertThat(values.get(1)).satisfies(assertValueHolder(2, Long.class, null));
-			assertThat(values.get(2)).satisfies(assertValueHolder("value", null, "param1"));
-			assertThat(values.get(3)).satisfies(assertValueHolder("another", CharSequence.class, "param2"));
+			assertThat(values).element(0).satisfies(assertValueHolder(String.class, null, null));
+			assertThat(values).element(1).satisfies(assertValueHolder(2, Long.class, null));
+			assertThat(values).element(2).satisfies(assertValueHolder("value", null, "param1"));
+			assertThat(values).element(3).satisfies(assertValueHolder("another", CharSequence.class, "param2"));
 			assertThat(values).hasSize(4);
 			assertThat(argumentValues.getIndexedArgumentValues()).isEmpty();
 		});
@@ -323,7 +323,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile((actual, compiled) -> {
 			Object value = actual.getPropertyValues().get("value");
 			assertThat(value).isInstanceOf(ManagedList.class);
-			assertThat(((List<?>) value).get(0)).isInstanceOf(BeanReference.class);
+			assertThat(((List<?>) value)).element(0).isInstanceOf(BeanReference.class);
 		});
 	}
 
@@ -412,8 +412,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.addQualifier(new AutowireCandidateQualifier("com.example.Another", ChronoUnit.SECONDS));
 		compile((actual, compiled) -> {
 			List<AutowireCandidateQualifier> qualifiers = new ArrayList<>(actual.getQualifiers());
-			assertThat(qualifiers.get(0)).satisfies(isQualifierFor("com.example.Qualifier", "id"));
-			assertThat(qualifiers.get(1)).satisfies(isQualifierFor("com.example.Another", ChronoUnit.SECONDS));
+			assertThat(qualifiers).element(0).satisfies(isQualifierFor("com.example.Qualifier", "id"));
+			assertThat(qualifiers).element(1).satisfies(isQualifierFor("com.example.Another", ChronoUnit.SECONDS));
 			assertThat(qualifiers).hasSize(2);
 		});
 	}

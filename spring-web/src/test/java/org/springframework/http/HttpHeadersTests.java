@@ -201,7 +201,7 @@ public class HttpHeadersTests {
 	void ifMatch() {
 		String ifMatch = "\"v2.6\"";
 		headers.setIfMatch(ifMatch);
-		assertThat(headers.getIfMatch().get(0)).as("Invalid If-Match header").isEqualTo(ifMatch);
+		assertThat(headers.getIfMatch()).element(0).as("Invalid If-Match header").isEqualTo(ifMatch);
 		assertThat(headers.getFirst("If-Match")).as("Invalid If-Match header").isEqualTo("\"v2.6\"");
 	}
 
@@ -215,8 +215,8 @@ public class HttpHeadersTests {
 	void ifMatchMultipleHeaders() {
 		headers.add(HttpHeaders.IF_MATCH, "\"v2,0\"");
 		headers.add(HttpHeaders.IF_MATCH, "W/\"v2,1\", \"v2,2\"");
-		assertThat(headers.get(HttpHeaders.IF_MATCH).get(0)).as("Invalid If-Match header").isEqualTo("\"v2,0\"");
-		assertThat(headers.get(HttpHeaders.IF_MATCH).get(1)).as("Invalid If-Match header").isEqualTo("W/\"v2,1\", \"v2,2\"");
+		assertThat(headers.get(HttpHeaders.IF_MATCH)).element(0).as("Invalid If-Match header").isEqualTo("\"v2,0\"");
+		assertThat(headers.get(HttpHeaders.IF_MATCH)).element(1).as("Invalid If-Match header").isEqualTo("W/\"v2,1\", \"v2,2\"");
 		assertThat(headers.getIfMatch()).contains("\"v2,0\"", "W/\"v2,1\"", "\"v2,2\"");
 	}
 
@@ -224,7 +224,7 @@ public class HttpHeadersTests {
 	void ifNoneMatch() {
 		String ifNoneMatch = "\"v2.6\"";
 		headers.setIfNoneMatch(ifNoneMatch);
-		assertThat(headers.getIfNoneMatch().get(0)).as("Invalid If-None-Match header").isEqualTo(ifNoneMatch);
+		assertThat(headers.getIfNoneMatch()).element(0).as("Invalid If-None-Match header").isEqualTo(ifNoneMatch);
 		assertThat(headers.getFirst("If-None-Match")).as("Invalid If-None-Match header").isEqualTo("\"v2.6\"");
 	}
 
@@ -232,7 +232,7 @@ public class HttpHeadersTests {
 	void ifNoneMatchWildCard() {
 		String ifNoneMatch = "*";
 		headers.setIfNoneMatch(ifNoneMatch);
-		assertThat(headers.getIfNoneMatch().get(0)).as("Invalid If-None-Match header").isEqualTo(ifNoneMatch);
+		assertThat(headers.getIfNoneMatch()).element(0).as("Invalid If-None-Match header").isEqualTo(ifNoneMatch);
 		assertThat(headers.getFirst("If-None-Match")).as("Invalid If-None-Match header").isEqualTo("*");
 	}
 
@@ -485,10 +485,10 @@ public class HttpHeadersTests {
 				new Locale.LanguageRange("*", 0.5)
 		);
 		assertThat(headers.getAcceptLanguage()).isEqualTo(expectedRanges);
-		assertThat(headers.getAcceptLanguageAsLocales().get(0)).isEqualTo(Locale.forLanguageTag("fr-ch"));
+		assertThat(headers.getAcceptLanguageAsLocales()).element(0).isEqualTo(Locale.forLanguageTag("fr-ch"));
 
 		headers.setAcceptLanguageAsLocales(Collections.singletonList(Locale.FRANCE));
-		assertThat(headers.getAcceptLanguageAsLocales().get(0)).isEqualTo(Locale.FRANCE);
+		assertThat(headers.getAcceptLanguageAsLocales()).element(0).isEqualTo(Locale.FRANCE);
 	}
 
 	@Test // SPR-15603
@@ -671,7 +671,7 @@ public class HttpHeadersTests {
 		headers.keySet().removeIf(key -> key.equals(headerName));
 		assertThat(headers.isEmpty()).isTrue();
 		headers.add(headerName, headerValue);
-		assertThat(headers.get(headerName).get(0)).isEqualTo(headerValue);
+		assertThat(headers.get(headerName)).element(0).isEqualTo(headerValue);
 	}
 
 	@Test
@@ -685,7 +685,7 @@ public class HttpHeadersTests {
 		headers.entrySet().removeIf(entry -> entry.getKey().equals(headerName));
 		assertThat(headers.isEmpty()).isTrue();
 		headers.add(headerName, headerValue);
-		assertThat(headers.get(headerName).get(0)).isEqualTo(headerValue);
+		assertThat(headers.get(headerName)).element(0).isEqualTo(headerValue);
 	}
 
 	@Test

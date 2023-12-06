@@ -119,8 +119,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				freshContext.refresh();
 				TestAwareCallbackBean bean = freshContext.getBean(TestAwareCallbackBean.class);
 				assertThat(bean.instances).hasSize(2);
-				assertThat(bean.instances.get(0)).isEqualTo(freshContext);
-				assertThat(bean.instances.get(1)).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
+				assertThat(bean.instances).element(0).isEqualTo(freshContext);
+				assertThat(bean.instances).element(1).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
 						assertThat(metadata.getClassName()).isEqualTo(TestAwareCallbackConfiguration.class.getName()));
 				freshContext.close();
 			});

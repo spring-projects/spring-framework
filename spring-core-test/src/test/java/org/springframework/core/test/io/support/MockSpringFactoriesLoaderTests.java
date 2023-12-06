@@ -62,8 +62,8 @@ class MockSpringFactoriesLoaderTests {
 	private void assertThatLoaderHasTestFactories(MockSpringFactoriesLoader loader) {
 		List<TestFactoryType> factories = loader.load(TestFactoryType.class);
 		assertThat(factories).hasSize(2);
-		assertThat(factories.get(0)).isInstanceOf(TestFactoryOne.class);
-		assertThat(factories.get(1)).isInstanceOf(TestFactoryTwo.class);
+		assertThat(factories).element(0).isInstanceOf(TestFactoryOne.class);
+		assertThat(factories).element(1).isInstanceOf(TestFactoryTwo.class);
 	}
 
 	interface TestFactoryType {

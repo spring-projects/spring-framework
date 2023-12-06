@@ -363,8 +363,8 @@ public class StoredProcedureTests {
 		assertThat(res.size()).as("incorrect number of returns").isEqualTo(1);
 		List<String> rs1 = (List<String>) res.get("rs");
 		assertThat(rs1).hasSize(2);
-		assertThat(rs1.get(0)).isEqualTo("Foo");
-		assertThat(rs1.get(1)).isEqualTo("Bar");
+		assertThat(rs1).element(0).isEqualTo("Foo");
+		assertThat(rs1).element(1).isEqualTo("Bar");
 		verify(resultSet).close();
 	}
 

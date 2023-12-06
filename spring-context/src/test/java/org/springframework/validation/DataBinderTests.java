@@ -480,7 +480,7 @@ class DataBinderTests {
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		try {
 			binder.bind(pvs);
-			assertThat(tb.getIntegerList().get(0)).isEqualTo(1);
+			assertThat(tb.getIntegerList()).element(0).isEqualTo(1);
 			assertThat(binder.getBindingResult().getFieldValue("integerList[0]")).isEqualTo("1");
 		}
 		finally {
@@ -2007,8 +2007,8 @@ class DataBinderTests {
 		assertThat(binder.getBindingResult().hasErrors()).isFalse();
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) form.getF().get("list");
-		assertThat(list.get(0)).isEqualTo("firstValue");
-		assertThat(list.get(1)).isEqualTo("secondValue");
+		assertThat(list).element(0).isEqualTo("firstValue");
+		assertThat(list).element(1).isEqualTo("secondValue");
 		assertThat(list).hasSize(2);
 	}
 
@@ -2043,7 +2043,7 @@ class DataBinderTests {
 
 		binder.bind(pvs);
 		assertThat(tb.getIntegerList()).hasSize(257);
-		assertThat(tb.getIntegerList().get(256)).isEqualTo(Integer.valueOf(1));
+		assertThat(tb.getIntegerList()).element(256).isEqualTo(Integer.valueOf(1));
 		assertThat(binder.getBindingResult().getFieldValue("integerList[256]")).isEqualTo(1);
 	}
 

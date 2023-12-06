@@ -267,8 +267,8 @@ class DefaultServerRequestTests {
 
 		List<String> result = request.body(new ParameterizedTypeReference<List<String>>() {});
 		assertThat(result).hasSize(2);
-		assertThat(result.get(0)).isEqualTo("foo");
-		assertThat(result.get(1)).isEqualTo("bar");
+		assertThat(result).element(0).isEqualTo("foo");
+		assertThat(result).element(1).isEqualTo("bar");
 	}
 
 	@Test

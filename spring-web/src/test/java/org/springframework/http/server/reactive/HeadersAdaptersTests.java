@@ -89,7 +89,7 @@ class HeadersAdaptersTests {
 		headers.add("TestHeader", "first");
 		headers.add("TestHeader", "second");
 		assertThat(headers.getFirst("TestHeader")).isEqualTo("first");
-		assertThat(headers.get("TestHeader").get(0)).isEqualTo("first");
+		assertThat(headers.get("TestHeader")).element(0).isEqualTo("first");
 	}
 
 	@ParameterizedHeadersTest

@@ -414,7 +414,7 @@ abstract class AbstractPropertyAccessorTests {
 		Map<String, String> map = new HashMap<>();
 		map.put("favoriteNumber", "9");
 		accessor.setPropertyValue("list[0]", map);
-		assertThat(target.list.get(0)).isEqualTo(map);
+		assertThat(target.list).element(0).isEqualTo(map);
 	}
 
 	@Test

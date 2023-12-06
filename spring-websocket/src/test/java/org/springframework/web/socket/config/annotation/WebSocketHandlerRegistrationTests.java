@@ -157,7 +157,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(mapping.sockJsService).isNotNull();
 		assertThat(mapping.sockJsService.getAllowedOrigins().contains("https://mydomain1.example")).isTrue();
 		List<HandshakeInterceptor> interceptors = mapping.sockJsService.getHandshakeInterceptors();
-		assertThat(interceptors.get(0)).isEqualTo(interceptor);
+		assertThat(interceptors).element(0).isEqualTo(interceptor);
 
 		OriginHandshakeInterceptor originInterceptor = (OriginHandshakeInterceptor) interceptors.get(1);
 		assertThat(originInterceptor.getAllowedOrigins()).containsExactly("https://mydomain1.example");

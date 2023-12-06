@@ -598,7 +598,7 @@ public class DefaultStompSessionTests {
 		assertThat(received.get()).isTrue();
 		assertThat(receivedHeaders.get()).isNotNull();
 		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
-		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
+		assertThat(receivedHeaders.get().get("foo")).element(0).isEqualTo("bar");
 	}
 
 	@Test
@@ -629,7 +629,7 @@ public class DefaultStompSessionTests {
 		assertThat(received.get()).isTrue();
 		assertThat(receivedHeaders.get()).isNotNull();
 		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
-		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
+		assertThat(receivedHeaders.get().get("foo")).element(0).isEqualTo("bar");
 	}
 
 	@Test
@@ -689,7 +689,7 @@ public class DefaultStompSessionTests {
 		headers = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		assertThat(headers).as(headers.toString()).hasSize(1);
 		assertThat(headers.get("foo")).hasSize(1);
-		assertThat(headers.get("foo").get(0)).isEqualTo("bar");
+		assertThat(headers.get("foo")).element(0).isEqualTo("bar");
 
 		assertThat(this.session.isConnected()).isFalse();
 		verifyNoMoreInteractions(this.sessionHandler);

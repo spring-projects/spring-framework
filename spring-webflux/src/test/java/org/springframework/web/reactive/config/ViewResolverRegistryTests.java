@@ -80,7 +80,7 @@ public class ViewResolverRegistryTests {
 		UrlBasedViewResolver viewResolver = new UrlBasedViewResolver();
 		this.registry.viewResolver(viewResolver);
 
-		assertThat(this.registry.getViewResolvers().get(0)).isSameAs(viewResolver);
+		assertThat(this.registry.getViewResolvers()).element(0).isSameAs(viewResolver);
 		assertThat(this.registry.getViewResolvers()).hasSize(1);
 	}
 
@@ -90,7 +90,7 @@ public class ViewResolverRegistryTests {
 		this.registry.defaultViews(view);
 
 		assertThat(this.registry.getDefaultViews()).hasSize(1);
-		assertThat(this.registry.getDefaultViews().get(0)).isSameAs(view);
+		assertThat(this.registry.getDefaultViews()).element(0).isSameAs(view);
 	}
 
 	@Test  // SPR-16431

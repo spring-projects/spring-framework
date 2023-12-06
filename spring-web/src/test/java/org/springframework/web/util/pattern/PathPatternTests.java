@@ -1043,15 +1043,15 @@ public class PathPatternTests {
 		paths.add(null);
 		paths.add(null);
 		paths.sort(comparator);
-		assertThat(paths.get(0)).isNull();
-		assertThat(paths.get(1)).isNull();
+		assertThat(paths).element(0).isNull();
+		assertThat(paths).element(1).isNull();
 		paths.clear();
 
 		paths.add(null);
 		paths.add(pp.parse("/hotels/new"));
 		paths.sort(comparator);
 		assertThat(paths.get(0).getPatternString()).isEqualTo("/hotels/new");
-		assertThat(paths.get(1)).isNull();
+		assertThat(paths).element(1).isNull();
 		paths.clear();
 
 		paths.add(pp.parse("/hotels/*"));

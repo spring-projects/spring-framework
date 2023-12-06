@@ -141,8 +141,8 @@ public class DelegatingWebMvcConfigurationTests {
 				this.webMvcConfig.mvcValidator());
 
 		assertThat(adapter.getMessageConverters()).as("One custom converter expected").hasSize(2);
-		assertThat(adapter.getMessageConverters().get(0)).isSameAs(customConverter);
-		assertThat(adapter.getMessageConverters().get(1)).isSameAs(stringConverter);
+		assertThat(adapter.getMessageConverters()).element(0).isSameAs(customConverter);
+		assertThat(adapter.getMessageConverters()).element(1).isSameAs(stringConverter);
 	}
 
 	@Test

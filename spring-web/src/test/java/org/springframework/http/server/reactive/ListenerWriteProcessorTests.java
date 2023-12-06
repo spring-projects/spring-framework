@@ -65,7 +65,7 @@ public class ListenerWriteProcessorTests {
 
 		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
 		assertThat(this.processor.getDiscardedBuffers()).hasSize(1);
-		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer);
+		assertThat(this.processor.getDiscardedBuffers()).element(0).isSameAs(buffer);
 	}
 
 	@Test // SPR-17410
@@ -81,7 +81,7 @@ public class ListenerWriteProcessorTests {
 
 		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
 		assertThat(this.processor.getDiscardedBuffers()).hasSize(1);
-		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer);
+		assertThat(this.processor.getDiscardedBuffers()).element(0).isSameAs(buffer);
 	}
 
 	@Test // SPR-17410
@@ -98,8 +98,8 @@ public class ListenerWriteProcessorTests {
 
 		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
 		assertThat(this.processor.getDiscardedBuffers()).hasSize(2);
-		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer2);
-		assertThat(this.processor.getDiscardedBuffers().get(1)).isSameAs(buffer1);
+		assertThat(this.processor.getDiscardedBuffers()).element(0).isSameAs(buffer2);
+		assertThat(this.processor.getDiscardedBuffers()).element(1).isSameAs(buffer1);
 	}
 
 

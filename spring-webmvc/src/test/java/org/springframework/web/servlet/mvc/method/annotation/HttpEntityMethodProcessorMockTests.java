@@ -474,7 +474,7 @@ class HttpEntityMethodProcessorMockTests {
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
 		verify(stringHttpMessageConverter).write(eq("body"), eq(TEXT_PLAIN), outputMessage.capture());
 		assertThat(mavContainer.isRequestHandled()).isTrue();
-		assertThat(outputMessage.getValue().getHeaders().get("header").get(0)).isEqualTo("headerValue");
+		assertThat(outputMessage.getValue().getHeaders().get("header")).element(0).isEqualTo("headerValue");
 	}
 
 	@Test

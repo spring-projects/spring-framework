@@ -138,7 +138,7 @@ public class NamedParameterQueryTests {
 				params, Integer.class);
 
 		assertThat(li.size()).as("All rows returned").isEqualTo(1);
-		assertThat(li.get(0)).as("First row is Integer").isEqualTo(11);
+		assertThat(li).element(0).as("First row is Integer").isEqualTo(11);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}

@@ -147,10 +147,10 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MultiValueMap<String, MultipartFile> resultMap = (MultiValueMap<String, MultipartFile>) result;
 		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfilelist")).hasSize(2);
-		assertThat(resultMap.get("mfilelist").get(0)).isEqualTo(expected1);
-		assertThat(resultMap.get("mfilelist").get(1)).isEqualTo(expected2);
+		assertThat(resultMap.get("mfilelist")).element(0).isEqualTo(expected1);
+		assertThat(resultMap.get("mfilelist")).element(1).isEqualTo(expected2);
 		assertThat(resultMap.get("other")).hasSize(1);
-		assertThat(resultMap.get("other").get(0)).isEqualTo(expected3);
+		assertThat(resultMap.get("other")).element(0).isEqualTo(expected3);
 	}
 
 	@Test
@@ -196,10 +196,10 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MultiValueMap<String, Part> resultMap = (MultiValueMap<String, Part>) result;
 		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfilelist")).hasSize(2);
-		assertThat(resultMap.get("mfilelist").get(0)).isEqualTo(expected1);
-		assertThat(resultMap.get("mfilelist").get(1)).isEqualTo(expected2);
+		assertThat(resultMap.get("mfilelist")).element(0).isEqualTo(expected1);
+		assertThat(resultMap.get("mfilelist")).element(1).isEqualTo(expected2);
 		assertThat(resultMap.get("other")).hasSize(1);
-		assertThat(resultMap.get("other").get(0)).isEqualTo(expected3);
+		assertThat(resultMap.get("other")).element(0).isEqualTo(expected3);
 	}
 
 

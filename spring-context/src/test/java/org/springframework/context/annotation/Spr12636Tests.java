@@ -50,8 +50,8 @@ public class Spr12636Tests {
 		this.context = new AnnotationConfigApplicationContext(
 				UserServiceTwo.class, UserServiceOne.class, UserServiceCollector.class);
 		UserServiceCollector bean = this.context.getBean(UserServiceCollector.class);
-		assertThat(bean.userServices.get(0)).isSameAs(context.getBean("serviceOne", UserService.class));
-		assertThat(bean.userServices.get(1)).isSameAs(context.getBean("serviceTwo", UserService.class));
+		assertThat(bean.userServices).element(0).isSameAs(context.getBean("serviceOne", UserService.class));
+		assertThat(bean.userServices).element(1).isSameAs(context.getBean("serviceTwo", UserService.class));
 
 	}
 
@@ -67,8 +67,8 @@ public class Spr12636Tests {
 		assertThat(AopUtils.isAopProxy(serviceTwo)).isTrue();
 
 		UserServiceCollector bean = this.context.getBean(UserServiceCollector.class);
-		assertThat(bean.userServices.get(0)).isSameAs(serviceOne);
-		assertThat(bean.userServices.get(1)).isSameAs(serviceTwo);
+		assertThat(bean.userServices).element(0).isSameAs(serviceOne);
+		assertThat(bean.userServices).element(1).isSameAs(serviceTwo);
 	}
 
 	@Configuration

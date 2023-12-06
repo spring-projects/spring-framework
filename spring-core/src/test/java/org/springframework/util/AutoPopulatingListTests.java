@@ -65,7 +65,7 @@ class AutoPopulatingListTests {
 		String helloWorld = "Hello World!";
 		list.add(10, null);
 		list.add(11, helloWorld);
-		assertThat(list.get(11)).isEqualTo(helloWorld);
+		assertThat(list).element(11).isEqualTo(helloWorld);
 
 		boolean condition3 = list.get(10) instanceof TestObject;
 		assertThat(condition3).isTrue();

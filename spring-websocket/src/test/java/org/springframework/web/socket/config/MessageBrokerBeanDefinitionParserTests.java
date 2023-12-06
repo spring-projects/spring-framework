@@ -341,9 +341,9 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		List<MessageConverter> converters = compositeMessageConverter.getConverters();
 		assertThat(converters).hasSize(3);
-		assertThat(converters.get(0)).isInstanceOf(StringMessageConverter.class);
-		assertThat(converters.get(1)).isInstanceOf(ByteArrayMessageConverter.class);
-		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
+		assertThat(converters).element(0).isInstanceOf(StringMessageConverter.class);
+		assertThat(converters).element(1).isInstanceOf(ByteArrayMessageConverter.class);
+		assertThat(converters).element(2).isInstanceOf(MappingJackson2MessageConverter.class);
 
 		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);

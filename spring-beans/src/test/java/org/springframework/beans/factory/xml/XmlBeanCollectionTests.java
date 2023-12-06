@@ -237,7 +237,7 @@ public class XmlBeanCollectionTests {
 		assertThat(l).isNotNull();
 		assertThat(l.size()).isEqualTo(4);
 		assertThat(l.get(0).equals("zero")).isTrue();
-		assertThat(l.get(3)).isNull();
+		assertThat(l).element(3).isNull();
 
 		// Check nested map in list
 		Map m = (Map) l.get(1);
@@ -366,8 +366,8 @@ public class XmlBeanCollectionTests {
 		List list = (List) this.beanFactory.getBean("listFactory");
 		assertThat(list instanceof LinkedList).isTrue();
 		assertThat(list.size()).isEqualTo(2);
-		assertThat(list.get(0)).isEqualTo("bar");
-		assertThat(list.get(1)).isEqualTo("jenny");
+		assertThat(list).element(0).isEqualTo("bar");
+		assertThat(list).element(1).isEqualTo("jenny");
 	}
 
 	@Test
@@ -375,8 +375,8 @@ public class XmlBeanCollectionTests {
 		List list = (List) this.beanFactory.getBean("pListFactory");
 		assertThat(list instanceof LinkedList).isTrue();
 		assertThat(list.size()).isEqualTo(2);
-		assertThat(list.get(0)).isEqualTo("bar");
-		assertThat(list.get(1)).isEqualTo("jenny");
+		assertThat(list).element(0).isEqualTo("bar");
+		assertThat(list).element(1).isEqualTo("jenny");
 	}
 
 	@Test

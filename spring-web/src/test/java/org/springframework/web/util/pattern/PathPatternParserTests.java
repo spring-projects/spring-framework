@@ -365,7 +365,7 @@ public class PathPatternParserTests {
 		patterns.add(p3);
 		patterns.add(p1);
 		Collections.sort(patterns);
-		assertThat(patterns.get(0)).isEqualTo(p1);
+		assertThat(patterns).element(0).isEqualTo(p1);
 
 		// Based purely on length
 		p1 = parse("/a/b/c");
@@ -377,7 +377,7 @@ public class PathPatternParserTests {
 		patterns.add(p3);
 		patterns.add(p1);
 		Collections.sort(patterns);
-		assertThat(patterns.get(0)).isEqualTo(p3);
+		assertThat(patterns).element(0).isEqualTo(p3);
 
 		// Based purely on 'wildness'
 		p1 = parse("/*");
@@ -389,7 +389,7 @@ public class PathPatternParserTests {
 		patterns.add(p3);
 		patterns.add(p1);
 		Collections.sort(patterns);
-		assertThat(patterns.get(0)).isEqualTo(p1);
+		assertThat(patterns).element(0).isEqualTo(p1);
 
 		// Based purely on catchAll
 		p1 = parse("{*foobar}");
@@ -410,8 +410,8 @@ public class PathPatternParserTests {
 		patterns.add(p3);
 		patterns.add(p1);
 		Collections.sort(patterns);
-		assertThat(patterns.get(0)).isEqualTo(p3);
-		assertThat(patterns.get(1)).isEqualTo(p2);
+		assertThat(patterns).element(0).isEqualTo(p3);
+		assertThat(patterns).element(1).isEqualTo(p2);
 	}
 
 	@Test

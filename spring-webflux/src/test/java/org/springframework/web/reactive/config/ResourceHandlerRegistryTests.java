@@ -140,17 +140,17 @@ class ResourceHandlerRegistryTests {
 		ResourceWebHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers).hasSize(4);
-		assertThat(resolvers.get(0)).isInstanceOf(CachingResourceResolver.class);
+		assertThat(resolvers).element(0).isInstanceOf(CachingResourceResolver.class);
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
 		assertThat(cachingResolver.getCache()).isInstanceOf(ConcurrentMapCache.class);
-		assertThat(resolvers.get(1)).isEqualTo(mockResolver);
-		assertThat(resolvers.get(2)).isInstanceOf(WebJarsResourceResolver.class);
-		assertThat(resolvers.get(3)).isInstanceOf(PathResourceResolver.class);
+		assertThat(resolvers).element(1).isEqualTo(mockResolver);
+		assertThat(resolvers).element(2).isInstanceOf(WebJarsResourceResolver.class);
+		assertThat(resolvers).element(3).isInstanceOf(PathResourceResolver.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).hasSize(2);
-		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
-		assertThat(transformers.get(1)).isEqualTo(mockTransformer);
+		assertThat(transformers).element(0).isInstanceOf(CachingResourceTransformer.class);
+		assertThat(transformers).element(1).isEqualTo(mockTransformer);
 		Mockito.verify(mockTransformer).setResourceUrlProvider(resourceUrlProvider);
 	}
 
@@ -161,8 +161,8 @@ class ResourceHandlerRegistryTests {
 		ResourceWebHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers).hasSize(2);
-		assertThat(resolvers.get(0)).isInstanceOf(WebJarsResourceResolver.class);
-		assertThat(resolvers.get(1)).isInstanceOf(PathResourceResolver.class);
+		assertThat(resolvers).element(0).isInstanceOf(WebJarsResourceResolver.class);
+		assertThat(resolvers).element(1).isInstanceOf(PathResourceResolver.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).isEmpty();
@@ -179,15 +179,15 @@ class ResourceHandlerRegistryTests {
 		ResourceWebHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers).hasSize(4);
-		assertThat(resolvers.get(0)).isInstanceOf(CachingResourceResolver.class);
-		assertThat(resolvers.get(1)).isSameAs(versionResolver);
-		assertThat(resolvers.get(2)).isInstanceOf(WebJarsResourceResolver.class);
-		assertThat(resolvers.get(3)).isInstanceOf(PathResourceResolver.class);
+		assertThat(resolvers).element(0).isInstanceOf(CachingResourceResolver.class);
+		assertThat(resolvers).element(1).isSameAs(versionResolver);
+		assertThat(resolvers).element(2).isInstanceOf(WebJarsResourceResolver.class);
+		assertThat(resolvers).element(3).isInstanceOf(PathResourceResolver.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).hasSize(2);
-		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
-		assertThat(transformers.get(1)).isInstanceOf(CssLinkResourceTransformer.class);
+		assertThat(transformers).element(0).isInstanceOf(CachingResourceTransformer.class);
+		assertThat(transformers).element(1).isInstanceOf(CssLinkResourceTransformer.class);
 	}
 
 	@Test
@@ -212,15 +212,15 @@ class ResourceHandlerRegistryTests {
 		ResourceWebHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		assertThat(resolvers).hasSize(4);
-		assertThat(resolvers.get(0)).isSameAs(cachingResolver);
-		assertThat(resolvers.get(1)).isSameAs(versionResolver);
-		assertThat(resolvers.get(2)).isSameAs(webjarsResolver);
-		assertThat(resolvers.get(3)).isSameAs(pathResourceResolver);
+		assertThat(resolvers).element(0).isSameAs(cachingResolver);
+		assertThat(resolvers).element(1).isSameAs(versionResolver);
+		assertThat(resolvers).element(2).isSameAs(webjarsResolver);
+		assertThat(resolvers).element(3).isSameAs(pathResourceResolver);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).hasSize(2);
-		assertThat(transformers.get(0)).isSameAs(cachingTransformer);
-		assertThat(transformers.get(1)).isSameAs(cssLinkTransformer);
+		assertThat(transformers).element(0).isSameAs(cachingTransformer);
+		assertThat(transformers).element(1).isSameAs(cssLinkTransformer);
 	}
 
 	@Test

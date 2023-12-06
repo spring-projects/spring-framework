@@ -599,14 +599,14 @@ class UriComponentsBuilderTests {
 	void queryParamWithValueWithEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=baz").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=baz");
-		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEqualTo("baz");
+		assertThat(uriComponents.getQueryParams().get("bar")).element(0).isEqualTo("baz");
 	}
 
 	@Test
 	void queryParamWithoutValueWithEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=");
-		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEmpty();
+		assertThat(uriComponents.getQueryParams().get("bar")).element(0).asString().isEmpty();
 	}
 
 	@Test
@@ -615,7 +615,7 @@ class UriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar");
 
 		// TODO [SPR-13537] Change equalTo(null) to equalTo("").
-		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isNull();
+		assertThat(uriComponents.getQueryParams().get("bar")).element(0).isNull();
 	}
 
 	@Test  // gh-24444

@@ -99,7 +99,7 @@ public class ContentNegotiationConfigurerTests {
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addParameter("f", "json");
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class ContentNegotiationConfigurerTests {
 		this.configurer.defaultContentType(MediaType.APPLICATION_JSON);
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class ContentNegotiationConfigurerTests {
 		this.configurer.defaultContentTypeStrategy(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 }

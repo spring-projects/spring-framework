@@ -33,8 +33,8 @@ class Spr7283Tests {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("spr7283.xml", getClass());
 		List<?> list = ctx.getBean("list", List.class);
 		assertThat(list).hasSize(2);
-		assertThat(list.get(0)).isInstanceOf(A.class);
-		assertThat(list.get(1)).isInstanceOf(B.class);
+		assertThat(list).element(0).isInstanceOf(A.class);
+		assertThat(list).element(1).isInstanceOf(B.class);
 		ctx.close();
 	}
 
