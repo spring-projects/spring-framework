@@ -276,7 +276,7 @@ public interface AnnotatedTypeMetadata {
 			stream = stream.sorted(reversedMetaDistance());
 		}
 
-		Adapt[] adaptations = Adapt.values(false, true);
+		Adapt[] adaptations = Adapt.values(classValuesAsString, true);
 		return stream
 				.map(annotation -> annotation.asAnnotationAttributes(adaptations))
 				.flatMap(attributes -> {
