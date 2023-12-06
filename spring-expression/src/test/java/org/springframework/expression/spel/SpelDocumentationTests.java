@@ -20,7 +20,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -374,20 +373,50 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void specialVariables() throws Exception {
-		// create an array of integers
-		List<Integer> primes = Arrays.asList(2, 3, 5, 7, 11, 13, 17);
+	void thisVariable() {
+		// Create a list of prime integers.
+		List<Integer> primes = List.of(2, 3, 5, 7, 11, 13, 17);
 
-		// create parser and set variable 'primes' as the array of integers
+		// Create parser and set variable 'primes' as the list of integers.
 		ExpressionParser parser = new SpelExpressionParser();
-		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.setVariable("primes",primes);
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+		context.setVariable("primes", primes);
 
-		// all prime numbers > 10 from the list (using selection ?{...})
-		List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression("#primes.?[#this>10]").getValue(context);
-		assertThat(primesGreaterThanTen.toString()).isEqualTo("[11, 13, 17]");
+		// Select all prime numbers > 10 from the list (using selection ?{...}).
+		String expression = "#primes.?[#this > 10]";
+
+		// Evaluates to a list containing [11, 13, 17].
+		List<Integer> primesGreaterThanTen =
+				parser.parseExpression(expression).getValue(context, List.class);
+
+		assertThat(primesGreaterThanTen).containsExactly(11, 13, 17);
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	void thisAndRootVariables() {
+		// Create parser and evaluation context.
+		ExpressionParser parser = new SpelExpressionParser();
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+
+		// Create an inventor to use as the root context object.
+		Inventor tesla = new Inventor("Nikola Tesla");
+		tesla.setInventions("Telephone repeater", "Tesla coil transformer");
+
+		// Iterate over all inventions of the Inventor referenced as the #root
+		// object, and generate a list of strings whose contents take the form
+		// "<inventor's name> invented the <invention>." (using projection !{...}).
+		String expression = "#root.inventions.![#root.name + ' invented the ' + #this + '.']";
+
+		// Evaluates to a list containing:
+		// Nikola Tesla invented the Telephone repeater.
+		// Nikola Tesla invented the Tesla coil transformer.
+		List<String> results = parser.parseExpression(expression).getValue(context, tesla, List.class);
+
+		assertThat(results).containsExactly(
+				"Nikola Tesla invented the Telephone repeater.",
+				"Nikola Tesla invented the Tesla coil transformer.");
+	}
 
 	@Test
 	void functions() throws Exception {
