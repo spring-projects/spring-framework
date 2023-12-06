@@ -198,14 +198,14 @@ public class XmlBeanCollectionTests {
 	public void testMapWithLiteralsAndReferences() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("mixedMap");
 		assertThat(hasMap.getMap().size()).isEqualTo(5);
-		assertThat(hasMap.getMap().get("foo").equals(10)).isTrue();
+		assertThat(hasMap.getMap().get("foo")).isEqualTo(10);
 		TestBean jenny = (TestBean) this.beanFactory.getBean("jenny");
 		assertThat(hasMap.getMap().get("jenny")).isSameAs(jenny);
 		assertThat(hasMap.getMap().get(5).equals("david")).isTrue();
 		assertThat(hasMap.getMap().get("bar") instanceof Long).isTrue();
-		assertThat(hasMap.getMap().get("bar").equals(100L)).isTrue();
+		assertThat(hasMap.getMap().get("bar")).isEqualTo(100L);
 		assertThat(hasMap.getMap().get("baz") instanceof Integer).isTrue();
-		assertThat(hasMap.getMap().get("baz").equals(200)).isTrue();
+		assertThat(hasMap.getMap().get("baz")).isEqualTo(200);
 	}
 
 	@Test
@@ -230,7 +230,7 @@ public class XmlBeanCollectionTests {
 		assertThat(hasMap.getMap().size()).isEqualTo(4);
 		assertThat(hasMap.getMap().get(null).equals("bar")).isTrue();
 		TestBean jenny = (TestBean) this.beanFactory.getBean("jenny");
-		assertThat(hasMap.getMap().get("jenny").equals(jenny)).isTrue();
+		assertThat(hasMap.getMap().get("jenny")).isEqualTo(jenny);
 
 		// Check list
 		List l = (List) hasMap.getMap().get("list");
@@ -250,7 +250,7 @@ public class XmlBeanCollectionTests {
 		l = (List) l.get(2);
 		assertThat(l).isNotNull();
 		assertThat(l.size()).isEqualTo(2);
-		assertThat(l.get(0).equals(jenny)).isTrue();
+		assertThat(l.get(0)).isEqualTo(jenny);
 		assertThat(l.get(1).equals("ba")).isTrue();
 
 		// Check nested map

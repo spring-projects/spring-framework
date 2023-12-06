@@ -85,8 +85,8 @@ public class CollectionsWithDefaultTypesTests {
 		List l = (List) jumble.getJumble();
 		assertThat(l.get(0).equals("literal")).isTrue();
 		Integer[] array1 = (Integer[]) l.get(1);
-		assertThat(array1[0].equals(2)).isTrue();
-		assertThat(array1[1].equals(4)).isTrue();
+		assertThat(array1[0]).isEqualTo(2);
+		assertThat(array1[1]).isEqualTo(4);
 		int[] array2 = (int[]) l.get(2);
 		assertThat(array2[0]).isEqualTo(3);
 		assertThat(array2[1]).isEqualTo(5);

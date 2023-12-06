@@ -210,7 +210,7 @@ class ConfigurationClassProcessingTests {
 		BeanFactory factory = initBeanFactory(ConfigWithNullReference.class);
 
 		TestBean foo = factory.getBean("foo", TestBean.class);
-		assertThat(factory.getBean("bar").equals(null)).isTrue();
+		assertThat(factory.getBean("bar")).isEqualTo(null);
 		assertThat(foo.getSpouse()).isNull();
 	}
 

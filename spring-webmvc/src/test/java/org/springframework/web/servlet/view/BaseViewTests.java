@@ -231,8 +231,8 @@ public class BaseViewTests {
 		String kingval = "";
 		v.setAttributesCSV("foo=(" + fooval + "),king={" + kingval + "},f1=[we]");
 		assertThat(v.getStaticAttributes()).hasSize(3);
-		assertThat(v.getStaticAttributes().get("foo").equals(fooval)).isTrue();
-		assertThat(v.getStaticAttributes().get("king").equals(kingval)).isTrue();
+		assertThat(v.getStaticAttributes().get("foo")).isEqualTo(fooval);
+		assertThat(v.getStaticAttributes().get("king")).isEqualTo(kingval);
 	}
 
 	@Test

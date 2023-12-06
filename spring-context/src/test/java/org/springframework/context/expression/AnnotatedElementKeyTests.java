@@ -67,7 +67,7 @@ class AnnotatedElementKeyTests {
 		AnnotatedElementKey first = new AnnotatedElementKey(this.method, getClass());
 		AnnotatedElementKey second = new AnnotatedElementKey(this.method, null);
 
-		assertThat(first.equals(second)).isFalse();
+		assertThat(first).isNotEqualTo(second);
 	}
 
 	private void assertKeyEquals(AnnotatedElementKey first, AnnotatedElementKey second) {

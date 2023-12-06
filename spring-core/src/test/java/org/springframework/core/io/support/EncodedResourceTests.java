@@ -43,7 +43,7 @@ class EncodedResourceTests {
 
 	@Test
 	void equalsWithNullOtherObject() {
-		assertThat(new EncodedResource(resource).equals(null)).isFalse();
+		assertThat(new EncodedResource(resource)).isNotEqualTo(null);
 	}
 
 	@Test

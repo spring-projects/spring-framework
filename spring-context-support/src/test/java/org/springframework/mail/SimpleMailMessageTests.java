@@ -128,7 +128,7 @@ public class SimpleMailMessageTests {
 		// Same object is equal
 		message1 = new SimpleMailMessage();
 		message2 = message1;
-		assertThat(message1.equals(message2)).isTrue();
+		assertThat(message1).isEqualTo(message2);
 
 		// Null object is not equal
 		message1 = new SimpleMailMessage();
@@ -143,7 +143,7 @@ public class SimpleMailMessageTests {
 		// Equal values are equal
 		message1 = new SimpleMailMessage();
 		message2 = new SimpleMailMessage();
-		assertThat(message1.equals(message2)).isTrue();
+		assertThat(message1).isEqualTo(message2);
 
 		message1 = new SimpleMailMessage();
 		message1.setFrom("from@somewhere");
@@ -155,7 +155,7 @@ public class SimpleMailMessageTests {
 		message1.setSubject("subject");
 		message1.setText("text");
 		message2 = new SimpleMailMessage(message1);
-		assertThat(message1.equals(message2)).isTrue();
+		assertThat(message1).isEqualTo(message2);
 	}
 
 	@Test

@@ -126,8 +126,8 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
 				.map(Connection.class::cast).as(StepVerifier::create)
 				.consumeNextWith(connection -> {
-					assertThat(connection.equals(connection)).isTrue();
-					assertThat(connection.equals(connectionMock1)).isFalse();
+					assertThat(connection).isEqualTo(connection);
+					assertThat(connection).isNotEqualTo(connectionMock1);
 				}).verifyComplete();
 	}
 

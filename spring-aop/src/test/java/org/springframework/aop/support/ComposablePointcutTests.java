@@ -141,7 +141,7 @@ public class ComposablePointcutTests {
 
 		pc1.intersection(GETTER_METHOD_MATCHER);
 
-		assertThat(pc1.equals(pc2)).isFalse();
+		assertThat(pc1).isNotEqualTo(pc2);
 		assertThat(pc1.hashCode()).isNotEqualTo(pc2.hashCode());
 
 		pc2.intersection(GETTER_METHOD_MATCHER);

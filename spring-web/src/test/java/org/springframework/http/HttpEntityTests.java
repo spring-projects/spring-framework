@@ -97,10 +97,10 @@ public class HttpEntityTests {
 		assertThat(responseEntity.getHeaders().getFirst("Content-Type")).isEqualTo("text/plain");
 		assertThat(responseEntity.getHeaders().getFirst("Content-Type")).isEqualTo("text/plain");
 
-		assertThat(httpEntity.equals(responseEntity)).isFalse();
-		assertThat(responseEntity.equals(httpEntity)).isFalse();
-		assertThat(responseEntity.equals(responseEntity2)).isTrue();
-		assertThat(responseEntity2.equals(responseEntity)).isTrue();
+		assertThat(httpEntity).isNotEqualTo(responseEntity);
+		assertThat(responseEntity).isNotEqualTo(httpEntity);
+		assertThat(responseEntity).isEqualTo(responseEntity2);
+		assertThat(responseEntity2).isEqualTo(responseEntity);
 	}
 
 	@Test
@@ -117,10 +117,10 @@ public class HttpEntityTests {
 		assertThat(requestEntity.getHeaders().getFirst("Content-Type")).isEqualTo("text/plain");
 		assertThat(requestEntity.getHeaders().getFirst("Content-Type")).isEqualTo("text/plain");
 
-		assertThat(httpEntity.equals(requestEntity)).isFalse();
-		assertThat(requestEntity.equals(httpEntity)).isFalse();
-		assertThat(requestEntity.equals(requestEntity2)).isTrue();
-		assertThat(requestEntity2.equals(requestEntity)).isTrue();
+		assertThat(httpEntity).isNotEqualTo(requestEntity);
+		assertThat(requestEntity).isNotEqualTo(httpEntity);
+		assertThat(requestEntity).isEqualTo(requestEntity2);
+		assertThat(requestEntity2).isEqualTo(requestEntity);
 	}
 
 }

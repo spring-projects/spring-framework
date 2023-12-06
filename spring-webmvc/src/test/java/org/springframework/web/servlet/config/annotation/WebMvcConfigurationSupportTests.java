@@ -142,13 +142,13 @@ public class WebMvcConfigurationSupportTests {
 		assertThat(handlerMappings.containsKey("defaultServletHandlerMapping")).isFalse();
 
 		Object nullBean = context.getBean("viewControllerHandlerMapping");
-		assertThat(nullBean.equals(null)).isTrue();
+		assertThat(nullBean).isEqualTo(null);
 
 		nullBean = context.getBean("resourceHandlerMapping");
-		assertThat(nullBean.equals(null)).isTrue();
+		assertThat(nullBean).isEqualTo(null);
 
 		nullBean = context.getBean("defaultServletHandlerMapping");
-		assertThat(nullBean.equals(null)).isTrue();
+		assertThat(nullBean).isEqualTo(null);
 	}
 
 	@Test

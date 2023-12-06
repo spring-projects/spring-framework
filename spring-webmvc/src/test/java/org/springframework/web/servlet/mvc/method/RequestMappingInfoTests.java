@@ -251,7 +251,7 @@ class RequestMappingInfoTests {
 				.consumes("text/plain").produces("text/plain")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = infoBuilder.paths("/foo").methods(GET, RequestMethod.POST)
@@ -259,7 +259,7 @@ class RequestMappingInfoTests {
 				.consumes("text/plain").produces("text/plain")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = infoBuilder.paths("/foo").methods(GET)
@@ -267,7 +267,7 @@ class RequestMappingInfoTests {
 				.consumes("text/plain").produces("text/plain")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = infoBuilder.paths("/foo").methods(GET)
@@ -275,7 +275,7 @@ class RequestMappingInfoTests {
 				.consumes("text/plain").produces("text/plain")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = infoBuilder.paths("/foo").methods(GET)
@@ -283,7 +283,7 @@ class RequestMappingInfoTests {
 				.consumes("text/NOOOOOO").produces("text/plain")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = infoBuilder.paths("/foo").methods(GET)
@@ -291,7 +291,7 @@ class RequestMappingInfoTests {
 				.consumes("text/plain").produces("text/NOOOOOO")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = infoBuilder.paths("/foo").methods(GET)
@@ -299,7 +299,7 @@ class RequestMappingInfoTests {
 				.consumes("text/plain").produces("text/plain")
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 	}
 

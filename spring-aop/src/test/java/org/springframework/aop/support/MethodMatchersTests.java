@@ -110,8 +110,8 @@ public class MethodMatchersTests {
 	public void testUnionEquals() {
 		MethodMatcher first = MethodMatchers.union(MethodMatcher.TRUE, MethodMatcher.TRUE);
 		MethodMatcher second = new ComposablePointcut(MethodMatcher.TRUE).union(new ComposablePointcut(MethodMatcher.TRUE)).getMethodMatcher();
-		assertThat(first.equals(second)).isTrue();
-		assertThat(second.equals(first)).isTrue();
+		assertThat(first).isEqualTo(second);
+		assertThat(second).isEqualTo(first);
 	}
 
 	@Test
