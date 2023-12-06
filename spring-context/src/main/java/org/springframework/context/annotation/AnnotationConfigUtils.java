@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.lang.annotation.Annotation;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
@@ -32,6 +33,7 @@ import org.springframework.context.event.EventListenerMethodProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
@@ -281,9 +283,10 @@ public abstract class AnnotationConfigUtils {
 	}
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
-			Class<? extends Annotation> annotationType, Class<? extends Annotation> containerType) {
+			Class<? extends Annotation> annotationType, Class<? extends Annotation> containerType,
+			Predicate<MergedAnnotation<? extends Annotation>> predicate) {
 
-		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, false);
+		return metadata.getMergedRepeatableAnnotationAttributes(annotationType, containerType, predicate, false, false);
 	}
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,

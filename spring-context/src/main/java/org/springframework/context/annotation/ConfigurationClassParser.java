@@ -55,6 +55,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -285,9 +286,18 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// Process any @ComponentScan annotations
+		// Search for locally declared @ComponentScan annotations first.
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
-				sourceClass.getMetadata(), ComponentScan.class, ComponentScans.class);
+				sourceClass.getMetadata(), ComponentScan.class, ComponentScans.class,
+				MergedAnnotation::isDirectlyPresent);
+
+		// Fall back to searching for @ComponentScan meta-annotations (which indirectly
+		// includes locally declared composed annotations).
+		if (componentScans.isEmpty()) {
+			componentScans = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(),
+					ComponentScan.class, ComponentScans.class, MergedAnnotation::isMetaPresent);
+		}
+
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
