@@ -386,7 +386,7 @@ class GenericConversionServiceTests {
 	void convertiblePairDifferentEqualsAndHash() {
 		GenericConverter.ConvertiblePair pair = new GenericConverter.ConvertiblePair(Number.class, String.class);
 		GenericConverter.ConvertiblePair pairOpposite = new GenericConverter.ConvertiblePair(String.class, Number.class);
-		assertThat(pair.equals(pairOpposite)).isFalse();
+		assertThat(pair).isNotEqualTo(pairOpposite);
 		assertThat(pair.hashCode()).isNotEqualTo(pairOpposite.hashCode());
 	}
 

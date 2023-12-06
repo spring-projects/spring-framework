@@ -482,7 +482,7 @@ public class MessageBrokerConfigurationTests {
 		assertThat(handler.getBroadcastDestination()).isNull();
 
 		Object nullBean = context.getBean("userRegistryMessageHandler");
-		assertThat(nullBean.equals(null)).isTrue();
+		assertThat(nullBean).isEqualTo(null);
 	}
 
 	@Test // SPR-16275

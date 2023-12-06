@@ -543,7 +543,7 @@ public abstract class AbstractCacheAnnotationTests {
 		Object r1 = service.multiConditionalCacheAndEvict(key);
 		Object r3 = service.multiConditionalCacheAndEvict(key);
 
-		assertThat(r1.equals(r3)).isFalse();
+		assertThat(r1).isNotEqualTo(r3);
 		assertThat(primary.get(key)).isNull();
 
 		Object key2 = 3;

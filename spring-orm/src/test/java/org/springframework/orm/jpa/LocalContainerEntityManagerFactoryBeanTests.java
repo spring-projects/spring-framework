@@ -88,7 +88,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		assertThat(cefb.getObject()).as("EntityManagerFactory reference must be cached after init").isSameAs(emf);
 
 		assertThat(emf).as("EMF must be proxied").isNotSameAs(mockEmf);
-		assertThat(emf.equals(emf)).isTrue();
+		assertThat(emf).isEqualTo(emf);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setSerializationId("emf-bf");

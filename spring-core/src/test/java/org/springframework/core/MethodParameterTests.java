@@ -65,12 +65,12 @@ class MethodParameterTests {
 		assertThat(longParameter).isEqualTo(longParameter);
 		assertThat(intReturnType).isEqualTo(intReturnType);
 
-		assertThat(stringParameter.equals(longParameter)).isFalse();
-		assertThat(stringParameter.equals(intReturnType)).isFalse();
-		assertThat(longParameter.equals(stringParameter)).isFalse();
-		assertThat(longParameter.equals(intReturnType)).isFalse();
-		assertThat(intReturnType.equals(stringParameter)).isFalse();
-		assertThat(intReturnType.equals(longParameter)).isFalse();
+		assertThat(stringParameter).isNotEqualTo(longParameter);
+		assertThat(stringParameter).isNotEqualTo(intReturnType);
+		assertThat(longParameter).isNotEqualTo(stringParameter);
+		assertThat(longParameter).isNotEqualTo(intReturnType);
+		assertThat(intReturnType).isNotEqualTo(stringParameter);
+		assertThat(intReturnType).isNotEqualTo(longParameter);
 
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
 		MethodParameter methodParameter = new MethodParameter(method, 0);

@@ -44,20 +44,20 @@ public abstract class AbstractMethodMetadataTests {
 		MethodMetadata withMethodWithTwoArguments1 = getTagged(WithMethodWithTwoArguments.class);
 		MethodMetadata withMethodWithTwoArguments2 = getTagged(WithMethodWithTwoArguments.class);
 
-		assertThat(withMethod1.equals(null)).isFalse();
+		assertThat(withMethod1).isNotEqualTo(null);
 
-		assertThat(withMethod1.equals(withMethod1)).isTrue();
-		assertThat(withMethod2.equals(withMethod2)).isTrue();
-		assertThat(withMethod1.equals(withMethod2)).isTrue();
-		assertThat(withMethod2.equals(withMethod1)).isTrue();
+		assertThat(withMethod1).isEqualTo(withMethod1);
+		assertThat(withMethod2).isEqualTo(withMethod2);
+		assertThat(withMethod1).isEqualTo(withMethod2);
+		assertThat(withMethod2).isEqualTo(withMethod1);
 
-		assertThat(withMethodWithTwoArguments1.equals(withMethodWithTwoArguments1)).isTrue();
-		assertThat(withMethodWithTwoArguments2.equals(withMethodWithTwoArguments2)).isTrue();
-		assertThat(withMethodWithTwoArguments1.equals(withMethodWithTwoArguments2)).isTrue();
-		assertThat(withMethodWithTwoArguments2.equals(withMethodWithTwoArguments1)).isTrue();
+		assertThat(withMethodWithTwoArguments1).isEqualTo(withMethodWithTwoArguments1);
+		assertThat(withMethodWithTwoArguments2).isEqualTo(withMethodWithTwoArguments2);
+		assertThat(withMethodWithTwoArguments1).isEqualTo(withMethodWithTwoArguments2);
+		assertThat(withMethodWithTwoArguments2).isEqualTo(withMethodWithTwoArguments1);
 
-		assertThat(withMethod1.equals(withMethodWithTwoArguments1)).isFalse();
-		assertThat(withMethodWithTwoArguments1.equals(withMethod1)).isFalse();
+		assertThat(withMethod1).isNotEqualTo(withMethodWithTwoArguments1);
+		assertThat(withMethodWithTwoArguments1).isNotEqualTo(withMethod1);
 	}
 
 	@Test

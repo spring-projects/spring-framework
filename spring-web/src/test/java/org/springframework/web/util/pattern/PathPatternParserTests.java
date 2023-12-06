@@ -112,7 +112,7 @@ public class PathPatternParserTests {
 
 		pp1 = caseInsensitiveParser.parse("/abc");
 		pp2 = caseSensitiveParser.parse("/abc");
-		assertThat(pp1.equals(pp2)).isFalse();
+		assertThat(pp1).isNotEqualTo(pp2);
 		assertThat(pp2.hashCode()).isNotEqualTo(pp1.hashCode());
 	}
 

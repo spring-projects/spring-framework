@@ -233,7 +233,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET, RequestMethod.POST)
@@ -242,7 +242,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -251,7 +251,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -260,7 +260,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -269,7 +269,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -278,7 +278,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -287,7 +287,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=NOOOOOO"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 	}
 

@@ -44,20 +44,20 @@ public abstract class AbstractAnnotationMetadataTests {
 		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
 		AnnotationMetadata testMemberClass2 = get(TestMemberClass.class);
 
-		assertThat(testClass1.equals(null)).isFalse();
+		assertThat(testClass1).isNotEqualTo(null);
 
-		assertThat(testClass1.equals(testClass1)).isTrue();
-		assertThat(testClass2.equals(testClass2)).isTrue();
-		assertThat(testClass1.equals(testClass2)).isTrue();
-		assertThat(testClass2.equals(testClass1)).isTrue();
+		assertThat(testClass1).isEqualTo(testClass1);
+		assertThat(testClass2).isEqualTo(testClass2);
+		assertThat(testClass1).isEqualTo(testClass2);
+		assertThat(testClass2).isEqualTo(testClass1);
 
-		assertThat(testMemberClass1.equals(testMemberClass1)).isTrue();
-		assertThat(testMemberClass2.equals(testMemberClass2)).isTrue();
-		assertThat(testMemberClass1.equals(testMemberClass2)).isTrue();
-		assertThat(testMemberClass2.equals(testMemberClass1)).isTrue();
+		assertThat(testMemberClass1).isEqualTo(testMemberClass1);
+		assertThat(testMemberClass2).isEqualTo(testMemberClass2);
+		assertThat(testMemberClass1).isEqualTo(testMemberClass2);
+		assertThat(testMemberClass2).isEqualTo(testMemberClass1);
 
-		assertThat(testClass1.equals(testMemberClass1)).isFalse();
-		assertThat(testMemberClass1.equals(testClass1)).isFalse();
+		assertThat(testClass1).isNotEqualTo(testMemberClass1);
+		assertThat(testMemberClass1).isNotEqualTo(testClass1);
 	}
 
 	@Test

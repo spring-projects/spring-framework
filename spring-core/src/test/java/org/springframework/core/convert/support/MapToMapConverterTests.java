@@ -72,7 +72,7 @@ class MapToMapConverterTests {
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<Integer, Integer> result = (Map<Integer, Integer>) conversionService.convert(map, sourceType, targetType);
-		assertThat(map.equals(result)).isFalse();
+		assertThat(map).isNotEqualTo(result);
 		assertThat((int) result.get(1)).isEqualTo(9);
 		assertThat((int) result.get(2)).isEqualTo(37);
 	}
@@ -107,7 +107,7 @@ class MapToMapConverterTests {
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<Integer, Integer> result = (Map<Integer, Integer>) conversionService.convert(map, sourceType, targetType);
-		assertThat(map.equals(result)).isFalse();
+		assertThat(map).isNotEqualTo(result);
 		assertThat((int) result.get(1)).isEqualTo(9);
 		assertThat((int) result.get(2)).isEqualTo(37);
 	}
@@ -133,7 +133,7 @@ class MapToMapConverterTests {
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<Integer, List<Integer>> result = (Map<Integer, List<Integer>>) conversionService.convert(map, sourceType, targetType);
-		assertThat(map.equals(result)).isFalse();
+		assertThat(map).isNotEqualTo(result);
 		assertThat(result.get(1)).isEqualTo(Arrays.asList(9, 12));
 		assertThat(result.get(2)).isEqualTo(Arrays.asList(37, 23));
 	}
@@ -155,7 +155,7 @@ class MapToMapConverterTests {
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<Integer, List<Integer>> result = (Map<Integer, List<Integer>>) conversionService.convert(map, sourceType, targetType);
-		assertThat(map.equals(result)).isFalse();
+		assertThat(map).isNotEqualTo(result);
 		assertThat(result.get(1)).isEqualTo(Arrays.asList(9, 12));
 		assertThat(result.get(2)).isEqualTo(Arrays.asList(37, 23));
 	}
