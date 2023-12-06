@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class Inventor {
 		return inventions;
 	}
 
-	public void setInventions(String[] inventions) {
+	public void setInventions(String... inventions) {
 		this.inventions = inventions;
 	}
 
@@ -136,6 +136,10 @@ public class Inventor {
 
 	public String throwException(PlaceOfBirth pob) {
 		return pob.getCity();
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getName() {
@@ -214,6 +218,9 @@ public class Inventor {
 	}
 
 	public Inventor(String... strings) {
+		if (strings.length > 0) {
+			this.name = strings[0];
+		}
 	}
 
 	public boolean getSomeProperty() {

@@ -554,7 +554,7 @@ class EvaluationTests extends AbstractExpressionTests {
 
 		@Test
 		void propertyField() {
-			evaluate("name", "Nikola Tesla", String.class, false);
+			evaluate("name", "Nikola Tesla", String.class, true);
 			// not writable because (1) name is private (2) there is no setter, only a getter
 			evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
 					"org.springframework.expression.spel.testresources.Inventor");

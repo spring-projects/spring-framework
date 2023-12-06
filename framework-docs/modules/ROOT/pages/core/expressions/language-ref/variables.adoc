@@ -1,8 +1,8 @@
 [[expressions-ref-variables]]
 = Variables
 
-You can reference variables in the expression by using the `#variableName` syntax. Variables
-are set by using the `setVariable` method on `EvaluationContext` implementations.
+You can reference variables in an expression by using the `#variableName` syntax. Variables
+are set by using the `setVariable()` method in `EvaluationContext` implementations.
 
 [NOTE]
 ====
@@ -29,7 +29,7 @@ Java::
 	context.setVariable("newName", "Mike Tesla");
 
 	parser.parseExpression("name = #newName").getValue(context, tesla);
-	System.out.println(tesla.getName())  // "Mike Tesla"
+	System.out.println(tesla.getName());  // "Mike Tesla"
 ----
 
 Kotlin::
