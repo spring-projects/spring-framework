@@ -134,6 +134,33 @@ class DataFieldMaxValueIncrementerTests {
 	}
 
 	@Test
+	void mySQLIdentityColumnMaxValueIncrementer() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L, 2L, 3L, 4L);
+
+		MySQLIdentityColumnMaxValueIncrementer incrementer = new MySQLIdentityColumnMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.setPaddingLength(1);
+		incrementer.afterPropertiesSet();
+
+		assertThat(incrementer.nextIntValue()).isEqualTo(1);
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+		assertThat(incrementer.nextStringValue()).isEqualTo("3");
+		assertThat(incrementer.nextLongValue()).isEqualTo(4);
+
+		verify(statement, times(4)).executeUpdate("insert into myseq () values ()");
+		verify(resultSet, times(4)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
+	}
+
+	@Test
 	void mySQLMaxValueIncrementer() throws SQLException {
 		given(dataSource.getConnection()).willReturn(connection);
 		given(connection.createStatement()).willReturn(statement);
