@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -85,6 +87,13 @@ public class WebExchangeDataBinder extends WebDataBinder {
 		return getValuesToBind(exchange)
 				.doOnNext(map -> construct(new MapValueResolver(map)))
 				.then();
+	}
+
+	@Override
+	protected boolean shouldConstructArgument(MethodParameter param) {
+		Class<?> type = param.nestedIfOptional().getNestedParameterType();
+		return (super.shouldConstructArgument(param) &&
+				!MultipartFile.class.isAssignableFrom(type) && !Part.class.isAssignableFrom(type));
 	}
 
 	/**
