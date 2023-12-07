@@ -407,6 +407,12 @@ exposes the Hibernate transaction as a JDBC transaction if you have set up the p
 `DataSource` for which the transactions are supposed to be exposed through the
 `dataSource` property of the `HibernateTransactionManager` class.
 
+For JTA-style lazy retrieval of actual resource connections, Spring provides a
+corresponding `DataSource` proxy class for the target connection pool: see
+{spring-framework-api}/jdbc/datasource/LazyConnectionDataSourceProxy.html[`LazyConnectionDataSourceProxy`].
+This is particularly useful for Hibernate read-only transactions which can often
+be processed from a local cache rather than hitting the database.
+
 
 [[orm-hibernate-resources]]
 == Comparing Container-managed and Locally Defined Resources

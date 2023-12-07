@@ -230,6 +230,19 @@ provided you stick to the required connection lookup pattern. Note that JTA does
 savepoints or custom isolation levels and has a different timeout mechanism but otherwise
 exposes similar behavior in terms of JDBC resources and JDBC commit/rollback management.
 
+For JTA-style lazy retrieval of actual resource connections, Spring provides a
+corresponding `DataSource` proxy class for the target connection pool: see
+{spring-framework-api}/jdbc/datasource/LazyConnectionDataSourceProxy.html[`LazyConnectionDataSourceProxy`].
+This is particularly useful for potentially empty transactions without actual statement
+execution (never fetching an actual resource in such a scenario), and also in front of
+a routing `DataSource` which means to take the transaction-synchronized read-only flag
+and/or isolation level into account (e.g. `IsolationLevelDataSourceRouter`).
+
+`LazyConnectionDataSourceProxy` also provides special support for a read-only connection
+pool to use during a read-only transaction, avoiding the overhead of switching the JDBC
+Connection's read-only flag at the beginning and end of every transaction when fetching
+it from the primary connection pool (which may be costly depending on the JDBC driver).
+
 NOTE: As of 5.3, Spring provides an extended `JdbcTransactionManager` variant which adds
 exception translation capabilities on commit/rollback (aligned with `JdbcTemplate`).
 Where `DataSourceTransactionManager` will only ever throw `TransactionSystemException`

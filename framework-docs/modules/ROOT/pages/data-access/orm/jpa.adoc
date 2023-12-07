@@ -506,13 +506,20 @@ if you have not already done so, to get more detailed coverage of Spring's decla
 The recommended strategy for JPA is local transactions through JPA's native transaction
 support. Spring's `JpaTransactionManager` provides many capabilities known from local
 JDBC transactions (such as transaction-specific isolation levels and resource-level
-read-only optimizations) against any regular JDBC connection pool (no XA requirement).
+read-only optimizations) against any regular JDBC connection pool, without requiring
+a JTA transaction coordinator and XA-capable resources.
 
 Spring JPA also lets a configured `JpaTransactionManager` expose a JPA transaction
 to JDBC access code that accesses the same `DataSource`, provided that the registered
-`JpaDialect` supports retrieval of the underlying JDBC `Connection`.
-Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
-See the xref:data-access/orm/jpa.adoc#orm-jpa-dialect[next section] for details on the `JpaDialect` mechanism.
+`JpaDialect` supports retrieval of the underlying JDBC `Connection`. Spring provides
+dialects for the EclipseLink and Hibernate JPA implementations. See the
+xref:data-access/orm/jpa.adoc#orm-jpa-dialect[next section] for details on `JpaDialect`.
+
+For JTA-style lazy retrieval of actual resource connections, Spring provides a
+corresponding `DataSource` proxy class for the target connection pool: see
+{spring-framework-api}/jdbc/datasource/LazyConnectionDataSourceProxy.html[`LazyConnectionDataSourceProxy`].
+This is particularly useful for JPA read-only transactions which can often
+be processed from a local cache rather than hitting the database.
 
 
 [[orm-jpa-dialect]]
