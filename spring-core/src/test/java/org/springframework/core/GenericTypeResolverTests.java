@@ -377,26 +377,6 @@ class GenericTypeResolverTests {
 	interface IdFixingRepository<T> extends Repository<T, Long> {
 	}
 
-	interface First<N extends Number> {
-
-		default void foo(N f) {
-			// ...
-		}
-	}
-
-	interface Second<T> {
-
-		default void bar(T b) {
-			// ...
-		}
-	}
-
-	static class FirstSecondService implements First<Integer>, Second<String> {
-	}
-
-	static class SecondFirstService implements Second<String>, First<Integer> {
-	}
-
 	static class WithMethodParameter {
 		public void nestedGenerics(List<Map<String, Integer>> input) {
 		}
