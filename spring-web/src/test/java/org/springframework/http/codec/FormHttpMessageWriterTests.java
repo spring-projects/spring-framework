@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				.expectComplete()
 				.verify();
 		HttpHeaders headers = response.getHeaders();
-		assertThat(headers.getContentType().toString()).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_FORM_URLENCODED);
 		assertThat(headers.getContentLength()).isEqualTo(expected.length());
 	}
 

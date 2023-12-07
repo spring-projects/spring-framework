@@ -192,7 +192,7 @@ abstract class AbstractMockWebServerTests {
 	}
 
 	private MockResponse formRequest(RecordedRequest request) {
-		assertThat(request.getHeader(CONTENT_TYPE)).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(request.getHeader(CONTENT_TYPE)).isEqualTo("application/x-www-form-urlencoded");
 		assertThat(request.getBody().readUtf8()).contains("name+1=value+1", "name+2=value+2%2B1", "name+2=value+2%2B2");
 		return new MockResponse().setResponseCode(200);
 	}
@@ -235,7 +235,7 @@ abstract class AbstractMockWebServerTests {
 	protected class TestDispatcher extends Dispatcher {
 
 		@Override
-		public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+		public MockResponse dispatch(RecordedRequest request) {
 			try {
 				byte[] helloWorldBytes = helloWorld.getBytes(StandardCharsets.UTF_8);
 
