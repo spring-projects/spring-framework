@@ -156,6 +156,7 @@ Java::
 	/**
 	 * Bean definitions for {@link DataSourceConfiguration}
 	 */
+	@Generated
 	public class DataSourceConfiguration__BeanDefinitions {
 		/**
 		 * Get the bean definition for 'dataSourceConfiguration'
@@ -189,6 +190,9 @@ Java::
 ======
 
 NOTE: The exact code generated may differ depending on the exact nature of your bean definitions.
+
+TIP: Each generated class is annotated with `org.springframework.aot.generate.Generated` to
+identify them if they need to be excluded, for instance by static analysis tools.
 
 The generated code above creates bean definitions equivalent to the `@Configuration` class, but in a direct way and without the use of reflection if at all possible.
 There is a bean definition for `dataSourceConfiguration` and one for `dataSourceBean`.

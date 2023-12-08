@@ -95,6 +95,14 @@ class GeneratedClassTests {
 	}
 
 	@Test
+	void generateJavaFileIsAnnotatedWithGenerated() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		assertThat(generatedClass.generateJavaFile().toString())
+				.contains("@Generated")
+				.contains("import " + Generated.class.getName() + ";");
+	}
+
+	@Test
 	void generateJavaFileIncludesGeneratedMethods() {
 		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
 		generatedClass.getMethods().add("test", method -> method.addJavadoc("Test Method"));
