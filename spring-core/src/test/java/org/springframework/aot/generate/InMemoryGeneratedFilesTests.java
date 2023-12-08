@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class InMemoryGeneratedFilesTests {
 	}
 
 	@Test
-	void getGeneratedFilesReturnsFiles() throws Exception {
+	void getGeneratedFilesReturnsFiles() {
 		this.generatedFiles.addResourceFile("META-INF/test1", "test1");
 		this.generatedFiles.addResourceFile("META-INF/test2", "test2");
 		assertThat(this.generatedFiles.getGeneratedFiles(Kind.RESOURCE))
