@@ -509,7 +509,7 @@ Kotlin::
 
 [[webflux-ann-httpexchange-annotation]]
 == `@HttpExchange`
-[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Servlet stack]#
 
 As an alternative to  `@RequestMapping`, you can also handle requests with `@HttpExchange`
 methods. Such methods are declared on an
