@@ -178,6 +178,22 @@ class InvocableHandlerMethodKotlinTests {
 		assertHandlerResultValue(result, null)
 	}
 
+	@Test
+	fun valueClass() {
+		this.resolvers.add(stubResolver(1L))
+		val method = ValueClassController::valueClass.javaMethod!!
+		val result = invoke(ValueClassController(), method,1L)
+		assertHandlerResultValue(result, "1")
+	}
+
+	@Test
+	fun valueClassDefaultValue() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = ValueClassController::valueClassWithDefault.javaMethod!!
+		val result = invoke(ValueClassController(), method)
+		assertHandlerResultValue(result, "3.1")
+	}
+
 
 	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
 		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
@@ -266,4 +282,20 @@ class InvocableHandlerMethodKotlinTests {
 			return null
 		}
 	}
+
+	class ValueClassController {
+
+		fun valueClass(limit: LongValueClass) =
+			"${limit.value}"
+
+		fun valueClassWithDefault(limit: DoubleValueClass = DoubleValueClass(3.1)) =
+			"${limit.value}"
+
+	}
+
+	@JvmInline
+	value class LongValueClass(val value: Long)
+
+	@JvmInline
+	value class DoubleValueClass(val value: Double)
 }

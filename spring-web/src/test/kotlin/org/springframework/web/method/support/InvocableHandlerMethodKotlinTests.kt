@@ -84,6 +84,20 @@ class InvocableHandlerMethodKotlinTests {
 		Assertions.assertThat(value).isNull()
 	}
 
+	@Test
+	fun valueClass() {
+		composite.addResolver(StubArgumentResolver(Long::class.java, 1L))
+		val value = getInvocable(Long::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo(1L)
+	}
+
+	@Test
+	fun valueClassDefaultValue() {
+		composite.addResolver(StubArgumentResolver(Double::class.java))
+		val value = getInvocable(Double::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo(3.1)
+	}
+
 	private fun getInvocable(vararg argTypes: Class<*>): InvocableHandlerMethod {
 		val method = ResolvableMethod.on(Handler::class.java).argTypes(*argTypes).resolveMethod()
 		val handlerMethod = InvocableHandlerMethod(Handler(), method)
@@ -116,6 +130,18 @@ class InvocableHandlerMethodKotlinTests {
 		fun nullable(arg: String?): String? {
 			return null
 		}
+
+		fun valueClass(limit: LongValueClass) =
+			limit.value
+
+		fun valueClass(limit: DoubleValueClass = DoubleValueClass(3.1)) =
+			limit.value
 	}
+
+	@JvmInline
+	value class LongValueClass(val value: Long)
+
+	@JvmInline
+	value class DoubleValueClass(val value: Double)
 
 }
