@@ -30,6 +30,8 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcCall}.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
+ * @author Giuseppe Milicia
  * @since 2.5
  */
 public interface CallMetaDataProvider {
@@ -54,6 +56,12 @@ public interface CallMetaDataProvider {
 	 */
 	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
 			@Nullable String schemaName, @Nullable String procedureName) throws SQLException;
+
+	/**
+	 * Get the call parameter meta-data that is currently used.
+	 * @return a List of {@link CallParameterMetaData}
+	 */
+	List<CallParameterMetaData> getCallParameterMetaData();
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta-data currently used.
@@ -99,6 +107,14 @@ public interface CallMetaDataProvider {
 	 */
 	@Nullable
 	String parameterNameToUse(@Nullable String parameterName);
+
+	/**
+	 * Return the name of the named parameter to use for binding the given parameter name.
+	 * @param parameterName the name of the parameter to bind
+	 * @return the name of the named parameter to use for binding the given parameter name
+	 * @since 6.1.2
+	 */
+	String namedParameterBindingToUse(@Nullable String parameterName);
 
 	/**
 	 * Create a default out parameter based on the provided meta-data.
@@ -165,12 +181,6 @@ public interface CallMetaDataProvider {
 	boolean byPassReturnParameter(String parameterName);
 
 	/**
-	 * Get the call parameter meta-data that is currently used.
-	 * @return a List of {@link CallParameterMetaData}
-	 */
-	List<CallParameterMetaData> getCallParameterMetaData();
-
-	/**
 	 * Does the database support the use of catalog name in procedure calls?
 	 */
 	boolean isSupportsCatalogsInProcedureCalls();
@@ -179,12 +189,5 @@ public interface CallMetaDataProvider {
 	 * Does the database support the use of schema name in procedure calls?
 	 */
 	boolean isSupportsSchemasInProcedureCalls();
-
-	/**
-	 * Returns the name of the named parameter to use for binding the given parameter name.
-	 * @param paramName the name of the parameter to bind
-	 * @return the name of the named parameter to use for binding the given parameter name,
-	 */
-	String namedParamBindingToUse(@Nullable String paramName);
 
 }

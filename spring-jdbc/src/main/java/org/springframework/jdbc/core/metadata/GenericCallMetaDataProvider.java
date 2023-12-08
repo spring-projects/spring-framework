@@ -171,8 +171,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public boolean byPassReturnParameter(String parameterName) {
-		return false;
+	public String namedParameterBindingToUse(@Nullable String parameterName) {
+		return parameterName + " => ?";
 	}
 
 	@Override
@@ -215,6 +215,11 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		return this.procedureColumnMetaDataUsed;
 	}
 
+	@Override
+	public boolean byPassReturnParameter(String parameterName) {
+		return false;
+	}
+
 
 	/**
 	 * Specify whether the database supports the use of catalog name in procedure calls.
@@ -244,16 +249,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	@Override
 	public boolean isSupportsSchemasInProcedureCalls() {
 		return this.supportsSchemasInProcedureCalls;
-	}
-
-	/**
-	 * Returns the name of the named parameter to use for binding the given parameter name.
-	 * @param paramName the name of the parameter to bind
-	 * @return the name of the named parameter to use for binding the given parameter name,
-	 */
-	@Override
-	public String namedParamBindingToUse(@Nullable String paramName) {
-		return paramName + " => ?";
 	}
 
 	/**
