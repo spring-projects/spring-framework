@@ -462,9 +462,7 @@ public final class Type {
         return "double";
       case ARRAY:
         StringBuilder stringBuilder = new StringBuilder(getElementType().getClassName());
-        for (int i = getDimensions(); i > 0; --i) {
-          stringBuilder.append("[]");
-        }
+          stringBuilder.append("[]".repeat(Math.max(0, getDimensions())));
         return stringBuilder.toString();
       case OBJECT:
       case INTERNAL:
