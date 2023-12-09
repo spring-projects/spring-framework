@@ -59,9 +59,7 @@ public abstract class AbstractSockJsMessageCodec implements SockJsMessageCodec {
 			if (isSockJsSpecialChar(c)) {
 				result.append('\\').append('u');
 				String hex = Integer.toHexString(c).toLowerCase();
-				for (int i = 0; i < (4 - hex.length()); i++) {
-					result.append('0');
-				}
+                result.append("0".repeat(Math.max(0, (4 - hex.length()))));
 				result.append(hex);
 			}
 			else {

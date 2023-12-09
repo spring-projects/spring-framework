@@ -68,9 +68,7 @@ public class PatternParseException extends IllegalArgumentException {
 	public String toDetailedString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.pattern).append('\n');
-		for (int i = 0; i < this.position; i++) {
-			sb.append(' ');
-		}
+        sb.append(" ".repeat(Math.max(0, this.position)));
 		sb.append("^\n");
 		sb.append(getMessage());
 		return sb.toString();

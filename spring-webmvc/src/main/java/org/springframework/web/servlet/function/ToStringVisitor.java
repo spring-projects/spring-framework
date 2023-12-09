@@ -80,9 +80,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	}
 
 	private void indent() {
-		for (int i = 0; i < this.indent; i++) {
-			this.builder.append(' ');
-		}
+        this.builder.append(" ".repeat(Math.max(0, this.indent)));
 	}
 
 
