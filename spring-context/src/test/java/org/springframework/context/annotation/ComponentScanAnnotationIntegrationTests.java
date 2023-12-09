@@ -456,11 +456,6 @@ class ComponentScanAnnotatedConfig_WithValueAttribute {
 }
 
 @Configuration
-@ComponentScan
-class ComponentScanWithNoPackagesConfig {
-}
-
-@Configuration
 @ComponentScan(basePackages = "example.scannable", nameGenerator = MyBeanNameGenerator.class)
 class ComponentScanWithBeanNameGenerator {
 }
