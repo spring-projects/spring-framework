@@ -159,6 +159,9 @@ import org.springframework.util.StringUtils;
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, BeanFactoryAware {
 
+	private static final Constructor<?>[] EMPTY_CONSTRUCTOR_ARRAY = new Constructor<?>[0];
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(4);
@@ -193,9 +196,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
 
+		ClassLoader classLoader = AutowiredAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("jakarta.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
+					ClassUtils.forName("jakarta.inject.Inject", classLoader));
 			logger.trace("'jakarta.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
@@ -204,7 +208,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("javax.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
+					ClassUtils.forName("javax.inject.Inject", classLoader));
 			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
@@ -285,7 +289,14 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		// Register externally managed config members on bean definition.
 		findInjectionMetadata(beanName, beanType, beanDefinition);
+	}
+
+	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.lookupMethodsChecked.remove(beanName);
+		this.injectionMetadataCache.remove(beanName);
 	}
 
 	@Override
@@ -321,12 +332,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
 		return metadata;
-	}
-
-	@Override
-	public void resetBeanDefinition(String beanName) {
-		this.lookupMethodsChecked.remove(beanName);
-		this.injectionMetadataCache.remove(beanName);
 	}
 
 	@Override
@@ -428,7 +433,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 										"default constructor to fall back to: " + candidates.get(0));
 							}
 						}
-						candidateConstructors = candidates.toArray(new Constructor<?>[0]);
+						candidateConstructors = candidates.toArray(EMPTY_CONSTRUCTOR_ARRAY);
 					}
 					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
@@ -441,7 +446,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						candidateConstructors = new Constructor<?>[] {primaryConstructor};
 					}
 					else {
-						candidateConstructors = new Constructor<?>[0];
+						candidateConstructors = EMPTY_CONSTRUCTOR_ARRAY;
 					}
 					this.candidateConstructorsCache.put(beanClass, candidateConstructors);
 				}
@@ -1011,7 +1016,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			hints.reflection().registerField(field);
 			CodeBlock resolver = CodeBlock.of("$T.$L($S)",
 					AutowiredFieldValueResolver.class,
-					(!required) ? "forField" : "forRequiredField", field.getName());
+					(!required ? "forField" : "forRequiredField"), field.getName());
 			AccessControl accessControl = AccessControl.forMember(field);
 			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
@@ -1026,7 +1031,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.$L", AutowiredMethodArgumentsResolver.class,
-					(!required) ? "forMethod" : "forRequiredMethod");
+					(!required ? "forMethod" : "forRequiredMethod"));
 			code.add("($S", method.getName());
 			if (method.getParameterCount() > 0) {
 				code.add(", $L", generateParameterTypesCode(method.getParameterTypes()));
