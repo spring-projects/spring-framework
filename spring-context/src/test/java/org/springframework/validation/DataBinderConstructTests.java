@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,6 +90,20 @@ public class DataBinderConstructTests {
 		assertThat(bindingResult.getFieldValue("param3")).isNull();
 	}
 
+	@Test
+	void dataClassBindingWithNestedClassAndNullableValue() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("nested.name", "value1"));
+		DataBinder binder = new DataBinder(null);
+		binder.setTargetType(ResolvableType.forClass(OuterClass.class));
+
+		binder.construct(valueResolver);
+		OuterClass outerClass = getTarget(binder);
+
+		assertThat(outerClass.getNested().getName()).isEqualTo("value1");
+		assertThat(outerClass.getOptionalNested().isPresent()).isFalse();
+		assertThat(outerClass.getNullableNested()).isNull();
+	}
+
 	@SuppressWarnings("SameParameterValue")
 	private static DataBinder initDataBinder(Class<DataClass> targetType) {
 		DataBinder binder = new DataBinder(null);
@@ -151,4 +166,41 @@ public class DataBinderConstructTests {
 		}
 	}
 
+	private static class NestedClass {
+		private final String name;
+
+		public NestedClass(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
+	private static class OuterClass {
+		private final NestedClass nested;
+		private final Optional<NestedClass> optionalNested;
+		@Nullable
+		private final NestedClass nullableNested;
+
+		public OuterClass(NestedClass nested, Optional<NestedClass> optionalNested, @Nullable NestedClass nullableNested) {
+			this.nested = nested;
+			this.optionalNested = optionalNested;
+			this.nullableNested = nullableNested;
+		}
+
+		public NestedClass getNested() {
+			return nested;
+		}
+
+		public Optional<NestedClass> getOptionalNested() {
+			return optionalNested;
+		}
+
+		@Nullable
+		public NestedClass getNullableNested() {
+			return nullableNested;
+		}
+	}
 }

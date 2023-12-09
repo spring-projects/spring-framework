@@ -948,7 +948,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				Class<?> paramType = paramTypes[i];
 				Object value = valueResolver.resolveValue(paramPath, paramType);
 
-				if (value == null && shouldConstructArgument(param)) {
+				if (value == null && !param.isOptional() && shouldConstructArgument(param)) {
 					ResolvableType type = ResolvableType.forMethodParameter(param);
 					args[i] = createObject(type, paramPath + ".", valueResolver);
 				}
