@@ -315,6 +315,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			}
 			Message message = receiveMessage(consumerToUse);
 			if (message != null) {
+				boolean exposeResource = (!transactional && isExposeListenerSession() &&
+						!TransactionSynchronizationManager.hasResource(obtainConnectionFactory()));
 				Observation observation = createObservation(message).start();
 				Observation.Scope scope = observation.openScope();
 				if (logger.isDebugEnabled()) {
@@ -322,14 +324,12 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
 							sessionToUse + "]");
 				}
-				messageReceived(invoker, sessionToUse);
-				boolean exposeResource = (!transactional && isExposeListenerSession() &&
-						!TransactionSynchronizationManager.hasResource(obtainConnectionFactory()));
-				if (exposeResource) {
-					TransactionSynchronizationManager.bindResource(
-							obtainConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
-				}
 				try {
+					messageReceived(invoker, sessionToUse);
+					if (exposeResource) {
+						TransactionSynchronizationManager.bindResource(
+								obtainConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
+					}
 					doExecuteListener(sessionToUse, message);
 				}
 				catch (Throwable ex) {
