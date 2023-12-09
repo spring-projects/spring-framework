@@ -354,6 +354,11 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	}
 
 	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
@@ -371,11 +376,6 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
 		return metadata;
-	}
-
-	@Override
-	public void resetBeanDefinition(String beanName) {
-		this.injectionMetadataCache.remove(beanName);
 	}
 
 	@Override
