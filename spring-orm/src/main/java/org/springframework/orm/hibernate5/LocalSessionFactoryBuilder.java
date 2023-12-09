@@ -52,6 +52,7 @@ import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -59,6 +60,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.ClassFormatException;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -109,6 +111,11 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
 
 	private static final TypeFilter CONVERTER_TYPE_FILTER = new AnnotationTypeFilter(Converter.class, false);
+
+	private static final String IGNORE_CLASSFORMAT_PROPERTY_NAME = "spring.classformat.ignore";
+
+	private static final boolean shouldIgnoreClassFormatException =
+			SpringProperties.getFlag(IGNORE_CLASSFORMAT_PROPERTY_NAME);
 
 
 	private final ResourcePatternResolver resourcePatternResolver;
@@ -334,6 +341,14 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					}
 					catch (FileNotFoundException ex) {
 						// Ignore non-readable resource
+					}
+					catch (ClassFormatException ex) {
+						if (!shouldIgnoreClassFormatException) {
+							throw new MappingException("Incompatible class format in " + resource, ex);
+						}
+					}
+					catch (Throwable ex) {
+						throw new MappingException("Failed to read candidate component class: " + resource, ex);
 					}
 				}
 			}
