@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -219,6 +220,19 @@ public class WebExchangeDataBinderTests {
 		assertThat(bean.getSomePartList().get(1).filename()).isEqualTo("spring.png");
 	}
 
+	@Test
+	public void testConstructorMultipart() throws Exception {
+		WebExchangeDataBinder binder = new WebExchangeDataBinder(null);
+		binder.setTargetType(ResolvableType.forClass(ConstructorMultipartBean.class));
+
+		MultiValueMap<String, Object> data = new LinkedMultiValueMap<>();
+		data.add("part", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
+		binder.construct(exchangeMultipart(data)).block(Duration.ofMillis(5000));
+		ConstructorMultipartBean bean = (ConstructorMultipartBean) binder.getTarget();
+
+		assertThat(bean.getPart().filename()).isEqualTo("foo.txt");
+		assertThat(bean.getNullableFilePart()).isNull();
+	}
 
 
 	private ServerWebExchange exchange(MultiValueMap<String, String> formData) {
@@ -313,4 +327,24 @@ public class WebExchangeDataBinderTests {
 		}
 	}
 
+	private static class ConstructorMultipartBean {
+		private final FilePart part;
+		private final FilePart nullableFilePart;
+
+		public ConstructorMultipartBean(
+				FilePart part,
+				FilePart nullableFilePart
+		) {
+			this.part = part;
+			this.nullableFilePart = nullableFilePart;
+		}
+
+		public FilePart getPart() {
+			return part;
+		}
+
+		public FilePart getNullableFilePart() {
+			return nullableFilePart;
+		}
+	}
 }
