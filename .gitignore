@@ -27,7 +27,7 @@ buildSrc/build
 spring-test/test-output/
 
 # Maven artifacts
-pom.xml
+#pom.xml
 /target/
 
 # Eclipse artifacts, including WTP generated manifests
@@ -51,3 +51,55 @@ atlassian-ide-plugin.xml
 .vscode/
 
 cached-antora-playbook.yml
+*#
+*.jar
+*.sw?
+*~
+.#*
+.*.md.html
+.attach_pid*
+.factorypath
+.metadata
+.recommenders
+.vscode
+/code
+MANIFEST.MF
+_site/
+activemq-data
+build
+!/**/src/**/bin
+!/**/src/**/build
+build.log
+dependency-reduced-pom.xml
+dump.rdb
+interpolated*.xml
+lib/
+manifest.yml
+overridedb.*
+target
+.flattened-pom.xml
+secrets.yml
+.sts4-cache
+
+
+target/
+logs/
+*.class
+*.bak
+*.log*
+
+### Common ###
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+
+### IntelliJ IDEA ###
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
