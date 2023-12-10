@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * A component provider that provides candidate components from a base package. Can
- * use {@link CandidateComponentsIndex the index} if it is available of scans the
- * classpath otherwise. Candidate components are identified by applying exclude and
- * include filters. {@link AnnotationTypeFilter}, {@link AssignableTypeFilter} include
- * filters on an annotation/superclass that are annotated with {@link Indexed} are
+ * A component provider that scans for candidate components starting from a
+ * specified base package. Can use the {@linkplain CandidateComponentsIndex component
+ * index}, if it is available, and scans the classpath otherwise.
+ *
+ * <p>Candidate components are identified by applying exclude and include filters.
+ * {@link AnnotationTypeFilter} and {@link AssignableTypeFilter} include filters
+ * for an annotation/target-type that is annotated with {@link Indexed} are
  * supported: if any other include filter is specified, the index is ignored and
  * classpath scanning is used instead.
  *
@@ -201,7 +203,6 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * {@link Controller @Controller} stereotype annotations.
 	 * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
 	 * JSR-330's {@link jakarta.inject.Named} annotations, if available.
-	 *
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
@@ -305,7 +306,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 
 	/**
-	 * Scan the class path for candidate components.
+	 * Scan the component index or class path for candidate components.
 	 * @param basePackage the package to check for annotated classes
 	 * @return a corresponding Set of autodetected bean definitions
 	 */
@@ -319,7 +320,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
-	 * Determine if the index can be used by this instance.
+	 * Determine if the component index can be used by this instance.
 	 * @return {@code true} if the index is available and the configuration of this
 	 * instance is supported by it, {@code false} otherwise
 	 * @since 5.0
@@ -460,8 +461,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 					}
 				}
 				catch (Throwable ex) {
-					throw new BeanDefinitionStoreException(
-							"Failed to read candidate component class: " + resource, ex);
+					throw new BeanDefinitionStoreException("Failed to read candidate component class: " + resource, ex);
 				}
 			}
 		}
