@@ -9,13 +9,13 @@
 			class属性：要创建对象所在类的全路径（包名称+类名称）
 	-->
 	<!--1 获取bean演示，user对象创建-->
-	<bean id="user" class="com.lxcecho.iocxml.bean.User"></bean>
+	<bean id="user" class="com.lxcecho.ioc.iocxml.bean.User"></bean>
 
-	<bean id="user1" class="com.lxcecho.iocxml.bean.User"></bean>
+	<bean id="user1" class="com.lxcecho.ioc.iocxml.bean.User"></bean>
 
 	<!--2 一个接口实现类获取过程-->
-	<bean id="userDaoImpl" class="com.lxcecho.iocxml.dao.impl.UserDaoImpl">
+	<bean id="userDaoImpl" class="com.lxcecho.ioc.iocxml.dao.impl.UserDaoImpl">
 	</bean>
-	<bean id="personDaoImpl" class="com.lxcecho.iocxml.dao.impl.PersonDaoImpl">
+	<bean id="personDaoImpl" class="com.lxcecho.ioc.iocxml.dao.impl.PersonDaoImpl">
 	</bean>
 </beans>

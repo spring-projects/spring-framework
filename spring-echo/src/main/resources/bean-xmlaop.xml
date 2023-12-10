@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!--开启组件扫描-->
+	<context:component-scan base-package="com.lxcecho.aop.xmlaop"></context:component-scan>
+
+	<!--配置aop五种通知类型-->
+	<aop:config>
+		<!--配置切面类-->
+		<aop:aspect ref="logAspect">
+			<!--配置切入点-->
+			<aop:pointcut id="pointcut" expression="execution(* com.lxcecho.aop.xmlaop.CalculatorImpl.*(..))"/>
+			<!--配置五种通知类型-->
+			<!--前置通知-->
+			<aop:before method="beforeMethod" pointcut-ref="pointcut"></aop:before>
+
+			<!--后置通知-->
+			<aop:after method="afterMethod" pointcut-ref="pointcut"></aop:after>
+
+			<!--返回通知-->
+			<aop:after-returning method="afterReturningMethod" returning="result"
+								 pointcut-ref="pointcut"></aop:after-returning>
+
+			<!--异常通知-->
+			<aop:after-throwing method="afterThrowingMethod" throwing="ex" pointcut-ref="pointcut"></aop:after-throwing>
+
+			<!--环绕通知-->
+			<aop:around method="aroundMethod" pointcut-ref="pointcut"></aop:around>
+		</aop:aspect>
+	</aop:config>
+</beans>

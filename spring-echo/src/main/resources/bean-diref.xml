@@ -9,7 +9,7 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<!--p命名空间注入-->
-	<bean id="studentp" class="com.lxcecho.iocxml.bean.Student"
+	<bean id="studentp" class="com.lxcecho.ioc.iocxml.bean.Student"
 		  p:sid="100" p:sname="mary" p:lessonList-ref="lessonList" p:teacherMap-ref="teacherMap">
 	</bean>
 
@@ -19,7 +19,7 @@
 		3 使用util:类型 定义
 		4 在学生bean引入util:类型定义bean，完成list、map类型属性注入
 	-->
-	<bean id="student" class="com.lxcecho.iocxml.bean.Student">
+	<bean id="student" class="com.lxcecho.ioc.iocxml.bean.Student">
 		<property name="sid" value="10000"></property>
 		<property name="sname" value="lucy"></property>
 		<!--注入list、map类型属性-->
@@ -47,18 +47,18 @@
 		</entry>
 	</util:map>
 
-	<bean id="lessonone" class="com.lxcecho.iocxml.bean.Lesson">
+	<bean id="lessonone" class="com.lxcecho.ioc.iocxml.bean.Lesson">
 		<property name="lessonName" value="java开发"></property>
 	</bean>
-	<bean id="lessontwo" class="com.lxcecho.iocxml.bean.Lesson">
+	<bean id="lessontwo" class="com.lxcecho.ioc.iocxml.bean.Lesson">
 		<property name="lessonName" value="前端开发"></property>
 	</bean>
 
-	<bean id="teacherone" class="com.lxcecho.iocxml.bean.Teacher">
+	<bean id="teacherone" class="com.lxcecho.ioc.iocxml.bean.Teacher">
 		<property name="teacherId" value="100"></property>
 		<property name="teacherName" value="西门讲师"></property>
 	</bean>
-	<bean id="teachertwo" class="com.lxcecho.iocxml.bean.Teacher">
+	<bean id="teachertwo" class="com.lxcecho.ioc.iocxml.bean.Teacher">
 		<property name="teacherId" value="200"></property>
 		<property name="teacherName" value="欧阳讲师"></property>
 	</bean>

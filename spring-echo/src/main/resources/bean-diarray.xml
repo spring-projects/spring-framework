@@ -4,10 +4,10 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<!--数组类型属性-->
-	<bean id="dept" class="com.lxcecho.iocxml.bean.Dept">
+	<bean id="dept" class="com.lxcecho.ioc.iocxml.bean.Dept">
 		<property name="dname" value="技术部"></property>
 	</bean>
-	<bean id="emp" class="com.lxcecho.iocxml.bean.Emp">
+	<bean id="emp" class="com.lxcecho.ioc.iocxml.bean.Emp">
 		<!--普通属性-->
 		<property name="ename" value="lucy"></property>
 		<property name="age" value="20"></property>

@@ -4,5 +4,5 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<!--通过scope属性配置单实例 多实例-->
-	<bean id="orders" class="com.lxcecho.iocxml.bean.Orders" scope="prototype"></bean>
+	<bean id="orders" class="com.lxcecho.ioc.iocxml.bean.Orders" scope="prototype"></bean>
 </beans>

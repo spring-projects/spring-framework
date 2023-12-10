@@ -4,7 +4,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<!--1 set方法注入-->
-	<bean id="book" class="com.lxcecho.iocxml.bean.Book">
+	<bean id="book" class="com.lxcecho.ioc.iocxml.bean.Book">
 		<property name="bname" value="前端开发"></property>
 		<property name="author" value="尚硅谷"></property>
 		<!--        <property name="others">-->
@@ -17,7 +17,7 @@
 	</bean>
 
 	<!--2 构造器注入-->
-	<bean id="bookCon" class="com.lxcecho.iocxml.bean.Book">
+	<bean id="bookCon" class="com.lxcecho.ioc.iocxml.bean.Book">
 		<constructor-arg name="bname" value="java开发"></constructor-arg>
 		<constructor-arg name="author" value="尚硅谷"></constructor-arg>
 	</bean>

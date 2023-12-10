@@ -4,23 +4,23 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!--根据类型自动装配-->
-    <!--<bean id="userController" class="com.lxcecho.iocxml.auto.controller.UserController"
+    <!--<bean id="userController" class="com.lxcecho.aop.auto.controller.UserController"
           autowire="byType">
     </bean>
-    <bean id="userService" class="com.lxcecho.iocxml.auto.service.UserServiceImpl"
+    <bean id="userService" class="com.lxcecho.aop.auto.service.UserServiceImpl"
           autowire="byType">
 
     </bean>
-    <bean id="userDao" class="com.lxcecho.iocxml.auto.dao.UserDaoImpl">
+    <bean id="userDao" class="com.lxcecho.aop.auto.dao.UserDaoImpl">
     </bean>-->
 
     <!--根据名称自动装配-->
-    <bean id="userController" class="com.lxcecho.iocxml.controller.UserController"
+    <bean id="userController" class="com.lxcecho.ioc.iocxml.controller.UserController"
           autowire="byName">
     </bean>
-    <bean id="userService" class="com.lxcecho.iocxml.service.impl.UserServiceImpl"
+    <bean id="userService" class="com.lxcecho.ioc.iocxml.service.impl.UserServiceImpl"
           autowire="byName">
     </bean>
-    <bean id="userDao" class="com.lxcecho.iocxml.dao.impl.UserDaoImpl">
+    <bean id="userDao" class="com.lxcecho.ioc.iocxml.dao.impl.UserDaoImpl">
     </bean>
 </beans>

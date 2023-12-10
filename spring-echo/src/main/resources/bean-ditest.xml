@@ -8,10 +8,10 @@
 		1 创建两个类对象：dept 和 emp
 		2 在emp的bean标签里面，使用property引入dept的bean
 	-->
-	<!--    <bean id="dept" class="com.lxcecho.iocxml.bean.Dept">-->
+	<!--    <bean id="dept" class="com.lxcecho.aop.bean.Dept">-->
 	<!--        <property name="dname" value="安保部"></property>-->
 	<!--    </bean>-->
-	<!--    <bean id="emp" class="com.lxcecho.iocxml.bean.Emp">-->
+	<!--    <bean id="emp" class="com.lxcecho.aop.bean.Emp">-->
 	<!--        &lt;!&ndash;注入对象类型属性-->
 	<!--            private Dept dept;-->
 	<!--        &ndash;&gt;-->
@@ -22,24 +22,24 @@
 	<!--    </bean>-->
 
 	<!--第二种方式 内部bean注入-->
-	<!--    <bean id="emp2" class="com.lxcecho.iocxml.bean.Emp">-->
+	<!--    <bean id="emp2" class="com.lxcecho.aop.bean.Emp">-->
 	<!--        &lt;!&ndash;普通属性注入&ndash;&gt;-->
 	<!--        <property name="ename" value="mary"></property>-->
 	<!--        <property name="age" value="20"></property>-->
 	<!--        &lt;!&ndash;内部bean&ndash;&gt;-->
 	<!--        <property name="dept">-->
-	<!--            <bean id="dept2" class="com.lxcecho.iocxml.bean.Dept">-->
+	<!--            <bean id="dept2" class="com.lxcecho.aop.bean.Dept">-->
 	<!--                <property name="dname" value="财务部"></property>-->
 	<!--            </bean>-->
 	<!--        </property>-->
 	<!--    </bean>-->
 
 	<!--第三种方式 级联赋值-->
-	<bean id="dept3" class="com.lxcecho.iocxml.bean.Dept">
+	<bean id="dept3" class="com.lxcecho.ioc.iocxml.bean.Dept">
 		<property name="dname" value="技术研发部"></property>
 	</bean>
 
-	<bean id="emp3" class="com.lxcecho.iocxml.bean.Emp">
+	<bean id="emp3" class="com.lxcecho.ioc.iocxml.bean.Emp">
 		<property name="ename" value="tom"></property>
 		<property name="age" value="30"></property>
 		<property name="dept" ref="dept3"></property>
