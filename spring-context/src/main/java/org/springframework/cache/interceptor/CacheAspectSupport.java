@@ -616,7 +616,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (CacheOperationContext context : contexts) {
 			CacheEvictOperation operation = (CacheEvictOperation) context.metadata.operation;
 			if (isConditionPassing(context, result)) {
-				Object key = null;
+				Object key = context.getGeneratedKey();
 				for (Cache cache : context.getCaches()) {
 					if (operation.isCacheWide()) {
 						logInvalidating(context, operation, null);
@@ -673,7 +673,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			throw new IllegalArgumentException("""
 					Null key returned for cache operation [%s]. If you are using named parameters, \
 					ensure that the compiler uses the '-parameters' flag."""
-						.formatted(context.metadata.operation));
+					.formatted(context.metadata.operation));
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Computed cache key '" + key + "' for operation " + context.metadata.operation);
@@ -798,6 +798,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		@Nullable
 		private Boolean conditionPassing;
 
+		@Nullable
+		private Object key;
+
 		public CacheOperationContext(CacheOperationMetadata metadata, Object[] args, Object target) {
 			this.metadata = metadata;
 			this.args = extractArgs(metadata.method, args);
@@ -873,9 +876,17 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		protected Object generateKey(@Nullable Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getKey())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.key(this.metadata.operation.getKey(), this.metadata.methodKey, evaluationContext);
+				this.key = evaluator.key(this.metadata.operation.getKey(), this.metadata.methodKey, evaluationContext);
 			}
-			return this.metadata.keyGenerator.generate(this.target, this.metadata.method, this.args);
+			else {
+				this.key = this.metadata.keyGenerator.generate(this.target, this.metadata.method, this.args);
+			}
+			return this.key;
+		}
+
+		@Nullable
+		protected Object getGeneratedKey() {
+			return this.key;
 		}
 
 		private EvaluationContext createEvaluationContext(@Nullable Object result) {
@@ -969,7 +980,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		public void performCachePut(@Nullable Object value) {
 			if (this.context.canPutToCache(value)) {
-				Object key = generateKey(this.context, value);
+				Object key = this.context.getGeneratedKey();
+				if (key == null) {
+					key = generateKey(this.context, value);
+				}
 				if (logger.isTraceEnabled()) {
 					logger.trace("Creating cache entry for key '" + key + "' in cache(s) " +
 							this.context.getCacheNames());

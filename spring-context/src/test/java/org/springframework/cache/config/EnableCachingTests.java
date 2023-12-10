@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package org.springframework.cache.config;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
@@ -137,6 +142,17 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		assertThat(ci.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 		assertThat(ci.getKeyGenerator()).isSameAs(context.getBean("keyGenerator"));
 		context.close();
+	}
+
+	@Test
+	void mutableKey() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(EnableCachingConfig.class, ServiceWithMutableKey.class);
+		ctx.refresh();
+
+		ServiceWithMutableKey service = ctx.getBean(ServiceWithMutableKey.class);
+		String result = service.find(new ArrayList<>(List.of("id")));
+		assertThat(service.find(new ArrayList<>(List.of("id")))).isSameAs(result);
 	}
 
 
@@ -274,6 +290,16 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		@Bean
 		public CacheResolver cacheResolver() {
 			return new NamedCacheResolver(cacheManager(), "foo");
+		}
+	}
+
+
+	static class ServiceWithMutableKey {
+
+		@Cacheable(value = "testCache", keyGenerator = "customKeyGenerator")
+		public String find(Collection<String> id) {
+			id.add("other");
+			return id.toString();
 		}
 	}
 
