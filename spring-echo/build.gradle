@@ -6,9 +6,11 @@ version = '6.0.15-SNAPSHOT'
 dependencies {
     /*当你引入 Spring Context 依赖之后，表示将 Spring 的基础依赖引入了*/
     api(project(":spring-context"))
+
     api(project(":spring-aop"))
     api(project(":spring-aspects"))
 
+    api(project(":spring-jdbc"))
     implementation 'com.alibaba:druid:1.2.15'
     implementation 'mysql:mysql-connector-java:8.0.30'
 

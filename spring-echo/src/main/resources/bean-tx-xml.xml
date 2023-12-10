@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!--开启组件扫描-->
+	<context:component-scan base-package="com.lxcecho.xmltx"></context:component-scan>
+
+	<!--数据源对象-->
+	<!--引入外部属性文件，创建数据源对象-->
+	<context:property-placeholder location="classpath:jdbc.properties"></context:property-placeholder>
+	<bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="username" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+	<!--JdbcTemplate对象-->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="druidDataSource"></property>
+	</bean>
+
+	<!--事务管理器-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="druidDataSource"></property>
+	</bean>
+
+	<!--配置事务增强-->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="update*" read-only="false" propagation="REQUIRED"></tx:method>
+			<tx:method name="buy*" read-only="false" propagation="REQUIRED"></tx:method>
+		</tx:attributes>
+	</tx:advice>
+
+	<!--配置切入点和通知使用的方法-->
+	<aop:config>
+		<aop:pointcut id="pt" expression="execution(* com.lxcecho.xmltx.service.*.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pt"></aop:advisor>
+	</aop:config>
+</beans>
