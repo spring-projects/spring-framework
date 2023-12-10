@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!--
+		1 创建两个对象
+		2 注入普通类型属性
+		3 在学生bean注入map集合类型属性
+	-->
+	<bean id="teacherone" class="com.lxcecho.iocxml.bean.Teacher">
+		<!--注入普通类型属性-->
+		<property name="teacherId" value="100"></property>
+		<property name="teacherName" value="西门讲师"></property>
+	</bean>
+	<bean id="teachertwo" class="com.lxcecho.iocxml.bean.Teacher">
+		<!--注入普通类型属性-->
+		<property name="teacherId" value="200"></property>
+		<property name="teacherName" value="上官讲师"></property>
+	</bean>
+
+	<bean id="student" class="com.lxcecho.iocxml.bean.Student">
+		<!--注入普通类型属性-->
+		<property name="sid" value="2000"></property>
+		<property name="sname" value="张三"></property>
+		<!--在学生bean注入map集合类型属性-->
+		<property name="teacherMap">
+			<map>
+				<entry>
+					<key>
+						<value>10010</value>
+					</key>
+					<ref bean="teacherone"></ref>
+				</entry>
+				<entry>
+					<key>
+						<value>10086</value>
+					</key>
+					<ref bean="teachertwo"></ref>
+				</entry>
+			</map>
+		</property>
+	</bean>
+</beans>

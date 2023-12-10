@@ -67,3 +67,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'spring-echo'
+

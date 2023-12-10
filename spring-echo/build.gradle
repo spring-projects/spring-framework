@@ -1,0 +1,31 @@
+description "Spring Echo Sample"
+
+group = 'com.lxcecho'
+version = '6.0.15-SNAPSHOT'
+
+dependencies {
+    /*当你引入 Spring Context 依赖之后，表示将 Spring 的基础依赖引入了*/
+    api(project(":spring-context"))
+    api(project(":spring-aop"))
+    api(project(":spring-aspects"))
+
+    implementation 'com.alibaba:druid:1.2.15'
+    implementation 'mysql:mysql-connector-java:8.0.30'
+
+    optional("org.apache.logging.log4j:log4j-api")
+    optional("org.slf4j:slf4j-api")
+    optional("org.apache.logging.log4j:log4j-core")
+    optional("org.apache.logging.log4j:log4j-jul")
+    optional("org.apache.logging.log4j:log4j-slf4j2-impl")
+
+    optional("jakarta.servlet:jakarta.servlet-api")
+
+    api(project(":spring-test"))
+
+    testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+    testFixturesApi("org.junit.jupiter:junit-jupiter-params")
+}
+
+//test {
+//    useJUnitPlatform()
+//}

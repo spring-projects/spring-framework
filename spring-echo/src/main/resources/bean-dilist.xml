@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="empone" class="com.lxcecho.iocxml.bean.Emp">
+		<property name="ename" value="lucy"></property>
+		<property name="age" value="20"></property>
+	</bean>
+	<bean id="emptwo" class="com.lxcecho.iocxml.bean.Emp">
+		<property name="ename" value="mary"></property>
+		<property name="age" value="30"></property>
+	</bean>
+
+	<bean id="dept" class="com.lxcecho.iocxml.bean.Dept">
+		<property name="dname" value="技术部"></property>
+		<property name="empList">
+			<list>
+				<ref bean="empone"></ref>
+				<ref bean="emptwo"></ref>
+			</list>
+		</property>
+	</bean>
+</beans>

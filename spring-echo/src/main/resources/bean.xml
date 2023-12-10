@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!--完成user对象创建
+		bean标签
+			id属性：唯一标识
+			class属性：要创建对象所在类的全路径（包名称+类名称）
+	-->
+	<!--1 获取bean演示，user对象创建-->
+	<bean id="user" class="com.lxcecho.iocxml.bean.User"></bean>
+
+	<bean id="user1" class="com.lxcecho.iocxml.bean.User"></bean>
+
+	<!--2 一个接口实现类获取过程-->
+	<bean id="userDaoImpl" class="com.lxcecho.iocxml.dao.impl.UserDaoImpl">
+	</bean>
+	<bean id="personDaoImpl" class="com.lxcecho.iocxml.dao.impl.PersonDaoImpl">
+	</bean>
+</beans>
