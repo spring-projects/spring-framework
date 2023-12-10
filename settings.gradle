@@ -68,4 +68,4 @@ settings.gradle.projectsLoaded {
 	}
 }
 include 'spring-echo'
-
+include 'spring-lxcecho'
