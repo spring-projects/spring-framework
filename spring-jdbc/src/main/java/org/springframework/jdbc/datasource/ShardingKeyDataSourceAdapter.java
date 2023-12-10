@@ -28,10 +28,10 @@ import org.springframework.lang.Nullable;
 /**
  * An adapter for a target {@link DataSource}, designed to apply sharding keys, if specified,
  * to every standard {@code #getConnection} call, returning a direct connection to the shard
- * corresponding to the specified sharding key value. All other methods are simply delegated
- * to the corresponding methods of the target DataSource.
+ * corresponding to the specified sharding key value. All other methods simply delegate
+ * to the corresponding methods of the target {@code DataSource}.
  *
- * <p>The target {@link DataSource} must implement the {@link #createConnectionBuilder} method;
+ * <p>The target {@code DataSource} must implement the {@link #createConnectionBuilder} method;
  * otherwise, a {@link java.sql.SQLFeatureNotSupportedException} will be thrown when attempting
  * to acquire shard connections.
  *
@@ -40,7 +40,7 @@ import org.springframework.lang.Nullable;
  *
  * <pre class="code">
  * ShardingKeyDataSourceAdapter dataSourceAdapter = new ShardingKeyDataSourceAdapter(dataSource);
- * dataSourceAdapter.setShardingKeyProvider(() -> dataSource.createShardingKeyBuilder()
+ * dataSourceAdapter.setShardingKeyProvider(() -&gt; dataSource.createShardingKeyBuilder()
  *     .subkey(SecurityContextHolder.getContext().getAuthentication().getName(), JDBCType.VARCHAR).build());
  * </pre>
  *
@@ -58,17 +58,20 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 
 
 	/**
-	 * Create a new instance of ShardingKeyDataSourceAdapter, wrapping the given {@link DataSource}.
-	 * @param dataSource the target DataSource to be wrapped
+	 * Create a new instance of {@code ShardingKeyDataSourceAdapter}, wrapping the
+	 * given {@link DataSource}.
+	 * @param dataSource the target {@code DataSource} to be wrapped
 	 */
 	public ShardingKeyDataSourceAdapter(DataSource dataSource) {
 		super(dataSource);
 	}
 
 	/**
-	 * Create a new instance of ShardingKeyDataSourceAdapter, wrapping the given {@link DataSource}.
-	 * @param dataSource the target DataSource to be wrapped
-	 * @param shardingKeyProvider the ShardingKeyProvider used to get the sharding keys
+	 * Create a new instance of {@code ShardingKeyDataSourceAdapter}, wrapping the
+	 * given {@link DataSource}.
+	 * @param dataSource the target {@code DataSource} to be wrapped
+	 * @param shardingKeyProvider the {@code ShardingKeyProvider} used to get the
+	 * sharding keys
 	 */
 	public ShardingKeyDataSourceAdapter(DataSource dataSource, ShardingKeyProvider shardingKeyProvider) {
 		super(dataSource);
@@ -87,8 +90,9 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 	/**
 	 * Obtain a connection to the database shard using the provided sharding key
 	 * and super sharding key (if available).
-	 * <p>The sharding key is obtained from the {@link ShardingKeyProvider}.
-	 * @return a Connection object representing a direct shard connection
+	 * <p>The sharding key is obtained from the configured
+	 * {@link #setShardingKeyProvider ShardingKeyProvider}.
+	 * @return a {@code Connection} object representing a direct shard connection
 	 * @throws SQLException if an error occurs while creating the connection
 	 * @see #createConnectionBuilder()
 	 */
@@ -100,11 +104,12 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 	/**
 	 * Obtain a connection to the database shard using the provided username and password,
 	 * considering the sharding keys (if available) and the given credentials.
-	 * <p>The sharding key is obtained from the {@link ShardingKeyProvider}.
+	 * <p>The sharding key is obtained from the configured
+	 * {@link #setShardingKeyProvider ShardingKeyProvider}.
 	 * @param username the database user on whose behalf the connection is being made
 	 * @param password the user's password
-	 * @return a Connection object representing a direct shard connection.
-	 * @throws SQLException if an error occurs while creating the connection.
+	 * @return a {@code Connection} object representing a direct shard connection
+	 * @throws SQLException if an error occurs while creating the connection
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
@@ -112,9 +117,9 @@ public class ShardingKeyDataSourceAdapter extends DelegatingDataSource {
 	}
 
 	/**
-	 * Create a new instance of {@link ConnectionBuilder} using the target DataSource's
-	 * {@code createConnectionBuilder()} method, and sets the appropriate sharding keys
-	 * from the {@link ShardingKeyProvider}.
+	 * Create a new instance of {@link ConnectionBuilder} using the target {@code DataSource}'s
+	 * {@code createConnectionBuilder()} method and set the appropriate sharding keys
+	 * from the configured {@link #setShardingKeyProvider ShardingKeyProvider}.
 	 * @return a ConnectionBuilder object representing a builder for direct shard connections
 	 * @throws SQLException if an error occurs while creating the ConnectionBuilder
 	 */
