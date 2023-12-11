@@ -603,37 +603,51 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 					resizing = true;
 				}
 
-				// Either create a new table or reuse the existing one
-				Reference<K, V>[] restructured =
-						(resizing ? createReferenceArray(restructureSize) : this.references);
-
-				// Restructure
 				int newCount = 0;
-				for (int i = 0; i < this.references.length; i++) {
-					ref = this.references[i];
-					if (!resizing) {
-						restructured[i] = null;
-					}
-					while (ref != null) {
-						if (!toPurge.contains(ref)) {
-							Entry<K, V> entry = ref.get();
-							// Also filter out null references that are now null
-							// they should be polled the queue in a later restructure call.
-							if (entry != null) {
-								int index = getIndex(ref.getHash(), restructured);
-								restructured[index] = this.referenceManager.createReference(
-										entry, ref.getHash(), restructured[index]);
-								newCount++;
-							}
-						}
-						ref = ref.getNext();
-					}
-				}
-
-				// Replace volatile members
+				// Restructure the resized reference array
 				if (resizing) {
+					Reference<K, V>[] restructured = createReferenceArray(restructureSize);
+					for (int i = 0; i < this.references.length; i++) {
+						ref = this.references[i];
+						while (ref != null) {
+							if (!toPurge.contains(ref)) {
+								Entry<K, V> entry = ref.get();
+								// Also filter out null references that are now null
+								// they should be polled from the queue in a later restructure call.
+								if (entry != null) {
+									int index = getIndex(ref.getHash(), restructured);
+									restructured[index] = this.referenceManager.createReference(
+											entry, ref.getHash(), restructured[index]);
+									newCount++;
+								}
+							}
+							ref = ref.getNext();
+						}
+					}
+					// Replace volatile members
 					this.references = restructured;
 					this.resizeThreshold = (int) (this.references.length * getLoadFactor());
+				}
+				// Restructure the existing reference array "in place"
+				else {
+					for (int i = 0; i < this.references.length; i++) {
+						Reference<K, V> purgedRef = null;
+						ref = this.references[i];
+						while (ref != null) {
+							if (!toPurge.contains(ref)) {
+								Entry<K, V> entry = ref.get();
+								// Also filter out null references that are now null
+								// they should be polled from the queue in a later restructure call.
+								if (entry != null) {
+									purgedRef = this.referenceManager.createReference(
+											entry, ref.getHash(), purgedRef);
+								}
+								newCount++;
+							}
+							ref = ref.getNext();
+						}
+						this.references[i] = purgedRef;
+					}
 				}
 				this.count.set(Math.max(newCount, 0));
 			}
