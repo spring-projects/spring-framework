@@ -16,13 +16,13 @@ public class CarTest {
 	@Test
 	public void test01() throws Exception {
 		//1 类名.class
-		Class clazz1 = Car.class;
+		Class<?> clazz1 = Car.class;
 
 		//2 对象.getClass()
-		Class clazz2 = new Car().getClass();
+		Class<?> clazz2 = new Car().getClass();
 
 		//3 Class.forName("全路径")
-		Class clazz3 = Class.forName("com.atguigu.reflect.Car");
+		Class<?> clazz3 = Class.forName("com.lxcecho.reflect.Car");
 
 		int length = clazz1.getInterfaces().length;
 		System.out.println(length);
@@ -34,7 +34,7 @@ public class CarTest {
 	//2、获取构造方法
 	@Test
 	public void test02() throws Exception {
-		Class clazz = Car.class;
+		Class<?> clazz = Car.class;
 		//获取所有构造
 		// getConstructors()获取所有public的构造方法
 //        Constructor[] constructors = clazz.getConstructors();
@@ -60,7 +60,7 @@ public class CarTest {
 	//3、获取属性
 	@Test
 	public void test03() throws Exception {
-		Class clazz = Car.class;
+		Class<?> clazz = Car.class;
 		Car car = (Car) clazz.getDeclaredConstructor().newInstance();
 		//获取所有public属性
 		//Field[] fields = clazz.getFields();
@@ -82,7 +82,7 @@ public class CarTest {
 	@Test
 	public void test04() throws Exception {
 		Car car = new Car("奔驰", 10, "黑色");
-		Class clazz = car.getClass();
+		Class<?> clazz = car.getClass();
 		//1 public方法
 		Method[] methods = clazz.getMethods();
 		for (Method m1 : methods) {

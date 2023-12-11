@@ -80,7 +80,7 @@ public class JdbcTemplateTest {
         /*
         //2 修改操作
         String sql = "update t_emp set name=? where id=?";
-        int rows = jdbcTemplate.update(sql,"林平之atguigu",3);
+        int rows = jdbcTemplate.update(sql,"林平之lxcecho",3);
         System.out.println(rows);
          */
 
