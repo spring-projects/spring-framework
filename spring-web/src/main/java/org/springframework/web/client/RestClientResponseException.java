@@ -27,6 +27,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Common base class for exceptions that contain actual HTTP response data.
@@ -88,9 +90,25 @@ public class RestClientResponseException extends RestClientException {
 		super(message);
 		this.statusCode = statusCode;
 		this.statusText = statusText;
-		this.responseHeaders = headers;
+		this.responseHeaders = copyHeaders(headers);
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = (responseCharset != null ? responseCharset.name() : null);
+	}
+
+	/**
+	 * Copies the given headers, because the backing map might not be
+	 * serializable.
+	 */
+	@Nullable
+	private static HttpHeaders copyHeaders(@Nullable HttpHeaders headers) {
+		if (headers != null) {
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(headers.size());
+			headers.forEach((name, values) -> values.forEach(value -> result.add(name, value)));
+			return HttpHeaders.readOnlyHttpHeaders(result);
+		}
+		else {
+			return null;
+		}
 	}
 
 
