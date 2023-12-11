@@ -25,6 +25,7 @@ dependencies {
 
     api(project(":spring-test"))
 
+    api("junit:junit:4.13.2")
     testFixturesApi("org.junit.jupiter:junit-jupiter-api")
     testFixturesApi("org.junit.jupiter:junit-jupiter-params")
 }
