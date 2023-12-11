@@ -645,8 +645,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * active flag as well as performing any initialization of property sources.
 	 */
 	protected void prepareRefresh() {
-		// Switch to active.
 		this.startupDate = System.currentTimeMillis();
+
+		// Remove shutdown hook during refresh phase.
+		removeShutdownHook();
+
+		// Switch to active.
 		this.closed.set(false);
 		this.active.set(true);
 
@@ -966,6 +970,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
+
+		// Restore shutdown hook if registered before.
+		restoreShutdownHook();
 	}
 
 	/**
@@ -1024,6 +1031,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 	}
 
+	private void removeShutdownHook() {
+		if (this.shutdownHook != null) {
+			try {
+				Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+			}
+			catch (IllegalStateException ex) {
+				// ignore - VM is already shutting down
+			}
+		}
+	}
+
+	private void restoreShutdownHook() {
+		if (this.shutdownHook != null) {
+			try {
+				Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+			}
+			catch (IllegalStateException | IllegalArgumentException ex) {
+				// ignore - VM is already shutting down or hook already registered
+			}
+		}
+	}
+
 	/**
 	 * Close this application context, destroying all beans in its bean factory.
 	 * <p>Delegates to {@code doClose()} for the actual closing procedure.
@@ -1034,17 +1063,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void close() {
 		synchronized (this.startupShutdownMonitor) {
-			doClose();
 			// If we registered a JVM shutdown hook, we don't need it anymore now:
-			// We've already explicitly closed the context.
-			if (this.shutdownHook != null) {
-				try {
-					Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-				}
-				catch (IllegalStateException ex) {
-					// ignore - VM is already shutting down
-				}
-			}
+			// We're already explicitly closing the context.
+			removeShutdownHook();
+
+			doClose();
 		}
 	}
 
