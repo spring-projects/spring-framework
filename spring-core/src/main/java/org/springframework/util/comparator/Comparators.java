@@ -39,7 +39,7 @@ public abstract class Comparators {
 	/**
 	 * Return a {@link Comparable} adapter which accepts
 	 * null values and sorts them lower than non-null values.
-	 * @see Comparator#nullsLast(Comparator)
+	 * @see Comparator#nullsFirst(Comparator)
 	 */
 	public static <T> Comparator<T> nullsLow() {
 		return nullsLow(comparable());
@@ -48,16 +48,16 @@ public abstract class Comparators {
 	/**
 	 * Return a decorator for the given comparator which accepts
 	 * null values and sorts them lower than non-null values.
-	 * @see Comparator#nullsLast(Comparator)
+	 * @see Comparator#nullsFirst(Comparator)
 	 */
 	public static <T> Comparator<T> nullsLow(Comparator<T> comparator) {
-		return Comparator.nullsLast(comparator);
+		return Comparator.nullsFirst(comparator);
 	}
 
 	/**
 	 * Return a {@link Comparable} adapter which accepts
 	 * null values and sorts them higher than non-null values.
-	 * @see Comparator#nullsFirst(Comparator)
+	 * @see Comparator#nullsLast(Comparator)
 	 */
 	public static <T> Comparator<T> nullsHigh() {
 		return nullsHigh(comparable());
@@ -66,10 +66,10 @@ public abstract class Comparators {
 	/**
 	 * Return a decorator for the given comparator which accepts
 	 * null values and sorts them higher than non-null values.
-	 * @see Comparator#nullsFirst(Comparator)
+	 * @see Comparator#nullsLast(Comparator)
 	 */
 	public static <T> Comparator<T> nullsHigh(Comparator<T> comparator) {
-		return Comparator.nullsFirst(comparator);
+		return Comparator.nullsLast(comparator);
 	}
 
 }
