@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.RouterFunctions.nest
+import org.springframework.web.server.CoWebFilter
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.CoroutineContext
@@ -731,7 +732,8 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	) : HandlerFunction<T> {
 
 		override fun handle(request: ServerRequest): Mono<T> {
-			return handle(Dispatchers.Unconfined, request)
+			val context = request.attributes()[CoWebFilter.COROUTINE_CONTEXT_ATTRIBUTE] as CoroutineContext?
+			return handle(context ?: Dispatchers.Unconfined, request)
 		}
 
 		fun handle(context: CoroutineContext, request: ServerRequest) = asMono(request, context) {

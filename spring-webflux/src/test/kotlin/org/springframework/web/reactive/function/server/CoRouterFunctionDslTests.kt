@@ -25,7 +25,11 @@ import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpMethod.PATCH
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
+import org.springframework.web.server.CoWebFilter
+import org.springframework.web.server.CoWebFilterChain
+import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse
 import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.test.StepVerifier
 
@@ -205,6 +209,16 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
+	fun webFilterAndContext() {
+		val strategies = HandlerStrategies.builder().webFilter(MyCoWebFilterWithContext()).build()
+		val httpHandler = RouterFunctions.toHttpHandler(routerWithoutContext, strategies)
+		val mockRequest = get("https://example.com/").build()
+		val mockResponse = MockServerHttpResponse()
+		StepVerifier.create(httpHandler.handle(mockRequest, mockResponse)).verifyComplete()
+		assertThat(mockResponse.headers.getFirst("context")).contains("Filter context")
+	}
+
+	@Test
 	fun multipleContextProviders() {
 		assertThatIllegalStateException().isThrownBy {
 			coRouter {
@@ -309,6 +323,12 @@ class CoRouterFunctionDslTests {
 		}
 	}
 
+	private val routerWithoutContext = coRouter {
+		GET("/") {
+			ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+		}
+	}
+
 	private val otherRouter = router {
 		"/other" {
 			ok().build()
@@ -369,3 +389,12 @@ class CoRouterFunctionDslTests {
 
 @Suppress("UNUSED_PARAMETER")
 private suspend fun handle(req: ServerRequest) = ServerResponse.ok().buildAndAwait()
+
+
+private class MyCoWebFilterWithContext : CoWebFilter() {
+	override suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain) {
+		withContext(CoroutineName("Filter context")) {
+			chain.filter(exchange)
+		}
+	}
+}
