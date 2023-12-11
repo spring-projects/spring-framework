@@ -38,8 +38,8 @@ abstract class CoroutinesUtils {
 
 	@Nullable
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	static Object awaitSingleOrNull(Object value, Object continuation) {
-		return MonoKt.awaitSingleOrNull(value instanceof Mono mono ? mono : Mono.just(value),
+	static Object awaitSingleOrNull(@Nullable Object value, Object continuation) {
+		return MonoKt.awaitSingleOrNull(value instanceof Mono mono ? mono : Mono.justOrEmpty(value),
 				(Continuation<Object>) continuation);
 	}
 
