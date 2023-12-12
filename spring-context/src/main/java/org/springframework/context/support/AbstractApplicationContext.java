@@ -27,6 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -203,8 +205,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Flag that indicates whether this context has been closed already. */
 	private final AtomicBoolean closed = new AtomicBoolean();
 
-	/** Synchronization monitor for the "refresh" and "destroy". */
-	private final Object startupShutdownMonitor = new Object();
+	/** Synchronization lock for the "refresh" and "destroy". */
+	private final Lock startupShutdownLock = new ReentrantLock();
 
 	/** Reference to the JVM shutdown hook, if registered. */
 	@Nullable
@@ -576,7 +578,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
-		synchronized (this.startupShutdownMonitor) {
+		this.startupShutdownLock.lock();
+		try {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
 			// Prepare this context for refreshing.
@@ -624,6 +627,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					logger.warn("Exception encountered during context initialization - " +
 							"cancelling refresh attempt: " + ex);
 				}
+
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
 
@@ -638,6 +642,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				contextRefresh.end();
 			}
 		}
+		finally {
+			this.startupShutdownLock.unlock();
+		}
 	}
 
 	/**
@@ -645,12 +652,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * active flag as well as performing any initialization of property sources.
 	 */
 	protected void prepareRefresh() {
-		this.startupDate = System.currentTimeMillis();
-
-		// Remove shutdown hook during refresh phase.
-		removeShutdownHook();
-
 		// Switch to active.
+		this.startupDate = System.currentTimeMillis();
 		this.closed.set(false);
 		this.active.set(true);
 
@@ -970,9 +973,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
-
-		// Restore shutdown hook if registered before.
-		restoreShutdownHook();
 	}
 
 	/**
@@ -1022,34 +1022,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.shutdownHook = new Thread(SHUTDOWN_HOOK_THREAD_NAME) {
 				@Override
 				public void run() {
-					synchronized (startupShutdownMonitor) {
-						doClose();
+					if (startupShutdownLock.tryLock()) {
+						try {
+							doClose();
+						}
+						finally {
+							startupShutdownLock.unlock();
+						}
 					}
 				}
 			};
 			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
-		}
-	}
-
-	private void removeShutdownHook() {
-		if (this.shutdownHook != null) {
-			try {
-				Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-			}
-			catch (IllegalStateException ex) {
-				// ignore - VM is already shutting down
-			}
-		}
-	}
-
-	private void restoreShutdownHook() {
-		if (this.shutdownHook != null) {
-			try {
-				Runtime.getRuntime().addShutdownHook(this.shutdownHook);
-			}
-			catch (IllegalStateException | IllegalArgumentException ex) {
-				// ignore - VM is already shutting down or hook already registered
-			}
 		}
 	}
 
@@ -1062,12 +1045,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Override
 	public void close() {
-		synchronized (this.startupShutdownMonitor) {
-			// If we registered a JVM shutdown hook, we don't need it anymore now:
-			// We're already explicitly closing the context.
-			removeShutdownHook();
-
-			doClose();
+		if (this.startupShutdownLock.tryLock()) {
+			try {
+				doClose();
+				// If we registered a JVM shutdown hook, we don't need it anymore now:
+				// We've already explicitly closed the context.
+				if (this.shutdownHook != null) {
+					try {
+						Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+					}
+					catch (IllegalStateException ex) {
+						// ignore - VM is already shutting down
+					}
+				}
+			}
+			finally {
+				this.startupShutdownLock.unlock();
+			}
 		}
 	}
 
