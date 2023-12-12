@@ -166,6 +166,10 @@ class BeanDefinitionPropertiesCodeGenerator {
 		Method method = ReflectionUtils.findMethod(methodDeclaringClass, methodName);
 		if (method != null) {
 			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
+			Method interfaceMethod = ClassUtils.getInterfaceMethodIfPossible(method, beanUserClass);
+			if (!interfaceMethod.equals(method)) {
+				this.hints.reflection().registerMethod(interfaceMethod, ExecutableMode.INVOKE);
+			}
 		}
 	}
 

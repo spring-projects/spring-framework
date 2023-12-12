@@ -458,6 +458,15 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		}
 
 		@Test
+		void singleInitMethodFromInterface() {
+			beanDefinition.setTargetType(InitializableTestBean.class);
+			beanDefinition.setInitMethodName("initialize");
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("initialize"));
+			assertHasMethodInvokeHints(InitializableTestBean.class, "initialize");
+			assertHasMethodInvokeHints(Initializable.class, "initialize");
+		}
+
+		@Test
 		void privateInitMethod() {
 			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setInitMethodName(privateInitMethod);
@@ -486,6 +495,16 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			beanDefinition.setDestroyMethodName("destroy");
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy"));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy");
+			assertReflectionOnPublisher();
+		}
+
+		@Test
+		void singleDestroyMethodFromInterface() {
+			beanDefinition.setTargetType(DisposableTestBean.class);
+			beanDefinition.setDestroyMethodName("dispose");
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("dispose"));
+			assertHasMethodInvokeHints(DisposableTestBean.class, "dispose");
+			assertHasMethodInvokeHints(Disposable.class, "dispose");
 			assertReflectionOnPublisher();
 		}
 
@@ -568,6 +587,31 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		@SuppressWarnings("unused")
 		private void privateDestroy() {
+		}
+
+	}
+
+	interface Initializable {
+
+		void initialize();
+	}
+
+	static class InitializableTestBean implements Initializable {
+
+		@Override
+		public void initialize() {
+		}
+	}
+
+	interface Disposable {
+
+		void dispose();
+	}
+
+	static class DisposableTestBean implements Disposable {
+
+		@Override
+		public void dispose() {
 		}
 
 	}
