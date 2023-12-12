@@ -354,6 +354,15 @@ class AnnotationsScannerTests {
 		Method source = methodFrom(WithSingleInterface.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2");
+
+		source = methodFrom(Hello1Impl.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly("1:TestAnnotation1");
+	}
+
+	@Test  // gh-31803
+	void typeHierarchyStrategyOnMethodWhenHasInterfaceHierarchyScansInterfacesOnlyOnce() {
+		Method source = methodFrom(Hello2Impl.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly("1:TestAnnotation1");
 	}
 
 	@Test
@@ -662,6 +671,30 @@ class AnnotationsScannerTests {
 		public void method() {
 		}
 	}
+
+	interface Hello1 {
+
+		@TestAnnotation1
+		void method();
+	}
+
+	interface Hello2 extends Hello1 {
+	}
+
+	static class Hello1Impl implements Hello1 {
+
+		@Override
+		public void method() {
+		}
+	}
+
+	static class Hello2Impl implements Hello2 {
+
+		@Override
+		public void method() {
+		}
+	}
+
 
 	@TestAnnotation2
 	@TestInheritedAnnotation2

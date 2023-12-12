@@ -42,6 +42,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationsScannerTests.Hello2Impl;
+import org.springframework.core.annotation.AnnotationsScannerTests.TestAnnotation1;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
@@ -554,6 +556,15 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(method,SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
 		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+	}
+
+	@Test  // gh-31803
+	void streamWithTypeHierarchyInheritedFromSuperInterfaceMethod() throws Exception {
+		Method method = Hello2Impl.class.getMethod("method");
+		long count = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
+				.stream(TestAnnotation1.class)
+				.count();
+		assertThat(count).isEqualTo(1);
 	}
 
 	@Test
