@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,11 +336,10 @@ abstract class AnnotationsScanner {
 
 		Method[] methods = baseTypeMethodsCache.get(baseType);
 		if (methods == null) {
-			boolean isInterface = baseType.isInterface();
-			methods = isInterface ? baseType.getMethods() : ReflectionUtils.getDeclaredMethods(baseType);
+			methods = ReflectionUtils.getDeclaredMethods(baseType);
 			int cleared = 0;
 			for (int i = 0; i < methods.length; i++) {
-				if ((!isInterface && Modifier.isPrivate(methods[i].getModifiers())) ||
+				if (Modifier.isPrivate(methods[i].getModifiers()) ||
 						hasPlainJavaAnnotationsOnly(methods[i]) ||
 						getDeclaredAnnotations(methods[i], false).length == 0) {
 					methods[i] = null;
