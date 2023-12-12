@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.springframework.core.MethodParameter;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.lang.Nullable;
@@ -92,8 +91,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	@Override
 	protected boolean shouldConstructArgument(MethodParameter param) {
 		Class<?> type = param.nestedIfOptional().getNestedParameterType();
-		return (super.shouldConstructArgument(param) &&
-				!MultipartFile.class.isAssignableFrom(type) && !Part.class.isAssignableFrom(type));
+		return (super.shouldConstructArgument(param) && !Part.class.isAssignableFrom(type));
 	}
 
 	/**

@@ -35,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
@@ -59,7 +60,7 @@ public class WebExchangeDataBinderTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	public void setup() {
 		this.testBean = new TestBean();
 		this.binder = new WebExchangeDataBinder(this.testBean, "person");
 		this.binder.registerCustomEditor(ITestBean.class, new TestBeanPropertyEditor());
@@ -67,7 +68,7 @@ public class WebExchangeDataBinderTests {
 
 
 	@Test
-	public void testBindingWithNestedObjectCreation() throws Exception {
+	public void testBindingWithNestedObjectCreation() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("spouse", "someValue");
 		formData.add("spouse.name", "test");
@@ -78,7 +79,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldPrefixCausesFieldReset() throws Exception {
+	public void testFieldPrefixCausesFieldReset() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("_postProcessed", "visible");
 		formData.add("postProcessed", "on");
@@ -91,7 +92,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() throws Exception {
+	public void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() {
 		this.binder.setIgnoreUnknownFields(false);
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -115,7 +116,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldDefault() throws Exception {
+	public void testFieldDefault() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!postProcessed", "off");
 		formData.add("postProcessed", "on");
@@ -128,7 +129,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldDefaultPreemptsFieldMarker() throws Exception {
+	public void testFieldDefaultPreemptsFieldMarker() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!postProcessed", "on");
 		formData.add("_postProcessed", "visible");
@@ -146,7 +147,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldDefaultNonBoolean() throws Exception {
+	public void testFieldDefaultNonBoolean() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!name", "anonymous");
 		formData.add("name", "Scott");
@@ -159,7 +160,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testWithCommaSeparatedStringArray() throws Exception {
+	public void testWithCommaSeparatedStringArray() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("stringArray", "bar");
 		formData.add("stringArray", "abc");
@@ -174,7 +175,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testBindingWithNestedObjectCreationAndWrongOrder() throws Exception {
+	public void testBindingWithNestedObjectCreationAndWrongOrder() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("spouse.name", "test");
 		formData.add("spouse", "someValue");
@@ -185,7 +186,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testBindingWithQueryParams() throws Exception {
+	public void testBindingWithQueryParams() {
 		String url = "/path?spouse=someValue&spouse.name=test";
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(url));
 		this.binder.bind(exchange).block(Duration.ofSeconds(5));
@@ -195,7 +196,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testMultipart() throws Exception {
+	public void testMultipart() {
 
 		MultipartBean bean = new MultipartBean();
 		WebExchangeDataBinder binder = new WebExchangeDataBinder(bean);
@@ -221,17 +222,17 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testConstructorMultipart() throws Exception {
+	public void testMultipartDataClass() {
 		WebExchangeDataBinder binder = new WebExchangeDataBinder(null);
-		binder.setTargetType(ResolvableType.forClass(ConstructorMultipartBean.class));
+		binder.setTargetType(ResolvableType.forClass(MultipartDataClass.class));
 
 		MultiValueMap<String, Object> data = new LinkedMultiValueMap<>();
 		data.add("part", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
 		binder.construct(exchangeMultipart(data)).block(Duration.ofMillis(5000));
-		ConstructorMultipartBean bean = (ConstructorMultipartBean) binder.getTarget();
 
+		MultipartDataClass bean = (MultipartDataClass) binder.getTarget();
 		assertThat(bean.getPart().filename()).isEqualTo("foo.txt");
-		assertThat(bean.getNullableFilePart()).isNull();
+		assertThat(bean.getNullablePart()).isNull(); // gh-31778
 	}
 
 
@@ -257,10 +258,11 @@ public class WebExchangeDataBinderTests {
 		new MultipartHttpMessageWriter().write(Mono.just(multipartData), forClass(MultiValueMap.class),
 				MediaType.MULTIPART_FORM_DATA, request, Collections.emptyMap()).block();
 
-		return MockServerWebExchange.from(MockServerHttpRequest
-				.post("/")
+		MockServerHttpRequest serverRequest = MockServerHttpRequest.post("/")
 				.contentType(request.getHeaders().getContentType())
-				.body(request.getBody()));
+				.body(request.getBody());
+
+		return MockServerWebExchange.from(serverRequest);
 	}
 
 
@@ -327,24 +329,26 @@ public class WebExchangeDataBinderTests {
 		}
 	}
 
-	private static class ConstructorMultipartBean {
-		private final FilePart part;
-		private final FilePart nullableFilePart;
 
-		public ConstructorMultipartBean(
-				FilePart part,
-				FilePart nullableFilePart
-		) {
+	private static class MultipartDataClass {
+
+		private final FilePart part;
+
+		@Nullable
+		private final FilePart nullablePart;
+
+		MultipartDataClass(FilePart part, @Nullable FilePart nullablePart) {
 			this.part = part;
-			this.nullableFilePart = nullableFilePart;
+			this.nullablePart = nullablePart;
 		}
 
 		public FilePart getPart() {
 			return part;
 		}
 
-		public FilePart getNullableFilePart() {
-			return nullableFilePart;
+		@Nullable
+		public FilePart getNullablePart() {
+			return nullablePart;
 		}
 	}
 }
