@@ -705,6 +705,11 @@ public interface RestClient {
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>By default, if there are no matching status handlers, responses with
 		 * status codes &gt;= 400 wil throw a {@link RestClientResponseException}.
+		 * <p>Note that {@link IOException IOExceptions},
+		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
+		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
+		 * thrown from {@code errorHandler} will be wrapped in a
+		 * {@link RestClientException}.
 		 * @param statusPredicate to match responses with
 		 * @param errorHandler handler that typically, though not necessarily,
 		 * throws an exception
@@ -717,6 +722,11 @@ public interface RestClient {
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>By default, if there are no matching status handlers, responses with
 		 * status codes &gt;= 400 wil throw a {@link RestClientResponseException}.
+		 * <p>Note that {@link IOException IOExceptions},
+		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
+		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
+		 * thrown from {@code errorHandler} will be wrapped in a
+		 * {@link RestClientException}.
 		 * @param errorHandler the error handler
 		 * @return this builder
 		 */

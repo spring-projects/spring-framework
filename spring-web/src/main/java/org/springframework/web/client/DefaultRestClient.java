@@ -220,8 +220,15 @@ final class DefaultRestClient implements RestClient {
 					responseWrapper.getHeaders(), RestClientUtils.getBody(responseWrapper));
 		}
 		catch (UncheckedIOException | IOException | HttpMessageNotReadableException ex) {
+			Throwable cause;
+			if (ex instanceof UncheckedIOException uncheckedIOException) {
+				cause = uncheckedIOException.getCause();
+			}
+			else {
+				cause = ex;
+			}
 			throw new RestClientException("Error while extracting response for type [" +
-					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", ex);
+					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", cause);
 		}
 	}
 

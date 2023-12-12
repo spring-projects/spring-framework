@@ -593,6 +593,27 @@ class RestClientIntegrationTests {
 	}
 
 	@ParameterizedRestClientTest
+	void statusHandlerIOException(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				this.restClient.get()
+						.uri("/greeting")
+						.retrieve()
+						.onStatus(HttpStatusCode::is5xxServerError, (request, response) -> {
+							throw new IOException("500 error!");
+						})
+						.body(String.class)
+		).withCauseInstanceOf(IOException.class);
+
+		expectRequestCount(1);
+		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
+	}
+
+	@ParameterizedRestClientTest
 	void statusHandlerParameterizedTypeReference(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
