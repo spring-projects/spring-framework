@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -99,6 +100,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private final List<MediaType> problemMediaTypes =
 			Arrays.asList(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
 
+	private final List<ErrorResponse.Interceptor> errorResponseInterceptors = new ArrayList<>();
+
 	private final Set<String> safeExtensions = new HashSet<>();
 
 
@@ -119,17 +122,32 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Constructor with list of converters and ContentNegotiationManager as well
-	 * as request/response body advice instances.
+	 * Variant of {@link #AbstractMessageConverterMethodProcessor(List)}
+	 * with an additional {@link ContentNegotiationManager} for return
+	 * value handling.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice) {
+
+		this(converters, manager, requestResponseBodyAdvice, Collections.emptyList());
+	}
+
+	/**
+	 * Variant of {@link #AbstractMessageConverterMethodProcessor(List, ContentNegotiationManager, List)}
+	 * with additional list of {@link ErrorResponse.Interceptor}s for return
+	 * value handling.
+	 * @since 6.2
+	 */
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
+			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice,
+			List<ErrorResponse.Interceptor> interceptors) {
 
 		super(converters, requestResponseBodyAdvice);
 
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
 		this.safeExtensions.addAll(SAFE_EXTENSIONS);
+		this.errorResponseInterceptors.addAll(interceptors);
 	}
 
 
@@ -142,6 +160,21 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Assert.state(response != null, "No HttpServletResponse");
 		return new ServletServerHttpResponse(response);
+	}
+
+	/**
+	 * Invoke the configured {@link ErrorResponse.Interceptor}'s.
+	 * @since 6.2
+	 */
+	protected void invokeErrorResponseInterceptors(ProblemDetail detail, @Nullable ErrorResponse errorResponse) {
+		try {
+			for (ErrorResponse.Interceptor handler : this.errorResponseInterceptors) {
+				handler.handleError(detail, errorResponse);
+			}
+		}
+		catch (Throwable ex) {
+			// ignore
+		}
 	}
 
 	/**

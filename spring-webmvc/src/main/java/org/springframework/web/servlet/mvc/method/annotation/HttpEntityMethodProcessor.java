@@ -103,13 +103,27 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	/**
-	 * Complete constructor for resolving {@code HttpEntity} and handling
-	 * {@code ResponseEntity}.
+	 * Variant of {@link #HttpEntityMethodProcessor(List, List)}
+	 * with an additional {@link ContentNegotiationManager} argument for return
+	 * value handling.
 	 */
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
 
 		super(converters, manager, requestResponseBodyAdvice);
+	}
+
+	/**
+	 * Variant of {@link #HttpEntityMethodProcessor(List, ContentNegotiationManager, List)}
+	 * with additional list of {@link ErrorResponse.Interceptor}s for return
+	 * value handling.
+	 * @since 6.2
+	 */
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> converters,
+			@Nullable ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice,
+			List<ErrorResponse.Interceptor> interceptors) {
+
+		super(converters, manager, requestResponseBodyAdvice, interceptors);
 	}
 
 
@@ -204,6 +218,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 							" doesn't match the ProblemDetail status: " + detail.getStatus());
 				}
 			}
+			invokeErrorResponseInterceptors(
+					detail, (returnValue instanceof ErrorResponse response ? response : null));
 		}
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();

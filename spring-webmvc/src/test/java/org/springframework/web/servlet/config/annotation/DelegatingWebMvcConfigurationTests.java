@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -198,8 +199,28 @@ public class DelegatingWebMvcConfigurationTests {
 				(HandlerExceptionResolverComposite) webMvcConfig
 						.handlerExceptionResolver(webMvcConfig.mvcContentNegotiationManager());
 
-		assertThat(composite.getExceptionResolvers())
-				.as("Only one custom converter is expected").hasSize(1);
+		assertThat(composite.getExceptionResolvers()).hasSize(1);
+	}
+
+	@Test
+	public void addErrorResponseInterceptors() {
+		ErrorResponse.Interceptor interceptor = (detail, errorResponse) -> {};
+		WebMvcConfigurer configurer = new WebMvcConfigurer() {
+			@Override
+			public void addErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
+				interceptors.add(interceptor);
+			}
+		};
+		webMvcConfig.setConfigurers(Collections.singletonList(configurer));
+
+		HandlerExceptionResolverComposite composite =
+				(HandlerExceptionResolverComposite) webMvcConfig
+						.handlerExceptionResolver(webMvcConfig.mvcContentNegotiationManager());
+
+		ExceptionHandlerExceptionResolver resolver =
+				(ExceptionHandlerExceptionResolver) composite.getExceptionResolvers().get(0);
+
+		assertThat(resolver.getErrorResponseInterceptors()).containsExactly(interceptor);
 	}
 
 	@Test
