@@ -13,7 +13,7 @@ dependencies {
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
 	api(platform("io.projectreactor:reactor-bom:2023.0.1-SNAPSHOT"))
 	api(platform("io.rsocket:rsocket-bom:1.1.3"))
-	api(platform("org.apache.groovy:groovy-bom:4.0.15"))
+	api(platform("org.apache.groovy:groovy-bom:4.0.16"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.21.1"))
 	api(platform("org.eclipse.jetty:jetty-bom:12.0.3"))
 	api(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.0.3"))
