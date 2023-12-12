@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 		map.forEach(this::put);
 	}
 
+	@SuppressWarnings("deprecation")  // on Tomcat 10.1.16+
 	@Override
 	public void clear() {
 		this.headers.clear();
