@@ -10,7 +10,7 @@ import org.springframework.core.io.Resource;
  * @author lxcecho azaki0426@gmail.com
  * @since 2023/12/11
  */
-public class ResourceLoader {
+public class ResourceLoaderTest {
 
 	@Test
 	public void demo1() {

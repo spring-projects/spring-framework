@@ -6,6 +6,11 @@ package com.lxcecho.jdbctx.tx.service;
  */
 public interface BookService {
 
-	//买书的方法：图书id和用户id
+	/**
+	 * 买书的方法：图书 id 和用户 id
+	 *
+	 * @param bookId
+	 * @param userId
+	 */
 	void buyBook(Integer bookId, Integer userId);
 }

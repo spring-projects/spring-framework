@@ -11,11 +11,12 @@
        http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<!--开启组件扫描-->
-	<context:component-scan base-package="com.lxcecho.xmltx"></context:component-scan>
+	<context:component-scan base-package="com.lxcecho.jdbctx.xmltx"></context:component-scan>
 
 	<!--数据源对象-->
 	<!--引入外部属性文件，创建数据源对象-->
 	<context:property-placeholder location="classpath:jdbc.properties"></context:property-placeholder>
+
 	<bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
 		<property name="url" value="${jdbc.url}"></property>
 		<property name="driverClassName" value="${jdbc.driver}"></property>
@@ -23,7 +24,7 @@
 		<property name="password" value="${jdbc.password}"></property>
 	</bean>
 
-	<!--JdbcTemplate对象-->
+	<!--JdbcTemplate 对象-->
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="druidDataSource"></property>
 	</bean>
@@ -44,7 +45,7 @@
 
 	<!--配置切入点和通知使用的方法-->
 	<aop:config>
-		<aop:pointcut id="pt" expression="execution(* com.lxcecho.xmltx.service.*.*(..))"/>
+		<aop:pointcut id="pt" expression="execution(* com.lxcecho.jdbctx.xmltx.service.*.*(..))"/>
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="pt"></aop:advisor>
 	</aop:config>
 </beans>

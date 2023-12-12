@@ -11,10 +11,11 @@
        http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<!--组件扫描-->
-	<!-- <context:component-scan base-package="com.lxcecho.tx"></context:component-scan>
+	<!-- <context:component-scan base-package="com.lxcecho.jdbctx.tx"></context:component-scan>
  -->
 	<!--引入外部属性文件，创建数据源对象-->
 	<context:property-placeholder location="classpath:jdbc.properties"></context:property-placeholder>
+
 	<!-- <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
 		 <property name="url" value="${jdbc.url}"></property>
 		 <property name="driverClassName" value="${jdbc.driver}"></property>
@@ -22,7 +23,7 @@
 		 <property name="password" value="${jdbc.password}"></property>
 	 </bean>-->
 
-	<!--创建jdbcTemplate对象，注入数据源-->
+	<!--创建 jdbcTemplate 对象，注入数据源-->
 	<!--<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="druidDataSource"></property>
 	</bean>-->
@@ -33,8 +34,8 @@
 
 	<!--
 		开启事务的注解驱动
-		通过注解@Transactional所标识的方法或标识的类中所有的方法，都会被事务管理器管理事务
+		通过注解 @Transactional 所标识的方法或标识的类中所有的方法，都会被事务管理器管理事务
 	-->
-	<!-- transaction-manager属性的默认值是transactionManager，如果事务管理器bean的id正好就是这个默认值，则可以省略这个属性 -->
+	<!-- transaction-manager 属性的默认值是 transactionManager，如果事务管理器 bean 的 id 正好就是这个默认值，则可以省略这个属性 -->
 	<!--<tx:annotation-driven transaction-manager="transactionManager" />-->
 </beans>

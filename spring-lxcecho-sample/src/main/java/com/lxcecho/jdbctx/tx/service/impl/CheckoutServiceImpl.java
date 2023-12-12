@@ -13,11 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
 
-	//注入bookService
+	// 注 入bookService
 	@Autowired
 	private BookService bookService;
 
-	//买多本书的方法
+	/**
+	 * 买多本书的方法
+	 *
+	 * @param bookIds
+	 * @param userId
+	 */
 	@Transactional
 	@Override
 	public void checkout(Integer[] bookIds, Integer userId) {

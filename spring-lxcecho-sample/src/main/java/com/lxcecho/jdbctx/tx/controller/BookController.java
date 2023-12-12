@@ -14,9 +14,9 @@ public class BookController {
 //    @Autowired
 //    private BookService bookService;
 
-	//买书的方法：图书id和用户id
+	// 买书的方法：图书 id 和用户 id
 //    public void buyBook(Integer bookId,Integer userId) {
-//        //调用service方法
+//        // 调用 service方法
 //        bookService.buyBook(bookId,userId);
 //    }
 
@@ -26,4 +26,5 @@ public class BookController {
 	public void checkout(Integer[] bookIds, Integer userId) {
 		checkoutService.checkout(bookIds, userId);
 	}
+
 }
