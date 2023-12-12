@@ -199,7 +199,7 @@ https://spring.io/projects/spring-framework#learn
 #### 2.3.2、创建java类
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 public class HelloWorld {
     
@@ -228,7 +228,7 @@ public class HelloWorld {
         id：设置bean的唯一标识
         class：设置bean所对应类型的全类名
 	-->
-    <bean id="helloWorld" class="com.atguigu.spring6.bean.HelloWorld"></bean>
+    <bean id="helloWorld" class="com.lxcecho.bean.HelloWorld"></bean>
     
 </beans>
 ```
@@ -236,7 +236,7 @@ public class HelloWorld {
 #### 2.3.4、创建测试类测试
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
@@ -266,7 +266,7 @@ public class HelloWorldTest {
 修改HelloWorld类：
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 public class HelloWorld {
 
@@ -293,7 +293,7 @@ public class HelloWorld {
 ```java
 // dom4j解析beans.xml文件，从中获取class属性值，类的全类名
  // 通过反射机制调用无参数构造方法创建对象
- Class clazz = Class.forName("com.atguigu.spring6.bean.HelloWorld");
+ Class clazz = Class.forName("com.lxcecho.bean.HelloWorld");
  //Object obj = clazz.newInstance();
  Object object = clazz.getDeclaredConstructor().newInstance();
 ```
@@ -560,7 +560,7 @@ BeanFactory 的子接口，提供了更多高级特性。面向 Spring 的使用
 引入spring-first模块java及test目录下实体类
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 public class HelloWorld {
 
@@ -576,7 +576,7 @@ public class HelloWorld {
 ```
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -632,13 +632,13 @@ public void testHelloWorld2(){
 当IOC容器中一共配置了两个：
 
 ```xml
-<bean id="helloworldOne" class="com.atguigu.spring6.bean.HelloWorld"></bean>
-<bean id="helloworldTwo" class="com.atguigu.spring6.bean.HelloWorld"></bean>
+<bean id="helloworldOne" class="com.lxcecho.bean.HelloWorld"></bean>
+<bean id="helloworldTwo" class="com.lxcecho.bean.HelloWorld"></bean>
 ```
 
 根据类型获取时会抛出异常：
 
-> org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'com.atguigu.spring6.bean.HelloWorld' available: expected single matching bean but found 2: helloworldOne,helloworldTwo
+> org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'com.lxcecho.bean.HelloWorld' available: expected single matching bean but found 2: helloworldOne,helloworldTwo
 
 ##### ⑤扩展知识
 
@@ -662,7 +662,7 @@ java中，instanceof运算符用于判断前面的对象是否是后面的类，
 **①创建学生类Student**
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 public class Student {
 
@@ -727,7 +727,7 @@ public class Student {
 spring-di.xml
 
 ```xml
-<bean id="studentOne" class="com.atguigu.spring6.bean.Student">
+<bean id="studentOne" class="com.lxcecho.bean.Student">
     <!-- property标签：通过组件类的setXxx()方法给组件对象设置属性 -->
     <!-- name属性：指定属性名（这个属性名是getXxx()、setXxx()方法定义的，和成员变量无关） -->
     <!-- value属性：指定属性值 -->
@@ -769,7 +769,7 @@ public Student(Integer id, String name, Integer age, String sex) {
 spring-di.xml
 
 ```xml
-<bean id="studentTwo" class="com.atguigu.spring6.bean.Student">
+<bean id="studentTwo" class="com.lxcecho.bean.Student">
     <constructor-arg value="1002"></constructor-arg>
     <constructor-arg value="李四"></constructor-arg>
     <constructor-arg value="33"></constructor-arg>
@@ -857,7 +857,7 @@ public void testDIByConstructor(){
 **①创建班级类Clazz**
 
 ```java
-package com.atguigu.spring6.bean
+package com.lxcecho.bean
     
 public class Clazz {
 
@@ -920,7 +920,7 @@ public void setClazz(Clazz clazz) {
 配置Clazz类型的bean：
 
 ```xml
-<bean id="clazzOne" class="com.atguigu.spring6.bean.Clazz">
+<bean id="clazzOne" class="com.lxcecho.bean.Clazz">
     <property name="clazzId" value="1111"></property>
     <property name="clazzName" value="财源滚滚班"></property>
 </bean>
@@ -929,7 +929,7 @@ public void setClazz(Clazz clazz) {
 为Student中的clazz属性赋值：
 
 ```xml
-<bean id="studentFour" class="com.atguigu.spring6.bean.Student">
+<bean id="studentFour" class="com.lxcecho.bean.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -942,7 +942,7 @@ public void setClazz(Clazz clazz) {
 错误演示：
 
 ```xml
-<bean id="studentFour" class="com.atguigu.spring6.bean.Student">
+<bean id="studentFour" class="com.lxcecho.bean.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -951,7 +951,7 @@ public void setClazz(Clazz clazz) {
 </bean>
 ```
 
-> 如果错把ref属性写成了value属性，会抛出异常： Caused by: java.lang.IllegalStateException: Cannot convert value of type 'java.lang.String' to required type 'com.atguigu.spring6.bean.Clazz' for property 'clazz': no matching editors or conversion strategy found 
+> 如果错把ref属性写成了value属性，会抛出异常： Caused by: java.lang.IllegalStateException: Cannot convert value of type 'java.lang.String' to required type 'com.lxcecho.bean.Clazz' for property 'clazz': no matching editors or conversion strategy found 
 >
 > 意思是不能把String类型转换成我们要的Clazz类型，说明我们使用value属性时，Spring只把这个属性看做一个普通的字符串，不会认为这是一个bean的id，更不会根据它去找到bean来赋值
 
@@ -960,7 +960,7 @@ public void setClazz(Clazz clazz) {
 ##### 方式二：内部bean
 
 ```xml
-<bean id="studentFour" class="com.atguigu.spring6.bean.Student">
+<bean id="studentFour" class="com.lxcecho.bean.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -968,7 +968,7 @@ public void setClazz(Clazz clazz) {
     <property name="clazz">
         <!-- 在一个bean中再声明一个bean就是内部bean -->
         <!-- 内部bean只能用于给属性赋值，不能在外部通过IOC容器获取，因此可以省略id属性 -->
-        <bean id="clazzInner" class="com.atguigu.spring6.bean.Clazz">
+        <bean id="clazzInner" class="com.lxcecho.bean.Clazz">
             <property name="clazzId" value="2222"></property>
             <property name="clazzName" value="远大前程班"></property>
         </bean>
@@ -979,7 +979,7 @@ public void setClazz(Clazz clazz) {
 ##### 方式三：级联属性赋值
 
 ```xml
-<bean id="studentFour" class="com.atguigu.spring6.bean.Student">
+<bean id="studentFour" class="com.lxcecho.bean.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -1053,7 +1053,7 @@ public void setStudents(List<Student> students) {
 配置bean：
 
 ```xml
-<bean id="clazzTwo" class="com.atguigu.spring6.bean.Clazz">
+<bean id="clazzTwo" class="com.lxcecho.bean.Clazz">
     <property name="clazzId" value="4444"></property>
     <property name="clazzName" value="Javaee0222"></property>
     <property name="students">
@@ -1073,7 +1073,7 @@ public void setStudents(List<Student> students) {
 创建教师类Teacher：
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 public class Teacher {
 
     private Integer teacherId;
@@ -1132,17 +1132,17 @@ public void setTeacherMap(Map<String, Teacher> teacherMap) {
 配置bean：
 
 ```xml
-<bean id="teacherOne" class="com.atguigu.spring6.bean.Teacher">
+<bean id="teacherOne" class="com.lxcecho.bean.Teacher">
     <property name="teacherId" value="10010"></property>
     <property name="teacherName" value="大宝"></property>
 </bean>
 
-<bean id="teacherTwo" class="com.atguigu.spring6.bean.Teacher">
+<bean id="teacherTwo" class="com.lxcecho.bean.Teacher">
     <property name="teacherId" value="10086"></property>
     <property name="teacherName" value="二宝"></property>
 </bean>
 
-<bean id="studentFour" class="com.atguigu.spring6.bean.Student">
+<bean id="studentFour" class="com.lxcecho.bean.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -1199,12 +1199,12 @@ public void setTeacherMap(Map<String, Teacher> teacherMap) {
         <ref bean="teacherTwo"></ref>
     </entry>
 </util:map>
-<bean id="clazzTwo" class="com.atguigu.spring6.bean.Clazz">
+<bean id="clazzTwo" class="com.lxcecho.bean.Clazz">
     <property name="clazzId" value="4444"></property>
     <property name="clazzName" value="Javaee0222"></property>
     <property name="students" ref="students"></property>
 </bean>
-<bean id="studentFour" class="com.atguigu.spring6.bean.Student">
+<bean id="studentFour" class="com.lxcecho.bean.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -1256,7 +1256,7 @@ public void setTeacherMap(Map<String, Teacher> teacherMap) {
 引入p命名空间后，可以通过以下方式为bean的各个属性赋值
 
 ```xml
-<bean id="studentSix" class="com.atguigu.spring6.bean.Student"
+<bean id="studentSix" class="com.lxcecho.bean.Student"
     p:id="1006" p:name="小明" p:clazz-ref="clazzOne" p:teacherMap-ref="teacherMap"></bean>
 ```
 
@@ -1363,7 +1363,7 @@ public void testDataSource() throws SQLException {
 **②创建类User**
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 public class User {
 
     private Integer id;
@@ -1433,7 +1433,7 @@ public class User {
 ```xml
 <!-- scope属性：取值singleton（默认值），bean在IOC容器中只有一个实例，IOC容器初始化时创建对象 -->
 <!-- scope属性：取值prototype，bean在IOC容器中可以有多个实例，getBean()时创建对象 -->
-<bean class="com.atguigu.spring6.bean.User" scope="prototype"></bean>
+<bean class="com.lxcecho.bean.User" scope="prototype"></bean>
 ```
 
 **④测试**
@@ -1554,7 +1554,7 @@ public class User {
 ```xml
 <!-- 使用init-method属性指定初始化方法 -->
 <!-- 使用destroy-method属性指定销毁方法 -->
-<bean class="com.atguigu.spring6.bean.User" scope="prototype" init-method="initMethod" destroy-method="destroyMethod">
+<bean class="com.lxcecho.bean.User" scope="prototype" init-method="initMethod" destroy-method="destroyMethod">
     <property name="id" value="1001"></property>
     <property name="username" value="admin"></property>
     <property name="password" value="123456"></property>
@@ -1581,7 +1581,7 @@ bean的后置处理器会在生命周期的初始化前后添加额外的操作�
 创建bean的后置处理器：
 
 ```java
-package com.atguigu.spring6.process;
+package com.lxcecho.process;
     
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -1606,7 +1606,7 @@ public class MyBeanProcessor implements BeanPostProcessor {
 
 ```xml
 <!-- bean的后置处理器要放入IOC容器才能生效 -->
-<bean id="myBeanProcessor" class="com.atguigu.spring6.process.MyBeanProcessor"/>
+<bean id="myBeanProcessor" class="com.lxcecho.process.MyBeanProcessor"/>
 ```
 
 
@@ -1771,7 +1771,7 @@ public interface FactoryBean<T> {
 **②创建类UserFactoryBean**
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 public class UserFactoryBean implements FactoryBean<User> {
     @Override
     public User getObject() throws Exception {
@@ -1788,7 +1788,7 @@ public class UserFactoryBean implements FactoryBean<User> {
 **③配置bean**
 
 ```xml
-<bean id="user" class="com.atguigu.spring6.bean.UserFactoryBean"></bean>
+<bean id="user" class="com.lxcecho.bean.UserFactoryBean"></bean>
 ```
 
 **④测试**
@@ -1816,7 +1816,7 @@ public void testUserFactoryBean(){
 创建类UserController
 
 ```java
-package com.atguigu.spring6.autowire.controller
+package com.lxcecho.autowire.controller
 public class UserController {
 
     private UserService userService;
@@ -1835,7 +1835,7 @@ public class UserController {
 创建接口UserService
 
 ```java
-package com.atguigu.spring6.autowire.service
+package com.lxcecho.autowire.service
 public interface UserService {
 
     void saveUser();
@@ -1846,7 +1846,7 @@ public interface UserService {
 创建类UserServiceImpl实现接口UserService
 
 ```java
-package com.atguigu.spring6.autowire.service.impl
+package com.lxcecho.autowire.service.impl
 public class UserServiceImpl implements UserService {
 
     private UserDao userDao;
@@ -1866,7 +1866,7 @@ public class UserServiceImpl implements UserService {
 创建接口UserDao
 
 ```java
-package com.atguigu.spring6.autowire.dao
+package com.lxcecho.autowire.dao
 public interface UserDao {
 
     void saveUser();
@@ -1877,7 +1877,7 @@ public interface UserDao {
 创建类UserDaoImpl实现接口UserDao
 
 ```java
-package com.atguigu.spring6.autowire.dao.impl
+package com.lxcecho.autowire.dao.impl
 public class UserDaoImpl implements UserDao {
 
     @Override
@@ -1901,11 +1901,11 @@ public class UserDaoImpl implements UserDao {
 > 若在IOC中，有多个兼容类型的bean能够为属性赋值，则抛出异常NoUniqueBeanDefinitionException
 
 ```xml
-<bean id="userController" class="com.atguigu.spring6.autowire.controller.UserController" autowire="byType"></bean>
+<bean id="userController" class="com.lxcecho.autowire.controller.UserController" autowire="byType"></bean>
 
-<bean id="userService" class="com.atguigu.spring6.autowire.service.impl.UserServiceImpl" autowire="byType"></bean>
+<bean id="userService" class="com.lxcecho.autowire.service.impl.UserServiceImpl" autowire="byType"></bean>
 
-<bean id="userDao" class="com.atguigu.spring6.autowire.dao.impl.UserDaoImpl"></bean>
+<bean id="userDao" class="com.lxcecho.autowire.dao.impl.UserDaoImpl"></bean>
 ```
 
 > 自动装配方式：byName
@@ -1913,13 +1913,13 @@ public class UserDaoImpl implements UserDao {
 > byName：将自动装配的属性的属性名，作为bean的id在IOC容器中匹配相对应的bean进行赋值
 
 ```xml
-<bean id="userController" class="com.atguigu.spring6.autowire.controller.UserController" autowire="byName"></bean>
+<bean id="userController" class="com.lxcecho.autowire.controller.UserController" autowire="byName"></bean>
 
-<bean id="userService" class="com.atguigu.spring6.autowire.service.impl.UserServiceImpl" autowire="byName"></bean>
-<bean id="userServiceImpl" class="com.atguigu.spring6.autowire.service.impl.UserServiceImpl" autowire="byName"></bean>
+<bean id="userService" class="com.lxcecho.autowire.service.impl.UserServiceImpl" autowire="byName"></bean>
+<bean id="userServiceImpl" class="com.lxcecho.autowire.service.impl.UserServiceImpl" autowire="byName"></bean>
 
-<bean id="userDao" class="com.atguigu.spring6.autowire.dao.impl.UserDaoImpl"></bean>
-<bean id="userDaoImpl" class="com.atguigu.spring6.autowire.dao.impl.UserDaoImpl"></bean>
+<bean id="userDao" class="com.lxcecho.autowire.dao.impl.UserDaoImpl"></bean>
+<bean id="userDaoImpl" class="com.lxcecho.autowire.dao.impl.UserDaoImpl"></bean>
 ```
 
 **③测试**
@@ -2004,7 +2004,7 @@ Spring 默认不使用注解装配 Bean，因此我们需要在 Spring 的 XML �
     http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context.xsd">
     <!--开启组件扫描功能-->
-    <context:component-scan base-package="com.atguigu.spring6"></context:component-scan>
+    <context:component-scan base-package="com.lxcecho"></context:component-scan>
 </beans>
 ```
 
@@ -2013,14 +2013,14 @@ Spring 默认不使用注解装配 Bean，因此我们需要在 Spring 的 XML �
 **情况一：最基本的扫描方式**
 
 ```xml
-<context:component-scan base-package="com.atguigu.spring6">
+<context:component-scan base-package="com.lxcecho">
 </context:component-scan>
 ```
 
 **情况二：指定要排除的组件**
 
 ```xml
-<context:component-scan base-package="com.atguigu.spring6">
+<context:component-scan base-package="com.lxcecho">
     <!-- context:exclude-filter标签：指定排除规则 -->
     <!-- 
  		type：设置排除或包含的依据
@@ -2028,7 +2028,7 @@ Spring 默认不使用注解装配 Bean，因此我们需要在 Spring 的 XML �
 		type="assignable"，根据类型排除，expression中设置要排除的类型的全类名
 	-->
     <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-        <!--<context:exclude-filter type="assignable" expression="com.atguigu.spring6.controller.UserController"/>-->
+        <!--<context:exclude-filter type="assignable" expression="com.lxcecho.controller.UserController"/>-->
 </context:component-scan>
 ```
 
@@ -2045,7 +2045,7 @@ Spring 默认不使用注解装配 Bean，因此我们需要在 Spring 的 XML �
 		type="assignable"，根据类型排除，expression中设置要排除的类型的全类名
 	-->
     <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-	<!--<context:include-filter type="assignable" expression="com.atguigu.spring6.controller.UserController"/>-->
+	<!--<context:include-filter type="assignable" expression="com.lxcecho.controller.UserController"/>-->
 </context:component-scan>
 ```
 
@@ -2104,7 +2104,7 @@ public @interface Autowired {
 创建UserDao接口
 
 ```java
-package com.atguigu.spring6.dao;
+package com.lxcecho.dao;
 
 public interface UserDao {
 
@@ -2115,9 +2115,9 @@ public interface UserDao {
 创建UserDaoImpl实现
 
 ```java
-package com.atguigu.spring6.dao.impl;
+package com.lxcecho.dao.impl;
 
-import com.atguigu.spring6.dao.UserDao;
+import com.lxcecho.dao.UserDao;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -2133,7 +2133,7 @@ public class UserDaoImpl implements UserDao {
 创建UserService接口
 
 ```java
-package com.atguigu.spring6.service;
+package com.lxcecho.service;
 
 public interface UserService {
 
@@ -2144,10 +2144,10 @@ public interface UserService {
 创建UserServiceImpl实现类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -2168,9 +2168,9 @@ public class UserServiceImpl implements UserService {
 创建UserController类
 
 ```java
-package com.atguigu.spring6.controller;
+package com.lxcecho.controller;
 
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -2191,9 +2191,9 @@ public class UserController {
 **测试一**
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
-import com.atguigu.spring6.controller.UserController;
+import com.lxcecho.controller.UserController;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2227,10 +2227,10 @@ public class UserTest {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -2255,9 +2255,9 @@ public class UserServiceImpl implements UserService {
 修改UserController类
 
 ```java
-package com.atguigu.spring6.controller;
+package com.lxcecho.controller;
 
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -2286,10 +2286,10 @@ public class UserController {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -2314,9 +2314,9 @@ public class UserServiceImpl implements UserService {
 修改UserController类
 
 ```java
-package com.atguigu.spring6.controller;
+package com.lxcecho.controller;
 
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -2345,10 +2345,10 @@ public class UserController {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -2372,9 +2372,9 @@ public class UserServiceImpl implements UserService {
 修改UserController类
 
 ```java
-package com.atguigu.spring6.controller;
+package com.lxcecho.controller;
 
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -2402,10 +2402,10 @@ public class UserController {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -2439,9 +2439,9 @@ public class UserServiceImpl implements UserService {
 添加dao层实现
 
 ```java
-package com.atguigu.spring6.dao.impl;
+package com.lxcecho.dao.impl;
 
-import com.atguigu.spring6.dao.UserDao;
+import com.lxcecho.dao.UserDao;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -2463,10 +2463,10 @@ public class UserDaoRedisImpl implements UserDao {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -2558,9 +2558,9 @@ public @interface Resource {
 修改UserDaoImpl类
 
 ```java
-package com.atguigu.spring6.dao.impl;
+package com.lxcecho.dao.impl;
 
-import com.atguigu.spring6.dao.UserDao;
+import com.lxcecho.dao.UserDao;
 import org.springframework.stereotype.Repository;
 
 @Repository("myUserDao")
@@ -2576,10 +2576,10 @@ public class UserDaoImpl implements UserDao {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -2606,9 +2606,9 @@ public class UserServiceImpl implements UserService {
 修改UserDaoImpl类
 
 ```java
-package com.atguigu.spring6.dao.impl;
+package com.lxcecho.dao.impl;
 
-import com.atguigu.spring6.dao.UserDao;
+import com.lxcecho.dao.UserDao;
 import org.springframework.stereotype.Repository;
 
 @Repository("myUserDao")
@@ -2624,10 +2624,10 @@ public class UserDaoImpl implements UserDao {
 修改UserServiceImpl类
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -2656,10 +2656,10 @@ public class UserServiceImpl implements UserService {
 修改UserServiceImpl类，userDao1属性名不存在
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
-import com.atguigu.spring6.dao.UserDao;
-import com.atguigu.spring6.service.UserService;
+import com.lxcecho.dao.UserDao;
+import com.lxcecho.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -2696,14 +2696,14 @@ public class UserServiceImpl implements UserService {
 全注解开发就是不再使用spring配置文件了，写一个配置类来代替配置文件。
 
 ```java
-package com.atguigu.spring6.config;
+package com.lxcecho.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-//@ComponentScan({"com.atguigu.spring6.controller", "com.atguigu.spring6.service","com.atguigu.spring6.dao"})
-@ComponentScan("com.atguigu.spring6")
+//@ComponentScan({"com.lxcecho.controller", "com.lxcecho.service","com.lxcecho.dao"})
+@ComponentScan("com.lxcecho")
 public class Spring6Config {
 }
 ```
@@ -2923,7 +2923,7 @@ public class TestCar {
 创建UserDao接口
 
 ```java
-package com.atguigu.spring6.test.dao;
+package com.lxcecho.test.dao;
 
 public interface UserDao {
 
@@ -2934,7 +2934,7 @@ public interface UserDao {
 创建UserDaoImpl实现
 
 ```java
-package com.atguigu.spring6.test.dao.impl;
+package com.lxcecho.test.dao.impl;
 
 import com.atguigu.spring.dao.UserDao;
 
@@ -2951,7 +2951,7 @@ public class UserDaoImpl implements UserDao {
 创建UserService接口
 
 ```java
-package com.atguigu.spring6.test.service;
+package com.lxcecho.test.service;
 
 public interface UserService {
 
@@ -4209,7 +4209,7 @@ beans.xml
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
-    <context:component-scan base-package="com.atguigu.spring6.bean"/>
+    <context:component-scan base-package="com.lxcecho.bean"/>
 </beans>
 ```
 
@@ -4218,7 +4218,7 @@ copy日志文件：log4j2.xml
 #### 6.1.4、添加java类
 
 ```java
-package com.atguigu.spring6.bean;
+package com.lxcecho.bean;
 
 import org.springframework.stereotype.Component;
 
@@ -4234,7 +4234,7 @@ public class User {
 #### 6.1.5、测试
 
 ```java
-import com.atguigu.spring6.bean.User;
+import com.lxcecho.bean.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -4280,7 +4280,7 @@ JUnit4在公司也会经常用到，在此也学习一下
 #### 6.2.2、测试
 
 ```java
-import com.atguigu.spring6.bean.User;
+import com.lxcecho.bean.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -4412,7 +4412,7 @@ CREATE TABLE `t_emp` (
 **创建测试类，整合JUnit，注入JdbcTemplate**
 
 ```java
-package com.atguigu.spring6;
+package com.lxcecho;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -4617,7 +4617,7 @@ try {
 
 ```xml
 <!--扫描组件-->
-<context:component-scan base-package="com.atguigu.spring6"></context:component-scan>
+<context:component-scan base-package="com.lxcecho"></context:component-scan>
 ```
 
 **②创建表**
@@ -4645,7 +4645,7 @@ insert  into `t_user`(`user_id`,`username`,`balance`) values (1,'admin',50);
 创建BookController：
 
 ```java
-package com.atguigu.spring6.controller;
+package com.lxcecho.controller;
 
 @Controller
 public class BookController {
@@ -4662,7 +4662,7 @@ public class BookController {
 创建接口BookService：
 
 ```java
-package com.atguigu.spring6.service;
+package com.lxcecho.service;
 public interface BookService {
     void buyBook(Integer bookId, Integer userId);
 }
@@ -4671,7 +4671,7 @@ public interface BookService {
 创建实现类BookServiceImpl：
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 @Service
 public class BookServiceImpl implements BookService {
 
@@ -4693,7 +4693,7 @@ public class BookServiceImpl implements BookService {
 创建接口BookDao：
 
 ```java
-package com.atguigu.spring6.dao;
+package com.lxcecho.dao;
 public interface BookDao {
     Integer getPriceByBookId(Integer bookId);
 
@@ -4706,7 +4706,7 @@ public interface BookDao {
 创建实现类BookDaoImpl：
 
 ```java
-package com.atguigu.spring6.dao.impl;
+package com.lxcecho.dao.impl;
 @Repository
 public class BookDaoImpl implements BookDao {
 
@@ -5013,7 +5013,7 @@ public void buyBook(Integer bookId, Integer userId) {
 创建接口CheckoutService：
 
 ```java
-package com.atguigu.spring6.service;
+package com.lxcecho.service;
 
 public interface CheckoutService {
     void checkout(Integer[] bookIds, Integer userId);
@@ -5023,7 +5023,7 @@ public interface CheckoutService {
 创建实现类CheckoutServiceImpl：
 
 ```java
-package com.atguigu.spring6.service.impl;
+package com.lxcecho.service.impl;
 
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
@@ -5072,7 +5072,7 @@ public void checkout(Integer[] bookIds, Integer userId){
 **①添加配置类**
 
 ```java
-package com.atguigu.spring6.config;
+package com.lxcecho.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.context.annotation.Bean;
@@ -5084,7 +5084,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan("com.atguigu.spring6")
+@ComponentScan("com.lxcecho")
 @EnableTransactionManagement
 public class SpringConfig {
 
@@ -5117,8 +5117,8 @@ public class SpringConfig {
 **②测试**
 
 ```java
-import com.atguigu.spring6.config.SpringConfig;
-import com.atguigu.spring6.controller.BookController;
+import com.lxcecho.config.SpringConfig;
+import com.lxcecho.controller.BookController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -5287,7 +5287,7 @@ file: ------该前缀用于从文件系统中读取资源
 ![image-20221207102315185](images\spring6\image-20221207102315185.png)
 
 ```java
-package com.atguigu.spring6.resources;
+package com.lxcecho.resources;
 
 import org.springframework.core.io.UrlResource;
 
@@ -5344,7 +5344,7 @@ ClassPathResource 用来访问类加载路径下的资源，相对于其他的 R
 ![image-20221207103020854](images\spring6\image-20221207103020854.png)
 
 ```java
-package com.atguigu.spring6.resources;
+package com.lxcecho.resources;
 
 import org.springframework.core.io.ClassPathResource;
 import java.io.InputStream;
@@ -5383,7 +5383,7 @@ Spring 提供的 FileSystemResource 类用于访问文件系统资源，使用 F
 **实验：使用FileSystemResource 访问文件系统资源**
 
 ```java
-package com.atguigu.spring6.resources;
+package com.lxcecho.resources;
 
 import org.springframework.core.io.FileSystemResource;
 
@@ -5465,7 +5465,7 @@ Spring 提供如下两个标志性接口：
 **实验一：ClassPathXmlApplicationContext获取Resource实例**
 
 ```java
-package com.atguigu.spring6.resouceloader;
+package com.lxcecho.resouceloader;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -5489,7 +5489,7 @@ public class Demo1 {
 **实验二：FileSystemApplicationContext获取Resource实例**
 
 ```java
-package com.atguigu.spring6.resouceloader;
+package com.lxcecho.resouceloader;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -5534,7 +5534,7 @@ ResourceLoaderAware接口实现类的实例将获得一个ResourceLoader的引�
 **第一步 创建类，实现ResourceLoaderAware接口**
 
 ```java
-package com.atguigu.spring6.resouceloader;
+package com.lxcecho.resouceloader;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
@@ -5566,14 +5566,14 @@ public class TestBean implements ResourceLoaderAware {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="testBean" class="com.atguigu.spring6.resouceloader.TestBean"></bean>
+    <bean id="testBean" class="com.lxcecho.resouceloader.TestBean"></bean>
 </beans>
 ```
 
 **第三步 测试**
 
 ```java
-package com.atguigu.spring6.resouceloader;
+package com.lxcecho.resouceloader;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -5615,7 +5615,7 @@ public class Demo3 {
 **第一步 创建依赖注入类，定义属性和方法**
 
 ```java
-package com.atguigu.spring6.resouceloader;
+package com.lxcecho.resouceloader;
 
 import org.springframework.core.io.Resource;
 
@@ -5645,7 +5645,7 @@ public class ResourceBean {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="resourceBean" class="com.atguigu.spring6.resouceloader.ResourceBean" >
+    <bean id="resourceBean" class="com.lxcecho.resouceloader.ResourceBean" >
       <!-- 可以使用file:、http:、ftp:等前缀强制Spring采用对应的资源访问策略 -->
       <!-- 如果不采用任何前缀，则Spring将采用与该ApplicationContext相同的资源访问策略来访问资源 -->
         <property name="res" value="classpath:atguigu.txt"/>
@@ -5656,7 +5656,7 @@ public class ResourceBean {
 **第三步 测试**
 
 ```java
-package com.atguigu.spring6.resouceloader;
+package com.lxcecho.resouceloader;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -5709,7 +5709,7 @@ public class Demo4 {
 **实验一：classpath前缀使用**
 
 ```java
-package com.atguigu.spring6.context;
+package com.lxcecho.context;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -5812,7 +5812,7 @@ ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath*:bean*.xm
 **第三步 测试**
 
 ```java
-package com.atguigu.spring6.javai18n;
+package com.lxcecho.javai18n;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -5905,7 +5905,7 @@ www.atguigu.com=欢迎 {0},时间:{1}
 **第三步 创建测试类**
 
 ```java
-package com.atguigu.spring6.javai18n;
+package com.lxcecho.javai18n;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -5985,7 +5985,7 @@ public class Demo2 {
 **第三步 创建实体类，定义属性和方法**
 
 ```java
-package com.atguigu.spring6.validation.method1;
+package com.lxcecho.validation.method1;
 
 public class Person {
     private String name;
@@ -6011,7 +6011,7 @@ public class Person {
 **第四步 创建类实现Validator接口，实现接口方法指定校验规则**
 
 ```java
-package com.atguigu.spring6.validation.method1;
+package com.lxcecho.validation.method1;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -6048,7 +6048,7 @@ validate是设置校验逻辑的地点，其中ValidationUtils，是Spring封装
 **第五步 使用上述Validator进行测试**
 
 ```java
-package com.atguigu.spring6.validation.method1;
+package com.lxcecho.validation.method1;
 
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -6087,7 +6087,7 @@ public class TestMethod1 {
 
 ```java
 @Configuration
-@ComponentScan("com.atguigu.spring6.validation.method2")
+@ComponentScan("com.lxcecho.validation.method2")
 public class ValidationConfig {
 
     @Bean
@@ -6102,7 +6102,7 @@ public class ValidationConfig {
 **第二步 创建实体类，使用注解定义校验规则**
 
 ```java
-package com.atguigu.spring6.validation.method2;
+package com.lxcecho.validation.method2;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -6151,7 +6151,7 @@ public class User {
 **（1）使用jakarta.validation.Validator校验**
 
 ```java
-package com.atguigu.spring6.validation.method2;
+package com.lxcecho.validation.method2;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -6176,7 +6176,7 @@ public class MyService1 {
 **（2）使用org.springframework.validation.Validator校验**
 
 ```java
-package com.atguigu.spring6.validation.method2;
+package com.lxcecho.validation.method2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6202,7 +6202,7 @@ public class MyService2 {
 **第四步 测试**
 
 ```java
-package com.atguigu.spring6.validation.method2;
+package com.lxcecho.validation.method2;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
@@ -6241,7 +6241,7 @@ public class TestMethod2 {
 **第一步 创建配置类，配置MethodValidationPostProcessor**
 
 ```java
-package com.atguigu.spring6.validation.method3;
+package com.lxcecho.validation.method3;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -6250,7 +6250,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 @Configuration
-@ComponentScan("com.atguigu.spring6.validation.method3")
+@ComponentScan("com.lxcecho.validation.method3")
 public class ValidationConfig {
 
     @Bean
@@ -6263,7 +6263,7 @@ public class ValidationConfig {
 **第二步 创建实体类，使用注解设置校验规则**
 
 ```java
-package com.atguigu.spring6.validation.method3;
+package com.lxcecho.validation.method3;
 
 import jakarta.validation.constraints.*;
 
@@ -6304,7 +6304,7 @@ public class User {
 **第三步 定义Service类，通过注解操作对象**
 
 ```java
-package com.atguigu.spring6.validation.method3;
+package com.lxcecho.validation.method3;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -6325,7 +6325,7 @@ public class MyService {
 **第四步 测试**
 
 ```java
-package com.atguigu.spring6.validation.method3;
+package com.lxcecho.validation.method3;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
@@ -6351,7 +6351,7 @@ public class TestMethod3 {
 **第一步 自定义校验注解**
 
 ```java
-package com.atguigu.spring6.validation.method4;
+package com.lxcecho.validation.method4;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -6384,7 +6384,7 @@ public @interface CannotBlank {
 **第二步 编写真正的校验类**
 
 ```java
-package com.atguigu.spring6.validation.method4;
+package com.lxcecho.validation.method4;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -67,5 +67,7 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
-include 'spring-echo'
+include 'spring-lxcecho-sample'
 include 'spring-lxcecho'
+include 'spring-lxcecho-notes'
+

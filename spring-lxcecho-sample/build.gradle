@@ -14,6 +14,9 @@ dependencies {
     implementation 'com.alibaba:druid:1.2.15'
     implementation 'mysql:mysql-connector-java:8.0.30'
 
+    optional("org.hibernate:hibernate-validator")
+    testRuntimeOnly("org.glassfish:jakarta.el")
+
     optional("org.apache.logging.log4j:log4j-api")
     optional("org.slf4j:slf4j-api")
     optional("org.apache.logging.log4j:log4j-core")
