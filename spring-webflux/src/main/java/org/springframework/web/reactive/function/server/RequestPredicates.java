@@ -294,19 +294,6 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static Map<String, String> mergePathVariables(Map<String, String> oldVariables,
-			Map<String, String> newVariables) {
-
-		if (!newVariables.isEmpty()) {
-			Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
-			mergedVariables.putAll(newVariables);
-			return mergedVariables;
-		}
-		else {
-			return oldVariables;
-		}
-	}
-
 	private static PathPattern mergePatterns(@Nullable PathPattern oldPattern, PathPattern newPattern) {
 		if (oldPattern != null) {
 			return oldPattern.combine(newPattern);
