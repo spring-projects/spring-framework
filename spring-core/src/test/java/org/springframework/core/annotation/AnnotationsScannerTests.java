@@ -197,7 +197,7 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
-	void typeHierarchyStrategyOnClassWhenHasInterfaceDoesNotIncludeInterfaces() {
+	void typeHierarchyStrategyOnClassWhenHasSingleInterfaceScansInterfaces() {
 		Class<?> source = WithSingleInterface.class;
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2");
@@ -353,7 +353,7 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
-	void typeHierarchyStrategyOnMethodWhenHasInterfaceDoesNotIncludeInterfaces() {
+	void typeHierarchyStrategyOnMethodWhenHasInterfaceScansInterfaces() {
 		Method source = methodFrom(WithSingleInterface.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2");
