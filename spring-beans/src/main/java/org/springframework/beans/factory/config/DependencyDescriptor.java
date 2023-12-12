@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,6 +373,16 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		else {
 			return obtainMethodParameter().getNestedParameterType();
 		}
+	}
+
+	/**
+	 * Determine whether this dependency supports lazy resolution,
+	 * e.g. through extra proxying. The default is {@code true}.
+	 * @since 6.1.2
+	 * @see org.springframework.beans.factory.support.AutowireCandidateResolver#getLazyResolutionProxyIfNecessary
+	 */
+	public boolean supportsLazyResolution() {
+		return true;
 	}
 
 

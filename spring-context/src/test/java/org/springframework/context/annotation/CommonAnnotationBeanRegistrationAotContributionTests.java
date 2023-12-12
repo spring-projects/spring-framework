@@ -142,7 +142,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 			postProcessor.apply(registeredBean, instance);
 			assertThat(instance).extracting("one").isEqualTo("1");
 			assertThat(getSourceFile(compiled, PrivateMethodResourceSample.class))
-					.contains("resolveAndInvoke(");
+					.contains("resolveAndSet(");
 		});
 	}
 
@@ -160,7 +160,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 			postProcessor.apply(registeredBean, instance);
 			assertThat(instance).extracting("text").isEqualTo("1");
 			assertThat(getSourceFile(compiled, PrivateMethodResourceWithCustomNameSample.class))
-					.contains("resolveAndInvoke(");
+					.contains("resolveAndSet(");
 		});
 	}
 
@@ -198,7 +198,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 			postProcessor.apply(registeredBean, instance);
 			assertThat(instance).extracting("one").isEqualTo("1");
 			assertThat(getSourceFile(compiled, PackagePrivateMethodResourceFromParentSample.class))
-					.contains("resolveAndInvoke(");
+					.contains("resolveAndSet(");
 		});
 	}
 

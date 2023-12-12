@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.context.aot;
+package org.springframework.context.annotation;
+
+import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,22 +32,23 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ResourceFieldValueResolver}.
+ * Tests for {@code ResourceMethodArgumentResolver}.
  *
  * @author Stephane Nicoll
  */
-class ResourceFieldValueResolverTests {
+class ResourceElementResolverMethodTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@Test
-	void resolveWhenFieldIsMissingThrowsException() {
+	void resolveWhenMethodIsMissingThrowsException() {
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
+		ResourceElementResolver resolver = ResourceElementResolver.forMethod("missing", InputStream.class);
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> ResourceFieldValueResolver.forField("missing")
-						.resolve(registeredBean))
-				.withMessage("No field 'missing' found on " + TestBean.class.getName());
+				.isThrownBy(() -> resolver.resolve(registeredBean))
+				.withMessage("Method 'missing' with parameter type 'java.io.InputStream' declared on %s could not be found.",
+						TestBean.class.getName());
 	}
 
 	@Test
@@ -53,8 +56,8 @@ class ResourceFieldValueResolverTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		Object resolved = ResourceFieldValueResolver.forField("one")
-				.resolve(registeredBean);
+		ResourceElementResolver resolver = ResourceElementResolver.forMethod("setOne", String.class);
+		Object resolved = resolver.resolve(registeredBean);
 		assertThat(resolved).isEqualTo("1");
 	}
 
@@ -63,8 +66,7 @@ class ResourceFieldValueResolverTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		Object resolved = ResourceFieldValueResolver.forField("test", "two")
-				.resolve(registeredBean);
+		Object resolved = ResourceElementResolver.forMethod("setTest", String.class, "two").resolve(registeredBean);
 		assertThat(resolved).isEqualTo("2");
 	}
 
@@ -72,8 +74,7 @@ class ResourceFieldValueResolverTests {
 	void resolveWheNoMatchFallbackOnType() {
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		Object resolved = ResourceFieldValueResolver.forField("one")
-				.resolve(registeredBean);
+		Object resolved = ResourceElementResolver.forMethod("setOne", String.class).resolve(registeredBean);
 		assertThat(resolved).isEqualTo("2");
 	}
 
@@ -82,9 +83,8 @@ class ResourceFieldValueResolverTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		assertThatThrownBy(() -> ResourceFieldValueResolver.forField("test")
-				.resolve(registeredBean)
-		).isInstanceOf(NoUniqueBeanDefinitionException.class)
+		assertThatThrownBy(() -> ResourceElementResolver.forMethod("setTest", String.class).resolve(registeredBean))
+				.isInstanceOf(NoUniqueBeanDefinitionException.class)
 				.hasMessageContaining(String.class.getName())
 				.hasMessageContaining("one").hasMessageContaining("two");
 	}
@@ -92,9 +92,8 @@ class ResourceFieldValueResolverTests {
 	@Test
 	void resolveWhenNoCandidateMatchingTypeThrowsException() {
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		assertThatThrownBy(() -> ResourceFieldValueResolver.forField("test")
-				.resolve(registeredBean)
-		).isInstanceOf(NoSuchBeanDefinitionException.class)
+		assertThatThrownBy(() -> ResourceElementResolver.forMethod("setTest", String.class).resolve(registeredBean))
+				.isInstanceOf(NoSuchBeanDefinitionException.class)
 				.hasMessageContaining(String.class.getName());
 	}
 
@@ -102,20 +101,18 @@ class ResourceFieldValueResolverTests {
 	void resolveWhenInvalidMatchingTypeThrowsException() {
 		this.beanFactory.registerSingleton("count", "counter");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		assertThatThrownBy(() -> ResourceFieldValueResolver.forField("count")
-				.resolve(registeredBean)
-		).isInstanceOf(BeanNotOfRequiredTypeException.class)
+		assertThatThrownBy(() -> ResourceElementResolver.forMethod("setCount", Integer.class).resolve(registeredBean))
+				.isInstanceOf(BeanNotOfRequiredTypeException.class)
 				.hasMessageContaining(Integer.class.getName())
 				.hasMessageContaining(String.class.getName());
 	}
 
 	@Test
-	void resolveAndSetSetsValue() {
+	void resolveAndInvokeInvokesMethod() {
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
 		TestBean testBean = new TestBean();
-		ResourceFieldValueResolver.forField("one").resolveAndSet(registeredBean,
-				testBean);
+		ResourceElementResolver.forMethod("setOne", String.class).resolveAndSet(registeredBean, testBean);
 		assertThat(testBean.one).isEqualTo("1");
 	}
 
@@ -123,24 +120,35 @@ class ResourceFieldValueResolverTests {
 	void resolveRegistersDependantBeans() {
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
-		ResourceFieldValueResolver.forField("one").resolve(registeredBean);
+		ResourceElementResolver.forMethod("setOne", String.class).resolve(registeredBean);
 		assertThat(this.beanFactory.getDependentBeans("one")).containsExactly("testBean");
 	}
 
 	private RegisteredBean registerTestBean(DefaultListableBeanFactory beanFactory) {
-		beanFactory.registerBeanDefinition("testBean",
-				new RootBeanDefinition(TestBean.class));
+		beanFactory.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
 		return RegisteredBean.of(beanFactory, "testBean");
 	}
 
+
 	static class TestBean {
 
-		String one;
+		private String one;
 
-		String test;
+		private String test;
 
-		Integer count;
+		private Integer count;
 
+		public void setOne(String one) {
+			this.one = one;
+		}
+
+		public void setTest(String test) {
+			this.test = test;
+		}
+
+		public void setCount(Integer count) {
+			this.count = count;
+		}
 	}
 
 }

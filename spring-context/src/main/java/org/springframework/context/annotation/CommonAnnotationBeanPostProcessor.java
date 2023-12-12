@@ -62,10 +62,7 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.aot.ResourceFieldValueResolver;
-import org.springframework.context.aot.ResourceMethodArgumentResolver;
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.javapoet.ClassName;
@@ -501,15 +498,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				return element.lookupType;
 			}
 			@Override
-			public boolean isStatic() {
-				return false;
-			}
-			@Override
 			public Object getTarget() {
 				return getResource(element, requestingBeanName);
-			}
-			@Override
-			public void releaseTarget(Object target) {
 			}
 		};
 
@@ -655,11 +645,22 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		 */
 		public final DependencyDescriptor getDependencyDescriptor() {
 			if (this.isField) {
-				return new LookupDependencyDescriptor((Field) this.member, this.lookupType);
+				return new ResourceElementResolver.LookupDependencyDescriptor(
+						(Field) this.member, this.lookupType, isLazyLookup());
 			}
 			else {
-				return new LookupDependencyDescriptor((Method) this.member, this.lookupType);
+				return new ResourceElementResolver.LookupDependencyDescriptor(
+						(Method) this.member, this.lookupType, isLazyLookup());
 			}
+		}
+
+		/**
+		 * Determine whether this dependency is marked for lazy lookup.
+		 * The default is {@code false}.
+		 * @since 6.1.2
+		 */
+		boolean isLazyLookup() {
+			return false;
 		}
 	}
 
@@ -707,6 +708,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
 					getResource(this, requestingBeanName));
 		}
+
+		@Override
+		boolean isLazyLookup() {
+			return this.lazyLookup;
+		}
 	}
 
 
@@ -752,6 +758,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
 					getResource(this, requestingBeanName));
+		}
+
+		@Override
+		boolean isLazyLookup() {
+			return this.lazyLookup;
 		}
 	}
 
@@ -811,30 +822,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
-
-	/**
-	 * Extension of the DependencyDescriptor class,
-	 * overriding the dependency type with the specified resource type.
-	 */
-	private static class LookupDependencyDescriptor extends DependencyDescriptor {
-
-		private final Class<?> lookupType;
-
-		public LookupDependencyDescriptor(Field field, Class<?> lookupType) {
-			super(field, true);
-			this.lookupType = lookupType;
-		}
-
-		public LookupDependencyDescriptor(Method method, Class<?> lookupType) {
-			super(new MethodParameter(method, 0), true);
-			this.lookupType = lookupType;
-		}
-
-		@Override
-		public Class<?> getDependencyType() {
-			return this.lookupType;
-		}
-	}
 
 	/**
 	 * {@link BeanRegistrationAotContribution} to inject resources on fields and methods.
@@ -924,11 +911,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private CodeBlock generateFieldResolverCode(Field field, LookupElement lookupElement) {
 			if (lookupElement.isDefaultName) {
-				return CodeBlock.of("$T.$L($S)", ResourceFieldValueResolver.class,
+				return CodeBlock.of("$T.$L($S)", ResourceElementResolver.class,
 						"forField", field.getName());
 			}
 			else {
-				return CodeBlock.of("$T.$L($S, $S)", ResourceFieldValueResolver.class,
+				return CodeBlock.of("$T.$L($S, $S)", ResourceElementResolver.class,
 						"forField", field.getName(), lookupElement.getName());
 			}
 		}
@@ -940,7 +927,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			AccessControl accessControl = AccessControl.forMember(method);
 			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
-				return CodeBlock.of("$L.resolveAndInvoke($L, $L)", resolver,
+				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
 						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
 			}
 			hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
@@ -951,11 +938,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private CodeBlock generateMethodResolverCode(Method method, LookupElement lookupElement) {
 			if (lookupElement.isDefaultName) {
-				return CodeBlock.of("$T.$L($S, $T.class)", ResourceMethodArgumentResolver.class,
+				return CodeBlock.of("$T.$L($S, $T.class)", ResourceElementResolver.class,
 						"forMethod", method.getName(), lookupElement.getLookupType());
 			}
 			else {
-				return CodeBlock.of("$T.$L($S, $T.class, $S)", ResourceMethodArgumentResolver.class,
+				return CodeBlock.of("$T.$L($S, $T.class, $S)", ResourceElementResolver.class,
 						"forMethod", method.getName(), lookupElement.getLookupType(), lookupElement.getName());
 			}
 		}

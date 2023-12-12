@@ -24,7 +24,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -253,7 +252,6 @@ class ApplicationContextAotGeneratorTests {
 		}
 
 		@Test
-		@Disabled("gh-31447")
 		void processAheadOfTimeWhenHasLazyResourceAutowiringOnField() {
 			testResourceAutowiringComponent(LazyResourceFieldComponent.class, (bean, generationContext) -> {
 				Environment environment = bean.getEnvironment();
