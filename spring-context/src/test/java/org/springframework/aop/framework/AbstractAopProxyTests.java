@@ -1143,16 +1143,9 @@ public abstract class AbstractAopProxyTests {
 				return TestBean.class;
 			}
 			@Override
-			public boolean isStatic() {
-				return false;
-			}
-			@Override
 			public Object getTarget() throws Exception {
 				assertThat(AopContext.currentProxy()).isEqualTo(proxy);
 				return target;
-			}
-			@Override
-			public void releaseTarget(Object target) throws Exception {
 			}
 		});
 
@@ -1903,15 +1896,6 @@ public abstract class AbstractAopProxyTests {
 				throw new RuntimeException("Expectation failed: " + gets + " gets and " + releases + " releases");
 			}
 		}
-
-		/**
-		 * @see org.springframework.aop.TargetSource#isStatic()
-		 */
-		@Override
-		public boolean isStatic() {
-			return false;
-		}
-
 	}
 
 

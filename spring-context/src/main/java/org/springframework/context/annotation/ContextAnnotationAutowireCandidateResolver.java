@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 	}
 
 	private Object buildLazyResolutionProxy(
-			final DependencyDescriptor descriptor, final @Nullable String beanName, boolean classOnly) {
+			final DependencyDescriptor descriptor, @Nullable final String beanName, boolean classOnly) {
 
 		BeanFactory beanFactory = getBeanFactory();
 		Assert.state(beanFactory instanceof DefaultListableBeanFactory,
@@ -96,10 +96,6 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			@Override
 			public Class<?> getTargetClass() {
 				return descriptor.getDependencyType();
-			}
-			@Override
-			public boolean isStatic() {
-				return false;
 			}
 			@Override
 			public Object getTarget() {
@@ -127,9 +123,6 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 					}
 				}
 				return target;
-			}
-			@Override
-			public void releaseTarget(Object target) {
 			}
 		};
 

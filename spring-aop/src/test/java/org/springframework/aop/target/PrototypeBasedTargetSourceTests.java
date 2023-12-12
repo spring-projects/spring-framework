@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,8 @@ public class PrototypeBasedTargetSourceTests {
 		private TestBean thisFieldIsNotSerializable = new TestBean();
 
 		@Override
-		public Object getTarget() throws Exception {
+		public Object getTarget() {
 			return newPrototypeInstance();
-		}
-
-		@Override
-		public void releaseTarget(Object target) throws Exception {
-			// Do nothing
 		}
 	}
 
