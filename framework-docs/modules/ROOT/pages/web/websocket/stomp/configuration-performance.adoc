@@ -103,9 +103,9 @@ You can also use the WebSocket transport configuration shown earlier to configur
 maximum allowed size for incoming STOMP messages. In theory, a WebSocket
 message can be almost unlimited in size. In practice, WebSocket servers impose
 limits -- for example, 8K on Tomcat and 64K on Jetty. For this reason, STOMP clients
-(such as the JavaScript https://github.com/JSteunou/webstomp-client[webstomp-client]
-and others) split larger STOMP messages at 16K boundaries and send them as multiple
-WebSocket  messages, which requires the server to buffer and re-assemble.
+such as https://github.com/stomp-js/stompjs[`stomp-js/stompjs`] and others split larger
+STOMP messages at 16K boundaries and send them as multiple WebSocket messages,
+which requires the server to buffer and re-assemble.
 
 Spring's STOMP-over-WebSocket support does this ,so applications can configure the
 maximum size for STOMP messages irrespective of WebSocket server-specific message
