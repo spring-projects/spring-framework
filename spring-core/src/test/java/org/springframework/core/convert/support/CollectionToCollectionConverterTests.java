@@ -134,10 +134,10 @@ class CollectionToCollectionConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("objectToCollection"));
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		List<List<List<Integer>>> result = (List<List<List<Integer>>>) conversionService.convert(list, sourceType, targetType);
-		assertThat(result.get(0).get(0)).element(0).isEqualTo((Integer) 9);
-		assertThat(result.get(0).get(1)).element(0).isEqualTo((Integer) 12);
-		assertThat(result.get(1).get(0)).element(0).isEqualTo((Integer) 37);
-		assertThat(result.get(1).get(1)).element(0).isEqualTo((Integer) 23);
+		assertThat(result.get(0).get(0)).element(0).isEqualTo(9);
+		assertThat(result.get(0).get(1)).element(0).isEqualTo(12);
+		assertThat(result.get(1).get(0)).element(0).isEqualTo(37);
+		assertThat(result.get(1).get(1)).element(0).isEqualTo(23);
 	}
 
 	@Test
@@ -154,10 +154,10 @@ class CollectionToCollectionConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("objectToCollection"));
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		List<List<List<Integer>>> result = (List<List<List<Integer>>>) conversionService.convert(list, sourceType, targetType);
-		assertThat(result.get(0).get(0)).element(0).isEqualTo((Integer) 9);
-		assertThat(result.get(0).get(0)).element(1).isEqualTo((Integer) 12);
-		assertThat(result.get(1).get(0)).element(0).isEqualTo((Integer) 37);
-		assertThat(result.get(1).get(0)).element(1).isEqualTo((Integer) 23);
+		assertThat(result.get(0).get(0)).element(0).isEqualTo(9);
+		assertThat(result.get(0).get(0)).element(1).isEqualTo(12);
+		assertThat(result.get(1).get(0)).element(0).isEqualTo(37);
+		assertThat(result.get(1).get(0)).element(1).isEqualTo(23);
 	}
 
 	@Test

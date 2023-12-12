@@ -67,7 +67,7 @@ import static org.assertj.core.api.Assertions.within;
 class CustomEditorTests {
 
 	@Test
-	void testComplexObject() {
+	void complexObject() {
 		TestBean tb = new TestBean();
 		String newName = "Rod";
 		String tbString = "Kerry_34";
@@ -85,7 +85,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testComplexObjectWithOldValueAccess() {
+	void complexObjectWithOldValueAccess() {
 		TestBean tb = new TestBean();
 		String newName = "Rod";
 		String tbString = "Kerry_34";
@@ -109,7 +109,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomEditorForSingleProperty() {
+	void customEditorForSingleProperty() {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
@@ -127,7 +127,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomEditorForAllStringProperties() {
+	void customEditorForAllStringProperties() {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
@@ -145,7 +145,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomEditorForSingleNestedProperty() {
+	void customEditorForSingleNestedProperty() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -164,7 +164,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomEditorForAllNestedStringProperties() {
+	void customEditorForAllNestedStringProperties() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -183,7 +183,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testDefaultBooleanEditorForPrimitiveType() {
+	void defaultBooleanEditorForPrimitiveType() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
@@ -224,7 +224,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testDefaultBooleanEditorForWrapperType() {
+	void defaultBooleanEditorForWrapperType() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
@@ -259,7 +259,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomBooleanEditorWithAllowEmpty() {
+	void customBooleanEditorWithAllowEmpty() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(Boolean.class, new CustomBooleanEditor(true));
@@ -296,7 +296,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomBooleanEditorWithSpecialTrueAndFalseStrings() {
+	void customBooleanEditorWithSpecialTrueAndFalseStrings() {
 		String trueString = "pechorin";
 		String falseString = "nash";
 
@@ -320,7 +320,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testDefaultNumberEditor() {
+	void defaultNumberEditor() {
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
@@ -364,7 +364,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomNumberEditorWithoutAllowEmpty() {
+	void customNumberEditorWithoutAllowEmpty() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -421,7 +421,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomNumberEditorWithAllowEmpty() {
+	void customNumberEditorWithAllowEmpty() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -445,7 +445,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomNumberEditorWithFrenchBigDecimal() {
+	void customNumberEditorWithFrenchBigDecimal() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRENCH);
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -462,14 +462,14 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testParseShortGreaterThanMaxValueWithoutNumberFormat() {
+	void parseShortGreaterThanMaxValueWithoutNumberFormat() {
 		CustomNumberEditor editor = new CustomNumberEditor(Short.class, true);
 		assertThatExceptionOfType(NumberFormatException.class).as("greater than Short.MAX_VALUE + 1").isThrownBy(() ->
 			editor.setAsText(String.valueOf(Short.MAX_VALUE + 1)));
 	}
 
 	@Test
-	void testByteArrayPropertyEditor() {
+	void byteArrayPropertyEditor() {
 		PrimitiveArrayBean bean = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("byteArray", "myvalue");
@@ -477,7 +477,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCharArrayPropertyEditor() {
+	void charArrayPropertyEditor() {
 		PrimitiveArrayBean bean = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("charArray", "myvalue");
@@ -485,7 +485,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCharacterEditor() {
+	void characterEditor() {
 		CharBean cb = new CharBean();
 		BeanWrapper bw = new BeanWrapperImpl(cb);
 
@@ -507,7 +507,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCharacterEditorWithAllowEmpty() {
+	void characterEditorWithAllowEmpty() {
 		CharBean cb = new CharBean();
 		BeanWrapper bw = new BeanWrapperImpl(cb);
 		bw.registerCustomEditor(Character.class, new CharacterEditor(true));
@@ -529,14 +529,14 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCharacterEditorSetAsTextWithStringLongerThanOneCharacter() {
+	void characterEditorSetAsTextWithStringLongerThanOneCharacter() {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				charEditor.setAsText("ColdWaterCanyon"));
 	}
 
 	@Test
-	void testCharacterEditorGetAsTextReturnsEmptyStringIfValueIsNull() {
+	void characterEditorGetAsTextReturnsEmptyStringIfValueIsNull() {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		assertThat(charEditor.getAsText()).isEmpty();
 		charEditor = new CharacterEditor(true);
@@ -549,14 +549,14 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCharacterEditorSetAsTextWithNullNotAllowingEmptyAsNull() {
+	void characterEditorSetAsTextWithNullNotAllowingEmptyAsNull() {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				charEditor.setAsText(null));
 	}
 
 	@Test
-	void testClassEditor() {
+	void classEditor() {
 		PropertyEditor classEditor = new ClassEditor();
 		classEditor.setAsText(TestBean.class.getName());
 		assertThat(classEditor.getValue()).isEqualTo(TestBean.class);
@@ -571,14 +571,14 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testClassEditorWithNonExistentClass() {
+	void classEditorWithNonExistentClass() {
 		PropertyEditor classEditor = new ClassEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				classEditor.setAsText("hairdresser.on.Fire"));
 	}
 
 	@Test
-	void testClassEditorWithArray() {
+	void classEditorWithArray() {
 		PropertyEditor classEditor = new ClassEditor();
 		classEditor.setAsText("org.springframework.beans.testfixture.beans.TestBean[]");
 		assertThat(classEditor.getValue()).isEqualTo(TestBean[].class);
@@ -589,7 +589,7 @@ class CustomEditorTests {
 	* SPR_2165 - ClassEditor is inconsistent with multidimensional arrays
 	*/
 	@Test
-	void testGetAsTextWithTwoDimensionalArray() {
+	void getAsTextWithTwoDimensionalArray() {
 		String[][] chessboard = new String[8][8];
 		ClassEditor editor = new ClassEditor();
 		editor.setValue(chessboard.getClass());
@@ -600,7 +600,7 @@ class CustomEditorTests {
 	 * SPR_2165 - ClassEditor is inconsistent with multidimensional arrays
 	 */
 	@Test
-	void testGetAsTextWithRidiculousMultiDimensionalArray() {
+	void getAsTextWithRidiculousMultiDimensionalArray() {
 		String[][][][][] ridiculousChessboard = new String[8][4][0][1][3];
 		ClassEditor editor = new ClassEditor();
 		editor.setValue(ridiculousChessboard.getClass());
@@ -608,7 +608,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testFileEditor() {
+	void fileEditor() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("file:myfile.txt");
 		assertThat(fileEditor.getValue()).isEqualTo(new File("myfile.txt"));
@@ -616,7 +616,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testFileEditorWithRelativePath() {
+	void fileEditorWithRelativePath() {
 		PropertyEditor fileEditor = new FileEditor();
 		try {
 			fileEditor.setAsText("myfile.txt");
@@ -628,7 +628,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testFileEditorWithAbsolutePath() {
+	void fileEditorWithAbsolutePath() {
 		PropertyEditor fileEditor = new FileEditor();
 		// testing on Windows
 		if (new File("C:/myfile.txt").isAbsolute()) {
@@ -643,7 +643,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testLocaleEditor() {
+	void localeEditor() {
 		PropertyEditor localeEditor = new LocaleEditor();
 		localeEditor.setAsText("en_CA");
 		assertThat(localeEditor.getValue()).isEqualTo(Locale.CANADA);
@@ -654,7 +654,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testPatternEditor() {
+	void patternEditor() {
 		final String REGEX = "a.*";
 
 		PropertyEditor patternEditor = new PatternEditor();
@@ -671,7 +671,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomBooleanEditor() {
+	void customBooleanEditor() {
 		CustomBooleanEditor editor = new CustomBooleanEditor(false);
 
 		editor.setAsText("true");
@@ -691,7 +691,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomBooleanEditorWithEmptyAsNull() {
+	void customBooleanEditorWithEmptyAsNull() {
 		CustomBooleanEditor editor = new CustomBooleanEditor(true);
 
 		editor.setAsText("true");
@@ -708,7 +708,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomDateEditor() {
+	void customDateEditor() {
 		CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("MM/dd/yyyy"), false);
 		editor.setValue(null);
 		assertThat(editor.getValue()).isNull();
@@ -716,7 +716,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomDateEditorWithEmptyAsNull() {
+	void customDateEditorWithEmptyAsNull() {
 		CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("MM/dd/yyyy"), true);
 		editor.setValue(null);
 		assertThat(editor.getValue()).isNull();
@@ -724,7 +724,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomDateEditorWithExactDateLength() {
+	void customDateEditorWithExactDateLength() {
 		int maxLength = 10;
 		String validDate = "01/01/2005";
 		String invalidDate = "01/01/05";
@@ -740,7 +740,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomNumberEditor() {
+	void customNumberEditor() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, false);
 		editor.setAsText("5");
 		assertThat(editor.getValue()).isEqualTo(5);
@@ -751,14 +751,14 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCustomNumberEditorWithHex() {
+	void customNumberEditorWithHex() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, false);
 		editor.setAsText("0x" + Integer.toHexString(64));
 		assertThat(editor.getValue()).isEqualTo(64);
 	}
 
 	@Test
-	void testCustomNumberEditorWithEmptyAsNull() {
+	void customNumberEditorWithEmptyAsNull() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, true);
 		editor.setAsText("5");
 		assertThat(editor.getValue()).isEqualTo(5);
@@ -772,7 +772,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testStringTrimmerEditor() {
+	void stringTrimmerEditor() {
 		StringTrimmerEditor editor = new StringTrimmerEditor(false);
 		editor.setAsText("test");
 		assertThat(editor.getValue()).isEqualTo("test");
@@ -790,7 +790,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testStringTrimmerEditorWithEmptyAsNull() {
+	void stringTrimmerEditorWithEmptyAsNull() {
 		StringTrimmerEditor editor = new StringTrimmerEditor(true);
 		editor.setAsText("test");
 		assertThat(editor.getValue()).isEqualTo("test");
@@ -806,7 +806,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testStringTrimmerEditorWithCharsToDelete() {
+	void stringTrimmerEditorWithCharsToDelete() {
 		StringTrimmerEditor editor = new StringTrimmerEditor("\r\n\f", false);
 		editor.setAsText("te\ns\ft");
 		assertThat(editor.getValue()).isEqualTo("test");
@@ -822,7 +822,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testStringTrimmerEditorWithCharsToDeleteAndEmptyAsNull() {
+	void stringTrimmerEditorWithCharsToDeleteAndEmptyAsNull() {
 		StringTrimmerEditor editor = new StringTrimmerEditor("\r\n\f", true);
 		editor.setAsText("te\ns\ft");
 		assertThat(editor.getValue()).isEqualTo("test");
@@ -838,7 +838,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testIndexedPropertiesWithCustomEditorForType() {
+	void indexedPropertiesWithCustomEditorForType() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
@@ -891,7 +891,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testIndexedPropertiesWithCustomEditorForProperty() {
+	void indexedPropertiesWithCustomEditorForProperty() {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array.name", new PropertyEditorSupport() {
@@ -958,7 +958,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testIndexedPropertiesWithIndividualCustomEditorForProperty() {
+	void indexedPropertiesWithIndividualCustomEditorForProperty() {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array[0].name", new PropertyEditorSupport() {
@@ -1043,7 +1043,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testNestedIndexedPropertiesWithCustomEditorForProperty() {
+	void nestedIndexedPropertiesWithCustomEditorForProperty() {
 		IndexedTestBean bean = new IndexedTestBean();
 		TestBean tb0 = bean.getArray()[0];
 		TestBean tb1 = bean.getArray()[1];
@@ -1127,7 +1127,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testNestedIndexedPropertiesWithIndexedCustomEditorForProperty() {
+	void nestedIndexedPropertiesWithIndexedCustomEditorForProperty() {
 		IndexedTestBean bean = new IndexedTestBean();
 		TestBean tb0 = bean.getArray()[0];
 		TestBean tb1 = bean.getArray()[1];
@@ -1178,7 +1178,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testIndexedPropertiesWithDirectAccessAndPropertyEditors() {
+	void indexedPropertiesWithDirectAccessAndPropertyEditors() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
@@ -1232,7 +1232,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testIndexedPropertiesWithDirectAccessAndSpecificPropertyEditors() {
+	void indexedPropertiesWithDirectAccessAndSpecificPropertyEditors() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "array[0]", new PropertyEditorSupport() {
@@ -1319,7 +1319,8 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testIndexedPropertiesWithListPropertyEditor() {
+	@SuppressWarnings("unchecked")
+	void indexedPropertiesWithListPropertyEditor() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(List.class, "list", new PropertyEditorSupport() {
@@ -1337,7 +1338,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testConversionToOldCollections() throws PropertyVetoException {
+	void conversionToOldCollections() throws PropertyVetoException {
 		OldCollectionsBean tb = new OldCollectionsBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(Vector.class, new CustomCollectionEditor(Vector.class));
@@ -1354,7 +1355,8 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testUninitializedArrayPropertyWithCustomEditor() {
+	@SuppressWarnings("unchecked")
+	void uninitializedArrayPropertyWithCustomEditor() {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		PropertyEditor pe = new CustomNumberEditor(Integer.class, true);
@@ -1370,7 +1372,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testArrayToArrayConversion() throws PropertyVetoException {
+	void arrayToArrayConversion() throws PropertyVetoException {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
@@ -1386,7 +1388,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testArrayToStringConversion() throws PropertyVetoException {
+	void arrayToStringConversion() throws PropertyVetoException {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
@@ -1400,7 +1402,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testClassArrayEditorSunnyDay() {
+	void classArrayEditorSunnyDay() {
 		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
 		classArrayEditor.setAsText("java.lang.String,java.util.HashMap");
 		Class<?>[] classes = (Class<?>[]) classArrayEditor.getValue();
@@ -1413,7 +1415,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testClassArrayEditorSunnyDayWithArrayTypes() {
+	void classArrayEditorSunnyDayWithArrayTypes() {
 		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
 		classArrayEditor.setAsText("java.lang.String[],java.util.Map[],int[],float[][][]");
 		Class<?>[] classes = (Class<?>[]) classArrayEditor.getValue();
@@ -1428,7 +1430,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testClassArrayEditorSetAsTextWithNull() {
+	void classArrayEditorSetAsTextWithNull() {
 		ClassArrayEditor editor = new ClassArrayEditor();
 		editor.setAsText(null);
 		assertThat(editor.getValue()).isNull();
@@ -1436,7 +1438,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testClassArrayEditorSetAsTextWithEmptyString() {
+	void classArrayEditorSetAsTextWithEmptyString() {
 		ClassArrayEditor editor = new ClassArrayEditor();
 		editor.setAsText("");
 		assertThat(editor.getValue()).isNull();
@@ -1444,7 +1446,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testClassArrayEditorSetAsTextWithWhitespaceString() {
+	void classArrayEditorSetAsTextWithWhitespaceString() {
 		ClassArrayEditor editor = new ClassArrayEditor();
 		editor.setAsText("\n");
 		assertThat(editor.getValue()).isNull();
@@ -1452,7 +1454,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void testCharsetEditor() {
+	void charsetEditor() {
 		CharsetEditor editor = new CharsetEditor();
 		String name = "UTF-8";
 		editor.setAsText(name);

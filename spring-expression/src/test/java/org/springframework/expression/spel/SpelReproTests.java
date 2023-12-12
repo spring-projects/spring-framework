@@ -1375,7 +1375,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		Object value = expr.getValue(coll);
 		assertThat(value).isInstanceOf(ArrayList.class);
 		@SuppressWarnings("rawtypes")
-		ArrayList list = (ArrayList) value;
+		ArrayList<?> list = (ArrayList) value;
 		assertThat(list).element(0).isEqualTo("one");
 		assertThat(list).element(1).isEqualTo("two");
 	}
@@ -1443,13 +1443,12 @@ class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	void SPR12522() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
 		Object value = expression.getValue();
 		assertThat(value).isInstanceOf(List.class);
-		assertThat(((List) value)).isEmpty();
+		assertThat(((List<?>) value)).isEmpty();
 	}
 
 	@Test

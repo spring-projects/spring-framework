@@ -99,7 +99,7 @@ class PayloadApplicationEventTests {
 	@Test
 	@SuppressWarnings("resource")
 	void testPayloadObjectWithPayloadType() {
-		final NumberHolder payload = new NumberHolder<>(42);
+		final NumberHolder<Integer> payload = new NumberHolder<>(42);
 
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(NumberHolderListener.class) {
 			@Override
@@ -117,7 +117,7 @@ class PayloadApplicationEventTests {
 	@Test
 	@SuppressWarnings("resource")
 	void testPayloadObjectWithPayloadTypeOnParentContext() {
-		final NumberHolder payload = new NumberHolder<>(42);
+		final NumberHolder<Integer> payload = new NumberHolder<>(42);
 
 		ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext(NumberHolderListener.class);
 		ConfigurableApplicationContext ac = new GenericApplicationContext(parent) {

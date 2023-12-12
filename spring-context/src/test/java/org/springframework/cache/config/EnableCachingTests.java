@@ -153,6 +153,7 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		ServiceWithMutableKey service = ctx.getBean(ServiceWithMutableKey.class);
 		String result = service.find(new ArrayList<>(List.of("id")));
 		assertThat(service.find(new ArrayList<>(List.of("id")))).isSameAs(result);
+		ctx.close();
 	}
 
 

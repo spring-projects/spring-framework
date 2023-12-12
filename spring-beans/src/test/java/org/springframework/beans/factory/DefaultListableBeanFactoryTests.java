@@ -3416,7 +3416,7 @@ class DefaultListableBeanFactoryTests {
 	}
 
 
-	private static class PriorityTestBeanFactory {
+	static class PriorityTestBeanFactory {
 
 		public static LowPriorityTestBean lowPriorityTestBean() {
 			return new LowPriorityTestBean();
