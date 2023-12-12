@@ -438,12 +438,11 @@ final class DefaultWebClient implements WebClient {
 		@SuppressWarnings("deprecation")
 		@Override
 		public Mono<ClientResponse> exchange() {
-			ClientRequestObservationContext observationContext = new ClientRequestObservationContext();
 			ClientRequest.Builder requestBuilder = initRequestBuilder();
+			ClientRequestObservationContext observationContext = new ClientRequestObservationContext(requestBuilder);
 			return Mono.deferContextual(contextView -> {
 				Observation observation = ClientHttpObservationDocumentation.HTTP_REACTIVE_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
-				observationContext.setCarrier(requestBuilder);
 				observation
 						.parentObservation(contextView.getOrDefault(ObservationThreadLocalAccessor.KEY, null))
 						.start();
@@ -452,7 +451,7 @@ final class DefaultWebClient implements WebClient {
 					filterFunction = filterFunctions.andThen(filterFunction);
 				}
 				ClientRequest request = requestBuilder
-						.attribute(ClientRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observation.getContext())
+						.attribute(ClientRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext)
 						.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				observationContext.setRequest(request);
