@@ -34,6 +34,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.springframework.aot.generate.GeneratedMethods;
+import org.springframework.aot.generate.ValueCodeGenerator;
+import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
+import org.springframework.aot.generate.ValueCodeGeneratorDelegates;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -89,7 +92,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private final Predicate<String> attributeFilter;
 
-	private final BeanDefinitionPropertyValueCodeGenerator valueCodeGenerator;
+	private final ValueCodeGenerator valueCodeGenerator;
 
 
 	BeanDefinitionPropertiesCodeGenerator(RuntimeHints hints,
@@ -98,8 +101,11 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 		this.hints = hints;
 		this.attributeFilter = attributeFilter;
-		this.valueCodeGenerator = new BeanDefinitionPropertyValueCodeGenerator(generatedMethods,
-				(object, type) -> customValueCodeGenerator.apply(PropertyNamesStack.peek(), object));
+		this.valueCodeGenerator = ValueCodeGenerator
+				.with(new ValueCodeGeneratorDelegateAdapter(customValueCodeGenerator))
+				.add(BeanDefinitionPropertyValueCodeGeneratorDelegates.INSTANCES)
+				.add(ValueCodeGeneratorDelegates.INSTANCES)
+				.scoped(generatedMethods);
 	}
 
 
@@ -366,6 +372,22 @@ class BeanDefinitionPropertiesCodeGenerator {
 		return (castNecessary ? CodeBlock.of("($T) $L", castType, valueCode) : valueCode);
 	}
 
+
+	static class ValueCodeGeneratorDelegateAdapter implements Delegate {
+
+		private final BiFunction<String, Object, CodeBlock> customValueCodeGenerator;
+
+		ValueCodeGeneratorDelegateAdapter(BiFunction<String, Object, CodeBlock> customValueCodeGenerator) {
+			this.customValueCodeGenerator = customValueCodeGenerator;
+		}
+
+		@Override
+		public CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
+			return this.customValueCodeGenerator.apply(PropertyNamesStack.peek(), value);
+		}
+	}
+
+
 	static class PropertyNamesStack {
 
 		private static final ThreadLocal<ArrayDeque<String>> threadLocal = ThreadLocal.withInitial(ArrayDeque::new);
@@ -384,7 +406,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 			String value = threadLocal.get().peek();
 			return ("".equals(value) ? null : value);
 		}
-
 	}
 
 }

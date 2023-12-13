@@ -27,6 +27,7 @@ import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -50,6 +51,8 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Stephane Nicoll
  */
 class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragments {
+
+	private static final ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
 
 	private final BeanRegistrationsCode beanRegistrationsCode;
 
@@ -147,9 +150,9 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	private CodeBlock generateBeanTypeCode(ResolvableType beanType) {
 		if (!beanType.hasGenerics()) {
-			return CodeBlock.of("$T.class", ClassUtils.getUserClass(beanType.toClass()));
+			return valueCodeGenerator.generateCode(ClassUtils.getUserClass(beanType.toClass()));
 		}
-		return ResolvableTypeCodeGenerator.generateCode(beanType);
+		return valueCodeGenerator.generateCode(beanType);
 	}
 
 	private boolean targetTypeNecessary(ResolvableType beanType, @Nullable Class<?> beanClass) {
