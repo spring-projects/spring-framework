@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.servlet.ServletRequest;
 
@@ -120,6 +121,16 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 				}
 			}
 			return value;
+		}
+
+		@Override
+		protected Set<String> initParameterNames(ServletRequest request) {
+			Set<String> set = super.initParameterNames(request);
+			Map<String, String> uriVars = getUriVars(getRequest());
+			if (uriVars != null) {
+				set.addAll(uriVars.keySet());
+			}
+			return set;
 		}
 	}
 

@@ -19,12 +19,14 @@ package org.springframework.validation;
 import java.beans.ConstructorProperties;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,6 +78,17 @@ public class DataBinderConstructTests {
 		assertThat(bindingResult.getFieldValue("param3")).isNull();
 	}
 
+	@Test // gh-31821
+	void dataClassBindingWithNestedOptionalParameterWithMissingParameter() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("param1", "value1"));
+		DataBinder binder = initDataBinder(NestedDataClass.class);
+		binder.construct(valueResolver);
+
+		NestedDataClass dataClass = getTarget(binder);
+		assertThat(dataClass.param1()).isEqualTo("value1");
+		assertThat(dataClass.nestedParam2()).isNull();
+	}
+
 	@Test
 	void dataClassBindingWithConversionError() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("param1", "value1", "param2", "x"));
@@ -90,7 +103,7 @@ public class DataBinderConstructTests {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static DataBinder initDataBinder(Class<DataClass> targetType) {
+	private static DataBinder initDataBinder(Class<?> targetType) {
 		DataBinder binder = new DataBinder(null);
 		binder.setTargetType(ResolvableType.forClass(targetType));
 		binder.setConversionService(new DefaultFormattingConversionService());
@@ -137,17 +150,45 @@ public class DataBinderConstructTests {
 	}
 
 
+	private static class NestedDataClass {
+
+		private final String param1;
+
+		@Nullable
+		private final DataClass nestedParam2;
+
+		public NestedDataClass(String param1, @Nullable DataClass nestedParam2) {
+			this.param1 = param1;
+			this.nestedParam2 = nestedParam2;
+		}
+
+		public String param1() {
+			return this.param1;
+		}
+
+		@Nullable
+		public DataClass nestedParam2() {
+			return this.nestedParam2;
+		}
+	}
+
+
 	private static class MapValueResolver implements DataBinder.ValueResolver {
 
-		private final Map<String, Object> values;
+		private final Map<String, Object> map;
 
-		private MapValueResolver(Map<String, Object> values) {
-			this.values = values;
+		private MapValueResolver(Map<String, Object> map) {
+			this.map = map;
 		}
 
 		@Override
 		public Object resolveValue(String name, Class<?> type) {
-			return values.get(name);
+			return map.get(name);
+		}
+
+		@Override
+		public Set<String> getNames() {
+			return this.map.keySet();
 		}
 	}
 

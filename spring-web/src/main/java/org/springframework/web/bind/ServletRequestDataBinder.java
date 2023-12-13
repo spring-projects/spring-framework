@@ -17,7 +17,10 @@
 package org.springframework.web.bind;
 
 import java.lang.reflect.Array;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -213,6 +216,9 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 		private final WebDataBinder dataBinder;
 
+		@Nullable
+		private Set<String> parameterNames;
+
 		protected ServletRequestValueResolver(ServletRequest request, WebDataBinder dataBinder) {
 			this.request = request;
 			this.dataBinder = dataBinder;
@@ -260,6 +266,23 @@ public class ServletRequestDataBinder extends WebDataBinder {
 				}
 			}
 			return null;
+		}
+
+		@Override
+		public Set<String> getNames() {
+			if (this.parameterNames == null) {
+				this.parameterNames = initParameterNames(this.request);
+			}
+			return this.parameterNames;
+		}
+
+		protected Set<String> initParameterNames(ServletRequest request) {
+			Set<String> set = new LinkedHashSet<>();
+			Enumeration<String> enumeration = request.getParameterNames();
+			while (enumeration.hasMoreElements()) {
+				set.add(enumeration.nextElement());
+			}
+			return set;
 		}
 	}
 

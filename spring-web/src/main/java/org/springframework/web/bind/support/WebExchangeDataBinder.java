@@ -18,6 +18,7 @@ package org.springframework.web.bind.support;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import reactor.core.publisher.Mono;
@@ -163,6 +164,11 @@ public class WebExchangeDataBinder extends WebDataBinder {
 		@Override
 		public Object resolveValue(String name, Class<?> type) {
 			return this.map.get(name);
+		}
+
+		@Override
+		public Set<String> getNames() {
+			return this.map.keySet();
 		}
 	}
 
