@@ -194,6 +194,45 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
+	fun nestedContextProvider() {
+		val mockRequest = get("https://example.com/nested/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(nestedRouterWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun nestedContextProviderWithOverride() {
+		val mockRequest = get("https://example.com/nested/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(nestedRouterWithContextProviderOverride.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun doubleNestedContextProvider() {
+		val mockRequest = get("https://example.com/nested/nested/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(nestedRouterWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
 	fun contextProviderAndFilter() {
 		val mockRequest = get("https://example.com/")
 			.header("Custom-Header", "bar")
@@ -319,6 +358,36 @@ class CoRouterFunctionDslTests {
 			}
 			else {
 				next.invoke(request)
+			}
+		}
+	}
+
+	private val nestedRouterWithContextProvider = coRouter {
+		context {
+			CoroutineName(it.headers().firstHeader("Custom-Header")!!)
+		}
+		"/nested".nest {
+			GET("/") {
+				ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+			}
+			"/nested".nest {
+				GET("/") {
+					ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+				}
+			}
+		}
+	}
+
+	private val nestedRouterWithContextProviderOverride = coRouter {
+		context {
+			CoroutineName("parent-context")
+		}
+		"/nested".nest {
+			context {
+				CoroutineName(it.headers().firstHeader("Custom-Header")!!)
+			}
+			GET("/") {
+				ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
 			}
 		}
 	}
