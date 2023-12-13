@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  */
-public abstract class BeanDefinitionReaderUtils {
+public final class BeanDefinitionReaderUtils {
 
 	/**
 	 * Separator for generated bean names. If a class name or parent name is not
@@ -43,6 +43,8 @@ public abstract class BeanDefinitionReaderUtils {
 	 */
 	public static final String GENERATED_BEAN_NAME_SEPARATOR = BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 
+	private BeanDefinitionReaderUtils() {
+	}
 
 	/**
 	 * Create a new GenericBeanDefinition for the given parent name and class name,

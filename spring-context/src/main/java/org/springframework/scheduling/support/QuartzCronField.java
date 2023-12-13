@@ -335,14 +335,12 @@ final class QuartzCronField extends CronField {
 	@Override
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
 		T result = adjust(temporal);
-		if (result != null) {
-			if (result.compareTo(temporal) < 0) {
-				// We ended up before the start, roll forward and try again
-				temporal = this.rollForwardType.rollForward(temporal);
-				result = adjust(temporal);
-				if (result != null) {
-					result = type().reset(result);
-				}
+		if (result != null && result.compareTo(temporal) < 0) {
+			// We ended up before the start, roll forward and try again
+			temporal = this.rollForwardType.rollForward(temporal);
+			result = adjust(temporal);
+			if (result != null) {
+				result = type().reset(result);
 			}
 		}
 		return result;

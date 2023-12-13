@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  * @since 1.2
  * @see #locateMBeanServer
  */
-public abstract class JmxUtils {
+public final class JmxUtils {
 
 	/**
 	 * The key used when extending an existing {@link ObjectName} with the
@@ -65,7 +65,8 @@ public abstract class JmxUtils {
 
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
-
+	private JmxUtils() {
+	}
 	/**
 	 * Attempt to find a locally running {@code MBeanServer}. Fails if no
 	 * {@code MBeanServer} can be found. Logs a warning if more than one

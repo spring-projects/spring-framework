@@ -45,8 +45,10 @@ import org.springframework.util.Assert;
  * @since 3.1.2
  * @see BeanFactoryUtils
  */
-public abstract class BeanFactoryAnnotationUtils {
+public final class BeanFactoryAnnotationUtils {
 
+	private BeanFactoryAnnotationUtils() {
+	}
 	/**
 	 * Retrieve all beans of type {@code T} from the given {@code BeanFactory} declaring a
 	 * qualifier (e.g. via {@code <qualifier>} or {@code @Qualifier}) matching the given

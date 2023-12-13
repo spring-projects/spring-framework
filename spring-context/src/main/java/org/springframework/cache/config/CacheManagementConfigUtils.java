@@ -22,7 +22,7 @@ package org.springframework.cache.config;
  * @author Juergen Hoeller
  * @since 4.1
  */
-public abstract class CacheManagementConfigUtils {
+public final class CacheManagementConfigUtils {
 
 	/**
 	 * The name of the cache advisor bean.
@@ -47,5 +47,8 @@ public abstract class CacheManagementConfigUtils {
 	 */
 	public static final String JCACHE_ASPECT_BEAN_NAME =
 			"org.springframework.cache.config.internalJCacheAspect";
+
+	private CacheManagementConfigUtils() {
+	}
 
 }

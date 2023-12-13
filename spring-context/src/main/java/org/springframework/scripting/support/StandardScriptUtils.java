@@ -34,7 +34,10 @@ import javax.script.SimpleBindings;
  * @author Juergen Hoeller
  * @since 4.2.2
  */
-public abstract class StandardScriptUtils {
+public final class StandardScriptUtils {
+
+	private StandardScriptUtils() {
+	}
 
 	/**
 	 * Retrieve a {@link ScriptEngine} from the given {@link ScriptEngineManager}

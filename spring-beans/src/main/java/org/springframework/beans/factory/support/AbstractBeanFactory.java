@@ -1525,8 +1525,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch)
 			throws ClassNotFoundException {
 
-		ClassLoader beanClassLoader = getBeanClassLoader();
-		ClassLoader dynamicLoader = beanClassLoader;
+		ClassLoader bClassLoader = getBeanClassLoader();
+		ClassLoader dynamicLoader = bClassLoader;
 		boolean freshResolve = false;
 
 		if (!ObjectUtils.isEmpty(typesToMatch)) {
@@ -1578,7 +1578,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 
 		// Resolve regularly, caching the result in the BeanDefinition...
-		return mbd.resolveBeanClass(beanClassLoader);
+		return mbd.resolveBeanClass(bClassLoader);
 	}
 
 	/**

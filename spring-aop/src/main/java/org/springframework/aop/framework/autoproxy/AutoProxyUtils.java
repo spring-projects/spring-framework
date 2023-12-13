@@ -31,7 +31,10 @@ import org.springframework.util.StringUtils;
  * @since 2.0.3
  * @see AbstractAutoProxyCreator
  */
-public abstract class AutoProxyUtils {
+public final class AutoProxyUtils {
+
+	private AutoProxyUtils(){
+	}
 
 	/**
 	 * Bean definition attribute that may indicate whether a given bean is supposed

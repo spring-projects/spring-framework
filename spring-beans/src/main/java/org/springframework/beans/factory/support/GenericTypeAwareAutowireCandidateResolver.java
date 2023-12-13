@@ -158,13 +158,11 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	@Nullable
 	protected RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
 		BeanDefinitionHolder decDef = rbd.getDecoratedDefinition();
-		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
-			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
+		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf && clbf.containsBeanDefinition(decDef.getBeanName())) {
 				BeanDefinition dbd = clbf.getMergedBeanDefinition(decDef.getBeanName());
 				if (dbd instanceof RootBeanDefinition rootBeanDef) {
 					return rootBeanDef;
 				}
-			}
 		}
 		return null;
 	}

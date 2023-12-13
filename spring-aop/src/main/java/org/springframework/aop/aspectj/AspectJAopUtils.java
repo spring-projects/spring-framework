@@ -30,7 +30,10 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class AspectJAopUtils {
+public final class AspectJAopUtils {
+
+	private AspectJAopUtils(){
+	}
 
 	/**
 	 * Return {@code true} if the advisor is a form of before advice.

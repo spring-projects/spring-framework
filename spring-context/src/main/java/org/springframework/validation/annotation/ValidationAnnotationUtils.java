@@ -29,9 +29,12 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 5.3.7
  */
-public abstract class ValidationAnnotationUtils {
+public final class ValidationAnnotationUtils {
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
+	private ValidationAnnotationUtils() {
+	}
 
 
 	/**

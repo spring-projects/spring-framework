@@ -74,7 +74,7 @@ class MBeanExportBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		String serverBeanName = element.getAttribute(SERVER_ATTRIBUTE);
 		if (StringUtils.hasText(serverBeanName)) {
-			builder.addPropertyReference("server", serverBeanName);
+			builder.addPropertyReference(SERVER_ATTRIBUTE, serverBeanName);
 		}
 
 		String registration = element.getAttribute(REGISTRATION_ATTRIBUTE);

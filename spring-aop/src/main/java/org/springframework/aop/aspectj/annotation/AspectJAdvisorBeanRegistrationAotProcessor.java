@@ -33,13 +33,13 @@ import org.springframework.util.ClassUtils;
  */
 class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final boolean aspectjPresent = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
+	private static final boolean ASPECTJ_PRESENT = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
 			AspectJAdvisorBeanRegistrationAotProcessor.class.getClassLoader());
 
 
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (aspectjPresent) {
+		if (ASPECTJ_PRESENT) {
 			Class<?> beanClass = registeredBean.getBeanClass();
 			if (AbstractAspectJAdvisorFactory.compiledByAjc(beanClass)) {
 				return new AspectJAdvisorContribution(beanClass);

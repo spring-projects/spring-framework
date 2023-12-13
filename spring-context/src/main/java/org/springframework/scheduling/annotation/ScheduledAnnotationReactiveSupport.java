@@ -57,7 +57,7 @@ import static org.springframework.scheduling.support.ScheduledTaskObservationDoc
  * @author Brian Clozel
  * @since 6.1
  */
-abstract class ScheduledAnnotationReactiveSupport {
+final class ScheduledAnnotationReactiveSupport {
 
 	static final boolean reactorPresent = ClassUtils.isPresent(
 			"reactor.core.publisher.Flux", ScheduledAnnotationReactiveSupport.class.getClassLoader());
@@ -66,6 +66,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 			"kotlinx.coroutines.reactor.MonoKt", ScheduledAnnotationReactiveSupport.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ScheduledAnnotationReactiveSupport.class);
+
+	private ScheduledAnnotationReactiveSupport() {
+	}
 
 
 	/**

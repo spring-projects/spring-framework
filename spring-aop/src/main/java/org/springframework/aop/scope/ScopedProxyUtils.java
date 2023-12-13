@@ -36,11 +36,14 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 2.5
  */
-public abstract class ScopedProxyUtils {
+public final class ScopedProxyUtils {
 
 	private static final String TARGET_NAME_PREFIX = "scopedTarget.";
 
 	private static final int TARGET_NAME_PREFIX_LENGTH = TARGET_NAME_PREFIX.length();
+
+	private ScopedProxyUtils() {
+	}
 
 
 	/**

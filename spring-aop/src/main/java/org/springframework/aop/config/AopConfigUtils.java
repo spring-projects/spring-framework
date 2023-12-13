@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * @since 2.5
  * @see AopNamespaceUtils
  */
-public abstract class AopConfigUtils {
+public final class AopConfigUtils {
 
 	/**
 	 * The bean name of the internally managed auto-proxy creator.
@@ -62,7 +62,8 @@ public abstract class AopConfigUtils {
 		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class);
 		APC_PRIORITY_LIST.add(AnnotationAwareAspectJAutoProxyCreator.class);
 	}
-
+	private AopConfigUtils() {
+	}
 
 	@Nullable
 	public static BeanDefinition registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {

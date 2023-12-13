@@ -121,10 +121,8 @@ public class ConstructorArgumentValues {
 	 */
 	private void addOrMergeIndexedArgumentValue(Integer key, ValueHolder newValue) {
 		ValueHolder currentValue = this.indexedArgumentValues.get(key);
-		if (currentValue != null && newValue.getValue() instanceof Mergeable mergeable) {
-			if (mergeable.isMergeEnabled()) {
+		if (currentValue != null && newValue.getValue() instanceof Mergeable mergeable && mergeable.isMergeEnabled()) {
 				newValue.setValue(mergeable.merge(currentValue.getValue()));
-			}
 		}
 		this.indexedArgumentValues.put(key, newValue);
 	}
@@ -229,10 +227,8 @@ public class ConstructorArgumentValues {
 			for (Iterator<ValueHolder> it = this.genericArgumentValues.iterator(); it.hasNext();) {
 				ValueHolder currentValue = it.next();
 				if (newValue.getName().equals(currentValue.getName())) {
-					if (newValue.getValue() instanceof Mergeable mergeable) {
-						if (mergeable.isMergeEnabled()) {
-							newValue.setValue(mergeable.merge(currentValue.getValue()));
-						}
+					if (newValue.getValue() instanceof Mergeable mergeable && mergeable.isMergeEnabled()) {
+						newValue.setValue(mergeable.merge(currentValue.getValue()));
 					}
 					it.remove();
 				}

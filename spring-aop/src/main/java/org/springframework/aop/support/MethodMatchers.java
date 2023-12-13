@@ -41,7 +41,10 @@ import org.springframework.util.Assert;
  * @see ClassFilters
  * @see Pointcuts
  */
-public abstract class MethodMatchers {
+public final class MethodMatchers {
+
+	private MethodMatchers() {
+	}
 
 	/**
 	 * Match all methods that <i>either</i> (or both) of the given MethodMatchers matches.

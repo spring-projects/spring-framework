@@ -30,7 +30,10 @@ import org.springframework.lang.Nullable;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-abstract class CoroutinesUtils {
+final class CoroutinesUtils {
+
+	private CoroutinesUtils() {
+	}
 
 	static Object asFlow(Object publisher) {
 		return ReactiveFlowKt.asFlow((Publisher<?>) publisher);

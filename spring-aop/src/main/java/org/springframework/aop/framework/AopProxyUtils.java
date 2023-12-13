@@ -47,7 +47,10 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @see org.springframework.aop.support.AopUtils
  */
-public abstract class AopProxyUtils {
+public final class AopProxyUtils {
+
+	private AopProxyUtils(){
+	}
 
 	/**
 	 * Obtain the singleton target object behind the given proxy, if any.

@@ -449,7 +449,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 					editorHolder = this.customEditorsForPath.get(strippedName);
 				}
 			}
-			if (editorHolder != null) {
+			else {
 				return editorHolder.getRegisteredType();
 			}
 		}

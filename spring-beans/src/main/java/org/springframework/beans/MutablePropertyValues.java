@@ -221,11 +221,9 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	private PropertyValue mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
 		Object value = newPv.getValue();
-		if (value instanceof Mergeable mergeable) {
-			if (mergeable.isMergeEnabled()) {
+		if (value instanceof Mergeable mergeable && mergeable.isMergeEnabled() ) {
 				Object merged = mergeable.merge(currentPv.getValue());
 				return new PropertyValue(newPv.getName(), merged);
-			}
 		}
 		return newPv;
 	}

@@ -43,7 +43,10 @@ import org.springframework.util.Assert;
  * @see ComponentScan.Filter
  * @see org.springframework.core.type.filter.TypeFilter
  */
-public abstract class TypeFilterUtils {
+public final class TypeFilterUtils {
+
+	private TypeFilterUtils() {
+	}
 
 	/**
 	 * Create {@linkplain TypeFilter type filters} from the supplied

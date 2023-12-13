@@ -40,7 +40,7 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  * @see AopConfigUtils
  */
-public abstract class AopNamespaceUtils {
+public final class AopNamespaceUtils {
 
 	/**
 	 * The {@code proxy-target-class} attribute as found on AOP-related XML tags.
@@ -51,6 +51,9 @@ public abstract class AopNamespaceUtils {
 	 * The {@code expose-proxy} attribute as found on AOP-related XML tags.
 	 */
 	private static final String EXPOSE_PROXY_ATTRIBUTE = "expose-proxy";
+
+	private AopNamespaceUtils() {
+	}
 
 
 	public static void registerAutoProxyCreatorIfNecessary(

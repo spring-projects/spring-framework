@@ -36,7 +36,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public abstract class TaskUtils {
+public final class TaskUtils {
 
 	/**
 	 * An ErrorHandler strategy that will log the Exception but perform
@@ -51,6 +51,9 @@ public abstract class TaskUtils {
 	 * execution of a scheduled task.
 	 */
 	public static final ErrorHandler LOG_AND_PROPAGATE_ERROR_HANDLER = new PropagatingErrorHandler();
+
+	private TaskUtils() {
+	}
 
 
 	/**

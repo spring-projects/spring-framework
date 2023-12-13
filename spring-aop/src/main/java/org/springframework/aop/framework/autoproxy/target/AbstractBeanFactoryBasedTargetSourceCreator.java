@@ -151,8 +151,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
-		internalBeanFactory.getBeanPostProcessors().removeIf(beanPostProcessor ->
-				beanPostProcessor instanceof AopInfrastructureBean);
+		internalBeanFactory.getBeanPostProcessors().removeIf(AopInfrastructureBean.class::isInstance);
 
 		return internalBeanFactory;
 	}

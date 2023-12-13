@@ -44,8 +44,10 @@ import org.springframework.javapoet.CodeBlock;
  * @author Stephane Nicoll
  * @since 6.1.2
  */
-abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
+final class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 
+	private BeanDefinitionPropertyValueCodeGeneratorDelegates() {
+	}
 	/**
 	 * Return the {@link Delegate} implementations for common bean definition
 	 * property value types. These are:

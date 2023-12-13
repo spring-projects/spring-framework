@@ -28,7 +28,7 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
  * @author Mark Fisher
  * @since 2.5
  */
-public abstract class LangNamespaceUtils {
+public final class LangNamespaceUtils {
 
 	/**
 	 * The unique name under which the internally managed {@link ScriptFactoryPostProcessor} is
@@ -36,6 +36,9 @@ public abstract class LangNamespaceUtils {
 	 */
 	private static final String SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME =
 			"org.springframework.scripting.config.scriptFactoryPostProcessor";
+
+	private LangNamespaceUtils() {
+	}
 
 
 	/**

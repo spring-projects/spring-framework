@@ -39,7 +39,10 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class BshScriptUtils {
+public final class BshScriptUtils {
+
+	private BshScriptUtils() {
+	}
 
 	/**
 	 * Create a new BeanShell-scripted object from the given script source.

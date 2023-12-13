@@ -22,7 +22,7 @@ package org.springframework.scheduling.config;
  * @author Juergen Hoeller
  * @since 4.1
  */
-public abstract class TaskManagementConfigUtils {
+public final class TaskManagementConfigUtils {
 
 	/**
 	 * The bean name of the internally managed Scheduled annotation processor.
@@ -41,5 +41,8 @@ public abstract class TaskManagementConfigUtils {
 	 */
 	public static final String ASYNC_EXECUTION_ASPECT_BEAN_NAME =
 			"org.springframework.scheduling.config.internalAsyncExecutionAspect";
+
+	private TaskManagementConfigUtils() {
+	}
 
 }

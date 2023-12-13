@@ -40,13 +40,16 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  * @see org.springframework.beans.factory.NamedBean
  */
-public abstract class ExposeBeanNameAdvisors {
+public final class ExposeBeanNameAdvisors {
 
 	/**
 	 * Binding for the bean name of the bean which is currently being invoked
 	 * in the ReflectiveMethodInvocation userAttributes Map.
 	 */
 	private static final String BEAN_NAME_ATTRIBUTE = ExposeBeanNameAdvisors.class.getName() + ".BEAN_NAME";
+
+	private ExposeBeanNameAdvisors() {
+	}
 
 
 	/**

@@ -28,7 +28,10 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see BindingResult#MODEL_KEY_PREFIX
  */
-public abstract class BindingResultUtils {
+public final class BindingResultUtils {
+
+	private BindingResultUtils() {
+	}
 
 	/**
 	 * Find the BindingResult for the given name in the given model.

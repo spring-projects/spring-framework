@@ -91,23 +91,21 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			return bean;
 		}
 
-		if (bean instanceof Advised advised) {
-			if (!advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
+		if (bean instanceof Advised advised && !advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
 				// Add our local Advisor to the existing proxy's Advisor chain.
-				if (this.beforeExistingAdvisors) {
-					advised.addAdvisor(0, this.advisor);
-				}
-				else if (advised.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE &&
-						advised.getAdvisorCount() > 0) {
+			if (this.beforeExistingAdvisors) {
+				advised.addAdvisor(0, this.advisor);
+			}
+			else if (advised.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE &&
+					advised.getAdvisorCount() > 0) {
 					// No target, leave last Advisor in place and add new Advisor right before.
-					advised.addAdvisor(advised.getAdvisorCount() - 1, this.advisor);
-					return bean;
-				}
-				else {
-					advised.addAdvisor(this.advisor);
-				}
+				advised.addAdvisor(advised.getAdvisorCount() - 1, this.advisor);
 				return bean;
 			}
+			else {
+				advised.addAdvisor(this.advisor);
+			}
+			return bean;
 		}
 
 		if (isEligible(bean, beanName)) {

@@ -28,7 +28,10 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class JmxMetadataUtils {
+public final class JmxMetadataUtils {
+
+	private JmxMetadataUtils() {
+	}
 
 	/**
 	 * Convert the supplied {@link ManagedNotification} into the corresponding

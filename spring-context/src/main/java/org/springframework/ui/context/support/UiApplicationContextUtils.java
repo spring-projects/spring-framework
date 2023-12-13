@@ -34,7 +34,7 @@ import org.springframework.ui.context.ThemeSource;
  * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
-public abstract class UiApplicationContextUtils {
+public final class UiApplicationContextUtils {
 
 	/**
 	 * Name of the ThemeSource bean in the factory.
@@ -45,6 +45,9 @@ public abstract class UiApplicationContextUtils {
 
 
 	private static final Log logger = LogFactory.getLog(UiApplicationContextUtils.class);
+
+	private UiApplicationContextUtils() {
+	}
 
 
 	/**

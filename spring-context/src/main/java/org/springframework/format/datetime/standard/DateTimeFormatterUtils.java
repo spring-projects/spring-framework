@@ -27,7 +27,10 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 5.3.5
  */
-abstract class DateTimeFormatterUtils {
+final class DateTimeFormatterUtils {
+
+	private DateTimeFormatterUtils() {
+	}
 
 	static DateTimeFormatter createStrictDateTimeFormatter(String pattern) {
 		// Using strict parsing to align with Joda-Time and standard DateFormat behavior:

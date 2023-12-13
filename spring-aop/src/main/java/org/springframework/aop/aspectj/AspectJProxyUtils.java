@@ -32,7 +32,10 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class AspectJProxyUtils {
+public final class AspectJProxyUtils {
+
+	private AspectJProxyUtils(){
+	}
 
 	/**
 	 * Add special advisors if necessary to work with a proxy chain that contains AspectJ advisors:

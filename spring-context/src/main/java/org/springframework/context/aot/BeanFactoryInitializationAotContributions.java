@@ -19,6 +19,7 @@ package org.springframework.context.aot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.beans.factory.aot.AotServices;
@@ -61,15 +62,10 @@ class BeanFactoryInitializationAotContributions {
 	private List<BeanFactoryInitializationAotContribution> getContributions(
 			DefaultListableBeanFactory beanFactory,
 			List<BeanFactoryInitializationAotProcessor> processors) {
-		List<BeanFactoryInitializationAotContribution> contributions = new ArrayList<>();
-		for (BeanFactoryInitializationAotProcessor processor : processors) {
-			BeanFactoryInitializationAotContribution contribution = processor
-					.processAheadOfTime(beanFactory);
-			if (contribution != null) {
-				contributions.add(contribution);
-			}
-		}
-		return Collections.unmodifiableList(contributions);
+
+		return processors.stream().map(processor -> processor.processAheadOfTime(beanFactory))
+				.filter(Objects::nonNull)
+				.toList();
 	}
 
 	void applyTo(GenerationContext generationContext,

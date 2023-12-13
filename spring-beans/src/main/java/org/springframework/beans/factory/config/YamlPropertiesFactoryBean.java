@@ -132,7 +132,7 @@ public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryB
 	 */
 	protected Properties createProperties() {
 		Properties result = CollectionFactory.createStringAdaptingProperties();
-		process((properties, map) -> result.putAll(properties));
+		process((props, map) -> result.putAll(props));
 		return result;
 	}
 

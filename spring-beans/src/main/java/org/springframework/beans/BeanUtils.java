@@ -798,18 +798,16 @@ public abstract class BeanUtils {
 						sourceResults.getPropertyDescriptor(targetPd.getName()) : targetPd);
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
-					if (readMethod != null) {
-						if (isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
-							try {
-								ReflectionUtils.makeAccessible(readMethod);
-								Object value = readMethod.invoke(source);
-								ReflectionUtils.makeAccessible(writeMethod);
-								writeMethod.invoke(target, value);
-							}
-							catch (Throwable ex) {
-								throw new FatalBeanException(
-										"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
-							}
+					if (readMethod != null && isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
+						try {
+							ReflectionUtils.makeAccessible(readMethod);
+							Object value = readMethod.invoke(source);
+							ReflectionUtils.makeAccessible(writeMethod);
+							writeMethod.invoke(target, value);
+						}
+						catch (Throwable ex) {
+							throw new FatalBeanException(
+									"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
 						}
 					}
 				}

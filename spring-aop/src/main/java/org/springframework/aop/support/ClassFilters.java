@@ -36,7 +36,10 @@ import org.springframework.util.ObjectUtils;
  * @see MethodMatchers
  * @see Pointcuts
  */
-public abstract class ClassFilters {
+public final class ClassFilters {
+
+	private ClassFilters(){
+	}
 
 	/**
 	 * Match all classes that <i>either</i> (or both) of the given ClassFilters matches.

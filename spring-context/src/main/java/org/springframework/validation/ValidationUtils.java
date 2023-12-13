@@ -37,9 +37,12 @@ import org.springframework.util.StringUtils;
  * @see Validator
  * @see Errors
  */
-public abstract class ValidationUtils {
+public final class ValidationUtils {
 
 	private static final Log logger = LogFactory.getLog(ValidationUtils.class);
+
+	private ValidationUtils() {
+	}
 
 
 	/**

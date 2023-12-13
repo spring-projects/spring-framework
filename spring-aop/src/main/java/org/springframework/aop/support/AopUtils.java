@@ -63,7 +63,10 @@ import org.springframework.util.ReflectionUtils;
  * @author Sebastien Deleuze
  * @see org.springframework.aop.framework.AopProxyUtils
  */
-public abstract class AopUtils {
+public final class AopUtils {
+
+	private AopUtils(){
+	}
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.

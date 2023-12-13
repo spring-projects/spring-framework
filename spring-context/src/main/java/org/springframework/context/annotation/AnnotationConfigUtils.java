@@ -59,7 +59,10 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
  */
-public abstract class AnnotationConfigUtils {
+public final class AnnotationConfigUtils {
+
+	private AnnotationConfigUtils() {
+	}
 
 	/**
 	 * The bean name of the internally managed Configuration annotation processor.

@@ -30,11 +30,14 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Juergen Hoeller
  * @since 3.1
  */
-abstract class BeanAnnotationHelper {
+final class BeanAnnotationHelper {
 
 	private static final Map<Method, String> beanNameCache = new ConcurrentReferenceHashMap<>();
 
 	private static final Map<Method, Boolean> scopedProxyCache = new ConcurrentReferenceHashMap<>();
+
+	private BeanAnnotationHelper() {
+	}
 
 
 	public static boolean isBeanAnnotated(Method method) {

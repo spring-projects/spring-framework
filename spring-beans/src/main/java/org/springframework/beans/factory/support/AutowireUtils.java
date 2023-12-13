@@ -49,7 +49,10 @@ import org.springframework.util.ClassUtils;
  * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
-abstract class AutowireUtils {
+final class AutowireUtils {
+
+	private AutowireUtils(){
+	}
 
 	public static final Comparator<Executable> EXECUTABLE_COMPARATOR = (e1, e2) -> {
 		int result = Boolean.compare(Modifier.isPublic(e2.getModifiers()), Modifier.isPublic(e1.getModifiers()));
