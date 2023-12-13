@@ -205,8 +205,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Flag that indicates whether this context has been closed already. */
 	private final AtomicBoolean closed = new AtomicBoolean();
 
-	/** Synchronization lock for the "refresh" and "destroy". */
+	/** Synchronization lock for "refresh" and "close". */
 	private final Lock startupShutdownLock = new ReentrantLock();
+
+	/** Currently active startup/shutdown thread. */
+	@Nullable
+	private volatile Thread startupShutdownThread;
 
 	/** Reference to the JVM shutdown hook, if registered. */
 	@Nullable
@@ -580,6 +584,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		this.startupShutdownLock.lock();
 		try {
+			this.startupShutdownThread = Thread.currentThread();
+
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
 			// Prepare this context for refreshing.
@@ -643,6 +649,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		finally {
+			this.startupShutdownThread = null;
 			this.startupShutdownLock.unlock();
 		}
 	}
@@ -1022,18 +1029,45 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.shutdownHook = new Thread(SHUTDOWN_HOOK_THREAD_NAME) {
 				@Override
 				public void run() {
-					if (startupShutdownLock.tryLock()) {
-						try {
-							doClose();
-						}
-						finally {
-							startupShutdownLock.unlock();
-						}
+					if (isStartupShutdownThreadStuck()) {
+						active.set(false);
+						return;
+					}
+					startupShutdownLock.lock();
+					try {
+						doClose();
+					}
+					finally {
+						startupShutdownLock.unlock();
 					}
 				}
 			};
 			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 		}
+	}
+
+	/**
+	 * Determine whether an active startup/shutdown thread is currently stuck,
+	 * e.g. through a {@code System.exit} call in a user component.
+	 */
+	private boolean isStartupShutdownThreadStuck() {
+		Thread activeThread = this.startupShutdownThread;
+		if (activeThread != null && activeThread.getState() == Thread.State.WAITING) {
+			// Indefinitely waiting: might be Thread.join or the like, or System.exit
+			activeThread.interrupt();
+			try {
+				// Leave just a little bit of time for the interruption to show effect
+				Thread.sleep(1);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			if (activeThread.getState() == Thread.State.WAITING) {
+				// Interrupted but still waiting: very likely a System.exit call
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1045,23 +1079,31 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Override
 	public void close() {
-		if (this.startupShutdownLock.tryLock()) {
-			try {
-				doClose();
-				// If we registered a JVM shutdown hook, we don't need it anymore now:
-				// We've already explicitly closed the context.
-				if (this.shutdownHook != null) {
-					try {
-						Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-					}
-					catch (IllegalStateException ex) {
-						// ignore - VM is already shutting down
-					}
+		if (isStartupShutdownThreadStuck()) {
+			this.active.set(false);
+			return;
+		}
+
+		this.startupShutdownLock.lock();
+		try {
+			this.startupShutdownThread = Thread.currentThread();
+
+			doClose();
+
+			// If we registered a JVM shutdown hook, we don't need it anymore now:
+			// We've already explicitly closed the context.
+			if (this.shutdownHook != null) {
+				try {
+					Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+				}
+				catch (IllegalStateException ex) {
+					// ignore - VM is already shutting down
 				}
 			}
-			finally {
-				this.startupShutdownLock.unlock();
-			}
+		}
+		finally {
+			this.startupShutdownThread = null;
+			this.startupShutdownLock.unlock();
 		}
 	}
 
