@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@code ResourceFieldValueResolver}.
+ * Tests for {@link ResourceElementResolver} with fields.
  *
  * @author Stephane Nicoll
  */

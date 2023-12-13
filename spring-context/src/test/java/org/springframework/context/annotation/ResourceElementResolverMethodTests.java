@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@code ResourceMethodArgumentResolver}.
+ * Tests for {@link ResourceElementResolver} with methods.
  *
  * @author Stephane Nicoll
  */
