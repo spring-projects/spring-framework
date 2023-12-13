@@ -708,19 +708,20 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			PathPatternsRequestCondition pathPatternsCondition = null;
 			PatternsRequestCondition patternsCondition = null;
 
-			if (this.options.getPathMatcher() != null) {
+			PathPatternParser parser = this.options.getPatternParserToUse();
+
+			if (parser != null) {
+				pathPatternsCondition = (ObjectUtils.isEmpty(this.paths) ?
+						EMPTY_PATH_PATTERNS :
+						new PathPatternsRequestCondition(parser, this.paths));
+			}
+			else {
 				patternsCondition = (ObjectUtils.isEmpty(this.paths) ?
 						EMPTY_PATTERNS :
 						new PatternsRequestCondition(
-								this.paths, null, this.options.getPathMatcher(),
+								this.paths, null, this.options.pathMatcher,
 								this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
 								this.options.getFileExtensions()));
-			}
-			else {
-				PathPatternParser parser = (this.options.getPatternParser() != null ?
-						this.options.getPatternParser() : new PathPatternParser());
-				pathPatternsCondition = (ObjectUtils.isEmpty(this.paths) ?
-						EMPTY_PATH_PATTERNS : new PathPatternsRequestCondition(parser, this.paths));
 			}
 
 			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
@@ -784,9 +785,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		@Override
 		@SuppressWarnings("deprecation")
 		public Builder paths(String... paths) {
-			if (this.options.patternParser != null) {
+			PathPatternParser parser = this.options.getPatternParserToUse();
+
+			if (parser != null) {
 				this.pathPatternsCondition = (ObjectUtils.isEmpty(paths) ?
-						EMPTY_PATH_PATTERNS : new PathPatternsRequestCondition(this.options.patternParser, paths));
+						EMPTY_PATH_PATTERNS : new PathPatternsRequestCondition(parser, paths));
 			}
 			else {
 				this.patternsCondition = (ObjectUtils.isEmpty(paths) ?
@@ -873,6 +876,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
+		private static PathPatternParser defaultPatternParser = new PathPatternParser();
+
+
 		@Nullable
 		private PathPatternParser patternParser;
 
@@ -952,6 +958,20 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		@Nullable
 		public PathMatcher getPathMatcher() {
 			return this.pathMatcher;
+		}
+
+		/**
+		 * Return the {@code PathPatternParser} to use, the one set explicitly
+		 * or falling back on a default instance if both {@code PathPatternParser}
+		 * and {@code PathMatcher} are not set.
+		 * @since 6.1.2
+		 */
+		@Nullable
+		public PathPatternParser getPatternParserToUse() {
+			if (this.patternParser == null && this.pathMatcher == null) {
+				return defaultPatternParser;
+			}
+			return this.patternParser;
 		}
 
 		/**
