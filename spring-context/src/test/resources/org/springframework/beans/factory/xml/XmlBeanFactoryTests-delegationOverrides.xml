@@ -36,11 +36,20 @@
 
 	<bean id="replaceVoidMethod" parent="someParent"
 			class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
+	</bean>
 
+	<bean id="replaceEchoMethod" class="org.springframework.beans.factory.xml.EchoService">
+		<!--
+			This method is not overloaded, so we don't need to specify any arg types
+		-->
+		<replaced-method name="echo" replacer="reverseArrayReplacer" />
 	</bean>
 
 	<bean id="reverseReplacer"
 		class="org.springframework.beans.factory.xml.ReverseMethodReplacer"/>
+
+	<bean id="reverseArrayReplacer"
+		class="org.springframework.beans.factory.xml.ReverseArrayMethodReplacer"/>
 
 	<bean id="fixedReplacer"
 		class="org.springframework.beans.factory.xml.FixedMethodReplacer"/>
