@@ -22,8 +22,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
@@ -56,6 +61,8 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.IndexedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
@@ -1336,6 +1343,15 @@ class XmlBeanFactoryTests {
 		assertThat(dos.lastArg).isEqualTo(s2);
 	}
 
+	@Test  // gh-31826
+	void replaceNonOverloadedInterfaceMethodWithoutSpecifyingExplicitArgTypes() {
+		try (ConfigurableApplicationContext context =
+				new ClassPathXmlApplicationContext(DELEGATION_OVERRIDES_CONTEXT.getPath())) {
+			EchoService echoService = context.getBean(EchoService.class);
+			assertThat(echoService.echo("foo", "bar")).containsExactly("bar", "foo");
+		}
+	}
+
 	@Test
 	void lookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
@@ -1890,4 +1906,21 @@ class XmlBeanFactoryTests {
 		}
 	}
 
+}
+
+interface EchoService {
+
+	String[] echo(Object... objects);
+}
+
+class ReverseArrayMethodReplacer implements MethodReplacer {
+
+	@Override
+	public Object reimplement(Object obj, Method method, Object[] args) {
+		List<String> list = Arrays.stream((Object[]) args[0])
+				.map(Object::toString)
+				.collect(Collectors.toCollection(ArrayList::new));
+		Collections.reverse(list);
+		return list.toArray(String[]::new);
+	}
 }
