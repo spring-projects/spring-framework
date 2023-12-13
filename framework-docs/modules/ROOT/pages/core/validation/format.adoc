@@ -184,9 +184,7 @@ Java::
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
 
-		private static final Set<Class<?>> FIELD_TYPES = Set.of(Short.class,
-				Integer.class, Long.class, Float.class, Double.class,
-				BigDecimal.class, BigInteger.class);
+		private static final Set<Class<?>> FIELD_TYPES = Set.of(Short.class, Integer.class, Long.class, Float.class, Double.class, BigDecimal.class, BigInteger.class);
 
 		public Set<Class<?>> getFieldTypes() {
 			return FIELD_TYPES;
