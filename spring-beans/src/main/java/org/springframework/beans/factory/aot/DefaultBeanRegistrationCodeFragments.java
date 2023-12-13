@@ -28,7 +28,9 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGenerator;
+import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.aot.AotServices.Loader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.InstanceSupplier;
@@ -171,12 +173,12 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
 			Predicate<String> attributeFilter) {
-
-		return new BeanDefinitionPropertiesCodeGenerator(
-				generationContext.getRuntimeHints(), attributeFilter,
-				beanRegistrationCode.getMethods(),
-				(name, value) -> generateValueCode(generationContext, name, value))
-				.generateCode(beanDefinition);
+		Loader loader = AotServices.factories(this.registeredBean.getBeanFactory().getBeanClassLoader());
+		List<Delegate> additionalDelegates = loader.load(Delegate.class).asList();
+		return new BeanDefinitionPropertiesCodeGenerator(generationContext.getRuntimeHints(),
+				attributeFilter, beanRegistrationCode.getMethods(),
+				additionalDelegates, (name, value) -> generateValueCode(generationContext, name, value)
+		).generateCode(beanDefinition);
 	}
 
 	@Nullable

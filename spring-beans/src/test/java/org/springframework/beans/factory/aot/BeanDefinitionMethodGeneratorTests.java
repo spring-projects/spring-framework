@@ -45,6 +45,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.AnnotatedBean;
 import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.aot.CustomBean;
+import org.springframework.beans.testfixture.beans.factory.aot.CustomPropertyValue;
 import org.springframework.beans.testfixture.beans.factory.aot.InnerBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
@@ -603,6 +605,23 @@ class BeanDefinitionMethodGeneratorTests {
 			assertThat(compiled.getSourceFile(".*BeanDefinitions"))
 					.contains("getSecondBeanDefinition()");
 		});
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenCustomPropertyValueUsesCustomDelegate() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(CustomBean.class);
+		beanDefinition.getPropertyValues().addPropertyValue(
+				"customPropertyValue", new CustomPropertyValue("test"));
+		RegisteredBean bean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, bean, "test",
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) ->
+				assertThat(actual.getPropertyValues().get("customPropertyValue"))
+						.isInstanceOfSatisfying(CustomPropertyValue.class, customPropertyValue
+								-> assertThat(customPropertyValue.value()).isEqualTo("test")));
 	}
 
 	@Test
