@@ -42,6 +42,7 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.junit.platform:junit-platform-launcher")  // for AOT processing
+	optional("org.mockito:mockito-core")
 	optional("org.seleniumhq.selenium:htmlunit-driver") {
 		exclude group: "commons-logging", module: "commons-logging"
 		exclude group: "net.bytebuddy", module: "byte-buddy"
@@ -79,6 +80,7 @@ dependencies {
 	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.junit.platform:junit-platform-testkit")
+	testImplementation("org.mockito:mockito-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("org.glassfish:jakarta.el")

@@ -183,6 +183,7 @@
 ***** xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[]
 ***** xref:testing/annotations/integration-spring/annotation-sqlgroup.adoc[]
 ***** xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[]
+***** xref:testing/annotations/integration-spring/annotation-beanoverriding.adoc[]
 **** xref:testing/annotations/integration-junit4.adoc[]
 **** xref:testing/annotations/integration-junit-jupiter.adoc[]
 **** xref:testing/annotations/integration-meta.adoc[]
