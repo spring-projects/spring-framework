@@ -28,7 +28,7 @@ javadoc {
 		header = rootProject.description
 		use = true
 		overview = project.relativePath("$rootProject.rootDir/framework-docs/src/docs/api/overview.html")
-		destinationDir = file("${project.buildDir}/docs/javadoc-api")
+		destinationDir = layout.buildDirectory.dir("docs/javadoc-api").get().asFile
 		splitIndex = true
 		links(rootProject.ext.javadocLinks)
 		addBooleanOption('Xdoclint:syntax,reference', true) // only check syntax and reference with doclint
