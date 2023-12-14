@@ -145,6 +145,15 @@ class CoroutinesUtilsTests {
 		}
 	}
 
+	@Test
+	fun invokeSuspendingFunctionWithValueClassParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClass") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
+		}
+	}
+
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
@@ -171,5 +180,13 @@ class CoroutinesUtilsTests {
 	suspend fun suspendingNullable(): String? {
 		return null
 	}
+
+	suspend fun suspendingFunctionWithValueClass(value: ValueClass): String {
+		delay(1)
+		return value.value
+	}
+
+	@JvmInline
+	value class ValueClass(val value: String)
 
 }
