@@ -18,7 +18,8 @@ package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -402,7 +403,8 @@ public class HandlerMethod extends AnnotatedMethod {
 					}
 					else {
 						Class<?> type = parameter.getParameterType();
-						if (merged.stream().anyMatch(VALID_PREDICATE) && List.class.isAssignableFrom(type)) {
+						if (merged.stream().anyMatch(VALID_PREDICATE) &&
+								(Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))) {
 							return true;
 						}
 					}
