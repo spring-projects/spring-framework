@@ -26,10 +26,10 @@ import org.hibernate.property.access.spi.PropertyAccess;
 /**
  * Hibernate 6.3+ substitution designed to leniently return {@code null}, as authorized by the API, to avoid throwing an
  * {@code HibernateException}.
- * TODO Ask Hibernate team to fix this as it looks like a bug
  *
  * @author Sebastien Deleuze
  * @since 6.1
+ * @see <a href="https://hibernate.atlassian.net/browse/HHH-17568">HHH-17568</a>
  */
 @TargetClass(className = "org.hibernate.bytecode.internal.none.BytecodeProviderImpl", onlyWith = SubstituteOnlyIfPresent.class)
 final class Target_BytecodeProvider {
