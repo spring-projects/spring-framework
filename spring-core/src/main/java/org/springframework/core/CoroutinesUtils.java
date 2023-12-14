@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,6 +41,7 @@ import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.reactor.MonoKt;
 import kotlinx.coroutines.reactor.ReactorFlowKt;
 import org.reactivestreams.Publisher;
+import org.springframework.util.ReflectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -54,6 +56,9 @@ import org.springframework.util.CollectionUtils;
  * @since 5.2
  */
 public abstract class CoroutinesUtils {
+
+	private static final ReflectionUtils.MethodFilter boxImplFilter =
+			(method -> method.isSynthetic() && Modifier.isStatic(method.getModifiers()) && method.getName().equals("box-impl"));
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -115,7 +120,14 @@ public abstract class CoroutinesUtils {
 							case INSTANCE -> argMap.put(parameter, target);
 							case VALUE -> {
 								if (!parameter.isOptional() || args[index] != null) {
-									argMap.put(parameter, args[index]);
+									if (parameter.getType().getClassifier() instanceof KClass<?> kClass && kClass.isValue()) {
+										Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
+										Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(javaClass, boxImplFilter);
+										Assert.state(methods.length == 1, "Unable to find a single box-impl synthetic static method in " + javaClass.getName());
+										argMap.put(parameter, ReflectionUtils.invokeMethod(methods[0], null, args[index]));
+									} else {
+										argMap.put(parameter, args[index]);
+									}
 								}
 								index++;
 							}
