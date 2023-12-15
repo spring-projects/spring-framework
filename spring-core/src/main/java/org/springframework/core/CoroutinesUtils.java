@@ -41,12 +41,12 @@ import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.reactor.MonoKt;
 import kotlinx.coroutines.reactor.ReactorFlowKt;
 import org.reactivestreams.Publisher;
-import org.springframework.util.ReflectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Utilities for working with Kotlin Coroutines.
@@ -125,7 +125,8 @@ public abstract class CoroutinesUtils {
 										Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(javaClass, boxImplFilter);
 										Assert.state(methods.length == 1, "Unable to find a single box-impl synthetic static method in " + javaClass.getName());
 										argMap.put(parameter, ReflectionUtils.invokeMethod(methods[0], null, args[index]));
-									} else {
+									}
+									else {
 										argMap.put(parameter, args[index]);
 									}
 								}
