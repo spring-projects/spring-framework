@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aot.nativex;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,8 +39,13 @@ class SerializationHintsWriter {
 
 	public static final SerializationHintsWriter INSTANCE = new SerializationHintsWriter();
 
+	private static final Comparator<JavaSerializationHint> JAVA_SERIALIZATION_HINT_COMPARATOR =
+			Comparator.comparing(JavaSerializationHint::getType);
+
 	public void write(BasicJsonWriter writer, SerializationHints hints) {
-		writer.writeArray(hints.javaSerializationHints().map(this::toAttributes).toList());
+		writer.writeArray(hints.javaSerializationHints()
+				.sorted(JAVA_SERIALIZATION_HINT_COMPARATOR)
+				.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(JavaSerializationHint serializationHint) {

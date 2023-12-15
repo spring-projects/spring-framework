@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.aot.nativex;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.ProxyHints;
+import org.springframework.aot.hint.TypeReference;
 
 /**
  * Write {@link JdkProxyHint}s contained in a {@link ProxyHints} to the JSON
@@ -38,8 +41,18 @@ class ProxyHintsWriter {
 
 	public static final ProxyHintsWriter INSTANCE = new ProxyHintsWriter();
 
+	private static final Comparator<JdkProxyHint> JDK_PROXY_HINT_COMPARATOR =
+			(left, right) -> {
+				String leftSignature = left.getProxiedInterfaces().stream()
+						.map(TypeReference::getCanonicalName).collect(Collectors.joining(","));
+				String rightSignature = right.getProxiedInterfaces().stream()
+						.map(TypeReference::getCanonicalName).collect(Collectors.joining(","));
+				return leftSignature.compareTo(rightSignature);
+			};
+
 	public void write(BasicJsonWriter writer, ProxyHints hints) {
-		writer.writeArray(hints.jdkProxyHints().map(this::toAttributes).toList());
+		writer.writeArray(hints.jdkProxyHints().sorted(JDK_PROXY_HINT_COMPARATOR)
+				.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(JdkProxyHint hint) {

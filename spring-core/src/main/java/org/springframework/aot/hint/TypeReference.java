@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * @author Sebastien Deleuze
  * @since 6.0
  */
-public interface TypeReference {
+public interface TypeReference extends Comparable<TypeReference> {
 
 	/**
 	 * Return the fully qualified name of this type reference.

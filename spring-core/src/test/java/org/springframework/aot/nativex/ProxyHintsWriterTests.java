@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aot.nativex;
 import java.io.StringWriter;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -32,8 +33,9 @@ import org.springframework.aot.hint.TypeReference;
  * Tests for {@link ProxyHintsWriter}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  */
-public class ProxyHintsWriterTests {
+class ProxyHintsWriterTests {
 
 	@Test
 	void empty() throws JSONException {
@@ -64,6 +66,18 @@ public class ProxyHintsWriterTests {
 	}
 
 	@Test
+	void shouldWriteEntriesInNaturalOrder() throws JSONException {
+		ProxyHints hints = new ProxyHints();
+		hints.registerJdkProxy(Supplier.class);
+		hints.registerJdkProxy(Function.class);
+		assertEquals("""
+				[
+					{ "interfaces": [ "java.util.function.Function" ] },
+					{ "interfaces": [ "java.util.function.Supplier" ] }
+				]""", hints);
+	}
+
+	@Test
 	void shouldWriteInnerClass() throws JSONException {
 		ProxyHints hints = new ProxyHints();
 		hints.registerJdkProxy(Inner.class);
@@ -88,7 +102,7 @@ public class ProxyHintsWriterTests {
 		StringWriter out = new StringWriter();
 		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
 		ProxyHintsWriter.INSTANCE.write(writer, hints);
-		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.NON_EXTENSIBLE);
+		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.STRICT);
 	}
 
 	interface Inner {

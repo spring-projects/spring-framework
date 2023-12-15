@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -32,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 6.0
  */
-public final class ExecutableHint extends MemberHint {
+public final class ExecutableHint extends MemberHint implements Comparable<ExecutableHint> {
 
 	private final List<TypeReference> parameterTypes;
 
@@ -89,6 +91,17 @@ public final class ExecutableHint extends MemberHint {
 	 */
 	public static Consumer<Builder> builtWith(ExecutableMode mode) {
 		return builder -> builder.withMode(mode);
+	}
+
+	@Override
+	public int compareTo(ExecutableHint other) {
+		return Comparator.comparing(ExecutableHint::getName, String::compareToIgnoreCase)
+				.thenComparing(ExecutableHint::getParameterTypes, Comparator.comparingInt(List::size))
+				.thenComparing(ExecutableHint::getParameterTypes, (params1, params2) -> {
+					String left = params1.stream().map(TypeReference::getCanonicalName).collect(Collectors.joining(","));
+					String right = params2.stream().map(TypeReference::getCanonicalName).collect(Collectors.joining(","));
+					return left.compareTo(right);
+				}).compare(this, other);
 	}
 
 	/**
