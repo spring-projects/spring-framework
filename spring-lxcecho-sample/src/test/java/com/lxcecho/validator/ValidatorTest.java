@@ -44,8 +44,7 @@ public class ValidatorTest {
 
 	@Test
 	public void testValidationOne() {
-		ApplicationContext context =
-				new AnnotationConfigApplicationContext(ValidationConfig.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(ValidationConfig.class);
 		MyValidation1 validation1 = context.getBean(MyValidation1.class);
 
 		User user = new User();
@@ -57,8 +56,7 @@ public class ValidatorTest {
 
 	@Test
 	public void testValidationTwo() {
-		ApplicationContext context =
-				new AnnotationConfigApplicationContext(ValidationConfig.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(ValidationConfig.class);
 		MyValidation2 validation2 = context.getBean(MyValidation2.class);
 
 		User user = new User();

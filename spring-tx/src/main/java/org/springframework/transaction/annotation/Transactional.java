@@ -155,14 +155,14 @@ public @interface Transactional {
 	String[] label() default {};
 
 	/**
-	 * The transaction propagation type.
+	 * The transaction propagation type. 事务传播行为
 	 * <p>Defaults to {@link Propagation#REQUIRED}.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
 	 */
 	Propagation propagation() default Propagation.REQUIRED;
 
 	/**
-	 * The transaction isolation level.
+	 * The transaction isolation level. 事务隔离级别
 	 * <p>Defaults to {@link Isolation#DEFAULT}.
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
 	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
@@ -176,6 +176,9 @@ public @interface Transactional {
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
+	 * 超时回滚，释放资源。
+	 * 执行过程中抛出异常：org.springframework.transaction.TransactionTimedOutException: Transaction timed out: deadline was Sat Dec 16 23:31:00 CST 2023
+	 *
 	 * The timeout for this transaction (in seconds).
 	 * <p>Defaults to the default timeout of the underlying transaction system.
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
@@ -199,6 +202,9 @@ public @interface Transactional {
 	String timeoutString() default "";
 
 	/**
+	 * 对一个查询操作来说，如果我们把它设置成只读，就能够明确告诉数据库，这个操作不涉及写操作。这样数据库就能够针对查询操作来进行优化。
+	 * 对增删改操作设置只读会抛出下面异常：Caused by: java.sql.SQLException: Connection is read-only. Queries leading to data modification are not allowed
+	 *
 	 * A boolean flag that can be set to {@code true} if the transaction is
 	 * effectively read-only, allowing for corresponding optimizations at runtime.
 	 * <p>Defaults to {@code false}.
@@ -244,6 +250,7 @@ public @interface Transactional {
 	String[] rollbackForClassName() default {};
 
 	/**
+	 * 需要设置一个 Class 类型的对象
 	 * Defines zero (0) or more exception {@link Class types}, which must be
 	 * subclasses of {@link Throwable}, indicating which exception types must
 	 * <b>not</b> cause a transaction rollback.
@@ -258,6 +265,7 @@ public @interface Transactional {
 	Class<? extends Throwable>[] noRollbackFor() default {};
 
 	/**
+	 * 需要设置一个字符串类型的全类名，如：noRollbackForClassName = "java.lang.ArithmeticException"
 	 * Defines zero (0) or more exception name patterns (for exceptions which must be a
 	 * subclass of {@link Throwable}) indicating which exception types must <b>not</b>
 	 * cause a transaction rollback.

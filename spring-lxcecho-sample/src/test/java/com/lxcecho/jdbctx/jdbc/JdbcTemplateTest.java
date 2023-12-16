@@ -1,12 +1,7 @@
-package com.lxcecho.jdbctx;
+package com.lxcecho.jdbctx.jdbc;
 
-import com.lxcecho.jdbctx.jdbc.Emp;
-import com.lxcecho.jdbctx.tx.config.TxConfig;
-import com.lxcecho.jdbctx.tx.controller.BookController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -23,7 +18,9 @@ public class JdbcTemplateTest {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	// 查询：返回对象
+	/**
+	 * 查询：返回对象
+	 */
 	@Test
 	public void testSelectObject() {
 		// 写法一
@@ -45,7 +42,9 @@ public class JdbcTemplateTest {
 		System.out.println(emp);*/
 	}
 
-	// 查询：返回 list 集合
+	/**
+	 * 查询：返回 list 集合
+	 */
 	@Test
 	public void testSelectList() {
 		String sql = "select * from t_emp";
@@ -53,7 +52,9 @@ public class JdbcTemplateTest {
 		System.out.println(list);
 	}
 
-	// 查询：返回单个值
+	/**
+	 * 查询：返回单个值
+	 */
 	@Test
 	public void testSelectValue() {
 		String sql = "select count(*) from t_emp";
@@ -61,7 +62,9 @@ public class JdbcTemplateTest {
 		System.out.println(count);
 	}
 
-	//添加  修改  删除操作
+	/**
+	 * 添加  修改  删除操作
+	 */
 	@Test
 	public void testUpdate() {
 		// 1 添加操作
@@ -83,15 +86,6 @@ public class JdbcTemplateTest {
 		String sql = "delete from t_emp where id=?";
 		int rows = jdbcTemplate.update(sql, 3);
 		System.out.println(rows);
-	}
-
-	@Test
-	public void testTxAllAnnotation() {
-		ApplicationContext applicationContext =
-				new AnnotationConfigApplicationContext(TxConfig.class);
-		BookController accountService = applicationContext.getBean("bookController", BookController.class);
-		Integer[] bookIds = {1, 2};
-		accountService.checkout(bookIds, 1);
 	}
 
 }

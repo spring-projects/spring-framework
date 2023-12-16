@@ -1,6 +1,7 @@
-package com.lxcecho.jdbctx.tx.controller;
+package com.lxcecho.jdbctx.annotx.controller;
 
-import com.lxcecho.jdbctx.tx.service.CheckoutService;
+import com.lxcecho.jdbctx.annotx.service.BookService;
+import com.lxcecho.jdbctx.annotx.service.CheckoutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -11,14 +12,14 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class BookController {
 
-//    @Autowired
-//    private BookService bookService;
+	@Autowired
+	private BookService bookService;
 
 	// 买书的方法：图书 id 和用户 id
-//    public void buyBook(Integer bookId,Integer userId) {
-//        // 调用 service方法
-//        bookService.buyBook(bookId,userId);
-//    }
+	public void buyBook(Integer bookId, Integer userId) {
+		// 调用 service 方法
+		bookService.buyBook(bookId, userId);
+	}
 
 	@Autowired
 	private CheckoutService checkoutService;

@@ -11,13 +11,11 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 //@ExtendWith(SpringExtension.class)
 //@ContextConfiguration("classpath:bean.xml")
 @SpringJUnitConfig(locations = "classpath:bean-junit.xml")
-public class SpringTestJunit5 {
+public class SpringJunit5Test {
 
-	//注入
 	@Autowired
 	private JUnitUser JUnitUser;
 
-	//测试方法
 	@Test
 	public void testUser() {
 		System.out.println(JUnitUser);

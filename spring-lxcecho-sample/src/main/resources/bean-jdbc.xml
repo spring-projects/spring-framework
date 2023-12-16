@@ -18,7 +18,7 @@
 		<property name="driverClassName" value="${jdbc.driver}"></property>
 	</bean>
 
-	<!--JdbcTemplate对象-->
+	<!--JdbcTemplate 对象-->
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="druidDataSource"></property>
 	</bean>

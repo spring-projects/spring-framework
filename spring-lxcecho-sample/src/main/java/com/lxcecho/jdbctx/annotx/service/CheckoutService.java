@@ -1,4 +1,4 @@
-package com.lxcecho.jdbctx.tx.service;
+package com.lxcecho.jdbctx.annotx.service;
 
 /**
  * @author lxcecho azaki0426@gmail.com

@@ -19,6 +19,8 @@ package org.springframework.transaction.annotation;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
+ * 数据库系统必须具有隔离并发运行各个事务的能力，使它们不会相互影响，避免各种并发问题。一个事务与其他事务隔离的程度称为隔离级别。
+ * SQL标准中规定了多种事务隔离级别，不同隔离级别对应不同的干扰程度，隔离级别越高，数据一致性就越好，但并发性越弱。
  * Enumeration that represents transaction isolation levels for use with the
  * {@link Transactional @Transactional} annotation, corresponding to the
  * {@link TransactionDefinition} interface.
@@ -37,6 +39,8 @@ public enum Isolation {
 	DEFAULT(TransactionDefinition.ISOLATION_DEFAULT),
 
 	/**
+	 * 允许 Transaction-1 读取 Transaction-2 未提交的修改
+	 *
 	 * A constant indicating that dirty reads, non-repeatable reads, and phantom reads
 	 * can occur.
 	 * <p>This level allows a row changed by one transaction to be read by
@@ -48,6 +52,8 @@ public enum Isolation {
 	READ_UNCOMMITTED(TransactionDefinition.ISOLATION_READ_UNCOMMITTED),
 
 	/**
+	 * 要求 Transaction-1 只能读取 Transaction-2 已提交的修改
+	 *
 	 * A constant indicating that dirty reads are prevented; non-repeatable reads
 	 * and phantom reads can occur.
 	 * <p>This level only prohibits a transaction from reading a row with uncommitted
@@ -57,6 +63,8 @@ public enum Isolation {
 	READ_COMMITTED(TransactionDefinition.ISOLATION_READ_COMMITTED),
 
 	/**
+	 * 确保 Transaction-1 可以多次从一个字段中读取到相同的值，即 Transaction-1 执行期间禁止其它事务对这个字段进行更新。
+	 *
 	 * A constant indicating that dirty reads and non-repeatable reads are
 	 * prevented; phantom reads can occur.
 	 * <p>This level prohibits a transaction from reading a row with uncommitted changes
@@ -68,6 +76,8 @@ public enum Isolation {
 	REPEATABLE_READ(TransactionDefinition.ISOLATION_REPEATABLE_READ),
 
 	/**
+	 * 确保 Transaction-1 可以多次从一个表中读取到相同的行，在 Transaction-1 执行期间，禁止其它事务对这个表进行添加、更新、删除操作。可以避免任何并发问题，但性能十分低下。
+	 *
 	 * A constant indicating that dirty reads, non-repeatable reads, and phantom
 	 * reads are prevented.
 	 * <p>This level includes the prohibitions in {@link #REPEATABLE_READ}

@@ -1,7 +1,7 @@
-package com.lxcecho.jdbctx.tx.service.impl;
+package com.lxcecho.jdbctx.annotx.service.impl;
 
-import com.lxcecho.jdbctx.tx.service.BookService;
-import com.lxcecho.jdbctx.tx.service.CheckoutService;
+import com.lxcecho.jdbctx.annotx.service.BookService;
+import com.lxcecho.jdbctx.annotx.service.CheckoutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
 
-	// 注 入bookService
+	/**
+	 * 注入 bookService
+	 */
 	@Autowired
 	private BookService bookService;
 
@@ -27,7 +29,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 	@Override
 	public void checkout(Integer[] bookIds, Integer userId) {
 		for (Integer bookId : bookIds) {
-			//调用service的方法
+			// 调用 service 的方法
 			bookService.buyBook(bookId, userId);
 		}
 	}

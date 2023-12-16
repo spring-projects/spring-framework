@@ -12,15 +12,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:bean-junit.xml")
-public class SpringTestJunit4 {
+public class SpringJunit4Test {
 
 	@Autowired
-	private JUnitUser JUnitUser;
+	private JUnitUser jUnitUser;
 
 	@Test
 	public void testUser4() {
-		System.out.println(JUnitUser);
-		JUnitUser.run();
+		System.out.println(jUnitUser);
+		jUnitUser.run();
 	}
 
 }

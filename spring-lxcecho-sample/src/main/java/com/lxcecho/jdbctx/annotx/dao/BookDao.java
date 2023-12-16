@@ -1,4 +1,4 @@
-package com.lxcecho.jdbctx.tx.dao;
+package com.lxcecho.jdbctx.annotx.dao;
 
 /**
  * @author lxcecho azaki0426@gmail.com

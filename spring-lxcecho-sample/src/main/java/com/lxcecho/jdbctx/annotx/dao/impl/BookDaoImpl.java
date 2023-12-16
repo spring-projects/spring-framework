@@ -1,6 +1,6 @@
-package com.lxcecho.jdbctx.tx.dao.impl;
+package com.lxcecho.jdbctx.annotx.dao.impl;
 
-import com.lxcecho.jdbctx.tx.dao.BookDao;
+import com.lxcecho.jdbctx.annotx.dao.BookDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
