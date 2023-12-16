@@ -1,4 +1,4 @@
-package com.lxcecho.resources.di;
+package com.lxcecho.resources.prefix;
 
 /**
  * @author lxcecho azaki0426@gmail.com

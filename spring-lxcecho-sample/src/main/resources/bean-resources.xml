@@ -9,5 +9,5 @@
 		<property name="resource" value="classpath:lxcecho.txt"></property>
 	</bean>
 
-	<bean id="user" class="com.lxcecho.resources.di.User"></bean>
+	<bean id="user" class="com.lxcecho.resources.prefix.User"></bean>
 </beans>

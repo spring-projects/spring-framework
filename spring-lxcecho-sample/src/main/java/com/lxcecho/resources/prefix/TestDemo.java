@@ -1,9 +1,7 @@
 package com.lxcecho.resources.prefix;
 
-import com.lxcecho.resources.di.User;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.Resource;
 
 /**
  * @author lxcecho azaki0426@gmail.com
@@ -12,8 +10,7 @@ import org.springframework.core.io.Resource;
 public class TestDemo {
 
 	public static void main(String[] args) {
-		ApplicationContext context =
-				new ClassPathXmlApplicationContext("classpath:bean*.xml");
+		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:bean-resources.xml");
 //        Resource resource = context.getResource("lxcecho.txt");
 //        System.out.println(resource.getDescription());
 

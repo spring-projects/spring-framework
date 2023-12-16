@@ -14,12 +14,12 @@ import java.io.InputStream;
 public class ClassPathResourceDemo {
 
 	public static void loadClasspathResource(String path) {
-		//创建对象ClassPathResource
+		// 创建对象 ClassPathResource
 		ClassPathResource resource = new ClassPathResource(path);
 
 		System.out.println(resource.getFilename());
 		System.out.println(resource.getDescription());
-		//获取文件内容
+		// 获取文件内容
 		try {
 			InputStream in = resource.getInputStream();
 			byte[] b = new byte[1024];
@@ -34,4 +34,5 @@ public class ClassPathResourceDemo {
 	public static void main(String[] args) {
 		loadClasspathResource("lxcecho.txt");
 	}
+
 }

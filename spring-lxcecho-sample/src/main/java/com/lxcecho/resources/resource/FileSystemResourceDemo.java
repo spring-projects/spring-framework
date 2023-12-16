@@ -18,9 +18,9 @@ public class FileSystemResourceDemo {
 
 	public static void main(String[] args) {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext();
-//        通过ApplicationContext访问资源
-//        ApplicationContext实例获取Resource实例时，
-//        默认采用与ApplicationContext相同的资源访问策略
+//        通过 ApplicationContext 访问资源
+//        ApplicationContext 实例获取 Resource 实例时，
+//        默认采用与 ApplicationContext 相同的资源访问策略
 		Resource res = ctx.getResource("lxcecho.txt");
 		System.out.println("==" + res);
 		System.out.println(res.getFilename());
@@ -31,7 +31,7 @@ public class FileSystemResourceDemo {
 	}
 
 	public static void loadFileResource(String path) {
-		//创建对象
+		// 创建对象
 		FileSystemResource resource = new FileSystemResource(path);
 
 		System.out.println(resource.getFilename());
