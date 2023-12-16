@@ -78,7 +78,7 @@ class MapToMapConverterTests {
 	}
 
 	@Test
-	void scalarMapNotGenericTarget() throws Exception {
+	void scalarMapNotGenericTarget() {
 		Map<String, String> map = new HashMap<>();
 		map.put("1", "9");
 		map.put("2", "37");
@@ -161,7 +161,7 @@ class MapToMapConverterTests {
 	}
 
 	@Test
-	void collectionMapNotGenericTarget() throws Exception {
+	void collectionMapNotGenericTarget() {
 		Map<String, List<String>> map = new HashMap<>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
@@ -171,7 +171,7 @@ class MapToMapConverterTests {
 	}
 
 	@Test
-	void collectionMapNotGenericTargetCollectionToObjectInteraction() throws Exception {
+	void collectionMapNotGenericTargetCollectionToObjectInteraction() {
 		Map<String, List<String>> map = new HashMap<>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
@@ -193,7 +193,7 @@ class MapToMapConverterTests {
 	}
 
 	@Test
-	void emptyMapNoTargetGenericInfo() throws Exception {
+	void emptyMapNoTargetGenericInfo() {
 		Map<String, String> map = new HashMap<>();
 
 		assertThat(conversionService.canConvert(Map.class, Map.class)).isTrue();
@@ -214,7 +214,7 @@ class MapToMapConverterTests {
 	}
 
 	@Test
-	void noDefaultConstructorCopyNotRequired() throws Exception {
+	void noDefaultConstructorCopyNotRequired() {
 		// SPR-9284
 		NoDefaultConstructorMap<String, Integer> map = new NoDefaultConstructorMap<>(
 				Collections.<String, Integer>singletonMap("1", 1));

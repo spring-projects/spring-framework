@@ -364,7 +364,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void valueOfArray() throws Exception {
+	void valueOfArray() {
 		TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(int[].class);
 		assertThat(typeDescriptor.isArray()).isTrue();
 		assertThat(typeDescriptor.isCollection()).isFalse();
@@ -373,7 +373,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void valueOfCollection() throws Exception {
+	void valueOfCollection() {
 		TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(Collection.class);
 		assertThat(typeDescriptor.isCollection()).isTrue();
 		assertThat(typeDescriptor.isArray()).isFalse();
@@ -412,7 +412,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void nestedMethodParameterNot1NestedLevel() throws Exception {
+	void nestedMethodParameterNot1NestedLevel() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0, 2), 2));
 	}
@@ -430,7 +430,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
-	void nestedMethodParameterTypeInvalidNestingLevel() throws Exception {
+	void nestedMethodParameterTypeInvalidNestingLevel() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0, 2), 2));
 	}

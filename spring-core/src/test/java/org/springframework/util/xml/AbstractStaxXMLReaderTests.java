@@ -243,7 +243,7 @@ abstract class AbstractStaxXMLReaderTests {
 	private static class CopyCharsAnswer implements Answer<Object> {
 
 		@Override
-		public Object answer(InvocationOnMock invocation) throws Throwable {
+		public Object answer(InvocationOnMock invocation) {
 			char[] chars = (char[]) invocation.getArguments()[0];
 			char[] copy = new char[chars.length];
 			System.arraycopy(chars, 0, copy, 0, chars.length);

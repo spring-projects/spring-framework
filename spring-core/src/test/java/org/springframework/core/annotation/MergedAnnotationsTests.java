@@ -835,7 +835,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getDirectWithJavaxAnnotationType() throws Exception {
+	void getDirectWithJavaxAnnotationType() {
 		assertThat(MergedAnnotations.from(ResourceHolder.class).get(
 				Resource.class).getString("name")).isEqualTo("x");
 	}
@@ -1214,7 +1214,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void isDirectlyPresentForAllScenarios() throws Exception {
+	void isDirectlyPresentForAllScenarios() {
 		// no class-level annotation
 		assertThat(MergedAnnotations.from(NonAnnotatedInterface.class).get(
 				Transactional.class).isDirectlyPresent()).isFalse();
@@ -1357,7 +1357,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getValueFromNonPublicAnnotation() throws Exception {
+	void getValueFromNonPublicAnnotation() {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
 		assertThat(declaredAnnotations).hasSize(1);
 		Annotation annotation = declaredAnnotations[0];
@@ -1499,7 +1499,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithoutAttributeAliases() throws Exception {
+	void synthesizeWithoutAttributeAliases() {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertThat(component).isNotNull();
 		Component synthesizedComponent = MergedAnnotation.from(component).synthesize();
@@ -1631,7 +1631,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAliasForIsMissingAttributeDeclaration() throws Exception {
+	void synthesizeWhenAliasForIsMissingAttributeDeclaration() {
 		AliasForWithMissingAttributeDeclaration annotation =
 				AliasForWithMissingAttributeDeclarationClass.class.getAnnotation(
 						AliasForWithMissingAttributeDeclaration.class);
@@ -1643,7 +1643,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAliasForHasDuplicateAttributeDeclaration() throws Exception {
+	void synthesizeWhenAliasForHasDuplicateAttributeDeclaration() {
 		AliasForWithDuplicateAttributeDeclaration annotation = AliasForWithDuplicateAttributeDeclarationClass.class.getAnnotation(
 				AliasForWithDuplicateAttributeDeclaration.class);
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
@@ -1654,7 +1654,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasForNonexistentAttribute() throws Exception {
+	void synthesizeWhenAttributeAliasForNonexistentAttribute() {
 		AliasForNonexistentAttribute annotation = AliasForNonexistentAttributeClass.class.getAnnotation(
 				AliasForNonexistentAttribute.class);
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
@@ -1665,7 +1665,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasWithMirroredAliasForWrongAttribute() throws Exception {
+	void synthesizeWhenAttributeAliasWithMirroredAliasForWrongAttribute() {
 		AliasForWithMirroredAliasForWrongAttribute annotation =
 				AliasForWithMirroredAliasForWrongAttributeClass.class.getAnnotation(
 						AliasForWithMirroredAliasForWrongAttribute.class);
@@ -1677,7 +1677,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasForAttributeOfDifferentType() throws Exception {
+	void synthesizeWhenAttributeAliasForAttributeOfDifferentType() {
 		AliasForAttributeOfDifferentType annotation = AliasForAttributeOfDifferentTypeClass.class.getAnnotation(
 				AliasForAttributeOfDifferentType.class);
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
@@ -1690,7 +1690,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasForWithMissingDefaultValues() throws Exception {
+	void synthesizeWhenAttributeAliasForWithMissingDefaultValues() {
 		AliasForWithMissingDefaultValues annotation = AliasForWithMissingDefaultValuesClass.class.getAnnotation(
 				AliasForWithMissingDefaultValues.class);
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
@@ -1703,7 +1703,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasForAttributeWithDifferentDefaultValue() throws Exception {
+	void synthesizeWhenAttributeAliasForAttributeWithDifferentDefaultValue() {
 		AliasForAttributeWithDifferentDefaultValue annotation =
 				AliasForAttributeWithDifferentDefaultValueClass.class.getAnnotation(
 						AliasForAttributeWithDifferentDefaultValue.class);
@@ -1717,7 +1717,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasForMetaAnnotationThatIsNotMetaPresent() throws Exception {
+	void synthesizeWhenAttributeAliasForMetaAnnotationThatIsNotMetaPresent() {
 		AliasedComposedTestConfigurationNotMetaPresent annotation =
 				AliasedComposedTestConfigurationNotMetaPresentClass.class.getAnnotation(
 						AliasedComposedTestConfigurationNotMetaPresent.class);
@@ -1738,7 +1738,7 @@ class MergedAnnotationsTests {
 		testSynthesisWithImplicitAliases(GroovyImplicitAliasesSimpleTestConfigurationClass.class, "groovyScript");
 	}
 
-	private void testSynthesisWithImplicitAliases(Class<?> clazz, String expected) throws Exception {
+	private void testSynthesisWithImplicitAliases(Class<?> clazz, String expected) {
 		ImplicitAliasesTestConfiguration config = clazz.getAnnotation(ImplicitAliasesTestConfiguration.class);
 		assertThat(config).isNotNull();
 		ImplicitAliasesTestConfiguration synthesized = MergedAnnotation.from(config).synthesize();
@@ -1750,8 +1750,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithImplicitAliasesWithImpliedAliasNamesOmitted()
-			throws Exception {
+	void synthesizeWithImplicitAliasesWithImpliedAliasNamesOmitted() {
 		testSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
 				ValueImplicitAliasesWithImpliedAliasNamesOmittedTestConfigurationClass.class,
 				"value");
@@ -1777,7 +1776,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithImplicitAliasesForAliasPair() throws Exception {
+	void synthesizeWithImplicitAliasesForAliasPair() {
 		ImplicitAliasesForAliasPairTestConfiguration config =
 				ImplicitAliasesForAliasPairTestConfigurationClass.class.getAnnotation(
 						ImplicitAliasesForAliasPairTestConfiguration.class);
@@ -1788,7 +1787,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithTransitiveImplicitAliases() throws Exception {
+	void synthesizeWithTransitiveImplicitAliases() {
 		TransitiveImplicitAliasesTestConfiguration config =
 				TransitiveImplicitAliasesTestConfigurationClass.class.getAnnotation(
 						TransitiveImplicitAliasesTestConfiguration.class);
@@ -1799,7 +1798,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithTransitiveImplicitAliasesForAliasPair() throws Exception {
+	void synthesizeWithTransitiveImplicitAliasesForAliasPair() {
 		TransitiveImplicitAliasesForAliasPairTestConfiguration config =
 				TransitiveImplicitAliasesForAliasPairTestConfigurationClass.class.getAnnotation(
 						TransitiveImplicitAliasesForAliasPairTestConfiguration.class);
@@ -1811,7 +1810,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithImplicitAliasesWithMissingDefaultValues() throws Exception {
+	void synthesizeWithImplicitAliasesWithMissingDefaultValues() {
 		Class<?> clazz = ImplicitAliasesWithMissingDefaultValuesTestConfigurationClass.class;
 		Class<ImplicitAliasesWithMissingDefaultValuesTestConfiguration> annotationType =
 				ImplicitAliasesWithMissingDefaultValuesTestConfiguration.class;
@@ -1826,8 +1825,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithImplicitAliasesWithDifferentDefaultValues()
-			throws Exception {
+	void synthesizeWithImplicitAliasesWithDifferentDefaultValues() {
 		Class<?> clazz = ImplicitAliasesWithDifferentDefaultValuesTestConfigurationClass.class;
 		Class<ImplicitAliasesWithDifferentDefaultValuesTestConfiguration> annotationType =
 				ImplicitAliasesWithDifferentDefaultValuesTestConfiguration.class;
@@ -1842,7 +1840,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithImplicitAliasesWithDuplicateValues() throws Exception {
+	void synthesizeWithImplicitAliasesWithDuplicateValues() {
 		Class<?> clazz = ImplicitAliasesWithDuplicateValuesTestConfigurationClass.class;
 		Class<ImplicitAliasesWithDuplicateValuesTestConfiguration> annotationType =
 				ImplicitAliasesWithDuplicateValuesTestConfiguration.class;
@@ -1858,7 +1856,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromMapWithoutAttributeAliases() throws Exception {
+	void synthesizeFromMapWithoutAttributeAliases() {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertThat(component).isNotNull();
 		Map<String, Object> map = Collections.singletonMap("value", "webController");
@@ -1870,7 +1868,7 @@ class MergedAnnotationsTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void synthesizeFromMapWithNestedMap() throws Exception {
+	void synthesizeFromMapWithNestedMap() {
 		ComponentScanSingleFilter componentScan = ComponentScanSingleFilterClass.class.getAnnotation(
 				ComponentScanSingleFilter.class);
 		assertThat(componentScan).isNotNull();
@@ -1891,7 +1889,7 @@ class MergedAnnotationsTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void synthesizeFromMapWithNestedArrayOfMaps() throws Exception {
+	void synthesizeFromMapWithNestedArrayOfMaps() {
 		ComponentScan componentScan = ComponentScanClass.class.getAnnotation(
 				ComponentScan.class);
 		assertThat(componentScan).isNotNull();
@@ -1915,7 +1913,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromDefaultsWithoutAttributeAliases() throws Exception {
+	void synthesizeFromDefaultsWithoutAttributeAliases() {
 		MergedAnnotation<AnnotationWithDefaults> annotation = MergedAnnotation.of(
 				AnnotationWithDefaults.class);
 		AnnotationWithDefaults synthesized = annotation.synthesize();
@@ -1925,7 +1923,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromDefaultsWithAttributeAliases() throws Exception {
+	void synthesizeFromDefaultsWithAttributeAliases() {
 		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.of(
 				TestConfiguration.class);
 		TestConfiguration synthesized = annotation.synthesize();
@@ -1934,14 +1932,13 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWhenAttributeAliasesWithDifferentValues() throws Exception {
+	void synthesizeWhenAttributeAliasesWithDifferentValues() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
 				MergedAnnotation.from(TestConfigurationMismatch.class.getAnnotation(TestConfiguration.class)).synthesize());
 	}
 
 	@Test
-	void synthesizeFromMapWithMinimalAttributesWithAttributeAliases()
-			throws Exception {
+	void synthesizeFromMapWithMinimalAttributesWithAttributeAliases() {
 		Map<String, Object> map = Collections.singletonMap("location", "test.xml");
 		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.of(
 				TestConfiguration.class, map);
@@ -1951,8 +1948,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromMapWithAttributeAliasesThatOverrideArraysWithSingleElements()
-			throws Exception {
+	void synthesizeFromMapWithAttributeAliasesThatOverrideArraysWithSingleElements() {
 		synthesizeFromMapWithAttributeAliasesThatOverrideArraysWithSingleElements(
 				Collections.singletonMap("value", "/foo"));
 		synthesizeFromMapWithAttributeAliasesThatOverrideArraysWithSingleElements(
@@ -1978,8 +1974,7 @@ class MergedAnnotationsTests {
 		testSynthesisFromMapWithImplicitAliases("groovyScript");
 	}
 
-	private void testSynthesisFromMapWithImplicitAliases(String attributeNameAndValue)
-			throws Exception {
+	private void testSynthesisFromMapWithImplicitAliases(String attributeNameAndValue) {
 		Map<String, Object> map = Collections.singletonMap(attributeNameAndValue,
 				attributeNameAndValue);
 		MergedAnnotation<ImplicitAliasesTestConfiguration> annotation = MergedAnnotation.of(
@@ -1994,12 +1989,12 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromMapWithMissingAttributeValue() throws Exception {
+	void synthesizeFromMapWithMissingAttributeValue() {
 		testMissingTextAttribute(Collections.emptyMap());
 	}
 
 	@Test
-	void synthesizeFromMapWithNullAttributeValue() throws Exception {
+	void synthesizeFromMapWithNullAttributeValue() {
 		Map<String, Object> map = Collections.singletonMap("text", null);
 		assertThat(map).containsKey("text");
 		testMissingTextAttribute(map);
@@ -2013,7 +2008,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromMapWithAttributeOfIncorrectType() throws Exception {
+	void synthesizeFromMapWithAttributeOfIncorrectType() {
 		Map<String, Object> map = Collections.singletonMap("value", 42L);
 		MergedAnnotation<Component> annotation = MergedAnnotation.of(Component.class, map);
 		assertThatIllegalStateException().isThrownBy(() -> annotation.synthesize().value())
@@ -2023,7 +2018,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromAnnotationAttributesWithoutAttributeAliases() throws Exception {
+	void synthesizeFromAnnotationAttributesWithoutAttributeAliases() {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertThat(component).isNotNull();
 		Map<String, Object> attributes = MergedAnnotation.from(component).asMap();
@@ -2194,7 +2189,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithArrayOfAnnotations() throws Exception {
+	void synthesizeWithArrayOfAnnotations() {
 		Hierarchy hierarchy = HierarchyClass.class.getAnnotation(Hierarchy.class);
 		assertThat(hierarchy).isNotNull();
 		Hierarchy synthesizedHierarchy = MergedAnnotation.from(hierarchy).synthesize();
@@ -2216,7 +2211,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithArrayOfChars() throws Exception {
+	void synthesizeWithArrayOfChars() {
 		CharsContainer charsContainer = GroupOfCharsClass.class.getAnnotation(
 				CharsContainer.class);
 		assertThat(charsContainer).isNotNull();

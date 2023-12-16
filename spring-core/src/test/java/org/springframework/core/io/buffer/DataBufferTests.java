@@ -16,7 +16,6 @@
 
 package org.springframework.core.io.buffer;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -675,7 +674,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void readableByteBuffers(DataBufferFactory bufferFactory) throws IOException {
+	void readableByteBuffers(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer dataBuffer = this.bufferFactory.join(Arrays.asList(stringBuffer("a"),

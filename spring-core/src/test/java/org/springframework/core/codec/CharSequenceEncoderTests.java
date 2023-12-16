@@ -48,7 +48,7 @@ class CharSequenceEncoderTests extends AbstractEncoderTests<CharSequenceEncoder>
 
 	@Override
 	@Test
-	public void canEncode() throws Exception {
+	public void canEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),

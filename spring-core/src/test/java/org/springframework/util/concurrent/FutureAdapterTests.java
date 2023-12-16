@@ -16,7 +16,6 @@
 
 package org.springframework.util.concurrent;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +36,7 @@ class FutureAdapterTests {
 
 	private FutureAdapter<String, Integer> adapter = new FutureAdapter<>(adaptee) {
 		@Override
-		protected String adapt(Integer adapteeResult) throws ExecutionException {
+		protected String adapt(Integer adapteeResult) {
 			return adapteeResult.toString();
 		}
 	};

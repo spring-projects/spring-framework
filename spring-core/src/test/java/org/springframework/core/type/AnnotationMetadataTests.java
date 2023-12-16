@@ -297,7 +297,7 @@ class AnnotationMetadataTests {
 	 * behaves the same.
 	 */
 	@Test  // gh-31041
-	void multipleComposedRepeatableAnnotationsUsingAnnotatedElementUtils() throws Exception {
+	void multipleComposedRepeatableAnnotationsUsingAnnotatedElementUtils() {
 		Class<?> element = MultipleComposedRepeatableAnnotationsClass.class;
 
 		Set<TestComponentScan> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(element, TestComponentScan.class);
@@ -313,7 +313,7 @@ class AnnotationMetadataTests {
 	 * behaves the same.
 	 */
 	@Test  // gh-31041
-	void multipleRepeatableAnnotationsInContainersUsingAnnotatedElementUtils() throws Exception {
+	void multipleRepeatableAnnotationsInContainersUsingAnnotatedElementUtils() {
 		Class<?> element = MultipleRepeatableAnnotationsInContainersClass.class;
 
 		Set<TestComponentScan> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(element, TestComponentScan.class);

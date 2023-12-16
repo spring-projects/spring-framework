@@ -137,7 +137,7 @@ class PropertySourceProcessorTests {
 	private static class IllegalArgumentExceptionPropertySourceFactory implements PropertySourceFactory {
 
 		@Override
-		public PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
+		public PropertySource<?> createPropertySource(String name, EncodedResource resource) {
 			throw new IllegalArgumentException("bogus");
 		}
 	}

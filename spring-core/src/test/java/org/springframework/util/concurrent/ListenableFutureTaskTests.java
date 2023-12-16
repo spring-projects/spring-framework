@@ -42,11 +42,12 @@ class ListenableFutureTaskTests {
 		Callable<String> callable = () -> s;
 
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
-		task.addCallback(new ListenableFutureCallback<String>() {
+		task.addCallback(new ListenableFutureCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				assertThat(result).isEqualTo(s);
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
 				throw new AssertionError(ex.getMessage(), ex);
@@ -60,18 +61,19 @@ class ListenableFutureTaskTests {
 	}
 
 	@Test
-	void failure() throws Exception {
+	void failure() {
 		final String s = "Hello World";
 		Callable<String> callable = () -> {
 			throw new IOException(s);
 		};
 
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
-		task.addCallback(new ListenableFutureCallback<String>() {
+		task.addCallback(new ListenableFutureCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				fail("onSuccess not expected");
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
 				assertThat(ex.getMessage()).isEqualTo(s);
@@ -108,7 +110,7 @@ class ListenableFutureTaskTests {
 	}
 
 	@Test
-	void failureWithLambdas() throws Exception {
+	void failureWithLambdas() {
 		final String s = "Hello World";
 		IOException ex = new IOException(s);
 		Callable<String> callable = () -> {

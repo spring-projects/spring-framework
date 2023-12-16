@@ -16,14 +16,12 @@
 
 package org.springframework.aot.hint;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -443,7 +441,7 @@ class BindingReflectionHintsRegistrarTests {
 		}
 
 		@Override
-		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) {
 			return null;
 		}
 	}
@@ -456,7 +454,7 @@ class BindingReflectionHintsRegistrarTests {
 		}
 
 		@Override
-		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) {
 			return null;
 		}
 	}

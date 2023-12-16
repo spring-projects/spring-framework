@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -77,7 +76,7 @@ class ResourceUtilsTests {
 	private static class DummyURLStreamHandler extends URLStreamHandler {
 
 		@Override
-		protected URLConnection openConnection(URL url) throws IOException {
+		protected URLConnection openConnection(URL url) {
 			throw new UnsupportedOperationException();
 		}
 	}

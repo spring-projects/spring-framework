@@ -143,7 +143,7 @@ class AntPathMatcherTests {
 
 	// SPR-14247
 	@Test
-	void matchWithTrimTokensEnabled() throws Exception {
+	void matchWithTrimTokensEnabled() {
 		pathMatcher.setTrimTokens(true);
 
 		assertThat(pathMatcher.match("/foo/bar", "/foo /bar")).isTrue();
@@ -299,7 +299,7 @@ class AntPathMatcherTests {
 	}
 
 	@Test
-	void extractPathWithinPattern() throws Exception {
+	void extractPathWithinPattern() {
 		assertThat(pathMatcher.extractPathWithinPattern("/docs/commit.html", "/docs/commit.html")).isEmpty();
 
 		assertThat(pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit")).isEqualTo("cvs/commit");
@@ -325,7 +325,7 @@ class AntPathMatcherTests {
 	}
 
 	@Test
-	void extractUriTemplateVariables() throws Exception {
+	void extractUriTemplateVariables() {
 		Map<String, String> result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}", "/hotels/1");
 		assertThat(result).isEqualTo(Collections.singletonMap("hotel", "1"));
 

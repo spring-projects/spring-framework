@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 		assertThat(stream(annotations, "value")).containsExactly("fooCache", "barCache");
 	}
 
-	Method getBridgeMethod() throws NoSuchMethodException {
+	Method getBridgeMethod() {
 		List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithLocalMethods(StringGenericParameter.class, method -> {
 			if ("getFor".equals(method.getName())) {

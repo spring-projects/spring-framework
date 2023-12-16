@@ -428,7 +428,7 @@ class ResourceTests {
 			}
 
 			@Override
-			protected void customizeConnection(HttpURLConnection con) throws IOException {
+			protected void customizeConnection(HttpURLConnection con) {
 				con.setRequestProperty("Framework-Name", "Spring");
 			}
 		}
@@ -436,7 +436,7 @@ class ResourceTests {
 		class ResourceDispatcher extends Dispatcher {
 
 			@Override
-			public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+			public MockResponse dispatch(RecordedRequest request) {
 				if (request.getPath().equals("/resource")) {
 					return switch (request.getMethod()) {
 						case "HEAD" -> new MockResponse()

@@ -476,7 +476,7 @@ class GenericConversionServiceTests {
 	}
 
 	@Test
-	void subclassOfEnumToString() throws Exception {
+	void subclassOfEnumToString() {
 		conversionService.addConverter(new EnumToStringConverter(conversionService));
 		assertThat(conversionService.convert(EnumWithSubclass.FIRST, String.class)).isEqualTo("FIRST");
 	}

@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.entry;
 public abstract class AbstractMethodMetadataTests {
 
 	@Test
-	public void verifyEquals() throws Exception {
+	public void verifyEquals() {
 		MethodMetadata withMethod1 = getTagged(WithMethod.class);
 		MethodMetadata withMethod2 = getTagged(WithMethod.class);
 		MethodMetadata withMethodWithTwoArguments1 = getTagged(WithMethodWithTwoArguments.class);
@@ -61,7 +61,7 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Test
-	public void verifyHashCode() throws Exception {
+	public void verifyHashCode() {
 		MethodMetadata withMethod1 = getTagged(WithMethod.class);
 		MethodMetadata withMethod2 = getTagged(WithMethod.class);
 		MethodMetadata withMethodWithTwoArguments1 = getTagged(WithMethodWithTwoArguments.class);
@@ -74,7 +74,7 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Test
-	public void verifyToString() throws Exception {
+	public void verifyToString() {
 		assertThat(getTagged(WithMethod.class).toString())
 			.endsWith(WithMethod.class.getName() + ".test()");
 

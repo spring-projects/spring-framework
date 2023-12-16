@@ -192,28 +192,28 @@ class ConstantsTests {
 	}
 
 	@Test
-	void getValuesWithNullPrefix() throws Exception {
+	void getValuesWithNullPrefix() {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(null);
 		assertThat(values).as("Must have returned *all* public static final values").hasSize(7);
 	}
 
 	@Test
-	void getValuesWithEmptyStringPrefix() throws Exception {
+	void getValuesWithEmptyStringPrefix() {
 		Constants c = new Constants(A.class);
 		Set<Object> values = c.getValues("");
 		assertThat(values).as("Must have returned *all* public static final values").hasSize(7);
 	}
 
 	@Test
-	void getValuesWithWhitespacedStringPrefix() throws Exception {
+	void getValuesWithWhitespacedStringPrefix() {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(" ");
 		assertThat(values).as("Must have returned *all* public static final values").hasSize(7);
 	}
 
 	@Test
-	void withClassThatExposesNoConstants() throws Exception {
+	void withClassThatExposesNoConstants() {
 		Constants c = new Constants(NoConstants.class);
 		assertThat(c.getSize()).isEqualTo(0);
 		final Set<?> values = c.getValues("");
@@ -222,7 +222,7 @@ class ConstantsTests {
 	}
 
 	@Test
-	void ctorWithNullClass() throws Exception {
+	void ctorWithNullClass() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new Constants(null));
 	}

@@ -80,7 +80,7 @@ class FileSystemUtilsTests {
 
 
 	@AfterEach
-	void tearDown() throws Exception {
+	void tearDown() {
 		File tmp = new File("./tmp");
 		if (tmp.exists()) {
 			FileSystemUtils.deleteRecursively(tmp);

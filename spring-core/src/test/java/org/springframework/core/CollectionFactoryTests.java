@@ -306,7 +306,7 @@ class CollectionFactoryTests {
 
 
 	enum Color {
-		RED, BLUE;
+		RED, BLUE
 	}
 
 }

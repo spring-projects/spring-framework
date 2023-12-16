@@ -118,7 +118,7 @@ class CollectionUtilsTests {
 	}
 
 	@Test
-	void containsAny() throws Exception {
+	void containsAny() {
 		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
@@ -137,19 +137,19 @@ class CollectionUtilsTests {
 	}
 
 	@Test
-	void containsInstanceWithNullCollection() throws Exception {
+	void containsInstanceWithNullCollection() {
 		assertThat(CollectionUtils.containsInstance(null, this)).as("Must return false if supplied Collection argument is null").isFalse();
 	}
 
 	@Test
-	void containsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
+	void containsInstanceWithInstancesThatAreEqualButDistinct() {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("fiona"));
 		assertThat(CollectionUtils.containsInstance(list, new Instance("fiona"))).as("Must return false if instance is not in the supplied Collection argument").isFalse();
 	}
 
 	@Test
-	void containsInstanceWithSameInstance() throws Exception {
+	void containsInstanceWithSameInstance() {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		Instance instance = new Instance("fiona");
@@ -158,7 +158,7 @@ class CollectionUtilsTests {
 	}
 
 	@Test
-	void containsInstanceWithNullInstance() throws Exception {
+	void containsInstanceWithNullInstance() {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		list.add(new Instance("fiona"));
@@ -166,7 +166,7 @@ class CollectionUtilsTests {
 	}
 
 	@Test
-	void findFirstMatch() throws Exception {
+	void findFirstMatch() {
 		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");

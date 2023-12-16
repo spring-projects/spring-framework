@@ -152,7 +152,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void withGenericParameter() throws Exception {
+	void withGenericParameter() {
 		Method[] methods = StringGenericParameter.class.getMethods();
 		Method bridgeMethod = null;
 		Method bridgedMethod = null;
@@ -173,7 +173,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void onAllMethods() throws Exception {
+	void onAllMethods() {
 		Method[] methods = StringList.class.getMethods();
 		for (Method method : methods) {
 			assertThat(BridgeMethodResolver.findBridgedMethod(method)).isNotNull();
@@ -206,7 +206,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void spr2648() throws Exception {
+	void spr2648() {
 		Method bridgeMethod = ReflectionUtils.findMethod(GenericSqlMapIntegerDao.class, "saveOrUpdate", Object.class);
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
@@ -296,7 +296,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void spr3534() throws Exception {
+	void spr3534() {
 		Method bridgeMethod = ReflectionUtils.findMethod(TestEmailProvider.class, "findBy", Object.class);
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
@@ -843,7 +843,7 @@ class BridgeMethodResolverTests {
 
 	public interface SimpleGenericRepository<T> {
 
-		public Class<T> getPersistentClass();
+		Class<T> getPersistentClass();
 
 		List<T> findByQuery();
 
@@ -884,7 +884,7 @@ class BridgeMethodResolverTests {
 			return null;
 		}
 
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 		}
 	}
 

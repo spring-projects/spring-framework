@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.entry;
 public abstract class AbstractAnnotationMetadataTests {
 
 	@Test
-	public void verifyEquals() throws Exception {
+	public void verifyEquals() {
 		AnnotationMetadata testClass1 = get(TestClass.class);
 		AnnotationMetadata testClass2 = get(TestClass.class);
 		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
@@ -61,7 +61,7 @@ public abstract class AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	public void verifyHashCode() throws Exception {
+	public void verifyHashCode() {
 		AnnotationMetadata testClass1 = get(TestClass.class);
 		AnnotationMetadata testClass2 = get(TestClass.class);
 		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
@@ -74,7 +74,7 @@ public abstract class AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	public void verifyToString() throws Exception {
+	public void verifyToString() {
 		assertThat(get(TestClass.class).toString()).isEqualTo(TestClass.class.getName());
 	}
 
