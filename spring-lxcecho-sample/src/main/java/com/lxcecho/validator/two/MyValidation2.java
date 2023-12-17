@@ -15,15 +15,15 @@ import java.util.List;
 @Service
 public class MyValidation2 {
 
-    @Autowired
-    private Validator validator;
+	@Autowired
+	private Validator validator;
 
-    public boolean validatorByUserTwo(User user) {
-        BindException bindException = new BindException(user,user.getName());
-        validator.validate(user,bindException);
-        List<ObjectError> allErrors = bindException.getAllErrors();
-        System.out.println(allErrors);
-        return bindException.hasErrors();
-    }
+	public boolean validatorByUserTwo(User user) {
+		BindException bindException = new BindException(user, user.getName());
+		validator.validate(user, bindException);
+		List<ObjectError> allErrors = bindException.getAllErrors();
+		System.out.println(allErrors);
+		return bindException.hasErrors();
+	}
 
 }

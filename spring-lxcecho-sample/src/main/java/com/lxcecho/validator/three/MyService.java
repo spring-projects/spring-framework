@@ -13,8 +13,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class MyService {
 
-    public String testMethod(@NotNull @Valid User user) {
-        return user.toString();
-    }
+	public String testMethod(@NotNull @Valid User user) {
+		return user.toString();
+	}
 
 }

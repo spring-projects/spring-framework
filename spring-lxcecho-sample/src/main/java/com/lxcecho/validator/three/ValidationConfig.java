@@ -13,10 +13,10 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @ComponentScan("com.lxcecho.validator.three")
 public class ValidationConfig {
 
-    @Bean
-    public MethodValidationPostProcessor validationPostProcessor() {
-        return new MethodValidationPostProcessor();
-    }
+	@Bean
+	public MethodValidationPostProcessor validationPostProcessor() {
+		return new MethodValidationPostProcessor();
+	}
 
 }
 

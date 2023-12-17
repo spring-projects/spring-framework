@@ -1,6 +1,5 @@
 package com.lxcecho.validator.four;
 
-import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -12,6 +11,7 @@ public class CannotBlankValidation implements ConstraintValidator<CannotBlank, S
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
+		// null 时不进行校验
 		if (value != null && value.contains(" ")) {
 			// 获取默认提示信息
 			String defaultConstraintMessageTemplate = context.getDefaultConstraintMessageTemplate();

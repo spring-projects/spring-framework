@@ -16,17 +16,35 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {CannotBlankValidation.class})
 public @interface CannotBlank {
 
-    // 默认错误信息
-    String message() default "不能包含空格";
+	/**
+	 * 默认错误信息
+	 *
+	 * @return
+	 */
+	String message() default "不能包含空格";
 
-    Class<?>[] groups() default {};
+	/**
+	 * 分组
+	 *
+	 * @return
+	 */
+	Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+	/**
+	 * 负载
+	 *
+	 * @return
+	 */
+	Class<? extends Payload>[] payload() default {};
 
-    @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @Documented
-    public @interface List {
-        CannotBlank[] value();
-    }
+	/**
+	 * 指定多个时使用
+	 */
+	@Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	public @interface List {
+		CannotBlank[] value();
+	}
+
 }

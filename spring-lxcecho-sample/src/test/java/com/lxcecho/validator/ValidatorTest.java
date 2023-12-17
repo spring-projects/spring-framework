@@ -2,6 +2,7 @@ package com.lxcecho.validator;
 
 import com.lxcecho.validator.one.Person;
 import com.lxcecho.validator.one.PersonValidator;
+import com.lxcecho.validator.three.MyService;
 import com.lxcecho.validator.two.MyValidation1;
 import com.lxcecho.validator.two.MyValidation2;
 import com.lxcecho.validator.two.User;
@@ -28,7 +29,7 @@ public class ValidatorTest {
 		person.setName("lucy");
 		person.setAge(250);
 
-		// 创建 person 对应 databinder
+		// 创建 person 对应 dataBinder
 		DataBinder binder = new DataBinder(person);
 
 		// 设置校验器
@@ -65,6 +66,17 @@ public class ValidatorTest {
 
 		boolean message = validation2.validatorByUserTwo(user);
 		System.out.println(message);
+	}
+
+	@Test
+	public void testValidationOnMethod() {
+		ApplicationContext context = new AnnotationConfigApplicationContext(com.lxcecho.validator.three.ValidationConfig.class);
+		MyService service = context.getBean(MyService.class);
+		com.lxcecho.validator.three.User user = new com.lxcecho.validator.three.User();
+		user.setName("lucy");
+		user.setPhone("13566754321");
+		user.setMessage("test echo");
+		service.testMethod(user);
 	}
 
 }
