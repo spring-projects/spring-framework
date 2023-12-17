@@ -25,8 +25,7 @@ public class TxByAnnoTest {
 
 	@Test
 	public void testTxAllAnnotation() {
-		ApplicationContext applicationContext =
-				new AnnotationConfigApplicationContext(TxConfig.class);
+		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(TxConfig.class);
 		BookController accountService = applicationContext.getBean("bookController", BookController.class);
 		Integer[] bookIds = {1, 2};
 		accountService.checkout(bookIds, 1);

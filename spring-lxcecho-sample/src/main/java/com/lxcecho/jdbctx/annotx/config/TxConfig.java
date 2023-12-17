@@ -14,9 +14,9 @@ import javax.sql.DataSource;
  * @author lxcecho azaki0426@gmail.com
  * @since 2023/12/11
  */
-//@Configuration  // 配置类
-//@ComponentScan("com.lxcecho.jdbctx.annotx")
-//@EnableTransactionManagement // 开启事务管理
+@Configuration  // 配置类
+@ComponentScan("com.lxcecho.jdbctx.annotx")
+@EnableTransactionManagement // 开启事务管理
 public class TxConfig {
 
 	@Bean
