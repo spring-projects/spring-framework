@@ -6,12 +6,26 @@ package com.lxcecho.jdbctx.xmltx.dao;
  */
 public interface BookDao {
 
-    //根据图书id查询图书价格
-    Integer getBookPriceByBookId(Integer bookId);
+	/**
+	 * 根据图书 id 查询图书价格
+	 *
+	 * @param bookId
+	 * @return
+	 */
+	Integer getBookPriceByBookId(Integer bookId);
 
-    //更新图书表库存量 -1
-    void updateStock(Integer bookId);
+	/**
+	 * 更新图书表库存量 -1
+	 *
+	 * @param bookId
+	 */
+	void updateStock(Integer bookId);
 
-    //更新用户表用户余额 -图书价格
-    void updateUserBalance(Integer userId, Integer price);
+	/**
+	 * 更新用户表用户余额 -图书价格
+	 *
+	 * @param userId
+	 * @param price
+	 */
+	void updateUserBalance(Integer userId, Integer price);
 }

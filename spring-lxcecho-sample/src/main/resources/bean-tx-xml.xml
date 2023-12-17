@@ -37,9 +37,22 @@
 	<!--5. 配置事务增强，配置事务通知，设置事务相关属性-->
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">
 		<tx:attributes>
+			<!-- tx:method 标签：配置具体的事务方法 -->
+			<!-- name 属性：指定方法名，可以使用星号代表多个字符 -->
 			<tx:method name="get*" read-only="true"/>
-			<tx:method name="update*" read-only="false" propagation="REQUIRED"></tx:method>
+			<tx:method name="query*" read-only="true"></tx:method>
+			<tx:method name="find*" read-only="true"></tx:method>
 			<tx:method name="buy*" read-only="false" propagation="REQUIRED"></tx:method>
+
+			<!-- read-only属性：设置只读属性 -->
+			<!-- rollback-for属性：设置回滚的异常 -->
+			<!-- no-rollback-for属性：设置不回滚的异常 -->
+			<!-- isolation属性：设置事务的隔离级别 -->
+			<!-- timeout属性：设置事务的超时属性 -->
+			<!-- propagation属性：设置事务的传播行为 -->
+			<tx:method name="save*" read-only="false" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW"/>
+			<tx:method name="update*" read-only="false" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW"/>
+			<tx:method name="delete*" read-only="false" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW"/>
 		</tx:attributes>
 	</tx:advice>
 
