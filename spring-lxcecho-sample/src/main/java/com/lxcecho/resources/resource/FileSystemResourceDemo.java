@@ -16,26 +16,20 @@ import java.io.InputStream;
  */
 public class FileSystemResourceDemo {
 
-	public static void main(String[] args) {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext();
-//        通过 ApplicationContext 访问资源
-//        ApplicationContext 实例获取 Resource 实例时，
-//        默认采用与 ApplicationContext 相同的资源访问策略
-		Resource res = ctx.getResource("lxcecho.txt");
-		System.out.println("==" + res);
-		System.out.println(res.getFilename());
-
-//        loadFileResource("c:\\lxcecho.txt");
-
-//        loadFileResource("lxcecho.txt");
-	}
-
+	/**
+	 * FileSystemResource 实例可使用 FileSystemResource 构造器显示地创建，但更多的时候它都是隐式创建。
+	 * 执行 Spring 的某个方法时，该方法接受一个代表资源路径的字符串参数，当 Spring 识别该字符串参数中包含 file: 前缀后，系统将会自动创建 FileSystemResource 对象。
+	 *
+	 * @param path 相对路径/绝对路径
+	 */
 	public static void loadFileResource(String path) {
 		// 创建对象
 		FileSystemResource resource = new FileSystemResource(path);
-
+		// 获取文件名
 		System.out.println(resource.getFilename());
+		// 获取文件描述
 		System.out.println(resource.getDescription());
+		//获取文件内容
 		try {
 			InputStream in = resource.getInputStream();
 			byte[] b = new byte[1024];

@@ -12,18 +12,10 @@ import java.net.MalformedURLException;
  */
 public class UrlResourceDemo {
 
-	public static void main(String[] args) {
-		// http 前缀
-//        loadUrlResource("http://www.baidu.com");
-
-		// file 前缀
-		loadUrlResource("file:settings.gradle");
-	}
-
 	/**
 	 * 访问前缀 http、file
 	 *
-	 * @param path
+	 * @param path 路径
 	 */
 	public static void loadUrlResource(String path) {
 

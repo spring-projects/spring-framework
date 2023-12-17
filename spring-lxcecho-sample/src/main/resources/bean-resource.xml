@@ -3,9 +3,11 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="testBean" class="com.lxcecho.resources.resourceloaderaware.TestBean"></bean>
+	<bean id="testResourceLoaderAwareBean" class="com.lxcecho.resources.resourceloaderaware.TestResourceLoaderAwareBean"></bean>
 
 	<bean id="resourceBean" class="com.lxcecho.resources.di.ResourceBean">
+		<!-- 可以使用 file:、http:、ftp: 等前缀强制 Spring 采用对应的资源访问策略 -->
+		<!-- 如果不采用任何前缀，则 Spring 将采用与该 ApplicationContext 相同的资源访问策略来访问资源 -->
 		<property name="resource" value="classpath:lxcecho.txt"></property>
 	</bean>
 
