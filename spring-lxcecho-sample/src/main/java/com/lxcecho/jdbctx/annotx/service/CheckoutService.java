@@ -5,6 +5,7 @@ package com.lxcecho.jdbctx.annotx.service;
  * @since 2023/12/11
  */
 public interface CheckoutService {
+
 	/**
 	 * 买多本书的方法
 	 *
@@ -12,4 +13,5 @@ public interface CheckoutService {
 	 * @param userId
 	 */
 	void checkout(Integer[] bookIds, Integer userId);
+
 }

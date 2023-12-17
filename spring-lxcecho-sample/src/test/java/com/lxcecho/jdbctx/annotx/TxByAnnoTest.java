@@ -16,10 +16,11 @@ public class TxByAnnoTest {
 
 	@Test
 	public void testBuyBook() {
-		bookController.buyBook(1,1);
+//		bookController.buyBook(1,1);
 
-		/*Integer[] bookIds = {1, 2};
-		bookController.checkout(bookIds, 1);*/
+		// Test propagation
+		Integer[] bookIds = {1, 2};
+		bookController.checkout(bookIds, 1);
 	}
 
 	@Test
