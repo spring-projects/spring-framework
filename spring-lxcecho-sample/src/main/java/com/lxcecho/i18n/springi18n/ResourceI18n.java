@@ -14,11 +14,14 @@ import java.util.ResourceBundle;
 public class ResourceI18n {
 
 	public static void main(String[] args) {
-		ApplicationContext context =
-				new ClassPathXmlApplicationContext("bean.xml");
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean-i18n.xml");
 
+		// 传递动态参数，使用数组形式对应 {0} {1} 顺序
 		Object[] objs = new Object[]{"lxcecho", new Date().toString()};
-		String value = context.getMessage("www.lxcecho.com", objs, Locale.UK);
-		System.out.println(value);
+
+		// www.lxcecho.com 为资源文件的 key 值,
+		//objs 为资源文件 value 值所需要的参数，Local.CHINA 为国际化为语言
+		String str=context.getMessage("echo", objs, Locale.CHINA);
+		System.out.println(str);
 	}
 }

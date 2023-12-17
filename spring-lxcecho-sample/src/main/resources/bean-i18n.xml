@@ -6,11 +6,9 @@
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>lxcecho</value>
+				<value>echo</value>
 			</list>
 		</property>
-		<property name="defaultEncoding">
-			<value>utf-8</value>
-		</property>
+		<property name="defaultEncoding" value="utf-8"/>
 	</bean>
 </beans>
