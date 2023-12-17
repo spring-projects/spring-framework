@@ -7,6 +7,7 @@ import com.lxcecho.ioc.iocxml.dao.UserDao;
  * @since 2023/12/10
  */
 public class PersonDaoImpl implements UserDao {
+
 	@Override
 	public void run() {
 		System.out.println("person run....");
@@ -14,6 +15,7 @@ public class PersonDaoImpl implements UserDao {
 
 	@Override
 	public void addUserDao() {
-		System.out.println("userDao方法执行了...");
+		System.out.println("userDao 方法执行了...");
 	}
+
 }

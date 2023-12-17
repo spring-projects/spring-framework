@@ -6,5 +6,6 @@ package com.lxcecho.ioc.iocxml.service;
  */
 public interface UserService {
 
-    public void addUserService();
+    void addUserService();
+
 }

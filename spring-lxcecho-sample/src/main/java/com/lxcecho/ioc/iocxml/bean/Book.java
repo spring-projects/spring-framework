@@ -16,14 +16,23 @@ public class Book {
 		System.out.println("无参数构造执行了...");
 	}
 
-	//有参数构造方法
+	/**
+	 * 有参数构造方法
+	 *
+	 * @param bname
+	 * @param author
+	 */
 	public Book(String bname, String author) {
 		System.out.println("有参数构造执行了...");
 		this.bname = bname;
 		this.author = author;
 	}
 
-	//生成set方法
+	/**
+	 * 生成 set 方法
+	 *
+	 * @return
+	 */
 	public String getBname() {
 		return bname;
 	}
@@ -57,13 +66,4 @@ public class Book {
 				'}';
 	}
 
-	public static void main(String[] args) {
-		//set方法注入
-		Book book = new Book();
-		book.setBname("java");
-		book.setAuthor("尚硅谷");
-
-		//通过构造器注入
-		Book book1 = new Book("c++", "尚硅谷");
-	}
 }

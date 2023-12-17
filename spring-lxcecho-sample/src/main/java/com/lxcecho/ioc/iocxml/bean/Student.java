@@ -14,10 +14,11 @@ public class Student {
     private Map<String,Teacher> teacherMap;
 
     private String sid;
+
     private String sname;
 
     public void run() {
-        System.out.println("学生编号： "+sid+ "学生名称："+sname);
+        System.out.println("学生编号： "+sid+ " 学生名称："+sname);
         System.out.println(teacherMap);
         System.out.println(lessonList);
     }
@@ -37,16 +38,21 @@ public class Student {
     public void setTeacherMap(Map<String, Teacher> teacherMap) {
         this.teacherMap = teacherMap;
     }
+
     public String getSid() {
         return sid;
     }
+
     public void setSid(String sid) {
         this.sid = sid;
     }
+
     public String getSname() {
         return sname;
     }
+
     public void setSname(String sname) {
         this.sname = sname;
     }
+
 }

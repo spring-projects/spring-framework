@@ -6,8 +6,8 @@ package com.lxcecho.ioc.iocxml.dao;
  */
 public interface UserDao {
 
-    public void run();
+    void run();
 
-	public void addUserDao();
+	void addUserDao();
 
 }

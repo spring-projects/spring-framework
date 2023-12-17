@@ -17,6 +17,17 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class IocByXmlTest {
 
 	@Test
+	public void testBook() {
+		// set 方法注入
+		Book book = new Book();
+		book.setBname("java");
+		book.setAuthor("尚硅谷");
+
+		// 通过构造器注入
+		Book book1 = new Book("c++", "尚硅谷");
+	}
+
+	@Test
 	public void testBookSetter() {
 		ApplicationContext context = new ClassPathXmlApplicationContext("bean-di.xml");
 		Book book = context.getBean("book", Book.class);
@@ -82,8 +93,8 @@ public class IocByXmlTest {
 		ApplicationContext context = new ClassPathXmlApplicationContext("bean.xml");
 
 		// 获取创建的对象
-		User user = (User)context.getBean("user");
-		System.out.println("1:"+user);
+		User user = (User) context.getBean("user");
+		System.out.println("1:" + user);
 
 		// 使用对象调用方法进行测试
 		System.out.print("2:");
@@ -100,7 +111,7 @@ public class IocByXmlTest {
 		Class<?> clazz = Class.forName("com.lxcecho.ioc.iocxml.bean.User");
 		// 调用方法创建对象
 		//Object o = clazz.newInstance();
-		User user = (User)clazz.getDeclaredConstructor().newInstance();
+		User user = (User) clazz.getDeclaredConstructor().newInstance();
 		System.out.println(user);
 	}
 
@@ -134,6 +145,22 @@ public class IocByXmlTest {
 		System.out.println(orders);
 		Orders orders1 = context.getBean("orders", Orders.class);
 		System.out.println(orders1);
+	}
+
+	@Test
+	public void testUser() {
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean.xml");
+		//1 根据id获取bean
+		User user1 = (User) context.getBean("user1");
+		System.out.println("1 根据 id 获取 bean: " + user1);
+
+		//2 根据类型获取bean
+//        User user2 = context.getBean(User.class);
+//        System.out.println("2 根据类型获取bean: "+user2);
+
+		//3 根据id和类型获取bean
+//        User user3 = context.getBean("user", User.class);
+//        System.out.println("3 根据id和类型获取bean: "+user3);
 	}
 
 }
