@@ -1,8 +1,8 @@
 package com.lxcecho.ioc;
 
-import com.lxcecho.ioc.iocannoaop.config.SpringConfig;
-import com.lxcecho.ioc.iocannoaop.controller.AutowiredUserController;
-import com.lxcecho.ioc.iocannoaop.controller.ResourceUserController;
+import com.lxcecho.ioc.iocanno.config.SpringConfig;
+import com.lxcecho.ioc.iocanno.controller.AutowiredBaseController;
+import com.lxcecho.ioc.iocanno.controller.ResourceUserController;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -16,8 +16,8 @@ public class IocByAnnotationTest {
 
 	@Test
 	public void testAnnotationXml() {
-		ApplicationContext context = new ClassPathXmlApplicationContext("bean-annoioc.xml");
-		AutowiredUserController controller = context.getBean(AutowiredUserController.class);
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean-iocanno.xml");
+		AutowiredBaseController controller = context.getBean(AutowiredBaseController.class);
 		controller.add();
 	}
 

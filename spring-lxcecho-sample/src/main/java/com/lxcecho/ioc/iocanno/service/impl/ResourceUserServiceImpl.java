@@ -1,7 +1,7 @@
-package com.lxcecho.ioc.iocannoaop.service.impl;
+package com.lxcecho.ioc.iocanno.service.impl;
 
-import com.lxcecho.ioc.iocannoaop.dao.UserDao;
-import com.lxcecho.ioc.iocannoaop.service.UserService;
+import com.lxcecho.ioc.iocanno.dao.UserDao;
+import com.lxcecho.ioc.iocanno.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class ResourceUserServiceImpl implements UserService {
 
 	@Override
 	public void add() {
-		System.out.println("service.....");
+		System.out.println("ResourceUserServiceImpl.....");
 		myUserDao.add();
 	}
 }

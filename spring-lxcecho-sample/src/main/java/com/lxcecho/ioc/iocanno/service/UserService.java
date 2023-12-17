@@ -1,4 +1,4 @@
-package com.lxcecho.ioc.iocannoaop.service;
+package com.lxcecho.ioc.iocanno.service;
 
 /**
  * @author lxcecho azaki0426@gmail.com
@@ -6,6 +6,6 @@ package com.lxcecho.ioc.iocannoaop.service;
  */
 public interface UserService {
 
-    public void add();
+    void add();
 
 }

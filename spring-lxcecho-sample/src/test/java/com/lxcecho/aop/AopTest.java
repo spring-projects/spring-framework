@@ -13,7 +13,7 @@ public class AopTest {
 
 	@Test
 	public void testAdd() {
-		ApplicationContext context = new ClassPathXmlApplicationContext("bean-annoaop.xml");
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean-aopanno.xml");
 		Calculator calculator = context.getBean(Calculator.class);
 		calculator.add(2, 3);
 	}

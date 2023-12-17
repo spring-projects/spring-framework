@@ -8,5 +8,5 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<!--开启组件扫描-->
-	<context:component-scan base-package="com.lxcecho.ioc.iocannoaop"></context:component-scan>
+	<context:component-scan base-package="com.lxcecho.ioc.iocanno"></context:component-scan>
 </beans>

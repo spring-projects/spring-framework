@@ -1,4 +1,4 @@
-package com.lxcecho.ioc.iocannoaop.dao;
+package com.lxcecho.ioc.iocanno.dao;
 
 /**
  * @author lxcecho azaki0426@gmail.com
@@ -6,6 +6,6 @@ package com.lxcecho.ioc.iocannoaop.dao;
  */
 public interface UserDao {
 
-    public void add();
+    void add();
 
 }

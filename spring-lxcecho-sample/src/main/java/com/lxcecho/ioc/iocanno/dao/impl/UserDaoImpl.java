@@ -1,6 +1,6 @@
-package com.lxcecho.ioc.iocannoaop.dao.impl;
+package com.lxcecho.ioc.iocanno.dao.impl;
 
-import com.lxcecho.ioc.iocannoaop.dao.UserDao;
+import com.lxcecho.ioc.iocanno.dao.UserDao;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,9 +9,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class UserDaoImpl  implements UserDao {
+
     @Override
     public void add() {
-        System.out.println("dao........");
+        System.out.println("UserDaoImpl........");
     }
 
 }

@@ -1,4 +1,4 @@
-package com.lxcecho.ioc.iocannoaop.bean;
+package com.lxcecho.ioc.iocanno.bean;
 
 import org.springframework.stereotype.Controller;
 
