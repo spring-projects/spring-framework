@@ -371,7 +371,7 @@ public class DefaultDataBuffer implements DataBuffer {
 				.slice();
 		this.writePosition = Math.max(this.writePosition, index) - index;
 		this.readPosition = Math.max(this.readPosition, index) - index;
-		capacity(this.byteBuffer.capacity());
+		this.capacity = this.byteBuffer.capacity();
 
 		return result;
 	}
