@@ -18,23 +18,29 @@ package org.springframework.web.multipart.support;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link StandardMultipartHttpServletRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 class StandardMultipartHttpServletRequestTests {
 
@@ -92,12 +98,47 @@ class StandardMultipartHttpServletRequestTests {
 				""".replace("\n", "\r\n"));
 	}
 
+	@Test
+	void plainSizeExceededServletException() {
+		ServletException ex = new ServletException("Request size exceeded");
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+	@Test  // gh-28759
+	void jetty94MaxRequestSizeException() {
+		ServletException ex = new ServletException(new IllegalStateException("Request exceeds maxRequestSize"));
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+	@Test  // gh-31850
+	void jetty12MaxLengthExceededException() {
+		ServletException ex = new ServletException(new RuntimeException("400: bad multipart",
+				new IllegalStateException("max length exceeded")));
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
 
 	private static StandardMultipartHttpServletRequest requestWithPart(String name, String disposition, String content) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockPart part = new MockPart(name, null, content.getBytes(StandardCharsets.UTF_8));
 		part.getHeaders().set("Content-Disposition", disposition);
 		request.addPart(part);
+		return new StandardMultipartHttpServletRequest(request);
+	}
+
+	private static StandardMultipartHttpServletRequest requestWithException(ServletException ex) {
+		MockHttpServletRequest request = new MockHttpServletRequest() {
+			@Override
+			public Collection<Part> getParts() throws ServletException {
+				throw ex;
+			}
+		};
 		return new StandardMultipartHttpServletRequest(request);
 	}
 
