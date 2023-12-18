@@ -218,7 +218,9 @@ public class ReflectUtils {
 			dimensions++;
 		}
 		StringBuilder brackets = new StringBuilder(className.length() - dimensions);
-        brackets.append("[".repeat(Math.max(0, dimensions)));
+		for (int i = 0; i < dimensions; i++) {
+			brackets.append('[');
+		}
 		className = className.substring(0, className.length() - 2 * dimensions);
 
 		String prefix = (dimensions > 0) ? brackets + "L" : "";
