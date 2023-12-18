@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
+import org.springframework.validation.SmartValidator;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.BindParamNameResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -224,7 +225,8 @@ public class BindingContext {
 			if (ReactiveAdapterRegistry.getSharedInstance().getAdapter(parameter.getParameterType()) == null) {
 				for (Annotation annotation : parameter.getParameterAnnotations()) {
 					if (annotation.annotationType().getName().equals("jakarta.validation.Valid")) {
-						binder.setExcludedValidators(validator -> validator instanceof jakarta.validation.Validator);
+						binder.setExcludedValidators(v -> v instanceof jakarta.validation.Validator ||
+								v instanceof SmartValidator sv && sv.unwrap(jakarta.validation.Validator.class) != null);
 					}
 				}
 			}

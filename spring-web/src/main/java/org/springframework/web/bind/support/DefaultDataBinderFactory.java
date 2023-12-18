@@ -22,6 +22,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.DataBinder;
+import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -148,7 +149,8 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 		public static void initBinder(DataBinder binder, MethodParameter parameter) {
 			for (Annotation annotation : parameter.getParameterAnnotations()) {
 				if (annotation.annotationType().getName().equals("jakarta.validation.Valid")) {
-					binder.setExcludedValidators(validator -> validator instanceof jakarta.validation.Validator);
+					binder.setExcludedValidators(v -> v instanceof jakarta.validation.Validator ||
+							v instanceof SmartValidator sv && sv.unwrap(jakarta.validation.Validator.class) != null);
 				}
 			}
 		}
