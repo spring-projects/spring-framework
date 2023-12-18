@@ -118,8 +118,9 @@ public class JettyWebSocketHandlerAdapter {
 	}
 
 	private static ByteBuffer copyByteBuffer(ByteBuffer src) {
-		ByteBuffer dest = ByteBuffer.allocate(src.capacity());
-		dest.put(0, src, 0, src.remaining());
+		ByteBuffer dest = ByteBuffer.allocate(src.remaining());
+		dest.put(src);
+		dest.flip();
 		return dest;
 	}
 
