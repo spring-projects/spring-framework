@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,9 +68,7 @@ public class PatternParseException extends IllegalArgumentException {
 	public String toDetailedString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.pattern).append('\n');
-		for (int i = 0; i < this.position; i++) {
-			sb.append(' ');
-		}
+		sb.append(" ".repeat(Math.max(0, this.position)));
 		sb.append("^\n");
 		sb.append(getMessage());
 		return sb.toString();
