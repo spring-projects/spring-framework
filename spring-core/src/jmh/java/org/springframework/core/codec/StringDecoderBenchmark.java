@@ -50,6 +50,7 @@ public class StringDecoderBenchmark {
 
 	@Benchmark
 	public void parseSseLines(SseLinesState state, Blackhole blackhole) {
+
 		blackhole.consume(state.parseLines().blockLast());
 	}
 
