@@ -28,7 +28,7 @@ javadoc {
 		header = rootProject.description
 		use = true
 		overview = project.relativePath("$rootProject.rootDir/framework-docs/src/docs/api/overview.html")
-		destinationDir = file("${project.buildDir}/docs/javadoc-api")
+		destinationDir = file("$project.docsDir/javadoc-api")
 		splitIndex = true
 		links(rootProject.ext.javadocLinks)
 		addBooleanOption('Xdoclint:syntax,reference', true) // only check syntax and reference with doclint
@@ -52,7 +52,7 @@ rootProject.tasks.dokkaHtmlMultiModule.configure {
 		tasks.named("javadoc")
 	}
 	moduleName.set("spring-framework")
-	outputDirectory.set(project.file("$buildDir/docs/kdoc-api"))
+	outputDirectory.set(file("$docsDir/kdoc-api"))
 	includes.from("$rootProject.rootDir/framework-docs/src/docs/api/dokka-overview.md")
 }
 
