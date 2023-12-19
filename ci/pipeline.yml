@@ -255,6 +255,8 @@ jobs:
   plan:
     - get: ci-image
     - get: git-repo
+    - get: every-morning
+      trigger: true
     - put: repo-status-jdk22-build
       params: { state: "pending", commit: "git-repo" }
     - do:
