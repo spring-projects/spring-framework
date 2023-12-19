@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.reactive.BindingContext
@@ -194,6 +195,14 @@ class InvocableHandlerMethodKotlinTests {
 		assertHandlerResultValue(result, "3.1")
 	}
 
+	@Test
+	fun propertyAccessor() {
+		this.resolvers.add(stubResolver(Mono.empty()))
+		val method = PropertyAccessorController::prop.getter.javaMethod!!
+		val result = invoke(PropertyAccessorController(), method)
+		assertHandlerResultValue(result, "foo")
+	}
+
 
 	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
 		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
@@ -291,6 +300,13 @@ class InvocableHandlerMethodKotlinTests {
 		fun valueClassWithDefault(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			"${limit.value}"
 
+	}
+
+	class PropertyAccessorController {
+
+		val prop: String
+			@GetMapping("/")
+			get() = "foo"
 	}
 
 	@JvmInline

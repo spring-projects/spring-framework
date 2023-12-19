@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 import kotlin.Unit;
 import kotlin.jvm.JvmClassMappingKt;
@@ -306,8 +305,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		@Nullable
 		@SuppressWarnings("deprecation")
-		public static Object invokeFunction(Method method, Object target, Object[] args) {
-			KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+		public static Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			// For property accessors
+			if (function == null) {
+				return method.invoke(target, args);
+			}
 			if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
 				KCallablesJvm.setAccessible(function, true);
 			}

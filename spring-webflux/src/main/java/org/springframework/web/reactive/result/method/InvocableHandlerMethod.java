@@ -24,7 +24,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import kotlin.Unit;
@@ -306,7 +305,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		@Nullable
 		@SuppressWarnings("deprecation")
 		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
-				ServerWebExchange exchange) {
+				ServerWebExchange exchange) throws InvocationTargetException, IllegalAccessException {
 
 			if (isSuspendingFunction) {
 				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
@@ -318,7 +317,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			else {
-				KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				// For property accessors
+				if (function == null) {
+					return method.invoke(target, args);
+				}
 				if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
 					KCallablesJvm.setAccessible(function, true);
 				}

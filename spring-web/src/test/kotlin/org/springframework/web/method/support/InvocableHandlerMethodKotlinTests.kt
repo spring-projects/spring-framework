@@ -98,6 +98,12 @@ class InvocableHandlerMethodKotlinTests {
 		Assertions.assertThat(value).isEqualTo(3.1)
 	}
 
+	@Test
+	fun propertyAccessor() {
+		val value = getInvocable(PropertyAccessorHandler::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo("foo")
+	}
+
 	private fun getInvocable(clazz: Class<*>, vararg argTypes: Class<*>): InvocableHandlerMethod {
 		val method = ResolvableMethod.on(clazz).argTypes(*argTypes).resolveMethod()
 		val handlerMethod = InvocableHandlerMethod(clazz.constructors.first().newInstance(), method)
@@ -136,6 +142,12 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClass(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			limit.value
+	}
+
+	private class PropertyAccessorHandler {
+
+		val prop: String
+			get() = "foo"
 	}
 
 	@JvmInline
