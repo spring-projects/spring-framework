@@ -198,7 +198,7 @@ public final class WebHttpHandlerBuilder {
 				.forEach(builder::httpHandlerDecorator);
 
 		context.getBeanProvider(ObservationRegistry.class).ifUnique(builder::observationRegistry);
-		context.getBeanProvider(ServerRequestObservationConvention.class).ifUnique(builder::observationConvention);
+		context.getBeanProvider(ServerRequestObservationConvention.class).ifAvailable(builder::observationConvention);
 
 		try {
 			builder.sessionManager(
