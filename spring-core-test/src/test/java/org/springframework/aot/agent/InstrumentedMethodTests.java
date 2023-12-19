@@ -40,16 +40,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class InstrumentedMethodTests {
 
-	private RuntimeHints hints = new RuntimeHints();
+	private final RuntimeHints hints = new RuntimeHints();
 
 
 	@Nested
 	class ClassReflectionInstrumentationTests {
 
-		RecordedInvocation stringGetClasses = RecordedInvocation.of(InstrumentedMethod.CLASS_GETCLASSES)
+		final RecordedInvocation stringGetClasses = RecordedInvocation.of(InstrumentedMethod.CLASS_GETCLASSES)
 				.onInstance(String.class).returnValue(String.class.getClasses()).build();
 
-		RecordedInvocation stringGetDeclaredClasses = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDCLASSES)
+		final RecordedInvocation stringGetDeclaredClasses = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDCLASSES)
 				.onInstance(String.class).returnValue(String.class.getDeclaredClasses()).build();
 
 		@Test
@@ -106,12 +106,12 @@ class InstrumentedMethodTests {
 
 		RecordedInvocation stringGetConstructor;
 
-		RecordedInvocation stringGetConstructors = RecordedInvocation.of(InstrumentedMethod.CLASS_GETCONSTRUCTORS)
+		final RecordedInvocation stringGetConstructors = RecordedInvocation.of(InstrumentedMethod.CLASS_GETCONSTRUCTORS)
 				.onInstance(String.class).returnValue(String.class.getConstructors()).build();
 
 		RecordedInvocation stringGetDeclaredConstructor;
 
-		RecordedInvocation stringGetDeclaredConstructors = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTORS)
+		final RecordedInvocation stringGetDeclaredConstructors = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTORS)
 				.onInstance(String.class).returnValue(String.class.getDeclaredConstructors()).build();
 
 		@BeforeEach
@@ -434,7 +434,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodShouldNotMatchInstrospectPublicMethodsHintWhenPrivate() throws Exception {
+		void classGetMethodShouldNotMatchInstrospectPublicMethodsHintWhenPrivate() {
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetScaleMethod);
 		}
@@ -556,7 +556,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetFieldShouldNotMatchPublicFieldsHintWhenPrivate() throws NoSuchFieldException {
+		void classGetFieldShouldNotMatchPublicFieldsHintWhenPrivate() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETFIELD)
 					.onInstance(String.class).withArgument("value").returnValue(null).build();
 			hints.reflection().registerType(String.class, MemberCategory.PUBLIC_FIELDS);
@@ -572,7 +572,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetFieldShouldNotMatchForWrongType() throws Exception {
+		void classGetFieldShouldNotMatchForWrongType() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETFIELD)
 					.onInstance(String.class).withArgument("value").returnValue(null).build();
 			hints.reflection().registerType(Integer.class, MemberCategory.DECLARED_FIELDS);
