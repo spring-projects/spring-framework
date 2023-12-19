@@ -38,7 +38,7 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun intDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Int::class.java, null))
-		val value = getInvocable(Int::class.java).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, Int::class.java).invokeForRequest(request, null)
 
 		Assertions.assertThat(getStubResolver(0).resolvedParameters).hasSize(1)
 		Assertions.assertThat(value).isEqualTo("20")
@@ -47,7 +47,7 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun booleanDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Boolean::class.java, null))
-		val value = getInvocable(Boolean::class.java).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, Boolean::class.java).invokeForRequest(request, null)
 
 		Assertions.assertThat(getStubResolver(0).resolvedParameters).hasSize(1)
 		Assertions.assertThat(value).isEqualTo("true")
@@ -56,7 +56,7 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun nullableIntDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Int::class.javaObjectType, null))
-		val value = getInvocable(Int::class.javaObjectType).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, Int::class.javaObjectType).invokeForRequest(request, null)
 
 		Assertions.assertThat(getStubResolver(0).resolvedParameters).hasSize(1)
 		Assertions.assertThat(value).isEqualTo("20")
@@ -65,7 +65,7 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun nullableBooleanDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Boolean::class.javaObjectType, null))
-		val value = getInvocable(Boolean::class.javaObjectType).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, Boolean::class.javaObjectType).invokeForRequest(request, null)
 
 		Assertions.assertThat(getStubResolver(0).resolvedParameters).hasSize(1)
 		Assertions.assertThat(value).isEqualTo("true")
@@ -73,34 +73,34 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun unitReturnValue() {
-		val value = getInvocable().invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isNull()
 	}
 
 	@Test
 	fun nullReturnValue() {
 		composite.addResolver(StubArgumentResolver(String::class.java, null))
-		val value = getInvocable(String::class.java).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, String::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isNull()
 	}
 
 	@Test
 	fun valueClass() {
 		composite.addResolver(StubArgumentResolver(Long::class.java, 1L))
-		val value = getInvocable(Long::class.java).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, Long::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo(1L)
 	}
 
 	@Test
 	fun valueClassDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Double::class.java))
-		val value = getInvocable(Double::class.java).invokeForRequest(request, null)
+		val value = getInvocable(Handler::class.java, Double::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo(3.1)
 	}
 
-	private fun getInvocable(vararg argTypes: Class<*>): InvocableHandlerMethod {
-		val method = ResolvableMethod.on(Handler::class.java).argTypes(*argTypes).resolveMethod()
-		val handlerMethod = InvocableHandlerMethod(Handler(), method)
+	private fun getInvocable(clazz: Class<*>, vararg argTypes: Class<*>): InvocableHandlerMethod {
+		val method = ResolvableMethod.on(clazz).argTypes(*argTypes).resolveMethod()
+		val handlerMethod = InvocableHandlerMethod(clazz.constructors.first().newInstance(), method)
 		handlerMethod.setHandlerMethodArgumentResolvers(composite)
 		return handlerMethod
 	}
