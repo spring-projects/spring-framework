@@ -49,6 +49,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -302,7 +303,7 @@ public class MethodValidationAdapter implements MethodValidator {
 			Function<Integer, Object> argumentFunction) {
 
 		Map<MethodParameter, ParamResultBuilder> paramViolations = new LinkedHashMap<>();
-		Map<BeanResultKey, BeanResultBuilder> beanViolations = new LinkedHashMap<>();
+		Map<Path.Node, BeanResultBuilder> beanViolations = new LinkedHashMap<>();
 
 		for (ConstraintViolation<Object> violation : violations) {
 			Iterator<Path.Node> itr = violation.getPropertyPath().iterator();
@@ -328,10 +329,37 @@ public class MethodValidationAdapter implements MethodValidator {
 							.addViolation(violation);
 				}
 				else {
-					Object leafBean = violation.getLeafBean();
-					BeanResultKey key = new BeanResultKey(node, leafBean);
+					// If the argument is a container of elements, we need the specific element,
+					// but the only option is to check for a parent container index/key in the
+					// next part of the property path.
+					Path.Node paramNode = node;
+					node = itr.next();
+
+					Object bean;
+					Object container;
+					Integer containerIndex = node.getIndex();
+					Object containerKey = node.getKey();
+					if (containerIndex != null && arg instanceof List<?> list) {
+						bean = list.get(containerIndex);
+						container = list;
+					}
+					else if (containerIndex != null && arg instanceof Object[] array) {
+						bean = array[containerIndex];
+						container = array;
+					}
+					else if (containerKey != null && arg instanceof Map<?, ?> map) {
+						bean = map.get(containerKey);
+						container = map;
+					}
+					else {
+						Assert.state(!node.isInIterable(), "No way to unwrap Iterable without index");
+						bean = arg;
+						container = null;
+					}
+
 					beanViolations
-							.computeIfAbsent(key, k -> new BeanResultBuilder(parameter, arg, itr.next(), leafBean))
+							.computeIfAbsent(paramNode, k ->
+									new BeanResultBuilder(parameter, bean, container, containerIndex, containerKey))
 							.addViolation(violation);
 				}
 				break;
@@ -448,13 +476,16 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		private final Set<ConstraintViolation<Object>> violations = new LinkedHashSet<>();
 
-		public BeanResultBuilder(MethodParameter param, @Nullable Object arg, Path.Node node, @Nullable Object leafBean) {
+		public BeanResultBuilder(
+				MethodParameter param, @Nullable Object bean, @Nullable Object container,
+				@Nullable Integer containerIndex, @Nullable Object containerKey) {
+
 			this.parameter = param;
-			this.bean = leafBean;
-			this.container = (arg != null && !arg.equals(leafBean) ? arg : null);
-			this.containerIndex = node.getIndex();
-			this.containerKey = node.getKey();
-			this.errors = createBindingResult(param, leafBean);
+			this.bean = bean;
+			this.container = container;
+			this.containerIndex = containerIndex;
+			this.containerKey = containerKey;
+			this.errors = createBindingResult(param, this.bean);
 		}
 
 		public void addViolation(ConstraintViolation<Object> violation) {
@@ -468,22 +499,6 @@ public class MethodValidationAdapter implements MethodValidator {
 					this.containerIndex, this.containerKey);
 		}
 	}
-
-
-	/**
-	 * Unique key for cascaded violations associated with a bean.
-	 * <p>The bean may be an element within a container such as a List, Set, array,
-	 * Map, Optional, and others. In that case the {@link Path.Node} represents
-	 * the container element with its index or key, if applicable, while the
-	 * {@link ConstraintViolation#getLeafBean() leafBean} is the actual
-	 * element instance. The pair should be unique. For example in a Set, the
-	 * node is the same but element instances are unique. In a List or Map the
-	 * node is further qualified by an index or key while element instances
-	 * may be the same.
-	 * @param node the path to the bean associated with the violation
-	 * @param leafBean the bean instance
-	 */
-	record BeanResultKey(Path.Node node, Object leafBean) { }
 
 
 	/**

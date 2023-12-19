@@ -17,10 +17,8 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.validation.Valid;
@@ -197,42 +195,6 @@ public class MethodValidationAdapterTests {
 		});
 	}
 
-	@Test
-	void validateSetArgument() {
-		MyService target = new MyService();
-		Method method = getMethod(target, "addPeople");
-
-		testArgs(target, method, new Object[] {Set.of(faustino1234, cayetana6789)}, ex -> {
-
-			assertThat(ex.getAllValidationResults()).hasSize(2);
-
-			int paramIndex = 0;
-			String objectName = "people";
-			List<ParameterErrors> results = ex.getBeanResults();
-
-			assertThat(results).satisfiesExactlyInAnyOrder(
-				result -> assertBeanResult(result, paramIndex, objectName, faustino1234, List.of("""
-					Field error in object 'people' on field 'name': rejected value [Faustino1234]; \
-					codes [Size.people.name,Size.name,Size.java.lang.String,Size]; \
-					arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-					codes [people.name,name]; arguments []; default message [name],10,1]; \
-					default message [size must be between 1 and 10]""")),
-				result -> assertBeanResult(result, paramIndex, objectName, cayetana6789, List.of("""
-					Field error in object 'people' on field 'name': rejected value [Cayetana6789]; \
-					codes [Size.people.name,Size.name,Size.java.lang.String,Size]; \
-					arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-					codes [people.name,name]; arguments []; default message [name],10,1]; \
-					default message [size must be between 1 and 10]""", """
-					Field error in object 'people' on field 'hobbies[0]': rejected value [  ]; \
-					codes [NotBlank.people.hobbies[0],NotBlank.people.hobbies,NotBlank.hobbies[0],\
-					NotBlank.hobbies,NotBlank.java.lang.String,NotBlank]; arguments \
-					[org.springframework.context.support.DefaultMessageSourceResolvable: codes \
-					[people.hobbies[0],hobbies[0]]; arguments []; default message [hobbies[0]]]; \
-					default message [must not be blank]"""))
-			);
-		});
-	}
-
 	private void testArgs(Object target, Method method, Object[] args, Consumer<MethodValidationResult> consumer) {
 		consumer.accept(this.validationAdapter.validateArguments(target, method, null, args, new Class<?>[0]));
 	}
@@ -285,7 +247,7 @@ public class MethodValidationAdapterTests {
 			throw new UnsupportedOperationException();
 		}
 
-		public void addPeople(@Valid Collection<Person> people) {
+		public void addPeople(@Valid List<Person> people) {
 		}
 
 	}
