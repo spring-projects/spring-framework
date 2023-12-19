@@ -506,6 +506,7 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments,
 	 * returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL containing named parameters
 	 * @param paramSource container of arguments and SQL types to bind to the query
 	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
@@ -513,6 +514,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @see MapSqlParameterSource
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)
 			throws DataAccessException;
@@ -520,6 +522,7 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments,
 	 * returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL containing named parameters
 	 * @param paramSource container of arguments and SQL types to bind to the query
 	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
@@ -528,6 +531,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @see MapSqlParameterSource
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
 			throws DataAccessException;
@@ -558,6 +562,7 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied
 	 * arguments, returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
 	 * arguments for the query
@@ -568,12 +573,14 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder);
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments,
 	 * returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
 	 * arguments for the query
@@ -585,7 +592,9 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
 			String[] keyColumnNames);
+
 }

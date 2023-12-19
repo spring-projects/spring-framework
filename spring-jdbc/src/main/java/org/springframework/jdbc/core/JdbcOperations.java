@@ -933,12 +933,14 @@ public interface JdbcOperations {
 	 * <p>Note that the given PreparedStatementCreator has to create a statement
 	 * with activated extraction of generated keys (a JDBC 3.0 feature). This can
 	 * either be done directly or through using a PreparedStatementCreatorFactory.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param psc a callback that provides SQL and any necessary parameters
 	 * @param generatedKeyHolder a KeyHolder that will hold the generated keys
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @see PreparedStatementCreatorFactory
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) throws DataAccessException;
 
@@ -1004,7 +1006,8 @@ public interface JdbcOperations {
 	 * <p>Note that the given PreparedStatementCreator has to create a statement
 	 * with activated extraction of generated keys (a JDBC 3.0 feature). This can
 	 * either be done directly or through using a PreparedStatementCreatorFactory.
-	 * <p>Will fall back to separate updates on a single PreparedStatement
+	 * <p>This method requires support for generated keys in the JDBC driver.
+	 * It will fall back to separate updates on a single PreparedStatement
 	 * if the JDBC driver does not support batch updates.
 	 * @param psc a callback that creates a PreparedStatement given a Connection
 	 * @param pss object to set parameters on the PreparedStatement
@@ -1016,6 +1019,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int[] batchUpdate(PreparedStatementCreator psc, BatchPreparedStatementSetter pss,
 			KeyHolder generatedKeyHolder) throws DataAccessException;
