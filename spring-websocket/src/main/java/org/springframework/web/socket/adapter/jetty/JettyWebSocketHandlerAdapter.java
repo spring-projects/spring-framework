@@ -114,6 +114,8 @@ public class JettyWebSocketHandlerAdapter {
 				callback.fail(ex);
 				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 			}
+		} else {
+			callback.succeed();
 		}
 	}
 
