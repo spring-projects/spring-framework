@@ -503,6 +503,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	private Object evaluate(@Nullable Object cacheHit, CacheOperationInvoker invoker, Method method,
 			CacheOperationContexts contexts) {
 
+		// Re-invocation in reactive pipeline after late cache hit determination?
+		if (contexts.processed) {
+			return cacheHit;
+		}
+
 		Object cacheValue;
 		Object returnValue;
 
@@ -540,6 +545,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (returnOverride != null) {
 			returnValue = returnOverride;
 		}
+
+		// Mark as processed for re-invocation after late cache hit determination
+		contexts.processed = true;
 
 		return returnValue;
 	}
@@ -687,6 +695,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		private final MultiValueMap<Class<? extends CacheOperation>, CacheOperationContext> contexts;
 
 		private final boolean sync;
+
+		boolean processed;
 
 		public CacheOperationContexts(Collection<? extends CacheOperation> operations, Method method,
 				Object[] args, Object target, Class<?> targetClass) {
@@ -1082,19 +1092,23 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					return null;
 				}
 				if (adapter.isMultiValue()) {
-					return adapter.fromPublisher(Flux.from(
-							Mono.fromFuture(cachedFuture)
-									.flatMap(value -> (Mono<?>) evaluate(Mono.justOrEmpty(unwrapCacheValue(value)), invoker, method, contexts)))
-							.flatMap(v -> (v instanceof Iterable<?> iv ? Flux.fromIterable(iv) : Flux.just(v)))
-							.switchIfEmpty(Flux.defer(() -> (Flux<?>) evaluate(null, invoker, method, contexts))));
+					return adapter.fromPublisher(Flux.from(Mono.fromFuture(cachedFuture))
+							.switchIfEmpty(Flux.defer(() -> (Flux) evaluate(null, invoker, method, contexts)))
+							.flatMap(v -> evaluate(valueToFlux(v, contexts), invoker, method, contexts)));
 				}
 				else {
 					return adapter.fromPublisher(Mono.fromFuture(cachedFuture)
-							.flatMap(value -> (Mono<?>) evaluate(Mono.justOrEmpty(unwrapCacheValue(value)), invoker, method, contexts))
-							.switchIfEmpty(Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts))));
+							.switchIfEmpty(Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts)))
+							.flatMap(v -> evaluate(Mono.justOrEmpty(unwrapCacheValue(v)), invoker, method, contexts)));
 				}
 			}
 			return NOT_HANDLED;
+		}
+
+		private Flux<?> valueToFlux(Object value, CacheOperationContexts contexts) {
+			Object data = unwrapCacheValue(value);
+			return (!contexts.processed && data instanceof Iterable<?> iterable ? Flux.fromIterable(iterable) :
+					(data != null ? Flux.just(data) : Flux.empty()));
 		}
 
 		@Nullable

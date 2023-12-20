@@ -32,6 +32,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -171,6 +172,11 @@ public class ReactiveCachingTests {
 						public CompletableFuture<?> retrieve(Object key) {
 							return CompletableFuture.completedFuture(lookup(key));
 						}
+						@Override
+						public void put(Object key, @Nullable Object value) {
+							assertThat(get(key) == null).as("Double put");
+							super.put(key, value);
+						}
 					};
 				}
 			};
@@ -192,6 +198,11 @@ public class ReactiveCachingTests {
 						public CompletableFuture<?> retrieve(Object key) {
 							Object value = lookup(key);
 							return CompletableFuture.completedFuture(value != null ? toValueWrapper(value) : null);
+						}
+						@Override
+						public void put(Object key, @Nullable Object value) {
+							assertThat(get(key) == null).as("Double put");
+							super.put(key, value);
 						}
 					};
 				}
