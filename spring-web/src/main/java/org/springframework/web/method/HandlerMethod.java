@@ -17,8 +17,13 @@
 package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
@@ -396,17 +401,19 @@ public class HandlerMethod extends AnnotatedMethod {
 
 		public static boolean checkArguments(Class<?> beanType, MethodParameter[] parameters) {
 			if (AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {
-				for (MethodParameter parameter : parameters) {
-					MergedAnnotations merged = MergedAnnotations.from(parameter.getParameterAnnotations());
+				for (MethodParameter param : parameters) {
+					MergedAnnotations merged = MergedAnnotations.from(param.getParameterAnnotations());
 					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {
 						return true;
 					}
-					else {
-						Class<?> type = parameter.getParameterType();
-						if (merged.stream().anyMatch(VALID_PREDICATE) &&
-								(Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))) {
-							return true;
-						}
+					Class<?> type = param.getParameterType();
+					if (merged.stream().anyMatch(VALID_PREDICATE) &&
+							(Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))) {
+						return true;
+					}
+					merged = MergedAnnotations.from(getContainerElementAnnotations(param));
+					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {
+						return true;
 					}
 				}
 			}
@@ -420,6 +427,26 @@ public class HandlerMethod extends AnnotatedMethod {
 			}
 			return false;
 		}
+
+		/**
+		 * There may be constraints on elements of a container (list, map).
+		 */
+		private static Annotation[] getContainerElementAnnotations(MethodParameter param) {
+			List<Annotation> result = null;
+			int i = param.getParameterIndex();
+			Method method = param.getMethod();
+			if (method != null && method.getAnnotatedParameterTypes()[i] instanceof AnnotatedParameterizedType apt) {
+				for (AnnotatedType type : apt.getAnnotatedActualTypeArguments()) {
+					for (Annotation annot : type.getAnnotations()) {
+						result = (result != null ? result : new ArrayList<>());
+						result.add(annot);
+					}
+				}
+			}
+			result = (result != null ? result : Collections.emptyList());
+			return result.toArray(new Annotation[0]);
+		}
+
 	}
 
 }

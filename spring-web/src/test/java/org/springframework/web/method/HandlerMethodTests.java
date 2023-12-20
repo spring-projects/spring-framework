@@ -21,6 +21,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 
@@ -38,45 +39,45 @@ public class HandlerMethodTests {
 	@Test
 	void shouldValidateArgsWithConstraintsDirectlyOnClass() {
 		Object target = new MyClass();
-		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
-		testShouldValidateArguments(target, List.of("addPerson", "getPerson", "getIntValue", "addPersonNotValidated"), false);
+		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addNames"), true);
+		testValidateArgs(target, List.of("addPerson", "getPerson", "getIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void shouldValidateArgsWithConstraintsOnInterface() {
 		Object target = new MyInterfaceImpl();
-		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
-		testShouldValidateArguments(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
+		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
+		testValidateArgs(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
 	}
 
 	@Test
 	void shouldValidateReturnValueWithConstraintsDirectlyOnClass() {
 		Object target = new MyClass();
-		testShouldValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
-		testShouldValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
+		testValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
+		testValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void shouldValidateReturnValueWithConstraintsOnInterface() {
 		Object target = new MyInterfaceImpl();
-		testShouldValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
-		testShouldValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
+		testValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
+		testValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void classLevelValidatedAnnotation() {
 		Object target = new MyValidatedClass();
-		testShouldValidateArguments(target, List.of("addPerson"), false);
-		testShouldValidateReturnValue(target, List.of("getPerson"), false);
+		testValidateArgs(target, List.of("addPerson"), false);
+		testValidateReturnValue(target, List.of("getPerson"), false);
 	}
 
-	private static void testShouldValidateArguments(Object target, List<String> methodNames, boolean expected) {
+	private static void testValidateArgs(Object target, List<String> methodNames, boolean expected) {
 		for (String methodName : methodNames) {
 			assertThat(getHandlerMethod(target, methodName).shouldValidateArguments()).isEqualTo(expected);
 		}
 	}
 
-	private static void testShouldValidateReturnValue(Object target, List<String> methodNames, boolean expected) {
+	private static void testValidateReturnValue(Object target, List<String> methodNames, boolean expected) {
 		for (String methodName : methodNames) {
 			assertThat(getHandlerMethod(target, methodName).shouldValidateReturnValue()).isEqualTo(expected);
 		}
@@ -111,6 +112,9 @@ public class HandlerMethodTests {
 		}
 
 		public void addPersons(@Valid List<Person> persons) {
+		}
+
+		public void addNames(List<@NotEmpty String> names) {
 		}
 
 		public void addPersonNotValidated(Person person) {
