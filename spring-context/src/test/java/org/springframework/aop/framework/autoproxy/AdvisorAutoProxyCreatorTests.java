@@ -48,8 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dave Syer
  * @author Chris Beams
  */
-@SuppressWarnings("resource")
-public class AdvisorAutoProxyCreatorTests {
+class AdvisorAutoProxyCreatorTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -75,7 +74,7 @@ public class AdvisorAutoProxyCreatorTests {
 	 * which are sourced from matching advisors
 	 */
 	@Test
-	public void testCommonInterceptorAndAdvisor() throws Exception {
+	void testCommonInterceptorAndAdvisor() {
 		BeanFactory bf = new ClassPathXmlApplicationContext(COMMON_INTERCEPTORS_CONTEXT, CLASS);
 		ITestBean test1 = (ITestBean) bf.getBean("test1");
 		assertThat(AopUtils.isAopProxy(test1)).isTrue();
@@ -120,7 +119,7 @@ public class AdvisorAutoProxyCreatorTests {
 	 * hence no proxying, for this bean
 	 */
 	@Test
-	public void testCustomTargetSourceNoMatch() throws Exception {
+	void testCustomTargetSourceNoMatch() {
 		BeanFactory bf = new ClassPathXmlApplicationContext(CUSTOM_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertThat(AopUtils.isAopProxy(test)).isFalse();
@@ -129,7 +128,7 @@ public class AdvisorAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testCustomPrototypeTargetSource() throws Exception {
+	void testCustomPrototypeTargetSource() {
 		CountingTestBean.count = 0;
 		BeanFactory bf = new ClassPathXmlApplicationContext(CUSTOM_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("prototypeTest");
@@ -145,7 +144,7 @@ public class AdvisorAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testLazyInitTargetSource() throws Exception {
+	void testLazyInitTargetSource() {
 		CountingTestBean.count = 0;
 		BeanFactory bf = new ClassPathXmlApplicationContext(CUSTOM_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("lazyInitTest");
@@ -161,7 +160,7 @@ public class AdvisorAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testQuickTargetSourceCreator() throws Exception {
+	void testQuickTargetSourceCreator() {
 		ClassPathXmlApplicationContext bf =
 				new ClassPathXmlApplicationContext(QUICK_TARGETSOURCE_CONTEXT, CLASS);
 		ITestBean test = (ITestBean) bf.getBean("test");
@@ -209,7 +208,7 @@ public class AdvisorAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testWithOptimizedProxy() throws Exception {
+	void testWithOptimizedProxy() {
 		BeanFactory beanFactory = new ClassPathXmlApplicationContext(OPTIMIZED_CONTEXT, CLASS);
 
 		ITestBean testBean = (ITestBean) beanFactory.getBean("optimizedTestBean");

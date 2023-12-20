@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * Unit tests for {@link CompositeLog}.
  * @author Rossen Stoyanchev
  */
-public class CompositeLogTests {
+class CompositeLogTests {
 
 	private final Log logger1 = mock();
 

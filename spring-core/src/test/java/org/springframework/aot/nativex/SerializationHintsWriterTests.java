@@ -32,7 +32,7 @@ import org.springframework.core.env.Environment;
  *
  * @author Sebastien Deleuze
  */
-public class SerializationHintsWriterTests {
+class SerializationHintsWriterTests {
 
 	@Test
 	void shouldWriteEmptyHint() throws JSONException {

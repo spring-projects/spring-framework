@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
  */
-public class ReflectionHintsWriterTests {
+class ReflectionHintsWriterTests {
 
 	@Test
 	void empty() throws JSONException {

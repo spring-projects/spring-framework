@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class ScopedProxyTests {
+class ScopedProxyTests {
 
 	private static final Class<?> CLASS = ScopedProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -51,7 +51,7 @@ public class ScopedProxyTests {
 
 
 	@Test  // SPR-2108
-	public void testProxyAssignable() throws Exception {
+	void testProxyAssignable() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(MAP_CONTEXT);
 		Object baseMap = bf.getBean("singletonMap");
@@ -60,7 +60,7 @@ public class ScopedProxyTests {
 	}
 
 	@Test
-	public void testSimpleProxy() throws Exception {
+	void testSimpleProxy() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(MAP_CONTEXT);
 		Object simpleMap = bf.getBean("simpleMap");
@@ -71,7 +71,7 @@ public class ScopedProxyTests {
 	}
 
 	@Test
-	public void testScopedOverride() throws Exception {
+	void testScopedOverride() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(OVERRIDE_CONTEXT);
 		SimpleMapScope scope = new SimpleMapScope();
@@ -87,7 +87,7 @@ public class ScopedProxyTests {
 	}
 
 	@Test
-	public void testJdkScopedProxy() throws Exception {
+	void testJdkScopedProxy() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(TESTBEAN_CONTEXT);
 		bf.setSerializationId("X");
@@ -119,7 +119,7 @@ public class ScopedProxyTests {
 	}
 
 	@Test
-	public void testCglibScopedProxy() throws Exception {
+	void testCglibScopedProxy() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(LIST_CONTEXT);
 		bf.setSerializationId("Y");

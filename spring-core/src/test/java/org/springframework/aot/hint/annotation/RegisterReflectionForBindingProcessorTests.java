@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Sebastien Deleuze
  */
-public class RegisterReflectionForBindingProcessorTests {
+class RegisterReflectionForBindingProcessorTests {
 
 	private final RegisterReflectionForBindingProcessor processor = new RegisterReflectionForBindingProcessor();
 

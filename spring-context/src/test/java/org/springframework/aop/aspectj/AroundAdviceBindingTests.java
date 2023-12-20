@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class AroundAdviceBindingTests {
+class AroundAdviceBindingTests {
 
 	private AroundAdviceBindingCollaborator mockCollaborator = mock();
 
@@ -50,7 +50,7 @@ public class AroundAdviceBindingTests {
 
 
 	@BeforeEach
-	public void onSetUp() throws Exception {
+	void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		AroundAdviceBindingTestAspect aroundAdviceAspect = (AroundAdviceBindingTestAspect) ctx.getBean("testAspect");
@@ -67,25 +67,25 @@ public class AroundAdviceBindingTests {
 	}
 
 	@Test
-	public void testOneIntArg() {
+	void testOneIntArg() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntArg(5);
 	}
 
 	@Test
-	public void testOneObjectArgBoundToTarget() {
+	void testOneObjectArgBoundToTarget() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);
 	}
 
 	@Test
-	public void testOneIntAndOneObjectArgs() {
+	void testOneIntAndOneObjectArgs() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntAndOneObject(5, this.testBeanProxy);
 	}
 
 	@Test
-	public void testJustJoinPoint() {
+	void testJustJoinPoint() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).justJoinPoint("getAge");
 	}

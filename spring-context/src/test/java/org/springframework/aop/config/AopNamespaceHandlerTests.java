@@ -37,13 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public class AopNamespaceHandlerTests {
+class AopNamespaceHandlerTests {
 
 	private ApplicationContext context;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.context = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 	}
 
@@ -53,7 +53,7 @@ public class AopNamespaceHandlerTests {
 
 
 	@Test
-	public void testIsProxy() throws Exception {
+	void testIsProxy() {
 		ITestBean bean = getTestBean();
 
 		assertThat(AopUtils.isAopProxy(bean)).as("Bean is not a proxy").isTrue();
@@ -66,7 +66,7 @@ public class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testAdviceInvokedCorrectly() throws Exception {
+	void testAdviceInvokedCorrectly() {
 		CountingBeforeAdvice getAgeCounter = (CountingBeforeAdvice) this.context.getBean("getAgeCounter");
 		CountingBeforeAdvice getNameCounter = (CountingBeforeAdvice) this.context.getBean("getNameCounter");
 
@@ -87,7 +87,7 @@ public class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testAspectApplied() throws Exception {
+	void testAspectApplied() {
 		ITestBean bean = getTestBean();
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
@@ -107,7 +107,7 @@ public class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testAspectAppliedForInitializeBeanWithEmptyName() {
+	void testAspectAppliedForInitializeBeanWithEmptyName() {
 		ITestBean bean = (ITestBean) this.context.getAutowireCapableBeanFactory().initializeBean(new TestBean(), "");
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
@@ -127,7 +127,7 @@ public class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testAspectAppliedForInitializeBeanWithNullName() {
+	void testAspectAppliedForInitializeBeanWithNullName() {
 		ITestBean bean = (ITestBean) this.context.getAutowireCapableBeanFactory().initializeBean(new TestBean(), null);
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
