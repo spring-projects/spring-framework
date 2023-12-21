@@ -329,11 +329,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				int index = 0;
 				for (KParameter parameter : function.getParameters()) {
 					switch (parameter.getKind()) {
-						case INSTANCE:
-							argMap.put(parameter, target);
-							break;
-						case VALUE:
-						case EXTENSION_RECEIVER:
+						case INSTANCE -> argMap.put(parameter, target);
+						case VALUE, EXTENSION_RECEIVER -> {
 							if (!parameter.isOptional() || args[index] != null) {
 								if (parameter.getType().getClassifier() instanceof KClass<?> kClass && kClass.isValue()) {
 									Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
@@ -346,7 +343,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								}
 							}
 							index++;
-							break;
+						}
 					}
 				}
 				Object result = function.callBy(argMap);
