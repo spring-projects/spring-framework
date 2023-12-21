@@ -142,8 +142,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
 	 * be called.
 	 * @param outputStreaming if output streaming is enabled
-	 * @deprecated as of 6.1, this property is ignored with no direct replacement.
-	 * @deprecated since 6.1 requests are always streamed, as if this property is {@code true}
+	 * @deprecated as of 6.1 requests are always streamed, as if this property is {@code true}
 	 */
 	@Deprecated(since = "6.1", forRemoval = true)
 	public void setOutputStreaming(boolean outputStreaming) {

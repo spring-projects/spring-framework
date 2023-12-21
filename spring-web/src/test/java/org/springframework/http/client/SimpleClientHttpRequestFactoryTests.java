@@ -105,7 +105,6 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		}
 	}
 
-
 	@Test // SPR-13225
 	public void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock();
@@ -115,7 +114,6 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		SimpleClientHttpRequest.addHeaders(urlConnection, headers);
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
-
 
 
 	private static class TestHttpURLConnection extends HttpURLConnection {
