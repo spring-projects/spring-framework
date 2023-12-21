@@ -204,10 +204,17 @@ public class CaffeineCacheManager implements CacheManager {
 	 * {@link #setAllowNullValues setAllowNullValues(false)}. This makes the semantics
 	 * of CompletableFuture-based access simpler and optimizes retrieval performance
 	 * since a Caffeine-provided CompletableFuture handle does not have to get wrapped.
+	 * <p>If you come here for the adaptation of reactive types such as a Reactor
+	 * {@code Mono} or {@code Flux} onto asynchronous caching, we recommend the standard
+	 * arrangement for caching the produced values asynchronously in 6.1 through enabling
+	 * this Caffeine mode. If this is not immediately possible/desirable for existing
+	 * apps, you may set the system property "spring.cache.reactivestreams.ignore=true"
+	 * to restore 6.0 behavior where reactive handles are treated as regular values.
 	 * @since 6.1
 	 * @see Caffeine#buildAsync()
 	 * @see Cache#retrieve(Object)
 	 * @see Cache#retrieve(Object, Supplier)
+	 * @see org.springframework.cache.interceptor.CacheAspectSupport#IGNORE_REACTIVESTREAMS_PROPERTY_NAME
 	 */
 	public void setAsyncCacheMode(boolean asyncCacheMode) {
 		if (this.asyncCacheMode != asyncCacheMode) {

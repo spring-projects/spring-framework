@@ -52,6 +52,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.SpringProperties;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
@@ -94,8 +95,30 @@ import org.springframework.util.function.SupplierUtils;
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		implements BeanFactoryAware, InitializingBean, SmartInitializingSingleton {
 
+	/**
+	 * System property that instructs Spring's caching infrastructure to ignore the
+	 * presence of Reactive Streams, in particular Reactor's {@link Mono}/{@link Flux}
+	 * in {@link org.springframework.cache.annotation.Cacheable} method return type
+	 * declarations.
+	 * <p>By default, as of 6.1, Reactive Streams Publishers such as Reactor's
+	 * {@link Mono}/{@link Flux} will be specifically processed for asynchronous
+	 * caching of their produced values rather than trying to cache the returned
+	 * {@code Publisher} instances themselves.
+	 * <p>Switch this flag to "true" in order to ignore Reactive Streams Publishers
+	 * and process them as regular return values through synchronous caching,
+	 * restoring 6.0 behavior. Note that this is not recommended and only works in
+	 * very limited scenarios, e.g. with manual `Mono.cache()`/`Flux.cache()` calls.
+	 * @since 6.1.3
+	 * @see org.reactivestreams.Publisher
+	 */
+	public static final String IGNORE_REACTIVESTREAMS_PROPERTY_NAME = "spring.cache.reactivestreams.ignore";
+
+	private static final boolean shouldIgnoreReactiveStreams =
+			SpringProperties.getFlag(IGNORE_REACTIVESTREAMS_PROPERTY_NAME);
+
 	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", CacheAspectSupport.class.getClassLoader());
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -124,7 +147,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 
 	protected CacheAspectSupport() {
-		this.reactiveCachingHandler = (reactiveStreamsPresent ? new ReactiveCachingHandler() : null);
+		this.reactiveCachingHandler =
+				(reactiveStreamsPresent && !shouldIgnoreReactiveStreams ? new ReactiveCachingHandler() : null);
 	}
 
 
