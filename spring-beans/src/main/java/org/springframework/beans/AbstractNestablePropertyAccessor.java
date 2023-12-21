@@ -461,7 +461,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			ph.setValue(valueToApply);
 		}
 		catch (TypeMismatchException ex) {
-			throw ex;
+			if (!ph.setValueFallbackIfPossible(pv.getValue())) {
+				throw ex;
+			}
 		}
 		catch (InvocationTargetException ex) {
 			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(
@@ -1061,6 +1063,10 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		public abstract Object getValue() throws Exception;
 
 		public abstract void setValue(@Nullable Object value) throws Exception;
+
+		public boolean setValueFallbackIfPossible(@Nullable Object value) {
+			return false;
+		}
 	}
 
 

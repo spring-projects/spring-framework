@@ -19,6 +19,8 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
@@ -277,6 +279,22 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 			Method writeMethod = this.pd.getWriteMethodForActualAccess();
 			ReflectionUtils.makeAccessible(writeMethod);
 			writeMethod.invoke(getWrappedInstance(), value);
+		}
+
+		@Override
+		public boolean setValueFallbackIfPossible(@Nullable Object value) {
+			Method writeMethod = this.pd.getWriteMethodFallback(value != null ? value.getClass() : null);
+			if (writeMethod != null) {
+				ReflectionUtils.makeAccessible(writeMethod);
+				try {
+					writeMethod.invoke(getWrappedInstance(), value);
+					return true;
+				}
+				catch (Exception ex) {
+					LogFactory.getLog(BeanPropertyHandler.class).debug("Write method fallback failed", ex);
+				}
+			}
+			return false;
 		}
 	}
 
