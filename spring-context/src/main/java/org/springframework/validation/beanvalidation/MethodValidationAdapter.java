@@ -329,9 +329,12 @@ public class MethodValidationAdapter implements MethodValidator {
 							.addViolation(violation);
 				}
 				else {
-					// If the argument is a container of elements, we need the specific element,
-					// but the only option is to check for a parent container index/key in the
-					// next part of the property path.
+
+					// https://github.com/jakartaee/validation/issues/194
+					// If the argument is a container of elements, we need the element, but
+					// the only option is to see if the next part of the property path has
+					// a container index/key for its parent and use it.
+
 					Path.Node paramNode = node;
 					node = itr.next();
 

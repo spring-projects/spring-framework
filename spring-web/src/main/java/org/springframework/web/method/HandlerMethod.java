@@ -21,7 +21,6 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -407,8 +406,7 @@ public class HandlerMethod extends AnnotatedMethod {
 						return true;
 					}
 					Class<?> type = param.getParameterType();
-					if (merged.stream().anyMatch(VALID_PREDICATE) &&
-							(Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))) {
+					if (merged.stream().anyMatch(VALID_PREDICATE) && isIndexOrKeyBasedContainer(type)) {
 						return true;
 					}
 					merged = MergedAnnotations.from(getContainerElementAnnotations(param));
@@ -426,6 +424,15 @@ public class HandlerMethod extends AnnotatedMethod {
 				return merged.stream().anyMatch(CONSTRAINT_PREDICATE.or(VALID_PREDICATE));
 			}
 			return false;
+		}
+
+		private static boolean isIndexOrKeyBasedContainer(Class<?> type) {
+
+			// Index or key-based containers only, or MethodValidationAdapter cannot access
+			// the element given what is exposed in ConstraintViolation.
+
+			return (List.class.isAssignableFrom(type) || Object[].class.isAssignableFrom(type) ||
+					Map.class.isAssignableFrom(type));
 		}
 
 		/**
