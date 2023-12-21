@@ -96,25 +96,37 @@ public class OrderComparator implements Comparator<Object> {
 	 * @return the order value, or {@code Ordered.LOWEST_PRECEDENCE} as fallback
 	 */
 	private int getOrder(@Nullable Object obj, @Nullable OrderSourceProvider sourceProvider) {
-		Integer order = null;
 		if (obj != null && sourceProvider != null) {
 			Object orderSource = sourceProvider.getOrderSource(obj);
-			if (orderSource != null) {
-				if (orderSource.getClass().isArray()) {
-					for (Object source : ObjectUtils.toObjectArray(orderSource)) {
-						order = findOrder(source);
-						if (order != null) {
-							break;
-						}
-					}
-				}
-				else {
-					order = findOrder(orderSource);
-				}
+			Integer order = processOrderSource(orderSource);
+			return (order != null ? order : getOrder(obj));
+		}
+		return getOrder(obj);
+	}
+
+	@Nullable
+	private Integer processOrderSource(@Nullable Object orderSource) {
+		if (orderSource != null) {
+			if (orderSource.getClass().isArray()) {
+				return processArrayOrderSource(orderSource);
+			} else {
+				return findOrder(orderSource);
 			}
 		}
-		return (order != null ? order : getOrder(obj));
+		return null;
 	}
+
+	@Nullable
+	private Integer processArrayOrderSource(@Nullable Object orderSource) {
+		for (Object source : ObjectUtils.toObjectArray(orderSource)) {
+			Integer order = findOrder(source);
+			if (order != null) {
+				return order;
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Determine the order value for the given object.
