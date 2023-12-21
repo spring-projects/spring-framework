@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 6.1
  */
-public class ReactiveCachingTests {
+class ReactiveCachingTests {
 
 	@ParameterizedTest
 	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
@@ -174,7 +174,7 @@ public class ReactiveCachingTests {
 						}
 						@Override
 						public void put(Object key, @Nullable Object value) {
-							assertThat(get(key) == null).as("Double put");
+							assertThat(get(key)).as("Double put").isNull();
 							super.put(key, value);
 						}
 					};
@@ -201,7 +201,7 @@ public class ReactiveCachingTests {
 						}
 						@Override
 						public void put(Object key, @Nullable Object value) {
-							assertThat(get(key) == null).as("Double put");
+							assertThat(get(key)).as("Double put").isNull();
 							super.put(key, value);
 						}
 					};
