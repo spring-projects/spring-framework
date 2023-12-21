@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -146,6 +147,20 @@ public class MethodValidationAdapterPropertyPathTests {
 			assertSingleFieldError(errors, 1, courses, null, "CS 101", "professor.name", invalidPerson.name());
 		}
 
+		@Test
+		void fieldOfObjectPropertyOfOptionalBean() {
+			Method method = getMethod("addOptionalCourse");
+			Optional<Course> optional = Optional.of(new Course("CS 101", invalidPerson, Collections.emptyList()));
+			Object[] args = {optional};
+
+			MethodValidationResult result =
+					validationAdapter.validateArguments(new MyService(), method, null, args, HINTS);
+
+			assertThat(result.getAllErrors()).hasSize(1);
+			ParameterErrors errors = result.getBeanResults().get(0);
+			assertSingleFieldError(errors, 1, optional, null, null, "professor.name", invalidPerson.name());
+		}
+
 	}
 
 
@@ -204,7 +219,7 @@ public class MethodValidationAdapterPropertyPathTests {
 	}
 
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 	private static class MyService {
 
 		public void addCourse(@Valid Course course) {
@@ -217,6 +232,9 @@ public class MethodValidationAdapterPropertyPathTests {
 		}
 
 		public void addCourseMap(@Valid Map<String, Course> courses) {
+		}
+
+		public void addOptionalCourse(@Valid Optional<Course> course) {
 		}
 
 		@Valid

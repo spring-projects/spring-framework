@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -353,6 +354,10 @@ public class MethodValidationAdapter implements MethodValidator {
 					else if (containerKey != null && arg instanceof Map<?, ?> map) {
 						bean = map.get(containerKey);
 						container = map;
+					}
+					else if (arg instanceof Optional<?> optional) {
+						bean = optional.orElse(null);
+						container = optional;
 					}
 					else {
 						Assert.state(!node.isInIterable(), "No way to unwrap Iterable without index");
