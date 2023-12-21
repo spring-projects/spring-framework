@@ -21,6 +21,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.MethodParameter
 import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -34,6 +35,7 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod
 import org.springframework.web.reactive.result.method.annotation.ContinuationHandlerMethodArgumentResolver
 import org.springframework.web.reactive.result.method.annotation.RequestParamMethodArgumentResolver
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get
+import org.springframework.web.testfixture.method.ResolvableMethod
 import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
@@ -55,7 +57,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun resolveNoArg() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = CoroutinesController::singleArg.javaMethod!!
 		val result = invoke(CoroutinesController(), method, null)
 		assertHandlerResultValue(result, "success:null")
@@ -116,7 +118,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun defaultValue() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = DefaultValueController::handle.javaMethod!!
 		val result = invoke(DefaultValueController(), method)
 		assertHandlerResultValue(result, "default")
@@ -124,7 +126,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun defaultValueOverridden() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = DefaultValueController::handle.javaMethod!!
 		exchange = MockServerWebExchange.from(get("http://localhost:8080/path").queryParam("value", "override"))
 		val result = invoke(DefaultValueController(), method)
@@ -133,7 +135,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun defaultValues() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, Int::class.java))
 		val method = DefaultValueController::handleMultiple.javaMethod!!
 		val result = invoke(DefaultValueController(), method)
 		assertHandlerResultValue(result, "10-20")
@@ -141,7 +143,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun defaultValuesOverridden() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, Int::class.java))
 		val method = DefaultValueController::handleMultiple.javaMethod!!
 		exchange = MockServerWebExchange.from(get("http://localhost:8080/path").queryParam("limit2", "40"))
 		val result = invoke(DefaultValueController(), method)
@@ -150,7 +152,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun suspendingDefaultValue() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = DefaultValueController::handleSuspending.javaMethod!!
 		val result = invoke(DefaultValueController(), method)
 		assertHandlerResultValue(result, "default")
@@ -158,7 +160,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun suspendingDefaultValueOverridden() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = DefaultValueController::handleSuspending.javaMethod!!
 		exchange = MockServerWebExchange.from(get("http://localhost:8080/path").queryParam("value", "override"))
 		val result = invoke(DefaultValueController(), method)
@@ -181,7 +183,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun valueClass() {
-		this.resolvers.add(stubResolver(1L))
+		this.resolvers.add(stubResolver(1L, Long::class.java))
 		val method = ValueClassController::valueClass.javaMethod!!
 		val result = invoke(ValueClassController(), method,1L)
 		assertHandlerResultValue(result, "1")
@@ -189,7 +191,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun valueClassDefaultValue() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, Double::class.java))
 		val method = ValueClassController::valueClassWithDefault.javaMethod!!
 		val result = invoke(ValueClassController(), method)
 		assertHandlerResultValue(result, "3.1")
@@ -197,10 +199,29 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun propertyAccessor() {
-		this.resolvers.add(stubResolver(Mono.empty()))
+		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = PropertyAccessorController::prop.getter.javaMethod!!
 		val result = invoke(PropertyAccessorController(), method)
 		assertHandlerResultValue(result, "foo")
+	}
+
+	@Test
+	fun extension() {
+		this.resolvers.add(stubResolver(CustomException("foo")))
+		val method = ResolvableMethod.on(ExtensionHandler::class.java).argTypes(CustomException::class.java).resolveMethod()
+		val result = invoke(ExtensionHandler(), method)
+		assertHandlerResultValue(result, "foo")
+	}
+
+	@Test
+	fun extensionWithParameter() {
+		this.resolvers.add(stubResolver(CustomException("foo")))
+		this.resolvers.add(stubResolver(20, Int::class.java))
+		val method = ResolvableMethod.on(ExtensionHandler::class.java)
+			.argTypes(CustomException::class.java, Int::class.javaPrimitiveType)
+			.resolveMethod()
+		val result = invoke(ExtensionHandler(), method)
+		assertHandlerResultValue(result, "foo-20")
 	}
 
 
@@ -214,14 +235,13 @@ class InvocableHandlerMethodKotlinTests {
 		return invocable.invoke(this.exchange, BindingContext(), *providedArgs)
 	}
 
-	private fun stubResolver(stubValue: Any?): HandlerMethodArgumentResolver {
-		return stubResolver(Mono.justOrEmpty(stubValue))
-	}
+	private fun stubResolver(stubValue: Any): HandlerMethodArgumentResolver =
+		stubResolver(stubValue, stubValue::class.java)
 
-	private fun stubResolver(stubValue: Mono<Any>): HandlerMethodArgumentResolver {
+	private fun stubResolver(stubValue: Any?, stubClass: Class<*>): HandlerMethodArgumentResolver {
 		val resolver = mockk<HandlerMethodArgumentResolver>()
-		every { resolver.supportsParameter(any()) } returns true
-		every { resolver.resolveArgument(any(), any(), any()) } returns stubValue
+		every { resolver.supportsParameter(any()) } answers { (it.invocation.args[0] as MethodParameter).getParameterType() == stubClass }
+		every { resolver.resolveArgument(any(), any(), any()) } returns Mono.justOrEmpty(stubValue)
 		return resolver
 	}
 
@@ -309,9 +329,22 @@ class InvocableHandlerMethodKotlinTests {
 			get() = "foo"
 	}
 
+	class ExtensionHandler {
+
+		fun CustomException.handle(): String {
+			return "${this.message}"
+		}
+
+		fun CustomException.handleWithParameter(limit: Int): String {
+			return "${this.message}-$limit"
+		}
+	}
+
 	@JvmInline
 	value class LongValueClass(val value: Long)
 
 	@JvmInline
 	value class DoubleValueClass(val value: Double)
+
+	class CustomException(message: String) : Throwable(message)
 }

@@ -154,6 +154,26 @@ class CoroutinesUtilsTests {
 		}
 	}
 
+	@Test
+	fun invokeSuspendingFunctionWithExtension() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtension",
+			CustomException::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, CustomException("foo")) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithExtensionAndParameter() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtensionAndParameter",
+			CustomException::class.java, Int::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, CustomException("foo"), 20) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo-20")
+		}
+	}
+
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
@@ -186,7 +206,19 @@ class CoroutinesUtilsTests {
 		return value.value
 	}
 
+	suspend fun CustomException.suspendingFunctionWithExtension(): String {
+		delay(1)
+		return "${this.message}"
+	}
+
+	suspend fun CustomException.suspendingFunctionWithExtensionAndParameter(limit: Int): String {
+		delay(1)
+		return "${this.message}-$limit"
+	}
+
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	class CustomException(message: String) : Throwable(message)
 
 }

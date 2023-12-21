@@ -104,6 +104,22 @@ class InvocableHandlerMethodKotlinTests {
 		Assertions.assertThat(value).isEqualTo("foo")
 	}
 
+	@Test
+	fun extension() {
+		composite.addResolver(StubArgumentResolver(CustomException::class.java, CustomException("foo")))
+		val value = getInvocable(ExtensionHandler::class.java, CustomException::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo("foo")
+	}
+
+	@Test
+	fun extensionWithParameter() {
+		composite.addResolver(StubArgumentResolver(CustomException::class.java, CustomException("foo")))
+		composite.addResolver(StubArgumentResolver(Int::class.java, 20))
+		val value = getInvocable(ExtensionHandler::class.java, CustomException::class.java, Int::class.java)
+			.invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo("foo-20")
+	}
+
 	private fun getInvocable(clazz: Class<*>, vararg argTypes: Class<*>): InvocableHandlerMethod {
 		val method = ResolvableMethod.on(clazz).argTypes(*argTypes).resolveMethod()
 		val handlerMethod = InvocableHandlerMethod(clazz.constructors.first().newInstance(), method)
@@ -150,10 +166,23 @@ class InvocableHandlerMethodKotlinTests {
 			get() = "foo"
 	}
 
+	private class ExtensionHandler {
+
+		fun CustomException.handle(): String {
+			return "${this.message}"
+		}
+
+		fun CustomException.handleWithParameter(limit: Int): String {
+			return "${this.message}-$limit"
+		}
+	}
+
 	@JvmInline
 	value class LongValueClass(val value: Long)
 
 	@JvmInline
 	value class DoubleValueClass(val value: Double)
+
+	class CustomException(message: String) : Throwable(message)
 
 }
