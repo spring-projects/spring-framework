@@ -429,9 +429,6 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		return this.dynamicAttributes;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setDynamicAttribute(String uri, String localName, Object value) throws JspException {
 		if (this.dynamicAttributes == null) {

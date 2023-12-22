@@ -204,9 +204,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return TestContextSpringFactoriesUtils.loadFactoryImplementations(TestExecutionListener.class);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public final MergedContextConfiguration buildMergedContextConfiguration() {
