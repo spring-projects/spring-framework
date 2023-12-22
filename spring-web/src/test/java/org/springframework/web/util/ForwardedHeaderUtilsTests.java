@@ -29,10 +29,10 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Unit tests for {@link UriComponentsBuilder}.
+ * Unit tests for {@link ForwardedHeaderUtils}.
  *
  * @author Rossen Stoyanchev
  */
@@ -169,8 +169,9 @@ class ForwardedHeaderUtilsTests {
 
 		HttpRequest httpRequest = new ServletServerHttpRequest(request);
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ForwardedHeaderUtils.adaptFromForwardedHeaders(httpRequest.getURI(), httpRequest.getHeaders()).build());
+		assertThatThrownBy(() ->
+				ForwardedHeaderUtils.adaptFromForwardedHeaders(httpRequest.getURI(), httpRequest.getHeaders()).build())
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test

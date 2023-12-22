@@ -32,13 +32,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -47,6 +47,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
  * @author Rob Winch
+ * @author Brian Clozel
  */
 public class ForwardedHeaderFilterTests {
 
@@ -75,7 +76,7 @@ public class ForwardedHeaderFilterTests {
 
 	@BeforeEach
 	@SuppressWarnings("serial")
-	public void setup() {
+	void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
@@ -83,7 +84,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
-	public void shouldFilter() {
+	void shouldFilter() {
 		testShouldFilter(FORWARDED);
 		testShouldFilter(X_FORWARDED_HOST);
 		testShouldFilter(X_FORWARDED_PORT);
@@ -100,13 +101,13 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
-	public void shouldNotFilter() {
+	void shouldNotFilter() {
 		assertThat(this.filter.shouldNotFilter(new MockHttpServletRequest())).isTrue();
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {"https", "wss"})
-	public void forwardedRequest(String protocol) throws Exception {
+	void forwardedRequest(String protocol) throws Exception {
 		this.request.setRequestURI("/mvc-showcase");
 		this.request.addHeader(X_FORWARDED_PROTO, protocol);
 		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
@@ -133,7 +134,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
-	public void forwardedRequestInRemoveOnlyMode() throws Exception {
+	void forwardedRequestInRemoveOnlyMode() throws Exception {
 		this.request.setRequestURI("/mvc-showcase");
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
 		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
@@ -164,7 +165,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
-	public void forwardedRequestWithSsl() throws Exception {
+	void forwardedRequestWithSsl() throws Exception {
 		this.request.setRequestURI("/mvc-showcase");
 		this.request.addHeader(X_FORWARDED_SSL, "on");
 		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
@@ -188,7 +189,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test // SPR-16983
-	public void forwardedRequestWithForwardDispatch() throws Exception {
+	void forwardedRequestWithForwardDispatch() throws Exception {
 		this.request.setRequestURI("/foo");
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
 		this.request.addHeader(X_FORWARDED_HOST, "www.mycompany.example");
@@ -210,7 +211,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test // gh-30828
-	public void forwardedRequestWithErrorDispatch() throws Exception {
+	void forwardedRequestWithErrorDispatch() throws Exception {
 		this.request.setRequestURI("/foo");
 		this.request.setDispatcherType(DispatcherType.ERROR);
 		this.request.addHeader(X_FORWARDED_PROTO, "https");
@@ -229,29 +230,62 @@ public class ForwardedHeaderFilterTests {
 		assertThat(wrappedRequest.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).isEqualTo("/app/foo");
 	}
 
+	@Nested // gh-31842
+	class InvalidRequests {
+
+		@Test
+		void shouldRejectInvalidForwardedForIpv4() throws Exception {
+			request.addHeader(FORWARDED, "for=127.0.0.1:");
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, filterChain);
+			assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		}
+
+		@Test
+		void shouldRejectInvalidForwardedForIpv6() throws Exception {
+			request.addHeader(FORWARDED, "for=\"2a02:918:175:ab60:45ee:c12c:dac1:808b\"");
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, filterChain);
+			assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		}
+
+		@Test // gh-31842
+		void shouldRejectInvalidForwardedPort() throws Exception {
+			request.addHeader(X_FORWARDED_PORT, "invalid");
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, filterChain);
+			assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		}
+
+	}
+
+
 	@Nested
 	class ForwardedPrefix {
 
 		@Test
-		public void contextPathEmpty() throws Exception {
+		void contextPathEmpty() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "");
 			assertThat(filterAndGetContextPath()).isEmpty();
 		}
 
 		@Test
-		public void contextPathWithTrailingSlash() throws Exception {
+		void contextPathWithTrailingSlash() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/foo/bar/");
 			assertThat(filterAndGetContextPath()).isEqualTo("/foo/bar");
 		}
 
 		@Test
-		public void contextPathWithTrailingSlashes() throws Exception {
+		void contextPathWithTrailingSlashes() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/foo/bar/baz///");
 			assertThat(filterAndGetContextPath()).isEqualTo("/foo/bar/baz");
 		}
 
 		@Test
-		public void contextPathWithForwardedPrefix() throws Exception {
+		void contextPathWithForwardedPrefix() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/prefix");
 			request.setContextPath("/mvc-showcase");
 
@@ -260,7 +294,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
+		void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 			request.setContextPath("/mvc-showcase");
 
@@ -273,7 +307,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void contextPathPreserveEncoding() throws Exception {
+		void contextPathPreserveEncoding() throws Exception {
 			request.setContextPath("/app%20");
 			request.setRequestURI("/app%20/path/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -284,7 +318,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUri() throws Exception {
+		void requestUri() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/");
 			request.setContextPath("/app");
 			request.setRequestURI("/app/path");
@@ -295,7 +329,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriWithTrailingSlash() throws Exception {
+		void requestUriWithTrailingSlash() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/");
 			request.setContextPath("/app");
 			request.setRequestURI("/app/path/");
@@ -306,7 +340,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriPreserveEncoding() throws Exception {
+		void requestUriPreserveEncoding() throws Exception {
 			request.setContextPath("/app");
 			request.setRequestURI("/app/path%20with%20spaces/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -317,7 +351,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriEqualsContextPath() throws Exception {
+		void requestUriEqualsContextPath() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/");
 			request.setContextPath("/app");
 			request.setRequestURI("/app");
@@ -328,7 +362,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriRootUrl() throws Exception {
+		void requestUriRootUrl() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/");
 			request.setContextPath("/app");
 			request.setRequestURI("/app/");
@@ -339,7 +373,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriPreserveSemicolonContent() throws Exception {
+		void requestUriPreserveSemicolonContent() throws Exception {
 			request.setContextPath("");
 			request.setRequestURI("/path;a=b/with/semicolon");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -350,7 +384,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void caseInsensitiveForwardedPrefix() throws Exception {
+		void caseInsensitiveForwardedPrefix() throws Exception {
 			request = new MockHttpServletRequest() {
 
 				@Override // SPR-14372: make it case-sensitive
@@ -373,7 +407,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriWithForwardedPrefix() throws Exception {
+		void requestUriWithForwardedPrefix() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/prefix");
 			request.setRequestURI("/mvc-showcase");
 
@@ -382,7 +416,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestUriWithForwardedPrefixTrailingSlash() throws Exception {
+		void requestUriWithForwardedPrefixTrailingSlash() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 			request.setRequestURI("/mvc-showcase");
 
@@ -409,7 +443,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void requestURLNewStringBuffer() throws Exception {
+		void requestURLNewStringBuffer() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 			request.setRequestURI("/mvc-showcase");
 
@@ -423,7 +457,7 @@ public class ForwardedHeaderFilterTests {
 	class ForwardedFor {
 
 		@Test
-		public void xForwardedForEmpty() throws Exception {
+		void xForwardedForEmpty() throws Exception {
 			request.addHeader(X_FORWARDED_FOR, "");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -433,7 +467,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void xForwardedForSingleIdentifier() throws Exception {
+		void xForwardedForSingleIdentifier() throws Exception {
 			request.addHeader(X_FORWARDED_FOR, "203.0.113.195");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -442,7 +476,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void xForwardedForMultipleIdentifiers() throws Exception {
+		void xForwardedForMultipleIdentifiers() throws Exception {
 			request.addHeader(X_FORWARDED_FOR, "203.0.113.195, 70.41.3.18, 150.172.238.178");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -451,7 +485,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void forwardedForIpV4Identifier() throws Exception {
+		void forwardedForIpV4Identifier() throws Exception {
 			request.addHeader(FORWARDED, "for=203.0.113.195");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -460,7 +494,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void forwardedForIpV6Identifier() throws Exception {
+		void forwardedForIpV6Identifier() throws Exception {
 			request.addHeader(FORWARDED, "for=\"[2001:db8:cafe::17]\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -469,7 +503,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void forwardedForIpV4IdentifierWithPort() throws Exception {
+		void forwardedForIpV4IdentifierWithPort() throws Exception {
 			request.addHeader(FORWARDED, "for=\"203.0.113.195:47011\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -478,7 +512,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void forwardedForIpV6IdentifierWithPort() throws Exception {
+		void forwardedForIpV6IdentifierWithPort() throws Exception {
 			request.addHeader(FORWARDED, "For=\"[2001:db8:cafe::17]:47011\"");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -487,7 +521,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void forwardedForMultipleIdentifiers() throws Exception {
+		void forwardedForMultipleIdentifiers() throws Exception {
 			request.addHeader(FORWARDED, "for=203.0.113.195;proto=http, for=\"[2001:db8:cafe::17]\", for=unknown");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
@@ -495,19 +529,13 @@ public class ForwardedHeaderFilterTests {
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 
-		@Test  // gh-26748
-		public void forwardedForInvalidIpV6Address() {
-			request.addHeader(FORWARDED, "for=\"2a02:918:175:ab60:45ee:c12c:dac1:808b\"");
-			assertThatIllegalArgumentException().isThrownBy(
-					ForwardedHeaderFilterTests.this::filterAndGetWrappedRequest);
-		}
 	}
 
 	@Nested
 	class SendRedirect {
 
 		@Test
-		public void sendRedirectWithAbsolutePath() throws Exception {
+		void sendRedirectWithAbsolutePath() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -517,7 +545,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test // SPR-16506
-		public void sendRedirectWithAbsolutePathQueryParamAndFragment() throws Exception {
+		void sendRedirectWithAbsolutePathQueryParamAndFragment() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -528,7 +556,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithContextPath() throws Exception {
+		void sendRedirectWithContextPath() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -539,7 +567,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithRelativePath() throws Exception {
+		void sendRedirectWithRelativePath() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -550,7 +578,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithFileInPathAndRelativeRedirect() throws Exception {
+		void sendRedirectWithFileInPathAndRelativeRedirect() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -561,7 +589,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithRelativePathIgnoresFile() throws Exception {
+		void sendRedirectWithRelativePathIgnoresFile() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -572,7 +600,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithLocationDotDotPath() throws Exception {
+		void sendRedirectWithLocationDotDotPath() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -582,7 +610,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithLocationHasScheme() throws Exception {
+		void sendRedirectWithLocationHasScheme() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -593,7 +621,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithLocationSlashSlash() throws Exception {
+		void sendRedirectWithLocationSlashSlash() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -604,7 +632,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithLocationSlashSlashParentDotDot() throws Exception {
+		void sendRedirectWithLocationSlashSlashParentDotDot() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -615,19 +643,19 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWithNoXForwardedAndAbsolutePath() throws Exception {
+		void sendRedirectWithNoXForwardedAndAbsolutePath() throws Exception {
 			String redirectedUrl = sendRedirect("/foo/bar");
 			assertThat(redirectedUrl).isEqualTo("/foo/bar");
 		}
 
 		@Test
-		public void sendRedirectWithNoXForwardedAndDotDotPath() throws Exception {
+		void sendRedirectWithNoXForwardedAndDotDotPath() throws Exception {
 			String redirectedUrl = sendRedirect("../foo/bar");
 			assertThat(redirectedUrl).isEqualTo("../foo/bar");
 		}
 
 		@Test
-		public void sendRedirectWhenRequestOnlyAndXForwardedThenUsesRelativeRedirects() throws Exception {
+		void sendRedirectWhenRequestOnlyAndXForwardedThenUsesRelativeRedirects() throws Exception {
 			request.addHeader(X_FORWARDED_PROTO, "https");
 			request.addHeader(X_FORWARDED_HOST, "example.com");
 			request.addHeader(X_FORWARDED_PORT, "443");
@@ -638,7 +666,7 @@ public class ForwardedHeaderFilterTests {
 		}
 
 		@Test
-		public void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
+		void sendRedirectWhenRequestOnlyAndNoXForwardedThenUsesRelativeRedirects() throws Exception {
 			filter.setRelativeRedirects(true);
 			String location = sendRedirect("/a");
 
