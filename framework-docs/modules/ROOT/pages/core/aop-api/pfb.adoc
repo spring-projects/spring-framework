@@ -291,6 +291,8 @@ to consider:
 * `final` classes cannot be proxied, because they cannot be extended.
 * `final` methods cannot be advised, because they cannot be overridden.
 * `private` methods cannot be advised, because they cannot be overridden.
+* Methods that are not visible, typically package private methods in a parent class
+from a different package, cannot be advised because they are effectively private.
 
 NOTE: There is no need to add CGLIB to your classpath. CGLIB is repackaged and included
 in the `spring-core` JAR. In other words, CGLIB-based AOP works "out of the box", as do
