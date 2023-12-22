@@ -56,8 +56,7 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable
 
 	@Test
 	void testNullConfig() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new JdkDynamicAopProxy(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> new JdkDynamicAopProxy(null));
 	}
 
 	@Test
@@ -69,10 +68,8 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable
 		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
 		Object proxy = aop.getProxy();
-		boolean condition = proxy instanceof ITestBean;
-		assertThat(condition).isTrue();
-		boolean condition1 = proxy instanceof TestBean;
-		assertThat(condition1).isFalse();
+		assertThat(proxy instanceof ITestBean).isTrue();
+		assertThat(proxy instanceof TestBean).isFalse();
 	}
 
 	@Test
@@ -131,11 +128,15 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable
 
 	@Test
 	void testEqualsAndHashCodeDefined() {
-		AdvisedSupport as = new AdvisedSupport(Named.class);
-		as.setTarget(new Person());
-		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
-		Named proxy = (Named) aopProxy.getProxy();
 		Named named = new Person();
+		AdvisedSupport as = new AdvisedSupport(Named.class);
+		as.setTarget(named);
+
+		Named proxy = (Named) new JdkDynamicAopProxy(as).getProxy();
+		assertThat(proxy).isEqualTo(named);
+		assertThat(named.hashCode()).isEqualTo(proxy.hashCode());
+
+		proxy = (Named) new JdkDynamicAopProxy(as).getProxy();
 		assertThat(proxy).isEqualTo(named);
 		assertThat(named.hashCode()).isEqualTo(proxy.hashCode());
 	}
