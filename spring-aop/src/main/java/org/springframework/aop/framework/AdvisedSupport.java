@@ -117,7 +117,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see JdkDynamicAopProxy#JdkDynamicAopProxy(AdvisedSupport)
 	 */
 	@Nullable
-	transient Object proxyMetadataCache;
+	transient volatile Object proxyMetadataCache;
 
 
 	/**

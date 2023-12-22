@@ -316,31 +316,41 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 */
 	static final class ProxiedInterfacesCache {
 
-		Class<?>[] proxiedInterfaces;
+		final Class<?>[] proxiedInterfaces;
 
-		boolean equalsDefined;
+		final boolean equalsDefined;
 
-		boolean hashCodeDefined;
+		final boolean hashCodeDefined;
 
 		ProxiedInterfacesCache(AdvisedSupport config) {
 			this.proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(config, true);
 
 			// Find any {@link #equals} or {@link #hashCode} method that may be defined
-			//on the supplied set of interfaces.
+			// on the supplied set of interfaces.
+			boolean equalsDefined = false;
+			boolean hashCodeDefined = false;
 			for (Class<?> proxiedInterface : this.proxiedInterfaces) {
 				Method[] methods = proxiedInterface.getDeclaredMethods();
 				for (Method method : methods) {
 					if (AopUtils.isEqualsMethod(method)) {
-						this.equalsDefined = true;
+						equalsDefined = true;
+						if (hashCodeDefined) {
+							break;
+						}
 					}
 					if (AopUtils.isHashCodeMethod(method)) {
-						this.hashCodeDefined = true;
-					}
-					if (this.equalsDefined && this.hashCodeDefined) {
-						return;
+						hashCodeDefined = true;
+						if (equalsDefined) {
+							break;
+						}
 					}
 				}
+				if (equalsDefined && hashCodeDefined) {
+					break;
+				}
 			}
+			this.equalsDefined = equalsDefined;
+			this.hashCodeDefined = hashCodeDefined;
 		}
 	}
 
