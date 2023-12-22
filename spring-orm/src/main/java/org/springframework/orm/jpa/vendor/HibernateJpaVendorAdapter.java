@@ -36,6 +36,7 @@ import org.hibernate.dialect.Informix10Dialect;
 import org.hibernate.dialect.MySQL57Dialect;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.Oracle12cDialect;
+import org.hibernate.dialect.OracleDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SybaseDialect;
@@ -202,7 +203,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 				case HANA -> HANAColumnStoreDialect.class;
 				case HSQL -> HSQLDialect.class;
 				case MYSQL -> MySQLDialect.class;
-				case ORACLE -> Oracle12cDialect.class;
+				case ORACLE -> OracleDialect.class;
 				case POSTGRESQL -> org.hibernate.dialect.PostgreSQLDialect.class;
 				case SQL_SERVER -> SQLServer2012Dialect.class;
 				case SYBASE -> SybaseDialect.class;
