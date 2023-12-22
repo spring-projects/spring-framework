@@ -104,10 +104,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * {@link Mono}/{@link Flux} will be specifically processed for asynchronous
 	 * caching of their produced values rather than trying to cache the returned
 	 * {@code Publisher} instances themselves.
-	 * <p>Switch this flag to "true" in order to ignore Reactive Streams Publishers
-	 * and process them as regular return values through synchronous caching,
-	 * restoring 6.0 behavior. Note that this is not recommended and only works in
-	 * very limited scenarios, e.g. with manual `Mono.cache()`/`Flux.cache()` calls.
+	 * <p>Switch this flag to "true" in order to ignore Reactive Streams Publishers and
+	 * process them as regular return values through synchronous caching, restoring 6.0
+	 * behavior. Note that this is not recommended and only works in very limited
+	 * scenarios, e.g. with manual {@code Mono.cache()}/{@code Flux.cache()} calls.
 	 * @since 6.1.3
 	 * @see org.reactivestreams.Publisher
 	 */

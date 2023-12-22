@@ -105,13 +105,15 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		}
 	}
 
-	@Test // SPR-13225
+	@Test  // SPR-13225
 	public void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock();
 		given(urlConnection.getRequestMethod()).willReturn("GET");
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);
 		SimpleClientHttpRequest.addHeaders(urlConnection, headers);
+
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
 
