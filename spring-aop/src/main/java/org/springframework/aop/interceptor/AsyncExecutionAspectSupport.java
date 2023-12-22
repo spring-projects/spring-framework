@@ -58,6 +58,7 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author He Bo
+ * @author Sebastien Deleuze
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
@@ -292,7 +293,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		else if (Future.class.isAssignableFrom(returnType)) {
 			return executor.submit(task);
 		}
-		else if (void.class == returnType) {
+		else if (void.class == returnType || "kotlin.Unit".equals(returnType.getName())) {
 			executor.submit(task);
 			return null;
 		}
