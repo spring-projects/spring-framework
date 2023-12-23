@@ -479,12 +479,12 @@ the framework to invoke a suspending function as a `Publisher`.
 
 The Spring Framework will obtain a `Publisher` for the annotated method once and will
 schedule a `Runnable` in which it subscribes to said `Publisher`. These inner regular
-subscriptions occur according to the corresponding `cron`/fixedDelay`/`fixedRate` configuration.
+subscriptions occur according to the corresponding `cron`/`fixedDelay`/`fixedRate` configuration.
 
 If the `Publisher` emits `onNext` signal(s), these are ignored and discarded (the same way
 return values from synchronous `@Scheduled` methods are ignored).
 
-In the following example, the `Flux` emits `onNext("Hello"), onNext("World")` every 5
+In the following example, the `Flux` emits `onNext("Hello")`, `onNext("World")` every 5
 seconds, but these values are unused:
 
 [source,java,indent=0,subs="verbatim,quotes"]
