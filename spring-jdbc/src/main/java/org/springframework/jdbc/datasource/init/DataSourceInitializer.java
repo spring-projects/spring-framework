@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,21 +58,22 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	/**
-	 * Set the {@link DatabasePopulator} to execute during the bean initialization phase.
+	 * Set the {@link DatabasePopulator} to execute during the bean initialization phase,
+	 * if any.
 	 * @param databasePopulator the {@code DatabasePopulator} to use during initialization
 	 * @see #setDatabaseCleaner
 	 */
-	public void setDatabasePopulator(DatabasePopulator databasePopulator) {
+	public void setDatabasePopulator(@Nullable DatabasePopulator databasePopulator) {
 		this.databasePopulator = databasePopulator;
 	}
 
 	/**
-	 * Set the {@link DatabasePopulator} to execute during the bean destruction
-	 * phase, cleaning up the database and leaving it in a known state for others.
+	 * Set the {@link DatabasePopulator} to execute during the bean destruction phase,
+	 * if any, cleaning up the database and leaving it in a known state for others.
 	 * @param databaseCleaner the {@code DatabasePopulator} to use during destruction
 	 * @see #setDatabasePopulator
 	 */
-	public void setDatabaseCleaner(DatabasePopulator databaseCleaner) {
+	public void setDatabaseCleaner(@Nullable DatabasePopulator databaseCleaner) {
 		this.databaseCleaner = databaseCleaner;
 	}
 
