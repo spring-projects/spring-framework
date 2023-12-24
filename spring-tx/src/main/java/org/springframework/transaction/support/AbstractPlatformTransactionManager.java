@@ -496,15 +496,13 @@ public abstract class AbstractPlatformTransactionManager
 			logger.debug("Participating in existing transaction");
 		}
 		if (isValidateExistingTransaction()) {
-			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
-				if (currentIsolationLevel == null || currentIsolationLevel != definition.getIsolationLevel()) {
-					throw new IllegalTransactionStateException("Participating transaction with definition [" +
-							definition + "] specifies isolation level which is incompatible with existing transaction: " +
-							(currentIsolationLevel != null ?
-									DefaultTransactionDefinition.getIsolationLevelName(currentIsolationLevel) :
-									"(unknown)"));
-				}
+			Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+			if (currentIsolationLevel == null || isNotCompatibilityIsolationLevel(definition, currentIsolationLevel)) {
+				throw new IllegalTransactionStateException("Participating transaction with definition [" +
+						definition + "] specifies isolation level which is incompatible with existing transaction: " +
+						(currentIsolationLevel != null ?
+								DefaultTransactionDefinition.getIsolationLevelName(currentIsolationLevel) :
+								"(unknown)"));
 			}
 			if (!definition.isReadOnly()) {
 				if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
@@ -1226,6 +1224,10 @@ public abstract class AbstractPlatformTransactionManager
 	 */
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
 		return false;
+	}
+
+	protected boolean isNotCompatibilityIsolationLevel(int isolation,int currentIsolatioin){
+		return isolation != TransactionDefinition.ISOLATION_DEFAULT && isolation != currentIsolatioin;
 	}
 
 	/**
