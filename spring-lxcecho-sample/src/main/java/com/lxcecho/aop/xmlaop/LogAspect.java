@@ -13,7 +13,7 @@ import java.util.Arrays;
  * @author lxcecho azaki0426@gmail.com
  * @since 2023/12/10
  */
-@Component //ioc容器
+@Component // ioc 容器
 public class LogAspect {
 
 	//前置通知

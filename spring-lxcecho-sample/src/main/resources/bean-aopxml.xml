@@ -13,6 +13,8 @@
 	<!--开启组件扫描-->
 	<context:component-scan base-package="com.lxcecho.aop.xmlaop"></context:component-scan>
 
+	<bean id="logAspect" class="com.lxcecho.aop.xmlaop.LogAspect"/>
+
 	<!--配置aop五种通知类型-->
 	<aop:config>
 		<!--配置切面类-->
