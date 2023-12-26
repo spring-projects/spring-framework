@@ -252,7 +252,9 @@ application server environments, as well -- in particular on Tomcat and Jetty.
 As of 6.1, `ThreadPoolTaskScheduler` provides a pause/resume capability and graceful
 shutdown through Spring's lifecycle management. There is also a new option called
 `SimpleAsyncTaskScheduler` which is aligned with JDK 21's Virtual Threads, using a
-single scheduler thread but firing up a new thread for every scheduled task execution.
+single scheduler thread but firing up a new thread for every scheduled task execution
+(except for fixed-delay tasks which all operate on a single scheduler thread, so for
+this virtual-thread-aligned option, fixed rates and cron triggers are recommended).
 
 
 

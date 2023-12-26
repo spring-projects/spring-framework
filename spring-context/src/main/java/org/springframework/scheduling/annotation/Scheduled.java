@@ -131,6 +131,9 @@ public @interface Scheduled {
 	 * last invocation and the start of the next.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p><b>NOTE: With virtual threads, fixed rates and cron triggers are recommended
+	 * over fixed delays.</b> Fixed-delay tasks operate on a single scheduler thread
+	 * with {@link org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler}.
 	 * @return the delay
 	 */
 	long fixedDelay() default -1;
@@ -142,6 +145,9 @@ public @interface Scheduled {
 	 * {@link #timeUnit}.
 	 * <p>This attribute variant supports Spring-style "${...}" placeholders
 	 * as well as SpEL expressions.
+	 * <p><b>NOTE: With virtual threads, fixed rates and cron triggers are recommended
+	 * over fixed delays.</b> Fixed-delay tasks operate on a single scheduler thread
+	 * with {@link org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler}.
 	 * @return the delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
