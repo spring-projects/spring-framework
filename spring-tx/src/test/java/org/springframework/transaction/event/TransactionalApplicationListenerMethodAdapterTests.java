@@ -144,6 +144,13 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 	}
 
 	@Test
+	public void withTransactionalNotSupportedAnnotation() {
+		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
+		Method m = ReflectionUtils.findMethod(SampleEvents.class, "withTransactionalNotSupportedAnnotation", String.class);
+		assertThatNoException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.class, m));
+	}
+
+	@Test
 	public void withAsyncTransactionalAnnotation() {
 		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
 		Method m = ReflectionUtils.findMethod(SampleEvents.class, "withAsyncTransactionalAnnotation", String.class);
@@ -230,6 +237,11 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 		@TransactionalEventListener
 		@Transactional(propagation = Propagation.REQUIRES_NEW)
 		public void withTransactionalRequiresNewAnnotation(String data) {
+		}
+
+		@TransactionalEventListener
+		@Transactional(propagation = Propagation.NOT_SUPPORTED)
+		public void withTransactionalNotSupportedAnnotation(String data) {
 		}
 
 		@TransactionalEventListener
