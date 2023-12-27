@@ -324,7 +324,6 @@ Kotlin::
 
 
 
-
 [[beans-factory-scopes-application]]
 === Application Scope
 
@@ -374,14 +373,12 @@ Kotlin::
 
 
 
-
 [[beans-factory-scopes-websocket]]
 === WebSocket Scope
 
 WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
 STOMP over WebSocket applications, see
 xref:web/websocket/stomp/scope.adoc[WebSocket scope] for more details.
-
 
 
 
@@ -541,6 +538,19 @@ interfaces. The following example shows a proxy based on an interface:
 
 For more detailed information about choosing class-based or interface-based proxying,
 see xref:core/aop/proxying.adoc[Proxying Mechanisms].
+
+
+
+[[beans-factory-scopes-injection]]
+=== Injecting Request/Session References Directly
+
+As an alternative to factory scopes, a Spring `WebApplicationContext` also supports
+the injection of `HttpServletRequest`, `HttpServletResponse`, `HttpSession`,
+`WebRequest` and (if JSF is present) `FacesContext` and `ExternalContext` into
+Spring-managed beans, simply through type-based autowiring next to regular injection
+points for other beans. Spring generally injects proxies for such request and session
+objects which has the advantage of working in singleton beans and serializable beans
+as well, similar to scoped proxies for factory-scoped beans.
 
 
 
