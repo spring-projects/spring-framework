@@ -131,8 +131,8 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withUnresolvablePlaceholder() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithUnresolvablePlaceholder.class))
-			.withCauseInstanceOf(IllegalArgumentException.class);
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithUnresolvablePlaceholder.class))
+				.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -163,8 +163,8 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withEmptyResourceLocations() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithEmptyResourceLocations.class))
-			.withCauseInstanceOf(IllegalArgumentException.class);
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithEmptyResourceLocations.class))
+				.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -256,8 +256,8 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withMissingPropertySource() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithMissingPropertySource.class))
-			.withCauseInstanceOf(FileNotFoundException.class);
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithMissingPropertySource.class))
+				.withCauseInstanceOf(FileNotFoundException.class);
 	}
 
 	@Test

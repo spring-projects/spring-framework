@@ -145,13 +145,13 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	@Override
-	public void onError(AsyncEvent event) throws IOException {
-		this.exceptionHandlers.forEach(consumer -> consumer.accept(event.getThrowable()));
+	public void onTimeout(AsyncEvent event) throws IOException {
+		this.timeoutHandlers.forEach(Runnable::run);
 	}
 
 	@Override
-	public void onTimeout(AsyncEvent event) throws IOException {
-		this.timeoutHandlers.forEach(Runnable::run);
+	public void onError(AsyncEvent event) throws IOException {
+		this.exceptionHandlers.forEach(consumer -> consumer.accept(event.getThrowable()));
 	}
 
 	@Override

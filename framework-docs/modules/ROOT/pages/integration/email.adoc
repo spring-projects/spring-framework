@@ -85,7 +85,7 @@ email when someone places an order:
 
 			// Call the collaborators to persist the order...
 
-			// Create a thread safe "copy" of the template message and customize it
+			// Create a thread-safe "copy" of the template message and customize it
 			SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
 			msg.setTo(order.getCustomer().getEmailAddress());
 			msg.setText(
