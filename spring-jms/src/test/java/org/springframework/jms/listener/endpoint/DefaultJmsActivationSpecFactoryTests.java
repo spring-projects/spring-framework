@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
  * @author Agim Emruli
  * @author Juergen Hoeller
  */
-public class DefaultJmsActivationSpecFactoryTests {
+class DefaultJmsActivationSpecFactoryTests {
 
 	private final JmsActivationSpecConfig activationSpecConfig = new JmsActivationSpecConfig() {{
 		setMaxConcurrency(5);
@@ -46,7 +46,7 @@ public class DefaultJmsActivationSpecFactoryTests {
 
 
 	@Test
-	public void activeMQResourceAdapterSetup() {
+	void activeMQResourceAdapterSetup() {
 		activationSpecConfig.setAcknowledgeMode(Session.SESSION_TRANSACTED);
 		JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 		StubActiveMQActivationSpec spec = (StubActiveMQActivationSpec) activationSpecFactory.createActivationSpec(
@@ -58,7 +58,7 @@ public class DefaultJmsActivationSpecFactoryTests {
 	}
 
 	@Test
-	public void webSphereResourceAdapterSetup() throws Exception {
+	void webSphereResourceAdapterSetup() throws Exception {
 		Destination destination = new StubQueue();
 
 		DestinationResolver destinationResolver = mock();

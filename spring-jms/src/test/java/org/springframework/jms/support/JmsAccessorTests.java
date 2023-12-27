@@ -80,7 +80,7 @@ class JmsAccessorTests {
 
 	/**
 	 * This test effectively verifies that the internal 'constants' map is properly
-	 * configured for all acknowledge mode constants constants defined in
+	 * configured for all acknowledge mode constants defined in
 	 * {@link jakarta.jms.Session}.
 	 */
 	@Test

@@ -141,7 +141,6 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void invalidProxy() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InvalidProxyTestBean.class))

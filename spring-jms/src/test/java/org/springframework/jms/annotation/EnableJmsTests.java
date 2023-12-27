@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jms.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import jakarta.jms.JMSException;
 import jakarta.jms.MessageListener;
 import org.junit.jupiter.api.Test;
 
@@ -103,7 +102,6 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void containerAreStartedByDefault() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsDefaultContainerFactoryConfig.class, DefaultBean.class);
@@ -115,7 +113,6 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void containerCanBeStarterViaTheRegistry() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsAutoStartupFalseConfig.class, DefaultBean.class);
@@ -131,7 +128,7 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 
 	@Override
 	@Test
-	void jmsHandlerMethodFactoryConfiguration() throws JMSException {
+	void jmsHandlerMethodFactoryConfiguration() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsHandlerMethodFactoryConfig.class, ValidationBean.class);
 
@@ -179,7 +176,6 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void unknownFactory() {
 		 // not found
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->

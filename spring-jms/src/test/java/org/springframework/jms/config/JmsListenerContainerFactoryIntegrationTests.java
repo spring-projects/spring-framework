@@ -47,7 +47,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Stephane Nicoll
  */
-public class JmsListenerContainerFactoryIntegrationTests {
+class JmsListenerContainerFactoryIntegrationTests {
 
 	private final DefaultJmsListenerContainerFactory containerFactory = new DefaultJmsListenerContainerFactory();
 
@@ -59,19 +59,19 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		initializeFactory(factory);
 	}
 
 
 	@Test
-	public void messageConverterUsedIfSet() throws JMSException {
+	void messageConverterUsedIfSet() throws JMSException {
 		this.containerFactory.setMessageConverter(new UpperCaseMessageConverter());
 		testMessageConverterIsUsed();
 	}
 
 	@Test
-	public void messagingMessageConverterCanBeUsed() throws JMSException {
+	void messagingMessageConverterCanBeUsed() throws JMSException {
 		MessagingMessageConverter converter = new MessagingMessageConverter();
 		converter.setPayloadConverter(new UpperCaseMessageConverter());
 		this.containerFactory.setMessageConverter(converter);
@@ -89,7 +89,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	}
 
 	@Test
-	public void parameterAnnotationWithJdkProxy() throws JMSException {
+	void parameterAnnotationWithJdkProxy() throws JMSException {
 		ProxyFactory pf = new ProxyFactory(sample);
 		listener = (JmsEndpointSampleInterface) pf.getProxy();
 
@@ -105,7 +105,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	}
 
 	@Test
-	public void parameterAnnotationWithCglibProxy() throws JMSException {
+	void parameterAnnotationWithCglibProxy() throws JMSException {
 		ProxyFactory pf = new ProxyFactory(sample);
 		pf.setProxyTargetClass(true);
 		listener = (JmsEndpointSampleBean) pf.getProxy();
@@ -178,7 +178,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	private static class UpperCaseMessageConverter implements MessageConverter {
 
 		@Override
-		public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
+		public Message toMessage(Object object, Session session) throws MessageConversionException {
 			return new StubTextMessage(object.toString().toUpperCase());
 		}
 

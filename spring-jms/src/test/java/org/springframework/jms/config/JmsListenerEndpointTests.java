@@ -35,10 +35,10 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Stephane Nicoll
  */
-public class JmsListenerEndpointTests {
+class JmsListenerEndpointTests {
 
 	@Test
-	public void setupJmsMessageContainerFullConfig() {
+	void setupJmsMessageContainerFullConfig() {
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 		MessageListener messageListener = new MessageListenerAdapter();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
@@ -58,7 +58,7 @@ public class JmsListenerEndpointTests {
 	}
 
 	@Test
-	public void setupJcaMessageContainerFullConfig() {
+	void setupJcaMessageContainerFullConfig() {
 		JmsMessageEndpointManager container = new JmsMessageEndpointManager();
 		MessageListener messageListener = new MessageListenerAdapter();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
@@ -78,7 +78,7 @@ public class JmsListenerEndpointTests {
 	}
 
 	@Test
-	public void setupConcurrencySimpleContainer() {
+	void setupConcurrencySimpleContainer() {
 		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
 		MessageListener messageListener = new MessageListenerAdapter();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
@@ -90,7 +90,7 @@ public class JmsListenerEndpointTests {
 	}
 
 	@Test
-	public void setupMessageContainerNoListener() {
+	void setupMessageContainerNoListener() {
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 
@@ -99,7 +99,7 @@ public class JmsListenerEndpointTests {
 	}
 
 	@Test
-	public void setupMessageContainerUnsupportedContainer() {
+	void setupMessageContainerUnsupportedContainer() {
 		MessageListenerContainer container = mock();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setMessageListener(new MessageListenerAdapter());

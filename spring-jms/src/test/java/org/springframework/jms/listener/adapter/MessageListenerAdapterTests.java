@@ -122,7 +122,7 @@ class MessageListenerAdapterTests {
 	}
 
 	@Test
-	void testWithMessageDelegate() throws Exception {
+	void testWithMessageDelegate() {
 		TextMessage textMessage = mock();
 
 		MessageDelegate delegate = mock();
@@ -159,7 +159,7 @@ class MessageListenerAdapterTests {
 	}
 
 	@Test
-	void testThatAnExceptionThrownFromTheHandlingMethodIsSimplySwallowedByDefault() throws Exception {
+	void testThatAnExceptionThrownFromTheHandlingMethodIsSimplySwallowedByDefault() {
 		final IllegalArgumentException exception = new IllegalArgumentException();
 
 		TextMessage textMessage = mock();
@@ -184,7 +184,7 @@ class MessageListenerAdapterTests {
 	}
 
 	@Test
-	void testThatTheDefaultMessageConverterisIndeedTheSimpleMessageConverter() throws Exception {
+	void testThatTheDefaultMessageConverterisIndeedTheSimpleMessageConverter() {
 		MessageListenerAdapter adapter = new MessageListenerAdapter();
 		assertThat(adapter.getMessageConverter()).as("The default [MessageConverter] must never be null.").isNotNull();
 		boolean condition = adapter.getMessageConverter() instanceof SimpleMessageConverter;
@@ -192,19 +192,19 @@ class MessageListenerAdapterTests {
 	}
 
 	@Test
-	void testThatWhenNoDelegateIsSuppliedTheDelegateIsAssumedToBeTheMessageListenerAdapterItself() throws Exception {
+	void testThatWhenNoDelegateIsSuppliedTheDelegateIsAssumedToBeTheMessageListenerAdapterItself() {
 		MessageListenerAdapter adapter = new MessageListenerAdapter();
 		assertThat(adapter.getDelegate()).isSameAs(adapter);
 	}
 
 	@Test
-	void testThatTheDefaultMessageHandlingMethodNameIsTheConstantDefault() throws Exception {
+	void testThatTheDefaultMessageHandlingMethodNameIsTheConstantDefault() {
 		MessageListenerAdapter adapter = new MessageListenerAdapter();
 		assertThat(adapter.getDefaultListenerMethod()).isEqualTo(MessageListenerAdapter.ORIGINAL_DEFAULT_LISTENER_METHOD);
 	}
 
 	@Test
-	void testWithResponsiveMessageDelegate_DoesNotSendReturnTextMessageIfNoSessionSupplied() throws Exception {
+	void testWithResponsiveMessageDelegate_DoesNotSendReturnTextMessageIfNoSessionSupplied() {
 		TextMessage textMessage = mock();
 		ResponsiveMessageDelegate delegate = mock();
 		given(delegate.handleMessage(textMessage)).willReturn(TEXT);
@@ -349,7 +349,7 @@ class MessageListenerAdapterTests {
 	}
 
 	@Test
-	void testWithResponsiveMessageDelegateDoesNotSendReturnTextMessageWhenSessionSupplied_AndListenerMethodThrowsException() throws Exception {
+	void testWithResponsiveMessageDelegateDoesNotSendReturnTextMessageWhenSessionSupplied_AndListenerMethodThrowsException() {
 		final TextMessage message = mock();
 		final QueueSession session = mock();
 
@@ -367,7 +367,7 @@ class MessageListenerAdapterTests {
 	}
 
 	@Test
-	void testWithResponsiveMessageDelegateWhenReturnTypeIsNotAJMSMessageAndNoMessageConverterIsSupplied() throws Exception {
+	void testWithResponsiveMessageDelegateWhenReturnTypeIsNotAJMSMessageAndNoMessageConverterIsSupplied() {
 		final TextMessage sentTextMessage = mock();
 		final Session session = mock();
 		ResponsiveMessageDelegate delegate = mock();

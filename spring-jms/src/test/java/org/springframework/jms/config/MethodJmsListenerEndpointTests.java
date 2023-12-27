@@ -410,7 +410,7 @@ class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
-	void validatePayloadInvalid() throws JMSException {
+	void validatePayloadInvalid() {
 		DefaultMessageHandlerMethodFactory customFactory = new DefaultMessageHandlerMethodFactory();
 		customFactory.setValidator(testValidator("invalid value"));
 
@@ -427,7 +427,7 @@ class MethodJmsListenerEndpointTests {
 	// failure scenario
 
 	@Test
-	void invalidPayloadType() throws JMSException {
+	void invalidPayloadType() {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(Integer.class);
 		Session session = mock();
 
@@ -439,7 +439,7 @@ class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
-	void invalidMessagePayloadType() throws JMSException {
+	void invalidMessagePayloadType() {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(Message.class);
 		Session session = mock();
 

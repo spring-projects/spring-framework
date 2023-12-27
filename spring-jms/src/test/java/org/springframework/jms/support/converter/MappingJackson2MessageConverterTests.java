@@ -56,7 +56,7 @@ class MappingJackson2MessageConverterTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		converter.setEncodingPropertyName("__encoding__");
 		converter.setTypeIdPropertyName("__typeid__");
 	}
@@ -195,7 +195,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	void toTextMessageWithReturnTypeAndMultipleJsonViews() throws JMSException, NoSuchMethodException {
+	void toTextMessageWithReturnTypeAndMultipleJsonViews() throws NoSuchMethodException {
 		Method method = this.getClass().getDeclaredMethod("invalid");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
@@ -203,7 +203,7 @@ class MappingJackson2MessageConverterTests {
 				testToTextMessageWithReturnType(returnType));
 	}
 
-	private void testToTextMessageWithReturnType(MethodParameter returnType) throws JMSException, NoSuchMethodException {
+	private void testToTextMessageWithReturnType(MethodParameter returnType) throws JMSException {
 		converter.setTargetType(MessageType.TEXT);
 		TextMessage textMessageMock = mock();
 

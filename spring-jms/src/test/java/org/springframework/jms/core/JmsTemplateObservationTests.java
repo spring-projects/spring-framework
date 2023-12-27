@@ -61,7 +61,7 @@ class JmsTemplateObservationTests {
 	}
 
 	@Test
-	void shouldRecordJmsProcessObservations() throws Exception {
+	void shouldRecordJmsProcessObservations() {
 		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
 		jmsTemplate.setObservationRegistry(registry);
 		jmsTemplate.convertAndSend("spring.test.observation", "message content");

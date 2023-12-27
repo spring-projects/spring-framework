@@ -254,7 +254,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator)
+	 * {@code send(Destination d, MessageCreator messageCreator)}
 	 */
 	@Test
 	void testSendDestination() throws Exception {

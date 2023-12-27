@@ -35,13 +35,13 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Rick Evans
  */
-public class DynamicDestinationResolverTests {
+class DynamicDestinationResolverTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
 
 	@Test
-	public void resolveWithPubSubTopicSession() throws Exception {
+	void resolveWithPubSubTopicSession() throws Exception {
 		Topic expectedDestination = new StubTopic();
 		TopicSession session = mock();
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
@@ -49,7 +49,7 @@ public class DynamicDestinationResolverTests {
 	}
 
 	@Test
-	public void resolveWithPubSubVanillaSession() throws Exception {
+	void resolveWithPubSubVanillaSession() throws Exception {
 		Topic expectedDestination = new StubTopic();
 		Session session = mock();
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
@@ -57,7 +57,7 @@ public class DynamicDestinationResolverTests {
 	}
 
 	@Test
-	public void resolveWithPointToPointQueueSession() throws Exception {
+	void resolveWithPointToPointQueueSession() throws Exception {
 		Queue expectedDestination = new StubQueue();
 		QueueSession session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
@@ -65,7 +65,7 @@ public class DynamicDestinationResolverTests {
 	}
 
 	@Test
-	public void resolveWithPointToPointVanillaSession() throws Exception {
+	void resolveWithPointToPointVanillaSession() throws Exception {
 		Queue expectedDestination = new StubQueue();
 		Session session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);

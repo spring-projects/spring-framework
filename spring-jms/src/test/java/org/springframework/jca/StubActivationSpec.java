@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.jca;
 
-import jakarta.resource.ResourceException;
 import jakarta.resource.spi.ActivationSpec;
-import jakarta.resource.spi.InvalidPropertyException;
 import jakarta.resource.spi.ResourceAdapter;
 
 /**
@@ -27,7 +25,7 @@ import jakarta.resource.spi.ResourceAdapter;
 public class StubActivationSpec implements ActivationSpec {
 
 	@Override
-	public void validate() throws InvalidPropertyException {
+	public void validate() {
 	}
 
 	@Override
@@ -36,7 +34,7 @@ public class StubActivationSpec implements ActivationSpec {
 	}
 
 	@Override
-	public void setResourceAdapter(ResourceAdapter resourceAdapter) throws ResourceException {
+	public void setResourceAdapter(ResourceAdapter resourceAdapter) {
 	}
 
 }
