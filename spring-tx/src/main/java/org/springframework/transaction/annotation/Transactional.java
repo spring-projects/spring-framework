@@ -105,6 +105,11 @@ import org.springframework.transaction.TransactionDefinition;
  * all participating data access operations need to execute within the same
  * Reactor context in the same reactive pipeline.
  *
+ * <p><b>Note: When configured with a {@code ReactiveTransactionManager}, all
+ * transaction-demarcated methods are expected to return a reactive pipeline.</b>
+ * Void methods or regular return types need to be associated with a regular
+ * {@code PlatformTransactionManager}, e.g. through {@link #transactionManager()}.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen

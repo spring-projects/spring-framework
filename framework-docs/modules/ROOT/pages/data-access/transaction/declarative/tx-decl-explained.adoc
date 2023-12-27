@@ -38,6 +38,11 @@ within the method.
 A reactive transaction managed by `ReactiveTransactionManager` uses the Reactor context
 instead of thread-local attributes. As a consequence, all participating data access
 operations need to execute within the same Reactor context in the same reactive pipeline.
+
+When configured with a `ReactiveTransactionManager`, all transaction-demarcated methods
+are expected to return a reactive pipeline. Void methods or regular return types need
+to be associated with a regular `PlatformTransactionManager`, e.g. through the
+`transactionManager` attribute of the corresponding `@Transactional` declarations.
 ====
 
 The following image shows a conceptual view of calling a method on a transactional proxy:
