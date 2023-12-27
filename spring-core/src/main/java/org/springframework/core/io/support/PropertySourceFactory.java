@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,20 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 4.3
  * @see DefaultPropertySourceFactory
+ * @see ResourcePropertySource
  */
 public interface PropertySourceFactory {
 
 	/**
 	 * Create a {@link PropertySource} that wraps the given resource.
+	 * <p>Implementations will typically create {@link ResourcePropertySource}
+	 * instances, with {@link PropertySourceProcessor} automatically adapting
+	 * property source names via {@link ResourcePropertySource#withResourceName()}
+	 * if necessary, e.g. when combining multiple sources for the same name
+	 * into a {@link org.springframework.core.env.CompositePropertySource}.
+	 * Custom implementations with custom {@link PropertySource} types need
+	 * to make sure to expose distinct enough names, possibly deriving from
+	 * {@link ResourcePropertySource} where possible.
 	 * @param name the name of the property source
 	 * (can be {@code null} in which case the factory implementation
 	 * will have to generate a name based on the given resource)
