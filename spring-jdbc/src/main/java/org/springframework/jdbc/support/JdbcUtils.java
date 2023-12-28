@@ -242,19 +242,17 @@ public abstract class JdbcUtils {
 			// Corresponding SQL types for JSR-310 / Joda-Time types, left up
 			// to the caller to convert them (e.g. through a ConversionService).
 			String typeName = requiredType.getSimpleName();
-			if ("LocalDate".equals(typeName)) {
-				return rs.getDate(index);
-			}
-			else if ("LocalTime".equals(typeName)) {
-				return rs.getTime(index);
-			}
-			else if ("LocalDateTime".equals(typeName)) {
-				return rs.getTimestamp(index);
-			}
+			return switch (typeName) {
+				case "LocalDate" -> rs.getDate(index);
+				case "LocalTime" -> rs.getTime(index);
+				case "LocalDateTime" -> rs.getTimestamp(index);
+				default ->
 
-			// Fall back to getObject without type specification, again
-			// left up to the caller to convert the value if necessary.
-			return getResultSetValue(rs, index);
+					// Fall back to getObject without type specification, again
+					// left up to the caller to convert the value if necessary.
+						getResultSetValue(rs, index);
+			};
+
 		}
 
 		// Perform was-null check if necessary (for results that the JDBC driver returns as primitives).
