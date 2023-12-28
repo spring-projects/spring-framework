@@ -713,7 +713,7 @@ class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMap
 				return false;
 			}
 			Person person = (Person) o;
-			return !(!Objects.equals(this.name, person.name));
+			return Objects.equals(this.name, person.name);
 		}
 
 		@Override

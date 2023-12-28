@@ -49,14 +49,8 @@ public class Pet {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-
-		final Pet pet = (Pet) o;
-
-		if (!Objects.equals(name, pet.name)) {
-			return false;
-		}
-
-		return true;
+		Pet pet = (Pet) o;
+		return Objects.equals(this.name, pet.name);
 	}
 
 	@Override

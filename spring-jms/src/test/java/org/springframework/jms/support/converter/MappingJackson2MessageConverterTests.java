@@ -286,10 +286,7 @@ class MappingJackson2MessageConverterTests {
 				return false;
 			}
 			MyBean bean = (MyBean) o;
-			if (!Objects.equals(foo, bean.foo)) {
-				return false;
-			}
-			return true;
+			return Objects.equals(this.foo, bean.foo);
 		}
 
 		@Override
