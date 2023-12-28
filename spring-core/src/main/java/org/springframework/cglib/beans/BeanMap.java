@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.asm.ClassVisitor;
@@ -288,7 +289,7 @@ abstract public class BeanMap implements Map {
 			}
 			Object v1 = get(key);
 			Object v2 = other.get(key);
-			if (!((v1 == null) ? v2 == null : v1.equals(v2))) {
+			if (!(Objects.equals(v1, v2))) {
 				return false;
 			}
 		}
