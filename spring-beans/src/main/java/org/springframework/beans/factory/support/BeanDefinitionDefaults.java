@@ -59,7 +59,7 @@ public class BeanDefinitionDefaults {
 	 * @return whether to apply lazy-init semantics ({@code false} by default)
 	 */
 	public boolean isLazyInit() {
-		return (this.lazyInit != null && this.lazyInit.booleanValue());
+		return (this.lazyInit != null && this.lazyInit);
 	}
 
 	/**
