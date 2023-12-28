@@ -918,6 +918,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			return this.key;
 		}
 
+		/**
+		 * Get generated key.
+		 * @return generated key
+		 * @since 6.1.2
+		 */
 		@Nullable
 		protected Object getGeneratedKey() {
 			return this.key;
