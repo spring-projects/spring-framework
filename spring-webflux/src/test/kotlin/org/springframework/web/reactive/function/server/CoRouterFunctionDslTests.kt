@@ -281,8 +281,8 @@ class CoRouterFunctionDslTests {
 			listOf(mapOf("foo" to "bar"), mapOf("foo" to "n1")),
 			listOf(mapOf("baz" to "qux"), mapOf("foo" to "n1")),
 			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
-		);
-		assertThat(visitor.visitCount()).isEqualTo(7);
+		)
+		assertThat(visitor.visitCount()).isEqualTo(7)
 	}
 
 	private fun sampleRouter() = coRouter {

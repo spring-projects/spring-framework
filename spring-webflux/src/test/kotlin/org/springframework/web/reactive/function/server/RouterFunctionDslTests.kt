@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.support.ServerRequestWrapper
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
 import org.springframework.web.testfixture.server.MockServerWebExchange
-import org.springframework.web.reactive.function.server.AttributesTestVisitor
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.security.Principal
@@ -167,8 +166,8 @@ class RouterFunctionDslTests {
 			listOf(mapOf("foo" to "bar"), mapOf("foo" to "n1")),
 			listOf(mapOf("baz" to "qux"), mapOf("foo" to "n1")),
 			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
-		);
-		assertThat(visitor.visitCount()).isEqualTo(7);
+		)
+		assertThat(visitor.visitCount()).isEqualTo(7)
 	}
 
 	@Test

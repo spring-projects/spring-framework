@@ -46,7 +46,7 @@ class AopUtilsKotlinTests {
     @Suppress("unused")
     suspend fun suspendingFunction(value: String): String {
         delay(1)
-        return value;
+        return value
     }
 
 }
