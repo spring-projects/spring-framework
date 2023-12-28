@@ -23,7 +23,6 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -268,8 +267,8 @@ public class GenericBean<T> {
 
 	public void setCustomEnumSetMismatch(Set<String> customEnumSet) {
 		this.customEnumSet = new HashSet<>(customEnumSet.size());
-		for (Iterator<String> iterator = customEnumSet.iterator(); iterator.hasNext(); ) {
-			this.customEnumSet.add(CustomEnum.valueOf(iterator.next()));
+		for (String customEnumName : customEnumSet) {
+			this.customEnumSet.add(CustomEnum.valueOf(customEnumName));
 		}
 	}
 
