@@ -55,7 +55,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Suspending handler method`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		val entity = performGet<String>("/suspend", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/suspend", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foo")
 	}
@@ -64,7 +64,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Handler method returning Deferred`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		val entity = performGet<String>("/deferred", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/deferred", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foo")
 	}
@@ -73,7 +73,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Suspending ResponseEntity handler method`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		val entity = performGet<String>("/suspend-response-entity", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/suspend-response-entity", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("{\"value\":\"foo\"}")
 	}
@@ -82,7 +82,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Handler method returning Flow`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		val entity = performGet<String>("/flow", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/flow", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foobar")
 	}
@@ -91,7 +91,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Suspending handler method returning Flow`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		val entity = performGet<String>("/suspending-flow", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/suspending-flow", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foobar")
 	}
@@ -101,7 +101,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		startServer(httpServer)
 
 		assertThatExceptionOfType(HttpServerErrorException.InternalServerError::class.java).isThrownBy {
-			performGet<String>("/error", HttpHeaders.EMPTY, String::class.java)
+			performGet("/error", HttpHeaders.EMPTY, String::class.java)
 		}
 	}
 
@@ -110,7 +110,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		startServer(httpServer)
 
 		assertThatExceptionOfType(HttpServerErrorException.InternalServerError::class.java).isThrownBy {
-			performGet<String>("/flow-error", HttpHeaders.EMPTY, String::class.java)
+			performGet("/flow-error", HttpHeaders.EMPTY, String::class.java)
 		}
 	}
 
@@ -120,7 +120,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 		startServer(httpServer)
 
-		val entity = performGet<String>("/entity-flux", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/entity-flux", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foobar")
 	}
@@ -129,7 +129,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	fun `Suspending handler method returning ResponseEntity of Flow`(httpServer: HttpServer) {
 		startServer(httpServer)
 
-		val entity = performGet<String>("/entity-flow", HttpHeaders.EMPTY, String::class.java)
+		val entity = performGet("/entity-flow", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("foobar")
 	}
@@ -195,7 +195,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 		@GetMapping("/entity-flux")
 		suspend fun entityFlux() : ResponseEntity<Flux<String>> {
-			val strings = Flux.just("foo", "bar");
+			val strings = Flux.just("foo", "bar")
 			delay(1)
 			return ResponseEntity.ok().body(strings)
 		}

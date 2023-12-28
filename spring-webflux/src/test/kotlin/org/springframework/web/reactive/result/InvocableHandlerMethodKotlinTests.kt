@@ -52,7 +52,7 @@ class InvocableHandlerMethodKotlinTests {
 
 	private var exchange = MockServerWebExchange.from(get("http://localhost:8080/path"))
 
-	private val resolvers = mutableListOf<HandlerMethodArgumentResolver>(ContinuationHandlerMethodArgumentResolver(),
+	private val resolvers = mutableListOf(ContinuationHandlerMethodArgumentResolver(),
 		RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance(), false))
 
 	@Test
