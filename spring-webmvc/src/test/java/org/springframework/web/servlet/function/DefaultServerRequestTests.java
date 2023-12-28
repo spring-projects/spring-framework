@@ -265,7 +265,7 @@ class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				List.of(new MappingJackson2HttpMessageConverter()));
 
-		List<String> result = request.body(new ParameterizedTypeReference<List<String>>() {});
+		List<String> result = request.body(new ParameterizedTypeReference<>() {});
 		assertThat(result).hasSize(2);
 		assertThat(result).element(0).isEqualTo("foo");
 		assertThat(result).element(1).isEqualTo("bar");

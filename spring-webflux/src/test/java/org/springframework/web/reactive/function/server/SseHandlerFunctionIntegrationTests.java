@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -100,7 +101,7 @@ class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrati
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
@@ -175,7 +176,7 @@ class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrati
 				return false;
 			}
 			Person person = (Person) o;
-			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
+			return Objects.equals(this.name, person.name);
 		}
 
 		@Override

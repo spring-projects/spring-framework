@@ -607,8 +607,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				// Restructure the resized reference array
 				if (resizing) {
 					Reference<K, V>[] restructured = createReferenceArray(restructureSize);
-					for (int i = 0; i < this.references.length; i++) {
-						ref = this.references[i];
+					for (Reference<K, V> reference : this.references) {
+						ref = reference;
 						while (ref != null) {
 							if (!toPurge.contains(ref)) {
 								Entry<K, V> entry = ref.get();

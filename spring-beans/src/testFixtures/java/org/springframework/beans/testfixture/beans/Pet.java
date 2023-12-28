@@ -16,6 +16,8 @@
 
 package org.springframework.beans.testfixture.beans;
 
+import java.util.Objects;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -47,14 +49,8 @@ public class Pet {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-
-		final Pet pet = (Pet) o;
-
-		if (name != null ? !name.equals(pet.name) : pet.name != null) {
-			return false;
-		}
-
-		return true;
+		Pet pet = (Pet) o;
+		return Objects.equals(this.name, pet.name);
 	}
 
 	@Override

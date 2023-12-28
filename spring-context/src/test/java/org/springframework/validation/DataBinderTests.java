@@ -2043,7 +2043,7 @@ class DataBinderTests {
 
 		binder.bind(pvs);
 		assertThat(tb.getIntegerList()).hasSize(257);
-		assertThat(tb.getIntegerList()).element(256).isEqualTo(Integer.valueOf(1));
+		assertThat(tb.getIntegerList()).element(256).isEqualTo(1);
 		assertThat(binder.getBindingResult().getFieldValue("integerList[256]")).isEqualTo(1);
 	}
 

@@ -169,7 +169,7 @@ class ChannelSendOperatorTests {
 					return Mono.never();
 				});
 
-		operator.subscribe(new BaseSubscriber<Void>() {});
+		operator.subscribe(new BaseSubscriber<>() {});
 		try {
 			writeSubscriber.signalDemand(1);  // Let cached signals ("foo" and error) be published..
 		}

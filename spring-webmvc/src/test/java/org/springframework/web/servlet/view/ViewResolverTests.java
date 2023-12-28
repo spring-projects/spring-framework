@@ -291,7 +291,7 @@ class ViewResolverTests {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		view.render(new HashMap<String, Object>(), request, this.response);
+		view.render(new HashMap<>(), request, this.response);
 	}
 
 	@Test
@@ -327,7 +327,7 @@ class ViewResolverTests {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		view.render(new HashMap<String, Object>(), request, this.response);
+		view.render(new HashMap<>(), request, this.response);
 	}
 
 	@Test

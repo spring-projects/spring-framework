@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.rxjava3.core.Completable;
@@ -712,7 +713,7 @@ class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMap
 				return false;
 			}
 			Person person = (Person) o;
-			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
+			return Objects.equals(this.name, person.name);
 		}
 
 		@Override

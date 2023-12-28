@@ -124,7 +124,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 		Mono<Map<String, String>> mono = this.webClient.get()
 				.uri("/sample").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
+				.bodyToMono(new ParameterizedTypeReference<>() {});
 
 		StepVerifier.create(mono).expectError(WebClientResponseException.class).verify(Duration.ofSeconds(3));
 		assertThat(this.server.getRequestCount()).isEqualTo(1);

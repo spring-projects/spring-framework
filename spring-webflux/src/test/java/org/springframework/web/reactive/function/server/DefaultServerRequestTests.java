@@ -318,8 +318,7 @@ public class DefaultServerRequestTests {
 			DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
 			Mono<Map<String, String>> resultMono = request.bodyToMono(
-					new ParameterizedTypeReference<Map<String, String>>() {
-					});
+					new ParameterizedTypeReference<>() {});
 			StepVerifier.create(resultMono)
 					.expectError(ServerWebInputException.class)
 					.verify();

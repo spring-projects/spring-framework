@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.jms.BytesMessage;
@@ -285,10 +286,7 @@ class MappingJackson2MessageConverterTests {
 				return false;
 			}
 			MyBean bean = (MyBean) o;
-			if (foo != null ? !foo.equals(bean.foo) : bean.foo != null) {
-				return false;
-			}
-			return true;
+			return Objects.equals(this.foo, bean.foo);
 		}
 
 		@Override

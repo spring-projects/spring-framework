@@ -248,7 +248,7 @@ class DefaultMessageListenerContainerTests {
 	private static ConnectionFactory createRecoverableContainerFactory(final int failingAttempts) {
 		try {
 			ConnectionFactory connectionFactory = mock();
-			given(connectionFactory.createConnection()).will(new Answer<Object>() {
+			given(connectionFactory.createConnection()).will(new Answer<>() {
 				int currentAttempts = 0;
 				@Override
 				public Object answer(InvocationOnMock invocation) throws Throwable {

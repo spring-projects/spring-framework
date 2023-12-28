@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,11 +102,7 @@ public class SpringConfigurator extends Configurator {
 	private String getBeanNameByType(WebApplicationContext wac, Class<?> endpointClass) {
 		String wacId = wac.getId();
 
-		Map<Class<?>, String> beanNamesByType = cache.get(wacId);
-		if (beanNamesByType == null) {
-			beanNamesByType = new ConcurrentHashMap<>();
-			cache.put(wacId, beanNamesByType);
-		}
+		Map<Class<?>, String> beanNamesByType = cache.computeIfAbsent(wacId, k -> new ConcurrentHashMap<>());
 
 		if (!beanNamesByType.containsKey(endpointClass)) {
 			String[] names = wac.getBeanNamesForType(endpointClass);

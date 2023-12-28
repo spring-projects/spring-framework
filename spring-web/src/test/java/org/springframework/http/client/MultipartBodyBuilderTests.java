@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class MultipartBodyBuilderTests {
 
 		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
 		builder.asyncPart("publisherClass", publisher, String.class).header("baz", "qux");
-		builder.asyncPart("publisherPtr", publisher, new ParameterizedTypeReference<String>() {}).header("baz", "qux");
+		builder.asyncPart("publisherPtr", publisher, new ParameterizedTypeReference<>() {}).header("baz", "qux");
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 

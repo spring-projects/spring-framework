@@ -109,11 +109,13 @@ class SseServerResponseTests {
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 
-		String expected = "data:{\n" +
-				"data:  \"name\" : \"John Doe\",\n" +
-				"data:  \"age\" : 42\n" +
-				"data:}\n" +
-				"\n";
+		String expected = """
+				data:{
+				data:  "name" : "John Doe",
+				data:  "age" : 42
+				data:}
+
+				""";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 

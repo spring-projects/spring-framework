@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -153,7 +154,7 @@ class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				return false;
 			}
 			Person person = (Person) o;
-			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
+			return Objects.equals(this.name, person.name);
 		}
 
 		@Override

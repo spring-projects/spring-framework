@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
@@ -134,7 +135,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<Person>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		verifyPersonEvents(result);
 	}
@@ -147,7 +148,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<Person>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		verifyPersonEvents(result);
 	}
@@ -277,7 +278,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				return false;
 			}
 			Person person = (Person) o;
-			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
+			return Objects.equals(this.name, person.name);
 		}
 
 		@Override

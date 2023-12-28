@@ -137,7 +137,7 @@ class RestTemplateXhrTransportTests {
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		connect(restTemplate).addCallback(
-				new org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>() {
+				new org.springframework.util.concurrent.ListenableFutureCallback<>() {
 					@Override
 					public void onSuccess(WebSocketSession result) {
 					}

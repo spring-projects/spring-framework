@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class SpelExceptionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aMap['one'] eq 1");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariables(new HashMap<String, Object>() {
+		ctx.setVariables(new HashMap<>() {
 			{
 				put("aMap", new HashMap<String, Integer>() {
 					{
@@ -98,7 +98,7 @@ public class SpelExceptionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList.contains('one')");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariables(new HashMap<String, Object>() {
+		ctx.setVariables(new HashMap<>() {
 			{
 				put("aList", new ArrayList<String>() {
 					{
@@ -120,7 +120,7 @@ public class SpelExceptionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList[0] eq 'one'");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariables(new HashMap<String, Object>() {
+		ctx.setVariables(new HashMap<>() {
 			{
 				put("aList", new ArrayList<String>() {
 					{
@@ -150,7 +150,7 @@ public class SpelExceptionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#anArray[0] eq 1");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariables(new HashMap<String, Object>() {
+		ctx.setVariables(new HashMap<>() {
 			{
 				put("anArray", new int[] {1,2,3});
 			}

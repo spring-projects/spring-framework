@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,7 +221,7 @@ public class AnnotationAsyncExecutionAspectTests {
 
 		@Async public Future<Integer> incrementReturningAFuture() {
 			counter++;
-			return new AsyncResult<Integer>(5);
+			return new AsyncResult<>(5);
 		}
 
 		/**
@@ -256,7 +256,7 @@ public class AnnotationAsyncExecutionAspectTests {
 
 		public Future<Integer> incrementReturningAFuture() {
 			counter++;
-			return new AsyncResult<Integer>(5);
+			return new AsyncResult<>(5);
 		}
 	}
 
@@ -265,12 +265,12 @@ public class AnnotationAsyncExecutionAspectTests {
 
 		@Async
 		public Future<Thread> defaultWork() {
-			return new AsyncResult<Thread>(Thread.currentThread());
+			return new AsyncResult<>(Thread.currentThread());
 		}
 
 		@Async("e1")
 		public ListenableFuture<Thread> e1Work() {
-			return new AsyncResult<Thread>(Thread.currentThread());
+			return new AsyncResult<>(Thread.currentThread());
 		}
 
 		@Async("e1")

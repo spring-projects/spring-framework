@@ -24,7 +24,6 @@ import java.rmi.MarshalException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -1224,8 +1223,7 @@ public abstract class AbstractAopProxyTests {
 			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) invocation;
-				for (Iterator<String> it = rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ){
-					Object key = it.next();
+				for (Object key : rmi.getUserAttributes().keySet()) {
 					assertThat(rmi.getUserAttributes().get(key)).isEqualTo(expectedValues.get(key));
 				}
 				rmi.getUserAttributes().putAll(valuesToAdd);
@@ -1233,7 +1231,7 @@ public abstract class AbstractAopProxyTests {
 			}
 		}
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
-		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<String, String>());
+		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<>());
 		Map<String, String> firstValuesToAdd = new HashMap<>();
 		firstValuesToAdd.put("test", "");
 		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap<>(), firstValuesToAdd);

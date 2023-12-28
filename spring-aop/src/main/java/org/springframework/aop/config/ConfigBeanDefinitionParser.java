@@ -201,9 +201,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			List<BeanReference> beanReferences = new ArrayList<>();
 
 			List<Element> declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
-			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
-				Element declareParentsElement = declareParents.get(i);
-				beanDefinitions.add(parseDeclareParents(declareParentsElement, parserContext));
+			for (Element declareParent : declareParents) {
+				beanDefinitions.add(parseDeclareParents(declareParent, parserContext));
 			}
 
 			// We have to parse "advice" and all the advice kinds in one loop, to get the
@@ -405,24 +404,14 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private Class<?> getAdviceClass(Element adviceElement, ParserContext parserContext) {
 		String elementName = parserContext.getDelegate().getLocalName(adviceElement);
-		if (BEFORE.equals(elementName)) {
-			return AspectJMethodBeforeAdvice.class;
-		}
-		else if (AFTER.equals(elementName)) {
-			return AspectJAfterAdvice.class;
-		}
-		else if (AFTER_RETURNING_ELEMENT.equals(elementName)) {
-			return AspectJAfterReturningAdvice.class;
-		}
-		else if (AFTER_THROWING_ELEMENT.equals(elementName)) {
-			return AspectJAfterThrowingAdvice.class;
-		}
-		else if (AROUND.equals(elementName)) {
-			return AspectJAroundAdvice.class;
-		}
-		else {
-			throw new IllegalArgumentException("Unknown advice kind [" + elementName + "].");
-		}
+		return switch (elementName) {
+			case BEFORE -> AspectJMethodBeforeAdvice.class;
+			case AFTER -> AspectJAfterAdvice.class;
+			case AFTER_RETURNING_ELEMENT -> AspectJAfterReturningAdvice.class;
+			case AFTER_THROWING_ELEMENT -> AspectJAfterThrowingAdvice.class;
+			case AROUND -> AspectJAroundAdvice.class;
+			default -> throw new IllegalArgumentException("Unknown advice kind [" + elementName + "].");
+		};
 	}
 
 	/**

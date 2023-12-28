@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,7 +293,7 @@ class DefaultServerResponseBuilderTests {
 		List<String> body = new ArrayList<>();
 		body.add("foo");
 		body.add("bar");
-		ServerResponse response = ServerResponse.ok().body(body, new ParameterizedTypeReference<List<String>>() {});
+		ServerResponse response = ServerResponse.ok().body(body, new ParameterizedTypeReference<>() {});
 
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
