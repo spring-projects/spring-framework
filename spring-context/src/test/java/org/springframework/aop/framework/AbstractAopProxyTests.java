@@ -343,8 +343,7 @@ public abstract class AbstractAopProxyTests {
 		ProxyFactory pf1 = new ProxyFactory(et);
 		assertThat(pf1.isExposeProxy()).isFalse();
 		INeedsToSeeProxy proxied = (INeedsToSeeProxy) createProxy(pf1);
-		assertThatIllegalStateException().isThrownBy(() ->
-				proxied.incrementViaProxy());
+		assertThatIllegalStateException().isThrownBy(proxied::incrementViaProxy);
 	}
 
 	@Test

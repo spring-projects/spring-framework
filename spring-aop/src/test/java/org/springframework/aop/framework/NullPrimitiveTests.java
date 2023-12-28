@@ -51,8 +51,7 @@ public class NullPrimitiveTests {
 
 		Foo foo = (Foo) factory.getProxy();
 
-		assertThatExceptionOfType(AopInvocationException.class).isThrownBy(() ->
-				foo.getValue())
+		assertThatExceptionOfType(AopInvocationException.class).isThrownBy(foo::getValue)
 			.withMessageContaining("Foo.getValue()");
 	}
 
@@ -71,8 +70,7 @@ public class NullPrimitiveTests {
 
 		Bar bar = (Bar) factory.getProxy();
 
-		assertThatExceptionOfType(AopInvocationException.class).isThrownBy(() ->
-				bar.getValue())
+		assertThatExceptionOfType(AopInvocationException.class).isThrownBy(bar::getValue)
 			.withMessageContaining("Bar.getValue()");
 	}
 

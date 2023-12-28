@@ -94,9 +94,7 @@ public class ShadowSource extends DefaultTask {
 			resolutionResult.getRootComponent().get().getDependencies().forEach(dependency -> {
 				Set<ComponentArtifactsResult> artifactsResults = resolveSourceArtifacts(dependency);
 				for (ComponentArtifactsResult artifactResult : artifactsResults) {
-					artifactResult.getArtifacts(SourcesArtifact.class).forEach(sourceArtifact -> {
-						sourceJarFiles.add(((ResolvedArtifactResult) sourceArtifact).getFile());
-					});
+					artifactResult.getArtifacts(SourcesArtifact.class).forEach(sourceArtifact -> sourceJarFiles.add(((ResolvedArtifactResult) sourceArtifact).getFile()));
 				}
 			});
 		}

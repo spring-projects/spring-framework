@@ -143,7 +143,7 @@ class RegisteredBeanTests {
 	void getMergedBeanDefinitionWhenSingletonThrowsException() {
 		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "sb");
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
-				.isThrownBy(() -> registeredBean.getMergedBeanDefinition());
+				.isThrownBy(registeredBean::getMergedBeanDefinition);
 	}
 
 	@Test

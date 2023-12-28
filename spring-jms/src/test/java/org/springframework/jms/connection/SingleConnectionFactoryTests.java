@@ -428,7 +428,7 @@ class SingleConnectionFactoryTests {
 		// Attempt to get connection again
 		// - JMSException should be returned from FailingTestConnection
 		// - connection should be still null (no new connection without exception listener like before fix)
-		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> scf.getConnection());
+		assertThatExceptionOfType(JMSException.class).isThrownBy(scf::getConnection);
 		assertThat(createConnectionMethodCounter.get()).isEqualTo(4);
 		assertThat(conField.get(scf)).isNull();
 

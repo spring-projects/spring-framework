@@ -87,12 +87,7 @@ public class RequestContextListenerTests {
 				"test", runnable, RequestAttributes.SCOPE_REQUEST);
 
 		// Execute requestDestroyed callback in different thread.
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				listener.requestDestroyed(new ServletRequestEvent(context, request));
-			}
-		};
+		Thread thread = new Thread(() -> listener.requestDestroyed(new ServletRequestEvent(context, request)));
 		thread.start();
 		try {
 			thread.join();

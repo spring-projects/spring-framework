@@ -79,7 +79,7 @@ class SimpleJdbcCallTests {
 		SimpleJdbcCall sproc = new SimpleJdbcCall(dataSource).withProcedureName(NO_SUCH_PROC);
 		try {
 			assertThatExceptionOfType(BadSqlGrammarException.class)
-				.isThrownBy(() -> sproc.execute())
+				.isThrownBy(sproc::execute)
 				.withCause(sqlException);
 		}
 		finally {

@@ -88,8 +88,7 @@ public class RdbmsOperationTests {
 	@Test
 	public void operationConfiguredViaJdbcTemplateMustGetDataSource() {
 		operation.setSql("foo");
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
-				operation.compile())
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(operation::compile)
 			.withMessageContaining("'dataSource'");
 	}
 

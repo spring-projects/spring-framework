@@ -555,12 +555,7 @@ public class DataSourceJtaTransactionTests {
 					JtaTransactionObject txObject,
 					final List<TransactionSynchronization> synchronizations)
 					throws RollbackException, SystemException {
-				Thread async = new Thread() {
-					@Override
-					public void run() {
-						invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_COMMITTED);
-					}
-				};
+				Thread async = new Thread(() -> invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_COMMITTED));
 				async.start();
 				try {
 					async.join();

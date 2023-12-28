@@ -38,12 +38,8 @@ public class LocalDevelopmentPlugin implements Plugin<Project> {
 	}
 
 	private void skipDocumentationTasks(Project project) {
-		project.afterEvaluate(p -> {
-			p.getTasks().matching(task -> {
-						return JavaBasePlugin.DOCUMENTATION_GROUP.equals(task.getGroup())
-								|| "distribution".equals(task.getGroup());
-					})
-					.forEach(task -> task.setEnabled(false));
-		});
+		project.afterEvaluate(p -> p.getTasks().matching(task -> JavaBasePlugin.DOCUMENTATION_GROUP.equals(task.getGroup())
+				|| "distribution".equals(task.getGroup()))
+				.forEach(task -> task.setEnabled(false)));
 	}
 }

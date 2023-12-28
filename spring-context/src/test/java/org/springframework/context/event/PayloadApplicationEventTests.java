@@ -165,7 +165,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
 
 		ConfigurableApplicationContext ac = new GenericApplicationContext();
 		ac.addApplicationListener(listener);
@@ -183,7 +183,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListenerOnParentContext() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
 
 		ConfigurableApplicationContext parent = new GenericApplicationContext();
 		parent.addApplicationListener(listener);

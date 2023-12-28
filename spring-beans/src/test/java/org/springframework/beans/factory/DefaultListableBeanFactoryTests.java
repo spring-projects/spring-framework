@@ -1545,7 +1545,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("tb2", bd2);
 
 		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> lbf.preInstantiateSingletons())
+				.isThrownBy(lbf::preInstantiateSingletons)
 				.withMessageContaining("Circular")
 				.withMessageContaining("'tb2'")
 				.withMessageContaining("'tb1'");

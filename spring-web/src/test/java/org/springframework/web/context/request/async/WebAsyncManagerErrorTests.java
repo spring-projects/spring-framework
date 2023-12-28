@@ -195,7 +195,7 @@ public class WebAsyncManagerErrorTests {
 	public void startDeferredResultProcessingErrorAndResumeThroughCallback() throws Exception {
 
 		final DeferredResult<Throwable> deferredResult = new DeferredResult<>();
-		deferredResult.onError(t -> deferredResult.setResult(t));
+		deferredResult.onError(deferredResult::setResult);
 
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 

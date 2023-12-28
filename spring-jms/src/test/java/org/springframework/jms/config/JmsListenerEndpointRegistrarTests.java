@@ -83,8 +83,7 @@ class JmsListenerEndpointRegistrarTests {
 		endpoint.setId("some id");
 		this.registrar.registerEndpoint(endpoint, null);
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.registrar.afterPropertiesSet())
+		assertThatIllegalStateException().isThrownBy(this.registrar::afterPropertiesSet)
 			.withMessageContaining(endpoint.toString());
 	}
 

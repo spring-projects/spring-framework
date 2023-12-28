@@ -53,7 +53,7 @@ class KeyHolderTests {
 		kh.getKeyList().add(singletonMap("key", "ABC"));
 
 		assertThatExceptionOfType(DataRetrievalFailureException.class)
-			.isThrownBy(() -> kh.getKey())
+			.isThrownBy(kh::getKey)
 			.withMessage("The generated key type is not supported. Unable to cast [java.lang.String] to [java.lang.Number].");
 	}
 
@@ -62,7 +62,7 @@ class KeyHolderTests {
 		kh.getKeyList().add(emptyMap());
 
 		assertThatExceptionOfType(DataRetrievalFailureException.class)
-			.isThrownBy(() -> kh.getKey())
+			.isThrownBy(kh::getKey)
 			.withMessageStartingWith("Unable to retrieve the generated key.");
 	}
 
@@ -72,7 +72,7 @@ class KeyHolderTests {
 
 		assertThat(kh.getKeys()).as("two keys should be in the map").hasSize(2);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-			.isThrownBy(() -> kh.getKey())
+			.isThrownBy(kh::getKey)
 			.withMessageStartingWith("The getKey method should only be used when a single key is returned.");
 	}
 
@@ -109,7 +109,7 @@ class KeyHolderTests {
 
 		assertThat(kh.getKeyList()).as("two rows should be in the list").hasSize(2);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-			.isThrownBy(() -> kh.getKeys())
+			.isThrownBy(kh::getKeys)
 			.withMessageStartingWith("The getKeys method should only be used when keys for a single row are returned.");
 	}
 

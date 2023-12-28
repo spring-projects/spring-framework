@@ -66,13 +66,7 @@ class ConversionServiceFactoryBeanTests {
 		converters.add(new ConverterFactory<String, Bar>() {
 			@Override
 			public <T extends Bar> Converter<String, T> getConverter(Class<T> targetType) {
-				return new Converter<> () {
-					@SuppressWarnings("unchecked")
-					@Override
-					public T convert(String source) {
-						return (T) new Bar();
-					}
-				};
+				return source -> (T) new Bar();
 			}
 		});
 		converters.add(new GenericConverter() {

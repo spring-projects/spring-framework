@@ -196,8 +196,7 @@ class AnnotationDrivenEventListenerTests {
 		failingContext.register(BasicConfiguration.class,
 				InvalidMethodSignatureEventListener.class);
 
-		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(() ->
-				failingContext.refresh())
+		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(failingContext::refresh)
 			.withMessageContaining(InvalidMethodSignatureEventListener.class.getName())
 			.withMessageContaining("cannotBeCalled");
 	}

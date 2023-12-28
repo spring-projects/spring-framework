@@ -89,11 +89,9 @@ class ServerHttpObservationFilterTests {
 	void filterShouldUnwrapServletException() {
 		IllegalArgumentException customError = new IllegalArgumentException("custom error");
 
-		assertThatThrownBy(() -> {
-			this.filter.doFilter(this.request, this.response, (request, response) -> {
-				throw new ServletException(customError);
-			});
-		}).isInstanceOf(ServletException.class);
+		assertThatThrownBy(() -> this.filter.doFilter(this.request, this.response, (request, response) -> {
+			throw new ServletException(customError);
+		})).isInstanceOf(ServletException.class);
 		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
 				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).isEqualTo(customError);
@@ -102,11 +100,9 @@ class ServerHttpObservationFilterTests {
 
 	@Test
 	void filterShouldSetDefaultErrorStatusForBubblingExceptions() {
-		assertThatThrownBy(() -> {
-			this.filter.doFilter(this.request, this.response, (request, response) -> {
-				throw new ServletException(new IllegalArgumentException("custom error"));
-			});
-		}).isInstanceOf(ServletException.class);
+		assertThatThrownBy(() -> this.filter.doFilter(this.request, this.response, (request, response) -> {
+			throw new ServletException(new IllegalArgumentException("custom error"));
+		})).isInstanceOf(ServletException.class);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR")
 				.hasLowCardinalityKeyValue("status", "500");
 	}

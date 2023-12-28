@@ -736,27 +736,24 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 			}
 			// Not using the Quartz startDelayed method since we explicitly want a daemon
 			// thread here, not keeping the JVM alive in case of all other threads ending.
-			Thread schedulerThread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						TimeUnit.SECONDS.sleep(startupDelay);
-					}
-					catch (InterruptedException ex) {
-						Thread.currentThread().interrupt();
-						// simply proceed
-					}
-					if (logger.isInfoEnabled()) {
-						logger.info("Starting Quartz Scheduler now, after delay of " + startupDelay + " seconds");
-					}
-					try {
-						scheduler.start();
-					}
-					catch (SchedulerException ex) {
-						throw new SchedulingException("Could not start Quartz Scheduler after delay", ex);
-					}
+			Thread schedulerThread = new Thread(() -> {
+				try {
+					TimeUnit.SECONDS.sleep(startupDelay);
 				}
-			};
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+					// simply proceed
+				}
+				if (logger.isInfoEnabled()) {
+					logger.info("Starting Quartz Scheduler now, after delay of " + startupDelay + " seconds");
+				}
+				try {
+					scheduler.start();
+				}
+				catch (SchedulerException ex) {
+					throw new SchedulingException("Could not start Quartz Scheduler after delay", ex);
+				}
+			});
 			schedulerThread.setName("Quartz Scheduler [" + scheduler.getSchedulerName() + "]");
 			schedulerThread.setDaemon(true);
 			schedulerThread.start();

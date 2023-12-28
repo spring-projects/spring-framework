@@ -262,7 +262,7 @@ public class EmitUtils {
                                            final String[] strings,
                                            final ObjectSwitchCallback callback,
                                            final boolean skipEquals) throws Exception {
-        final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), value -> value.hashCode());
+        final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), Object::hashCode);
         final Label def = e.make_label();
         final Label end = e.make_label();
         e.dup();

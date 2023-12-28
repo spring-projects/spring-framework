@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultServerResponseBuilderTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
+	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
 	@Test
 	@SuppressWarnings("deprecation")

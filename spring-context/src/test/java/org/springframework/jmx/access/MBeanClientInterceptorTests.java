@@ -171,7 +171,7 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	void invokeUnexposedMethodWithException() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean bean = getProxy();
-		assertThatExceptionOfType(InvalidInvocationException.class).isThrownBy(() -> bean.dontExposeMe());
+		assertThatExceptionOfType(InvalidInvocationException.class).isThrownBy(bean::dontExposeMe);
 	}
 
 	@Test

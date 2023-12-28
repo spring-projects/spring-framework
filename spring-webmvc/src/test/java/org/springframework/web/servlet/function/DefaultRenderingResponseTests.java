@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultRenderingResponseTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
+	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
 	@Test
 	public void create() throws Exception {

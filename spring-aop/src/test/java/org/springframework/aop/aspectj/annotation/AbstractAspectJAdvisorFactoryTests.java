@@ -362,7 +362,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		assertThat(lockable.locked()).as("Already locked").isTrue();
 		lockable.lock();
 		assertThat(lockable.locked()).as("Real target ignores locking").isTrue();
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> lockable.unlock());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(lockable::unlock);
 	}
 
 	@Test
