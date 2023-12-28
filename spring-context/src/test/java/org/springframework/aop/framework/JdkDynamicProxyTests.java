@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Chris Beams
  * @since 13.03.2003
  */
+@SuppressWarnings("serial")
 class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
 
 	@Override

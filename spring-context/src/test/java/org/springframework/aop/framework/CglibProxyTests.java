@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
+@SuppressWarnings("serial")
 class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
 
 	private static final String DEPENDENCY_CHECK_CONTEXT =
