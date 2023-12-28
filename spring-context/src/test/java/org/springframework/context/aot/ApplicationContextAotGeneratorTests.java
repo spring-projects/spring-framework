@@ -488,7 +488,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Nested
-	static class ActiveProfile {
+	class ActiveProfile {
 
 		@ParameterizedTest
 		@MethodSource("activeProfilesParameters")
