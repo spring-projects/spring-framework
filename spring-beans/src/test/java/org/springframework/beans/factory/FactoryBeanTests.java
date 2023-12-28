@@ -284,11 +284,7 @@ public class FactoryBeanTests {
 			if (bean instanceof FactoryBean) {
 				return bean;
 			}
-			AtomicInteger c = count.get(beanName);
-			if (c == null) {
-				c = new AtomicInteger();
-				count.put(beanName, c);
-			}
+			AtomicInteger c = count.computeIfAbsent(beanName, k -> new AtomicInteger());
 			c.incrementAndGet();
 			return bean;
 		}
