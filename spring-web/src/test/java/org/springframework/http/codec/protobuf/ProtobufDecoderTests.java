@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,8 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	@SuppressWarnings("deprecation")
 	public void decodeSplitMessageSize() {
 		this.decoder.setMaxMessageSize(100009);
-		Msg bigMessage = Msg.newBuilder().setFoo("azertyuiop".repeat(10000)).setBlah(secondMsg2).build();
+		Msg bigMessage = Msg.newBuilder().setFoo("azertyuiop".repeat(10000))
+				.setBlah(secondMsg2).build();
 
 		Flux<DataBuffer> input = Flux.just(bigMessage, bigMessage)
 				.flatMap(msg -> Mono.defer(() -> {
