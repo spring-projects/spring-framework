@@ -72,7 +72,14 @@ public class BufferingStompDecoderTests {
 	@Test
 	public void twoMessagesInOneChunk() throws InterruptedException {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
-		String chunk = "SEND\na:alpha\n\nPayload1\0" + "SEND\na:alpha\n\nPayload2\0";
+		String chunk = """
+				SEND
+				a:alpha
+
+				Payload1\0SEND
+				a:alpha
+
+				Payload2\0""";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
 
 		assertThat(messages).hasSize(2);

@@ -28,10 +28,16 @@ public class OuterSample {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014sample.proto\",\n\003Msg\022\013\n\003foo\030\001 \001(\t\022\030\n\004bl" +
-      "ah\030\002 \001(\0132\n.SecondMsg\"\031\n\tSecondMsg\022\014\n\004bla" +
-      "h\030\001 \001(\005B-\n\034org.springframework.protobufB" +
-      "\013OuterSampleP\001"
+			"""
+
+\014sample.proto",
+\003Msg\022\013
+\003foo\030\001 \001(\t\022\030
+\004blah\030\002 \001(\0132
+.SecondMsg"\031
+\tSecondMsg\022\014
+\004blah\030\001 \001(\005B-
+\034org.springframework.protobufB\013OuterSampleP\001"""
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

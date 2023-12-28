@@ -114,8 +114,11 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		pvs = new MutablePropertyValues();
 		pvs.add(
-				"mappings", "/head.do=headController\n" +
-				"body.do=bodyController\n/noview*=noviewController\n/noview/simple*=noviewController");
+				"mappings", """
+						/head.do=headController
+						body.do=bodyController
+						/noview*=noviewController
+						/noview/simple*=noviewController""");
 		pvs.add("order", "1");
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 

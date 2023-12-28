@@ -66,8 +66,25 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 	void readServerSentEvents() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
-						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
-						"id:c43\nevent:bar\nretry:456\ndata:baz\n\ndata:\n\ndata: \n\n")));
+						"""
+								id:c42
+								event:foo
+								retry:123
+								:bla
+								:bla bla
+								:bla bla bla
+								data:bar
+
+								id:c43
+								event:bar
+								retry:456
+								data:baz
+
+								data:
+
+								data:\s
+
+								""")));
 
 		Flux<ServerSentEvent> events = this.reader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
