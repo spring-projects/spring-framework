@@ -162,11 +162,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	@SuppressWarnings("deprecation")
 	public void decodeSplitMessageSize() {
 		this.decoder.setMaxMessageSize(100009);
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < 10000; i++) {
-			builder.append("azertyuiop");
-		}
-		Msg bigMessage = Msg.newBuilder().setFoo(builder.toString()).setBlah(secondMsg2).build();
+		Msg bigMessage = Msg.newBuilder().setFoo("azertyuiop".repeat(10000)).setBlah(secondMsg2).build();
 
 		Flux<DataBuffer> input = Flux.just(bigMessage, bigMessage)
 				.flatMap(msg -> Mono.defer(() -> {

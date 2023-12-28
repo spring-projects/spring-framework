@@ -239,13 +239,10 @@ public class StompHeaderAccessorTests {
 		String actual = accessor.getShortLogMessage("payload".getBytes(StandardCharsets.UTF_8));
 		assertThat(actual).isEqualTo("SEND /foo session=123 application/json payload=payload");
 
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 80; i++) {
-			sb.append('a');
-		}
-		final String payload = sb.toString() + " > 80";
+		String string = "a".repeat(80);
+		final String payload = string + " > 80";
 		actual = accessor.getShortLogMessage(payload.getBytes(StandardCharsets.UTF_8));
-		assertThat(actual).isEqualTo(("SEND /foo session=123 application/json payload=" + sb + "...(truncated)"));
+		assertThat(actual).isEqualTo(("SEND /foo session=123 application/json payload=" + string + "...(truncated)"));
 	}
 
 }
