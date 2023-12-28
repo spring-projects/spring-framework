@@ -164,7 +164,7 @@ public class RequestContext {
 	 * no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
-		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
+		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape);
 	}
 
 	/**

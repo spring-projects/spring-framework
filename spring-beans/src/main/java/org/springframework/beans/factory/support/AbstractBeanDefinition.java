@@ -581,7 +581,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public boolean isLazyInit() {
-		return (this.lazyInit != null && this.lazyInit.booleanValue());
+		return (this.lazyInit != null && this.lazyInit);
 	}
 
 	/**

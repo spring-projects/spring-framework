@@ -111,7 +111,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	@Override
 	protected boolean isDefaultHtmlEscape() {
 		Boolean defaultHtmlEscape = getRequestContext().getDefaultHtmlEscape();
-		return (defaultHtmlEscape == null || defaultHtmlEscape.booleanValue());
+		return (defaultHtmlEscape == null || defaultHtmlEscape);
 	}
 
 

@@ -61,7 +61,7 @@ public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 	 */
 	protected boolean isHtmlEscape() {
 		if (this.htmlEscape != null) {
-			return this.htmlEscape.booleanValue();
+			return this.htmlEscape;
 		}
 		else {
 			return isDefaultHtmlEscape();
