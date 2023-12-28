@@ -138,7 +138,8 @@ class BodyExtractorsTests {
 	@Test
 	void toMonoParameterizedTypeReference() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
-				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
+				BodyExtractors.toMono(new ParameterizedTypeReference<>() {
+				});
 
 		byte[] bytes = "{\"username\":\"foo\",\"password\":\"bar\"}".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
@@ -183,7 +184,8 @@ class BodyExtractorsTests {
 	@Test  // SPR-15758
 	void toMonoWithEmptyBodyAndNoContentType() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
-				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
+				BodyExtractors.toMono(new ParameterizedTypeReference<>() {
+				});
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(Flux.empty());
 		Mono<Map<String, String>> result = extractor.extract(request, this.context);

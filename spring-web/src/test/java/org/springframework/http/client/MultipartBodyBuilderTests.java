@@ -56,7 +56,8 @@ public class MultipartBodyBuilderTests {
 
 		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
 		builder.asyncPart("publisherClass", publisher, String.class).header("baz", "qux");
-		builder.asyncPart("publisherPtr", publisher, new ParameterizedTypeReference<String>() {}).header("baz", "qux");
+		builder.asyncPart("publisherPtr", publisher, new ParameterizedTypeReference<>() {
+		}).header("baz", "qux");
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 

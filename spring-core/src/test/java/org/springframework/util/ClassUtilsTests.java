@@ -453,7 +453,7 @@ class ClassUtilsTests {
 	void isNotLambda() {
 		assertIsNotLambda(new EnigmaSupplier());
 
-		assertIsNotLambda(new Supplier<String>() {
+		assertIsNotLambda(new Supplier<>() {
 			@Override
 			public String get() {
 				return "anonymous inner class";

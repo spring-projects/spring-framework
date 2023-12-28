@@ -216,7 +216,7 @@ abstract class AbstractSockJsIntegrationTests {
 		CountDownLatch latch = new CountDownLatch(1);
 		initSockJsClient(createWebSocketTransport());
 		this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").addCallback(
-				new org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>() {
+				new org.springframework.util.concurrent.ListenableFutureCallback<>() {
 					@Override
 					public void onSuccess(WebSocketSession result) {
 					}

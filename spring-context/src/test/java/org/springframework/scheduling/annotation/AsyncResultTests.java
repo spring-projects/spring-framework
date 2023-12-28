@@ -37,11 +37,12 @@ public class AsyncResultTests {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
 		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forValue(value);
-		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<String>() {
+		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				values.add(result);
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
 				throw new AssertionError("Failure callback not expected: " + ex, ex);
@@ -59,11 +60,12 @@ public class AsyncResultTests {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
 		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
-		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<String>() {
+		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				throw new AssertionError("Success callback not expected: " + result);
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
 				values.add(ex);
