@@ -474,7 +474,7 @@ public class PathPatternParserTests {
 	}
 
 	@SafeVarargs
-	private final void assertPathElements(PathPattern p, Class<? extends PathElement>... sectionClasses) {
+	private void assertPathElements(PathPattern p, Class<? extends PathElement>... sectionClasses) {
 		PathElement head = p.getHeadSection();
 		for (Class<? extends PathElement> sectionClass : sectionClasses) {
 			if (head == null) {

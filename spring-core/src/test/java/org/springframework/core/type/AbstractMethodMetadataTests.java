@@ -263,7 +263,7 @@ public abstract class AbstractMethodMetadataTests {
 	public static class WithPrivateMethod {
 
 		@Tag
-		private final String test() {
+		private String test() {
 			return "";
 		}
 

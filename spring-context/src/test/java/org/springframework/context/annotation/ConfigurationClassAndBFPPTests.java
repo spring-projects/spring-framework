@@ -88,7 +88,7 @@ class ConfigurationClassAndBFPPTests {
 		@Autowired TestBean autowiredTestBean;
 
 		@Bean
-		public static final BeanFactoryPostProcessor bfpp() {
+		public static BeanFactoryPostProcessor bfpp() {
 			return beanFactory -> {
 				// no-op
 			};

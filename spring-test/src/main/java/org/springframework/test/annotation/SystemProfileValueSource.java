@@ -34,7 +34,7 @@ public final class SystemProfileValueSource implements ProfileValueSource {
 	/**
 	 * Obtain the canonical instance of this ProfileValueSource.
 	 */
-	public static final SystemProfileValueSource getInstance() {
+	public static SystemProfileValueSource getInstance() {
 		return INSTANCE;
 	}
 
