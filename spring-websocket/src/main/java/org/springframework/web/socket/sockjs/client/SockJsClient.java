@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 4.1
  * @see <a href="https://github.com/sockjs/sockjs-client">https://github.com/sockjs/sockjs-client</a>
  * @see org.springframework.web.socket.sockjs.client.Transport
@@ -242,7 +243,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 		CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
 		try {
-			SockJsUrlInfo sockJsUrlInfo = new SockJsUrlInfo(url);
+			SockJsUrlInfo sockJsUrlInfo = buildSockJsUrlInfo(url);
 			ServerInfo serverInfo = getServerInfo(sockJsUrlInfo, getHttpRequestHeaders(headers));
 			createRequest(sockJsUrlInfo, headers, serverInfo).connect(handler, connectFuture);
 		}
@@ -253,6 +254,18 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 			connectFuture.completeExceptionally(exception);
 		}
 		return connectFuture;
+	}
+
+	/**
+	 * Create a new {@link SockJsUrlInfo} for the current client execution.
+	 * <p>The default implementation builds a {@code SockJsUrlInfo} which
+	 * calculates a random server id and session id if necessary.
+	 * @param url the target URL
+	 * @since 6.1.3
+	 * @see SockJsUrlInfo#SockJsUrlInfo(URI)
+	 */
+	protected SockJsUrlInfo buildSockJsUrlInfo(URI url) {
+		return new SockJsUrlInfo(url);
 	}
 
 	@Nullable
