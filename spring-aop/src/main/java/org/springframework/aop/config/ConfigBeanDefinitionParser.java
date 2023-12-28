@@ -201,9 +201,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			List<BeanReference> beanReferences = new ArrayList<>();
 
 			List<Element> declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
-			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
-				Element declareParentsElement = declareParents.get(i);
-				beanDefinitions.add(parseDeclareParents(declareParentsElement, parserContext));
+			for (Element declareParent : declareParents) {
+				beanDefinitions.add(parseDeclareParents(declareParent, parserContext));
 			}
 
 			// We have to parse "advice" and all the advice kinds in one loop, to get the
