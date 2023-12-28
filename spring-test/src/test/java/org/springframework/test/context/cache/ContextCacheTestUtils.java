@@ -32,7 +32,7 @@ public class ContextCacheTestUtils {
 	/**
 	 * Reset the state of the static context cache in {@link DefaultCacheAwareContextLoaderDelegate}.
 	 */
-	public static final void resetContextCache() {
+	public static void resetContextCache() {
 		DefaultCacheAwareContextLoaderDelegate.defaultContextCache.reset();
 	}
 
@@ -43,7 +43,7 @@ public class ContextCacheTestUtils {
 	 * @param expectedHitCount the expected hit count
 	 * @param expectedMissCount the expected miss count
 	 */
-	public static final void assertContextCacheStatistics(int expectedSize, int expectedHitCount, int expectedMissCount) {
+	public static void assertContextCacheStatistics(int expectedSize, int expectedHitCount, int expectedMissCount) {
 		assertContextCacheStatistics(null, expectedSize, expectedHitCount, expectedMissCount);
 	}
 
@@ -55,8 +55,8 @@ public class ContextCacheTestUtils {
 	 * @param expectedHitCount the expected hit count
 	 * @param expectedMissCount the expected miss count
 	 */
-	public static final void assertContextCacheStatistics(String usageScenario, int expectedSize, int expectedHitCount,
-			int expectedMissCount) {
+	public static void assertContextCacheStatistics(String usageScenario, int expectedSize, int expectedHitCount,
+													int expectedMissCount) {
 		assertContextCacheStatistics(DefaultCacheAwareContextLoaderDelegate.defaultContextCache, usageScenario,
 			expectedSize, expectedHitCount, expectedMissCount);
 	}
@@ -70,8 +70,8 @@ public class ContextCacheTestUtils {
 	 * @param expectedHitCount the expected hit count
 	 * @param expectedMissCount the expected miss count
 	 */
-	public static final void assertContextCacheStatistics(ContextCache contextCache, String usageScenario,
-			int expectedSize, int expectedHitCount, int expectedMissCount) {
+	public static void assertContextCacheStatistics(ContextCache contextCache, String usageScenario,
+													int expectedSize, int expectedHitCount, int expectedMissCount) {
 
 		String context = (StringUtils.hasText(usageScenario) ? " (" + usageScenario + ")" : "");
 
