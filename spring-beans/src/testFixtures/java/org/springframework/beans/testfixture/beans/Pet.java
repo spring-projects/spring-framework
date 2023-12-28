@@ -16,6 +16,8 @@
 
 package org.springframework.beans.testfixture.beans;
 
+import java.util.Objects;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -50,7 +52,7 @@ public class Pet {
 
 		final Pet pet = (Pet) o;
 
-		if (name != null ? !name.equals(pet.name) : pet.name != null) {
+		if (!Objects.equals(name, pet.name)) {
 			return false;
 		}
 
