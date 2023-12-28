@@ -246,13 +246,10 @@ public abstract class JdbcUtils {
 				case "LocalDate" -> rs.getDate(index);
 				case "LocalTime" -> rs.getTime(index);
 				case "LocalDateTime" -> rs.getTimestamp(index);
-				default ->
-
-					// Fall back to getObject without type specification, again
-					// left up to the caller to convert the value if necessary.
-						getResultSetValue(rs, index);
+				// Fall back to getObject without type specification, again
+				// left up to the caller to convert the value if necessary.
+				default -> getResultSetValue(rs, index);
 			};
-
 		}
 
 		// Perform was-null check if necessary (for results that the JDBC driver returns as primitives).
