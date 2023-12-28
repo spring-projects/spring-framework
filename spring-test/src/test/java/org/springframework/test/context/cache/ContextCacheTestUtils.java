@@ -56,7 +56,7 @@ public class ContextCacheTestUtils {
 	 * @param expectedMissCount the expected miss count
 	 */
 	public static void assertContextCacheStatistics(String usageScenario, int expectedSize, int expectedHitCount,
-													int expectedMissCount) {
+			int expectedMissCount) {
 		assertContextCacheStatistics(DefaultCacheAwareContextLoaderDelegate.defaultContextCache, usageScenario,
 			expectedSize, expectedHitCount, expectedMissCount);
 	}
@@ -71,7 +71,7 @@ public class ContextCacheTestUtils {
 	 * @param expectedMissCount the expected miss count
 	 */
 	public static void assertContextCacheStatistics(ContextCache contextCache, String usageScenario,
-													int expectedSize, int expectedHitCount, int expectedMissCount) {
+			int expectedSize, int expectedHitCount, int expectedMissCount) {
 
 		String context = (StringUtils.hasText(usageScenario) ? " (" + usageScenario + ")" : "");
 
