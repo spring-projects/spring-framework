@@ -134,8 +134,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<>() {
-				});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		verifyPersonEvents(result);
 	}
@@ -148,8 +147,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<>() {
-				});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		verifyPersonEvents(result);
 	}

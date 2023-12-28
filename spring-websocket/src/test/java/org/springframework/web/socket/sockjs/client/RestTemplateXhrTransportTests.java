@@ -141,7 +141,6 @@ class RestTemplateXhrTransportTests {
 					@Override
 					public void onSuccess(WebSocketSession result) {
 					}
-
 					@Override
 					public void onFailure(Throwable ex) {
 						if (ex == expected) {

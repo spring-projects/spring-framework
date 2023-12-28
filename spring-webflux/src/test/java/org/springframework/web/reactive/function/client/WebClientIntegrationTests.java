@@ -197,8 +197,7 @@ class WebClientIntegrationTests {
 		Mono<ValueContainer<Pojo>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<>() {
-				});
+				.bodyToMono(new ParameterizedTypeReference<>() {});
 
 		StepVerifier.create(result)
 				.assertNext(c -> assertThat(c.getContainerValue()).isEqualTo(new Pojo("foofoo", "barbar")))
@@ -805,8 +804,7 @@ class WebClientIntegrationTests {
 				.uri("/greeting")
 				.retrieve()
 				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
-				.bodyToMono(new ParameterizedTypeReference<>() {
-				});
+				.bodyToMono(new ParameterizedTypeReference<>() {});
 
 		StepVerifier.create(result)
 				.expectError(MyException.class)
