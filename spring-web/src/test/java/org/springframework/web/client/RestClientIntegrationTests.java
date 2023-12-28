@@ -166,7 +166,8 @@ class RestClientIntegrationTests {
 		ValueContainer<Pojo> result = this.restClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.body(new ParameterizedTypeReference<ValueContainer<Pojo>>() {});
+				.body(new ParameterizedTypeReference<>() {
+				});
 
 		assertThat(result.getContainerValue()).isNotNull();
 		Pojo pojo = result.getContainerValue();
@@ -191,7 +192,8 @@ class RestClientIntegrationTests {
 		ValueContainer<List<Pojo>> result = this.restClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.body(new ParameterizedTypeReference<ValueContainer<List<Pojo>>>() {});
+				.body(new ParameterizedTypeReference<>() {
+				});
 
 		assertThat(result.containerValue).isNotNull();
 		assertThat(result.containerValue).containsExactly(new Pojo("foofoo", "barbar"));

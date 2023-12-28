@@ -1231,7 +1231,7 @@ public abstract class AbstractAopProxyTests {
 			}
 		}
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
-		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<String, String>());
+		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<>());
 		Map<String, String> firstValuesToAdd = new HashMap<>();
 		firstValuesToAdd.put("test", "");
 		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap<>(), firstValuesToAdd);

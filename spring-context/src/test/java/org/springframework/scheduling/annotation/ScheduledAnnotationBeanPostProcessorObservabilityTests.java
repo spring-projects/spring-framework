@@ -276,7 +276,7 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		@Scheduled(fixedDelay = 10_000, initialDelay = 5_000)
 		Mono<String> hasCurrentObservation() {
 			return Mono.just("test")
-					.tap(() -> new DefaultSignalListener<String>() {
+					.tap(() -> new DefaultSignalListener<>() {
 						@Override
 						public void doFirst() throws Throwable {
 							Observation observation = observationRegistry.getCurrentObservation();
