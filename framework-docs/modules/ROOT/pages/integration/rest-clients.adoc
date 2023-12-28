@@ -906,8 +906,8 @@ For `WebClient`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
-	WebClientAdapter adapter = WebClientAdapter.forClient(webClient)
+	WebClient webClient = WebClient.builder().baseUrl("https://api.github.com/").build();
+	WebClientAdapter adapter = WebClientAdapter.create(webClient)
 	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 
 	RepositoryService service = factory.createClient(RepositoryService.class);
