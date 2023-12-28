@@ -58,9 +58,10 @@ public class PropertiesEditorTests {
 
 	@Test
 	public void handlesEqualsInValue() {
-		String s = "foo=bar\n" +
-			"me=mi\n" +
-			"x=y=z";
+		String s = """
+				foo=bar
+				me=mi
+				x=y=z""";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
@@ -98,12 +99,14 @@ public class PropertiesEditorTests {
 	 */
 	@Test
 	public void ignoresCommentLinesAndEmptyLines() {
-		String s = "#Ignore this comment\n" +
-			"foo=bar\n" +
-			"#Another=comment more junk /\n" +
-			"me=mi\n" +
-			"x=x\n" +
-			"\n";
+		String s = """
+				#Ignore this comment
+				foo=bar
+				#Another=comment more junk /
+				me=mi
+				x=x
+
+				""";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();

@@ -404,16 +404,18 @@ public class BodyInsertersTests {
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
 					String content = new String(resultBytes, StandardCharsets.UTF_8);
-					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
-							"Content-Type: text/plain;charset=UTF-8\r\n" +
-							"Content-Length: 6\r\n" +
-							"\r\n" +
-							"value1");
-					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
-							"Content-Type: text/plain;charset=UTF-8\r\n" +
-							"Content-Length: 6\r\n" +
-							"\r\n" +
-							"value2");
+					assertThat(content).contains("""
+							Content-Disposition: form-data; name="name"\r
+							Content-Type: text/plain;charset=UTF-8\r
+							Content-Length: 6\r
+							\r
+							value1""");
+					assertThat(content).contains("""
+							Content-Disposition: form-data; name="name"\r
+							Content-Type: text/plain;charset=UTF-8\r
+							Content-Length: 6\r
+							\r
+							value2""");
 				})
 				.expectComplete()
 				.verify();
