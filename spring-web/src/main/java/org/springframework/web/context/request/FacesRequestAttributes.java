@@ -131,60 +131,26 @@ public class FacesRequestAttributes implements RequestAttributes {
 
 	@Override
 	public Object resolveReference(String key) {
-		if (REFERENCE_REQUEST.equals(key)) {
-			return getExternalContext().getRequest();
-		}
-		else if (REFERENCE_SESSION.equals(key)) {
-			return getExternalContext().getSession(true);
-		}
-		else if ("application".equals(key)) {
-			return getExternalContext().getContext();
-		}
-		else if ("requestScope".equals(key)) {
-			return getExternalContext().getRequestMap();
-		}
-		else if ("sessionScope".equals(key)) {
-			return getExternalContext().getSessionMap();
-		}
-		else if ("applicationScope".equals(key)) {
-			return getExternalContext().getApplicationMap();
-		}
-		else if ("facesContext".equals(key)) {
-			return getFacesContext();
-		}
-		else if ("cookie".equals(key)) {
-			return getExternalContext().getRequestCookieMap();
-		}
-		else if ("header".equals(key)) {
-			return getExternalContext().getRequestHeaderMap();
-		}
-		else if ("headerValues".equals(key)) {
-			return getExternalContext().getRequestHeaderValuesMap();
-		}
-		else if ("param".equals(key)) {
-			return getExternalContext().getRequestParameterMap();
-		}
-		else if ("paramValues".equals(key)) {
-			return getExternalContext().getRequestParameterValuesMap();
-		}
-		else if ("initParam".equals(key)) {
-			return getExternalContext().getInitParameterMap();
-		}
-		else if ("view".equals(key)) {
-			return getFacesContext().getViewRoot();
-		}
-		else if ("viewScope".equals(key)) {
-			return getFacesContext().getViewRoot().getViewMap();
-		}
-		else if ("flash".equals(key)) {
-			return getExternalContext().getFlash();
-		}
-		else if ("resource".equals(key)) {
-			return getFacesContext().getApplication().getResourceHandler();
-		}
-		else {
-			return null;
-		}
+		return switch (key) {
+			case REFERENCE_REQUEST -> getExternalContext().getRequest();
+			case REFERENCE_SESSION -> getExternalContext().getSession(true);
+			case "application" -> getExternalContext().getContext();
+			case "requestScope" -> getExternalContext().getRequestMap();
+			case "sessionScope" -> getExternalContext().getSessionMap();
+			case "applicationScope" -> getExternalContext().getApplicationMap();
+			case "facesContext" -> getFacesContext();
+			case "cookie" -> getExternalContext().getRequestCookieMap();
+			case "header" -> getExternalContext().getRequestHeaderMap();
+			case "headerValues" -> getExternalContext().getRequestHeaderValuesMap();
+			case "param" -> getExternalContext().getRequestParameterMap();
+			case "paramValues" -> getExternalContext().getRequestParameterValuesMap();
+			case "initParam" -> getExternalContext().getInitParameterMap();
+			case "view" -> getFacesContext().getViewRoot();
+			case "viewScope" -> getFacesContext().getViewRoot().getViewMap();
+			case "flash" -> getExternalContext().getFlash();
+			case "resource" -> getFacesContext().getApplication().getResourceHandler();
+			default -> null;
+		};
 	}
 
 	@Override
