@@ -907,7 +907,7 @@ For `WebClient`:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient webClient = WebClient.builder().baseUrl("https://api.github.com/").build();
-	WebClientAdapter adapter = WebClientAdapter.create(webClient)
+	WebClientAdapter adapter = WebClientAdapter.create(webClient);
 	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 
 	RepositoryService service = factory.createClient(RepositoryService.class);
@@ -1090,7 +1090,7 @@ responses performed through the client:
 			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
 			.build();
 
-	WebClientAdapter clientAdapter = WebClientAdapter.forClient(webClient);
+	WebClientAdapter clientAdapter = WebClientAdapter.create(webClient);
 	HttpServiceProxyFactory factory = HttpServiceProxyFactory
 			.builder(clientAdapter).build();
 ----
