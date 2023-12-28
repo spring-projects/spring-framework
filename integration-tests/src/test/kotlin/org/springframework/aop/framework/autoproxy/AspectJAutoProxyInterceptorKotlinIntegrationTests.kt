@@ -94,12 +94,12 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
     open class Echo {
 
         open fun echo(value: String): String {
-            return value;
+            return value
         }
 
         open suspend fun suspendingEcho(value: String): String {
             delay(1)
-            return value;
+            return value
         }
 
     }
