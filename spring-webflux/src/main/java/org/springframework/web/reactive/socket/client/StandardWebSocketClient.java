@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 						return Mono.error(ex);
 					}
 				})
-				.subscribeOn(Schedulers.boundedElastic()); // connectToServer is blocking
+				.subscribeOn(Schedulers.boundedElastic());  // connectToServer is blocking
 	}
 
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
@@ -130,22 +130,36 @@ public class StandardWebSocketClient implements WebSocketClient {
 		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 	}
 
+	/**
+	 * Create the {@link StandardWebSocketSession} for the given Jakarta WebSocket Session.
+	 * @see #bufferFactory()
+	 */
 	protected StandardWebSocketSession createWebSocketSession(
 			Session session, HandshakeInfo info, Sinks.Empty<Void> completionSink) {
 
-		return new StandardWebSocketSession(
-				session, info, DefaultDataBufferFactory.sharedInstance, completionSink);
+		return new StandardWebSocketSession(session, info, bufferFactory(), completionSink);
 	}
 
-	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
+	/**
+	 * Return the {@link DataBufferFactory} to use.
+	 * @see #createWebSocketSession
+	 */
+	protected DataBufferFactory bufferFactory() {
+		return DefaultDataBufferFactory.sharedInstance;
+	}
+
+	/**
+	 * Create the {@link ClientEndpointConfig} for the given configurator.
+	 * Can be overridden to add extensions or an SSL context.
+	 * @param configurator the configurator to apply
+	 * @param subProtocols the preferred sub-protocols
+	 * @since 6.1.3
+	 */
+	protected ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
 		return ClientEndpointConfig.Builder.create()
 				.configurator(configurator)
 				.preferredSubprotocols(subProtocols)
 				.build();
-	}
-
-	protected DataBufferFactory bufferFactory() {
-		return DefaultDataBufferFactory.sharedInstance;
 	}
 
 
