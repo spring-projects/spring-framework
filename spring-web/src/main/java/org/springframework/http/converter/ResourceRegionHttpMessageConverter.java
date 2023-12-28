@@ -151,20 +151,12 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		responseHeaders.add("Content-Range", "bytes " + start + '-' + end + '/' + resourceLength);
 		responseHeaders.setContentLength(rangeLength);
 
-		InputStream in = region.getResource().getInputStream();
 		// We cannot use try-with-resources here for the InputStream, since we have
 		// custom handling of the close() method in a finally-block.
-		try {
+		try (InputStream in = region.getResource().getInputStream()) {
 			StreamUtils.copyRange(in, outputMessage.getBody(), start, end);
 		}
-		finally {
-			try {
-				in.close();
-			}
-			catch (IOException ex) {
-				// ignore
-			}
-		}
+		// ignore
 	}
 
 	private void writeResourceRegionCollection(Collection<ResourceRegion> resourceRegions,

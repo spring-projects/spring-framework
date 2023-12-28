@@ -47,14 +47,11 @@ public class Spr16217Tests {
 	@Test
 	public void baseConfigurationIsIncludedOnceWhenBothConfigurationClassesAreActive() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.setAllowBeanDefinitionOverriding(false);
-		context.register(UnconditionalImportingConfiguration.class);
-		context.refresh();
-		try {
+		try (context) {
+			context.setAllowBeanDefinitionOverriding(false);
+			context.register(UnconditionalImportingConfiguration.class);
+			context.refresh();
 			context.getBean("someBean");
-		}
-		finally {
-			context.close();
 		}
 	}
 

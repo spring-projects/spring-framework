@@ -409,21 +409,14 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
 		// We cannot use try-with-resources here for the WebSocketSession, since we have
 		// custom handling of the close() method in a finally-block.
-		try {
+		try (session) {
 			session.sendMessage(new TextMessage(bytes));
 		}
 		catch (Throwable ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
 			logger.debug("Failed to send STOMP ERROR to client", ex);
 		}
-		finally {
-			try {
-				session.close(CloseStatus.PROTOCOL_ERROR);
-			}
-			catch (IOException ex) {
-				// Ignore
-			}
-		}
+		// Ignore
 	}
 
 	private boolean detectImmutableMessageInterceptor(MessageChannel channel) {

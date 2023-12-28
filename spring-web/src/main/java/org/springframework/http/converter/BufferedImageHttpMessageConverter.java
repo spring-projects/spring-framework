@@ -168,12 +168,10 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	public BufferedImage read(@Nullable Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		ImageInputStream imageInputStream = null;
-		ImageReader imageReader = null;
 		// We cannot use try-with-resources here for the ImageInputStream, since we have
 		// custom handling of the close() method in a finally-block.
-		try {
-			imageInputStream = createImageInputStream(inputMessage.getBody());
+		ImageReader imageReader = null;
+		try (ImageInputStream imageInputStream = createImageInputStream(inputMessage.getBody())) {
 			MediaType contentType = inputMessage.getHeaders().getContentType();
 			if (contentType == null) {
 				throw new HttpMessageNotReadableException("No Content-Type header", inputMessage);
@@ -196,14 +194,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 			if (imageReader != null) {
 				imageReader.dispose();
 			}
-			if (imageInputStream != null) {
-				try {
-					imageInputStream.close();
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-			}
+			// ignore
 		}
 	}
 
