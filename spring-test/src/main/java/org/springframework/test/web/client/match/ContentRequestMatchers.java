@@ -60,6 +60,8 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  */
 public class ContentRequestMatchers {
 
+	private static final String DEFAULT_ENCODING = "UTF-8";
+
 	private final XmlExpectationsHelper xmlHelper;
 
 	private final JsonExpectationsHelper jsonHelper;
@@ -363,7 +365,9 @@ public class ContentRequestMatchers {
 		public static MultiValueMap<String, ?> parse(MockClientHttpRequest request) {
 			try {
 				FileUpload fileUpload = new FileUpload();
-				fileUpload.setFileItemFactory(new DiskFileItemFactory());
+				DiskFileItemFactory factory = new DiskFileItemFactory();
+				factory.setDefaultCharset(DEFAULT_ENCODING);
+				fileUpload.setFileItemFactory(factory);
 
 				List<FileItem> fileItems = fileUpload.parseRequest(new UploadContext() {
 					private final byte[] body = request.getBodyAsBytes();
