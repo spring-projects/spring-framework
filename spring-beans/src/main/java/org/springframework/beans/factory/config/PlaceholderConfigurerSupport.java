@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Default value separator: {@value}. */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
+	/** Default escape character: {@value}. */
+	public static final Character DEFAULT_ESCAPE_CHARACTER = '\\';
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
@@ -110,6 +112,10 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
 	@Nullable
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
+
+	/** Defaults to {@value #DEFAULT_ESCAPE_CHARACTER}. */
+	@Nullable
+	protected Character escapeCharacter = DEFAULT_ESCAPE_CHARACTER;
 
 	protected boolean trimValues = false;
 
@@ -149,6 +155,17 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 */
 	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.valueSeparator = valueSeparator;
+	}
+
+	/**
+	 * Specify the escape character to use to ignore placeholder prefix
+	 * or value separator, or {@code null} if no escaping should take
+	 * place.
+	 * <p>Default is {@value #DEFAULT_ESCAPE_CHARACTER}.
+	 * @since 6.2
+	 */
+	public void setEscapeCharacter(@Nullable Character escsEscapeCharacter) {
+		this.escapeCharacter = escsEscapeCharacter;
 	}
 
 	/**

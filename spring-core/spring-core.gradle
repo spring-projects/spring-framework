@@ -102,6 +102,7 @@ dependencies {
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation("org.mockito:mockito-core")
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
