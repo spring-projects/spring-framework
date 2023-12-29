@@ -98,6 +98,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
+	 * 通过类加载期获取代理
+	 *
 	 * Create a new proxy according to the settings in this factory.
 	 * <p>Can be called repeatedly. Effect will vary if we've added
 	 * or removed interfaces. Can add and remove interceptors.
@@ -107,6 +109,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 */
 	public Object getProxy(@Nullable ClassLoader classLoader) {
+		// 分别进入 createAopProxy() getProxy()
 		return createAopProxy().getProxy(classLoader);
 	}
 

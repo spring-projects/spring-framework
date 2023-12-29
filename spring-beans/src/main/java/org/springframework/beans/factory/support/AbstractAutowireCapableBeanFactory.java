@@ -425,12 +425,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	/**
+	 * 循环所有后置处理器调用：AOP 调试，此处最好用断点表达式，否则要循环很多次
+	 * 【因为在 AbstractApplicationContext#refresh() 中的 invokeBeanFactoryPostProcessor() 方法也调用到这里】
+	 *
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
+	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
+	 * enforce the given instance to be returned, i.e. no proxies etc)
+	 * @return
+	 * @throws BeansException
+	 */
 	@Override
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
 
 		Object result = existingBean;
+		// AOP：此处有 7 个内置后置处理器，生成代理会调用里面的 AnnotationAwareAspectJAutoCreator
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			// AOP 调用 AbstractAutoProxyCreator#postProcessAfterInitialization()
 			Object current = processor.postProcessAfterInitialization(result, beanName);
 			if (current == null) {
 				return result;
