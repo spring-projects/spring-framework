@@ -48,7 +48,7 @@ import static org.mockito.Mockito.mock;
  * @author Biju Kunjummen
  * @author Sam Brannen
  */
-public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marshaller> {
+class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marshaller> {
 
 	private static final String INPUT_STRING = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 			"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
@@ -78,7 +78,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 	}
 
 	@Test
-	public void marshalAttachments() throws Exception {
+	void marshalAttachments() throws Exception {
 		unmarshaller = new Jaxb2Marshaller();
 		unmarshaller.setClassesToBeBound(BinaryObject.class);
 		unmarshaller.setMtomEnabled(true);
@@ -102,12 +102,11 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 
 		StringReader reader = new StringReader(content);
 		Object result = unmarshaller.unmarshal(new StreamSource(reader), mimeContainer);
-		boolean condition = result instanceof BinaryObject;
-		assertThat(condition).as("Result is not a BinaryObject").isTrue();
-		BinaryObject object = (BinaryObject) result;
-		assertThat(object.getBytes()).as("bytes property not set").isNotNull();
-		assertThat(object.getBytes()).as("bytes property not set").isNotEmpty();
-		assertThat(object.getSwaDataHandler()).as("datahandler property not set").isNotNull();
+		assertThat(result).isInstanceOfSatisfying(BinaryObject.class, object -> {
+			assertThat(object.getBytes()).as("bytes property not set").isNotNull();
+			assertThat(object.getBytes()).as("bytes property not set").isNotEmpty();
+			assertThat(object.getSwaDataHandler()).as("datahandler property not set").isNotNull();
+		});
 	}
 
 	@Test
@@ -129,7 +128,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 	public void unmarshalAnXmlReferringToAWrappedXmlElementDecl() throws Exception {
 		// SPR-10714
 		unmarshaller = new Jaxb2Marshaller();
-		unmarshaller.setPackagesToScan(new String[] { "org.springframework.oxm.jaxb" });
+		unmarshaller.setPackagesToScan("org.springframework.oxm.jaxb");
 		unmarshaller.afterPropertiesSet();
 		Source source = new StreamSource(new StringReader(
 				"<brand-airplane><name>test</name></brand-airplane>"));
@@ -138,7 +137,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 	}
 
 	@Test
-	public void unmarshalFile() throws IOException {
+	void unmarshalFile() throws IOException {
 		Resource resource = new ClassPathResource("jaxb2.xml", getClass());
 		File file = resource.getFile();
 

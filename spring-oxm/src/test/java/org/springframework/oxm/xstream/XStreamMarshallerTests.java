@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,7 +150,7 @@ class XStreamMarshallerTests {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		StreamResult result = new StreamResult(os);
 		marshaller.marshal(flight, result);
-		String s = os.toString("UTF-8");
+		String s = os.toString(StandardCharsets.UTF_8);
 		assertThat(XmlContent.of(s)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
@@ -206,7 +207,7 @@ class XStreamMarshallerTests {
 	}
 
 	@Test
-	void converters() throws Exception {
+	void converters() {
 		marshaller.setConverters(new EncodedByteArrayConverter());
 		byte[] buf = {0x1, 0x2};
 
