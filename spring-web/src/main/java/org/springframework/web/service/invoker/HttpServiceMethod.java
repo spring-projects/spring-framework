@@ -179,7 +179,10 @@ final class HttpServiceMethod {
 				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver,
 				Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
-			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
+			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), HttpExchange.class);
+			if (annot1 == null) {
+				annot1 = AnnotatedElementUtils.getMergedAnnotation(containingClass, HttpExchange.class);
+			}
 			HttpExchange annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
 
 			Assert.notNull(annot2, "Expected HttpRequest annotation");

@@ -204,6 +204,26 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
+	@Test
+	void nestedAnnotatedService() {
+		SubAnnotatedService service = this.proxyFactory.createClient(SubAnnotatedService.class);
+
+		service.performGet();
+
+		HttpRequestValues requestValues = this.client.getRequestValues();
+		assertThat(requestValues.getUriTemplate()).isEqualTo("/api");
+
+		service.performV1Get();
+
+		requestValues = this.client.getRequestValues();
+		assertThat(requestValues.getUriTemplate()).isEqualTo("/v1/api");
+
+		service.performV2Get();
+
+		requestValues = this.client.getRequestValues();
+		assertThat(requestValues.getUriTemplate()).isEqualTo("/v2/api");
+	}
+
 	protected void verifyReactorClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
 		assertThat(this.reactorClient.getInvokedMethodName()).isEqualTo(methodName);
 		assertThat(this.reactorClient.getBodyType()).isEqualTo(expectedBodyType);
@@ -308,6 +328,34 @@ class HttpServiceMethodTests {
 	@SuppressWarnings("unused")
 	@HttpExchange(url = "${baseUrl}", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
 	private interface TypeAndMethodLevelAnnotatedService extends MethodLevelAnnotatedService {
+	}
+
+
+	private interface SuperAnnotatedService {
+
+		@GetExchange("/api")
+		void performGet();
+
+	}
+
+	@HttpExchange("/v1")
+	private interface SuperAnnotatedServiceV1 {
+
+		@GetExchange("/api")
+		void performV1Get();
+
+	}
+
+	@HttpExchange("/v2")
+	private interface SuperAnnotatedServiceV2 {
+
+		@GetExchange("/api")
+		void performV2Get();
+
+	}
+
+	private interface SubAnnotatedService
+			extends SuperAnnotatedService, SuperAnnotatedServiceV1, SuperAnnotatedServiceV2 {
 	}
 
 }
