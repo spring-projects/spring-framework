@@ -324,7 +324,6 @@ Kotlin::
 
 
 
-
 [[beans-factory-scopes-application]]
 === Application Scope
 
@@ -374,14 +373,12 @@ Kotlin::
 
 
 
-
 [[beans-factory-scopes-websocket]]
 === WebSocket Scope
 
 WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
 STOMP over WebSocket applications, see
 xref:web/websocket/stomp/scope.adoc[WebSocket scope] for more details.
-
 
 
 

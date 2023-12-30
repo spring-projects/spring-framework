@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,6 +276,11 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		}
 
 		@Override
+		public void onStartAsync(AsyncEvent event) {
+			// no-op
+		}
+
+		@Override
 		public void onTimeout(AsyncEvent event) {
 			// Should never happen since we call asyncContext.setTimeout(-1)
 			if (logger.isDebugEnabled()) {
@@ -340,11 +345,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 					context.complete();
 				}
 			});
-		}
-
-		@Override
-		public void onStartAsync(AsyncEvent event) {
-			// no-op
 		}
 	}
 

@@ -168,7 +168,7 @@ Kotlin::
 ======
 
 NOTE: Pooling stateless service objects is not usually necessary. We do not believe it should
-be the default choice, as most stateless objects are naturally thread safe, and instance
+be the default choice, as most stateless objects are naturally thread-safe, and instance
 pooling is problematic if resources are cached.
 
 Simpler pooling is available by using auto-proxying. You can set the `TargetSource` implementations
