@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ import static org.mockito.Mockito.verify;
  */
 public class SimpleClientHttpRequestFactoryTests {
 
-
-	@Test // SPR-13225
+	@Test  // SPR-13225
 	public void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock(HttpURLConnection.class);
 		given(urlConnection.getRequestMethod()).willReturn("GET");
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);
 		SimpleBufferingClientHttpRequest.addHeaders(urlConnection, headers);
+
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,16 +102,16 @@ class GenericApplicationContextTests {
 
 		assertThat(context.getBean(String.class)).isSameAs(context.getBean("testBean"));
 		assertThat(context.getAutowireCapableBeanFactory().getBean(String.class))
-			.isSameAs(context.getAutowireCapableBeanFactory().getBean("testBean"));
+				.isSameAs(context.getAutowireCapableBeanFactory().getBean("testBean"));
 
 		context.close();
 
 		assertThatIllegalStateException()
-			.isThrownBy(() -> context.getBean(String.class));
+				.isThrownBy(() -> context.getBean(String.class));
 		assertThatIllegalStateException()
-			.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean(String.class));
+				.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean(String.class));
 		assertThatIllegalStateException()
-			.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean("testBean"));
+				.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean("testBean"));
 	}
 
 	@Test

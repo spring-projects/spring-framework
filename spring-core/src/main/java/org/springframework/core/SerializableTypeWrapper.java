@@ -159,7 +159,7 @@ final class SerializableTypeWrapper {
 
 		/**
 		 * Return the source of the type, or {@code null} if not known.
-		 * <p>The default implementations returns {@code null}.
+		 * <p>The default implementation returns {@code null}.
 		 */
 		@Nullable
 		default Object getSource() {

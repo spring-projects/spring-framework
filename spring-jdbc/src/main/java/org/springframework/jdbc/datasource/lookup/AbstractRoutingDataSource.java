@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 
 	/**
 	 * Specify the map of target DataSources, with the lookup key as key.
-	 * The mapped value can either be a corresponding {@link javax.sql.DataSource}
+	 * <p>The mapped value can either be a corresponding {@link javax.sql.DataSource}
 	 * instance or a data source name String (to be resolved via a
 	 * {@link #setDataSourceLookup DataSourceLookup}).
 	 * <p>The key can be of arbitrary type; this class implements the
@@ -212,6 +212,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return (iface.isInstance(this) || determineTargetDataSource().isWrapperFor(iface));
 	}
+
 
 	/**
 	 * Retrieve the current target DataSource. Determines the

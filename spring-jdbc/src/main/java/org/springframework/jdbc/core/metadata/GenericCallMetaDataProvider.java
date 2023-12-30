@@ -169,11 +169,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public boolean byPassReturnParameter(String parameterName) {
-		return false;
-	}
-
-	@Override
 	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
 		return new SqlOutParameter(parameterName, meta.getSqlType());
 	}
@@ -211,6 +206,11 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	@Override
 	public boolean isProcedureColumnMetaDataUsed() {
 		return this.procedureColumnMetaDataUsed;
+	}
+
+	@Override
+	public boolean byPassReturnParameter(String parameterName) {
+		return false;
 	}
 
 

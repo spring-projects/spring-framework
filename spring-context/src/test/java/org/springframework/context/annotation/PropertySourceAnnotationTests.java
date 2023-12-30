@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,8 +138,8 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withUnresolvablePlaceholder() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithUnresolvablePlaceholder.class))
-			.withCauseInstanceOf(IllegalArgumentException.class);
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithUnresolvablePlaceholder.class))
+				.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -170,8 +170,8 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withEmptyResourceLocations() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithEmptyResourceLocations.class))
-			.withCauseInstanceOf(IllegalArgumentException.class);
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithEmptyResourceLocations.class))
+				.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -253,8 +253,8 @@ class PropertySourceAnnotationTests {
 	@Test
 	void withMissingPropertySource() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithMissingPropertySource.class))
-			.withCauseInstanceOf(FileNotFoundException.class);
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(ConfigWithMissingPropertySource.class))
+				.withCauseInstanceOf(FileNotFoundException.class);
 	}
 
 	@Test

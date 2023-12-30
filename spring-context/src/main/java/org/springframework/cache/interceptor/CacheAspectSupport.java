@@ -547,10 +547,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Collect the {@link CachePutRequest} for all {@link CacheOperation} using
-	 * the specified result value.
+	 * Collect a {@link CachePutRequest} for every {@link CacheOperation}
+	 * using the specified result value.
 	 * @param contexts the contexts to handle
-	 * @param result the result value (never {@code null})
+	 * @param result the result value
 	 * @param putRequests the collection to update
 	 */
 	private void collectPutRequests(Collection<CacheOperationContext> contexts,

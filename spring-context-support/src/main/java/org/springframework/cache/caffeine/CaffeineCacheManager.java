@@ -236,7 +236,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Build a common {@link CaffeineCache} instance for the specified cache name,
 	 * using the common Caffeine configuration specified on this cache manager.
 	 * <p>Delegates to {@link #adaptCaffeineCache} as the adaptation method to
-	 * Spring's cache abstraction (allowing for centralized decoration etc),
+	 * Spring's cache abstraction (allowing for centralized decoration etc.),
 	 * passing in a freshly built native Caffeine Cache instance.
 	 * @param name the name of the cache
 	 * @return the Spring CaffeineCache adapter (or a decorator thereof)

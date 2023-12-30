@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,8 +355,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						(isSuspendingFunction ? (hasSuspendingFlowReturnType ? Flux.class : Mono.class) : method.getReturnType());
 				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
 				if (adapter == null) {
-					throw new IllegalStateException("Cannot apply reactive transaction to non-reactive return type: " +
-							method.getReturnType());
+					throw new IllegalStateException("Cannot apply reactive transaction to non-reactive return type [" +
+							method.getReturnType() + "] with specified transaction manager: " + tm);
 				}
 				return new ReactiveTransactionSupport(adapter);
 			});
