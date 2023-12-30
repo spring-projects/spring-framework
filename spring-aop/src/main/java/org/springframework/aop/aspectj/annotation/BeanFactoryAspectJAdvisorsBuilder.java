@@ -81,7 +81,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 	 * @see #isEligibleBean
 	 */
 	public List<Advisor> buildAspectJAdvisors() {
-		List<String> aspectNames = this.aspectBeanNames;
+		List<String> aspectNames = this.aspectBeanNames; // TODO 这个值是什么时候赋值的？？？
 
 		if (aspectNames == null) {
 			synchronized (this) {
