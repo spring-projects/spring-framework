@@ -36,8 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-@SuppressWarnings("deprecation")
-public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
+class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Override
 	protected String[] getConfigLocations() {
@@ -47,18 +46,18 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 
 
 	@Test
-	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
+	void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertThat(emfi.getNativeEntityManagerFactory()).isInstanceOf(SessionFactory.class);
 	}
 
 	@Test
-	public void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
+	void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
 		assertThat(((EntityManagerProxy) sharedEntityManager).getTargetEntityManager()).isInstanceOf(Session.class);
 	}
 
 	@Test
-	public void testCanUnwrapAopProxy() {
+	void testCanUnwrapAopProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		EntityManager proxy = ProxyFactory.getProxy(EntityManager.class, new SingletonTargetSource(em));
 		assertThat(proxy.unwrap(Session.class)).isSameAs(em);

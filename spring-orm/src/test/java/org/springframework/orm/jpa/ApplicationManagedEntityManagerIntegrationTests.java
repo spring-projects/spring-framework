@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
+class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
@@ -54,20 +54,20 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	}
 
 	@Test
-	public void testEntityManagerProxyAcceptsProgrammaticTxJoining() {
+	void testEntityManagerProxyAcceptsProgrammaticTxJoining() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 	}
 
 	@Test
-	public void testInstantiateAndSave() {
+	void testInstantiateAndSave() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 	}
 
 	@Test
-	public void testCannotFlushWithoutGettingTransaction() {
+	void testCannotFlushWithoutGettingTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
 				doInstantiateAndSave(em));
@@ -93,12 +93,12 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	}
 
 	@Test
-	public void testStateClean() {
+	void testStateClean() {
 		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 	}
 
 	@Test
-	public void testReuseInNewTransaction() {
+	void testReuseInNewTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 
@@ -134,7 +134,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	}
 
 	@Test
-	public void testRollbackOccurs() {
+	void testRollbackOccurs() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);
@@ -143,7 +143,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	}
 
 	@Test
-	public void testCommitOccurs() {
+	void testCommitOccurs() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);

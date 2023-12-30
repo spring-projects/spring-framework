@@ -88,7 +88,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		if (applicationContext == null) {
 			applicationContext = new ClassPathXmlApplicationContext(getConfigLocations());
 		}

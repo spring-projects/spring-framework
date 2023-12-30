@@ -34,12 +34,12 @@ import static org.mockito.Mockito.mock;
  * @author Costin Leau
  * @author Phillip Webb
  */
-public class DefaultJpaDialectTests {
+class DefaultJpaDialectTests {
 
 	private JpaDialect dialect = new DefaultJpaDialect();
 
 	@Test
-	public void testDefaultTransactionDefinition() throws Exception {
+	void testDefaultTransactionDefinition() {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
 		assertThatExceptionOfType(TransactionException.class).isThrownBy(() ->
@@ -47,7 +47,7 @@ public class DefaultJpaDialectTests {
 	}
 
 	@Test
-	public void testDefaultBeginTransaction() throws Exception {
+	void testDefaultBeginTransaction() throws Exception {
 		TransactionDefinition definition = new DefaultTransactionDefinition();
 		EntityManager entityManager = mock();
 		EntityTransaction entityTx = mock();
@@ -58,7 +58,7 @@ public class DefaultJpaDialectTests {
 	}
 
 	@Test
-	public void testTranslateException() {
+	void testTranslateException() {
 		OptimisticLockException ex = new OptimisticLockException();
 		assertThat(dialect.translateExceptionIfPossible(ex).getCause()).isEqualTo(EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex).getCause());
 	}

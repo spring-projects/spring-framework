@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  */
 @SuppressWarnings("rawtypes")
-public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
+class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 
 	// Static fields set by inner class DummyPersistenceProvider
 
@@ -43,22 +43,22 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 	private static Map actualProps;
 
 	@AfterEach
-	public void verifyClosed() throws Exception {
+	public void verifyClosed() {
 		verify(mockEmf).close();
 	}
 
 	@Test
-	public void testValidUsageWithDefaultProperties() throws Exception {
+	void testValidUsageWithDefaultProperties() throws Exception {
 		testValidUsage(null);
 	}
 
 	@Test
-	public void testValidUsageWithExplicitProperties() throws Exception {
+	void testValidUsageWithExplicitProperties() throws Exception {
 		testValidUsage(new Properties());
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void testValidUsage(Properties props) throws Exception {
+	protected void testValidUsage(Properties props) {
 		// This will be set by DummyPersistenceProvider
 		actualName = null;
 		actualProps = null;

@@ -48,7 +48,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@Test
-	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		boolean condition = entityManagerFactory instanceof EntityManagerFactoryInfo;
 		assertThat(condition).as("Must have introduced config interface").isTrue();
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
@@ -58,33 +58,33 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testStateClean() {
+	void testStateClean() {
 		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 	}
 
 	@Test
-	public void testJdbcTx1_1() {
+	void testJdbcTx1_1() {
 		testJdbcTx2();
 	}
 
 	@Test
-	public void testJdbcTx1_2() {
+	void testJdbcTx1_2() {
 		testJdbcTx2();
 	}
 
 	@Test
-	public void testJdbcTx1_3() {
+	void testJdbcTx1_3() {
 		testJdbcTx2();
 	}
 
 	@Test
-	public void testJdbcTx2() {
+	void testJdbcTx2() {
 		assertThat(countRowsInTable("person")).as("Any previous tx must have been rolled back").isEqualTo(0);
 		executeSqlScript("/org/springframework/orm/jpa/insertPerson.sql");
 	}
 
 	@Test
-	public void testEntityManagerProxyIsProxy() {
+	void testEntityManagerProxyIsProxy() {
 		assertThat(Proxy.isProxyClass(sharedEntityManager.getClass())).isTrue();
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		q.getResultList();
@@ -95,7 +95,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testBogusQuery() {
+	void testBogusQuery() {
 		assertThatRuntimeException().isThrownBy(() -> {
 			Query query = sharedEntityManager.createQuery("It's raining toads");
 			// required in OpenJPA case
@@ -104,7 +104,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testGetReferenceWhenNoRow() {
+	void testGetReferenceWhenNoRow() {
 		assertThatException().isThrownBy(() -> {
 				Person notThere = sharedEntityManager.getReference(Person.class, 666);
 				// We may get here (as with Hibernate). Either behaviour is valid:
@@ -115,7 +115,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testLazyLoading() throws Exception {
+	void testLazyLoading() throws Exception {
 		try {
 			Person tony = new Person();
 			tony.setFirstName("Tony");
@@ -171,13 +171,13 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
+	void testEntityManagerProxyRejectsProgrammaticTxManagement() {
 		assertThatIllegalStateException().as("Should not be able to create transactions on container managed EntityManager").isThrownBy(
 				sharedEntityManager::getTransaction);
 	}
 
 	@Test
-	public void testInstantiateAndSaveWithSharedEmProxy() {
+	void testInstantiateAndSaveWithSharedEmProxy() {
 		testInstantiateAndSave(sharedEntityManager);
 	}
 
@@ -246,7 +246,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testCanSerializeProxies() throws Exception {
+	void testCanSerializeProxies() throws Exception {
 		assertThat(SerializationTestUtils.serializeAndDeserialize(entityManagerFactory)).isNotNull();
 		assertThat(SerializationTestUtils.serializeAndDeserialize(sharedEntityManager)).isNotNull();
 	}

@@ -35,10 +35,10 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-public class SharedEntityManagerFactoryTests {
+class SharedEntityManagerFactoryTests {
 
 	@Test
-	public void testValidUsage() {
+	void testValidUsage() {
 		Object o = new Object();
 
 		EntityManager mockEm = mock();
