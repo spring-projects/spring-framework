@@ -774,7 +774,7 @@ public class ClassWriter extends ClassVisitor {
     lastRecordComponent = null;
     firstAttribute = null;
     compute = hasFrames ? MethodWriter.COMPUTE_INSERTED_FRAMES : MethodWriter.COMPUTE_NOTHING;
-    new ClassReader(classFile, 0, /* checkClassVersion = */ false)
+    new ClassReader(classFile, 0, /* checkClassVersion= */ false)
         .accept(
             this,
             attributes,

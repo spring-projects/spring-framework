@@ -1414,23 +1414,23 @@ final class SymbolTable {
     }
 
     Entry(final int index, final int tag, final String value, final int hashCode) {
-      super(index, tag, /* owner = */ null, /* name = */ null, value, /* data = */ 0);
+      super(index, tag, /* owner= */ null, /* name= */ null, value, /* data= */ 0);
       this.hashCode = hashCode;
     }
 
     Entry(final int index, final int tag, final String value, final long data, final int hashCode) {
-      super(index, tag, /* owner = */ null, /* name = */ null, value, data);
+      super(index, tag, /* owner= */ null, /* name= */ null, value, data);
       this.hashCode = hashCode;
     }
 
     Entry(
         final int index, final int tag, final String name, final String value, final int hashCode) {
-      super(index, tag, /* owner = */ null, name, value, /* data = */ 0);
+      super(index, tag, /* owner= */ null, name, value, /* data= */ 0);
       this.hashCode = hashCode;
     }
 
     Entry(final int index, final int tag, final long data, final int hashCode) {
-      super(index, tag, /* owner = */ null, /* name = */ null, /* value = */ null, data);
+      super(index, tag, /* owner= */ null, /* name= */ null, /* value= */ null, data);
       this.hashCode = hashCode;
     }
   }

@@ -144,7 +144,7 @@ final class AnnotationWriter extends AnnotationVisitor {
     // Write type_index and reserve space for num_element_value_pairs.
     annotation.putShort(symbolTable.addConstantUtf8(descriptor)).putShort(0);
     return new AnnotationWriter(
-        symbolTable, /* useNamedValues = */ true, annotation, previousAnnotation);
+        symbolTable, /* useNamedValues= */ true, annotation, previousAnnotation);
   }
 
   /**
@@ -179,7 +179,7 @@ final class AnnotationWriter extends AnnotationVisitor {
     // Write type_index and reserve space for num_element_value_pairs.
     typeAnnotation.putShort(symbolTable.addConstantUtf8(descriptor)).putShort(0);
     return new AnnotationWriter(
-        symbolTable, /* useNamedValues = */ true, typeAnnotation, previousAnnotation);
+        symbolTable, /* useNamedValues= */ true, typeAnnotation, previousAnnotation);
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -284,7 +284,7 @@ final class AnnotationWriter extends AnnotationVisitor {
     }
     // Write tag and type_index, and reserve 2 bytes for num_element_value_pairs.
     annotation.put12('@', symbolTable.addConstantUtf8(descriptor)).putShort(0);
-    return new AnnotationWriter(symbolTable, /* useNamedValues = */ true, annotation, null);
+    return new AnnotationWriter(symbolTable, /* useNamedValues= */ true, annotation, null);
   }
 
   @Override
@@ -303,7 +303,7 @@ final class AnnotationWriter extends AnnotationVisitor {
     // visit the array elements. Its num_element_value_pairs will correspond to the number of array
     // elements and will be stored in what is in fact num_values.
     annotation.put12('[', 0);
-    return new AnnotationWriter(symbolTable, /* useNamedValues = */ false, annotation, null);
+    return new AnnotationWriter(symbolTable, /* useNamedValues= */ false, annotation, null);
   }
 
   @Override
