@@ -26,7 +26,7 @@ import org.springframework.transaction.event.TransactionalEventListenerFactory;
  * Extension of {@link TransactionalEventListenerFactory},
  * detecting invalid transaction configuration for transactional event listeners:
  * {@link Transactional} only supported with {@link Propagation#REQUIRES_NEW}
- * and {@link Propagation#NEVER}.
+ * and {@link Propagation#NOT_SUPPORTED}.
  *
  * @author Juergen Hoeller
  * @since 6.1
