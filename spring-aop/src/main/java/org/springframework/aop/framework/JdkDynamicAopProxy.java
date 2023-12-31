@@ -314,7 +314,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * to be cached in {@link AdvisedSupport#proxyMetadataCache}.
 	 * @since 6.1.3
 	 */
-	static final class ProxiedInterfacesCache {
+	private static final class ProxiedInterfacesCache {
 
 		final Class<?>[] proxiedInterfaces;
 

@@ -112,7 +112,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Optional field for {@link AopProxy} implementations to store metadata in.
-	 * Used for {@link JdkDynamicAopProxy.ProxiedInterfacesCache}.
+	 * Used by {@link JdkDynamicAopProxy}.
 	 * @since 6.1.3
 	 * @see JdkDynamicAopProxy#JdkDynamicAopProxy(AdvisedSupport)
 	 */
