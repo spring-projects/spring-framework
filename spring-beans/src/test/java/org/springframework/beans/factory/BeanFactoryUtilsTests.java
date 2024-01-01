@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Sam Brannen
  * @since 04.07.2003
  */
-public class BeanFactoryUtilsTests {
+class BeanFactoryUtilsTests {
 
 	private static final Class<?> CLASS = BeanFactoryUtilsTests.class;
 	private static final Resource ROOT_CONTEXT = qualifiedResource(CLASS, "root.xml");
@@ -63,7 +63,7 @@ public class BeanFactoryUtilsTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		// Interesting hierarchical factory to test counts.
 
 		DefaultListableBeanFactory grandParent = new DefaultListableBeanFactory();
@@ -81,7 +81,7 @@ public class BeanFactoryUtilsTests {
 
 
 	@Test
-	public void testHierarchicalCountBeansWithNonHierarchicalFactory() {
+	void testHierarchicalCountBeansWithNonHierarchicalFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("t1", new TestBean());
 		lbf.addBean("t2", new TestBean());
@@ -92,7 +92,7 @@ public class BeanFactoryUtilsTests {
 	 * Check that override doesn't count as two separate beans.
 	 */
 	@Test
-	public void testHierarchicalCountBeansWithOverride() {
+	void testHierarchicalCountBeansWithOverride() {
 		// Leaf count
 		assertThat(this.listableBeanFactory.getBeanDefinitionCount()).isEqualTo(1);
 		// Count minus duplicate
@@ -101,14 +101,14 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testHierarchicalNamesWithNoMatch() {
+	void testHierarchicalNamesWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, NoOp.class));
 		assertThat(names).isEmpty();
 	}
 
 	@Test
-	public void testHierarchicalNamesWithMatchOnlyInRoot() {
+	void testHierarchicalNamesWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertThat(names).hasSize(1);
@@ -118,7 +118,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testGetBeanNamesForTypeWithOverride() {
+	void testGetBeanNamesForTypeWithOverride() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
@@ -130,7 +130,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testNoBeansOfType() {
+	void testNoBeansOfType() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("foo", new Object());
 		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
@@ -138,7 +138,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testFindsBeansOfTypeWithStaticFactory() {
+	void testFindsBeansOfTypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean t1 = new TestBean();
 		TestBean t2 = new TestBean();
@@ -169,7 +169,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testFindsBeansOfTypeWithDefaultFactory() {
+	void testFindsBeansOfTypeWithDefaultFactory() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
@@ -232,7 +232,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testHierarchicalResolutionWithOverride() {
+	void testHierarchicalResolutionWithOverride() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
@@ -271,14 +271,14 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testHierarchicalNamesForAnnotationWithNoMatch() {
+	void testHierarchicalNamesForAnnotationWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, Override.class));
 		assertThat(names).isEmpty();
 	}
 
 	@Test
-	public void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() {
+	void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
 		assertThat(names).hasSize(1);
@@ -288,7 +288,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testGetBeanNamesForAnnotationWithOverride() {
+	void testGetBeanNamesForAnnotationWithOverride() {
 		AnnotatedBean annotatedBean = new AnnotatedBean();
 		this.listableBeanFactory.registerSingleton("anotherAnnotatedBean", annotatedBean);
 		List<String> names = Arrays.asList(
@@ -299,31 +299,31 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testADependencies() {
+	void testADependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("a");
 		assertThat(ObjectUtils.isEmpty(deps)).isTrue();
 	}
 
 	@Test
-	public void testBDependencies() {
+	void testBDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("b");
 		assertThat(Arrays.equals(new String[] { "c" }, deps)).isTrue();
 	}
 
 	@Test
-	public void testCDependencies() {
+	void testCDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("c");
 		assertThat(Arrays.equals(new String[] { "int", "long" }, deps)).isTrue();
 	}
 
 	@Test
-	public void testIntDependencies() {
+	void testIntDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("int");
 		assertThat(Arrays.equals(new String[] { "buffer" }, deps)).isTrue();
 	}
 
 	@Test
-	public void findAnnotationOnBean() {
+	void findAnnotationOnBean() {
 		this.listableBeanFactory.registerSingleton("controllerAdvice", new ControllerAdviceClass());
 		this.listableBeanFactory.registerSingleton("restControllerAdvice", new RestControllerAdviceClass());
 		testFindAnnotationOnBean(this.listableBeanFactory);
@@ -350,7 +350,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void isSingletonAndIsPrototypeWithStaticFactory() {
+	void isSingletonAndIsPrototypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean bean = new TestBean();
 		DummyFactory fb1 = new DummyFactory();

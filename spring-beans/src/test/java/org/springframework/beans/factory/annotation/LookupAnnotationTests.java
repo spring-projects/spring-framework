@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Karl Pietrzak
  * @author Juergen Hoeller
  */
-public class LookupAnnotationTests {
+class LookupAnnotationTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		beanFactory = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
 		aabpp.setBeanFactory(beanFactory);
@@ -51,7 +51,7 @@ public class LookupAnnotationTests {
 
 
 	@Test
-	public void testWithoutConstructorArg() {
+	void testWithoutConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		Object expected = bean.get();
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -59,7 +59,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testWithOverloadedArg() {
+	void testWithOverloadedArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		TestBean expected = bean.get("haha");
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -68,7 +68,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testWithOneConstructorArg() {
+	void testWithOneConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		TestBean expected = bean.getOneArgument("haha");
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -77,7 +77,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testWithTwoConstructorArg() {
+	void testWithTwoConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		TestBean expected = bean.getTwoArguments("haha", 72);
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -87,7 +87,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testWithThreeArgsShouldFail() {
+	void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThatExceptionOfType(AbstractMethodError.class).as("TestBean has no three arg constructor").isThrownBy(() ->
 				bean.getThreeArguments("name", 1, 2));
@@ -95,7 +95,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testWithEarlyInjection() {
+	void testWithEarlyInjection() {
 		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
 		Object expected = bean.get();
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -115,7 +115,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testWithGenericBean() {
+	void testWithGenericBean() {
 		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class));
 		beanFactory.registerBeanDefinition("doubleStore", new RootBeanDefinition(DoubleStore.class));
 		beanFactory.registerBeanDefinition("floatStore", new RootBeanDefinition(FloatStore.class));
@@ -126,7 +126,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testSingletonWithoutMetadataCaching() {
+	void testSingletonWithoutMetadataCaching() {
 		beanFactory.setCacheBeanMetadata(false);
 
 		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class));
@@ -139,7 +139,7 @@ public class LookupAnnotationTests {
 	}
 
 	@Test
-	public void testPrototypeWithoutMetadataCaching() {
+	void testPrototypeWithoutMetadataCaching() {
 		beanFactory.setCacheBeanMetadata(false);
 
 		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class, BeanDefinition.SCOPE_PROTOTYPE, null));

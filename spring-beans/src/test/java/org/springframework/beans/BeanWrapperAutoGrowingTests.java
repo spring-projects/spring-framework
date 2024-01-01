@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class BeanWrapperAutoGrowingTests {
+class BeanWrapperAutoGrowingTests {
 
 	private final Bean bean = new Bean();
 
@@ -38,43 +38,43 @@ public class BeanWrapperAutoGrowingTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		wrapper.setAutoGrowNestedPaths(true);
 	}
 
 
 	@Test
-	public void getPropertyValueNullValueInNestedPath() {
+	void getPropertyValueNullValueInNestedPath() {
 		assertThat(wrapper.getPropertyValue("nested.prop")).isNull();
 	}
 
 	@Test
-	public void setPropertyValueNullValueInNestedPath() {
+	void setPropertyValueNullValueInNestedPath() {
 		wrapper.setPropertyValue("nested.prop", "test");
 		assertThat(bean.getNested().getProp()).isEqualTo("test");
 	}
 
 	@Test
-	public void getPropertyValueNullValueInNestedPathNoDefaultConstructor() {
+	void getPropertyValueNullValueInNestedPathNoDefaultConstructor() {
 		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
 				wrapper.getPropertyValue("nestedNoConstructor.prop"));
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowArray() {
+	void getPropertyValueAutoGrowArray() {
 		assertNotNull(wrapper.getPropertyValue("array[0]"));
 		assertThat(bean.getArray()).hasSize(1);
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
 	}
 
 	@Test
-	public void setPropertyValueAutoGrowArray() {
+	void setPropertyValueAutoGrowArray() {
 		wrapper.setPropertyValue("array[0].prop", "test");
 		assertThat(bean.getArray()[0].getProp()).isEqualTo("test");
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowArrayBySeveralElements() {
+	void getPropertyValueAutoGrowArrayBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("array[4]"));
 		assertThat(bean.getArray()).hasSize(5);
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
@@ -89,21 +89,21 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void getPropertyValueAutoGrow2dArray() {
+	void getPropertyValueAutoGrow2dArray() {
 		assertThat(wrapper.getPropertyValue("multiArray[0][0]")).isNotNull();
 		assertThat(bean.getMultiArray()[0]).hasSize(1);
 		assertThat(bean.getMultiArray()[0][0]).isInstanceOf(Bean.class);
 	}
 
 	@Test
-	public void getPropertyValueAutoGrow3dArray() {
+	void getPropertyValueAutoGrow3dArray() {
 		assertThat(wrapper.getPropertyValue("threeDimensionalArray[1][2][3]")).isNotNull();
 		assertThat(bean.getThreeDimensionalArray()[1]).hasNumberOfRows(3);
 		assertThat(bean.getThreeDimensionalArray()[1][2][3]).isInstanceOf(Bean.class);
 	}
 
 	@Test
-	public void setPropertyValueAutoGrow2dArray() {
+	void setPropertyValueAutoGrow2dArray() {
 		Bean newBean = new Bean();
 		newBean.setProp("enigma");
 		wrapper.setPropertyValue("multiArray[2][3]", newBean);
@@ -113,7 +113,7 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void setPropertyValueAutoGrow3dArray() {
+	void setPropertyValueAutoGrow3dArray() {
 		Bean newBean = new Bean();
 		newBean.setProp("enigma");
 		wrapper.setPropertyValue("threeDimensionalArray[2][3][4]", newBean);
@@ -123,20 +123,20 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowList() {
+	void getPropertyValueAutoGrowList() {
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
 		assertThat(bean.getList()).hasSize(1);
 		assertThat(bean.getList()).element(0).isInstanceOf(Bean.class);
 	}
 
 	@Test
-	public void setPropertyValueAutoGrowList() {
+	void setPropertyValueAutoGrowList() {
 		wrapper.setPropertyValue("list[0].prop", "test");
 		assertThat(bean.getList().get(0).getProp()).isEqualTo("test");
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowListBySeveralElements() {
+	void getPropertyValueAutoGrowListBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("list[4]"));
 		assertThat(bean.getList()).hasSize(5);
 		assertThat(bean.getList()).element(0).isInstanceOf(Bean.class);
@@ -151,7 +151,7 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowListFailsAgainstLimit() {
+	void getPropertyValueAutoGrowListFailsAgainstLimit() {
 		wrapper.setAutoGrowCollectionLimit(2);
 		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
 				wrapper.getPropertyValue("list[4]"))
@@ -159,26 +159,26 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowMultiDimensionalList() {
+	void getPropertyValueAutoGrowMultiDimensionalList() {
 		assertNotNull(wrapper.getPropertyValue("multiList[0][0]"));
 		assertThat(bean.getMultiList()).element(0).asList().hasSize(1);
 		assertThat(bean.getMultiList().get(0)).element(0).isInstanceOf(Bean.class);
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowListNotParameterized() {
+	void getPropertyValueAutoGrowListNotParameterized() {
 		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
 				wrapper.getPropertyValue("listNotParameterized[0]"));
 	}
 
 	@Test
-	public void setPropertyValueAutoGrowMap() {
+	void setPropertyValueAutoGrowMap() {
 		wrapper.setPropertyValue("map[A]", new Bean());
 		assertThat(bean.getMap().get("A")).isInstanceOf(Bean.class);
 	}
 
 	@Test
-	public void setNestedPropertyValueAutoGrowMap() {
+	void setNestedPropertyValueAutoGrowMap() {
 		wrapper.setPropertyValue("map[A].nested", new Bean());
 		assertThat(bean.getMap().get("A").getNested()).isInstanceOf(Bean.class);
 	}

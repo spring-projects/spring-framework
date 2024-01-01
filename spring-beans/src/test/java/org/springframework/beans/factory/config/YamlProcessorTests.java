@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ class YamlProcessorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void standardTypesSupportedByDefault() throws Exception {
+	void standardTypesSupportedByDefault() {
 		setYaml("value: !!set\n  ? first\n  ? second");
 		this.processor.process((properties, map) -> {
 			assertThat(properties).containsExactly(entry("value[0]", "first"), entry("value[1]", "second"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 09.11.2003
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTests {
+class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTests {
 
 	private DefaultListableBeanFactory parent;
 
@@ -52,7 +52,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		parent = new DefaultListableBeanFactory();
 
 		Map map = new HashMap();
@@ -105,24 +105,24 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void beanCount() {
+	void beanCount() {
 		assertTestBeanCount(13);
 	}
 
 	@Test
-	public void lifecycleMethods() {
+	void lifecycleMethods() {
 		LifecycleBean bean = (LifecycleBean) getBeanFactory().getBean("lifecycle");
 		bean.businessMethod();
 	}
 
 	@Test
-	public void protectedLifecycleMethods() {
+	void protectedLifecycleMethods() {
 		ProtectedLifecycleBean bean = (ProtectedLifecycleBean) getBeanFactory().getBean("protectedLifecycle");
 		bean.businessMethod();
 	}
 
 	@Test
-	public void descriptionButNoProperties() {
+	void descriptionButNoProperties() {
 		TestBean validEmpty = (TestBean) getBeanFactory().getBean("validEmptyWithDescription");
 		assertThat(validEmpty.getAge()).isZero();
 	}
@@ -131,7 +131,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	 * Test that properties with name as well as id creating an alias up front.
 	 */
 	@Test
-	public void autoAliasing() {
+	void autoAliasing() {
 		List beanNames = Arrays.asList(getListableBeanFactory().getBeanDefinitionNames());
 
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("aliased");
@@ -191,7 +191,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void factoryNesting() {
+	void factoryNesting() {
 		ITestBean father = (ITestBean) getBeanFactory().getBean("father");
 		assertThat(father).as("Bean from root context").isNotNull();
 
@@ -204,7 +204,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void factoryReferences() {
+	void factoryReferences() {
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 
 		DummyReferencer ref = (DummyReferencer) getBeanFactory().getBean("factoryReferencer");
@@ -217,7 +217,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void prototypeReferences() {
+	void prototypeReferences() {
 		// check that not broken by circular reference resolution mechanism
 		DummyReferencer ref1 = (DummyReferencer) getBeanFactory().getBean("prototypeReferencer");
 		assertThat(ref1.getTestBean1()).as("Not referencing same bean twice").isNotSameAs(ref1.getTestBean2());
@@ -230,7 +230,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void beanPostProcessor() {
+	void beanPostProcessor() {
 		TestBean kerry = (TestBean) getBeanFactory().getBean("kerry");
 		TestBean kathy = (TestBean) getBeanFactory().getBean("kathy");
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
@@ -242,7 +242,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void emptyValues() {
+	void emptyValues() {
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		TestBean kerry = (TestBean) getBeanFactory().getBean("kerry");
 		assertThat(rod.getTouchy()).as("Touchy is empty").isEqualTo("");
@@ -250,7 +250,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	@Test
-	public void commentsAndCdataInValue() {
+	void commentsAndCdataInValue() {
 		TestBean bean = (TestBean) getBeanFactory().getBean("commentsInValue");
 		assertThat(bean.getName()).as("Failed to handle comments and CDATA properly").isEqualTo("this is a <!--comment-->");
 	}

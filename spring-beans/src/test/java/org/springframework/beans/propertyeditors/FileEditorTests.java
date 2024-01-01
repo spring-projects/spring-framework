@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class FileEditorTests {
+class FileEditorTests {
 
 	@Test
-	public void testClasspathFileName() {
+	void testClasspathFileName() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class");
@@ -45,14 +45,14 @@ public class FileEditorTests {
 	}
 
 	@Test
-	public void testWithNonExistentResource() {
+	void testWithNonExistentResource() {
 		PropertyEditor propertyEditor = new FileEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				propertyEditor.setAsText("classpath:no_way_this_file_is_found.doc"));
 	}
 
 	@Test
-	public void testWithNonExistentFile() {
+	void testWithNonExistentFile() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("file:no_way_this_file_is_found.doc");
 		Object value = fileEditor.getValue();
@@ -62,7 +62,7 @@ public class FileEditorTests {
 	}
 
 	@Test
-	public void testAbsoluteFileName() {
+	void testAbsoluteFileName() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("/no_way_this_file_is_found.doc");
 		Object value = fileEditor.getValue();
@@ -72,7 +72,7 @@ public class FileEditorTests {
 	}
 
 	@Test
-	public void testUnqualifiedFileNameFound() {
+	void testUnqualifiedFileNameFound() {
 		PropertyEditor fileEditor = new FileEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class";
@@ -86,7 +86,7 @@ public class FileEditorTests {
 	}
 
 	@Test
-	public void testUnqualifiedFileNameNotFound() {
+	void testUnqualifiedFileNameNotFound() {
 		PropertyEditor fileEditor = new FileEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".clazz";

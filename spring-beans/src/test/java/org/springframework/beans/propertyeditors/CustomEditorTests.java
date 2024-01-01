@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1319,7 +1318,6 @@ class CustomEditorTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void indexedPropertiesWithListPropertyEditor() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1334,11 +1332,11 @@ class CustomEditorTests {
 		bw.setPropertyValue("list", "1");
 		assertThat(((TestBean) bean.getList().get(0)).getName()).isEqualTo("list1");
 		bw.setPropertyValue("list[0]", "test");
-		assertThat(bean.getList()).element(0).isEqualTo("test");
+		assertThat(bean.getList()).singleElement().isEqualTo("test");
 	}
 
 	@Test
-	void conversionToOldCollections() throws PropertyVetoException {
+	void conversionToOldCollections() {
 		OldCollectionsBean tb = new OldCollectionsBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(Vector.class, new CustomCollectionEditor(Vector.class));
@@ -1355,7 +1353,6 @@ class CustomEditorTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void uninitializedArrayPropertyWithCustomEditor() {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1372,7 +1369,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void arrayToArrayConversion() throws PropertyVetoException {
+	void arrayToArrayConversion() {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
@@ -1388,7 +1385,7 @@ class CustomEditorTests {
 	}
 
 	@Test
-	void arrayToStringConversion() throws PropertyVetoException {
+	void arrayToStringConversion() {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {

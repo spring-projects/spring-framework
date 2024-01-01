@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class BeanDefinitionTests {
+class BeanDefinitionTests {
 
 	@Test
-	public void beanDefinitionEquality() {
+	void beanDefinitionEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);
 		bd.setLazyInit(true);
@@ -46,7 +46,7 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
-	public void beanDefinitionEqualityWithPropertyValues() {
+	void beanDefinitionEqualityWithPropertyValues() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().add("name", "myName");
 		bd.getPropertyValues().add("age", "99");
@@ -64,7 +64,7 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
-	public void beanDefinitionEqualityWithConstructorArguments() {
+	void beanDefinitionEqualityWithConstructorArguments() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);
@@ -82,7 +82,7 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
-	public void beanDefinitionEqualityWithTypedConstructorArguments() {
+	void beanDefinitionEqualityWithTypedConstructorArguments() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test", "int");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5, "long");
@@ -101,7 +101,7 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
-	public void genericBeanDefinitionEquality() {
+	void genericBeanDefinitionEquality() {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setParentName("parent");
 		bd.setScope("request");
@@ -130,7 +130,7 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
-	public void beanDefinitionHolderEquality() {
+	void beanDefinitionHolderEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);
 		bd.setLazyInit(true);
@@ -149,7 +149,7 @@ public class BeanDefinitionTests {
 	}
 
 	@Test
-	public void beanDefinitionMerging() {
+	void beanDefinitionMerging() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);

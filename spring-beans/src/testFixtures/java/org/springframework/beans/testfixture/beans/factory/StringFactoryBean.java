@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.parsing;
+package org.springframework.beans.testfixture.beans.factory;
 
-import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.FactoryBean;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+public class StringFactoryBean implements FactoryBean<String> {
 
-/**
- * Unit tests for {@link ConstructorArgumentEntry}.
- *
- * @author Rick Evans
- * @author Chris Beams
- */
-class ConstructorArgumentEntryTests {
+	@Override
+	public String getObject() {
+		return "";
+	}
 
-	@Test
-	void testCtorBailsOnNegativeCtorIndexArgument() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new ConstructorArgumentEntry(-1));
+	@Override
+	public Class<String> getObjectType() {
+		return String.class;
+	}
+
+	@Override
+	public boolean isSingleton() {
+		return true;
 	}
 
 }
+
+

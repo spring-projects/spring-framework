@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
-public class QualifierAnnotationAutowireBeanFactoryTests {
+class QualifierAnnotationAutowireBeanFactoryTests {
 
 	private static final String JUERGEN = "juergen";
 
@@ -45,7 +45,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 
 	@Test
-	public void testAutowireCandidateDefaultWithIrrelevantDescriptor() throws Exception {
+	void testAutowireCandidateDefaultWithIrrelevantDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
@@ -59,7 +59,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireCandidateExplicitlyFalseWithIrrelevantDescriptor() throws Exception {
+	void testAutowireCandidateExplicitlyFalseWithIrrelevantDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
@@ -75,7 +75,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 	@Disabled
 	@Test
-	public void testAutowireCandidateWithFieldDescriptor() throws Exception {
+	void testAutowireCandidateWithFieldDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -99,7 +99,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireCandidateExplicitlyFalseWithFieldDescriptor() throws Exception {
+	void testAutowireCandidateExplicitlyFalseWithFieldDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
@@ -117,7 +117,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireCandidateWithShortClassName() throws Exception {
+	void testAutowireCandidateWithShortClassName() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
@@ -135,7 +135,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 	@Disabled
 	@Test
-	public void testAutowireCandidateWithConstructorDescriptor() throws Exception {
+	void testAutowireCandidateWithConstructorDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -157,7 +157,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 	@Disabled
 	@Test
-	public void testAutowireCandidateWithMethodDescriptor() throws Exception {
+	void testAutowireCandidateWithMethodDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
@@ -187,7 +187,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireCandidateWithMultipleCandidatesDescriptor() throws Exception {
+	void testAutowireCandidateWithMultipleCandidatesDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);

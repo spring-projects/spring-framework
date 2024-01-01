@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -564,8 +564,7 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
 		assertThat(gb.getGenericProperty()).isEqualTo(10);
-		assertThat(gb.getGenericListProperty()).element(0).isEqualTo(20);
-		assertThat(gb.getGenericListProperty()).element(1).isEqualTo(30);
+		assertThat(gb.getGenericListProperty()).containsExactly(20, 30);
 	}
 
 	@Test
@@ -575,8 +574,8 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
 		assertThat(gb.getGenericProperty()).element(0).isEqualTo(10);
-		assertThat(gb.getGenericListProperty().get(0)).element(0).isEqualTo(20);
-		assertThat(gb.getGenericListProperty().get(1)).element(0).isEqualTo(30);
+		assertThat(gb.getGenericListProperty().get(0)).containsExactly(20);
+		assertThat(gb.getGenericListProperty().get(1)).containsExactly(30);
 	}
 
 	@Test

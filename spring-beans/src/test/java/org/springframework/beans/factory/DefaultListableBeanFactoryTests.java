@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1240,7 +1240,7 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	void arrayPropertyWithOptionalAutowiring() throws MalformedURLException {
+	void arrayPropertyWithOptionalAutowiring() {
 		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class);
 		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		lbf.registerBeanDefinition("arrayBean", rbd);
@@ -3211,7 +3211,7 @@ class DefaultListableBeanFactoryTests {
 			extends RepositoryFactoryBeanSupport<T, S, ID> {
 
 		@Override
-		public T getObject() throws Exception {
+		public T getObject() {
 			throw new IllegalArgumentException("Should not be called");
 		}
 
@@ -3460,7 +3460,7 @@ class DefaultListableBeanFactoryTests {
 
 	enum NonPublicEnum {
 
-		VALUE_1, VALUE_2;
+		VALUE_1, VALUE_2
 	}
 
 

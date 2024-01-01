@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @see ExtendedBeanInfoTests
  */
-public class SimplePropertyDescriptorTests {
+class SimplePropertyDescriptorTests {
 
 	@Test
-	public void toStringOutput() throws IntrospectionException, SecurityException, NoSuchMethodException {
+	void toStringOutput() throws IntrospectionException, SecurityException, NoSuchMethodException {
 		{
 			Object pd = new ExtendedBeanInfo.SimplePropertyDescriptor("foo", null, null);
 			assertThat(pd.toString()).contains(
@@ -71,7 +71,7 @@ public class SimplePropertyDescriptorTests {
 	}
 
 	@Test
-	public void nonIndexedEquality() throws IntrospectionException, SecurityException, NoSuchMethodException {
+	void nonIndexedEquality() throws IntrospectionException, SecurityException, NoSuchMethodException {
 		Object pd1 = new ExtendedBeanInfo.SimplePropertyDescriptor("foo", null, null);
 		assertThat(pd1).isEqualTo(pd1);
 
@@ -108,7 +108,7 @@ public class SimplePropertyDescriptorTests {
 	}
 
 	@Test
-	public void indexedEquality() throws IntrospectionException, SecurityException, NoSuchMethodException {
+	void indexedEquality() throws IntrospectionException, SecurityException, NoSuchMethodException {
 		Object pd1 = new ExtendedBeanInfo.SimpleIndexedPropertyDescriptor("foo", null, null, null, null);
 		assertThat(pd1).isEqualTo(pd1);
 

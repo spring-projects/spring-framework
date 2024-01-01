@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.InjectAnnotationBeanPostProcessorTests.StringFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
+import org.springframework.beans.testfixture.beans.factory.StringFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.aot.GenericFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationCode;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
@@ -275,7 +275,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	static class PrivilegedTestBeanFactoryBean implements FactoryBean<SimpleBean> {
 
 		@Override
-		public SimpleBean getObject() throws Exception {
+		public SimpleBean getObject() {
 			return new SimpleBean();
 		}
 

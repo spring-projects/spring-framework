@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Costin Leau
  */
-public class SimpleConstructorNamespaceHandlerTests {
+class SimpleConstructorNamespaceHandlerTests {
 
 	@Test
-	public void simpleValue() throws Exception {
+	void simpleValue() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		String name = "simple";
 		//		beanFactory.getBean("simple1", DummyBean.class);
@@ -42,7 +42,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void simpleRef() throws Exception {
+	void simpleRef() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		String name = "simple-ref";
 		//		beanFactory.getBean("name-value1", TestBean.class);
@@ -51,7 +51,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void nameValue() throws Exception {
+	void nameValue() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		String name = "name-value";
 		//		beanFactory.getBean("name-value1", TestBean.class);
@@ -61,7 +61,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void nameRef() throws Exception {
+	void nameRef() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		TestBean nameValue = beanFactory.getBean("name-value", TestBean.class);
 		DummyBean nameRef = beanFactory.getBean("name-ref", DummyBean.class);
@@ -71,7 +71,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void typeIndexedValue() throws Exception {
+	void typeIndexedValue() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		DummyBean typeRef = beanFactory.getBean("indexed-value", DummyBean.class);
 
@@ -81,7 +81,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void typeIndexedRef() throws Exception {
+	void typeIndexedRef() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		DummyBean typeRef = beanFactory.getBean("indexed-ref", DummyBean.class);
 
@@ -90,7 +90,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void ambiguousConstructor() throws Exception {
+	void ambiguousConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
@@ -98,7 +98,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 	}
 
 	@Test
-	public void constructorWithNameEndingInRef() throws Exception {
+	void constructorWithNameEndingInRef() {
 		DefaultListableBeanFactory beanFactory = createFactory("simpleConstructorNamespaceHandlerTests.xml");
 		DummyBean derivedBean = beanFactory.getBean("beanWithRefConstructorArg", DummyBean.class);
 		assertThat(derivedBean.getAge()).isEqualTo(10);

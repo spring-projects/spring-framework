@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.beans.testfixture.beans.HasMap;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -53,20 +54,20 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @since 19.12.2004
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class XmlBeanCollectionTests {
+class XmlBeanCollectionTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@BeforeEach
-	public void loadBeans() {
+	void loadBeans() {
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource("collections.xml", getClass()));
 	}
 
 
 	@Test
-	public void testCollectionFactoryDefaults() throws Exception {
+	void testCollectionFactoryDefaults() throws Exception {
 		ListFactoryBean listFactory = new ListFactoryBean();
 		listFactory.setSourceList(new LinkedList());
 		listFactory.afterPropertiesSet();
@@ -84,7 +85,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testRefSubelement() {
+	void testRefSubelement() {
 		//assertTrue("5 beans in reftypes, not " + this.beanFactory.getBeanDefinitionCount(), this.beanFactory.getBeanDefinitionCount() == 5);
 		TestBean jen = (TestBean) this.beanFactory.getBean("jenny");
 		TestBean dave = (TestBean) this.beanFactory.getBean("david");
@@ -92,25 +93,25 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testPropertyWithLiteralValueSubelement() {
+	void testPropertyWithLiteralValueSubelement() {
 		TestBean verbose = (TestBean) this.beanFactory.getBean("verbose");
 		assertThat(verbose.getName()).isEqualTo("verbose");
 	}
 
 	@Test
-	public void testPropertyWithIdRefLocalAttrSubelement() {
+	void testPropertyWithIdRefLocalAttrSubelement() {
 		TestBean verbose = (TestBean) this.beanFactory.getBean("verbose2");
 		assertThat(verbose.getName()).isEqualTo("verbose");
 	}
 
 	@Test
-	public void testPropertyWithIdRefBeanAttrSubelement() {
+	void testPropertyWithIdRefBeanAttrSubelement() {
 		TestBean verbose = (TestBean) this.beanFactory.getBean("verbose3");
 		assertThat(verbose.getName()).isEqualTo("verbose");
 	}
 
 	@Test
-	public void testRefSubelementsBuildCollection() {
+	void testRefSubelementsBuildCollection() {
 		TestBean jen = (TestBean) this.beanFactory.getBean("jenny");
 		TestBean dave = (TestBean) this.beanFactory.getBean("david");
 		TestBean rod = (TestBean) this.beanFactory.getBean("rod");
@@ -127,7 +128,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testRefSubelementsBuildCollectionWithPrototypes() {
+	void testRefSubelementsBuildCollectionWithPrototypes() {
 		TestBean jen = (TestBean) this.beanFactory.getBean("pJenny");
 		TestBean dave = (TestBean) this.beanFactory.getBean("pDavid");
 		TestBean rod = (TestBean) this.beanFactory.getBean("pRod");
@@ -150,7 +151,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testRefSubelementsBuildCollectionFromSingleElement() {
+	void testRefSubelementsBuildCollectionFromSingleElement() {
 		TestBean loner = (TestBean) this.beanFactory.getBean("loner");
 		TestBean dave = (TestBean) this.beanFactory.getBean("david");
 		assertThat(loner.getFriends().size()).isEqualTo(1);
@@ -158,7 +159,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testBuildCollectionFromMixtureOfReferencesAndValues() {
+	void testBuildCollectionFromMixtureOfReferencesAndValues() {
 		MixedCollectionBean jumble = (MixedCollectionBean) this.beanFactory.getBean("jumble");
 		assertThat(jumble.getJumble().size()).as("Expected 5 elements, not " + jumble.getJumble().size()).isEqualTo(5);
 		List l = (List) jumble.getJumble();
@@ -172,7 +173,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testInvalidBeanNameReference() {
+	void testInvalidBeanNameReference() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				this.beanFactory.getBean("jumble2"))
 			.withCauseInstanceOf(BeanDefinitionStoreException.class)
@@ -180,13 +181,13 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testEmptyMap() {
+	void testEmptyMap() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("emptyMap");
 		assertThat(hasMap.getMap().size()).isEqualTo(0);
 	}
 
 	@Test
-	public void testMapWithLiteralsOnly() {
+	void testMapWithLiteralsOnly() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("literalMap");
 		assertThat(hasMap.getMap().size()).isEqualTo(3);
 		assertThat(hasMap.getMap().get("foo").equals("bar")).isTrue();
@@ -195,7 +196,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testMapWithLiteralsAndReferences() {
+	void testMapWithLiteralsAndReferences() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("mixedMap");
 		assertThat(hasMap.getMap().size()).isEqualTo(5);
 		assertThat(hasMap.getMap().get("foo")).isEqualTo(10);
@@ -209,7 +210,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testMapWithLiteralsAndPrototypeReferences() {
+	void testMapWithLiteralsAndPrototypeReferences() {
 		TestBean jenny = (TestBean) this.beanFactory.getBean("pJenny");
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("pMixedMap");
 		assertThat(hasMap.getMap().size()).isEqualTo(2);
@@ -225,7 +226,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testMapWithLiteralsReferencesAndList() {
+	void testMapWithLiteralsReferencesAndList() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("mixedMapWithList");
 		assertThat(hasMap.getMap().size()).isEqualTo(4);
 		assertThat(hasMap.getMap().get(null).equals("bar")).isTrue();
@@ -262,13 +263,13 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testEmptySet() {
+	void testEmptySet() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("emptySet");
 		assertThat(hasMap.getSet().size()).isEqualTo(0);
 	}
 
 	@Test
-	public void testPopulatedSet() {
+	void testPopulatedSet() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("set");
 		assertThat(hasMap.getSet().size()).isEqualTo(3);
 		assertThat(hasMap.getSet().contains("bar")).isTrue();
@@ -282,7 +283,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testPopulatedConcurrentSet() {
+	void testPopulatedConcurrentSet() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("concurrentSet");
 		assertThat(hasMap.getConcurrentSet().size()).isEqualTo(3);
 		assertThat(hasMap.getConcurrentSet().contains("bar")).isTrue();
@@ -292,7 +293,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testPopulatedIdentityMap() {
+	void testPopulatedIdentityMap() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("identityMap");
 		assertThat(hasMap.getIdentityMap().size()).isEqualTo(2);
 		HashSet set = new HashSet(hasMap.getIdentityMap().keySet());
@@ -301,14 +302,14 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testEmptyProps() {
+	void testEmptyProps() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("emptyProps");
 		assertThat(hasMap.getProps().size()).isEqualTo(0);
 		assertThat(Properties.class).isEqualTo(hasMap.getProps().getClass());
 	}
 
 	@Test
-	public void testPopulatedProps() {
+	void testPopulatedProps() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("props");
 		assertThat(hasMap.getProps().size()).isEqualTo(2);
 		assertThat(hasMap.getProps().get("foo").equals("bar")).isTrue();
@@ -316,7 +317,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testObjectArray() {
+	void testObjectArray() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("objectArray");
 		assertThat(hasMap.getObjectArray().length).isEqualTo(2);
 		assertThat(hasMap.getObjectArray()[0].equals("one")).isTrue();
@@ -324,7 +325,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testIntegerArray() {
+	void testIntegerArray() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("integerArray");
 		assertThat(hasMap.getIntegerArray().length).isEqualTo(3);
 		assertThat(hasMap.getIntegerArray()[0]).isEqualTo(0);
@@ -333,7 +334,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testClassArray() {
+	void testClassArray() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("classArray");
 		assertThat(hasMap.getClassArray().length).isEqualTo(2);
 		assertThat(hasMap.getClassArray()[0].equals(String.class)).isTrue();
@@ -341,7 +342,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testClassList() {
+	void testClassList() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("classList");
 		assertThat(hasMap.getClassList().size()).isEqualTo(2);
 		assertThat(hasMap.getClassList().get(0).equals(String.class)).isTrue();
@@ -349,7 +350,7 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testProps() {
+	void testProps() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("props");
 		assertThat(hasMap.getProps()).hasSize(2);
 		assertThat(hasMap.getProps().getProperty("foo")).isEqualTo("bar");
@@ -362,76 +363,55 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
-	public void testListFactory() {
+	void testListFactory() {
 		List list = (List) this.beanFactory.getBean("listFactory");
-		assertThat(list).isInstanceOf(LinkedList.class);
-		assertThat(list.size()).isEqualTo(2);
-		assertThat(list).element(0).isEqualTo("bar");
-		assertThat(list).element(1).isEqualTo("jenny");
+		assertThat(list).isInstanceOf(LinkedList.class).containsExactly("bar", "jenny");
 	}
 
 	@Test
-	public void testPrototypeListFactory() {
+	void testPrototypeListFactory() {
 		List list = (List) this.beanFactory.getBean("pListFactory");
-		assertThat(list).isInstanceOf(LinkedList.class);
-		assertThat(list.size()).isEqualTo(2);
-		assertThat(list).element(0).isEqualTo("bar");
-		assertThat(list).element(1).isEqualTo("jenny");
+		assertThat(list).isInstanceOf(LinkedList.class).containsExactly("bar", "jenny");
 	}
 
 	@Test
-	public void testSetFactory() {
+	void testSetFactory() {
 		Set set = (Set) this.beanFactory.getBean("setFactory");
-		assertThat(set).isInstanceOf(TreeSet.class);
-		assertThat(set.size()).isEqualTo(2);
-		assertThat(set).contains("bar");
-		assertThat(set).contains("jenny");
+		assertThat(set).isInstanceOf(TreeSet.class).containsOnly("bar", "jenny");
 	}
 
 	@Test
-	public void testPrototypeSetFactory() {
+	void testPrototypeSetFactory() {
 		Set set = (Set) this.beanFactory.getBean("pSetFactory");
-		assertThat(set).isInstanceOf(TreeSet.class);
-		assertThat(set.size()).isEqualTo(2);
-		assertThat(set).contains("bar");
-		assertThat(set).contains("jenny");
+		assertThat(set).isInstanceOf(TreeSet.class).containsOnly("bar", "jenny");
 	}
 
 	@Test
-	public void testMapFactory() {
+	void testMapFactory() {
 		Map map = (Map) this.beanFactory.getBean("mapFactory");
-		assertThat(map).isInstanceOf(TreeMap.class);
-		assertThat(map.size()).isEqualTo(2);
-		assertThat(map.get("foo")).isEqualTo("bar");
-		assertThat(map.get("jen")).isEqualTo("jenny");
+		assertThat(map).isInstanceOf(TreeMap.class).containsOnly(
+				entry("foo", "bar"), entry("jen", "jenny"));
 	}
 
 	@Test
-	public void testPrototypeMapFactory() {
+	void testPrototypeMapFactory() {
 		Map map = (Map) this.beanFactory.getBean("pMapFactory");
-		assertThat(map).isInstanceOf(TreeMap.class);
-		assertThat(map.size()).isEqualTo(2);
-		assertThat(map.get("foo")).isEqualTo("bar");
-		assertThat(map.get("jen")).isEqualTo("jenny");
+		assertThat(map).isInstanceOf(TreeMap.class).containsOnly(
+				entry("foo", "bar"), entry("jen", "jenny"));
 	}
 
 	@Test
-	public void testChoiceBetweenSetAndMap() {
+	void testChoiceBetweenSetAndMap() {
 		MapAndSet sam = (MapAndSet) this.beanFactory.getBean("setAndMap");
 		assertThat(sam.getObject() instanceof Map).as("Didn't choose constructor with Map argument").isTrue();
 		Map map = (Map) sam.getObject();
-		assertThat(map).hasSize(3);
-		assertThat(map.get("key1")).isEqualTo("val1");
-		assertThat(map.get("key2")).isEqualTo("val2");
-		assertThat(map.get("key3")).isEqualTo("val3");
+		assertThat(map).containsOnly(entry("key1", "val1"), entry("key2", "val2"), entry("key3", "val3"));
 	}
 
 	@Test
-	public void testEnumSetFactory() {
+	void testEnumSetFactory() {
 		Set set = (Set) this.beanFactory.getBean("enumSetFactory");
-		assertThat(set.size()).isEqualTo(2);
-		assertThat(set).contains("ONE");
-		assertThat(set).contains("TWO");
+		assertThat(set).containsOnly("ONE", "TWO");
 	}
 
 

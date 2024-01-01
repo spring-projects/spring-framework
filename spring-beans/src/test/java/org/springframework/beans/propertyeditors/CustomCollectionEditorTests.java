@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rick Evans
  * @author Chris Beams
  */
-public class CustomCollectionEditorTests {
+class CustomCollectionEditorTests {
 
 	@Test
-	public void testCtorWithNullCollectionType() {
+	void testCtorWithNullCollectionType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new CustomCollectionEditor(null));
 	}
@@ -47,38 +47,34 @@ public class CustomCollectionEditorTests {
 	}
 
 	@Test
-	public void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() {
+	void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setValue("1"));
 	}
 
 	@Test
-	public void testSunnyDaySetValue() {
+	void testSunnyDaySetValue() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue(new int[] {0, 1, 2});
 		Object value = editor.getValue();
 		assertThat(value).isNotNull();
 		assertThat(value).isInstanceOf(ArrayList.class);
-		List<?> list = (List<?>) value;
-		assertThat(list).as("There must be 3 elements in the converted collection").hasSize(3);
-		assertThat(list).element(0).isEqualTo(0);
-		assertThat(list).element(1).isEqualTo(1);
-		assertThat(list).element(2).isEqualTo(2);
+		assertThat(value).asList().containsExactly(0, 1, 2);
 	}
 
 	@Test
-	public void testWhenTargetTypeIsExactlyTheCollectionInterfaceUsesFallbackCollectionType() {
+	void testWhenTargetTypeIsExactlyTheCollectionInterfaceUsesFallbackCollectionType() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(Collection.class);
 		editor.setValue("0, 1, 2");
 		Collection<?> value = (Collection<?>) editor.getValue();
 		assertThat(value).isNotNull();
 		assertThat(value).as("There must be 1 element in the converted collection").hasSize(1);
-		assertThat(value).element(0).isEqualTo("0, 1, 2");
+		assertThat(value).singleElement().isEqualTo("0, 1, 2");
 	}
 
 	@Test
-	public void testSunnyDaySetAsTextYieldsSingleValue() {
+	void testSunnyDaySetAsTextYieldsSingleValue() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue("0, 1, 2");
 		Object value = editor.getValue();
@@ -86,7 +82,7 @@ public class CustomCollectionEditorTests {
 		assertThat(value).isInstanceOf(ArrayList.class);
 		List<?> list = (List<?>) value;
 		assertThat(list).as("There must be 1 element in the converted collection").hasSize(1);
-		assertThat(list).element(0).isEqualTo("0, 1, 2");
+		assertThat(list).singleElement().isEqualTo("0, 1, 2");
 	}
 
 

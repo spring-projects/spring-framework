@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", 5);
 		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(5);
-		assertThat(gb.getListOfLists().get(0)).element(0).isEqualTo(5);
+		assertThat(gb.getListOfLists()).singleElement().asList().containsExactly(5);
 	}
 
 	@Test
@@ -213,7 +213,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
 		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(5);
-		assertThat(gb.getListOfLists().get(0)).element(0).isEqualTo(5);
+		assertThat(gb.getListOfLists()).singleElement().asList().containsExactly(5);
 	}
 
 	@Test
@@ -298,7 +298,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", 5);
 		assertThat(bw.getPropertyValue("mapOfLists[1][0]")).isEqualTo(5);
-		assertThat(gb.getMapOfLists().get(1)).element(0).isEqualTo(5);
+		assertThat(gb.getMapOfLists().get(1)).containsExactly(5);
 	}
 
 	@Test
@@ -310,7 +310,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", "5");
 		assertThat(bw.getPropertyValue("mapOfLists[1][0]")).isEqualTo(5);
-		assertThat(gb.getMapOfLists().get(1)).element(0).isEqualTo(5);
+		assertThat(gb.getMapOfLists().get(1)).containsExactly(5);
 	}
 
 	@Test
@@ -516,8 +516,7 @@ class BeanWrapperGenericsTests {
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
 		assertThat(gb.getGenericProperty()).isEqualTo(10);
-		assertThat(gb.getGenericListProperty()).element(0).isEqualTo(20);
-		assertThat(gb.getGenericListProperty()).element(1).isEqualTo(30);
+		assertThat(gb.getGenericListProperty()).containsExactly(20, 30);
 	}
 
 	@Test
@@ -526,9 +525,9 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
-		assertThat(gb.getGenericProperty()).element(0).isEqualTo(10);
-		assertThat(gb.getGenericListProperty().get(0)).element(0).isEqualTo(20);
-		assertThat(gb.getGenericListProperty().get(1)).element(0).isEqualTo(30);
+		assertThat(gb.getGenericProperty()).containsExactly(10);
+		assertThat(gb.getGenericListProperty().get(0)).containsExactly(20);
+		assertThat(gb.getGenericListProperty().get(1)).containsExactly(30);
 	}
 
 	@Test

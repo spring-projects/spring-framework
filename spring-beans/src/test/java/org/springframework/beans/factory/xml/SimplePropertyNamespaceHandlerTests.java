@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  */
-public class SimplePropertyNamespaceHandlerTests {
+class SimplePropertyNamespaceHandlerTests {
 
 	@Test
-	public void simpleBeanConfigured() throws Exception {
+	void simpleBeanConfigured() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
 				new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
@@ -47,7 +47,7 @@ public class SimplePropertyNamespaceHandlerTests {
 	}
 
 	@Test
-	public void innerBeanConfigured() throws Exception {
+	void innerBeanConfigured() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
 				new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
@@ -59,7 +59,7 @@ public class SimplePropertyNamespaceHandlerTests {
 	}
 
 	@Test
-	public void withPropertyDefinedTwice() throws Exception {
+	void withPropertyDefinedTwice() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
@@ -67,7 +67,7 @@ public class SimplePropertyNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyWithNameEndingInRef() throws Exception {
+	void propertyWithNameEndingInRef() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
 				new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
