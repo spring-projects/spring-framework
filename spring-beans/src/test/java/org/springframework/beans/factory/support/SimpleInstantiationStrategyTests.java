@@ -46,7 +46,7 @@ class SimpleInstantiationStrategyTests {
 	}
 
 	@Test
-	void instantiateWitArgs() {
+	void instantiateWithArgs() {
 		RootBeanDefinition bd = new RootBeanDefinition(String.class);
 		Object simpleBean = instantiate(bd, new SampleFactory(),
 				method(SampleFactory.class, "beanWithTwoArgs"), "Test", 42);
@@ -54,7 +54,7 @@ class SimpleInstantiationStrategyTests {
 	}
 
 	@Test
-	void instantiateWitSubClassFactoryArgs() {
+	void instantiateWithSubClassFactoryArgs() {
 		RootBeanDefinition bd = new RootBeanDefinition(String.class);
 		Object simpleBean = instantiate(bd, new ExtendedSampleFactory(),
 				method(SampleFactory.class, "beanWithTwoArgs"), "Test", 42);

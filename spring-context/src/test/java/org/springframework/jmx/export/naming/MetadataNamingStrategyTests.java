@@ -62,25 +62,25 @@ class MetadataNamingStrategyTests {
 	}
 
 	@Test
-	void getObjectNameWhenBeanNamContainsComma() throws MalformedObjectNameException {
+	void getObjectNameWhenBeanNameContainsComma() throws MalformedObjectNameException {
 		ObjectName name = this.strategy.getObjectName(TEST_BEAN, "myBean,");
 		assertThat(name).satisfies(hasDefaultProperties(TEST_BEAN, "\"myBean,\""));
 	}
 
 	@Test
-	void getObjectNameWhenBeanNamContainsEquals() throws MalformedObjectNameException {
+	void getObjectNameWhenBeanNameContainsEquals() throws MalformedObjectNameException {
 		ObjectName name = this.strategy.getObjectName(TEST_BEAN, "my=Bean");
 		assertThat(name).satisfies(hasDefaultProperties(TEST_BEAN, "\"my=Bean\""));
 	}
 
 	@Test
-	void getObjectNameWhenBeanNamContainsColon() throws MalformedObjectNameException {
+	void getObjectNameWhenBeanNameContainsColon() throws MalformedObjectNameException {
 		ObjectName name = this.strategy.getObjectName(TEST_BEAN, "my:Bean");
 		assertThat(name).satisfies(hasDefaultProperties(TEST_BEAN, "\"my:Bean\""));
 	}
 
 	@Test
-	void getObjectNameWhenBeanNamContainsQuote() throws MalformedObjectNameException {
+	void getObjectNameWhenBeanNameContainsQuote() throws MalformedObjectNameException {
 		ObjectName name = this.strategy.getObjectName(TEST_BEAN, "\"myBean\"");
 		assertThat(name).satisfies(hasDefaultProperties(TEST_BEAN, "\"\\\"myBean\\\"\""));
 	}

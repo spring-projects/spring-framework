@@ -52,7 +52,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	/**
 	 * The class against which to match.
-	 * <p>Available for use in subclasses since 6.1.
+	 * @since 6.1
 	 */
 	protected final Class<?> clazz;
 

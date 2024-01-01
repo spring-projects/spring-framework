@@ -56,7 +56,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
-	private FastByteArrayOutputStream cachedContent;
+	private final FastByteArrayOutputStream cachedContent;
 
 	@Nullable
 	private final Integer contentCacheLimit;
