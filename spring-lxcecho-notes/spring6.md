@@ -1013,7 +1013,7 @@ public void setHobbies(String[] hobbies) {
 **②配置bean**
 
 ```xml
-<bean id="studentFour" class="com.atguigu.spring.bean6.Student">
+<bean id="studentFour" class="com.lxcecho.spring.bean6.Student">
     <property name="id" value="1004"></property>
     <property name="name" value="赵六"></property>
     <property name="age" value="26"></property>
@@ -1288,7 +1288,7 @@ public void setTeacherMap(Map<String, Teacher> teacherMap) {
 
 ```properties
 jdbc.user=root
-jdbc.password=atguigu
+jdbc.password=lxcecho
 jdbc.url=jdbc:mysql://localhost:3306/ssm?serverTimezone=UTC
 jdbc.driver=com.mysql.cj.jdbc.Driver
 ```
@@ -2035,7 +2035,7 @@ Spring 默认不使用注解装配 Bean，因此我们需要在 Spring 的 XML �
 **情况三：仅扫描指定组件**
 
 ```xml
-<context:component-scan base-package="com.atguigu" use-default-filters="false">
+<context:component-scan base-package="com.lxcecho" use-default-filters="false">
     <!-- context:include-filter标签：指定在原有扫描规则的基础上追加的规则 -->
     <!-- use-default-filters属性：取值false表示关闭默认扫描规则 -->
     <!-- 此时必须设置use-default-filters="false"，因为默认规则即扫描指定包下所有类 -->
@@ -2735,7 +2735,7 @@ public void testAllAnnotation(){
 **自定义类**
 
 ```java
-package com.atguigu.reflect;
+package com.lxcecho.reflect;
 
 public class Car {
 
@@ -2794,7 +2794,7 @@ public class Car {
 **编写测试类**
 
 ```java
-package com.atguigu.reflect;
+package com.lxcecho.reflect;
 
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
@@ -2813,7 +2813,7 @@ public class TestCar {
         Class clazz2 = new Car().getClass();
 
         //3 Class.forName("全路径")
-        Class clazz3 = Class.forName("com.atguigu.reflect.Car");
+        Class clazz3 = Class.forName("com.lxcecho.reflect.Car");
 
         //实例化
         Car car = (Car)clazz3.getConstructor().newInstance();
@@ -2903,7 +2903,7 @@ public class TestCar {
 
 **①搭建子模块**
 
-搭建模块：guigu-spring，搭建方式如其他spring子模块
+搭建模块：lxcecho-spring，搭建方式如其他spring子模块
 
 **②准备测试需要的bean**
 
@@ -2936,7 +2936,7 @@ public interface UserDao {
 ```java
 package com.lxcecho.test.dao.impl;
 
-import com.atguigu.spring.dao.UserDao;
+import com.lxcecho.spring.dao.UserDao;
 
 public class UserDaoImpl implements UserDao {
 
@@ -2962,10 +2962,10 @@ public interface UserService {
 创建UserServiceImpl实现类
 
 ```java
-package com.atguigu.spring.test.service.impl;
+package com.lxcecho.spring.test.service.impl;
 
-import com.atguigu.spring.core.annotation.Bean;
-import com.atguigu.spring.service.UserService;
+import com.lxcecho.spring.core.annotation.Bean;
+import com.lxcecho.spring.service.UserService;
 
 @Bean
 public class UserServiceImpl implements UserService {
@@ -2988,7 +2988,7 @@ public class UserServiceImpl implements UserService {
 bean注解
 
 ```java
-package com.atguigu.spring.core.annotation;
+package com.lxcecho.spring.core.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -3004,7 +3004,7 @@ public @interface Bean {
 依赖注入注解
 
 ```java
-package com.atguigu.spring.core.annotation;
+package com.lxcecho.spring.core.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -3022,7 +3022,7 @@ public @interface Di {
 **④定义bean容器接口**
 
 ```java
-package com.atguigu.spring.core;
+package com.lxcecho.spring.core;
 
 public interface ApplicationContext {
 
@@ -3035,7 +3035,7 @@ public interface ApplicationContext {
 AnnotationApplicationContext基于注解扫描bean
 
 ```java
-package com.atguigu.spring.core;
+package com.lxcecho.spring.core;
 
 import java.util.HashMap;
 
@@ -3064,9 +3064,9 @@ public class AnnotationApplicationContext implements ApplicationContext {
 我们通过构造方法传入包的base路径，扫描被@Bean注解的java对象，完整代码如下：
 
 ```java
-package com.atguigu.spring.core;
+package com.lxcecho.spring.core;
 
-import com.atguigu.spring.core.annotation.Bean;
+import com.lxcecho.spring.core.annotation.Bean;
 
 import java.io.File;
 import java.util.HashMap;
@@ -3166,18 +3166,18 @@ public class UserDaoImpl implements UserDao
 **⑧测试Bean加载**
 
 ```java
-package com.atguigu.spring;
+package com.lxcecho.spring;
 
-import com.atguigu.spring.core.AnnotationApplicationContext;
-import com.atguigu.spring.core.ApplicationContext;
-import com.atguigu.spring.test.service.UserService;
+import com.lxcecho.spring.core.AnnotationApplicationContext;
+import com.lxcecho.spring.core.ApplicationContext;
+import com.lxcecho.spring.test.service.UserService;
 import org.junit.jupiter.api.Test;
 
 public class SpringIocTest {
 
     @Test
     public void testIoc() {
-        ApplicationContext applicationContext = new AnnotationApplicationContext("com.atguigu.spring.test");
+        ApplicationContext applicationContext = new AnnotationApplicationContext("com.lxcecho.spring.test");
         UserService userService = (UserService)applicationContext.getBean(UserService.class);
         userService.out();
         System.out.println("run success");
@@ -3192,12 +3192,12 @@ public class SpringIocTest {
 只要userDao.print();调用成功，说明就注入成功
 
 ```java
-package com.atguigu.spring.test.service.impl;
+package com.lxcecho.spring.test.service.impl;
 
-import com.atguigu.spring.core.annotation.Bean;
-import com.atguigu.spring.core.annotation.Di;
-import com.atguigu.spring.dao.UserDao;
-import com.atguigu.spring.service.UserService;
+import com.lxcecho.spring.core.annotation.Bean;
+import com.lxcecho.spring.core.annotation.Di;
+import com.lxcecho.spring.dao.UserDao;
+import com.lxcecho.spring.service.UserService;
 
 @Bean
 public class UserServiceImpl implements UserService {
@@ -3218,10 +3218,10 @@ public class UserServiceImpl implements UserService {
 **⑩依赖注入实现**
 
 ```java
-package com.atguigu.spring.core;
+package com.lxcecho.spring.core;
 
-import com.atguigu.spring.core.annotation.Bean;
-import com.atguigu.spring.core.annotation.Di;
+import com.lxcecho.spring.core.annotation.Bean;
+import com.lxcecho.spring.core.annotation.Di;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -3845,32 +3845,32 @@ public class CalculatorImpl implements Calculator {
 @Component
 public class LogAspect {
     
-    @Before("execution(public int com.atguigu.aop.annotation.CalculatorImpl.*(..))")
+    @Before("execution(public int com.lxcecho.aop.annotation.CalculatorImpl.*(..))")
     public void beforeMethod(JoinPoint joinPoint){
         String methodName = joinPoint.getSignature().getName();
         String args = Arrays.toString(joinPoint.getArgs());
         System.out.println("Logger-->前置通知，方法名："+methodName+"，参数："+args);
     }
 
-    @After("execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))")
+    @After("execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))")
     public void afterMethod(JoinPoint joinPoint){
         String methodName = joinPoint.getSignature().getName();
         System.out.println("Logger-->后置通知，方法名："+methodName);
     }
 
-    @AfterReturning(value = "execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))", returning = "result")
+    @AfterReturning(value = "execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))", returning = "result")
     public void afterReturningMethod(JoinPoint joinPoint, Object result){
         String methodName = joinPoint.getSignature().getName();
         System.out.println("Logger-->返回通知，方法名："+methodName+"，结果："+result);
     }
 
-    @AfterThrowing(value = "execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))", throwing = "ex")
+    @AfterThrowing(value = "execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))", throwing = "ex")
     public void afterThrowingMethod(JoinPoint joinPoint, Throwable ex){
         String methodName = joinPoint.getSignature().getName();
         System.out.println("Logger-->异常通知，方法名："+methodName+"，异常："+ex);
     }
     
-    @Around("execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))")
+    @Around("execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))")
     public Object aroundMethod(ProceedingJoinPoint joinPoint){
         String methodName = joinPoint.getSignature().getName();
         String args = Arrays.toString(joinPoint.getArgs());
@@ -3912,7 +3912,7 @@ public class LogAspect {
         2、开启AspectJ的自动代理，为目标对象自动生成代理
         3、将切面类通过注解@Aspect标识
     -->
-    <context:component-scan base-package="com.atguigu.aop.annotation"></context:component-scan>
+    <context:component-scan base-package="com.lxcecho.aop.annotation"></context:component-scan>
 
     <aop:aspectj-autoproxy />
 </beans>
@@ -3975,7 +3975,7 @@ public class CalculatorTest {
 
 - 用*号代替“权限修饰符”和“返回值”部分表示“权限修饰符”和“返回值”不限
 - 在包名的部分，一个“*”号只能代表包的层次结构中的一层，表示这一层是任意的。
-  - 例如：*.Hello匹配com.Hello，不匹配com.atguigu.Hello
+  - 例如：*.Hello匹配com.Hello，不匹配com.lxcecho.Hello
 - 在包名的部分，使用“*..”表示包名任意、包的层次深度任意
 - 在类名的部分，类名部分整体用*号代替，表示类名任意
 - 在类名的部分，可以使用*号代替类名的一部分
@@ -4002,7 +4002,7 @@ public class CalculatorTest {
 **①声明**
 
 ```java
-@Pointcut("execution(* com.atguigu.aop.annotation.*.*(..))")
+@Pointcut("execution(* com.lxcecho.aop.annotation.*.*(..))")
 public void pointCut(){}
 ```
 
@@ -4020,7 +4020,7 @@ public void beforeMethod(JoinPoint joinPoint){
 **③在不同切面中使用**
 
 ```java
-@Before("com.atguigu.aop.CommonPointCut.pointCut()")
+@Before("com.lxcecho.aop.CommonPointCut.pointCut()")
 public void beforeMethod(JoinPoint joinPoint){
     String methodName = joinPoint.getSignature().getName();
     String args = Arrays.toString(joinPoint.getArgs());
@@ -4037,7 +4037,7 @@ public void beforeMethod(JoinPoint joinPoint){
 获取连接点信息可以在通知方法的参数位置设置JoinPoint类型的形参
 
 ```java
-@Before("execution(public int com.atguigu.aop.annotation.CalculatorImpl.*(..))")
+@Before("execution(public int com.lxcecho.aop.annotation.CalculatorImpl.*(..))")
 public void beforeMethod(JoinPoint joinPoint){
     //获取连接点的签名信息
     String methodName = joinPoint.getSignature().getName();
@@ -4052,7 +4052,7 @@ public void beforeMethod(JoinPoint joinPoint){
 @AfterReturning中的属性returning，用来将通知方法的某个形参，接收目标方法的返回值
 
 ```java
-@AfterReturning(value = "execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))", returning = "result")
+@AfterReturning(value = "execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))", returning = "result")
 public void afterReturningMethod(JoinPoint joinPoint, Object result){
     String methodName = joinPoint.getSignature().getName();
     System.out.println("Logger-->返回通知，方法名："+methodName+"，结果："+result);
@@ -4064,7 +4064,7 @@ public void afterReturningMethod(JoinPoint joinPoint, Object result){
 @AfterThrowing中的属性throwing，用来将通知方法的某个形参，接收目标方法的异常
 
 ```java
-@AfterThrowing(value = "execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))", throwing = "ex")
+@AfterThrowing(value = "execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))", throwing = "ex")
 public void afterThrowingMethod(JoinPoint joinPoint, Throwable ex){
     String methodName = joinPoint.getSignature().getName();
     System.out.println("Logger-->异常通知，方法名："+methodName+"，异常："+ex);
@@ -4076,7 +4076,7 @@ public void afterThrowingMethod(JoinPoint joinPoint, Throwable ex){
 #### 5.4.8、环绕通知
 
 ```java
-@Around("execution(* com.atguigu.aop.annotation.CalculatorImpl.*(..))")
+@Around("execution(* com.lxcecho.aop.annotation.CalculatorImpl.*(..))")
 public Object aroundMethod(ProceedingJoinPoint joinPoint){
     String methodName = joinPoint.getSignature().getName();
     String args = Arrays.toString(joinPoint.getArgs());
@@ -4123,13 +4123,13 @@ public Object aroundMethod(ProceedingJoinPoint joinPoint){
 #### 5.5.2、实现
 
 ```xml
-<context:component-scan base-package="com.atguigu.aop.xml"></context:component-scan>
+<context:component-scan base-package="com.lxcecho.aop.xml"></context:component-scan>
 
 <aop:config>
     <!--配置切面类-->
     <aop:aspect ref="loggerAspect">
         <aop:pointcut id="pointCut" 
-                   expression="execution(* com.atguigu.aop.xml.CalculatorImpl.*(..))"/>
+                   expression="execution(* com.lxcecho.aop.xml.CalculatorImpl.*(..))"/>
         <aop:before method="beforeMethod" pointcut-ref="pointCut"></aop:before>
         <aop:after method="afterMethod" pointcut-ref="pointCut"></aop:after>
         <aop:after-returning method="afterReturningMethod" returning="result" pointcut-ref="pointCut"></aop:after-returning>
@@ -4439,7 +4439,7 @@ public void testUpdate(){
     
     //修改功能
 	//String sql = "update t_emp set name=? where id=?";
-    //int result = jdbcTemplate.update(sql, "张三atguigu", 1);
+    //int result = jdbcTemplate.update(sql, "张三lxcecho", 1);
 
     //删除功能
 	//String sql = "delete from t_emp where id=?";
@@ -5151,7 +5151,7 @@ public class TxByAllAnnotationTest {
 ```xml
 <aop:config>
     <!-- 配置事务通知和切入点表达式 -->
-    <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.atguigu.spring.tx.xml.service.impl.*.*(..))"></aop:advisor>
+    <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.lxcecho.spring.tx.xml.service.impl.*.*(..))"></aop:advisor>
 </aop:config>
 <!-- tx:advice标签：配置事务通知 -->
 <!-- id属性：给事务通知标签设置唯一标识，便于引用 -->
@@ -5326,10 +5326,10 @@ public class UrlResourceDemo {
 ```java
 public static void main(String[] args) {
     //1 访问网络资源
-	//loadAndReadUrlResource("http://www.atguigu.com");
+	//loadAndReadUrlResource("http://www.lxcecho.com");
     
     //2 访问文件系统资源
-    loadAndReadUrlResource("file:atguigu.txt");
+    loadAndReadUrlResource("file:lxcecho.txt");
 }
 ```
 
@@ -5339,7 +5339,7 @@ public static void main(String[] args) {
 
 ClassPathResource 用来访问类加载路径下的资源，相对于其他的 Resource 实现类，其主要优势是方便访问类加载路径里的资源，尤其对于 Web 应用，ClassPathResource 可自动搜索位于 classes 下的资源文件，无须使用绝对路径访问。
 
-**实验：在类路径下创建文件atguigu.txt，使用ClassPathResource 访问**
+**实验：在类路径下创建文件lxcecho.txt，使用ClassPathResource 访问**
 
 ![image-20221207103020854](images\spring6\image-20221207103020854.png)
 
@@ -5367,7 +5367,7 @@ public class ClassPathResourceDemo {
     }
 
     public static void main(String[] args) throws Exception {
-        loadAndReadUrlResource("atguigu.txt");
+        loadAndReadUrlResource("lxcecho.txt");
     }
 }
 ```
@@ -5393,9 +5393,9 @@ public class FileSystemResourceDemo {
 
     public static void loadAndReadUrlResource(String path) throws Exception{
         //相对路径
-        FileSystemResource resource = new FileSystemResource("atguigu.txt");
+        FileSystemResource resource = new FileSystemResource("lxcecho.txt");
         //绝对路径
-        //FileSystemResource resource = new FileSystemResource("C:\\atguigu.txt");
+        //FileSystemResource resource = new FileSystemResource("C:\\lxcecho.txt");
         // 获取文件名
         System.out.println("resource.getFileName = " + resource.getFilename());
         // 获取文件描述
@@ -5409,7 +5409,7 @@ public class FileSystemResourceDemo {
     }
 
     public static void main(String[] args) throws Exception {
-        loadAndReadUrlResource("atguigu.txt");
+        loadAndReadUrlResource("lxcecho.txt");
     }
 }
 ```
@@ -5478,7 +5478,7 @@ public class Demo1 {
 //        通过ApplicationContext访问资源
 //        ApplicationContext实例获取Resource实例时，
 //        默认采用与ApplicationContext相同的资源访问策略
-        Resource res = ctx.getResource("atguigu.txt");
+        Resource res = ctx.getResource("lxcecho.txt");
         System.out.println(res.getFilename());
     }
 }
@@ -5499,7 +5499,7 @@ public class Demo2 {
 
     public static void main(String[] args) {
         ApplicationContext ctx = new FileSystemXmlApplicationContext();
-        Resource res = ctx.getResource("atguigu.txt");
+        Resource res = ctx.getResource("lxcecho.txt");
         System.out.println(res.getFilename());
     }
 }
@@ -5590,7 +5590,7 @@ public class Demo3 {
         ResourceLoader resourceLoader = testBean.getResourceLoader();
         System.out.println("Spring容器将自身注入到ResourceLoaderAware Bean 中 ？ ：" + (resourceLoader == ctx));
         //加载其他资源
-        Resource resource = resourceLoader.getResource("atguigu.txt");
+        Resource resource = resourceLoader.getResource("lxcecho.txt");
         System.out.println(resource.getFilename());
         System.out.println(resource.getDescription());
     }
@@ -5648,7 +5648,7 @@ public class ResourceBean {
     <bean id="resourceBean" class="com.lxcecho.resouceloader.ResourceBean" >
       <!-- 可以使用file:、http:、ftp:等前缀强制Spring采用对应的资源访问策略 -->
       <!-- 如果不采用任何前缀，则Spring将采用与该ApplicationContext相同的资源访问策略来访问资源 -->
-        <property name="res" value="classpath:atguigu.txt"/>
+        <property name="res" value="classpath:lxcecho.txt"/>
     </bean>
 </beans>
 ```
@@ -5726,7 +5726,7 @@ public class Demo1 {
         ApplicationContext ctx =
                 new ClassPathXmlApplicationContext("classpath:bean.xml");
         System.out.println(ctx);
-        Resource resource = ctx.getResource("atguigu.txt");
+        Resource resource = ctx.getResource("lxcecho.txt");
         System.out.println(resource.getFilename());
         System.out.println(resource.getDescription());
     }
@@ -5864,16 +5864,16 @@ spring中国际化是通过MessageSource这个接口来支持的
 
 ![image-20221207140024056](images\spring6\image-20221207140024056.png)
 
-**（1）创建atguigu_en_US.properties**
+**（1）创建lxcecho_en_US.properties**
 
 ```properties
-www.atguigu.com=welcome {0},时间:{1}
+www.lxcecho.com=welcome {0},时间:{1}
 ```
 
-**（2）创建atguigu_zh_CN.properties**
+**（2）创建lxcecho_zh_CN.properties**
 
 ```properties
-www.atguigu.com=欢迎 {0},时间:{1}
+www.lxcecho.com=欢迎 {0},时间:{1}
 ```
 
 
@@ -5890,7 +5890,7 @@ www.atguigu.com=欢迎 {0},时间:{1}
           class="org.springframework.context.support.ResourceBundleMessageSource">
         <property name="basenames">
             <list>
-                <value>atguigu</value>
+                <value>lxcecho</value>
             </list>
         </property>
         <property name="defaultEncoding">
@@ -5920,11 +5920,11 @@ public class Demo2 {
         ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
         
         //传递动态参数，使用数组形式对应{0} {1}顺序
-        Object[] objs = new Object[]{"atguigu",new Date().toString()};
+        Object[] objs = new Object[]{"lxcecho",new Date().toString()};
 
-        //www.atguigu.com为资源文件的key值,
+        //www.lxcecho.com为资源文件的key值,
         //objs为资源文件value值所需要的参数,Local.CHINA为国际化为语言
-        String str=context.getMessage("www.atguigu.com", objs, Locale.CHINA);
+        String str=context.getMessage("www.lxcecho.com", objs, Locale.CHINA);
         System.out.println(str);
     }
 }
