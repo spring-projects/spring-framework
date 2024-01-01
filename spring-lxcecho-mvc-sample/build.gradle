@@ -1,0 +1,26 @@
+description "Spring MVC Sample"
+
+group = 'com.lxcecho'
+version = '6.0.15-SNAPSHOT'
+
+dependencies {
+    /*当你引入 Spring Context 依赖之后，表示将 Spring 的基础依赖引入了*/
+    api(project(":spring-context"))
+    api(project(":spring-webmvc"))
+
+    optional("org.apache.tomcat.embed:tomcat-embed-core")
+    compileOnly("jakarta.servlet:jakarta.servlet-api")
+
+
+    optional("org.apache.logging.log4j:log4j-api")
+    optional("org.slf4j:slf4j-api")
+    optional("org.apache.logging.log4j:log4j-core")
+    optional("org.apache.logging.log4j:log4j-jul")
+    optional("org.apache.logging.log4j:log4j-slf4j2-impl")
+
+    api(project(":spring-test"))
+
+    api("junit:junit:4.13.2")
+    testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+    testFixturesApi("org.junit.jupiter:junit-jupiter-params")
+}

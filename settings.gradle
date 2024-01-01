@@ -70,4 +70,5 @@ settings.gradle.projectsLoaded {
 include 'spring-lxcecho-sample'
 include 'spring-lxcecho'
 include 'spring-lxcecho-notes'
+include 'spring-lxcecho-mvc-sample'
 
