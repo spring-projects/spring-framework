@@ -45,6 +45,7 @@ public class LogAspect {
 	 * @param joinPoint
 	 */
 	@Before(value = "pointCut()")
+//	@Before("execution(* com.lxcecho.aop.annoaop.CalculatorImpl.*(..))")
 	public void beforeMethod(JoinPoint joinPoint) {
 		String methodName = joinPoint.getSignature().getName();
 		Object[] args = joinPoint.getArgs();
@@ -57,6 +58,7 @@ public class LogAspect {
 	 * @param joinPoint
 	 */
 	@After(value = "pointCut()")
+//	@After(value = "execution(* com.lxcecho.aop.annoaop.CalculatorImpl.*(..))")
 	public void afterMethod(JoinPoint joinPoint) {
 		String methodName = joinPoint.getSignature().getName();
 		System.out.println("Logger-->后置通知，方法名称：" + methodName);
@@ -69,6 +71,7 @@ public class LogAspect {
 	 * @param result
 	 */
 	@AfterReturning(value = "pointCut()", returning = "result")
+//	@AfterReturning(value = "execution(* com.lxcecho.aop.annoaop.CalculatorImpl.*(..))", returning = "result")
 	public void afterReturningMethod(JoinPoint joinPoint, Object result) {
 		String methodName = joinPoint.getSignature().getName();
 		System.out.println("Logger-->返回通知，方法名称：" + methodName + "，返回结果：" + result);
@@ -81,6 +84,7 @@ public class LogAspect {
 	 * @param ex
 	 */
 	@AfterThrowing(value = "pointCut()", throwing = "ex")
+//	@AfterThrowing(value = "execution(* com.lxcecho.aop.annoaop.CalculatorImpl.*(..))", throwing = "ex")
 	public void afterThrowingMethod(JoinPoint joinPoint, Throwable ex) {
 		String methodName = joinPoint.getSignature().getName();
 		System.out.println("Logger-->异常通知，方法名称：" + methodName + "，异常信息：" + ex);
@@ -93,6 +97,7 @@ public class LogAspect {
 	 * @return
 	 */
 	/*@Around("pointCut()")
+	@Around("execution(* com.lxcecho.aop.annoaop.CalculatorImpl.*(..))")
 	public Object aroundMethod(ProceedingJoinPoint joinPoint) {
 		String methodName = joinPoint.getSignature().getName();
 		Object[] args = joinPoint.getArgs();

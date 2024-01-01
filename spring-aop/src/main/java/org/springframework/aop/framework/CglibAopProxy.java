@@ -699,6 +699,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					retVal = AopUtils.invokeJoinpointUsingReflection(target, method, argsToUse);
 				}
 				else {
+					// CglibMethodInvocation：把所有信息封装到这里【代理对象、真实对象、增强器链、当前方法、使用的参数】（这里是 FilterChain）
 					// We need to create a method invocation...
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}

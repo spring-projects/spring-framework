@@ -17,7 +17,7 @@ public class AopTest {
 	public void testAnnoAop() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(SpringAopConfig.class);
 		Calculator calculator = context.getBean(Calculator.class);
-		System.out.println(calculator.div(10, 3));
+		System.out.println(calculator.div(10, 0));
 	}
 
 	@Test
