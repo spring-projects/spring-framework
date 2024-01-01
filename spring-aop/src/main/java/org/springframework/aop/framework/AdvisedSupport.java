@@ -102,6 +102,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	private List<Advisor> advisors = new ArrayList<>();
 
+	/**
+	 * List of minimal {@link AdvisorKeyEntry} instances,
+	 * to be assigned to the {@link #advisors} field on reduction.
+	 * @since 6.0.10
+	 * @see #reduceToAdvisorKey
+	 */
 	private List<Advisor> advisorKey = this.advisors;
 
 
@@ -557,18 +563,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization; just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		this.methodCache = new ConcurrentHashMap<>(32);
-	}
-
 	@Override
 	public String toProxyConfigString() {
 		return toString();
@@ -587,6 +581,19 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append("targetSource [").append(this.targetSource).append("]; ");
 		sb.append(super.toString());
 		return sb.toString();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 
@@ -639,7 +646,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #getConfigurationOnlyCopy()
 	 * @see #getAdvisorKey()
 	 */
-	private static class AdvisorKeyEntry implements Advisor {
+	private static final class AdvisorKeyEntry implements Advisor {
 
 		private final Class<?> adviceType;
 
@@ -648,7 +655,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Nullable
 		private final String methodMatcherKey;
-
 
 		public AdvisorKeyEntry(Advisor advisor) {
 			this.adviceType = advisor.getAdvice().getClass();

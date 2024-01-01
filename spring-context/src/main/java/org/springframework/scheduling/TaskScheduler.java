@@ -70,7 +70,7 @@ public interface TaskScheduler {
 	 * wrapping a cron expression
 	 * @return a {@link ScheduledFuture} representing pending completion of the task,
 	 * or {@code null} if the given Trigger object never fires (i.e. returns
-	 * {@code null} from {@link Trigger#nextExecutionTime})
+	 * {@code null} from {@link Trigger#nextExecution})
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @see org.springframework.scheduling.support.CronTrigger

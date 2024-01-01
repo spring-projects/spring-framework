@@ -92,10 +92,10 @@ import org.springframework.util.function.ThrowingSupplier;
  * Supports autowiring constructors, properties by name, and properties by type.
  *
  * <p>The main template method to be implemented by subclasses is
- * {@link #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)},
- * used for autowiring by type. In case of a factory which is capable of searching
- * its bean definitions, matching beans will typically be implemented through such
- * a search. For other factory styles, simplified matching algorithms can be implemented.
+ * {@link #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)}, used for
+ * autowiring. In case of a {@link org.springframework.beans.factory.ListableBeanFactory}
+ * which is capable of searching its bean definitions, matching beans will typically be
+ * implemented through such a search. Otherwise, simplified matching can be implemented.
  *
  * <p>Note that this class does <i>not</i> assume or implement bean definition
  * registry capabilities. See {@link DefaultListableBeanFactory} for an implementation
@@ -507,15 +507,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (resolvedClass != null && !mbd.hasBeanClass() && mbd.getBeanClassName() != null) {
 			mbdToUse = new RootBeanDefinition(mbd);
 			mbdToUse.setBeanClass(resolvedClass);
-		}
-
-		// Prepare method overrides.
-		try {
-			mbdToUse.prepareMethodOverrides();
-		}
-		catch (BeanDefinitionValidationException ex) {
-			throw new BeanDefinitionStoreException(mbdToUse.getResourceDescription(),
-					beanName, "Validation of method overrides failed", ex);
+			try {
+				mbdToUse.prepareMethodOverrides();
+			}
+			catch (BeanDefinitionValidationException ex) {
+				throw new BeanDefinitionStoreException(mbdToUse.getResourceDescription(),
+						beanName, "Validation of method overrides failed", ex);
+			}
 		}
 
 		try {
@@ -666,7 +664,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
 		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-			boolean matchingOnlyFactoryBean = typesToMatch.length == 1 && typesToMatch[0] == FactoryBean.class;
+			boolean matchingOnlyFactoryBean = (typesToMatch.length == 1 && typesToMatch[0] == FactoryBean.class);
 			for (SmartInstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().smartInstantiationAware) {
 				Class<?> predicted = bp.predictBeanType(targetType, beanName);
 				if (predicted != null &&

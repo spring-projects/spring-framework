@@ -40,6 +40,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationsScannerTests.Hello2Impl;
+import org.springframework.core.annotation.AnnotationsScannerTests.TestAnnotation1;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -679,14 +681,21 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getWithTypeHierarchyInheritedFromInterfaceMethod()
-			throws NoSuchMethodException {
-		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod(
-				"handleFromInterface");
-		MergedAnnotation<?> annotation = MergedAnnotations.from(method,
-				SearchStrategy.TYPE_HIERARCHY).get(Order.class);
+	void getWithTypeHierarchyInheritedFromInterfaceMethod() throws Exception {
+		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
+		MergedAnnotation<?> annotation = MergedAnnotations.from(method,SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
 		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+	}
+
+	@Test  // gh-31803
+	void streamWithTypeHierarchyInheritedFromSuperInterfaceMethod() throws Exception {
+		Method method = Hello2Impl.class.getMethod("method");
+		long count = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+				.from(method)
+				.stream(TestAnnotation1.class)
+				.count();
+		assertThat(count).isEqualTo(1);
 	}
 
 	@Test
@@ -1384,7 +1393,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getRepeatableDeclaredOnMethod() throws Exception {
+	void streamRepeatableDeclaredOnMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
 		Stream<MergedAnnotation<MyRepeatable>> annotations = MergedAnnotations.from(
 				method, SearchStrategy.TYPE_HIERARCHY).stream(MyRepeatable.class);
@@ -1395,7 +1404,7 @@ class MergedAnnotationsTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void getRepeatableDeclaredOnClassWithAttributeAliases() {
+	void streamRepeatableDeclaredOnClassWithAttributeAliases() {
 		assertThat(MergedAnnotations.from(HierarchyClass.class).stream(
 				TestConfiguration.class)).isEmpty();
 		RepeatableContainers containers = RepeatableContainers.of(TestConfiguration.class,
@@ -1409,7 +1418,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getRepeatableDeclaredOnClass() {
+	void streamRepeatableDeclaredOnClass() {
 		Class<?> element = MyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
@@ -1417,7 +1426,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getRepeatableDeclaredOnSuperclass() {
+	void streamRepeatableDeclaredOnSuperclass() {
 		Class<?> element = SubMyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
@@ -1425,7 +1434,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getRepeatableDeclaredOnClassAndSuperclass() {
+	void streamRepeatableDeclaredOnClassAndSuperclass() {
 		Class<?> element = SubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
 		String[] expectedValuesJava = { "X", "Y", "Z" };
 		String[] expectedValuesSpring = { "X", "Y", "Z", "meta2" };
@@ -1433,7 +1442,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getRepeatableDeclaredOnMultipleSuperclasses() {
+	void streamRepeatableDeclaredOnMultipleSuperclasses() {
 		Class<?> element = SubSubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
 		String[] expectedValuesJava = { "X", "Y", "Z" };
 		String[] expectedValuesSpring = { "X", "Y", "Z", "meta2" };
@@ -1441,7 +1450,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getDirectRepeatablesDeclaredOnClass() {
+	void streamDirectRepeatablesDeclaredOnClass() {
 		Class<?> element = MyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
@@ -1449,7 +1458,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getDirectRepeatablesDeclaredOnSuperclass() {
+	void streamDirectRepeatablesDeclaredOnSuperclass() {
 		Class<?> element = SubMyRepeatableClass.class;
 		String[] expectedValuesJava = {};
 		String[] expectedValuesSpring = {};
@@ -1476,20 +1485,17 @@ class MergedAnnotationsTests {
 		MergedAnnotations annotations = MergedAnnotations.from(element, searchStrategy,
 				RepeatableContainers.of(MyRepeatable.class, MyRepeatableContainer.class),
 				AnnotationFilter.PLAIN);
-		assertThat(annotations.stream(MyRepeatable.class).filter(
-				MergedAnnotationPredicates.firstRunOf(
-						MergedAnnotation::getAggregateIndex)).map(
-								annotation -> annotation.getString(
-										"value"))).containsExactly(expected);
+		Stream<String> values = annotations.stream(MyRepeatable.class)
+				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+				.map(annotation -> annotation.getString("value"));
+		assertThat(values).containsExactly(expected);
 	}
 
 	private void testStandardRepeatables(SearchStrategy searchStrategy, Class<?> element, String[] expected) {
-		MergedAnnotations annotations = MergedAnnotations.from(element, searchStrategy);
-		assertThat(annotations.stream(MyRepeatable.class).filter(
-				MergedAnnotationPredicates.firstRunOf(
-						MergedAnnotation::getAggregateIndex)).map(
-								annotation -> annotation.getString(
-										"value"))).containsExactly(expected);
+		Stream<String> values = MergedAnnotations.from(element, searchStrategy).stream(MyRepeatable.class)
+				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+				.map(annotation -> annotation.getString("value"));
+		assertThat(values).containsExactly(expected);
 	}
 
 	@Test

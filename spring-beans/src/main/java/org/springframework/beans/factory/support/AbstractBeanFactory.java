@@ -731,7 +731,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			aliases.add(fullBeanName);
 		}
 		String[] retrievedAliases = super.getAliases(beanName);
-		String prefix = factoryPrefix ? FACTORY_BEAN_PREFIX : "";
+		String prefix = (factoryPrefix ? FACTORY_BEAN_PREFIX : "");
 		for (String retrievedAlias : retrievedAliases) {
 			String alias = prefix + retrievedAlias;
 			if (!alias.equals(name)) {
@@ -1497,13 +1497,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
-			return doResolveBeanClass(mbd, typesToMatch);
+			Class<?> beanClass = doResolveBeanClass(mbd, typesToMatch);
+			if (mbd.hasBeanClass()) {
+				mbd.prepareMethodOverrides();
+			}
+			return beanClass;
 		}
 		catch (ClassNotFoundException ex) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
 		catch (LinkageError err) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+					beanName, "Validation of method overrides failed", ex);
 		}
 	}
 

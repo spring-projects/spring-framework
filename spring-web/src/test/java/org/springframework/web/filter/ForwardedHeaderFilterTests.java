@@ -32,12 +32,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -46,6 +46,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
  * @author Rob Winch
+ * @author Brian Clozel
  */
 public class ForwardedHeaderFilterTests {
 
@@ -206,6 +207,38 @@ public class ForwardedHeaderFilterTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual.getRequestURI()).isEqualTo("/bar");
 		assertThat(actual.getRequestURL().toString()).isEqualTo("https://www.mycompany.example/bar");
+	}
+
+	@Nested // gh-31842
+	class InvalidRequests {
+
+		@Test
+		void shouldRejectInvalidForwardedForIpv4() throws Exception {
+			request.addHeader(FORWARDED, "for=127.0.0.1:");
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, filterChain);
+			assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		}
+
+		@Test
+		void shouldRejectInvalidForwardedForIpv6() throws Exception {
+			request.addHeader(FORWARDED, "for=\"2a02:918:175:ab60:45ee:c12c:dac1:808b\"");
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, filterChain);
+			assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		}
+
+		@Test
+		void shouldRejectInvalidForwardedPort() throws Exception {
+			request.addHeader(X_FORWARDED_PORT, "invalid");
+
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, filterChain);
+			assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		}
+
 	}
 
 	@Nested
@@ -474,12 +507,6 @@ public class ForwardedHeaderFilterTests {
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 
-		@Test  // gh-26748
-		public void forwardedForInvalidIpV6Address() {
-			request.addHeader(FORWARDED, "for=\"2a02:918:175:ab60:45ee:c12c:dac1:808b\"");
-			assertThatIllegalArgumentException().isThrownBy(
-					ForwardedHeaderFilterTests.this::filterAndGetWrappedRequest);
-		}
 	}
 
 	@Nested
