@@ -8,7 +8,7 @@ import com.lxcecho.service.UserService;
  * @author lxcecho azaki0426@gmail.com
  * @since 2023/12/11
  */
-public class Main {
+public class MainApp {
 	public static void main(String[] args) {
 		ApplicationContext context = new AnnotationApplicationContext("com.lxcecho");
 		UserService userService = (UserService) context.getBean(UserService.class);

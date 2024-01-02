@@ -5,12 +5,11 @@ version = '6.0.15-SNAPSHOT'
 
 dependencies {
     /*当你引入 Spring Context 依赖之后，表示将 Spring 的基础依赖引入了*/
-    api(project(":spring-context"))
     api(project(":spring-webmvc"))
 
     optional("org.apache.tomcat.embed:tomcat-embed-core")
+    implementation("org.apache.tomcat.embed:tomcat-embed-jasper:10.1.15")
     compileOnly("jakarta.servlet:jakarta.servlet-api")
-
 
     optional("org.apache.logging.log4j:log4j-api")
     optional("org.slf4j:slf4j-api")

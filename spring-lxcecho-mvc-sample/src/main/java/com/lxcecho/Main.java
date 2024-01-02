@@ -19,33 +19,32 @@ import org.apache.catalina.startup.Tomcat;
  */
 public class Main {
 	public static void main(String[] args) throws LifecycleException {
-		//自己写Tomcat的启动源码
+		// 自己写 Tomcat 的启动源码
 		Tomcat tomcat = new Tomcat();
-
 
 		tomcat.setPort(8888);
 		tomcat.setHostname("localhost");
 		tomcat.setBaseDir(".");
 
-		Context context = tomcat.addWebapp("/boot", System.getProperty("user.dir") + "/src/main");
+		Context context = tomcat.addWebapp("/com/lxcecho", System.getProperty("user.dir") + "/src/main");
 
 
 //        DispatcherServlet servlet = new DispatcherServlet();
-		//给Tomcat里面添加一个Servlet
+		// 给 Tomcat 里面添加一个 Servlet
 //        Wrapper hello = tomcat.addServlet("/boot", "hello", new HelloServlet());
 //        Wrapper hello = tomcat.addServlet("/boot", "hello", servlet);
-//        hello.addMapping("/"); //指定处理的请求
+//        hello.addMapping("/"); // 指定处理的请求
 
-		//自己创建 DispatcherServlet 对象，并且创建ioc容器，DispatcherServlet里面有ioc容器
+		// 自己创建 DispatcherServlet 对象，并且创建 ioc 容器，DispatcherServlet 里面有 ioc 容器
 
-		//自己创建一个DispatcherServlet注册进去
+		// 自己创建一个 DispatcherServlet 注册进去
 //        tomcat.addServlet(自己创建一个DispatcherServlet注册进去)
 
+		// 启动 tomcat 注解版 MVC 利用 Tomcat SPI 机制
+		tomcat.start();
 
-		tomcat.start();//启动tomcat 注解版MVC利用Tomcat SPI机制
-
-
-		tomcat.getServer().await(); //服务器等待
+		// 服务器等待
+		tomcat.getServer().await();
 
 	}
 }
