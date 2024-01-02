@@ -440,12 +440,8 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	val tuples: MutableList<Array<Any>> = ArrayList()
-	tuples.add(arrayOf("John", 35))
-	tuples.add(arrayOf("Ann", 50))
-
 	client.sql("SELECT id, name, state FROM table WHERE age IN (:ages)")
-		    .bind("tuples", arrayOf(35, 50))
+		    .bind("ages", arrayOf(35, 50))
 ----
 ======
 
