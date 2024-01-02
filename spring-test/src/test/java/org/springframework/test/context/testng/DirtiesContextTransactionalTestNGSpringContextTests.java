@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  * @since 2.5
  */
 @ContextConfiguration
-public class DirtiesContextTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
+class DirtiesContextTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
 
 	private ApplicationContext dirtiedApplicationContext;
 
@@ -64,13 +64,13 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 
 	@Test
 	@DirtiesContext
-	public void dirtyContext() {
+	void dirtyContext() {
 		performCommonAssertions();
 		this.dirtiedApplicationContext = super.applicationContext;
 	}
 
 	@Test(dependsOnMethods = { "dirtyContext" })
-	public void verifyContextWasDirtied() {
+	void verifyContextWasDirtied() {
 		performCommonAssertions();
 		assertThat(super.applicationContext)
 			.as("The application context should have been 'dirtied'.")
@@ -79,7 +79,7 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 	}
 
 	@Test(dependsOnMethods = { "verifyContextWasDirtied" })
-	public void verifyContextWasNotDirtied() {
+	void verifyContextWasNotDirtied() {
 		assertThat(this.applicationContext)
 			.as("The application context should NOT have been 'dirtied'.")
 			.isSameAs(this.dirtiedApplicationContext);

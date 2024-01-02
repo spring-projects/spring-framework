@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringC
 
 
 	@Test
-	public void asyncPublication() throws InterruptedException {
+	void asyncPublication() throws InterruptedException {
 		Thread t = new Thread(() -> context.publishEvent(new CustomEvent("asyncPublication")));
 		t.start();
 		t.join();
@@ -61,7 +61,7 @@ class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringC
 	}
 
 	@Test
-	public void asyncConsumption() {
+	void asyncConsumption() {
 		context.publishEvent(new CustomEvent("asyncConsumption"));
 
 		Awaitility.await().atMost(Durations.ONE_SECOND)

@@ -131,7 +131,7 @@ dependencies {
 		api("org.hsqldb:hsqldb:2.7.2")
 		api("org.javamoney:moneta:1.4.2")
 		api("org.jruby:jruby:9.4.5.0")
-		api("org.junit.support:testng-engine:1.0.4")
+		api("org.junit.support:testng-engine:1.0.5")
 		api("org.mozilla:rhino:1.7.14")
 		api("org.ogce:xpp3:1.1.6")
 		api("org.python:jython-standalone:2.7.3")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.test.context.transaction.ejb.dao.RequiresNewEjbTxTest
 @Test(suiteName = "Commit for REQUIRES_NEW")
 @ContextConfiguration("/org/springframework/test/context/transaction/ejb/requires-new-tx-config.xml")
 @Commit
-public class CommitForRequiresNewEjbTxDaoTestNGTests extends AbstractEjbTxDaoTestNGTests {
+class CommitForRequiresNewEjbTxDaoTestNGTests extends AbstractEjbTxDaoTestNGTests {
 
 	/* test methods in superclass */
 
