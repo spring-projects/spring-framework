@@ -108,7 +108,7 @@ By default, the following `KeyValues` are created:
 |===
 |Name | Description
 |`code.function` _(required)_|Name of Java `Method` that is scheduled for execution.
-|`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method.
+|`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method, or `"ANONYMOUS"` for anonymous classes.
 |`error` _(required)_|Class name of the exception thrown during the execution, or `"none"` if no exception happened.
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution).

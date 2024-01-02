@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 
 	private static final KeyValue OUTCOME_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
+	private static final KeyValue CODE_NAMESPACE_ANONYMOUS = KeyValue.of(LowCardinalityKeyNames.CODE_NAMESPACE, "ANONYMOUS");
+
 	@Override
 	public String getName() {
 		return DEFAULT_NAME;
@@ -61,7 +63,10 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 	}
 
 	protected KeyValue codeNamespace(ScheduledTaskObservationContext context) {
-		return KeyValue.of(LowCardinalityKeyNames.CODE_NAMESPACE, context.getTargetClass().getCanonicalName());
+		if (context.getTargetClass().getCanonicalName() != null) {
+			return KeyValue.of(LowCardinalityKeyNames.CODE_NAMESPACE, context.getTargetClass().getCanonicalName());
+		}
+		return CODE_NAMESPACE_ANONYMOUS;
 	}
 
 	protected KeyValue exception(ScheduledTaskObservationContext context) {
