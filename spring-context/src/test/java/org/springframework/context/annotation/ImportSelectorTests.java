@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -126,7 +127,7 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
 		assertThat(TestImportGroup.imports).hasSize(1);
-		assertThat(TestImportGroup.imports.values()).element(0).asList().hasSize(2);
+		assertThat(TestImportGroup.imports.values()).element(0).asInstanceOf(LIST).hasSize(2);
 	}
 
 	@Test

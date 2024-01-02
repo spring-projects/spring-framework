@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -75,7 +76,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rodolphe Lecocq
  */
 @SuppressWarnings("unused")
-public class ExceptionHandlerExceptionResolverTests {
+class ExceptionHandlerExceptionResolverTests {
 
 	private static int DEFAULT_RESOLVER_COUNT;
 
@@ -89,7 +90,7 @@ public class ExceptionHandlerExceptionResolverTests {
 
 
 	@BeforeAll
-	public static void setupOnce() {
+	static void setupOnce() {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
 		resolver.afterPropertiesSet();
 		DEFAULT_RESOLVER_COUNT = resolver.getArgumentResolvers().getResolvers().size();
@@ -97,7 +98,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolver = new ExceptionHandlerExceptionResolver();
 		this.resolver.setWarnLogCategory(this.resolver.getClass().getName());
 		this.request = new MockHttpServletRequest("GET", "/");
@@ -146,9 +147,9 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	void setResponseBodyAdvice() {
 		this.resolver.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
-		assertThat(this.resolver).extracting("responseBodyAdvice").asList().hasSize(1);
+		assertThat(this.resolver).extracting("responseBodyAdvice").asInstanceOf(LIST).hasSize(1);
 		this.resolver.setResponseBodyAdvice(Collections.singletonList(new CustomResponseBodyAdvice()));
-		assertThat(this.resolver).extracting("responseBodyAdvice").asList().hasSize(2);
+		assertThat(this.resolver).extracting("responseBodyAdvice").asInstanceOf(LIST).hasSize(2);
 	}
 
 	@Test
