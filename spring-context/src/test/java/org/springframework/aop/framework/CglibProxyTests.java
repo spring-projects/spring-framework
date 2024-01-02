@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.aop.testfixture.mixin.LockMixinAdvisor;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.NonNull;
@@ -52,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
+class CglibProxyTests extends AbstractAopProxyTests {
 
 	private static final String DEPENDENCY_CHECK_CONTEXT =
 			CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
@@ -376,8 +375,9 @@ class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
 
 	@Test
 	void testWithDependencyChecking() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass());
-		ctx.getBean("testBean");
+		try (ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass())) {
+			ctx.getBean("testBean");
+		}
 	}
 
 	@Test

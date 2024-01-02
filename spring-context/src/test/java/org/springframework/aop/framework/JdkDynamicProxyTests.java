@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.aop.framework;
-
-import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -38,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Chris Beams
  * @since 13.03.2003
  */
-class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
+class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
