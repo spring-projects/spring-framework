@@ -155,6 +155,8 @@ If there is no other resolution indicator (such as a qualifier or a primary mark
 for a non-unique dependency situation, Spring matches the injection point name
 (that is, the field name or parameter name) against the target bean names and chooses the
 same-named candidate, if any.
+
+Since version 6.1, this requires the `-parameters` Java compiler flag to be present.
 ====
 
 That said, if you intend to express annotation-driven injection by name, do not
