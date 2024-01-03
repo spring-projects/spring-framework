@@ -11,27 +11,27 @@
        http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<!--1. 开启组件扫描-->
-	<context:component-scan base-package="com.lxcecho.jdbctx.xmltx"></context:component-scan>
+	<context:component-scan base-package="com.lxcecho.jdbctx.xmltx"/>
 
 	<!--2. 数据源对象-->
 	<!--引入外部属性文件，创建数据源对象-->
-	<context:property-placeholder location="classpath:jdbc.properties"></context:property-placeholder>
+	<context:property-placeholder location="classpath:jdbc.properties"/>
 
 	<bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
-		<property name="url" value="${jdbc.url}"></property>
-		<property name="driverClassName" value="${jdbc.driver}"></property>
-		<property name="username" value="${jdbc.user}"></property>
-		<property name="password" value="${jdbc.password}"></property>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="driverClassName" value="${jdbc.driver}"/>
+		<property name="username" value="${jdbc.user}"/>
+		<property name="password" value="${jdbc.password}"/>
 	</bean>
 
 	<!--3. 创建 JdbcTemplate 对象，注入数据源-->
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-		<property name="dataSource" ref="druidDataSource"></property>
+		<property name="dataSource" ref="druidDataSource"/>
 	</bean>
 
 	<!--4. 创建事务管理器，注入数据源-->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="druidDataSource"></property>
+		<property name="dataSource" ref="druidDataSource"/>
 	</bean>
 
 	<!--5. 配置事务增强，配置事务通知，设置事务相关属性-->
@@ -40,9 +40,9 @@
 			<!-- tx:method 标签：配置具体的事务方法 -->
 			<!-- name 属性：指定方法名，可以使用星号代表多个字符 -->
 			<tx:method name="get*" read-only="true"/>
-			<tx:method name="query*" read-only="true"></tx:method>
-			<tx:method name="find*" read-only="true"></tx:method>
-			<tx:method name="buy*" read-only="false" propagation="REQUIRED"></tx:method>
+			<tx:method name="query*" read-only="true"/>
+			<tx:method name="find*" read-only="true"/>
+			<tx:method name="buy*" read-only="false" propagation="REQUIRED"/>
 
 			<!-- read-only属性：设置只读属性 -->
 			<!-- rollback-for属性：设置回滚的异常 -->
@@ -59,6 +59,6 @@
 	<!--6. 配置切入点和通知使用的方法，把事务通知添加到方法上-->
 	<aop:config>
 		<aop:pointcut id="pt" expression="execution(* com.lxcecho.jdbctx.xmltx.service.*.*(..))"/>
-		<aop:advisor advice-ref="txAdvice" pointcut-ref="pt"></aop:advisor>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pt"/>
 	</aop:config>
 </beans>

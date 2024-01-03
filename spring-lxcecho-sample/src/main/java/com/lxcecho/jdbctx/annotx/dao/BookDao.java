@@ -28,4 +28,6 @@ public interface BookDao {
 	 * @param price
 	 */
 	void updateUserBalance(Integer userId, Integer price);
+
+	Integer getUserBalance(Integer userId);
 }

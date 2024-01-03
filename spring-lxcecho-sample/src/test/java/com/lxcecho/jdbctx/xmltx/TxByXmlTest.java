@@ -14,6 +14,8 @@ public class TxByXmlTest {
 	@Test
 	public void testBuyBook() {
 		bookController.buyBook(1, 1);
+		// 测试事务传播行为：<tx:method name="buy*" read-only="false" propagation="REQUIRES_NEW"/>
+//		bookController.buyBook(2, 1);
 	}
 
 }

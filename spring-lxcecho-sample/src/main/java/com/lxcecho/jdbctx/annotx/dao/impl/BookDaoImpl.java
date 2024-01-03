@@ -24,8 +24,7 @@ public class BookDaoImpl implements BookDao {
 	@Override
 	public Integer getBookPriceByBookId(Integer bookId) {
 		String sql = "select price from t_book where book_id=?";
-		Integer price = jdbcTemplate.queryForObject(sql, Integer.class, bookId);
-		return price;
+		return jdbcTemplate.queryForObject(sql, Integer.class, bookId);
 	}
 
 	/**
@@ -49,5 +48,11 @@ public class BookDaoImpl implements BookDao {
 	public void updateUserBalance(Integer userId, Integer price) {
 		String sql = "update t_user set balance=balance-? where user_id=?";
 		jdbcTemplate.update(sql, price, userId);
+	}
+
+	@Override
+	public Integer getUserBalance(Integer userId) {
+		String sql = "select balance from t_user where user_id=?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, userId);
 	}
 }

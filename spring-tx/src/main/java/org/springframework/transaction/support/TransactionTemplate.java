@@ -117,6 +117,9 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		return this.transactionManager;
 	}
 
+	/**
+	 * 只是校验了事务管理器不为空
+	 */
 	@Override
 	public void afterPropertiesSet() {
 		if (this.transactionManager == null) {
@@ -134,21 +137,27 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			return cpptm.execute(this, action);
 		}
 		else {
+			// TODO 创建事务【与声明事务调用同一个方法】
 			TransactionStatus status = this.transactionManager.getTransaction(this);
 			T result;
 			try {
+				// 执行业务逻辑，这里就是用户自定义的业务代码。如果没有返回值的，就是 doInTransactionWithoutResult()；
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException | Error ex) {
+				// 应用运行时异常/错误异常-->回滚，调用 AbstractPlatformTransactionManager#rollback()：事务提交回滚
+				// TODO 回滚【与声明事务调用同一个方法】
 				// Transactional code threw application exception -> rollback
 				rollbackOnException(status, ex);
 				throw ex;
 			}
 			catch (Throwable ex) {
+				// 未知异常-->回滚，调用 AbstractPlatformTransactionManager#rollback()：事务提交回滚
 				// Transactional code threw unexpected exception -> rollback
 				rollbackOnException(status, ex);
 				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
+			// TODO 事务提交【与声明事务调用同一个方法】
 			this.transactionManager.commit(status);
 			return result;
 		}

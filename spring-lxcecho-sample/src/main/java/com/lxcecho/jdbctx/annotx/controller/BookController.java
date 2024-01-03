@@ -15,7 +15,12 @@ public class BookController {
 	@Autowired
 	private BookService bookService;
 
-	// 买书的方法：图书 id 和用户 id
+	/**
+	 * 买书的方法：图书 id 和用户 id
+	 *
+	 * @param bookId 書本 ID
+	 * @param userId 用戶 ID
+	 */
 	public void buyBook(Integer bookId, Integer userId) {
 		// 调用 service 方法
 		bookService.buyBook(bookId, userId);

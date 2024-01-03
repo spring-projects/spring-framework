@@ -19,6 +19,8 @@ package org.springframework.transaction;
 import org.springframework.lang.Nullable;
 
 /**
+ * 7 大传播 + 5大隔离 + 超时、只读、回滚
+ *
  * Interface that defines Spring-compliant transaction properties.
  * Based on the propagation behavior definitions analogous to EJB CMT attributes.
  *
@@ -43,6 +45,7 @@ import org.springframework.lang.Nullable;
  */
 public interface TransactionDefinition {
 
+	// ===========事务传播行为============
 	/**
 	 * Support a current transaction; create a new one if none exists.
 	 * Analogous to the EJB transaction attribute of the same name.
@@ -131,8 +134,11 @@ public interface TransactionDefinition {
 	 */
 	int PROPAGATION_NESTED = 6;
 
+	// ======事务隔离级别==========
 
 	/**
+	 * PlatformTransactionManager 默认隔离级别，使用数据库默认的事务隔离级别。另外四个与 JDBC 的隔离级别相对应
+	 *
 	 * Use the default isolation level of the underlying datastore.
 	 * <p>All other levels correspond to the JDBC isolation levels.
 	 * @see java.sql.Connection
@@ -140,6 +146,9 @@ public interface TransactionDefinition {
 	int ISOLATION_DEFAULT = -1;
 
 	/**
+	 * 读未提交：这是事务最低的隔离级别，它允许另外一个事务可以看到这个事务未提交的数据。这种隔离级别【会产生脏读，不可重复读和幻读】
+	 * 这种食物隔离级别下，select 语句不加锁。此时，可能读取到不一致数据，即“脏读”。这是并发最高，一致性最差的隔离级别。
+	 *
 	 * Indicates that dirty reads, non-repeatable reads, and phantom reads
 	 * can occur.
 	 * <p>This level allows a row changed by one transaction to be read by another
@@ -151,6 +160,8 @@ public interface TransactionDefinition {
 	int ISOLATION_READ_UNCOMMITTED = 1;  // same as java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
 
 	/**
+	 * 读已提交：保证一个事务修改的数据提交后才能被另一个事务读取，另外一个事务不能读取该事务未提交的数据。这种事务隔离级别【可以避免脏读出现，但是可能会出现不可重复读和幻读】
+	 *
 	 * Indicates that dirty reads are prevented; non-repeatable reads and
 	 * phantom reads can occur.
 	 * <p>This level only prohibits a transaction from reading a row with uncommitted
@@ -159,7 +170,12 @@ public interface TransactionDefinition {
 	 */
 	int ISOLATION_READ_COMMITTED = 2;  // same as java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
+	// TODO 在互联网大数据量，高并发量的场景下，几乎不会使用上述两种隔离级别 【ISOLATION_READ_UNCOMMITTED 和 ISOLATION_READ_COMMITTED】
+
 	/**
+	 * 可重复读：这种事务隔离级别【可以防止脏读、不可重复读，但是可能出现幻读】。他除了保证一个事务不能读取另一个事务未提交的数据外，还保证了不可重复读
+	 * 这是 MySql 默认隔离级别
+	 *
 	 * Indicates that dirty reads and non-repeatable reads are prevented;
 	 * phantom reads can occur.
 	 * <p>This level prohibits a transaction from reading a row with uncommitted changes
@@ -171,6 +187,8 @@ public interface TransactionDefinition {
 	int ISOLATION_REPEATABLE_READ = 4;  // same as java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 	/**
+	 * 串行化：代价最大，可靠性最高的隔离级别，所有事务都是按顺序一个接一个的执行【可避免脏读、不可重复读、幻读】
+	 *
 	 * Indicates that dirty reads, non-repeatable reads, and phantom reads
 	 * are prevented.
 	 * <p>This level includes the prohibitions in {@link #ISOLATION_REPEATABLE_READ}

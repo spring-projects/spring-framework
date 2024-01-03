@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-public class TxByAnnoAllTest {
+public class TxByAnnoForAnnoTest {
 
 	@Test
 	public void testTxAllAnnotation() {
