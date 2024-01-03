@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Statement;
 
@@ -30,6 +32,7 @@ import org.springframework.util.Assert;
  * Default implementation of {@link DatabaseClient.Builder}.
  *
  * @author Mark Paluch
+ * @author Injae Kim
  * @since 5.3
  */
 class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
@@ -41,6 +44,8 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 	private ConnectionFactory connectionFactory;
 
 	private ExecuteFunction executeFunction = Statement::execute;
+
+	private BiConsumer<? super Throwable, ? super Connection> handleInConnectionError = (t, conn) -> {};
 
 	private boolean namedParameters = true;
 
@@ -77,6 +82,13 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 	}
 
 	@Override
+	public DatabaseClient.Builder handleInConnectionError(
+			BiConsumer<? super Throwable, ? super Connection> handleInConnectionError) {
+		this.handleInConnectionError = handleInConnectionError;
+		return this;
+	}
+
+	@Override
 	public DatabaseClient build() {
 		Assert.notNull(this.connectionFactory, "ConnectionFactory must not be null");
 
@@ -91,7 +103,8 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 		}
 
 		return new DefaultDatabaseClient(
-				bindMarkers, this.connectionFactory, this.executeFunction, this.namedParameters);
+				bindMarkers, this.connectionFactory,
+				this.executeFunction, this.handleInConnectionError, this.namedParameters);
 	}
 
 	@Override

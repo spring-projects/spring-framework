@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -68,6 +69,7 @@ import org.springframework.util.StringUtils;
  * @author Bogdan Ilchyshyn
  * @author Simon Baslé
  * @author Juergen Hoeller
+ * @author Injae Kim
  * @since 5.3
  * @see DatabaseClient#create(ConnectionFactory)
  */
@@ -81,16 +83,21 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 	private final ExecuteFunction executeFunction;
 
+	private final BiConsumer<? super Throwable, ? super Connection> handleInConnectionError;
+
 	@Nullable
 	private final NamedParameterExpander namedParameterExpander;
 
 
 	DefaultDatabaseClient(BindMarkersFactory bindMarkersFactory, ConnectionFactory connectionFactory,
-			ExecuteFunction executeFunction, boolean namedParameters) {
+						  ExecuteFunction executeFunction,
+						  BiConsumer<? super Throwable, ? super Connection> handleInConnectionError,
+						  boolean namedParameters) {
 
 		this.bindMarkersFactory = bindMarkersFactory;
 		this.connectionFactory = connectionFactory;
 		this.executeFunction = executeFunction;
+		this.handleInConnectionError = handleInConnectionError;
 		this.namedParameterExpander = (namedParameters ? new NamedParameterExpander() : null);
 	}
 
@@ -122,11 +129,17 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			// Create close-suppressing Connection proxy
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
 					try {
-						return action.apply(connectionToUse);
+						return action.apply(connectionToUse)
+								.doOnError(t -> handleInConnectionError.accept(t, connectionCloseHolder.connection));
 					}
-					catch (R2dbcException ex) {
-						String sql = getSql(action);
-						return Mono.error(ConnectionFactoryUtils.convertR2dbcException("doInConnection", sql, ex));
+					catch (Throwable ex) {
+						handleInConnectionError.accept(ex, connectionCloseHolder.connection);
+						if (ex instanceof R2dbcException) {
+							String sql = getSql(action);
+							return Mono.error(ConnectionFactoryUtils.convertR2dbcException(
+									"doInConnection", sql, (R2dbcException) ex));
+						}
+						throw ex;
 					}
 				}, ConnectionCloseHolder::close, (it, err) -> it.close(),
 				ConnectionCloseHolder::close)
@@ -144,11 +157,17 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			// Create close-suppressing Connection proxy, also preparing returned Statements.
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
 					try {
-						return action.apply(connectionToUse);
+						return action.apply(connectionToUse)
+								.doOnError(t -> handleInConnectionError.accept(t, connectionCloseHolder.connection));
 					}
-					catch (R2dbcException ex) {
-						String sql = getSql(action);
-						return Flux.error(ConnectionFactoryUtils.convertR2dbcException("doInConnectionMany", sql, ex));
+					catch (Throwable ex) {
+						handleInConnectionError.accept(ex, connectionCloseHolder.connection);
+						if (ex instanceof R2dbcException) {
+							String sql = getSql(action);
+							return Flux.error(ConnectionFactoryUtils.convertR2dbcException(
+									"doInConnectionMany", sql, (R2dbcException) ex));
+						}
+						throw ex;
 					}
 				}, ConnectionCloseHolder::close, (it, err) -> it.close(),
 				ConnectionCloseHolder::close)

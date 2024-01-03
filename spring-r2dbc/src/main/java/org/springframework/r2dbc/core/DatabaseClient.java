@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,10 @@
 package org.springframework.r2dbc.core;
 
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
-import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.*;
 import io.r2dbc.spi.Readable;
-import io.r2dbc.spi.Result;
-import io.r2dbc.spi.Row;
-import io.r2dbc.spi.RowMetadata;
-import io.r2dbc.spi.Statement;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -56,6 +48,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
+ * @author Injae Kim
  * @since 5.3
  */
 public interface DatabaseClient extends ConnectionAccessor {
@@ -145,6 +138,12 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @see NamedParameterExpander
 		 */
 		Builder namedParameters(boolean enabled);
+
+		/**
+		 * Handle the given error on {@link ConnectionAccessor#inConnection}
+		 * or {@link ConnectionAccessor#inConnectionMany}.
+		 */
+		Builder handleInConnectionError(BiConsumer<? super Throwable, ? super Connection> handleInConnectionError);
 
 		/**
 		 * Apply a {@link Consumer} to configure this builder.

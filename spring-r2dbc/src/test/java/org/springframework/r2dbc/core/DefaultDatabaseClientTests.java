@@ -19,12 +19,9 @@ package org.springframework.r2dbc.core;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.Parameters;
-import io.r2dbc.spi.Result;
-import io.r2dbc.spi.Statement;
+import io.r2dbc.spi.*;
 import io.r2dbc.spi.test.MockColumnMetadata;
 import io.r2dbc.spi.test.MockResult;
 import io.r2dbc.spi.test.MockRow;
@@ -66,6 +63,7 @@ import static org.mockito.BDDMockito.when;
  * @author Ferdinand Jacobs
  * @author Jens Schauder
  * @author Simon Baslé
+ * @author Injae Kim
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
 class DefaultDatabaseClientTests {
@@ -127,6 +125,98 @@ class DefaultDatabaseClientTests {
 			}
 		});
 
+		verify(connection, times(1)).close();
+	}
+
+	@Test
+	void shouldHandleErrorInConnection() {
+		AtomicInteger handleErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
+			handleErrorCounter.incrementAndGet();
+			conn.getMetadata();
+		};
+
+		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
+				.handleInConnectionError(handleInConnectionError)
+				.build();
+		Mono<Object> mono = databaseClient.inConnection(connection -> Mono.error(new IllegalStateException()));
+
+		StepVerifier.create(mono)
+				.verifyErrorSatisfies(t -> {
+					assertThat(t).isInstanceOf(IllegalStateException.class);
+					assertThat(handleErrorCounter.get()).isOne();
+					verify(connection, times(1)).getMetadata();
+				});
+		verify(connection, times(1)).close();
+	}
+
+	@Test
+	void shouldHandleErrorInConnectionActionThrow() {
+		AtomicInteger handleErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
+			handleErrorCounter.incrementAndGet();
+			conn.getMetadata();
+		};
+
+		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
+				.handleInConnectionError(handleInConnectionError)
+				.build();
+		Mono<Object> mono = databaseClient.inConnection(connection -> {
+			throw new IllegalStateException();
+		});
+
+		StepVerifier.create(mono)
+				.verifyErrorSatisfies(t -> {
+					assertThat(t).isInstanceOf(IllegalStateException.class);
+					assertThat(handleErrorCounter.get()).isOne();
+					verify(connection, times(1)).getMetadata();
+				});
+		verify(connection, times(1)).close();
+	}
+
+	@Test
+	void shouldHandleErrorInConnectionMany() {
+		AtomicInteger handleErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
+			handleErrorCounter.incrementAndGet();
+			conn.getMetadata();
+		};
+
+		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
+				.handleInConnectionError(handleInConnectionError)
+				.build();
+		Flux<Object> flux = databaseClient.inConnectionMany(connection -> Flux.error(new IllegalStateException()));
+
+		StepVerifier.create(flux)
+				.verifyErrorSatisfies(t -> {
+					assertThat(t).isInstanceOf(IllegalStateException.class);
+					assertThat(handleErrorCounter.get()).isOne();
+					verify(connection, times(1)).getMetadata();
+				});
+		verify(connection, times(1)).close();
+	}
+
+	@Test
+	void shouldHandleErrorInConnectionManyActionThrow() {
+		AtomicInteger handleErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
+			handleErrorCounter.incrementAndGet();
+			conn.getMetadata();
+		};
+
+		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
+				.handleInConnectionError(handleInConnectionError)
+				.build();
+		Flux<Object> flux = databaseClient.inConnectionMany(connection -> {
+			throw new IllegalStateException();
+		});
+
+		StepVerifier.create(flux)
+				.verifyErrorSatisfies(t -> {
+					assertThat(t).isInstanceOf(IllegalStateException.class);
+					assertThat(handleErrorCounter.get()).isOne();
+					verify(connection, times(1)).getMetadata();
+				});
 		verify(connection, times(1)).close();
 	}
 
