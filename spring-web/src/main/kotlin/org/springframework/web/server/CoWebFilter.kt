@@ -26,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Kotlin-specific implementation of the [WebFilter] interface that allows for
- * using coroutines.
+ * using coroutines, including [kotlin.coroutines.CoroutineContext] propagation.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze

@@ -23,6 +23,9 @@ import reactor.core.publisher.Mono;
  * be used to implement cross-cutting, application-agnostic requirements such
  * as security, timeouts, and others.
  *
+ * <p>Consider using {@code org.springframework.web.server.CoWebFilter} with
+ * Kotlin Coroutines.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
