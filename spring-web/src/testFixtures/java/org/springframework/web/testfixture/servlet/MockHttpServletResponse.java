@@ -320,6 +320,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
 	}
 
+	/**
+	 * Get the length of the content body from the HTTP Content-Length header.
+	 * @return the value of the Content-Length header
+	 * @see #setContentLength(int)
+	 */
 	public int getContentLength() {
 		return (int) this.contentLength;
 	}
