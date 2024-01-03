@@ -458,13 +458,13 @@ class CglibProxyTests extends AbstractAopProxyTests {
 
 	public enum MyEnum implements MyInterface {
 
-		A, B;
+		A, B
 	}
 
 
 	public enum MyOtherEnum implements MyInterface {
 
-		C, D;
+		C, D
 	}
 
 
@@ -482,7 +482,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 			return finallyInvoked;
 		}
 
-		public void doTest() throws Exception {
+		public void doTest() {
 			try {
 				throw new ApplicationContextException("foo");
 			}
@@ -586,7 +586,7 @@ class CglibTestBean {
 class UnsupportedInterceptor implements MethodInterceptor {
 
 	@Override
-	public Object invoke(MethodInvocation mi) throws Throwable {
+	public Object invoke(MethodInvocation mi) {
 		throw new UnsupportedOperationException(mi.getMethod().getName());
 	}
 }

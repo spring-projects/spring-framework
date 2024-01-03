@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,11 @@ public abstract class AbstractCircularImportDetectionTests {
 
 	protected abstract ConfigurationClassParser newParser();
 
-	protected abstract String loadAsConfigurationSource(Class<?> clazz) throws Exception;
+	protected abstract String loadAsConfigurationSource(Class<?> clazz);
 
 
 	@Test
-	public void simpleCircularImportIsDetected() throws Exception {
+	void simpleCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
 			newParser().parse(loadAsConfigurationSource(A.class), "A");
@@ -52,7 +52,7 @@ public abstract class AbstractCircularImportDetectionTests {
 	}
 
 	@Test
-	public void complexCircularImportIsDetected() throws Exception {
+	void complexCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
 			newParser().parse(loadAsConfigurationSource(X.class), "X");

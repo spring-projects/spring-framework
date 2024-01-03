@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public abstract class AbstractNamingStrategyTests {
 
 	@Test
-	public void naming() throws Exception {
+	void naming() throws Exception {
 		ObjectNamingStrategy strat = getStrategy();
 		ObjectName objectName = strat.getObjectName(getManagedResource(), getKey());
 		assertThat(getCorrectObjectName()).isEqualTo(objectName.getCanonicalName());
@@ -36,7 +36,7 @@ public abstract class AbstractNamingStrategyTests {
 
 	protected abstract ObjectNamingStrategy getStrategy() throws Exception;
 
-	protected abstract Object getManagedResource() throws Exception;
+	protected abstract Object getManagedResource();
 
 	protected abstract String getKey();
 

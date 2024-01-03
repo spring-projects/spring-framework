@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Kazuki Shimizu
  * @author Juergen Hoeller
  */
-public class SpringValidatorAdapterTests {
+class SpringValidatorAdapterTests {
 
 	private final Validator nativeValidator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -71,7 +71,7 @@ public class SpringValidatorAdapterTests {
 
 
 	@BeforeEach
-	public void setupSpringValidatorAdapter() {
+	void setupSpringValidatorAdapter() {
 		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} must be between {2} and {1}");
 		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value as {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
@@ -80,7 +80,7 @@ public class SpringValidatorAdapterTests {
 
 
 	@Test
-	public void testUnwrap() {
+	void testUnwrap() {
 		Validator nativeValidator = validatorAdapter.unwrap(Validator.class);
 		assertThat(nativeValidator).isSameAs(this.nativeValidator);
 	}
@@ -174,7 +174,7 @@ public class SpringValidatorAdapterTests {
 	}
 
 	@Test
-	public void testPatternMessage() {
+	void testPatternMessage() {
 		TestBean testBean = new TestBean();
 		testBean.setEmail("X");
 		testBean.setConfirmEmail("X");

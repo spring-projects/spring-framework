@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @author Stephane Nicoll
  */
-public class ExpressionEvaluatorTests {
+class ExpressionEvaluatorTests {
 
 	private final StandardEvaluationContext originalEvaluationContext = new StandardEvaluationContext();
 
@@ -65,7 +65,7 @@ public class ExpressionEvaluatorTests {
 
 
 	@Test
-	public void testMultipleCachingSource() {
+	void testMultipleCachingSource() {
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 		assertThat(ops).hasSize(2);
 		Iterator<CacheOperation> it = ops.iterator();
@@ -80,7 +80,7 @@ public class ExpressionEvaluatorTests {
 	}
 
 	@Test
-	public void testMultipleCachingEval() {
+	void testMultipleCachingEval() {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(
 				AnnotatedClass.class, "multipleCaching", Object.class, Object.class);
@@ -102,28 +102,28 @@ public class ExpressionEvaluatorTests {
 	}
 
 	@Test
-	public void withReturnValue() {
+	void withReturnValue() {
 		EvaluationContext context = createEvaluationContext("theResult");
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
 		assertThat(value).isEqualTo("theResult");
 	}
 
 	@Test
-	public void withNullReturn() {
+	void withNullReturn() {
 		EvaluationContext context = createEvaluationContext(null);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
 		assertThat(value).isNull();
 	}
 
 	@Test
-	public void withoutReturnValue() {
+	void withoutReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
 		assertThat(value).isNull();
 	}
 
 	@Test
-	public void unavailableReturnValue() {
+	void unavailableReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE);
 		assertThatExceptionOfType(VariableNotAvailableException.class).isThrownBy(() ->
 				new SpelExpressionParser().parseExpression("#result").getValue(context))
@@ -131,7 +131,7 @@ public class ExpressionEvaluatorTests {
 	}
 
 	@Test
-	public void resolveBeanReference() {
+	void resolveBeanReference() {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		BeanDefinition beanDefinition = new RootBeanDefinition(String.class);
 		applicationContext.registerBeanDefinition("myBean", beanDefinition);

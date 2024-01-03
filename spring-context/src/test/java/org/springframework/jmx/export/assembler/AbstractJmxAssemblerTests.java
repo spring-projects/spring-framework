@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	protected abstract String getObjectName();
 
 	@Test
-	public void testMBeanRegistration() throws Exception {
+	void testMBeanRegistration() throws Exception {
 		// beans are registered at this point - just grab them from the server
 		ObjectInstance instance = getObjectInstance();
 		assertThat(instance).as("Bean should not be null").isNotNull();
 	}
 
 	@Test
-	public void testRegisterOperations() throws Exception {
+	void testRegisterOperations() throws Exception {
 		IJmxTestBean bean = getBean();
 		assertThat(bean).isNotNull();
 		MBeanInfo inf = getMBeanInfo();
@@ -64,7 +64,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testRegisterAttributes() throws Exception {
+	void testRegisterAttributes() throws Exception {
 		IJmxTestBean bean = getBean();
 		assertThat(bean).isNotNull();
 		MBeanInfo inf = getMBeanInfo();
@@ -72,13 +72,13 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testGetMBeanInfo() throws Exception {
+	void testGetMBeanInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		assertThat(info).as("MBeanInfo should not be null").isNotNull();
 	}
 
 	@Test
-	public void testGetMBeanAttributeInfo() throws Exception {
+	void testGetMBeanAttributeInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		MBeanAttributeInfo[] inf = info.getAttributes();
 		assertThat(inf).as("Invalid number of Attributes returned").hasSize(getExpectedAttributeCount());
@@ -90,7 +90,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testGetMBeanOperationInfo() throws Exception {
+	void testGetMBeanOperationInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		MBeanOperationInfo[] inf = info.getOperations();
 		assertThat(inf).as("Invalid number of Operations returned").hasSize(getExpectedOperationCount());
@@ -102,14 +102,14 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testDescriptionNotNull() throws Exception {
+	void testDescriptionNotNull() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
 		assertThat(info.getDescription()).as("The MBean description should not be null").isNotNull();
 	}
 
 	@Test
-	public void testSetAttribute() throws Exception {
+	void testSetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		getServer().setAttribute(objectName, new Attribute(NAME_ATTRIBUTE, "Rob Harrop"));
 		IJmxTestBean bean = (IJmxTestBean) getContext().getBean("testBean");
@@ -117,7 +117,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testGetAttribute() throws Exception {
+	void testGetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		getBean().setName("John Smith");
 		Object val = getServer().getAttribute(objectName, NAME_ATTRIBUTE);
@@ -125,7 +125,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testOperationInvocation() throws Exception{
+	void testOperationInvocation() throws Exception{
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		Object result = getServer().invoke(objectName, "add",
 				new Object[] {20, 30}, new String[] {"int", "int"});
@@ -133,7 +133,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testAttributeInfoHasDescriptors() throws Exception {
+	void testAttributeInfoHasDescriptors() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
 		ModelMBeanAttributeInfo attr = info.getAttribute(NAME_ATTRIBUTE);
@@ -145,7 +145,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testAttributeHasCorrespondingOperations() throws Exception {
+	void testAttributeHasCorrespondingOperations() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
 		ModelMBeanOperationInfo get = info.getOperation("getName");
@@ -160,7 +160,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	@Test
-	public void testNotificationMetadata() throws Exception {
+	void testNotificationMetadata() throws Exception {
 		ModelMBeanInfo info = (ModelMBeanInfo) getMBeanInfo();
 		MBeanNotificationInfo[] notifications = info.getNotifications();
 		assertThat(notifications).as("Incorrect number of notifications").hasSize(1);
@@ -175,8 +175,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	protected ModelMBeanInfo getMBeanInfoFromAssembler() throws Exception {
 		IJmxTestBean bean = getBean();
-		ModelMBeanInfo info = getAssembler().getMBeanInfo(bean, getObjectName());
-		return info;
+		return getAssembler().getMBeanInfo(bean, getObjectName());
 	}
 
 	protected IJmxTestBean getBean() {
@@ -196,6 +195,6 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	protected abstract int getExpectedAttributeCount();
 
-	protected abstract MBeanInfoAssembler getAssembler() throws Exception;
+	protected abstract MBeanInfoAssembler getAssembler();
 
 }

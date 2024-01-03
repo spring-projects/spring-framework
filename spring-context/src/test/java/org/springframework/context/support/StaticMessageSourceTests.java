@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class StaticMessageSourceTests extends AbstractApplicationContextTests {
+class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 	protected static final String MSG_TXT1_US =
 			"At '{1,time}' on \"{1,date}\", there was \"{2}\" on planet {0,number,integer}.";
@@ -68,14 +68,14 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	}
 
 	@Test
-	public void getMessageWithDefaultPassedInAndFoundInMsgCatalog() {
+	void getMessageWithDefaultPassedInAndFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertThat(sac.getMessage("message.format.example2", null, "This is a default msg if not found in MessageSource.", Locale.US)).as("valid msg from staticMsgSource with default msg passed in returned msg from msg catalog for Locale.US")
 				.isEqualTo("This is a test message in the message catalog with no args.");
 	}
 
 	@Test
-	public void getMessageWithDefaultPassedInAndNotFoundInMsgCatalog() {
+	void getMessageWithDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertThat(sac.getMessage("bogus.message", null, "This is a default msg if not found in MessageSource.", Locale.US)).as("bogus msg from staticMsgSource with default msg passed in returned default msg for Locale.US")
 				.isEqualTo("This is a default msg if not found in MessageSource.");
@@ -89,7 +89,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 */
 	@Test
-	public void getMessageWithMessageAlreadyLookedFor() {
+	void getMessageWithMessageAlreadyLookedFor() {
 		Object[] arguments = {
 			7, new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
@@ -117,7 +117,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	 * Example taken from the javadocs for the java.text.MessageFormat class
 	 */
 	@Test
-	public void getMessageWithNoDefaultPassedInAndFoundInMsgCatalog() {
+	void getMessageWithNoDefaultPassedInAndFoundInMsgCatalog() {
 		Object[] arguments = {
 			7, new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
@@ -144,14 +144,14 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	}
 
 	@Test
-	public void getMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
+	void getMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
 				sac.getMessage("bogus.message", null, Locale.US));
 	}
 
 	@Test
-	public void messageSourceResolvable() {
+	void messageSourceResolvable() {
 		// first code valid
 		String[] codes1 = new String[] {"message.format.example3", "message.format.example2"};
 		MessageSourceResolvable resolvable1 = new DefaultMessageSourceResolvable(codes1, null, "default");
@@ -177,7 +177,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	protected ConfigurableApplicationContext createContext() throws Exception {
+	protected ConfigurableApplicationContext createContext() {
 		StaticApplicationContext parent = new StaticApplicationContext();
 
 		Map<String, String> m = new HashMap<>();
@@ -215,7 +215,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	}
 
 	@Test
-	public void nestedMessageSourceWithParamInChild() {
+	void nestedMessageSourceWithParamInChild() {
 		StaticMessageSource source = new StaticMessageSource();
 		StaticMessageSource parent = new StaticMessageSource();
 		source.setParentMessageSource(parent);
@@ -230,7 +230,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	}
 
 	@Test
-	public void nestedMessageSourceWithParamInParent() {
+	void nestedMessageSourceWithParamInParent() {
 		StaticMessageSource source = new StaticMessageSource();
 		StaticMessageSource parent = new StaticMessageSource();
 		source.setParentMessageSource(parent);

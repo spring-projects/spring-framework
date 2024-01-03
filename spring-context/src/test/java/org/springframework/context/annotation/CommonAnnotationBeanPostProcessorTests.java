@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class CommonAnnotationBeanPostProcessorTests {
+class CommonAnnotationBeanPostProcessorTests {
 
 	@Test
-	public void testPostConstructAndPreDestroy() {
+	void testPostConstructAndPreDestroy() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(AnnotatedInitDestroyBean.class));
@@ -64,7 +64,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testPostConstructAndPreDestroyWithPostProcessor() {
+	void testPostConstructAndPreDestroyWithPostProcessor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addBeanPostProcessor(new InitDestroyBeanPostProcessor());
 		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
@@ -77,7 +77,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testPostConstructAndPreDestroyWithApplicationContextAndPostProcessor() {
+	void testPostConstructAndPreDestroyWithApplicationContextAndPostProcessor() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.registerBeanDefinition("bpp1", new RootBeanDefinition(InitDestroyBeanPostProcessor.class));
 		ctx.registerBeanDefinition("bpp2", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
@@ -91,7 +91,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testPostConstructAndPreDestroyWithLegacyAnnotations() {
+	void testPostConstructAndPreDestroyWithLegacyAnnotations() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(LegacyAnnotatedInitDestroyBean.class));
@@ -103,7 +103,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testPostConstructAndPreDestroyWithManualConfiguration() {
+	void testPostConstructAndPreDestroyWithManualConfiguration() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		InitDestroyAnnotationBeanPostProcessor bpp = new InitDestroyAnnotationBeanPostProcessor();
 		bpp.setInitAnnotationType(PostConstruct.class);
@@ -118,7 +118,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testPostProcessorWithNullBean() {
+	void testPostProcessorWithNullBean() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
 		RootBeanDefinition rbd = new RootBeanDefinition(NullFactory.class);
@@ -130,7 +130,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testSerialization() throws Exception {
+	void testSerialization() throws Exception {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		CommonAnnotationBeanPostProcessor bpp2 = SerializationTestUtils.serializeAndDeserialize(bpp);
 
@@ -140,7 +140,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testSerializationWithManualConfiguration() throws Exception {
+	void testSerializationWithManualConfiguration() throws Exception {
 		InitDestroyAnnotationBeanPostProcessor bpp = new InitDestroyAnnotationBeanPostProcessor();
 		bpp.setInitAnnotationType(PostConstruct.class);
 		bpp.setDestroyAnnotationType(PreDestroy.class);
@@ -152,7 +152,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjection() {
+	void testResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
@@ -176,7 +176,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjectionWithPrototypes() {
+	void testResourceInjectionWithPrototypes() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
@@ -213,7 +213,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjectionWithLegacyAnnotations() {
+	void testResourceInjectionWithLegacyAnnotations() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
@@ -237,7 +237,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjectionWithResolvableDependencyType() {
+	void testResourceInjectionWithResolvableDependencyType() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -273,7 +273,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjectionWithDefaultMethod() {
+	void testResourceInjectionWithDefaultMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -293,7 +293,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjectionWithTwoProcessors() {
+	void testResourceInjectionWithTwoProcessors() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
@@ -318,7 +318,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testResourceInjectionFromJndi() {
+	void testResourceInjectionFromJndi() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		SimpleJndiBeanFactory resourceFactory = new SimpleJndiBeanFactory();
@@ -343,7 +343,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testExtendedResourceInjection() {
+	void testExtendedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -396,7 +396,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testExtendedResourceInjectionWithOverriding() {
+	void testExtendedResourceInjectionWithOverriding() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -453,7 +453,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testExtendedEjbInjection() {
+	void testExtendedEjbInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -490,7 +490,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testLazyResolutionWithResourceField() {
+	void testLazyResolutionWithResourceField() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -508,7 +508,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testLazyResolutionWithResourceMethod() {
+	void testLazyResolutionWithResourceMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -526,7 +526,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testLazyResolutionWithCglibProxy() {
+	void testLazyResolutionWithCglibProxy() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -544,7 +544,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testLazyResolutionWithFallbackTypeMatch() {
+	void testLazyResolutionWithFallbackTypeMatch() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();

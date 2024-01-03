@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,7 +278,7 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 			return Mono.just("test")
 					.tap(() -> new DefaultSignalListener<>() {
 						@Override
-						public void doFirst() throws Throwable {
+						public void doFirst() {
 							Observation observation = observationRegistry.getCurrentObservation();
 							assertThat(observation).isNotNull();
 							assertThat(observation.getContext()).isInstanceOf(ScheduledTaskObservationContext.class);

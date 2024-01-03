@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,29 +28,29 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Keith Donald
  */
-public class NumberStyleFormatterTests {
+class NumberStyleFormatterTests {
 
 	private final NumberStyleFormatter formatter = new NumberStyleFormatter();
 
 
 	@Test
-	public void formatValue() {
+	void formatValue() {
 		assertThat(formatter.print(new BigDecimal("23.56"), Locale.US)).isEqualTo("23.56");
 	}
 
 	@Test
-	public void parseValue() throws ParseException {
+	void parseValue() throws ParseException {
 		assertThat(formatter.parse("23.56", Locale.US)).isEqualTo(new BigDecimal("23.56"));
 	}
 
 	@Test
-	public void parseBogusValue() throws ParseException {
+	void parseBogusValue() {
 		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
 				formatter.parse("bogus", Locale.US));
 	}
 
 	@Test
-	public void parsePercentValueNotLenientFailure() throws ParseException {
+	void parsePercentValueNotLenientFailure() {
 		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
 				formatter.parse("23.56bogus", Locale.US));
 	}

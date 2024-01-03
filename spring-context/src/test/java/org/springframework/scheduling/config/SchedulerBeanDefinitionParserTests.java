@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,33 +29,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Fisher
  */
-public class SchedulerBeanDefinitionParserTests {
+class SchedulerBeanDefinitionParserTests {
 
 	private ApplicationContext context;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"schedulerContext.xml", SchedulerBeanDefinitionParserTests.class);
 	}
 
 	@Test
-	public void defaultScheduler() {
+	void defaultScheduler() {
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) this.context.getBean("defaultScheduler");
 		Integer size = (Integer) new DirectFieldAccessor(scheduler).getPropertyValue("poolSize");
 		assertThat(size).isEqualTo(1);
 	}
 
 	@Test
-	public void customScheduler() {
+	void customScheduler() {
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) this.context.getBean("customScheduler");
 		Integer size = (Integer) new DirectFieldAccessor(scheduler).getPropertyValue("poolSize");
 		assertThat(size).isEqualTo(42);
 	}
 
 	@Test
-	public void threadNamePrefix() {
+	void threadNamePrefix() {
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) this.context.getBean("customScheduler");
 		assertThat(scheduler.getThreadNamePrefix()).isEqualTo("customScheduler-");
 	}

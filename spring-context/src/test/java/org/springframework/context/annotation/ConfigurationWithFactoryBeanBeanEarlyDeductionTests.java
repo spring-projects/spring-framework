@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,50 +40,50 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  */
-public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
+class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 
 	@Test
-	public void preFreezeDirect() {
+	void preFreezeDirect() {
 		assertPreFreeze(DirectConfiguration.class);
 	}
 
 	@Test
-	public void postFreezeDirect() {
+	void postFreezeDirect() {
 		assertPostFreeze(DirectConfiguration.class);
 	}
 
 	@Test
-	public void preFreezeGenericMethod() {
+	void preFreezeGenericMethod() {
 		assertPreFreeze(GenericMethodConfiguration.class);
 	}
 
 	@Test
-	public void postFreezeGenericMethod() {
+	void postFreezeGenericMethod() {
 		assertPostFreeze(GenericMethodConfiguration.class);
 	}
 
 	@Test
-	public void preFreezeGenericClass() {
+	void preFreezeGenericClass() {
 		assertPreFreeze(GenericClassConfiguration.class);
 	}
 
 	@Test
-	public void postFreezeGenericClass() {
+	void postFreezeGenericClass() {
 		assertPostFreeze(GenericClassConfiguration.class);
 	}
 
 	@Test
-	public void preFreezeAttribute() {
+	void preFreezeAttribute() {
 		assertPreFreeze(AttributeClassConfiguration.class);
 	}
 
 	@Test
-	public void postFreezeAttribute() {
+	void postFreezeAttribute() {
 		assertPostFreeze(AttributeClassConfiguration.class);
 	}
 
 	@Test
-	public void preFreezeUnresolvedGenericFactoryBean() {
+	void preFreezeUnresolvedGenericFactoryBean() {
 		// Covers the case where a @Configuration is picked up via component scanning
 		// and its bean definition only has a String bean class. In such cases
 		// beanDefinition.hasBeanClass() returns false so we need to actually
@@ -212,7 +212,7 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		}
 
 		@Override
-		public T getObject() throws Exception {
+		public T getObject() {
 			return this.instance;
 		}
 
@@ -236,7 +236,7 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		private final Object object = new MyBean();
 
 		@Override
-		public Object getObject() throws Exception {
+		public Object getObject() {
 			return object;
 		}
 

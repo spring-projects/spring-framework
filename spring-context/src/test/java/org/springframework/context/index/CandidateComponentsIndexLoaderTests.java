@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 public class CandidateComponentsIndexLoaderTests {
 
 	@Test
-	public void validateIndexIsDisabledByDefault() {
+	void validateIndexIsDisabledByDefault() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(null);
 		assertThat(index).as("No spring.components should be available at the default location").isNull();
 	}
 
 	@Test
-	public void loadIndexSeveralMatches() {
+	void loadIndexSeveralMatches() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
@@ -54,7 +54,7 @@ public class CandidateComponentsIndexLoaderTests {
 	}
 
 	@Test
-	public void loadIndexSingleMatch() {
+	void loadIndexSingleMatch() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
@@ -64,7 +64,7 @@ public class CandidateComponentsIndexLoaderTests {
 	}
 
 	@Test
-	public void loadIndexNoMatch() {
+	void loadIndexNoMatch() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
@@ -73,7 +73,7 @@ public class CandidateComponentsIndexLoaderTests {
 	}
 
 	@Test
-	public void loadIndexNoPackage() {
+	void loadIndexNoPackage() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
@@ -82,14 +82,14 @@ public class CandidateComponentsIndexLoaderTests {
 	}
 
 	@Test
-	public void loadIndexNoSpringComponentsResource() {
+	void loadIndexNoSpringComponentsResource() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.disableIndex(getClass().getClassLoader()));
 		assertThat(index).isNull();
 	}
 
 	@Test
-	public void loadIndexNoEntry() {
+	void loadIndexNoEntry() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("empty-spring.components", getClass())));
@@ -97,7 +97,7 @@ public class CandidateComponentsIndexLoaderTests {
 	}
 
 	@Test
-	public void loadIndexWithException() {
+	void loadIndexWithException() {
 		final IOException cause = new IOException("test exception");
 		assertThatIllegalStateException().isThrownBy(() -> {
 				CandidateComponentsTestClassLoader classLoader = new CandidateComponentsTestClassLoader(getClass().getClassLoader(), cause);

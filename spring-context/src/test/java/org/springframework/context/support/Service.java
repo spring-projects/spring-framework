@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,21 +81,18 @@ public class Service implements ApplicationContextAware, MessageSourceAware, Dis
 	@Override
 	public void destroy() {
 		this.properlyDestroyed = true;
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				Assert.state(applicationContext.getBean("messageSource") instanceof StaticMessageSource,
-						"Invalid MessageSource bean");
-				try {
-					applicationContext.getBean("service2");
-					// Should have thrown BeanCreationNotAllowedException
-					properlyDestroyed = false;
-				}
-				catch (BeanCreationNotAllowedException ex) {
-					// expected
-				}
+		Thread thread = new Thread(() -> {
+			Assert.state(applicationContext.getBean("messageSource") instanceof StaticMessageSource,
+					"Invalid MessageSource bean");
+			try {
+				applicationContext.getBean("service2");
+				// Should have thrown BeanCreationNotAllowedException
+				properlyDestroyed = false;
 			}
-		};
+			catch (BeanCreationNotAllowedException ex) {
+				// expected
+			}
+		});
 		thread.start();
 		try {
 			thread.join();

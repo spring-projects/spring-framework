@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -447,7 +447,7 @@ class DataBinderTests {
 
 		conversionService.addFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				throw new RuntimeException(text);
 			}
 			@Override
@@ -480,7 +480,7 @@ class DataBinderTests {
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		try {
 			binder.bind(pvs);
-			assertThat(tb.getIntegerList()).element(0).isEqualTo(1);
+			assertThat(tb.getIntegerList()).containsExactly(1);
 			assertThat(binder.getBindingResult().getFieldValue("integerList[0]")).isEqualTo("1");
 		}
 		finally {
@@ -650,7 +650,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				throw new RuntimeException(text);
 			}
 			@Override
@@ -1022,7 +1022,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				return "prefix" + text;
 			}
 			@Override
@@ -1061,7 +1061,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<Integer>() {
 			@Override
-			public Integer parse(String text, Locale locale) throws ParseException {
+			public Integer parse(String text, Locale locale) {
 				return 99;
 			}
 			@Override
@@ -1085,7 +1085,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				return "prefix" + text;
 			}
 			@Override
@@ -2007,9 +2007,7 @@ class DataBinderTests {
 		assertThat(binder.getBindingResult().hasErrors()).isFalse();
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) form.getF().get("list");
-		assertThat(list).element(0).isEqualTo("firstValue");
-		assertThat(list).element(1).isEqualTo("secondValue");
-		assertThat(list).hasSize(2);
+		assertThat(list).containsExactly("firstValue", "secondValue");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	void bindingNoErrorsNotIgnoreUnknown() throws Exception {
+	void bindingNoErrorsNotIgnoreUnknown() {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
@@ -76,7 +76,7 @@ class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	void bindingWithErrors() throws Exception {
+	void bindingWithErrors() {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
@@ -122,7 +122,7 @@ class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	void nestedBindingWithDisabledAutoGrow() throws Exception {
+	void nestedBindingWithDisabledAutoGrow() {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.setAutoGrowNestedPaths(false);
@@ -135,7 +135,7 @@ class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	void bindingWithErrorsAndCustomEditors() throws Exception {
+	void bindingWithErrorsAndCustomEditors() {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();

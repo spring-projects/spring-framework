@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Rob Winch
  */
-public class Spr10546Tests {
+class Spr10546Tests {
 	private ConfigurableApplicationContext context;
 
 	@AfterEach
-	public void closeContext() {
+	void closeContext() {
 		if (context != null) {
 			context.close();
 		}
@@ -44,7 +44,7 @@ public class Spr10546Tests {
 	// These fail prior to fixing SPR-10546
 
 	@Test
-	public void enclosingConfigFirstParentDefinesBean() {
+	void enclosingConfigFirstParentDefinesBean() {
 		assertLoadsMyBean(AEnclosingConfig.class,AEnclosingConfig.ChildConfig.class);
 	}
 
@@ -59,7 +59,7 @@ public class Spr10546Tests {
 	 * classpath scanning implementation being used by the author of this test.
 	 */
 	@Test
-	public void enclosingConfigFirstParentDefinesBeanWithScanning() {
+	void enclosingConfigFirstParentDefinesBeanWithScanning() {
 		AnnotationConfigApplicationContext ctx= new AnnotationConfigApplicationContext();
 		context = ctx;
 		ctx.scan(AEnclosingConfig.class.getPackage().getName());
@@ -68,7 +68,7 @@ public class Spr10546Tests {
 	}
 
 	@Test
-	public void enclosingConfigFirstParentDefinesBeanWithImportResource() {
+	void enclosingConfigFirstParentDefinesBeanWithImportResource() {
 		assertLoadsMyBean(AEnclosingWithImportResourceConfig.class,AEnclosingWithImportResourceConfig.ChildConfig.class);
 	}
 
@@ -79,7 +79,7 @@ public class Spr10546Tests {
 	}
 
 	@Test
-	public void enclosingConfigFirstParentDefinesBeanWithComponentScan() {
+	void enclosingConfigFirstParentDefinesBeanWithComponentScan() {
 		assertLoadsMyBean(AEnclosingWithComponentScanConfig.class,AEnclosingWithComponentScanConfig.ChildConfig.class);
 	}
 
@@ -90,7 +90,7 @@ public class Spr10546Tests {
 	}
 
 	@Test
-	public void enclosingConfigFirstParentWithParentDefinesBean() {
+	void enclosingConfigFirstParentWithParentDefinesBean() {
 		assertLoadsMyBean(AEnclosingWithGrandparentConfig.class,AEnclosingWithGrandparentConfig.ChildConfig.class);
 	}
 
@@ -101,7 +101,7 @@ public class Spr10546Tests {
 	}
 
 	@Test
-	public void importChildConfigThenChildConfig() {
+	void importChildConfigThenChildConfig() {
 		assertLoadsMyBean(ImportChildConfig.class,ChildConfig.class);
 	}
 
@@ -116,7 +116,7 @@ public class Spr10546Tests {
 	// These worked prior, but validating they continue to work
 
 	@Test
-	public void enclosingConfigFirstParentDefinesBeanWithImport() {
+	void enclosingConfigFirstParentDefinesBeanWithImport() {
 		assertLoadsMyBean(AEnclosingWithImportConfig.class,AEnclosingWithImportConfig.ChildConfig.class);
 	}
 
@@ -127,17 +127,17 @@ public class Spr10546Tests {
 	}
 
 	@Test
-	public void childConfigFirst() {
+	void childConfigFirst() {
 		assertLoadsMyBean(AEnclosingConfig.ChildConfig.class, AEnclosingConfig.class);
 	}
 
 	@Test
-	public void enclosingConfigOnly() {
+	void enclosingConfigOnly() {
 		assertLoadsMyBean(AEnclosingConfig.class);
 	}
 
 	@Test
-	public void childConfigOnly() {
+	void childConfigOnly() {
 		assertLoadsMyBean(AEnclosingConfig.ChildConfig.class);
 	}
 

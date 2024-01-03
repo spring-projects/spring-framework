@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.jmx.export.naming;
+package org.springframework.context.testfixture.jmx.export;
 
-import org.springframework.core.io.ClassPathResource;
+public class Person implements PersonMBean {
 
-/**
- * @author Juergen Hoeller
- */
-class PropertiesFileNamingStrategyTests extends PropertiesNamingStrategyTests {
+	private String name;
 
 	@Override
-	protected ObjectNamingStrategy getStrategy() throws Exception {
-		KeyNamingStrategy strat = new KeyNamingStrategy();
-		strat.setMappingLocation(new ClassPathResource("jmx-names.properties", getClass()));
-		strat.afterPropertiesSet();
-		return strat;
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

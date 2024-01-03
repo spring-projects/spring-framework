@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Keith Donald
  * @author Phillip Webb
  */
-public class DateFormatterTests {
+class DateFormatterTests {
 
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
 
 	@Test
-	public void shouldPrintAndParseDefault() throws Exception {
+	void shouldPrintAndParseDefault() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		Date date = getDate(2009, Calendar.JUNE, 1);
@@ -51,7 +51,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseFromPattern() throws ParseException {
+	void shouldPrintAndParseFromPattern() throws ParseException {
 		DateFormatter formatter = new DateFormatter("yyyy-MM-dd");
 		formatter.setTimeZone(UTC);
 		Date date = getDate(2009, Calendar.JUNE, 1);
@@ -60,7 +60,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseShort() throws Exception {
+	void shouldPrintAndParseShort() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.SHORT);
@@ -70,7 +70,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseMedium() throws Exception {
+	void shouldPrintAndParseMedium() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.MEDIUM);
@@ -80,7 +80,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseLong() throws Exception {
+	void shouldPrintAndParseLong() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.LONG);
@@ -90,7 +90,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseFull() throws Exception {
+	void shouldPrintAndParseFull() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.FULL);
@@ -100,7 +100,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseISODate() throws Exception {
+	void shouldPrintAndParseISODate() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.DATE);
@@ -111,7 +111,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseISOTime() throws Exception {
+	void shouldPrintAndParseISOTime() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.TIME);
@@ -122,7 +122,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldPrintAndParseISODateTime() throws Exception {
+	void shouldPrintAndParseISODateTime() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.DATE_TIME);
@@ -132,7 +132,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldThrowOnUnsupportedStylePattern() throws Exception {
+	void shouldThrowOnUnsupportedStylePattern() {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setStylePattern("OO");
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -141,7 +141,7 @@ public class DateFormatterTests {
 	}
 
 	@Test
-	public void shouldUseCorrectOrder() throws Exception {
+	void shouldUseCorrectOrder() {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.SHORT);

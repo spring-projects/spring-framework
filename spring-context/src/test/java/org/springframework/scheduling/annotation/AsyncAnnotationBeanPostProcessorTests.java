@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class AsyncAnnotationBeanPostProcessorTests {
+class AsyncAnnotationBeanPostProcessorTests {
 
 	@Test
-	public void proxyCreated() {
+	void proxyCreated() {
 		ConfigurableApplicationContext context = initContext(
 				new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		Object target = context.getBean("target");
@@ -61,7 +61,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void invokedAsynchronously() {
+	void invokedAsynchronously() {
 		ConfigurableApplicationContext context = initContext(
 				new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 
@@ -75,7 +75,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void invokedAsynchronouslyOnProxyTarget() {
+	void invokedAsynchronouslyOnProxyTarget() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("postProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		TestBean tb = new TestBean();
@@ -94,7 +94,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void threadNamePrefix() {
+	void threadNamePrefix() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setThreadNamePrefix("testExecutor");
@@ -111,7 +111,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void taskExecutorByBeanType() {
+	void taskExecutorByBeanType() {
 		StaticApplicationContext context = new StaticApplicationContext();
 
 		BeanDefinition processorDefinition = new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
@@ -136,7 +136,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void taskExecutorByBeanName() {
+	void taskExecutorByBeanName() {
 		StaticApplicationContext context = new StaticApplicationContext();
 
 		BeanDefinition processorDefinition = new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
@@ -165,7 +165,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void configuredThroughNamespace() {
+	void configuredThroughNamespace() {
 		GenericXmlApplicationContext context = new GenericXmlApplicationContext();
 		context.load(new ClassPathResource("taskNamespaceTests.xml", getClass()));
 		context.refresh();
@@ -223,7 +223,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void handleExceptionWithCustomExceptionHandler() {
+	void handleExceptionWithCustomExceptionHandler() {
 		Method m = ReflectionUtils.findMethod(TestBean.class, "failWithVoid");
 		TestableAsyncUncaughtExceptionHandler exceptionHandler =
 				new TestableAsyncUncaughtExceptionHandler();
@@ -240,7 +240,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void exceptionHandlerThrowsUnexpectedException() {
+	void exceptionHandlerThrowsUnexpectedException() {
 		Method m = ReflectionUtils.findMethod(TestBean.class, "failWithVoid");
 		TestableAsyncUncaughtExceptionHandler exceptionHandler =
 				new TestableAsyncUncaughtExceptionHandler(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,13 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class EnableSchedulingTests {
+class EnableSchedulingTests {
 
 	private AnnotationConfigApplicationContext ctx;
 
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		if (ctx != null) {
 			ctx.close();
 		}
@@ -140,7 +140,7 @@ public class EnableSchedulingTests {
 	}
 
 	@Test
-	public void withExplicitSchedulerAmbiguity_andSchedulingEnabled() {
+	void withExplicitSchedulerAmbiguity_andSchedulingEnabled() {
 		// No exception raised as of 4.3, aligned with the behavior for @Async methods (SPR-14030)
 		ctx = new AnnotationConfigApplicationContext(AmbiguousExplicitSchedulerConfig.class);
 	}
@@ -192,12 +192,12 @@ public class EnableSchedulingTests {
 	}
 
 	@Test
-	public void withAmbiguousTaskSchedulers_butNoActualTasks() {
+	void withAmbiguousTaskSchedulers_butNoActualTasks() {
 		ctx = new AnnotationConfigApplicationContext(SchedulingEnabled_withAmbiguousTaskSchedulers_butNoActualTasks.class);
 	}
 
 	@Test
-	public void withAmbiguousTaskSchedulers_andSingleTask() {
+	void withAmbiguousTaskSchedulers_andSingleTask() {
 		// No exception raised as of 4.3, aligned with the behavior for @Async methods (SPR-14030)
 		ctx = new AnnotationConfigApplicationContext(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask.class);
 	}

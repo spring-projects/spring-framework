@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class LookupMethodWrappedByCglibProxyTests {
+class LookupMethodWrappedByCglibProxyTests {
 
 	private static final Class<?> CLASS = LookupMethodWrappedByCglibProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -43,13 +43,13 @@ public class LookupMethodWrappedByCglibProxyTests {
 	private ApplicationContext applicationContext;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.applicationContext = new ClassPathXmlApplicationContext(CONTEXT, CLASS);
 		resetInterceptor();
 	}
 
 	@Test
-	public void testAutoProxiedLookup() {
+	void testAutoProxiedLookup() {
 		OverloadLookup olup = (OverloadLookup) applicationContext.getBean("autoProxiedOverload");
 		ITestBean jenny = olup.newTestBean();
 		assertThat(jenny.getName()).isEqualTo("Jenny");
@@ -58,7 +58,7 @@ public class LookupMethodWrappedByCglibProxyTests {
 	}
 
 	@Test
-	public void testRegularlyProxiedLookup() {
+	void testRegularlyProxiedLookup() {
 		OverloadLookup olup = (OverloadLookup) applicationContext.getBean("regularlyProxiedOverload");
 		ITestBean jenny = olup.newTestBean();
 		assertThat(jenny.getName()).isEqualTo("Jenny");

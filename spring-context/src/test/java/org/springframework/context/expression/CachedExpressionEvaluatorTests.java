@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Stephane Nicoll
  */
-public class CachedExpressionEvaluatorTests {
+class CachedExpressionEvaluatorTests {
 
 	private final TestExpressionEvaluator expressionEvaluator = new TestExpressionEvaluator();
 
 	@Test
-	public void parseNewExpression() {
+	void parseNewExpression() {
 		Method method = ReflectionUtils.findMethod(getClass(), "toString");
 		Expression expression = expressionEvaluator.getTestExpression("true", method, getClass());
 		hasParsedExpression("true");
@@ -49,7 +49,7 @@ public class CachedExpressionEvaluatorTests {
 	}
 
 	@Test
-	public void cacheExpression() {
+	void cacheExpression() {
 		Method method = ReflectionUtils.findMethod(getClass(), "toString");
 
 		expressionEvaluator.getTestExpression("true", method, getClass());
@@ -60,7 +60,7 @@ public class CachedExpressionEvaluatorTests {
 	}
 
 	@Test
-	public void cacheExpressionBasedOnConcreteType() {
+	void cacheExpressionBasedOnConcreteType() {
 		Method method = ReflectionUtils.findMethod(getClass(), "toString");
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		expressionEvaluator.getTestExpression("true", method, Object.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
+class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
 
 	protected ConcurrentMap<Object, Object> nativeCache;
 
@@ -48,7 +48,7 @@ public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<Con
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
 		this.nativeCacheNoNull = new ConcurrentHashMap<>();
@@ -73,13 +73,13 @@ public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<Con
 
 
 	@Test
-	public void testIsStoreByReferenceByDefault() {
+	void testIsStoreByReferenceByDefault() {
 		assertThat(this.cache.isStoreByValue()).isFalse();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testSerializer() {
+	void testSerializer() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
 		assertThat(serializeCache.isStoreByValue()).isTrue();
 
@@ -89,11 +89,11 @@ public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<Con
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();
 		assertThat(entry).hasSize(3);
-		assertThat(entry).element(0).isEqualTo("one");
+		assertThat(entry.get(0)).isEqualTo("one");
 	}
 
 	@Test
-	public void testNonSerializableContent() {
+	void testNonSerializableContent() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -104,7 +104,7 @@ public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<Con
 	}
 
 	@Test
-	public void testInvalidSerializedContent() {
+	void testInvalidSerializedContent() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
 
 		String key = createRandomKey();

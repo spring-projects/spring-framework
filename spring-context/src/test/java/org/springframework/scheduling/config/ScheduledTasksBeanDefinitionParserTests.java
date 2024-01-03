@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"scheduledTasksContext.xml", ScheduledTasksBeanDefinitionParserTests.class);
 		this.registrar = this.context.getBeansOfType(
@@ -57,14 +57,14 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void checkScheduler() {
+	void checkScheduler() {
 		Object schedulerBean = this.context.getBean("testScheduler");
 		Object schedulerRef = new DirectFieldAccessor(this.registrar).getPropertyValue("taskScheduler");
 		assertThat(schedulerRef).isEqualTo(schedulerBean);
 	}
 
 	@Test
-	public void checkTarget() {
+	void checkTarget() {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
 		Runnable runnable = tasks.get(0).getRunnable();
@@ -76,7 +76,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void fixedRateTasks() {
+	void fixedRateTasks() {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
 		assertThat(tasks).hasSize(3);
@@ -87,7 +87,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void fixedDelayTasks() {
+	void fixedDelayTasks() {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedDelayTasks");
 		assertThat(tasks).hasSize(2);
@@ -97,7 +97,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void cronTasks() {
+	void cronTasks() {
 		List<CronTask> tasks = (List<CronTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("cronTasks");
 		assertThat(tasks).hasSize(1);
@@ -105,7 +105,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void triggerTasks() {
+	void triggerTasks() {
 		List<TriggerTask> tasks = (List<TriggerTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("triggerTasks");
 		assertThat(tasks).hasSize(1);

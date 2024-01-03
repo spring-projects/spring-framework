@@ -239,13 +239,13 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 	public enum MyEnum implements MyInterface {
 
-		A, B;
+		A, B
 	}
 
 
 	public enum MyOtherEnum implements MyInterface {
 
-		C, D;
+		C, D
 	}
 
 }

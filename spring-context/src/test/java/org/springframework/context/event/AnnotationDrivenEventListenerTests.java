@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ class AnnotationDrivenEventListenerTests {
 
 
 	@AfterEach
-	public void closeContext() {
+	void closeContext() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -196,8 +196,7 @@ class AnnotationDrivenEventListenerTests {
 		failingContext.register(BasicConfiguration.class,
 				InvalidMethodSignatureEventListener.class);
 
-		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(() ->
-				failingContext.refresh())
+		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(failingContext::refresh)
 			.withMessageContaining(InvalidMethodSignatureEventListener.class.getName())
 			.withMessageContaining("cannotBeCalled");
 	}
@@ -680,14 +679,14 @@ class AnnotationDrivenEventListenerTests {
 		List<Class<?>> allClasses = new ArrayList<>();
 		allClasses.add(BasicConfiguration.class);
 		allClasses.addAll(Arrays.asList(classes));
-		doLoad(allClasses.toArray(new Class<?>[allClasses.size()]));
+		doLoad(allClasses.toArray(new Class<?>[0]));
 	}
 
 	private void loadAsync(Class<?>... classes) {
 		List<Class<?>> allClasses = new ArrayList<>();
 		allClasses.add(AsyncConfiguration.class);
 		allClasses.addAll(Arrays.asList(classes));
-		doLoad(allClasses.toArray(new Class<?>[allClasses.size()]));
+		doLoad(allClasses.toArray(new Class<?>[0]));
 	}
 
 	private void doLoad(Class<?>... classes) {

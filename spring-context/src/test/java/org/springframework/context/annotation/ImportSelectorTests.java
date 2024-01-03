@@ -70,7 +70,7 @@ public class ImportSelectorTests {
 
 
 	@BeforeEach
-	public void cleanup() {
+	void cleanup() {
 		ImportSelectorTests.importFrom.clear();
 		SampleImportSelector.cleanup();
 		TestImportGroup.cleanup();
@@ -78,7 +78,7 @@ public class ImportSelectorTests {
 
 
 	@Test
-	public void importSelectors() {
+	void importSelectors() {
 		DefaultListableBeanFactory beanFactory = spy(new DefaultListableBeanFactory());
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
 		context.register(Config.class);
@@ -92,7 +92,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void invokeAwareMethodsInImportSelector() {
+	void invokeAwareMethodsInImportSelector() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AwareConfig.class);
 		assertThat(SampleImportSelector.beanFactory).isEqualTo(context.getBeanFactory());
 		assertThat(SampleImportSelector.classLoader).isEqualTo(context.getBeanFactory().getBeanClassLoader());
@@ -101,7 +101,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void correctMetadataOnIndirectImports() {
+	void correctMetadataOnIndirectImports() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(IndirectConfig.class);
 		String indirectImport = IndirectImport.class.getName();
 		assertThat(importFrom.get(ImportSelector1.class)).isEqualTo(indirectImport);
@@ -115,7 +115,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void importSelectorsWithGroup() {
+	void importSelectorsWithGroup() {
 		DefaultListableBeanFactory beanFactory = spy(new DefaultListableBeanFactory());
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
 		context.register(GroupedConfig.class);
@@ -131,7 +131,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void importSelectorsSeparateWithGroup() {
+	void importSelectorsSeparateWithGroup() {
 		DefaultListableBeanFactory beanFactory = spy(new DefaultListableBeanFactory());
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
 		context.register(GroupedConfig1.class);
@@ -146,7 +146,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void importSelectorsWithNestedGroup() {
+	void importSelectorsWithNestedGroup() {
 		DefaultListableBeanFactory beanFactory = spy(new DefaultListableBeanFactory());
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
 		context.register(ParentConfiguration1.class);
@@ -166,7 +166,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void importSelectorsWithNestedGroupSameDeferredImport() {
+	void importSelectorsWithNestedGroupSameDeferredImport() {
 		DefaultListableBeanFactory beanFactory = spy(new DefaultListableBeanFactory());
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
 		context.register(ParentConfiguration2.class);
@@ -185,7 +185,7 @@ public class ImportSelectorTests {
 	}
 
 	@Test
-	public void invokeAwareMethodsInImportGroup() {
+	void invokeAwareMethodsInImportGroup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(GroupedConfig1.class);
 		assertThat(TestImportGroup.beanFactory).isEqualTo(context.getBeanFactory());
 		assertThat(TestImportGroup.classLoader).isEqualTo(context.getBeanFactory().getBeanClassLoader());

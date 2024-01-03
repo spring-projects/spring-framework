@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,24 +38,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 4.2
  */
-public class MoneyFormattingTests {
+class MoneyFormattingTests {
 
 	private final FormattingConversionService conversionService = new DefaultFormattingConversionService();
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
 
 
 	@Test
-	public void testAmountAndUnit() {
+	void testAmountAndUnit() {
 		MoneyHolder bean = new MoneyHolder();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -81,7 +81,7 @@ public class MoneyFormattingTests {
 	}
 
 	@Test
-	public void testAmountWithNumberFormat1() {
+	void testAmountWithNumberFormat1() {
 		FormattedMoneyHolder1 bean = new FormattedMoneyHolder1();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -104,7 +104,7 @@ public class MoneyFormattingTests {
 	}
 
 	@Test
-	public void testAmountWithNumberFormat2() {
+	void testAmountWithNumberFormat2() {
 		FormattedMoneyHolder2 bean = new FormattedMoneyHolder2();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -119,7 +119,7 @@ public class MoneyFormattingTests {
 	}
 
 	@Test
-	public void testAmountWithNumberFormat3() {
+	void testAmountWithNumberFormat3() {
 		FormattedMoneyHolder3 bean = new FormattedMoneyHolder3();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -134,7 +134,7 @@ public class MoneyFormattingTests {
 	}
 
 	@Test
-	public void testAmountWithNumberFormat4() {
+	void testAmountWithNumberFormat4() {
 		FormattedMoneyHolder4 bean = new FormattedMoneyHolder4();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -149,7 +149,7 @@ public class MoneyFormattingTests {
 	}
 
 	@Test
-	public void testAmountWithNumberFormat5() {
+	void testAmountWithNumberFormat5() {
 		FormattedMoneyHolder5 bean = new FormattedMoneyHolder5();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);

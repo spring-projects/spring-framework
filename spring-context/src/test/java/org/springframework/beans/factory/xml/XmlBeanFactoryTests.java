@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1611,7 +1611,7 @@ class XmlBeanFactoryTests {
 		public Object lastArg;
 
 		@Override
-		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
+		public Object reimplement(Object obj, Method method, Object[] args) {
 			assertThat(args).hasSize(1);
 			assertThat(method.getName()).isEqualTo("doSomething");
 			lastArg = args[0];
@@ -1668,7 +1668,7 @@ class XmlBeanFactoryTests {
 		}
 
 		/** Init method */
-		public void customInit() throws IOException {
+		public void customInit() {
 			assertThat(this.afterPropertiesSetInvoked).isTrue();
 			if (this.initMethodInvoked) {
 				throw new IllegalStateException("Already customInitialized");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,13 @@ class CustomInterceptorTests {
 	protected CacheableService<?> cs;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 		this.cs = ctx.getBean("service", CacheableService.class);
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		this.ctx.close();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -47,10 +46,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class FormattingConversionServiceFactoryBeanTests {
+class FormattingConversionServiceFactoryBeanTests {
 
 	@Test
-	public void testDefaultFormattersOn() throws Exception {
+	void testDefaultFormattersOn() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		FormattingConversionService fcs = factory.getObject();
@@ -69,7 +68,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	public void testDefaultFormattersOff() throws Exception {
+	void testDefaultFormattersOff() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.setRegisterDefaultFormatters(false);
 		factory.afterPropertiesSet();
@@ -82,7 +81,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	public void testCustomFormatter() throws Exception {
+	void testCustomFormatter() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		Set<Object> formatters = new HashSet<>();
 		formatters.add(new TestBeanFormatter());
@@ -103,7 +102,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	public void testFormatterRegistrar() throws Exception {
+	void testFormatterRegistrar() {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		Set<FormatterRegistrar> registrars = new HashSet<>();
 		registrars.add(new TestFormatterRegistrar());
@@ -117,7 +116,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	public void testInvalidFormatter() throws Exception {
+	void testInvalidFormatter() {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		Set<Object> formatters = new HashSet<>();
 		formatters.add(new Object());
@@ -164,7 +163,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		}
 
 		@Override
-		public TestBean parse(String text, Locale locale) throws ParseException {
+		public TestBean parse(String text, Locale locale) {
 			TestBean object = new TestBean();
 			object.setSpecialInt(Integer.parseInt(text));
 			return object;
@@ -189,7 +188,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		public Printer<?> getPrinter(SpecialInt annotation, Class<?> fieldType) {
 			assertThat(annotation.value()).isEqualTo("aliased");
 			assertThat(annotation.alias()).isEqualTo("aliased");
-			return (object, locale) -> ":" + object.toString();
+			return (object, locale) -> ":" + object;
 		}
 
 		@Override

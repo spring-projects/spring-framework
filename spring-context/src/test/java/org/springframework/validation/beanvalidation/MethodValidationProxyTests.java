@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  */
-public class MethodValidationProxyTests {
+class MethodValidationProxyTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
@@ -109,17 +109,17 @@ public class MethodValidationProxyTests {
 	}
 
 	@Test
-	public void testLazyValidatorForMethodValidation() {
+	void testLazyValidatorForMethodValidation() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfig.class);
 	}
 
 	@Test
-	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
+	void testLazyValidatorForMethodValidationWithProxyTargetClass() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithProxyTargetClass.class);
 	}
 
 	@Test
-	public void testLazyValidatorForMethodValidationWithValidatorProvider() {
+	void testLazyValidatorForMethodValidationWithValidatorProvider() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithValidatorProvider.class);
 	}
 
@@ -209,7 +209,7 @@ public class MethodValidationProxyTests {
 
 		@Nullable
 		@Override
-		public Object invoke(MethodInvocation invocation) throws Throwable {
+		public Object invoke(MethodInvocation invocation) {
 			Method method;
 			try {
 				method = ClassUtils.getMethod(MyValidBean.class, invocation.getMethod().getName(), (Class<?>[]) null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class MBeanServerFactoryBeanTests {
 
 	@BeforeEach
 	@AfterEach
-	void resetMBeanServers() throws Exception {
+	void resetMBeanServers() {
 		MBeanTestUtils.resetMBeanServers();
 	}
 
@@ -120,12 +120,12 @@ class MBeanServerFactoryBeanTests {
 	}
 
 	@Test
-	void createMBeanServer() throws Exception {
+	void createMBeanServer() {
 		assertCreation(true, "The server should be available in the list");
 	}
 
 	@Test
-	void newMBeanServer() throws Exception {
+	void newMBeanServer() {
 		assertCreation(false, "The server should not be available in the list");
 	}
 

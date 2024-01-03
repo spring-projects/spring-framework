@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -329,7 +329,7 @@ class AsyncExecutionTests {
 	}
 
 	@Test
-	void asyncMethodListener() throws Exception {
+	void asyncMethodListener() {
 		// Arrange
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodListener.class));
@@ -346,7 +346,7 @@ class AsyncExecutionTests {
 	}
 
 	@Test
-	void asyncClassListener() throws Exception {
+	void asyncClassListener() {
 		// Arrange
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassListener.class));
@@ -364,7 +364,7 @@ class AsyncExecutionTests {
 	}
 
 	@Test
-	void asyncPrototypeClassListener() throws Exception {
+	void asyncPrototypeClassListener() {
 		// Arrange
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(AsyncClassListener.class);

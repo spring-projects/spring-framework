@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,40 +29,40 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Keith Donald
  */
-public class CurrencyStyleFormatterTests {
+class CurrencyStyleFormatterTests {
 
 	private final CurrencyStyleFormatter formatter = new CurrencyStyleFormatter();
 
 
 	@Test
-	public void formatValue() {
+	void formatValue() {
 		assertThat(formatter.print(new BigDecimal("23"), Locale.US)).isEqualTo("$23.00");
 	}
 
 	@Test
-	public void parseValue() throws ParseException {
+	void parseValue() throws ParseException {
 		assertThat(formatter.parse("$23.56", Locale.US)).isEqualTo(new BigDecimal("23.56"));
 	}
 
 	@Test
-	public void parseBogusValue() throws ParseException {
+	void parseBogusValue() {
 		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
 				formatter.parse("bogus", Locale.US));
 	}
 
 	@Test
-	public void parseValueDefaultRoundDown() throws ParseException {
+	void parseValueDefaultRoundDown() throws ParseException {
 		this.formatter.setRoundingMode(RoundingMode.DOWN);
 		assertThat(formatter.parse("$23.567", Locale.US)).isEqualTo(new BigDecimal("23.56"));
 	}
 
 	@Test
-	public void parseWholeValue() throws ParseException {
+	void parseWholeValue() throws ParseException {
 		assertThat(formatter.parse("$23", Locale.US)).isEqualTo(new BigDecimal("23.00"));
 	}
 
 	@Test
-	public void parseValueNotLenientFailure() throws ParseException {
+	void parseValueNotLenientFailure() {
 		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
 				formatter.parse("$23.56bogus", Locale.US));
 	}

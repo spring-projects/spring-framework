@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ class ProxyFactoryBeanTests {
 
 
 	@BeforeEach
-	void setup() throws Exception {
+	void setup() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestApplicationListener.class));
 		this.factory = new DefaultListableBeanFactory(parent);
@@ -425,13 +425,12 @@ class ProxyFactoryBeanTests {
 		tb.getAge();
 		tb.setName("Tristan");
 		tb.toString();
-		assertThat(PointcutForVoid.methodNames).as("Recorded wrong number of invocations").hasSize(2);
-		assertThat(PointcutForVoid.methodNames).element(0).isEqualTo("setAge");
-		assertThat(PointcutForVoid.methodNames).element(1).isEqualTo("setName");
+		assertThat(PointcutForVoid.methodNames).as("Recorded wrong number of invocations")
+				.containsExactly("setAge", "setName");
 	}
 
 	@Test
-	void testCanAddThrowsAdviceWithoutAdvisor() throws Throwable {
+	void testCanAddThrowsAdviceWithoutAdvisor() {
 		DefaultListableBeanFactory f = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(f).loadBeanDefinitions(new ClassPathResource(THROWS_ADVICE_CONTEXT, CLASS));
 		MyThrowsHandler th = (MyThrowsHandler) f.getBean("throwsAdvice");

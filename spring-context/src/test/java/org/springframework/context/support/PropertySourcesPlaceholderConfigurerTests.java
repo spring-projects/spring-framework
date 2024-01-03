@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,10 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ro
  * @author Sam Brannen
  * @since 3.1
  */
-public class PropertySourcesPlaceholderConfigurerTests {
+class PropertySourcesPlaceholderConfigurerTests {
 
 	@Test
-	public void replacementFromEnvironmentProperties() {
+	void replacementFromEnvironmentProperties() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -73,7 +73,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void localPropertiesViaResource() {
+	void localPropertiesViaResource() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -88,17 +88,17 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void localPropertiesOverrideFalse() {
+	void localPropertiesOverrideFalse() {
 		localPropertiesOverride(false);
 	}
 
 	@Test
-	public void localPropertiesOverrideTrue() {
+	void localPropertiesOverrideTrue() {
 		localPropertiesOverride(true);
 	}
 
 	@Test
-	public void explicitPropertySources() {
+	void explicitPropertySources() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -116,7 +116,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void explicitPropertySourcesExcludesEnvironment() {
+	void explicitPropertySourcesExcludesEnvironment() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -158,7 +158,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void ignoreUnresolvablePlaceholders_falseIsDefault() {
+	void ignoreUnresolvablePlaceholders_falseIsDefault() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -175,7 +175,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void ignoreUnresolvablePlaceholders_true() {
+	void ignoreUnresolvablePlaceholders_true() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -256,7 +256,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void withNonEnumerablePropertySource() {
+	void withNonEnumerablePropertySource() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -305,7 +305,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void customPlaceholderPrefixAndSuffix() {
+	void customPlaceholderPrefixAndSuffix() {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ppc.setPlaceholderPrefix("@<");
 		ppc.setPlaceholderSuffix(">");
@@ -329,7 +329,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void nullValueIsPreserved() {
+	void nullValueIsPreserved() {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ppc.setNullValue("customNull");
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -342,7 +342,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void trimValuesIsOffByDefault() {
+	void trimValuesIsOffByDefault() {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean", rootBeanDefinition(TestBean.class)
@@ -354,7 +354,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void trimValuesIsApplied() {
+	void trimValuesIsApplied() {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ppc.setTrimValues(true);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -367,14 +367,14 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void getAppliedPropertySourcesTooEarly() throws Exception {
+	void getAppliedPropertySourcesTooEarly() {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		assertThatIllegalStateException().isThrownBy(
 				ppc::getAppliedPropertySources);
 	}
 
 	@Test
-	public void multipleLocationsWithDefaultResolvedValue() throws Exception {
+	void multipleLocationsWithDefaultResolvedValue() {
 		// SPR-10619
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		ClassPathResource doesNotHave = new ClassPathResource("test.properties", getClass());
@@ -392,7 +392,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void optionalPropertyWithValue() {
+	void optionalPropertyWithValue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setConversionService(new DefaultConversionService());
 		bf.registerBeanDefinition("testBean",
@@ -411,7 +411,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	}
 
 	@Test
-	public void optionalPropertyWithoutValue() {
+	void optionalPropertyWithoutValue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setConversionService(new DefaultConversionService());
 		bf.registerBeanDefinition("testBean",

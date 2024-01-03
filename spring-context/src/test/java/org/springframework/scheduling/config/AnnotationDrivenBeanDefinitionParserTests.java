@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,44 +31,44 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Fisher
  * @author Stephane Nicoll
  */
-public class AnnotationDrivenBeanDefinitionParserTests {
+class AnnotationDrivenBeanDefinitionParserTests {
 
 	private ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(
 			"annotationDrivenContext.xml", AnnotationDrivenBeanDefinitionParserTests.class);
 
 
 	@AfterEach
-	public void closeApplicationContext() {
+	void closeApplicationContext() {
 		context.close();
 	}
 
 
 	@Test
-	public void asyncPostProcessorRegistered() {
+	void asyncPostProcessorRegistered() {
 		assertThat(context.containsBean(TaskManagementConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
 	}
 
 	@Test
-	public void scheduledPostProcessorRegistered() {
+	void scheduledPostProcessorRegistered() {
 		assertThat(context.containsBean(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
 	}
 
 	@Test
-	public void asyncPostProcessorExecutorReference() {
+	void asyncPostProcessorExecutorReference() {
 		Object executor = context.getBean("testExecutor");
 		Object postProcessor = context.getBean(TaskManagementConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
 		assertThat(((Supplier<?>) new DirectFieldAccessor(postProcessor).getPropertyValue("executor")).get()).isSameAs(executor);
 	}
 
 	@Test
-	public void scheduledPostProcessorSchedulerReference() {
+	void scheduledPostProcessorSchedulerReference() {
 		Object scheduler = context.getBean("testScheduler");
 		Object postProcessor = context.getBean(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
 		assertThat(new DirectFieldAccessor(postProcessor).getPropertyValue("scheduler")).isSameAs(scheduler);
 	}
 
 	@Test
-	public void asyncPostProcessorExceptionHandlerReference() {
+	void asyncPostProcessorExceptionHandlerReference() {
 		Object exceptionHandler = context.getBean("testExceptionHandler");
 		Object postProcessor = context.getBean(TaskManagementConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
 		assertThat(((Supplier<?>) new DirectFieldAccessor(postProcessor).getPropertyValue("exceptionHandler")).get()).isSameAs(exceptionHandler);

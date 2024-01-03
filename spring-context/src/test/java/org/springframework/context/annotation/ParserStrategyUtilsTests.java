@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.reset;
  *
  * @author Phillip Webb
  */
-public class ParserStrategyUtilsTests {
+class ParserStrategyUtilsTests {
 
 	@Mock
 	private Environment environment;
@@ -66,7 +66,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasNoArgsConstructorCallsAware() {
+	void instantiateClassWhenHasNoArgsConstructorCallsAware() {
 		NoArgsConstructor instance = instantiateClass(NoArgsConstructor.class);
 		assertThat(instance.setEnvironment).isSameAs(this.environment);
 		assertThat(instance.setBeanFactory).isSameAs(this.registry);
@@ -75,7 +75,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasSingleConstructorInjectsParams() {
+	void instantiateClassWhenHasSingleConstructorInjectsParams() {
 		ArgsConstructor instance = instantiateClass(ArgsConstructor.class);
 		assertThat(instance.environment).isSameAs(this.environment);
 		assertThat(instance.beanFactory).isSameAs(this.registry);
@@ -84,7 +84,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasSingleConstructorAndAwareInjectsParamsAndCallsAware() {
+	void instantiateClassWhenHasSingleConstructorAndAwareInjectsParamsAndCallsAware() {
 		ArgsConstructorAndAware instance = instantiateClass(ArgsConstructorAndAware.class);
 		assertThat(instance.environment).isSameAs(this.environment);
 		assertThat(instance.setEnvironment).isSameAs(this.environment);
@@ -97,20 +97,20 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasMultipleConstructorsUsesNoArgsConstructor() {
+	void instantiateClassWhenHasMultipleConstructorsUsesNoArgsConstructor() {
 		// Remain back-compatible by using the default constructor if there's more than one
 		MultipleConstructors instance = instantiateClass(MultipleConstructors.class);
 		assertThat(instance.usedDefaultConstructor).isTrue();
 	}
 
 	@Test
-	public void instantiateClassWhenHasMultipleConstructorsAndNotDefaultThrowsException() {
+	void instantiateClassWhenHasMultipleConstructorsAndNotDefaultThrowsException() {
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				instantiateClass(MultipleConstructorsWithNoDefault.class));
 	}
 
 	@Test
-	public void instantiateClassWhenHasUnsupportedParameterThrowsException() {
+	void instantiateClassWhenHasUnsupportedParameterThrowsException() {
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				instantiateClass(InvalidConstructorParameterType.class))
 			.withCauseInstanceOf(IllegalStateException.class)
@@ -118,7 +118,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassHasSubclassParameterThrowsException() {
+	void instantiateClassHasSubclassParameterThrowsException() {
 		// To keep the algorithm simple we don't support subtypes
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				instantiateClass(InvalidConstructorParameterSubType.class))
@@ -127,14 +127,14 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasNoBeanClassLoaderInjectsNull() {
+	void instantiateClassWhenHasNoBeanClassLoaderInjectsNull() {
 		reset(this.resourceLoader);
 		ArgsConstructor instance = instantiateClass(ArgsConstructor.class);
 		assertThat(instance.beanClassLoader).isNull();
 	}
 
 	@Test
-	public void instantiateClassWhenHasNoBeanClassLoaderDoesNotCallAware() {
+	void instantiateClassWhenHasNoBeanClassLoaderDoesNotCallAware() {
 		reset(this.resourceLoader);
 		NoArgsConstructor instance = instantiateClass(NoArgsConstructor.class);
 		assertThat(instance.setBeanClassLoader).isNull();

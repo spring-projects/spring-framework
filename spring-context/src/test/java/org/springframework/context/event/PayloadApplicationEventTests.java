@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
 
 		ConfigurableApplicationContext ac = new GenericApplicationContext();
 		ac.addApplicationListener(listener);
@@ -183,7 +183,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListenerOnParentContext() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
 
 		ConfigurableApplicationContext parent = new GenericApplicationContext();
 		parent.addApplicationListener(listener);

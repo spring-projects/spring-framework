@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ class ScriptFactoryPostProcessorTests {
 	}
 
 	@Test
-	void testChangeScriptWithRefreshableBeanFunctionality() throws Exception {
+	void testChangeScriptWithRefreshableBeanFunctionality() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
@@ -112,7 +112,7 @@ class ScriptFactoryPostProcessorTests {
 	}
 
 	@Test
-	void testChangeScriptWithNoRefreshableBeanFunctionality() throws Exception {
+	void testChangeScriptWithNoRefreshableBeanFunctionality() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(false);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
@@ -132,7 +132,7 @@ class ScriptFactoryPostProcessorTests {
 	}
 
 	@Test
-	void testRefreshedScriptReferencePropagatesToCollaborators() throws Exception {
+	void testRefreshedScriptReferencePropagatesToCollaborators() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
@@ -161,7 +161,7 @@ class ScriptFactoryPostProcessorTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testReferencesAcrossAContainerHierarchy() throws Exception {
+	void testReferencesAcrossAContainerHierarchy() {
 		GenericApplicationContext businessContext = new GenericApplicationContext();
 		businessContext.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 		businessContext.refresh();
@@ -178,13 +178,13 @@ class ScriptFactoryPostProcessorTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testScriptHavingAReferenceToAnotherBean() throws Exception {
+	void testScriptHavingAReferenceToAnotherBean() {
 		// just tests that the (singleton) script-backed bean is able to be instantiated with references to its collaborators
 		new ClassPathXmlApplicationContext("org/springframework/scripting/support/groovyReferences.xml");
 	}
 
 	@Test
-	void testForRefreshedScriptHavingErrorPickedUpOnFirstCall() throws Exception {
+	void testForRefreshedScriptHavingErrorPickedUpOnFirstCall() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
@@ -211,7 +211,7 @@ class ScriptFactoryPostProcessorTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testPrototypeScriptedBean() throws Exception {
+	void testPrototypeScriptedBean() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 
@@ -230,7 +230,7 @@ class ScriptFactoryPostProcessorTests {
 		assertThat(messenger2).isNotSameAs(messenger1);
 	}
 
-	private static StaticScriptSource getScriptSource(GenericApplicationContext ctx) throws Exception {
+	private static StaticScriptSource getScriptSource(GenericApplicationContext ctx) {
 		ScriptFactoryPostProcessor processor = (ScriptFactoryPostProcessor) ctx.getBean(PROCESSOR_BEAN_NAME);
 		BeanDefinition bd = processor.scriptBeanFactory.getBeanDefinition("scriptedObject.messenger");
 		return (StaticScriptSource) bd.getConstructorArgumentValues().getIndexedArgumentValue(0, StaticScriptSource.class).getValue();
@@ -263,7 +263,7 @@ class ScriptFactoryPostProcessorTests {
 
 	private static void pauseToLetRefreshDelayKickIn(int secondsToPause) {
 		try {
-			Thread.sleep(secondsToPause * 1000);
+			Thread.sleep(secondsToPause * 1000L);
 		}
 		catch (InterruptedException ignored) {
 		}

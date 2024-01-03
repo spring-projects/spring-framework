@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,20 +37,20 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
-public class ExecutorBeanDefinitionParserTests {
+class ExecutorBeanDefinitionParserTests {
 
 	private ApplicationContext context;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"executorContext.xml", ExecutorBeanDefinitionParserTests.class);
 	}
 
 
 	@Test
-	public void defaultExecutor() throws Exception {
+	void defaultExecutor() throws Exception {
 		ThreadPoolTaskExecutor executor = this.context.getBean("default", ThreadPoolTaskExecutor.class);
 		assertThat(getCorePoolSize(executor)).isEqualTo(1);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(Integer.MAX_VALUE);
@@ -64,20 +64,20 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void singleSize() {
+	void singleSize() {
 		Object executor = this.context.getBean("singleSize");
 		assertThat(getCorePoolSize(executor)).isEqualTo(42);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(42);
 	}
 
 	@Test
-	public void invalidPoolSize() {
+	void invalidPoolSize() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				this.context.getBean("invalidPoolSize"));
 	}
 
 	@Test
-	public void rangeWithBoundedQueue() {
+	void rangeWithBoundedQueue() {
 		Object executor = this.context.getBean("rangeWithBoundedQueue");
 		assertThat(getCorePoolSize(executor)).isEqualTo(7);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(42);
@@ -85,7 +85,7 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void rangeWithUnboundedQueue() {
+	void rangeWithUnboundedQueue() {
 		Object executor = this.context.getBean("rangeWithUnboundedQueue");
 		assertThat(getCorePoolSize(executor)).isEqualTo(9);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(9);
@@ -95,7 +95,7 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithSingleSize() {
+	void propertyPlaceholderWithSingleSize() {
 		Object executor = this.context.getBean("propertyPlaceholderWithSingleSize");
 		assertThat(getCorePoolSize(executor)).isEqualTo(123);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(123);
@@ -105,7 +105,7 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithRange() {
+	void propertyPlaceholderWithRange() {
 		Object executor = this.context.getBean("propertyPlaceholderWithRange");
 		assertThat(getCorePoolSize(executor)).isEqualTo(5);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(25);
@@ -114,7 +114,7 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithRangeAndCoreThreadTimeout() {
+	void propertyPlaceholderWithRangeAndCoreThreadTimeout() {
 		Object executor = this.context.getBean("propertyPlaceholderWithRangeAndCoreThreadTimeout");
 		assertThat(getCorePoolSize(executor)).isEqualTo(99);
 		assertThat(getMaxPoolSize(executor)).isEqualTo(99);
@@ -122,19 +122,19 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void propertyPlaceholderWithInvalidPoolSize() {
+	void propertyPlaceholderWithInvalidPoolSize() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				this.context.getBean("propertyPlaceholderWithInvalidPoolSize"));
 	}
 
 	@Test
-	public void threadNamePrefix() {
+	void threadNamePrefix() {
 		CustomizableThreadCreator executor = this.context.getBean("default", CustomizableThreadCreator.class);
 		assertThat(executor.getThreadNamePrefix()).isEqualTo("default-");
 	}
 
 	@Test
-	public void typeCheck() {
+	void typeCheck() {
 		assertThat(this.context.isTypeMatch("default", Executor.class)).isTrue();
 		assertThat(this.context.isTypeMatch("default", TaskExecutor.class)).isTrue();
 		assertThat(this.context.isTypeMatch("default", ThreadPoolTaskExecutor.class)).isTrue();
