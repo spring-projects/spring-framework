@@ -17,6 +17,7 @@ Spring Framework provides support for Coroutines on the following scope:
 * WebFlux {spring-framework-api-kdoc}/spring-web/org.springframework.web.server/-co-web-filter/index.html[`CoWebFilter`]
 * Suspending function and `Flow` support in RSocket `@MessageMapping` annotated methods
 * Extensions for {spring-framework-api-kdoc}/spring-messaging/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
+* Spring AOP
 
 
 

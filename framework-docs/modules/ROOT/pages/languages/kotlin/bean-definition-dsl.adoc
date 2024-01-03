@@ -107,7 +107,7 @@ NOTE: Spring Boot is based on JavaConfig and
 {spring-boot-issues}/8115[does not yet provide specific support for functional bean definition],
 but you can experimentally use functional bean definitions through Spring Boot's `ApplicationContextInitializer` support.
 See {stackoverflow-questions}/45935931/how-to-use-functional-bean-definition-kotlin-dsl-with-spring-boot-and-spring-w/46033685#46033685[this Stack Overflow answer]
-for more details and up-to-date information. See also the experimental Kofu DSL developed in {spring-github-org}/spring-fu[Spring Fu incubator].
+for more details and up-to-date information. See also the experimental Kofu DSL developed in {spring-github-org}-experimental/spring-fu[Spring Fu incubator].
 
 
 
