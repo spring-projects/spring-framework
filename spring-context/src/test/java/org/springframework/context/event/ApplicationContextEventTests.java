@@ -21,9 +21,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
@@ -65,6 +67,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.context.support.AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME;
 
 /**
@@ -532,6 +535,20 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		context.publishEvent(new MyEvent(context));
 		context.close();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void addListenerWithConsumer() {
+		Consumer<ContextRefreshedEvent> consumer = mock(Consumer.class);
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.addApplicationListener(GenericApplicationListener.forEventType(
+				ContextRefreshedEvent.class, consumer));
+		context.refresh();
+		ArgumentCaptor<ContextRefreshedEvent> captor = ArgumentCaptor.forClass(ContextRefreshedEvent.class);
+		verify(consumer).accept(captor.capture());
+		assertThat(captor.getValue().getApplicationContext()).isSameAs(context);
+		verifyNoMoreInteractions(consumer);
 	}
 
 	@Test
