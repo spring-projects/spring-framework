@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -258,6 +259,22 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(result.getConsumesCondition().isBodyRequired()).isFalse();
 	}
 
+	@PathPatternsParameterizedTest
+	void aopProxied(RequestMappingHandlerMapping mapping, StaticWebApplicationContext wac) {
+		wac.registerBean("testController", ProxiedControllerInterface.class, () -> {
+			ProxyFactory factory = new ProxyFactory(new ComposedAnnotationController());
+            return (ProxiedControllerInterface) factory.getProxy();
+        });
+		wac.refresh();
+		mapping.afterPropertiesSet();
+		RequestMappingInfo result = mapping.getHandlerMethods().keySet().stream()
+				.filter(info -> info.getPatternValues().equals(Collections.singleton("/post")))
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("No /post"));
+
+		assertThat(result.getConsumesCondition().isBodyRequired()).isFalse();
+	}
+
 	@Test
 	void getMapping() {
 		assertComposedAnnotationMapping(RequestMethod.GET);
@@ -437,4 +454,8 @@ public class RequestMappingHandlerMappingTests {
 	private static class Foo {
 	}
 
+	interface ProxiedControllerInterface {
+		@GetMapping("/get")
+		void get();
+	}
 }

@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.handler;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -35,9 +37,12 @@ import java.util.stream.Collectors;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.aop.SpringProxy;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -252,17 +257,22 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected void processCandidateBean(String beanName) {
 		Class<?> beanType = null;
+		Object beanInstance = null;
 		try {
-			beanType = obtainApplicationContext().getType(beanName);
-		}
-		catch (Throwable ex) {
+			ApplicationContext applicationContext = obtainApplicationContext();
+			beanType = applicationContext.getType(beanName);
+			if (beanType != null && SpringProxy.class.isAssignableFrom(beanType) && Proxy.isProxyClass(beanType)) {
+				beanInstance = applicationContext.getBean(beanName);
+				beanType = AopProxyUtils.ultimateTargetClass(beanInstance);
+			}
+		} catch (Throwable ex) {
 			// An unresolvable bean type, probably from a lazy bean - let's ignore it.
 			if (logger.isTraceEnabled()) {
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
 		if (beanType != null && isHandler(beanType)) {
-			detectHandlerMethods(beanName);
+            detectHandlerMethods(Objects.requireNonNullElse(beanInstance, beanName));
 		}
 	}
 
@@ -272,8 +282,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #getMappingForMethod
 	 */
 	protected void detectHandlerMethods(Object handler) {
-		Class<?> handlerType = (handler instanceof String beanName ?
-				obtainApplicationContext().getType(beanName) : handler.getClass());
+		Class<?> handlerType;
+		if (handler instanceof String beanName) {
+			handlerType = obtainApplicationContext().getType(beanName);
+		} else {
+			handlerType = handler.getClass();
+			if (SpringProxy.class.isAssignableFrom(handlerType) && Proxy.isProxyClass(handlerType)) {
+				handlerType = AopProxyUtils.ultimateTargetClass(handler);
+			}
+		}
 
 		if (handlerType != null) {
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
