@@ -353,6 +353,32 @@ public class DefaultCorsProcessorTests {
 	}
 
 	@Test
+	public void preflightRequestPrivateNetworkWithWildcardOrigin() throws Exception {
+		this.request.setMethod(HttpMethod.OPTIONS.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
+		this.request.addHeader(DefaultCorsProcessor.ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK, "true");
+		this.conf.setAllowedOrigins(Arrays.asList("https://domain1.com", "*", "http://domain3.example"));
+		this.conf.addAllowedHeader("Header1");
+		this.conf.setAllowPrivateNetwork(true);
+
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.processor.processRequest(this.conf, this.request, this.response));
+
+		this.conf.setAllowedOrigins(null);
+		this.conf.addAllowedOriginPattern("*");
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
+		assertThat(this.response.containsHeader(DefaultCorsProcessor.ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK)).isTrue();
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain2.com");
+		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
+	}
+
+	@Test
 	public void preflightRequestAllowedHeaders() throws Exception {
 		this.request.setMethod(HttpMethod.OPTIONS.name());
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
@@ -433,6 +459,51 @@ public class DefaultCorsProcessorTests {
 		this.processor.processRequest(this.conf, this.request, this.response);
 		assertThat(this.response.getHeaders(HttpHeaders.VARY)).containsOnlyOnce(HttpHeaders.ORIGIN,
 				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+	}
+
+	@Test
+	public void preflightRequestWithoutAccessControlRequestPrivateNetwork() throws Exception {
+		this.request.setMethod(HttpMethod.OPTIONS.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.conf.addAllowedHeader("*");
+		this.conf.addAllowedOrigin("https://domain2.com");
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
+		assertThat(this.response.containsHeader(DefaultCorsProcessor.ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK)).isFalse();
+		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
+	}
+
+	@Test
+	public void preflightRequestWithAccessControlRequestPrivateNetworkNotAllowed() throws Exception {
+		this.request.setMethod(HttpMethod.OPTIONS.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(DefaultCorsProcessor.ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK, "true");
+		this.conf.addAllowedHeader("*");
+		this.conf.addAllowedOrigin("https://domain2.com");
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
+		assertThat(this.response.containsHeader(DefaultCorsProcessor.ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK)).isFalse();
+		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
+	}
+
+	@Test
+	public void preflightRequestWithAccessControlRequestPrivateNetworkAllowed() throws Exception {
+		this.request.setMethod(HttpMethod.OPTIONS.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(DefaultCorsProcessor.ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK, "true");
+		this.conf.addAllowedHeader("*");
+		this.conf.addAllowedOrigin("https://domain2.com");
+		this.conf.setAllowPrivateNetwork(true);
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
+		assertThat(this.response.containsHeader(DefaultCorsProcessor.ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK)).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 	}
 
 }

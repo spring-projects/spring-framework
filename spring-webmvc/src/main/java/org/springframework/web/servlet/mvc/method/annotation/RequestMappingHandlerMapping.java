@@ -501,6 +501,18 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
 
+		String allowPrivateNetwork = resolveCorsAnnotationValue(annotation.allowPrivateNetwork());
+		if ("true".equalsIgnoreCase(allowPrivateNetwork)) {
+			config.setAllowPrivateNetwork(true);
+		}
+		else if ("false".equalsIgnoreCase(allowPrivateNetwork)) {
+			config.setAllowPrivateNetwork(false);
+		}
+		else if (!allowPrivateNetwork.isEmpty()) {
+			throw new IllegalStateException("@CrossOrigin's allowPrivateNetwork value must be \"true\", \"false\", " +
+					"or an empty string (\"\"): current value is [" + allowPrivateNetwork + "]");
+		}
+
 		if (annotation.maxAge() >= 0 ) {
 			config.setMaxAge(annotation.maxAge());
 		}

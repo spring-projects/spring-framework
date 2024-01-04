@@ -530,6 +530,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			}
 			if (config != null) {
 				config.validateAllowCredentials();
+				config.validateAllowPrivateNetwork();
 			}
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}

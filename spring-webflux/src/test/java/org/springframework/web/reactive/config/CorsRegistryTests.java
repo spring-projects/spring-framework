@@ -51,8 +51,8 @@ public class CorsRegistryTests {
 	@Test
 	public void customizedMapping() {
 		this.registry.addMapping("/foo").allowedOrigins("https://domain2.com", "https://domain2.com")
-				.allowedMethods("DELETE").allowCredentials(false).allowedHeaders("header1", "header2")
-				.exposedHeaders("header3", "header4").maxAge(3600);
+				.allowedMethods("DELETE").allowCredentials(true).allowPrivateNetwork(true)
+				.allowedHeaders("header1", "header2").exposedHeaders("header3", "header4").maxAge(3600);
 		Map<String, CorsConfiguration> configs = this.registry.getCorsConfigurations();
 		assertThat(configs.size()).isEqualTo(1);
 		CorsConfiguration config = configs.get("/foo");
@@ -60,7 +60,8 @@ public class CorsRegistryTests {
 		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("DELETE"));
 		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
 		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header3", "header4"));
-		assertThat(config.getAllowCredentials()).isFalse();
+		assertThat(config.getAllowCredentials()).isTrue();
+		assertThat(config.getAllowPrivateNetwork()).isTrue();
 		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(3600));
 	}
 
@@ -90,6 +91,7 @@ public class CorsRegistryTests {
 		assertThat(config.getAllowedHeaders()).isEqualTo(Collections.singletonList("*"));
 		assertThat(config.getExposedHeaders()).isEmpty();
 		assertThat(config.getAllowCredentials()).isNull();
+		assertThat(config.getAllowPrivateNetwork()).isNull();
 		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(1800));
 	}
 
