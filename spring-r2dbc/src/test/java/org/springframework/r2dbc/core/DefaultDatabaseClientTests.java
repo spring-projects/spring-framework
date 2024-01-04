@@ -135,13 +135,13 @@ class DefaultDatabaseClientTests {
 	@Test
 	void onConnectionError() {
 		AtomicInteger onErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+		BiConsumer<Throwable, Connection> errorHandler = (t, conn) -> {
 			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.onConnectionError(onConnectionError)
+				.onConnectionError(errorHandler)
 				.build();
 		Mono<Object> mono = databaseClient.inConnection(connection -> Mono.error(new IllegalStateException()));
 
@@ -157,13 +157,13 @@ class DefaultDatabaseClientTests {
 	@Test
 	void onConnectionErrorActionThrow() {
 		AtomicInteger onErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+		BiConsumer<Throwable, Connection> errorHandler = (t, conn) -> {
 			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.onConnectionError(onConnectionError)
+				.onConnectionError(errorHandler)
 				.build();
 		Mono<Object> mono = databaseClient.inConnection(connection -> {
 			throw new IllegalStateException();
@@ -181,13 +181,13 @@ class DefaultDatabaseClientTests {
 	@Test
 	void onConnectionErrorInConnectionMany() {
 		AtomicInteger onErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+		BiConsumer<Throwable, Connection> errorHandler = (t, conn) -> {
 			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.onConnectionError(onConnectionError)
+				.onConnectionError(errorHandler)
 				.build();
 		Flux<Object> flux = databaseClient.inConnectionMany(connection -> Flux.error(new IllegalStateException()));
 
@@ -203,13 +203,13 @@ class DefaultDatabaseClientTests {
 	@Test
 	void onConnectionErrorInConnectionManyActionThrow() {
 		AtomicInteger onErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+		BiConsumer<Throwable, Connection> errorHandler = (t, conn) -> {
 			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.onConnectionError(onConnectionError)
+				.onConnectionError(errorHandler)
 				.build();
 		Flux<Object> flux = databaseClient.inConnectionMany(connection -> {
 			throw new IllegalStateException();

@@ -45,7 +45,7 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 
 	private ExecuteFunction executeFunction = Statement::execute;
 
-	private BiConsumer<? super Throwable, ? super Connection> onConnectionError = (t, conn) -> {};
+	private BiConsumer<? super Throwable, ? super Connection> errorHandler = (t, conn) -> {};
 
 	private boolean namedParameters = true;
 
@@ -83,8 +83,8 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 
 	@Override
 	public DatabaseClient.Builder onConnectionError(
-			BiConsumer<? super Throwable, ? super Connection> onConnectionError) {
-		this.onConnectionError = onConnectionError;
+			BiConsumer<? super Throwable, ? super Connection> errorHandler) {
+		this.errorHandler = errorHandler;
 		return this;
 	}
 
@@ -104,7 +104,7 @@ class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 
 		return new DefaultDatabaseClient(
 				bindMarkers, this.connectionFactory,
-				this.executeFunction, this.onConnectionError, this.namedParameters);
+				this.executeFunction, this.errorHandler, this.namedParameters);
 	}
 
 	@Override

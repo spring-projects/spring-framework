@@ -150,10 +150,12 @@ public interface DatabaseClient extends ConnectionAccessor {
 		Builder namedParameters(boolean enabled);
 
 		/**
-		 * Handle the given error on {@link ConnectionAccessor#inConnection}
+		 * Handle an exception thrown from {@link ConnectionAccessor#inConnection}
 		 * or {@link ConnectionAccessor#inConnectionMany}.
+		 * @param errorHandler a {@code BiConsumer} that handles the connection error
+		 * @since 6.2
 		 */
-		Builder onConnectionError(BiConsumer<? super Throwable, ? super Connection> onConnectionError);
+		Builder onConnectionError(BiConsumer<? super Throwable, ? super Connection> errorHandler);
 
 		/**
 		 * Apply a {@link Consumer} to configure this builder.
