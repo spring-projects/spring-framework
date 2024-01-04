@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,11 @@ import org.springframework.util.Assert;
  * for the database.
  * <li>Call {@link #setDatabaseName} to set an explicit name for the database.
  * <li>Call {@link #setDatabaseType} to set the database type if you wish to
- * use one of the supported types.
+ * use one of the supported types with their default settings.
  * <li>Call {@link #setDatabaseConfigurer} to configure support for a custom
- * embedded database type.
+ * embedded database type, or
+ * {@linkplain EmbeddedDatabaseConfigurers#customizeConfigurer customize} the
+ * default of a supported types.
  * <li>Call {@link #setDatabasePopulator} to change the algorithm used to
  * populate the database.
  * <li>Call {@link #setDataSourceFactory} to change the type of
@@ -60,6 +62,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.0
  */
 public class EmbeddedDatabaseFactory {
@@ -124,17 +127,23 @@ public class EmbeddedDatabaseFactory {
 
 	/**
 	 * Set the type of embedded database to use.
-	 * <p>Call this when you wish to configure one of the pre-supported types.
+	 * <p>Call this when you wish to configure one of the pre-supported types
+	 * with their default settings.
 	 * <p>Defaults to HSQL.
 	 * @param type the database type
 	 */
 	public void setDatabaseType(EmbeddedDatabaseType type) {
-		this.databaseConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(type);
+		this.databaseConfigurer = EmbeddedDatabaseConfigurers.getConfigurer(type);
 	}
 
 	/**
 	 * Set the strategy that will be used to configure the embedded database instance.
-	 * <p>Call this when you wish to use an embedded database type not already supported.
+	 * <p>Call this with
+	 * {@linkplain EmbeddedDatabaseConfigurers#customizeConfigurer customizeConfigurer}
+	 * when you wish to customize the settings of one of the pre-supported types.
+	 * Alternatively, use this when you wish to use an embedded database type not
+	 * already supported.
+	 * @since 6.2
 	 */
 	public void setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
 		this.databaseConfigurer = configurer;
@@ -178,7 +187,7 @@ public class EmbeddedDatabaseFactory {
 
 		// Create the embedded database first
 		if (this.databaseConfigurer == null) {
-			this.databaseConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(EmbeddedDatabaseType.HSQL);
+			this.databaseConfigurer = EmbeddedDatabaseConfigurers.getConfigurer(EmbeddedDatabaseType.HSQL);
 		}
 		this.databaseConfigurer.configureConnectionProperties(
 				this.dataSourceFactory.getConnectionProperties(), this.databaseName);

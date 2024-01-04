@@ -168,6 +168,74 @@ attribute of the `embedded-database` tag to `DERBY`. If you use the builder API,
 call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
 
 
+[[jdbc-embedded-database-types-custom]]
+== Customizing the Embedded Database Type
+
+While each supported type comes with default connection settings, it is possible
+to customize them if necessary. The following example uses H2 with a custom driver:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+    @Configuration
+    public class DataSourceConfig {
+
+        @Bean
+        public DataSource dataSource() {
+            return new EmbeddedDatabaseBuilder()
+                    .setDatabaseConfigurer(EmbeddedDatabaseConfigurers
+                            .customizeConfigurer(H2, this::customize))
+                    .addScript("schema.sql")
+                    .build();
+        }
+
+        private EmbeddedDatabaseConfigurer customize(EmbeddedDatabaseConfigurer defaultConfigurer) {
+            return new EmbeddedDatabaseConfigurerDelegate(defaultConfigurer) {
+                @Override
+                public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
+                    super.configureConnectionProperties(properties, databaseName);
+                    properties.setDriverClass(CustomDriver.class);
+                }
+            };
+        }
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class DataSourceConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+				.setDatabaseConfigurer(EmbeddedDatabaseConfigurers
+					.customizeConfigurer(EmbeddedDatabaseType.H2) { this.customize(it) })
+				.addScript("schema.sql")
+				.build()
+		}
+
+		private fun customize(defaultConfigurer: EmbeddedDatabaseConfigurer): EmbeddedDatabaseConfigurer {
+			return object : EmbeddedDatabaseConfigurerDelegate(defaultConfigurer) {
+				override fun configureConnectionProperties(
+					properties: ConnectionProperties,
+					databaseName: String
+				) {
+					super.configureConnectionProperties(properties, databaseName)
+					properties.setDriverClass(CustomDriver::class.java)
+				}
+			}
+		}
+	}
+----
+======
+
+
 [[jdbc-embedded-database-dao-testing]]
 == Testing Data Access Logic with an Embedded Database
 

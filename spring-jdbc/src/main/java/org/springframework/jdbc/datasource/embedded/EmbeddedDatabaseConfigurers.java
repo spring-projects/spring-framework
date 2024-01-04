@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
+import java.util.function.UnaryOperator;
+
 import org.springframework.util.Assert;
 
 /**
@@ -25,33 +27,45 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Oliver Gierke
  * @author Sam Brannen
- * @since 3.0
+ * @author Stephane Nicoll
+ * @since 6.2
  */
-final class EmbeddedDatabaseConfigurerFactory {
-
-	private EmbeddedDatabaseConfigurerFactory() {
-	}
-
+public abstract class EmbeddedDatabaseConfigurers {
 
 	/**
 	 * Return a configurer instance for the given embedded database type.
-	 * @param type the embedded database type (HSQL, H2 or Derby)
+	 * @param type the {@linkplain EmbeddedDatabaseType embedded database type}
 	 * @return the configurer instance
 	 * @throws IllegalStateException if the driver for the specified database type is not available
 	 */
-	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
+	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) {
 		Assert.notNull(type, "EmbeddedDatabaseType is required");
 		try {
 			return switch (type) {
 				case HSQL -> HsqlEmbeddedDatabaseConfigurer.getInstance();
 				case H2 -> H2EmbeddedDatabaseConfigurer.getInstance();
 				case DERBY -> DerbyEmbeddedDatabaseConfigurer.getInstance();
-				default -> throw new UnsupportedOperationException("Embedded database type [" + type + "] is not supported");
 			};
 		}
 		catch (ClassNotFoundException | NoClassDefFoundError ex) {
 			throw new IllegalStateException("Driver for test database type [" + type + "] is not available", ex);
 		}
+	}
+
+	/**
+	 * Customize the default configurer for the given embedded database type. The
+	 * {@code customizer} operator typically uses
+	 * {@link EmbeddedDatabaseConfigurerDelegate} to customize things as necessary.
+	 * @param type the {@linkplain EmbeddedDatabaseType embedded database type}
+	 * @param customizer the customizer to return based on the default
+	 * @return the customized configurer instance
+	 * @throws IllegalStateException if the driver for the specified database type is not available
+	 */
+	public static EmbeddedDatabaseConfigurer customizeConfigurer(
+			EmbeddedDatabaseType type, UnaryOperator<EmbeddedDatabaseConfigurer> customizer) {
+
+		EmbeddedDatabaseConfigurer defaultConfigurer = getConfigurer(type);
+		return customizer.apply(defaultConfigurer);
 	}
 
 }

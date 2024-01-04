@@ -122,6 +122,23 @@ class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
+	void setTypeConfigurerToCustomH2() {
+		doTwice(() -> {
+			EmbeddedDatabase db = builder
+					.setDatabaseConfigurer(EmbeddedDatabaseConfigurers.customizeConfigurer(H2, defaultConfigurer ->
+							new EmbeddedDatabaseConfigurerDelegate(defaultConfigurer) {
+								@Override
+								public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
+									super.configureConnectionProperties(properties, databaseName);
+								}
+							}))
+					.addScripts("db-schema.sql", "db-test-data.sql")//
+					.build();
+			assertDatabaseCreatedAndShutdown(db);
+		});
+	}
+
+	@Test
 	void setTypeToDerbyAndIgnoreFailedDrops() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
