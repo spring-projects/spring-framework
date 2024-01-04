@@ -83,7 +83,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 	private final ExecuteFunction executeFunction;
 
-	private final BiConsumer<? super Throwable, ? super Connection> handleInConnectionError;
+	private final BiConsumer<? super Throwable, ? super Connection> onConnectionError;
 
 	@Nullable
 	private final NamedParameterExpander namedParameterExpander;
@@ -91,13 +91,13 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 	DefaultDatabaseClient(BindMarkersFactory bindMarkersFactory, ConnectionFactory connectionFactory,
 						  ExecuteFunction executeFunction,
-						  BiConsumer<? super Throwable, ? super Connection> handleInConnectionError,
+						  BiConsumer<? super Throwable, ? super Connection> onConnectionError,
 						  boolean namedParameters) {
 
 		this.bindMarkersFactory = bindMarkersFactory;
 		this.connectionFactory = connectionFactory;
 		this.executeFunction = executeFunction;
-		this.handleInConnectionError = handleInConnectionError;
+		this.onConnectionError = onConnectionError;
 		this.namedParameterExpander = (namedParameters ? new NamedParameterExpander() : null);
 	}
 
@@ -130,10 +130,10 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
 					try {
 						return action.apply(connectionToUse)
-								.doOnError(t -> handleInConnectionError.accept(t, connectionCloseHolder.connection));
+								.doOnError(t -> onConnectionError.accept(t, connectionCloseHolder.connection));
 					}
 					catch (Throwable ex) {
-						handleInConnectionError.accept(ex, connectionCloseHolder.connection);
+						onConnectionError.accept(ex, connectionCloseHolder.connection);
 						if (ex instanceof R2dbcException) {
 							String sql = getSql(action);
 							return Mono.error(ConnectionFactoryUtils.convertR2dbcException(
@@ -158,10 +158,10 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
 					try {
 						return action.apply(connectionToUse)
-								.doOnError(t -> handleInConnectionError.accept(t, connectionCloseHolder.connection));
+								.doOnError(t -> onConnectionError.accept(t, connectionCloseHolder.connection));
 					}
 					catch (Throwable ex) {
-						handleInConnectionError.accept(ex, connectionCloseHolder.connection);
+						onConnectionError.accept(ex, connectionCloseHolder.connection);
 						if (ex instanceof R2dbcException) {
 							String sql = getSql(action);
 							return Flux.error(ConnectionFactoryUtils.convertR2dbcException(

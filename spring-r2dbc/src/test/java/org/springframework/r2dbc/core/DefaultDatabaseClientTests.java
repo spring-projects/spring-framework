@@ -133,37 +133,37 @@ class DefaultDatabaseClientTests {
 	}
 
 	@Test
-	void shouldHandleErrorInConnection() {
-		AtomicInteger handleErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
-			handleErrorCounter.incrementAndGet();
+	void onConnectionError() {
+		AtomicInteger onErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.handleInConnectionError(handleInConnectionError)
+				.onConnectionError(onConnectionError)
 				.build();
 		Mono<Object> mono = databaseClient.inConnection(connection -> Mono.error(new IllegalStateException()));
 
 		StepVerifier.create(mono)
 				.verifyErrorSatisfies(t -> {
 					assertThat(t).isInstanceOf(IllegalStateException.class);
-					assertThat(handleErrorCounter.get()).isOne();
+					assertThat(onErrorCounter.get()).isOne();
 					verify(connection, times(1)).getMetadata();
 				});
 		verify(connection, times(1)).close();
 	}
 
 	@Test
-	void shouldHandleErrorInConnectionActionThrow() {
-		AtomicInteger handleErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
-			handleErrorCounter.incrementAndGet();
+	void onConnectionErrorActionThrow() {
+		AtomicInteger onErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.handleInConnectionError(handleInConnectionError)
+				.onConnectionError(onConnectionError)
 				.build();
 		Mono<Object> mono = databaseClient.inConnection(connection -> {
 			throw new IllegalStateException();
@@ -172,44 +172,44 @@ class DefaultDatabaseClientTests {
 		StepVerifier.create(mono)
 				.verifyErrorSatisfies(t -> {
 					assertThat(t).isInstanceOf(IllegalStateException.class);
-					assertThat(handleErrorCounter.get()).isOne();
+					assertThat(onErrorCounter.get()).isOne();
 					verify(connection, times(1)).getMetadata();
 				});
 		verify(connection, times(1)).close();
 	}
 
 	@Test
-	void shouldHandleErrorInConnectionMany() {
-		AtomicInteger handleErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
-			handleErrorCounter.incrementAndGet();
+	void onConnectionErrorInConnectionMany() {
+		AtomicInteger onErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.handleInConnectionError(handleInConnectionError)
+				.onConnectionError(onConnectionError)
 				.build();
 		Flux<Object> flux = databaseClient.inConnectionMany(connection -> Flux.error(new IllegalStateException()));
 
 		StepVerifier.create(flux)
 				.verifyErrorSatisfies(t -> {
 					assertThat(t).isInstanceOf(IllegalStateException.class);
-					assertThat(handleErrorCounter.get()).isOne();
+					assertThat(onErrorCounter.get()).isOne();
 					verify(connection, times(1)).getMetadata();
 				});
 		verify(connection, times(1)).close();
 	}
 
 	@Test
-	void shouldHandleErrorInConnectionManyActionThrow() {
-		AtomicInteger handleErrorCounter = new AtomicInteger();
-		BiConsumer<Throwable, Connection> handleInConnectionError = (t, conn) -> {
-			handleErrorCounter.incrementAndGet();
+	void onConnectionErrorInConnectionManyActionThrow() {
+		AtomicInteger onErrorCounter = new AtomicInteger();
+		BiConsumer<Throwable, Connection> onConnectionError = (t, conn) -> {
+			onErrorCounter.incrementAndGet();
 			conn.getMetadata();
 		};
 
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder
-				.handleInConnectionError(handleInConnectionError)
+				.onConnectionError(onConnectionError)
 				.build();
 		Flux<Object> flux = databaseClient.inConnectionMany(connection -> {
 			throw new IllegalStateException();
@@ -218,7 +218,7 @@ class DefaultDatabaseClientTests {
 		StepVerifier.create(flux)
 				.verifyErrorSatisfies(t -> {
 					assertThat(t).isInstanceOf(IllegalStateException.class);
-					assertThat(handleErrorCounter.get()).isOne();
+					assertThat(onErrorCounter.get()).isOne();
 					verify(connection, times(1)).getMetadata();
 				});
 		verify(connection, times(1)).close();

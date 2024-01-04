@@ -153,7 +153,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Handle the given error on {@link ConnectionAccessor#inConnection}
 		 * or {@link ConnectionAccessor#inConnectionMany}.
 		 */
-		Builder handleInConnectionError(BiConsumer<? super Throwable, ? super Connection> handleInConnectionError);
+		Builder onConnectionError(BiConsumer<? super Throwable, ? super Connection> onConnectionError);
 
 		/**
 		 * Apply a {@link Consumer} to configure this builder.
