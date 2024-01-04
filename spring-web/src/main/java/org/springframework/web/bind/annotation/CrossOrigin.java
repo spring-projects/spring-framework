@@ -117,6 +117,14 @@ public @interface CrossOrigin {
 	String allowCredentials() default "";
 
 	/**
+	 * Whether private network access is supported. Please, see
+	 * {@link CorsConfiguration#setAllowPrivateNetwork(Boolean)} for details.
+	 * <p>By default this is not set (i.e. private network access is not supported).
+	 * @since 6.1.3
+	 */
+	String allowPrivateNetwork() default "";
+
+	/**
 	 * The maximum age (in seconds) of the cache duration for preflight responses.
 	 * <p>This property controls the value of the {@code Access-Control-Max-Age}
 	 * response header of preflight requests.

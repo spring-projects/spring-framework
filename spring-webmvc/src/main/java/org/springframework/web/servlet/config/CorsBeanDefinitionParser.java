@@ -84,6 +84,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 				}
 				config.applyPermitDefaultValues();
 				config.validateAllowCredentials();
+				config.validateAllowPrivateNetwork();
 				corsConfigurations.put(mapping.getAttribute("path"), config);
 			}
 		}

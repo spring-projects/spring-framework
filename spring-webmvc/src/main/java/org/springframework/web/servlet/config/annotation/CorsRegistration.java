@@ -133,6 +133,17 @@ public class CorsRegistration {
 	}
 
 	/**
+	 * Whether private network access is supported.
+	 * <p>By default this is not set (i.e. private network access is not supported).
+	 * @since 6.1.3
+	 * @see <a href="https://wicg.github.io/private-network-access/">Private network access specifications</a>
+	 */
+	public CorsRegistration allowPrivateNetwork(boolean allowPrivateNetwork) {
+		this.config.setAllowPrivateNetwork(allowPrivateNetwork);
+		return this;
+	}
+
+	/**
 	 * Configure how long in seconds the response from a pre-flight request
 	 * can be cached by clients.
 	 * <p>By default this is set to 1800 seconds (30 minutes).
