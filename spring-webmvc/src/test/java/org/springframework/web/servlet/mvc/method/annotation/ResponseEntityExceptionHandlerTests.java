@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,21 +201,21 @@ public class ResponseEntityExceptionHandlerTests {
 		}
 	}
 
-	@Test
+	@Test // gh-30300
 	public void reasonAsDetailShouldBeUpdatedViaMessageSource() {
 
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
 
-		String code = "bad.request";
+		String reason = "bad.request";
 		String message = "Breaking Bad Request";
 		try {
 			StaticMessageSource messageSource = new StaticMessageSource();
-			messageSource.addMessage(code, locale, message);
+			messageSource.addMessage(reason, locale, message);
 
 			this.exceptionHandler.setMessageSource(messageSource);
 
-			ResponseEntity<?> entity = testException(new ResponseStatusException(HttpStatus.BAD_REQUEST, code));
+			ResponseEntity<?> entity = testException(new ResponseStatusException(HttpStatus.BAD_REQUEST, reason));
 
 			ProblemDetail body = (ProblemDetail) entity.getBody();
 			assertThat(body.getDetail()).isEqualTo(message);

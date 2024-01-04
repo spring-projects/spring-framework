@@ -40,7 +40,6 @@ import org.springframework.lang.Nullable;
  * {@code @RestController} or {@code RestControllerAdvice} class.
  *
  * @author Rossen Stoyanchev
- * @author Yanming Zhou
  * @since 6.0
  * @see ErrorResponseException
  */
@@ -142,14 +141,6 @@ public interface ErrorResponse {
 			String detail = messageSource.getMessage(getDetailMessageCode(), arguments, null, locale);
 			if (detail != null) {
 				getBody().setDetail(detail);
-			}
-			else {
-				// detail from ResponseStatusException reason may be message code
-				detail = getBody().getDetail();
-				if (detail != null) {
-					detail = messageSource.getMessage(detail, null, detail, locale);
-					getBody().setDetail(detail);
-				}
 			}
 			String title = messageSource.getMessage(getTitleMessageCode(), null, null, locale);
 			if (title != null) {
