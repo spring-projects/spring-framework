@@ -146,9 +146,7 @@ class YamlProcessorTests {
 	void standardTypesSupportedByDefault() {
 		setYaml("value: !!set\n  ? first\n  ? second");
 		this.processor.process((properties, map) -> {
-			// Assert on Properties as a Map due to bug in AssertJ 3.25.0
-			Map<Object, Object> propsAsMap = new LinkedHashMap<>(properties);
-			assertThat(propsAsMap).containsExactly(entry("value[0]", "first"), entry("value[1]", "second"));
+			assertThat(properties).containsExactly(entry("value[0]", "first"), entry("value[1]", "second"));
 			assertThat(map.get("value")).asInstanceOf(InstanceOfAssertFactories.type(Set.class))
 					.satisfies(set -> assertThat(set).containsExactly("first", "second"));
 		});

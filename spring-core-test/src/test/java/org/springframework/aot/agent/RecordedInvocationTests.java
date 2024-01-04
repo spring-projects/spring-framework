@@ -19,7 +19,6 @@ package org.springframework.aot.agent;
 
 import java.lang.reflect.Method;
 
-import org.assertj.core.api.ThrowableAssert.ThrowingCallableWithValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +63,7 @@ class RecordedInvocationTests {
 
 	@Test
 	void staticInvocationShouldThrowWhenGetInstance() {
-		assertThatThrownBy((ThrowingCallableWithValue) staticInvocation::getInstance).isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(staticInvocation::getInstance).isInstanceOf(IllegalStateException.class);
 		assertThatThrownBy(staticInvocation::getInstanceTypeReference).isInstanceOf(IllegalStateException.class);
 	}
 
