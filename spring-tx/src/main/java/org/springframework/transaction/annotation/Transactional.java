@@ -155,14 +155,16 @@ public @interface Transactional {
 	String[] label() default {};
 
 	/**
-	 * The transaction propagation type. 事务传播行为
+	 * 事务传播行为：一个开启了事务的方法 A，调用了另一个开启了事务的方法 B，此时会出现什么情况？这就要看传播行为的设置了。
+	 * The transaction propagation type.
 	 * <p>Defaults to {@link Propagation#REQUIRED}.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
 	 */
 	Propagation propagation() default Propagation.REQUIRED;
 
 	/**
-	 * The transaction isolation level. 事务隔离级别
+	 * 事务隔离级别：读未提交、读已提交、可重复读、可串行化。MySQL 的默认隔离级别是 可重复读。
+	 * The transaction isolation level.
 	 * <p>Defaults to {@link Isolation#DEFAULT}.
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
 	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
@@ -176,7 +178,7 @@ public @interface Transactional {
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
-	 * 超时回滚，释放资源。
+	 * 超时回滚，释放资源。默认值为 -1，不会超时。
 	 * 执行过程中抛出异常：org.springframework.transaction.TransactionTimedOutException: Transaction timed out: deadline was Sat Dec 16 23:31:00 CST 2023
 	 *
 	 * The timeout for this transaction (in seconds).
@@ -202,6 +204,7 @@ public @interface Transactional {
 	String timeoutString() default "";
 
 	/**
+	 * 是否只读事务，只读事务要从两个方面来理解：它的功能是设置了只读事务后在整个事务的过程中，其他事务提交的内容对当前事务不可见的；只读事务只能有读操作，不能含有写操作，否则会报错。
 	 * 对一个查询操作来说，如果我们把它设置成只读，就能够明确告诉数据库，这个操作不涉及写操作。这样数据库就能够针对查询操作来进行优化。
 	 * 对增删改操作设置只读会抛出下面异常：Caused by: java.sql.SQLException: Connection is read-only. Queries leading to data modification are not allowed
 	 *
@@ -219,6 +222,7 @@ public @interface Transactional {
 	boolean readOnly() default false;
 
 	/**
+	 * 当方法内抛出指定的异常时，进行事务回滚。默认情况下支队 RuntimeException 回滚
 	 * Defines zero (0) or more exception {@linkplain Class types}, which must be
 	 * subclasses of {@link Throwable}, indicating which exception types must cause
 	 * a transaction rollback.
@@ -250,7 +254,7 @@ public @interface Transactional {
 	String[] rollbackForClassName() default {};
 
 	/**
-	 * 需要设置一个 Class 类型的对象
+	 * 用来设置出现指定的异常时，不进行回滚：需要设置一个 Class 类型的对象
 	 * Defines zero (0) or more exception {@link Class types}, which must be
 	 * subclasses of {@link Throwable}, indicating which exception types must
 	 * <b>not</b> cause a transaction rollback.

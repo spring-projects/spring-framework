@@ -334,6 +334,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Committing JDBC transaction on Connection [" + con + "]");
 		}
 		try {
+			// TODO：JDBC 链接提交事务
 			con.commit();
 		}
 		catch (SQLException ex) {
@@ -349,6 +350,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Rolling back JDBC transaction on Connection [" + con + "]");
 		}
 		try {
+			// TODO：JDBC 回滚事务
 			con.rollback();
 		}
 		catch (SQLException ex) {
