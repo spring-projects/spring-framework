@@ -17,10 +17,20 @@
 package org.springframework.r2dbc.core;
 
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-import io.r2dbc.spi.*;
+import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Readable;
+import io.r2dbc.spi.Result;
+import io.r2dbc.spi.Row;
+import io.r2dbc.spi.RowMetadata;
+import io.r2dbc.spi.Statement;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
