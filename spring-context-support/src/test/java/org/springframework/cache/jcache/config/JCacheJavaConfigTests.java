@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Stephane Nicoll
  */
-public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
+class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Override
 	protected ApplicationContext getApplicationContext() {
@@ -61,7 +61,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 
 	@Test
-	public void fullCachingConfig() throws Exception {
+	void fullCachingConfig() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(FullCachingConfig.class);
 
@@ -75,7 +75,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 	}
 
 	@Test
-	public void emptyConfigSupport() {
+	void emptyConfigSupport() {
 		ConfigurableApplicationContext context =
 				new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 
@@ -88,7 +88,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 	}
 
 	@Test
-	public void bothSetOnlyResolverIsUsed() {
+	void bothSetOnlyResolverIsUsed() {
 		ConfigurableApplicationContext context =
 				new AnnotationConfigApplicationContext(FullCachingConfigSupport.class);
 
@@ -100,7 +100,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 	}
 
 	@Test
-	public void exceptionCacheResolverLazilyRequired() {
+	void exceptionCacheResolverLazilyRequired() {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(NoExceptionCacheResolverConfig.class)) {
 			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
 			assertThat(cos.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));

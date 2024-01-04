@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Stephane Nicoll
  */
-public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCacheCache> {
+class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCacheCache> {
 
 	private CacheManager cacheManager;
 
@@ -45,7 +45,7 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.cacheManager = getCachingProvider().getCacheManager();
 		this.cacheManager.createCache(CACHE_NAME, new MutableConfiguration<>());
 		this.cacheManager.createCache(CACHE_NAME_NO_NULL, new MutableConfiguration<>());
@@ -61,7 +61,7 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 	}
 
 	@AfterEach
-	public void shutdown() {
+	void shutdown() {
 		if (this.cacheManager != null) {
 			this.cacheManager.close();
 		}

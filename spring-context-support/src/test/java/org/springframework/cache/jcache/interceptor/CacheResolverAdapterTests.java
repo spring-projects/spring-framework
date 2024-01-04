@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Stephane Nicoll
  */
-public class CacheResolverAdapterTests extends AbstractJCacheTests {
+class CacheResolverAdapterTests extends AbstractJCacheTests {
 
 	@Test
-	public void resolveSimpleCache() throws Exception {
+	void resolveSimpleCache() throws Exception {
 		DefaultCacheInvocationContext<?> dummyContext = createDummyContext();
 		CacheResolverAdapter adapter = new CacheResolverAdapter(getCacheResolver(dummyContext, "testCache"));
 		Collection<? extends Cache> caches = adapter.resolveCaches(dummyContext);
@@ -51,7 +51,7 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void resolveUnknownCache() throws Exception {
+	void resolveUnknownCache() throws Exception {
 		DefaultCacheInvocationContext<?> dummyContext = createDummyContext();
 		CacheResolverAdapter adapter = new CacheResolverAdapter(getCacheResolver(dummyContext, null));
 

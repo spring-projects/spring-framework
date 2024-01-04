@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Stephane Nicoll
  */
-public class CachePutOperationTests extends AbstractCacheOperationTests<CachePutOperation> {
+class CachePutOperationTests extends AbstractCacheOperationTests<CachePutOperation> {
 
 	@Override
 	protected CachePutOperation createSimpleOperation() {
@@ -41,7 +41,7 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 	}
 
 	@Test
-	public void simplePut() {
+	void simplePut() {
 		CachePutOperation operation = createSimpleOperation();
 
 		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L, sampleInstance);
@@ -55,7 +55,7 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 	}
 
 	@Test
-	public void noCacheValue() {
+	void noCacheValue() {
 		CacheMethodDetails<CachePut> methodDetails = create(CachePut.class,
 				SampleObject.class, "noCacheValue", Long.class);
 
@@ -64,7 +64,7 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 	}
 
 	@Test
-	public void multiCacheValues() {
+	void multiCacheValues() {
 		CacheMethodDetails<CachePut> methodDetails = create(CachePut.class,
 				SampleObject.class, "multiCacheValues", Long.class, SampleObject.class, SampleObject.class);
 
@@ -73,7 +73,7 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 	}
 
 	@Test
-	public void invokeWithWrongParameters() {
+	void invokeWithWrongParameters() {
 		CachePutOperation operation = createSimpleOperation();
 
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -81,7 +81,7 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 	}
 
 	@Test
-	public void fullPutConfig() {
+	void fullPutConfig() {
 		CacheMethodDetails<CachePut> methodDetails = create(CachePut.class,
 				SampleObject.class, "fullPutConfig", Long.class, SampleObject.class);
 		CachePutOperation operation = createDefaultOperation(methodDetails);

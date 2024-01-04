@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Stephane Nicoll
  */
-public class CacheResultOperationTests extends AbstractCacheOperationTests<CacheResultOperation> {
+class CacheResultOperationTests extends AbstractCacheOperationTests<CacheResultOperation> {
 
 	@Override
 	protected CacheResultOperation createSimpleOperation() {
@@ -47,7 +47,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 	}
 
 	@Test
-	public void simpleGet() {
+	void simpleGet() {
 		CacheResultOperation operation = createSimpleOperation();
 
 		assertThat(operation.getKeyGenerator()).isNotNull();
@@ -66,7 +66,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 	}
 
 	@Test
-	public void multiParameterKey() {
+	void multiParameterKey() {
 		CacheMethodDetails<CacheResult> methodDetails = create(CacheResult.class,
 				SampleObject.class, "multiKeysGet", Long.class, Boolean.class, String.class);
 		CacheResultOperation operation = createDefaultOperation(methodDetails);
@@ -78,7 +78,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 	}
 
 	@Test
-	public void invokeWithWrongParameters() {
+	void invokeWithWrongParameters() {
 		CacheMethodDetails<CacheResult> methodDetails = create(CacheResult.class,
 				SampleObject.class, "anotherSimpleGet", String.class, Long.class);
 		CacheResultOperation operation = createDefaultOperation(methodDetails);
@@ -89,7 +89,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 	}
 
 	@Test
-	public void tooManyKeyValues() {
+	void tooManyKeyValues() {
 		CacheMethodDetails<CacheResult> methodDetails = create(CacheResult.class,
 				SampleObject.class, "anotherSimpleGet", String.class, Long.class);
 		CacheResultOperation operation = createDefaultOperation(methodDetails);
@@ -100,7 +100,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 	}
 
 	@Test
-	public void annotatedGet() {
+	void annotatedGet() {
 		CacheMethodDetails<CacheResult> methodDetails = create(CacheResult.class,
 				SampleObject.class, "annotatedGet", Long.class, String.class);
 		CacheResultOperation operation = createDefaultOperation(methodDetails);
@@ -116,7 +116,7 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 	}
 
 	@Test
-	public void fullGetConfig() {
+	void fullGetConfig() {
 		CacheMethodDetails<CacheResult> methodDetails = create(CacheResult.class,
 				SampleObject.class, "fullGetConfig", Long.class);
 		CacheResultOperation operation = createDefaultOperation(methodDetails);

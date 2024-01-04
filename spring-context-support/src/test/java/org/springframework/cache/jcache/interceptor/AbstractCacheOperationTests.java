@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public abstract class AbstractCacheOperationTests<O extends JCacheOperation<?>> 
 
 
 	@Test
-	public void simple() {
+	void simple() {
 		O operation = createSimpleOperation();
 		assertThat(operation.getCacheName()).as("Wrong cache name").isEqualTo("simpleCache");
 		assertThat(operation.getAnnotations()).as("Unexpected number of annotation on " + operation.getMethod())

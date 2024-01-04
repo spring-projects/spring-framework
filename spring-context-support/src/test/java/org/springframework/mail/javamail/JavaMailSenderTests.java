@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -456,7 +456,7 @@ class JavaMailSenderTests {
 		private String connectedUsername = null;
 		private String connectedPassword = null;
 		private boolean closeCalled = false;
-		private List<Message> sentMessages = new ArrayList<>();
+		private final List<Message> sentMessages = new ArrayList<>();
 
 		private MockTransport(Session session, URLName urlName) {
 			super(session, urlName);
@@ -504,7 +504,7 @@ class JavaMailSenderTests {
 
 		@Override
 		public synchronized void close() throws MessagingException {
-			if ("".equals(connectedHost)) {
+			if (this.connectedHost.isEmpty()) {
 				throw new MessagingException("close failure");
 			}
 			this.closeCalled = true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 09.07.2005
  */
-public class InternetAddressEditorTests {
+class InternetAddressEditorTests {
 
 	private static final String EMPTY = "";
 	private static final String SIMPLE = "nobody@nowhere.com";
@@ -36,42 +36,42 @@ public class InternetAddressEditorTests {
 
 
 	@Test
-	public void uninitialized() {
+	void uninitialized() {
 		assertThat(editor.getAsText()).as("Uninitialized editor did not return empty value string").isEmpty();
 	}
 
 	@Test
-	public void setNull() {
+	void setNull() {
 		editor.setAsText(null);
 		assertThat(editor.getAsText()).as("Setting null did not result in empty value string").isEmpty();
 	}
 
 	@Test
-	public void setEmpty() {
+	void setEmpty() {
 		editor.setAsText(EMPTY);
 		assertThat(editor.getAsText()).as("Setting empty string did not result in empty value string").isEmpty();
 	}
 
 	@Test
-	public void allWhitespace() {
+	void allWhitespace() {
 		editor.setAsText(" ");
 		assertThat(editor.getAsText()).as("All whitespace was not recognized").isEmpty();
 	}
 
 	@Test
-	public void simpleGoodAddress() {
+	void simpleGoodAddress() {
 		editor.setAsText(SIMPLE);
 		assertThat(editor.getAsText()).as("Simple email address failed").isEqualTo(SIMPLE);
 	}
 
 	@Test
-	public void excessWhitespace() {
+	void excessWhitespace() {
 		editor.setAsText(" " + SIMPLE + " ");
 		assertThat(editor.getAsText()).as("Whitespace was not stripped").isEqualTo(SIMPLE);
 	}
 
 	@Test
-	public void simpleBadAddress() {
+	void simpleBadAddress() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText(BAD));
 	}

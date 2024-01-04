@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Stephane Nicoll
  */
-public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
+class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	private final DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
 
@@ -54,7 +54,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		source.setCacheResolver(defaultCacheResolver);
 		source.setExceptionCacheResolver(defaultExceptionCacheResolver);
 		source.setKeyGenerator(defaultKeyGenerator);
@@ -63,14 +63,14 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 
 	@Test
-	public void cache() {
+	void cache() {
 		CacheResultOperation op = getDefaultCacheOperation(CacheResultOperation.class, String.class);
 		assertDefaults(op);
 		assertThat(op.getExceptionCacheResolver()).as("Exception caching not enabled so resolver should not be set").isNull();
 	}
 
 	@Test
-	public void cacheWithException() {
+	void cacheWithException() {
 		CacheResultOperation op = getDefaultCacheOperation(CacheResultOperation.class, String.class, boolean.class);
 		assertDefaults(op);
 		assertThat(op.getExceptionCacheResolver()).isEqualTo(defaultExceptionCacheResolver);
@@ -78,41 +78,41 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void put() {
+	void put() {
 		CachePutOperation op = getDefaultCacheOperation(CachePutOperation.class, String.class, Object.class);
 		assertDefaults(op);
 	}
 
 	@Test
-	public void remove() {
+	void remove() {
 		CacheRemoveOperation op = getDefaultCacheOperation(CacheRemoveOperation.class, String.class);
 		assertDefaults(op);
 	}
 
 	@Test
-	public void removeAll() {
+	void removeAll() {
 		CacheRemoveAllOperation op = getDefaultCacheOperation(CacheRemoveAllOperation.class);
 		assertThat(op.getCacheResolver()).isEqualTo(defaultCacheResolver);
 	}
 
 	@Test
-	public void noAnnotation() {
+	void noAnnotation() {
 		assertThat(getCacheOperation(AnnotatedJCacheableService.class, this.cacheName)).isNull();
 	}
 
 	@Test
-	public void multiAnnotations() {
+	void multiAnnotations() {
 		assertThatIllegalStateException().isThrownBy(() -> getCacheOperation(InvalidCases.class, this.cacheName));
 	}
 
 	@Test
-	public void defaultCacheNameWithCandidate() {
+	void defaultCacheNameWithCandidate() {
 		Method method = ReflectionUtils.findMethod(Object.class, "toString");
 		assertThat(source.determineCacheName(method, null, "foo")).isEqualTo("foo");
 	}
 
 	@Test
-	public void defaultCacheNameWithDefaults() {
+	void defaultCacheNameWithDefaults() {
 		Method method = ReflectionUtils.findMethod(Object.class, "toString");
 		CacheDefaults mock = mock();
 		given(mock.cacheName()).willReturn("");
@@ -120,19 +120,19 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void defaultCacheNameNoDefaults() {
+	void defaultCacheNameNoDefaults() {
 		Method method = ReflectionUtils.findMethod(Object.class, "toString");
 		assertThat(source.determineCacheName(method, null, "")).isEqualTo("java.lang.Object.toString()");
 	}
 
 	@Test
-	public void defaultCacheNameWithParameters() {
+	void defaultCacheNameWithParameters() {
 		Method method = ReflectionUtils.findMethod(Comparator.class, "compare", Object.class, Object.class);
 		assertThat(source.determineCacheName(method, null, "")).isEqualTo("java.util.Comparator.compare(java.lang.Object,java.lang.Object)");
 	}
 
 	@Test
-	public void customCacheResolver() {
+	void customCacheResolver() {
 		CacheResultOperation operation =
 				getCacheOperation(CacheResultOperation.class, CustomService.class, this.cacheName, Long.class);
 		assertJCacheResolver(operation.getCacheResolver(), TestableCacheResolver.class);
@@ -142,7 +142,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void customKeyGenerator() {
+	void customKeyGenerator() {
 		CacheResultOperation operation =
 				getCacheOperation(CacheResultOperation.class, CustomService.class, this.cacheName, Long.class);
 		assertThat(operation.getCacheResolver()).isEqualTo(defaultCacheResolver);
@@ -151,7 +151,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void customKeyGeneratorSpringBean() {
+	void customKeyGeneratorSpringBean() {
 		TestableCacheKeyGenerator bean = new TestableCacheKeyGenerator();
 		beanFactory.registerSingleton("fooBar", bean);
 		CacheResultOperation operation =
@@ -164,7 +164,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void customKeyGeneratorAndCacheResolver() {
+	void customKeyGeneratorAndCacheResolver() {
 		CacheResultOperation operation = getCacheOperation(CacheResultOperation.class,
 				CustomServiceWithDefaults.class, this.cacheName, Long.class);
 		assertJCacheResolver(operation.getCacheResolver(), TestableCacheResolver.class);
@@ -173,7 +173,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	}
 
 	@Test
-	public void customKeyGeneratorAndCacheResolverWithExceptionName() {
+	void customKeyGeneratorAndCacheResolverWithExceptionName() {
 		CacheResultOperation operation = getCacheOperation(CacheResultOperation.class,
 				CustomServiceWithDefaults.class, this.cacheName, Long.class);
 		assertJCacheResolver(operation.getCacheResolver(), TestableCacheResolver.class);

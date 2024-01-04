@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,25 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class TransactionAwareCacheDecoratorTests {
+class TransactionAwareCacheDecoratorTests {
 
 	private final TransactionTemplate txTemplate = new TransactionTemplate(new CallCountingTransactionManager());
 
 
 	@Test
-	public void createWithNullTarget() {
+	void createWithNullTarget() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TransactionAwareCacheDecorator(null));
 	}
 
 	@Test
-	public void getTargetCache() {
+	void getTargetCache() {
 		Cache target = new ConcurrentMapCache("testCache");
 		TransactionAwareCacheDecorator cache = new TransactionAwareCacheDecorator(target);
 		assertThat(cache.getTargetCache()).isSameAs(target);
 	}
 
 	@Test
-	public void regularOperationsOnTarget() {
+	void regularOperationsOnTarget() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		assertThat(cache.getName()).isEqualTo(target.getName());
@@ -64,7 +64,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void putNonTransactional() {
+	void putNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 
@@ -74,7 +74,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void putTransactional() {
+	void putTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -88,7 +88,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void putIfAbsentNonTransactional() {
+	void putIfAbsentNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 
@@ -101,7 +101,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void putIfAbsentTransactional() {  // no transactional support for putIfAbsent
+	void putIfAbsentTransactional() {  // no transactional support for putIfAbsent
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -118,7 +118,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void evictNonTransactional() {
+	void evictNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -129,7 +129,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void evictTransactional() {
+	void evictTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -144,7 +144,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void evictIfPresentNonTransactional() {
+	void evictIfPresentNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -155,7 +155,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void evictIfPresentTransactional() {  // no transactional support for evictIfPresent
+	void evictIfPresentTransactional() {  // no transactional support for evictIfPresent
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -170,7 +170,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void clearNonTransactional() {
+	void clearNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -181,7 +181,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void clearTransactional() {
+	void clearTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -196,7 +196,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void invalidateNonTransactional() {
+	void invalidateNonTransactional() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
@@ -207,7 +207,7 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
-	public void invalidateTransactional() {  // no transactional support for invalidate
+	void invalidateTransactional() {  // no transactional support for invalidate
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();

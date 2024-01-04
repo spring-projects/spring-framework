@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerContext;
 import org.quartz.SchedulerFactory;
@@ -352,7 +351,6 @@ class QuartzSupportTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void schedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
@@ -363,7 +361,6 @@ class QuartzSupportTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void schedulerAutoStartupFalse() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SchedulerFactoryBean.class)
@@ -376,7 +373,7 @@ class QuartzSupportTests {
 	}
 
 	@Test
-	void schedulerRepositoryExposure() throws Exception {
+	void schedulerRepositoryExposure() {
 		try (ClassPathXmlApplicationContext ctx = context("schedulerRepositoryExposure.xml")) {
 			assertThat(ctx.getBean("scheduler")).isSameAs(SchedulerRepository.getInstance().lookup("myScheduler"));
 		}
@@ -387,7 +384,7 @@ class QuartzSupportTests {
 	 * TODO: Against Quartz 2.2, this test's job doesn't actually execute anymore...
 	 */
 	@Test
-	void schedulerWithHsqlDataSource() throws Exception {
+	void schedulerWithHsqlDataSource() {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -403,7 +400,6 @@ class QuartzSupportTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void schedulerFactoryBeanWithCustomJobStore() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 
@@ -459,7 +455,7 @@ class QuartzSupportTests {
 		}
 
 		@Override
-		public synchronized void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+		public synchronized void execute(JobExecutionContext jobExecutionContext) {
 			count++;
 		}
 	}
@@ -480,7 +476,7 @@ class QuartzSupportTests {
 		}
 
 		@Override
-		protected synchronized void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+		protected synchronized void executeInternal(JobExecutionContext jobExecutionContext) {
 			count++;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,12 +71,12 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 
 
 	@Test
-	public void getOnExistingCache() {
+	void getOnExistingCache() {
 		assertThat(getCacheManager(false).getCache(CACHE_NAME)).isInstanceOf(getCacheType());
 	}
 
 	@Test
-	public void getOnNewCache() {
+	void getOnNewCache() {
 		T cacheManager = getCacheManager(false);
 		addNativeCache(this.cacheName);
 		assertThat(cacheManager.getCacheNames()).doesNotContain(this.cacheName);
@@ -90,20 +90,20 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 	}
 
 	@Test
-	public void getOnUnknownCache() {
+	void getOnUnknownCache() {
 		T cacheManager = getCacheManager(false);
 		assertThat(cacheManager.getCacheNames()).doesNotContain(this.cacheName);
 		assertThat(cacheManager.getCache(this.cacheName)).isNull();
 	}
 
 	@Test
-	public void getTransactionalOnExistingCache() {
+	void getTransactionalOnExistingCache() {
 		assertThat(getCacheManager(true).getCache(CACHE_NAME))
 				.isInstanceOf(TransactionAwareCacheDecorator.class);
 	}
 
 	@Test
-	public void getTransactionalOnNewCache() {
+	void getTransactionalOnNewCache() {
 		T cacheManager = getCacheManager(true);
 		assertThat(cacheManager.getCacheNames()).doesNotContain(this.cacheName);
 		addNativeCache(this.cacheName);

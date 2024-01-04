@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
+class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 
 	private final TransactionTemplate txTemplate = new TransactionTemplate(new CallCountingTransactionManager());
 
@@ -68,7 +68,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	}
 
 	@AfterEach
-	public void shutdown() {
+	void shutdown() {
 		if (jCacheManager != null) {
 			jCacheManager.close();
 		}
@@ -82,22 +82,22 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	}
 
 	@Test
-	public void testEvictWithTransaction() {
+	void testEvictWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvict(this.cs, false));
 	}
 
 	@Test
-	public void testEvictEarlyWithTransaction() {
+	void testEvictEarlyWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvictEarly(this.cs));
 	}
 
 	@Test
-	public void testEvictAllWithTransaction() {
+	void testEvictAllWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvictAll(this.cs, false));
 	}
 
 	@Test
-	public void testEvictAllEarlyWithTransaction() {
+	void testEvictAllEarlyWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvictAllEarly(this.cs));
 	}
 

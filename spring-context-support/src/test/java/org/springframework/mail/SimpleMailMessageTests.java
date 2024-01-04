@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Chris Beams
  * @since 10.09.2003
  */
-public class SimpleMailMessageTests {
+class SimpleMailMessageTests {
 
 	@Test
-	public void testSimpleMessageCopyCtor() {
+	void testSimpleMessageCopyCtor() {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("me@mail.org");
 		message.setTo("you@mail.org");
@@ -45,8 +45,8 @@ public class SimpleMailMessageTests {
 		assertThat(messageCopy.getTo()[0]).isEqualTo("you@mail.org");
 
 		message.setReplyTo("reply@mail.org");
-		message.setCc(new String[]{"he@mail.org", "she@mail.org"});
-		message.setBcc(new String[]{"us@mail.org", "them@mail.org"});
+		message.setCc("he@mail.org", "she@mail.org");
+		message.setBcc("us@mail.org", "them@mail.org");
 		Date sentDate = new Date();
 		message.setSentDate(sentDate);
 		message.setSubject("my subject");
@@ -81,12 +81,12 @@ public class SimpleMailMessageTests {
 	}
 
 	@Test
-	public void testDeepCopyOfStringArrayTypedFieldsOnCopyCtor() throws Exception {
+	void testDeepCopyOfStringArrayTypedFieldsOnCopyCtor() {
 
 		SimpleMailMessage original = new SimpleMailMessage();
-		original.setTo(new String[]{"fiona@mail.org", "apple@mail.org"});
-		original.setCc(new String[]{"he@mail.org", "she@mail.org"});
-		original.setBcc(new String[]{"us@mail.org", "them@mail.org"});
+		original.setTo("fiona@mail.org", "apple@mail.org");
+		original.setCc("he@mail.org", "she@mail.org");
+		original.setBcc("us@mail.org", "them@mail.org");
 
 		SimpleMailMessage copy = new SimpleMailMessage(original);
 
@@ -160,13 +160,13 @@ public class SimpleMailMessageTests {
 	}
 
 	@Test
-	public void testCopyCtorChokesOnNullOriginalMessage() throws Exception {
+	void testCopyCtorChokesOnNullOriginalMessage() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SimpleMailMessage(null));
 	}
 
 	@Test
-	public void testCopyToChokesOnNullTargetMessage() throws Exception {
+	void testCopyToChokesOnNullTargetMessage() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SimpleMailMessage().copyTo(null));
 	}
