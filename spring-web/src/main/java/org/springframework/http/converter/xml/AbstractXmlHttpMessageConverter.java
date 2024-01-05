@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.StreamUtils;
  * that convert from/to XML.
  *
  * <p>By default, subclasses of this converter support {@code text/xml}, {@code application/xml}, and {@code
- * application/*-xml}. This can be overridden by setting the {@link #setSupportedMediaTypes(java.util.List)
+ * application/*+xml}. This can be overridden by setting the {@link #setSupportedMediaTypes(java.util.List)
  * supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
