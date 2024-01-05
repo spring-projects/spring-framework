@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlParameterValue;
@@ -285,25 +287,14 @@ class NamedParameterUtilsTests {
 		assertThat(newSql).isEqualTo(expectedSql);
 	}
 
-	@Test  // SPR-8280
-	public void parseSqlStatementWithQuotedSingleQuote() {
-		String sql = "SELECT ':foo'':doo', :xxx FROM DUAL";
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
-		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
-	}
-
-	@Test
-	void parseSqlStatementWithQuotesAndCommentBefore() {
-		String sql = "SELECT /*:doo*/':foo', :xxx FROM DUAL";
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
-		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
-	}
-
-	@Test
-	void parseSqlStatementWithQuotesAndCommentAfter() {
-		String sql = "SELECT ':foo'/*:doo*/, :xxx FROM DUAL";
+	@ParameterizedTest // SPR-8280 and others
+	@ValueSource(strings = {
+			"SELECT ':foo'':doo', :xxx FROM DUAL",
+			"SELECT /*:doo*/':foo', :xxx FROM DUAL",
+			"SELECT ':foo'/*:doo*/, :xxx FROM DUAL",
+			"SELECT \":foo\"\":doo\", :xxx FROM DUAL",
+			"SELECT `:foo``:doo`, :xxx FROM DUAL",})
+	void parseSqlStatementWithParametersInsideQuote(String sql) {
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
@@ -359,6 +350,14 @@ class NamedParameterUtilsTests {
 
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
 		assertThat(sqlToUse).isEqualTo("insert into foos (id) values (?)");
+	}
+
+	@Test // gh-31944
+	void parseSqlStatementWithBackticks() {
+		String sql = "select * from `tb&user` where id = :id";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(parsedSql.getParameterNames()).containsExactly("id");
+		assertThat(substituteNamedParameters(parsedSql)).isEqualTo("select * from `tb&user` where id = ?");
 	}
 
 	private static String substituteNamedParameters(ParsedSql parsedSql) {
