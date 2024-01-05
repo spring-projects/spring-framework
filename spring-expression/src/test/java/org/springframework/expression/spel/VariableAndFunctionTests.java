@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,35 +30,35 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Andy Clement
  * @author Sam Brannen
  */
-public class VariableAndFunctionTests extends AbstractExpressionTests {
+class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
-	public void testVariableAccess01() {
+	void testVariableAccess01() {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
 	}
 
 	@Test
-	public void testVariableAccess_WellKnownVariables() {
+	void testVariableAccess_WellKnownVariables() {
 		evaluate("#this.getName()","Nikola Tesla",String.class);
 		evaluate("#root.getName()","Nikola Tesla",String.class);
 	}
 
 	@Test
-	public void testFunctionAccess01() {
+	void testFunctionAccess01() {
 		evaluate("#reverseInt(1,2,3)", "int[3]{3,2,1}", int[].class);
 		evaluate("#reverseInt('1',2,3)", "int[3]{3,2,1}", int[].class); // requires type conversion of '1' to 1
 		evaluateAndCheckError("#reverseInt(1)", SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 3);
 	}
 
 	@Test
-	public void testFunctionAccess02() {
+	void testFunctionAccess02() {
 		evaluate("#reverseString('hello')", "olleh", String.class);
 		evaluate("#reverseString(37)", "73", String.class); // requires type conversion of 37 to '37'
 	}
 
 	@Test
-	public void testCallVarargsFunction() {
+	void testCallVarargsFunction() {
 		evaluate("#varargsFunction()", "[]", String.class);
 		evaluate("#varargsFunction(new String[0])", "[]", String.class);
 		evaluate("#varargsFunction('a')", "[a]", String.class);
@@ -89,7 +89,7 @@ public class VariableAndFunctionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testCallingIllegalFunctions() throws Exception {
+	void testCallingIllegalFunctions() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));

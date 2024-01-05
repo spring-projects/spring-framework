@@ -127,7 +127,7 @@ public abstract class AbstractExpressionTests {
 			}
 			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
-		Class<? extends Object> resultType = value.getClass();
+		Class<?> resultType = value.getClass();
 		if (expectedValue instanceof String) {
 			assertThat(AbstractExpressionTests.stringValueOf(value)).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}

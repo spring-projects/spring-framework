@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Joyce Zhan
  * @author Sam Brannen
  */
-public class PropertyAccessTests extends AbstractExpressionTests {
+class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	void simpleAccess01() {
@@ -291,7 +291,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			if (!(target instanceof String)) {
 				throw new RuntimeException("Assertion Failed! target should be String");
 			}
@@ -299,7 +299,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			if (!(target instanceof String)) {
 				throw new RuntimeException("Assertion Failed! target should be String");
 			}
@@ -307,7 +307,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			if (!name.equals("flibbles")) {
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			}

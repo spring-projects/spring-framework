@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Giovanni Dall'Oglio Risso
  * @since 3.0.4
  */
-public class ListTests extends AbstractExpressionTests {
+class ListTests extends AbstractExpressionTests {
 
 	// if the list is full of literals then it will be of the type unmodifiableClass
 	// rather than ArrayList
@@ -43,80 +43,80 @@ public class ListTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void testInlineListCreation01() {
+	void testInlineListCreation01() {
 		evaluate("{1, 2, 3, 4, 5}", "[1, 2, 3, 4, 5]", unmodifiableClass);
 	}
 
 	@Test
-	public void testInlineListCreation02() {
+	void testInlineListCreation02() {
 		evaluate("{'abc', 'xyz'}", "[abc, xyz]", unmodifiableClass);
 	}
 
 	@Test
-	public void testInlineListCreation03() {
+	void testInlineListCreation03() {
 		evaluate("{}", "[]", unmodifiableClass);
 	}
 
 	@Test
-	public void testInlineListCreation04() {
+	void testInlineListCreation04() {
 		evaluate("{'abc'=='xyz'}", "[false]", ArrayList.class);
 	}
 
 	@Test
-	public void testInlineListAndNesting() {
+	void testInlineListAndNesting() {
 		evaluate("{{1,2,3},{4,5,6}}", "[[1, 2, 3], [4, 5, 6]]", unmodifiableClass);
 		evaluate("{{1,'2',3},{4,{'a','b'},5,6}}", "[[1, 2, 3], [4, [a, b], 5, 6]]", unmodifiableClass);
 	}
 
 	@Test
-	public void testInlineListError() {
+	void testInlineListError() {
 		parseAndCheckError("{'abc'", SpelMessage.OOD);
 	}
 
 	@Test
-	public void testRelOperatorsIs02() {
+	void testRelOperatorsIs02() {
 		evaluate("{1, 2, 3, 4, 5} instanceof T(java.util.List)", "true", Boolean.class);
 	}
 
 	@Test
-	public void testInlineListCreation05() {
+	void testInlineListCreation05() {
 		evaluate("3 between {1,5}", "true", Boolean.class);
 	}
 
 	@Test
-	public void testInlineListCreation06() {
+	void testInlineListCreation06() {
 		evaluate("8 between {1,5}", "false", Boolean.class);
 	}
 
 	@Test
-	public void testInlineListAndProjectionSelection() {
+	void testInlineListAndProjectionSelection() {
 		evaluate("{1,2,3,4,5,6}.![#this>3]", "[false, false, false, true, true, true]", ArrayList.class);
 		evaluate("{1,2,3,4,5,6}.?[#this>3]", "[4, 5, 6]", ArrayList.class);
 		evaluate("{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this) == 'y']", "[2, 4, 6, 8, 10]", ArrayList.class);
 	}
 
 	@Test
-	public void testSetConstruction01() {
+	void testSetConstruction01() {
 		evaluate("new java.util.HashSet().addAll({'a','b','c'})", "true", Boolean.class);
 	}
 
 	@Test
-	public void testRelOperatorsBetween01() {
+	void testRelOperatorsBetween01() {
 		evaluate("32 between {32, 42}", "true", Boolean.class);
 	}
 
 	@Test
-	public void testRelOperatorsBetween02() {
+	void testRelOperatorsBetween02() {
 		evaluate("'efg' between {'abc', 'xyz'}", "true", Boolean.class);
 	}
 
 	@Test
-	public void testRelOperatorsBetween03() {
+	void testRelOperatorsBetween03() {
 		evaluate("42 between {32, 42}", "true", Boolean.class);
 	}
 
 	@Test
-	public void testRelOperatorsBetween04() {
+	void testRelOperatorsBetween04() {
 		evaluate("new java.math.BigDecimal('1') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}",
 			"true", Boolean.class);
 		evaluate("new java.math.BigDecimal('3') between {new java.math.BigDecimal('1'),new java.math.BigDecimal('5')}",
@@ -128,12 +128,12 @@ public class ListTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testRelOperatorsBetweenErrors02() {
+	void testRelOperatorsBetweenErrors02() {
 		evaluateAndCheckError("'abc' between {5,7}", SpelMessage.NOT_COMPARABLE, 6);
 	}
 
 	@Test
-	public void testConstantRepresentation1() {
+	void testConstantRepresentation1() {
 		checkConstantList("{1,2,3,4,5}", true);
 		checkConstantList("{'abc'}", true);
 		checkConstantList("{}", true);
@@ -158,7 +158,7 @@ public class ListTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testInlineListWriting() {
+	void testInlineListWriting() {
 		// list should be unmodifiable
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				evaluate("{1, 2, 3, 4, 5}[0]=6", "[1, 2, 3, 4, 5]", unmodifiableClass));

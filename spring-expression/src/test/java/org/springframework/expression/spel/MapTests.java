@@ -184,7 +184,7 @@ class MapTests extends AbstractExpressionTests {
 		assertThat(o).isEqualTo("value");
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	static class MapHolder {
 
 		public Map foo = Map.of(

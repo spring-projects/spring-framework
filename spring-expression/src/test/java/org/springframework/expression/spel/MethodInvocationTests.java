@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionInvocationTargetException;
@@ -49,15 +48,15 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Phillip Webb
  * @author Sam Brannen
  */
-public class MethodInvocationTests extends AbstractExpressionTests {
+class MethodInvocationTests extends AbstractExpressionTests {
 
 	@Test
-	public void testSimpleAccess01() {
+	void testSimpleAccess01() {
 		evaluate("getPlaceOfBirth().getCity()", "SmilJan", String.class);
 	}
 
 	@Test
-	public void testStringClass() {
+	void testStringClass() {
 		evaluate("new java.lang.String('hello').charAt(2)", 'l', Character.class);
 		evaluate("new java.lang.String('hello').charAt(2).equals('l'.charAt(0))", true, Boolean.class);
 		evaluate("'HELLO'.toLowerCase()", "hello", String.class);
@@ -65,13 +64,13 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testNonExistentMethods() {
+	void testNonExistentMethods() {
 		// name is ok but madeup() does not exist
 		evaluateAndCheckError("name.madeup()", SpelMessage.METHOD_NOT_FOUND, 5);
 	}
 
 	@Test
-	public void testWidening01() {
+	void testWidening01() {
 		// widening of int 3 to double 3 is OK
 		evaluate("new Double(3.0d).compareTo(8)", -1, Integer.class);
 		evaluate("new Double(3.0d).compareTo(3)", 0, Integer.class);
@@ -79,14 +78,14 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testArgumentConversion01() {
+	void testArgumentConversion01() {
 		// Rely on Double>String conversion for calling startsWith()
 		evaluate("new String('hello 2.0 to you').startsWith(7.0d)", false, Boolean.class);
 		evaluate("new String('7.0 foobar').startsWith(7.0d)", true, Boolean.class);
 	}
 
 	@Test
-	public void testMethodThrowingException_SPR6760() {
+	void testMethodThrowingException_SPR6760() {
 		// Test method on inventor: throwException()
 		// On 1 it will throw an IllegalArgumentException
 		// On 2 it will throw a RuntimeException
@@ -140,7 +139,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	 * Check on first usage (when the cachedExecutor in MethodReference is null) that the exception is not wrapped.
 	 */
 	@Test
-	public void testMethodThrowingException_SPR6941() {
+	void testMethodThrowingException_SPR6941() {
 		// Test method on inventor: throwException()
 		// On 1 it will throw an IllegalArgumentException
 		// On 2 it will throw a RuntimeException
@@ -157,7 +156,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testMethodThrowingException_SPR6941_2() {
+	void testMethodThrowingException_SPR6941_2() {
 		// Test method on inventor: throwException()
 		// On 1 it will throw an IllegalArgumentException
 		// On 2 it will throw a RuntimeException
@@ -175,7 +174,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testMethodFiltering_SPR6764() {
+	void testMethodFiltering_SPR6764() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setRootObject(new TestObject());
@@ -198,7 +197,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// check not called for other types
 		filter.filterCalled = false;
-		context.setRootObject(new String("abc"));
+		context.setRootObject("abc");
 		expr = (SpelExpression) parser.parseExpression("charAt(0)");
 		result = expr.getValue(context, String.class);
 		assertThat(result).isEqualTo("a");
@@ -215,7 +214,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testAddingMethodResolvers() {
+	void testAddingMethodResolvers() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		// reflective method accessor is the only one by default
@@ -236,7 +235,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testVarargsInvocation01() {
+	void testVarargsInvocation01() {
 		// Calling 'public String aVarargsMethod(String... strings)'
 		evaluate("aVarargsMethod('a','b','c')", "[a, b, c]", String.class);
 		evaluate("aVarargsMethod('a')", "[a]", String.class);
@@ -252,7 +251,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testVarargsInvocation02() {
+	void testVarargsInvocation02() {
 		// Calling 'public String aVarargsMethod2(int i, String... strings)'
 		evaluate("aVarargsMethod2(5,'a','b','c')", "5-[a, b, c]", String.class);
 		evaluate("aVarargsMethod2(2,'a')", "2-[a]", String.class);
@@ -267,7 +266,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testVarargsInvocation03() {
+	void testVarargsInvocation03() {
 		// Calling 'public int aVarargsMethod3(String str1, String... strings)' - returns all strings concatenated with "-"
 
 		// No conversion necessary
@@ -295,7 +294,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testVarargsOptionalInvocation() {
+	void testVarargsOptionalInvocation() {
 		// Calling 'public String optionalVarargsMethod(Optional<String>... values)'
 		evaluate("optionalVarargsMethod()", "[]", String.class);
 		evaluate("optionalVarargsMethod(new String[0])", "[]", String.class);
@@ -311,19 +310,19 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testInvocationOnNullContextObject() {
+	void testInvocationOnNullContextObject() {
 		evaluateAndCheckError("null.toString()",SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
 	}
 
 	@Test
-	public void testMethodOfClass() throws Exception {
+	void testMethodOfClass() {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
 		assertThat(value).isEqualTo("java.lang.String");
 	}
 
 	@Test
-	public void invokeMethodWithoutConversion() throws Exception {
+	void invokeMethodWithoutConversion() {
 		final BytesService service = new BytesService();
 		byte[] bytes = new byte[100];
 		StandardEvaluationContext context = new StandardEvaluationContext(bytes);
@@ -394,7 +393,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		@Override
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
-				List<TypeDescriptor> argumentTypes) throws AccessException {
+				List<TypeDescriptor> argumentTypes) {
 			throw new UnsupportedOperationException();
 		}
 	}

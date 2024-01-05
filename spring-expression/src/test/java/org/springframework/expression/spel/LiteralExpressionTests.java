@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class LiteralExpressionTests {
 
 
 	@Test
-	void getValue() throws Exception {
+	void getValue() {
 		assertThat(lEx.getValue()).isEqualTo("somevalue");
 		assertThat(lEx.getValue(String.class)).isEqualTo("somevalue");
 		assertThat(lEx.getValue(new Rooty())).isEqualTo("somevalue");
@@ -43,7 +43,7 @@ class LiteralExpressionTests {
 	}
 
 	@Test
-	void getValueWithSuppliedEvaluationContext() throws Exception {
+	void getValueWithSuppliedEvaluationContext() {
 		EvaluationContext ctx = new StandardEvaluationContext();
 		assertThat(lEx.getValue(ctx)).isEqualTo("somevalue");
 		assertThat(lEx.getValue(ctx, String.class)).isEqualTo("somevalue");
@@ -57,7 +57,7 @@ class LiteralExpressionTests {
 	}
 
 	@Test
-	void isWritable() throws Exception {
+	void isWritable() {
 		assertThat(lEx.isWritable(new StandardEvaluationContext())).isFalse();
 		assertThat(lEx.isWritable(new Rooty())).isFalse();
 		assertThat(lEx.isWritable(new StandardEvaluationContext(), new Rooty())).isFalse();
@@ -77,7 +77,7 @@ class LiteralExpressionTests {
 	}
 
 	@Test
-	void getValueType() throws Exception {
+	void getValueType() {
 		assertThat(lEx.getValueType()).isEqualTo(String.class);
 		assertThat(lEx.getValueType(new StandardEvaluationContext())).isEqualTo(String.class);
 		assertThat(lEx.getValueType(new Rooty())).isEqualTo(String.class);
@@ -85,7 +85,7 @@ class LiteralExpressionTests {
 	}
 
 	@Test
-	void getValueTypeDescriptor() throws Exception {
+	void getValueTypeDescriptor() {
 		assertThat(lEx.getValueTypeDescriptor().getType()).isEqualTo(String.class);
 		assertThat(lEx.getValueTypeDescriptor(new StandardEvaluationContext()).getType()).isEqualTo(String.class);
 		assertThat(lEx.getValueTypeDescriptor(new Rooty()).getType()).isEqualTo(String.class);

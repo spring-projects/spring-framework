@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -60,13 +59,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Andy Clement
  */
-public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
+class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 	/**
 	 * Scenario: using the standard infrastructure and running simple expression evaluation.
 	 */
 	@Test
-	public void testScenario_UsingStandardInfrastructure() {
+	void testScenario_UsingStandardInfrastructure() {
 		try {
 			// Create a parser
 			SpelExpressionParser parser = new SpelExpressionParser();
@@ -89,7 +88,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using the standard context but adding your own variables
 	 */
 	@Test
-	public void testScenario_DefiningVariablesThatWillBeAccessibleInExpressions() throws Exception {
+	void testScenario_DefiningVariablesThatWillBeAccessibleInExpressions() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -124,7 +123,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using your own root context object
 	 */
 	@Test
-	public void testScenario_UsingADifferentRootContextObject() throws Exception {
+	void testScenario_UsingADifferentRootContextObject() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -170,7 +169,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using your own java methods and calling them from the expression
 	 */
 	@Test
-	public void testScenario_RegisteringJavaMethodsAsFunctionsAndCallingThem() throws SecurityException, NoSuchMethodException {
+	void testScenario_RegisteringJavaMethodsAsFunctionsAndCallingThem() throws SecurityException, NoSuchMethodException {
 		try {
 			// Create a parser
 			SpelExpressionParser parser = new SpelExpressionParser();
@@ -192,7 +191,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: looking up your own MethodHandles and calling them from the expression
 	 */
 	@Test
-	public void testScenario_RegisteringJavaMethodsAsMethodHandlesAndCallingThem() throws SecurityException, NoSuchMethodException {
+	void testScenario_RegisteringJavaMethodsAsMethodHandlesAndCallingThem() throws SecurityException {
 		try {
 			// Create a parser
 			SpelExpressionParser parser = new SpelExpressionParser();
@@ -231,7 +230,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: add a property resolver that will get called in the resolver chain, this one only supports reading.
 	 */
 	@Test
-	public void testScenario_AddingYourOwnPropertyResolvers_1() throws Exception {
+	void testScenario_AddingYourOwnPropertyResolvers_1() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -247,7 +246,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testScenario_AddingYourOwnPropertyResolvers_2() throws Exception {
+	void testScenario_AddingYourOwnPropertyResolvers_2() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -287,23 +286,22 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			return propertyMap.containsKey(name);
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			return new TypedValue(propertyMap.get(name));
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return false;
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue)
-				throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 		}
 
 	}
@@ -331,22 +329,22 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			return propertyMap.containsKey(name);
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			return new TypedValue(propertyMap.get(name));
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return false;
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 		}
 
 	}

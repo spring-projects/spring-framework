@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class SelectionAndProjectionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void selectionWithList() throws Exception {
+	void selectionWithList() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
@@ -53,7 +53,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectFirstItemInList() throws Exception {
+	void selectFirstItemInList() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
@@ -62,7 +62,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectLastItemInList() throws Exception {
+	void selectLastItemInList() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
@@ -72,7 +72,7 @@ class SelectionAndProjectionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void selectionWithSet() throws Exception {
+	void selectionWithSet() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
 		Object value = expression.getValue(context);
@@ -82,7 +82,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectFirstItemInSet() throws Exception {
+	void selectFirstItemInSet() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
 		Object value = expression.getValue(context);
@@ -91,7 +91,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectLastItemInSet() throws Exception {
+	void selectLastItemInSet() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
 		Object value = expression.getValue(context);
@@ -101,7 +101,7 @@ class SelectionAndProjectionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void selectionWithIterable() throws Exception {
+	void selectionWithIterable() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new IterableTestBean());
 		Object value = expression.getValue(context);
@@ -111,7 +111,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectionWithArray() throws Exception {
+	void selectionWithArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
@@ -123,7 +123,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectFirstItemInArray() throws Exception {
+	void selectFirstItemInArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
@@ -132,7 +132,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectLastItemInArray() throws Exception {
+	void selectLastItemInArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
@@ -141,7 +141,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectionWithPrimitiveArray() throws Exception {
+	void selectionWithPrimitiveArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("ints.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
@@ -153,7 +153,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectFirstItemInPrimitiveArray() throws Exception {
+	void selectFirstItemInPrimitiveArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("ints.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
@@ -162,7 +162,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void selectLastItemInPrimitiveArray() throws Exception {
+	void selectLastItemInPrimitiveArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("ints.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
@@ -205,7 +205,7 @@ class SelectionAndProjectionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void projectionWithList() throws Exception {
+	void projectionWithList() {
 		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("testList", IntegerTestBean.createList());
@@ -217,7 +217,7 @@ class SelectionAndProjectionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void projectionWithSet() throws Exception {
+	void projectionWithSet() {
 		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("testList", IntegerTestBean.createSet());
@@ -229,7 +229,7 @@ class SelectionAndProjectionTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void projectionWithIterable() throws Exception {
+	void projectionWithIterable() {
 		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("testList", IntegerTestBean.createIterable());
@@ -240,7 +240,7 @@ class SelectionAndProjectionTests {
 	}
 
 	@Test
-	void projectionWithArray() throws Exception {
+	void projectionWithArray() {
 		Expression expression = new SpelExpressionParser().parseRaw("#testArray.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("testArray", IntegerTestBean.createArray());
@@ -296,7 +296,7 @@ class SelectionAndProjectionTests {
 		}
 
 		public Iterable<Integer> getIntegers() {
-			return integers::iterator;
+			return integers;
 		}
 	}
 
@@ -373,7 +373,7 @@ class SelectionAndProjectionTests {
 
 		static Iterable<IntegerTestBean> createIterable() {
 			final Set<IntegerTestBean> set = createSet();
-			return set::iterator;
+			return set;
 		}
 
 		static IntegerTestBean[] createArray() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class StandardComponentsTests {
 
 	@Test
-	public void testStandardEvaluationContext() {
+	void testStandardEvaluationContext() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		assertThat(context.getTypeComparator()).isNotNull();
 
@@ -48,7 +48,7 @@ public class StandardComponentsTests {
 	}
 
 	@Test
-	public void testStandardOperatorOverloader() throws EvaluationException {
+	void testStandardOperatorOverloader() throws EvaluationException {
 		OperatorOverloader oo = new StandardOperatorOverloader();
 		assertThat(oo.overridesOperation(Operation.ADD, null, null)).isFalse();
 		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
@@ -56,7 +56,7 @@ public class StandardComponentsTests {
 	}
 
 	@Test
-	public void testStandardTypeLocator() {
+	void testStandardTypeLocator() {
 		StandardTypeLocator tl = new StandardTypeLocator();
 		List<String> prefixes = tl.getImportPrefixes();
 		assertThat(prefixes).hasSize(1);
@@ -69,7 +69,7 @@ public class StandardComponentsTests {
 	}
 
 	@Test
-	public void testStandardTypeConverter() throws EvaluationException {
+	void testStandardTypeConverter() throws EvaluationException {
 		TypeConverter tc = new StandardTypeConverter();
 		tc.convertValue(3, TypeDescriptor.forObject(3), TypeDescriptor.valueOf(Double.class));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
@@ -40,15 +39,15 @@ import static org.assertj.core.api.Assertions.assertThatException;
  *
  * @author Andy Clement
  */
-public class ConstructorInvocationTests extends AbstractExpressionTests {
+class ConstructorInvocationTests extends AbstractExpressionTests {
 
 	@Test
-	public void testTypeConstructors() {
+	void testTypeConstructors() {
 		evaluate("new String('hello world')", "hello world", String.class);
 	}
 
 	@Test
-	public void testNonExistentType() {
+	void testNonExistentType() {
 		evaluateAndCheckError("new FooBar()", SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
 	}
 
@@ -89,7 +88,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void testConstructorThrowingException_SPR6760() {
+	void testConstructorThrowingException_SPR6760() {
 		// Test ctor on inventor:
 		// On 1 it will throw an IllegalArgumentException
 		// On 2 it will throw a RuntimeException
@@ -151,7 +150,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testAddingConstructorResolvers() {
+	void testAddingConstructorResolvers() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		// reflective constructor accessor is the only one by default
@@ -176,7 +175,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 		@Override
 		public ConstructorExecutor resolve(EvaluationContext context, String typeName,
-				List<TypeDescriptor> argumentTypes) throws AccessException {
+				List<TypeDescriptor> argumentTypes) {
 			throw new UnsupportedOperationException("Auto-generated method stub");
 		}
 
@@ -184,7 +183,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void testVarargsInvocation01() {
+	void testVarargsInvocation01() {
 		// Calling 'Fruit(String... strings)'
 		evaluate("new org.springframework.expression.spel.testresources.Fruit('a','b','c').stringscount()", 3,
 			Integer.class);
@@ -200,7 +199,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testVarargsInvocation02() {
+	void testVarargsInvocation02() {
 		// Calling 'Fruit(int i, String... strings)' - returns int+length_of_strings
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(5,'a','b','c').stringscount()", 8,
 			Integer.class);
@@ -220,7 +219,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 	 * the argument in order to satisfy a suitable constructor.
 	 */
 	@Test
-	public void testWidening01() {
+	void testWidening01() {
 		// widening of int 3 to double 3 is OK
 		evaluate("new Double(3)", 3.0d, Double.class);
 		// widening of int 3 to long 3 is OK

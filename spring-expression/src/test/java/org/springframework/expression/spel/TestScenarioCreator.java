@@ -119,9 +119,9 @@ class TestScenarioCreator {
 		c.set(1856, 7, 9);
 		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
-		tesla.setInventions(new String[] { "Telephone repeater", "Rotating magnetic field principle",
+		tesla.setInventions("Telephone repeater", "Rotating magnetic field principle",
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
-				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights" });
+				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights");
 		testContext.setRootObject(tesla);
 	}
 
@@ -153,7 +153,7 @@ class TestScenarioCreator {
 	}
 
 	public static String varargsFunction2(int i, String... strings) {
-		return String.valueOf(i) + "-" + Arrays.toString(strings);
+		return i + "-" + Arrays.toString(strings);
 	}
 
 	public static String message(String template, String... args) {

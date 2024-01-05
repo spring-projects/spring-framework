@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @since 3.2
  * @see OpPlus
  */
-public class OpPlusTests {
+class OpPlusTests {
 
 	@Test
-	public void test_emptyOperands() {
+	void test_emptyOperands() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new OpPlus(-1, -1));
 	}
 
 	@Test
-	public void test_unaryPlusWithStringLiteral() {
+	void test_unaryPlusWithStringLiteral() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		StringLiteral str = new StringLiteral("word", -1, -1, "word");
@@ -62,7 +62,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_unaryPlusWithNumberOperand() {
+	void test_unaryPlusWithNumberOperand() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		{
@@ -97,7 +97,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithNumberOperands() {
+	void test_binaryPlusWithNumberOperands() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		{
@@ -135,7 +135,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithStringOperands() {
+	void test_binaryPlusWithStringOperands() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		StringLiteral n1 = new StringLiteral("\"foo\"", -1, -1, "\"foo\"");
@@ -149,7 +149,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithLeftStringOperand() {
+	void test_binaryPlusWithLeftStringOperand() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		StringLiteral n1 = new StringLiteral("\"number is \"", -1, -1, "\"number is \"");
@@ -163,7 +163,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithRightStringOperand() {
+	void test_binaryPlusWithRightStringOperand() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		LongLiteral n1 = new LongLiteral("123", -1, -1, 123);
@@ -177,7 +177,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithTime_ToString() {
+	void test_binaryPlusWithTime_ToString() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 		Time time = new Time(new Date().getTime());
 
@@ -194,7 +194,7 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithTimeConverted() {
+	void test_binaryPlusWithTimeConverted() {
 		SimpleDateFormat format = new SimpleDateFormat("hh :--: mm :--: ss", Locale.ENGLISH);
 
 		GenericConversionService conversionService = new GenericConversionService();

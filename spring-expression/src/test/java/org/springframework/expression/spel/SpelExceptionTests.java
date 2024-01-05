@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author DJ Kulkarni
  */
-public class SpelExceptionTests {
+class SpelExceptionTests {
 
 	@Test
-	public void spelExpressionMapNullVariables() {
+	void spelExpressionMapNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aMap.containsKey('one')");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
@@ -46,7 +46,7 @@ public class SpelExceptionTests {
 	}
 
 	@Test
-	public void spelExpressionMapIndexAccessNullVariables() {
+	void spelExpressionMapIndexAccessNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aMap['one'] eq 1");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
@@ -77,7 +77,7 @@ public class SpelExceptionTests {
 	}
 
 	@Test
-	public void spelExpressionListNullVariables() {
+	void spelExpressionListNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList.contains('one')");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
@@ -85,7 +85,7 @@ public class SpelExceptionTests {
 	}
 
 	@Test
-	public void spelExpressionListIndexAccessNullVariables() {
+	void spelExpressionListIndexAccessNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList[0] eq 'one'");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
@@ -137,7 +137,7 @@ public class SpelExceptionTests {
 	}
 
 	@Test
-	public void spelExpressionArrayIndexAccessNullVariables() {
+	void spelExpressionArrayIndexAccessNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#anArray[0] eq 1");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(

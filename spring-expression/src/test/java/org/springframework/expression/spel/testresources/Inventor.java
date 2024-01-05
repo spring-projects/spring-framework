@@ -202,7 +202,7 @@ public class Inventor {
 	}
 
 	public String aVarargsMethod2(int i, String... strings) {
-		return String.valueOf(i) + "-" + Arrays.toString(strings);
+		return i + "-" + Arrays.toString(strings);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -37,20 +36,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Clement
  */
-public class MapAccessTests extends AbstractExpressionTests {
+class MapAccessTests extends AbstractExpressionTests {
 
 	@Test
-	public void testSimpleMapAccess01() {
+	void testSimpleMapAccess01() {
 		evaluate("testMap.get('monday')", "montag", String.class);
 	}
 
 	@Test
-	public void testMapAccessThroughIndexer() {
+	void testMapAccessThroughIndexer() {
 		evaluate("testMap['monday']", "montag", String.class);
 	}
 
 	@Test
-	public void testCustomMapAccessor() throws Exception {
+	void testCustomMapAccessor() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		ctx.addPropertyAccessor(new MapAccessor());
@@ -61,7 +60,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testVariableMapAccess() throws Exception {
+	void testVariableMapAccess() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		ctx.setVariable("day", "saturday");
@@ -72,7 +71,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testGetValue() {
+	void testGetValue() {
 		Map<String, String> props1 = new HashMap<>();
 		props1.put("key1", "value1");
 		props1.put("key2", "value2");
@@ -86,7 +85,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testGetValueFromRootMap() {
+	void testGetValueFromRootMap() {
 		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
 
@@ -157,23 +156,23 @@ public class MapAccessTests extends AbstractExpressionTests {
 	public static class MapAccessor implements PropertyAccessor {
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return true;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			((Map<Object, Object>) target).put(name, newValue);
 		}
 

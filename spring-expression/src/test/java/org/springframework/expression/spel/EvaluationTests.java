@@ -19,7 +19,6 @@ package org.springframework.expression.spel;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -336,7 +335,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			StandardEvaluationContext context = new StandardEvaluationContext();
 
 			// Register a custom MethodResolver...
-			context.setMethodResolvers(Arrays.asList((evaluationContext, targetObject, name, argumentTypes) -> null));
+			context.setMethodResolvers(List.of((evaluationContext, targetObject, name, argumentTypes) -> null));
 
 			// or simply...
 			// context.setMethodResolvers(new ArrayList<MethodResolver>());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,39 +36,39 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Keith Donald
  * @author Andy Clement
  */
-public class SetValueTests extends AbstractExpressionTests {
+class SetValueTests extends AbstractExpressionTests {
 
 	private static final boolean DEBUG = false;
 
 
 	@Test
-	public void testSetProperty() {
+	void testSetProperty() {
 		setValue("wonNobelPrize", true);
 	}
 
 	@Test
-	public void testSetNestedProperty() {
+	void testSetNestedProperty() {
 		setValue("placeOfBirth.city", "Wien");
 	}
 
 	@Test
-	public void testSetArrayElementValue() {
+	void testSetArrayElementValue() {
 		setValue("inventions[0]", "Just the telephone");
 	}
 
 	@Test
-	public void testErrorCase() {
+	void testErrorCase() {
 		setValueExpectError("3=4", null);
 	}
 
 	@Test
-	public void testSetElementOfNull() {
+	void testSetElementOfNull() {
 		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",
 				SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	@Test
-	public void testSetArrayElementValueAllPrimitiveTypes() {
+	void testSetArrayElementValueAllPrimitiveTypes() {
 		setValue("arrayContainer.ints[1]", 3);
 		setValue("arrayContainer.floats[1]", 3.0f);
 		setValue("arrayContainer.booleans[1]", false);
@@ -80,7 +80,7 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testIsWritableForInvalidExpressions_SPR10610() {
+	void testIsWritableForInvalidExpressions_SPR10610() {
 		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 
 		// PROPERTYORFIELDREFERENCE
@@ -115,7 +115,7 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetArrayElementValueAllPrimitiveTypesErrors() {
+	void testSetArrayElementValueAllPrimitiveTypesErrors() {
 		// none of these sets are possible due to (expected) conversion problems
 		setValueExpectError("arrayContainer.ints[1]", "wibble");
 		setValueExpectError("arrayContainer.floats[1]", "dribble");
@@ -129,59 +129,59 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetArrayElementNestedValue() {
+	void testSetArrayElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
 	}
 
 	@Test
-	public void testSetListElementValue() {
+	void testSetListElementValue() {
 		setValue("placesLivedList[0]", new PlaceOfBirth("Wien"));
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoercion() {
+	void testSetGenericListElementValueTypeCoercion() {
 		// TODO currently failing since setValue does a getValue and "Wien" string != PlaceOfBirth - check with andy
 		setValue("placesLivedList[0]", "Wien");
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoercionOK() {
+	void testSetGenericListElementValueTypeCoercionOK() {
 		setValue("booleanList[0]", "true", Boolean.TRUE);
 	}
 
 	@Test
-	public void testSetListElementNestedValue() {
+	void testSetListElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
 	}
 
 	@Test
-	public void testSetArrayElementInvalidIndex() {
+	void testSetArrayElementInvalidIndex() {
 		setValueExpectError("placesLived[23]", "Wien");
 		setValueExpectError("placesLivedList[23]", "Wien");
 	}
 
 	@Test
-	public void testSetMapElements() {
+	void testSetMapElements() {
 		setValue("testMap['montag']","lundi");
 	}
 
 	@Test
-	public void testIndexingIntoUnsupportedType() {
+	void testIndexingIntoUnsupportedType() {
 		setValueExpectError("'hello'[3]", 'p');
 	}
 
 	@Test
-	public void testSetPropertyTypeCoercion() {
+	void testSetPropertyTypeCoercion() {
 		setValue("publicBoolean", "true", Boolean.TRUE);
 	}
 
 	@Test
-	public void testSetPropertyTypeCoercionThroughSetter() {
+	void testSetPropertyTypeCoercionThroughSetter() {
 		setValue("SomeProperty", "true", Boolean.TRUE);
 	}
 
 	@Test
-	public void testAssign() throws Exception {
+	void testAssign() {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("publicName='Andy'");
 		assertThat(e.isWritable(eContext)).isFalse();
@@ -192,7 +192,7 @@ public class SetValueTests extends AbstractExpressionTests {
 	 * Testing the coercion of both the keys and the values to the correct type
 	 */
 	@Test
-	public void testSetGenericMapElementRequiresCoercion() throws Exception {
+	void testSetGenericMapElementRequiresCoercion() {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("mapOfStringToBoolean[42]");
 		assertThat(e.getValue(eContext)).isNull();
@@ -218,7 +218,7 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 
-	private Expression parse(String expressionString) throws Exception {
+	private Expression parse(String expressionString) {
 		return parser.parseExpression(expressionString);
 	}
 

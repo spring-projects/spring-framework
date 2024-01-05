@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Clement
  */
-public class OperatorOverloaderTests extends AbstractExpressionTests {
+class OperatorOverloaderTests extends AbstractExpressionTests {
 
 	@Test
-	public void testSimpleOperations() throws Exception {
+	void testSimpleOperations() {
 		// no built-in support for this:
 		evaluateAndCheckError("'abc'-true",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 
@@ -57,7 +57,7 @@ public class OperatorOverloaderTests extends AbstractExpressionTests {
 		@Override
 		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
 			if (operation==Operation.ADD) {
-				return ((String)leftOperand)+((Boolean)rightOperand).toString();
+				return leftOperand + ((Boolean) rightOperand).toString();
 			}
 			else {
 				return leftOperand;
@@ -66,10 +66,7 @@ public class OperatorOverloaderTests extends AbstractExpressionTests {
 
 		@Override
 		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
-			if (leftOperand instanceof String && rightOperand instanceof Boolean) {
-				return true;
-			}
-			return false;
+			return leftOperand instanceof String && rightOperand instanceof Boolean;
 
 		}
 	}

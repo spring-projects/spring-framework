@@ -48,7 +48,7 @@ public class SpelUtilities {
 			sb.append(indent).append(t.getClass().getSimpleName());
 			sb.append("  value:").append(t.toStringAST());
 			sb.append(t.getChildCount() < 2 ? "" : "  #children:" + t.getChildCount());
-			out.println(sb.toString());
+			out.println(sb);
 			for (int i = 0; i < t.getChildCount(); i++) {
 				printAST(out, t.getChild(i), indent + "  ");
 			}

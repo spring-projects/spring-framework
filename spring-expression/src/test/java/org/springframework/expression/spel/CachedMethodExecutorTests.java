@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Oliver Becker
  */
-public class CachedMethodExecutorTests {
+class CachedMethodExecutorTests {
 
 	private final ExpressionParser parser = new SpelExpressionParser();
 
@@ -39,7 +39,7 @@ public class CachedMethodExecutorTests {
 
 
 	@Test
-	public void testCachedExecutionForParameters() {
+	void testCachedExecutionForParameters() {
 		Expression expression = this.parser.parseExpression("echo(#var)");
 
 		assertMethodExecution(expression, 42, "int: 42");
@@ -49,7 +49,7 @@ public class CachedMethodExecutorTests {
 	}
 
 	@Test
-	public void testCachedExecutionForTarget() {
+	void testCachedExecutionForTarget() {
 		Expression expression = this.parser.parseExpression("#var.echo(42)");
 
 		assertMethodExecution(expression, new RootObject(), "int: 42");

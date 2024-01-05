@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Fisher
  */
-public class PropertiesConversionSpelTests {
+class PropertiesConversionSpelTests {
 
 	private static final SpelExpressionParser parser = new SpelExpressionParser();
 
 	@Test
-	public void props() {
+	void props() {
 		Properties props = new Properties();
 		props.setProperty("x", "1");
 		props.setProperty("y", "2");
@@ -49,7 +49,7 @@ public class PropertiesConversionSpelTests {
 	}
 
 	@Test
-	public void mapWithAllStringValues() {
+	void mapWithAllStringValues() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("x", "1");
 		map.put("y", "2");
@@ -62,7 +62,7 @@ public class PropertiesConversionSpelTests {
 	}
 
 	@Test
-	public void mapWithNonStringValue() {
+	void mapWithNonStringValue() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("x", "1");
 		map.put("y", 2);
@@ -76,7 +76,7 @@ public class PropertiesConversionSpelTests {
 	}
 
 	@Test
-	public void customMapWithNonStringValue() {
+	void customMapWithNonStringValue() {
 		CustomMap map = new CustomMap();
 		map.put("x", "1");
 		map.put("y", 2);
