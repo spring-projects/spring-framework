@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 class CommonAnnotationBeanPostProcessorTests {
 
@@ -63,6 +64,20 @@ class CommonAnnotationBeanPostProcessorTests {
 	void setup() {
 		bpp.setResourceFactory(bf);
 		bf.addBeanPostProcessor(bpp);
+	}
+
+	@Test
+	void processInjection() {
+		ResourceInjectionBean bean = new ResourceInjectionBean();
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		bpp.processInjection(bean);
+
+		assertThat(bean.getTestBean()).isSameAs(tb);
+		assertThat(bean.getTestBean2()).isSameAs(tb);
 	}
 
 	@Test

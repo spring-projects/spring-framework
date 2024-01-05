@@ -371,6 +371,29 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		return pvs;
 	}
 
+	/**
+	 * <em>Native</em> processing method for direct calls with an arbitrary target
+	 * instance, resolving all of its fields and methods which are annotated with
+	 * one of the supported 'resource' annotation types.
+	 * @param bean the target instance to process
+	 * @throws BeanCreationException if resource injection failed
+	 * @since 6.1.3
+	 */
+	public void processInjection(Object bean) throws BeanCreationException {
+		Class<?> clazz = bean.getClass();
+		InjectionMetadata metadata = findResourceMetadata(clazz.getName(), clazz, null);
+		try {
+			metadata.inject(bean, null, null);
+		}
+		catch (BeanCreationException ex) {
+			throw ex;
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(
+					"Injection of resource dependencies failed for class [" + clazz + "]", ex);
+		}
+	}
+
 
 	private InjectionMetadata findResourceMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
