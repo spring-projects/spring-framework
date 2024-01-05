@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
@@ -153,10 +154,14 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 		Object bean = testContext.getTestInstance();
 		Class<?> clazz = testContext.getTestClass();
+
 		ConfigurableListableBeanFactory beanFactory = gac.getBeanFactory();
-		AutowiredAnnotationBeanPostProcessor beanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
-		beanPostProcessor.setBeanFactory(beanFactory);
-		beanPostProcessor.processInjection(bean);
+		AutowiredAnnotationBeanPostProcessor autowiredAnnotationBpp = new AutowiredAnnotationBeanPostProcessor();
+		autowiredAnnotationBpp.setBeanFactory(beanFactory);
+		autowiredAnnotationBpp.processInjection(bean);
+		CommonAnnotationBeanPostProcessor commonAnnotationBpp = new CommonAnnotationBeanPostProcessor();
+		commonAnnotationBpp.setBeanFactory(beanFactory);
+		commonAnnotationBpp.processInjection(bean);
 		beanFactory.initializeBean(bean, clazz.getName() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX);
 		testContext.removeAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE);
 	}
