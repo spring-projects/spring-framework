@@ -301,8 +301,8 @@ public class MethodValidationAdapter implements MethodValidator {
 			Function<Integer, MethodParameter> parameterFunction,
 			Function<Integer, Object> argumentFunction) {
 
-		Map<MethodParameter, ParamResultBuilder> paramViolations = new LinkedHashMap<>();
-		Map<Path.Node, BeanResultBuilder> beanViolations = new LinkedHashMap<>();
+		Map<Path.Node, ParamValidationResultBuilder> paramViolations = new LinkedHashMap<>();
+		Map<Path.Node, ParamErrorsBuilder> nestedViolations = new LinkedHashMap<>();
 
 		for (ConstraintViolation<Object> violation : violations) {
 			Iterator<Path.Node> itr = violation.getPropertyPath().iterator();
@@ -322,59 +322,62 @@ public class MethodValidationAdapter implements MethodValidator {
 				}
 
 				Object arg = argumentFunction.apply(parameter.getParameterIndex());
-				if (!itr.hasNext()) {
-					paramViolations
-							.computeIfAbsent(parameter, p -> new ParamResultBuilder(target, parameter, arg))
+
+				// If the arg is a container, we need to element, but the only way to extract it
+				// is to check for and use a container index or key on the next node:
+				// https://github.com/jakartaee/validation/issues/194
+
+				Path.Node parameterNode = node;
+				if (itr.hasNext()) {
+					node = itr.next();
+				}
+
+				Object value;
+				Object container;
+				Integer index = node.getIndex();
+				Object key = node.getKey();
+				if (index != null && arg instanceof List<?> list) {
+					value = list.get(index);
+					container = list;
+				}
+				else if (index != null && arg instanceof Object[] array) {
+					value = array[index];
+					container = array;
+				}
+				else if (key != null && arg instanceof Map<?, ?> map) {
+					value = map.get(key);
+					container = map;
+				}
+				else if (arg instanceof Optional<?> optional) {
+					value = optional.orElse(null);
+					container = optional;
+				}
+				else {
+					Assert.state(!node.isInIterable(), "No way to unwrap Iterable without index");
+					value = arg;
+					container = null;
+				}
+
+				if (node.getKind().equals(ElementKind.PROPERTY)) {
+					nestedViolations
+							.computeIfAbsent(parameterNode, k ->
+									new ParamErrorsBuilder(parameter, value, container, index, key))
 							.addViolation(violation);
 				}
 				else {
-
-					// https://github.com/jakartaee/validation/issues/194
-					// If the argument is a container of elements, we need the element, but
-					// the only option is to see if the next part of the property path has
-					// a container index/key for its parent and use it.
-
-					Path.Node paramNode = node;
-					node = itr.next();
-
-					Object bean;
-					Object container;
-					Integer containerIndex = node.getIndex();
-					Object containerKey = node.getKey();
-					if (containerIndex != null && arg instanceof List<?> list) {
-						bean = list.get(containerIndex);
-						container = list;
-					}
-					else if (containerIndex != null && arg instanceof Object[] array) {
-						bean = array[containerIndex];
-						container = array;
-					}
-					else if (containerKey != null && arg instanceof Map<?, ?> map) {
-						bean = map.get(containerKey);
-						container = map;
-					}
-					else if (arg instanceof Optional<?> optional) {
-						bean = optional.orElse(null);
-						container = optional;
-					}
-					else {
-						Assert.state(!node.isInIterable(), "No way to unwrap Iterable without index");
-						bean = arg;
-						container = null;
-					}
-
-					beanViolations
-							.computeIfAbsent(paramNode, k ->
-									new BeanResultBuilder(parameter, bean, container, containerIndex, containerKey))
+					paramViolations
+							.computeIfAbsent(parameterNode, p ->
+									new ParamValidationResultBuilder(target, parameter, value, container, index, key))
 							.addViolation(violation);
 				}
+
 				break;
 			}
 		}
 
 		List<ParameterValidationResult> resultList = new ArrayList<>();
 		paramViolations.forEach((param, builder) -> resultList.add(builder.build()));
-		beanViolations.forEach((key, builder) -> resultList.add(builder.build()));
+		nestedViolations.forEach((key, builder) -> resultList.add(builder.build()));
 		resultList.sort(resultComparator);
 
 		return MethodValidationResult.create(target, method, resultList);
@@ -430,21 +433,35 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * Builds a validation result for a value method parameter with constraints
 	 * declared directly on it.
 	 */
-	private final class ParamResultBuilder {
+	private final class ParamValidationResultBuilder {
 
 		private final Object target;
 
 		private final MethodParameter parameter;
 
 		@Nullable
-		private final Object argument;
+		private final Object value;
+
+		@Nullable
+		private final Object container;
+
+		@Nullable
+		private final Integer containerIndex;
+
+		@Nullable
+		private final Object containerKey;
 
 		private final List<MessageSourceResolvable> resolvableErrors = new ArrayList<>();
 
-		public ParamResultBuilder(Object target, MethodParameter parameter, @Nullable Object argument) {
+		public ParamValidationResultBuilder(
+				Object target, MethodParameter parameter, @Nullable Object value, @Nullable Object container,
+				@Nullable Integer containerIndex, @Nullable Object containerKey) {
 			this.target = target;
 			this.parameter = parameter;
-			this.argument = argument;
+			this.value = value;
+			this.container = container;
+			this.containerIndex = containerIndex;
+			this.containerKey = containerKey;
 		}
 
 		public void addViolation(ConstraintViolation<Object> violation) {
@@ -452,7 +469,9 @@ public class MethodValidationAdapter implements MethodValidator {
 		}
 
 		public ParameterValidationResult build() {
-			return new ParameterValidationResult(this.parameter, this.argument, this.resolvableErrors);
+			return new ParameterValidationResult(
+					this.parameter, this.value, this.resolvableErrors, this.container,
+					this.containerIndex, this.containerKey);
 		}
 
 	}
@@ -462,7 +481,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * Builds a validation result for an {@link jakarta.validation.Valid @Valid}
 	 * annotated bean method parameter with cascaded constraints.
 	 */
-	private final class BeanResultBuilder {
+	private final class ParamErrorsBuilder {
 
 		private final MethodParameter parameter;
 
@@ -482,7 +501,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		private final Set<ConstraintViolation<Object>> violations = new LinkedHashSet<>();
 
-		public BeanResultBuilder(
+		public ParamErrorsBuilder(
 				MethodParameter param, @Nullable Object bean, @Nullable Object container,
 				@Nullable Integer containerIndex, @Nullable Object containerKey) {
 

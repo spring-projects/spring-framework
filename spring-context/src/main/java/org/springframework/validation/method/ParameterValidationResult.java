@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,12 @@ import org.springframework.util.ObjectUtils;
  * {@link ParameterErrors}.
  * </ul>
  *
+ * <p>When the method parameter is a container such as a {@link List}, array,
+ * or {@link java.util.Map}, then a separate {@link ParameterValidationResult}
+ * is created for each element with errors. In that case, the properties
+ * {@link #getContainer() container}, {@link #getContainerIndex() containerIndex},
+ * and {@link #getContainerKey() containerKey} provide additional context.
+ *
  * @author Rossen Stoyanchev
  * @since 6.1
  */
@@ -47,18 +53,43 @@ public class ParameterValidationResult {
 
 	private final List<MessageSourceResolvable> resolvableErrors;
 
+	@Nullable
+	private final Object container;
+
+	@Nullable
+	private final Integer containerIndex;
+
+	@Nullable
+	private final Object containerKey;
+
 
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 */
 	public ParameterValidationResult(
-			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors) {
+			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors,
+			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
 
 		Assert.notNull(param, "MethodParameter is required");
 		Assert.notEmpty(errors, "`resolvableErrors` must not be empty");
 		this.methodParameter = param;
 		this.argument = arg;
 		this.resolvableErrors = List.copyOf(errors);
+		this.container = container;
+		this.containerIndex = index;
+		this.containerKey = key;
+	}
+
+	/**
+	 * Create a {@code ParameterValidationResult}.
+	 * @deprecated in favor of
+	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object)}
+	 */
+	@Deprecated(since = "6.1.3", forRemoval = true)
+	public ParameterValidationResult(
+			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors) {
+
+		this(param, arg, errors, null, null, null);
 	}
 
 
@@ -100,6 +131,39 @@ public class ParameterValidationResult {
 		return this.resolvableErrors;
 	}
 
+	/**
+	 * When {@code @Valid} is declared on a container of elements such as
+	 * {@link java.util.Collection}, {@link java.util.Map},
+	 * {@link java.util.Optional}, and others, this method returns the container
+	 * of the validated {@link #getArgument() argument}, while
+	 * {@link #getContainerIndex()} and {@link #getContainerKey()} provide
+	 * information about the index or key if applicable.
+	 */
+	@Nullable
+	public Object getContainer() {
+		return this.container;
+	}
+
+	/**
+	 * When {@code @Valid} is declared on an indexed container of elements such as
+	 * {@link List} or array, this method returns the index of the validated
+	 * {@link #getArgument() argument}.
+	 */
+	@Nullable
+	public Integer getContainerIndex() {
+		return this.containerIndex;
+	}
+
+	/**
+	 * When {@code @Valid} is declared on a container of elements referenced by
+	 * key such as {@link java.util.Map}, this method returns the key of the
+	 * validated {@link #getArgument() argument}.
+	 */
+	@Nullable
+	public Object getContainerKey() {
+		return this.containerKey;
+	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -111,7 +175,9 @@ public class ParameterValidationResult {
 		}
 		ParameterValidationResult otherResult = (ParameterValidationResult) other;
 		return (getMethodParameter().equals(otherResult.getMethodParameter()) &&
-				ObjectUtils.nullSafeEquals(getArgument(), otherResult.getArgument()));
+				ObjectUtils.nullSafeEquals(getArgument(), otherResult.getArgument()) &&
+				ObjectUtils.nullSafeEquals(getContainerIndex(), otherResult.getContainerIndex()) &&
+				ObjectUtils.nullSafeEquals(getContainerKey(), otherResult.getContainerKey()));
 	}
 
 	@Override
@@ -119,14 +185,18 @@ public class ParameterValidationResult {
 		int hashCode = super.hashCode();
 		hashCode = 29 * hashCode + getMethodParameter().hashCode();
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getArgument());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getContainerIndex());
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getContainerKey());
 		return hashCode;
 	}
 
 	@Override
 	public String toString() {
-		return "Validation results for method parameter '" + this.methodParameter +
-				"': argument [" + ObjectUtils.nullSafeConciseToString(this.argument) + "]; " +
-				getResolvableErrors();
+		return getClass().getSimpleName() + " for " + this.methodParameter +
+				", argument value '" + ObjectUtils.nullSafeConciseToString(this.argument) + "'," +
+				(this.containerIndex != null ? "containerIndex[" + this.containerIndex + "]," : "") +
+				(this.containerKey != null ? "containerKey['" + this.containerKey + "']," : "") +
+				" errors: " + getResolvableErrors();
 	}
 
 }
