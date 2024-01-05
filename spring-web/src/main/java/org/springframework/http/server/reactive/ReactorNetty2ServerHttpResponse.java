@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import io.netty5.buffer.Buffer;
 import io.netty5.channel.ChannelId;
+import io.netty5.handler.codec.http.headers.DefaultHttpSetCookie;
+import io.netty5.handler.codec.http.headers.HttpSetCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -106,11 +107,13 @@ class ReactorNetty2ServerHttpResponse extends AbstractServerHttpResponse impleme
 
 	@Override
 	protected void applyCookies() {
-		// Netty Cookie doesn't support sameSite. When this is resolved, we can adapt to it again:
-		// https://github.com/netty/netty/issues/8161
-		for (List<ResponseCookie> cookies : getCookies().values()) {
-			for (ResponseCookie cookie : cookies) {
-				this.response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+		for (String name : getCookies().keySet()) {
+			for (ResponseCookie httpCookie : getCookies().get(name)) {
+				Long maxAge = (!httpCookie.getMaxAge().isNegative()) ? httpCookie.getMaxAge().getSeconds() : null;
+				HttpSetCookie.SameSite sameSite = (httpCookie.getSameSite() != null) ? HttpSetCookie.SameSite.valueOf(httpCookie.getSameSite()) : null;
+				DefaultHttpSetCookie cookie = new DefaultHttpSetCookie(name, httpCookie.getValue(), httpCookie.getPath(),
+						httpCookie.getDomain(), null, maxAge, sameSite, false, httpCookie.isSecure(), httpCookie.isHttpOnly());
+				this.response.addCookie(cookie);
 			}
 		}
 	}
