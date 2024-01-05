@@ -153,7 +153,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 		}
 
 		Object bean = testContext.getTestInstance();
-		Class<?> clazz = testContext.getTestClass();
+		String beanName = testContext.getTestClass().getName() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX;
 
 		ConfigurableListableBeanFactory beanFactory = gac.getBeanFactory();
 		AutowiredAnnotationBeanPostProcessor autowiredAnnotationBpp = new AutowiredAnnotationBeanPostProcessor();
@@ -162,7 +162,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 		CommonAnnotationBeanPostProcessor commonAnnotationBpp = new CommonAnnotationBeanPostProcessor();
 		commonAnnotationBpp.setBeanFactory(beanFactory);
 		commonAnnotationBpp.processInjection(bean);
-		beanFactory.initializeBean(bean, clazz.getName() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX);
+		beanFactory.initializeBean(bean, beanName);
 		testContext.removeAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE);
 	}
 
