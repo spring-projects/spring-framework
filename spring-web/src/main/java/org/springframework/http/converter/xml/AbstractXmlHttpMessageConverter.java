@@ -56,7 +56,7 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 
 	/**
 	 * Protected constructor that sets the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes}
-	 * to {@code text/xml} and {@code application/xml}, and {@code application/*-xml}.
+	 * to {@code text/xml} and {@code application/xml}, and {@code application/*+xml}.
 	 */
 	protected AbstractXmlHttpMessageConverter() {
 		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML, new MediaType("application", "*+xml"));
