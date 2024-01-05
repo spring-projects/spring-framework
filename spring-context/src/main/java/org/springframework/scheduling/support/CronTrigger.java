@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class CronTrigger implements Trigger {
 
 	private final CronExpression expression;
 
+	@Nullable
 	private final ZoneId zoneId;
 
 
@@ -48,7 +49,8 @@ public class CronTrigger implements Trigger {
 	 * expression conventions
 	 */
 	public CronTrigger(String expression) {
-		this(expression, ZoneId.systemDefault());
+		this.expression = CronExpression.parse(expression);
+		this.zoneId = null;
 	}
 
 	/**
@@ -58,7 +60,9 @@ public class CronTrigger implements Trigger {
 	 * @param timeZone a time zone in which the trigger times will be generated
 	 */
 	public CronTrigger(String expression, TimeZone timeZone) {
-		this(expression, timeZone.toZoneId());
+		this.expression = CronExpression.parse(expression);
+		Assert.notNull(timeZone, "TimeZone must not be null");
+		this.zoneId = timeZone.toZoneId();
 	}
 
 	/**
@@ -70,10 +74,8 @@ public class CronTrigger implements Trigger {
 	 * @see CronExpression#parse(String)
 	 */
 	public CronTrigger(String expression, ZoneId zoneId) {
-		Assert.hasLength(expression, "Expression must not be empty");
-		Assert.notNull(zoneId, "ZoneId must not be null");
-
 		this.expression = CronExpression.parse(expression);
+		Assert.notNull(zoneId, "ZoneId must not be null");
 		this.zoneId = zoneId;
 	}
 
@@ -94,22 +96,23 @@ public class CronTrigger implements Trigger {
 	 */
 	@Override
 	public Instant nextExecution(TriggerContext triggerContext) {
-		Instant instant = triggerContext.lastCompletion();
-		if (instant != null) {
+		Instant timestamp = triggerContext.lastCompletion();
+		if (timestamp != null) {
 			Instant scheduled = triggerContext.lastScheduledExecution();
-			if (scheduled != null && instant.isBefore(scheduled)) {
+			if (scheduled != null && timestamp.isBefore(scheduled)) {
 				// Previous task apparently executed too early...
 				// Let's simply use the last calculated execution time then,
 				// in order to prevent accidental re-fires in the same second.
-				instant = scheduled;
+				timestamp = scheduled;
 			}
 		}
 		else {
-			instant = triggerContext.getClock().instant();
+			timestamp = triggerContext.getClock().instant();
 		}
-		ZonedDateTime dateTime = ZonedDateTime.ofInstant(instant, this.zoneId);
-		ZonedDateTime next = this.expression.next(dateTime);
-		return (next != null ? next.toInstant() : null);
+		ZoneId zone = (this.zoneId != null ? this.zoneId : triggerContext.getClock().getZone());
+		ZonedDateTime zonedTimestamp = ZonedDateTime.ofInstant(timestamp, zone);
+		ZonedDateTime nextTimestamp = this.expression.next(zonedTimestamp);
+		return (nextTimestamp != null ? nextTimestamp.toInstant() : null);
 	}
 
 
