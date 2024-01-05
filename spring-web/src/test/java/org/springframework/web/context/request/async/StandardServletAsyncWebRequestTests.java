@@ -16,9 +16,12 @@
 
 package org.springframework.web.context.request.async;
 
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -122,6 +125,36 @@ public class StandardServletAsyncWebRequestTests {
 		Exception e = new Exception();
 		this.asyncRequest.onError(new AsyncEvent(new MockAsyncContext(this.request, this.response), e));
 		verify(errorHandler).accept(e);
+	}
+
+	@Test
+	public void onErrorShouldCompleteAsyncContext() throws Exception {
+		this.asyncRequest.startAsync();
+		AtomicInteger completeCounter = new AtomicInteger();
+		MockAsyncContext context = (MockAsyncContext) this.request.getAsyncContext();
+		context.addListener(new AsyncListener() {
+			@Override
+			public void onComplete(AsyncEvent asyncEvent) throws IOException {
+				completeCounter.incrementAndGet();
+			}
+
+			@Override
+			public void onTimeout(AsyncEvent asyncEvent) throws IOException {
+
+			}
+
+			@Override
+			public void onError(AsyncEvent asyncEvent) throws IOException {
+
+			}
+
+			@Override
+			public void onStartAsync(AsyncEvent asyncEvent) throws IOException {
+
+			}
+		});
+		this.asyncRequest.onError(new AsyncEvent(new MockAsyncContext(this.request, this.response), new Exception()));
+		assertThat(completeCounter.get()).isOne();
 	}
 
 	@Test

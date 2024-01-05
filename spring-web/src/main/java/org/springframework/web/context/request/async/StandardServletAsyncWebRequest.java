@@ -151,6 +151,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
+		if (this.asyncContext != null) {
+			this.asyncContext.complete();
+		}
 		this.exceptionHandlers.forEach(consumer -> consumer.accept(event.getThrowable()));
 	}
 
