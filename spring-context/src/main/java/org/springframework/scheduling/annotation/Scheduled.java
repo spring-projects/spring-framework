@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,9 +100,9 @@ public @interface Scheduled {
 
 	/**
 	 * A time zone for which the cron expression will be resolved. By default, this
-	 * attribute is the empty String (i.e. the server's local time zone will be used).
+	 * attribute is the empty String (i.e. the scheduler's time zone will be used).
 	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)},
-	 * or an empty String to indicate the server's default time zone
+	 * or an empty String to indicate the scheduler's default time zone
 	 * @since 4.0
 	 * @see org.springframework.scheduling.support.CronTrigger#CronTrigger(String, java.util.TimeZone)
 	 * @see java.util.TimeZone

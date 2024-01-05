@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +83,7 @@ import org.springframework.util.StringValueResolver;
  * "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the
+ * {@code <task:annotation-driven>} XML element and also by the
  * {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
@@ -434,14 +433,14 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
 					processedSchedule = true;
 					if (!Scheduled.CRON_DISABLED.equals(cron)) {
-						TimeZone timeZone;
+						CronTrigger trigger;
 						if (StringUtils.hasText(zone)) {
-							timeZone = StringUtils.parseTimeZoneString(zone);
+							trigger = new CronTrigger(cron, StringUtils.parseTimeZoneString(zone));
 						}
 						else {
-							timeZone = TimeZone.getDefault();
+							trigger = new CronTrigger(cron);
 						}
-						tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
+						tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, trigger)));
 					}
 				}
 			}

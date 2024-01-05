@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -848,6 +848,7 @@ class CronTriggerTests {
 		assertThat(nextExecutionTime).isEqualTo(this.calendar.getTime());
 	}
 
+
 	private static void roundup(Calendar calendar) {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
@@ -861,9 +862,7 @@ class CronTriggerTests {
 	}
 
 	private static TriggerContext getTriggerContext(Date lastCompletionTime) {
-		SimpleTriggerContext context = new SimpleTriggerContext();
-		context.update(null, null, lastCompletionTime);
-		return context;
+		return new SimpleTriggerContext(null, null, lastCompletionTime);
 	}
 
 

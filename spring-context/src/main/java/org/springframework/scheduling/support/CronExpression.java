@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,18 +57,12 @@ public final class CronExpression {
 	private final String expression;
 
 
-	private CronExpression(
-			CronField seconds,
-			CronField minutes,
-			CronField hours,
-			CronField daysOfMonth,
-			CronField months,
-			CronField daysOfWeek,
-			String expression) {
+	private CronExpression(CronField seconds, CronField minutes, CronField hours,
+			CronField daysOfMonth, CronField months, CronField daysOfWeek, String expression) {
 
-		// reverse order, to make big changes first
-		// to make sure we end up at 0 nanos, we add an extra field
-		this.fields = new CronField[]{daysOfWeek, months, daysOfMonth, hours, minutes, seconds, CronField.zeroNanos()};
+		// Reverse order, to make big changes first.
+		// To make sure we end up at 0 nanos, we add an extra field.
+		this.fields = new CronField[] {daysOfWeek, months, daysOfMonth, hours, minutes, seconds, CronField.zeroNanos()};
 		this.expression = expression;
 	}
 
@@ -121,11 +115,8 @@ public final class CronExpression {
 	 * {@code LW}), it means "the last weekday of the month".
 	 * </li>
 	 * <li>
-	 * In the "day of week" field, {@code L} stands for "the last day of the
-	 * week".
-	 * If prefixed by a number or three-letter name (i.e. {@code dL} or
-	 * {@code DDDL}), it means "the last day of week {@code d} (or {@code DDD})
-	 * in the month".
+	 * In the "day of week" field, {@code dL} or {@code DDDL} stands for
+	 * "the last day of week {@code d} (or {@code DDD}) in the month".
 	 * </li>
 	 * </ul>
 	 * </li>
@@ -177,7 +168,7 @@ public final class CronExpression {
 	 * the cron format
 	 */
 	public static CronExpression parse(String expression) {
-		Assert.hasLength(expression, "Expression string must not be empty");
+		Assert.hasLength(expression, "Expression must not be empty");
 
 		expression = resolveMacros(expression);
 
@@ -271,27 +262,18 @@ public final class CronExpression {
 
 
 	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof CronExpression &&
+				Arrays.equals(this.fields, ((CronExpression) other).fields)));
+	}
+
+	@Override
 	public int hashCode() {
 		return Arrays.hashCode(this.fields);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o instanceof CronExpression) {
-			CronExpression other = (CronExpression) o;
-			return Arrays.equals(this.fields, other.fields);
-		}
-		else {
-			return false;
-		}
-	}
-
 	/**
 	 * Return the expression string used to create this {@code CronExpression}.
-	 * @return the expression string
 	 */
 	@Override
 	public String toString() {
