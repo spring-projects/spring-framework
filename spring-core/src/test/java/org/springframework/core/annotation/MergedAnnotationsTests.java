@@ -2273,8 +2273,8 @@ class MergedAnnotationsTests {
 
 	// @formatter:off
 
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.METHOD })
 	@Inherited
 	@interface Transactional {
 
@@ -2327,8 +2327,8 @@ class MergedAnnotationsTests {
 	static class AliasedTransactionalComponentClass {
 	}
 
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.METHOD })
 	@Inherited
 	@interface AliasedTransactional {
 

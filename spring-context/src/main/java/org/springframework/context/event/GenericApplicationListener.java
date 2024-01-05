@@ -55,6 +55,7 @@ public interface GenericApplicationListener extends SmartApplicationListener {
 	 */
 	boolean supportsEventType(ResolvableType eventType);
 
+
 	/**
 	 * Create a new {@code ApplicationListener} for the given event type.
 	 * @param eventType the event to listen to

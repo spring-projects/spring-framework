@@ -22,8 +22,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.core.ResolvableType;
 
 /**
- * A {@link GenericApplicationListener} implementation that supports a single
- * event type.
+ * A {@link GenericApplicationListener} implementation that supports a single event type.
  *
  * @author Stephane Nicoll
  * @since 6.1.3
@@ -35,10 +34,12 @@ class GenericApplicationListenerDelegate<E extends ApplicationEvent> implements 
 
 	private final Consumer<E> consumer;
 
+
 	GenericApplicationListenerDelegate(Class<E> supportedEventType, Consumer<E> consumer) {
 		this.supportedEventType = supportedEventType;
 		this.consumer = consumer;
 	}
+
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {

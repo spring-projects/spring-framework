@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * @author Sam Brannen
  * @since 6.0
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
 @Documented
 @ExtendWith(CompileWithForkedClassLoaderExtension.class)
 public @interface CompileWithForkedClassLoader {
