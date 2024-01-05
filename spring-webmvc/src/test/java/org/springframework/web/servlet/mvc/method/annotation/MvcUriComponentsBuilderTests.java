@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.sql.Savepoint;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,10 +35,14 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -144,6 +149,31 @@ public class MvcUriComponentsBuilderTests {
 
 		assertThat(uriComponents.toString()).isEqualTo("https://example.org:9090/base/people");
 		assertThat(builder.toUriString()).isEqualTo("https://example.org:9090/base");
+	}
+
+	@Test
+	public void fromControllerWithPlaceholder() {
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addFirst(new MapPropertySource("test",
+				Map.of("context.test.mapping", "people")));
+		initWebApplicationContext(WebConfig.class, environment);
+		UriComponents uriComponents = fromController(ConfigurablePersonController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/people");
+	}
+
+	@Test
+	public void fromControllerWithPlaceholderAndMissingValue() {
+		StandardEnvironment environment = new StandardEnvironment();
+		assertThat(environment.containsProperty("context.test.mapping")).isFalse();
+		initWebApplicationContext(WebConfig.class, environment);
+		UriComponents uriComponents = fromController(ConfigurablePersonController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/${context.test.mapping}");
+	}
+
+	@Test
+	public void fromControllerWithPlaceholderAndNoValueResolver() {
+		UriComponents uriComponents = fromController(ConfigurablePersonController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/${context.test.mapping}");
 	}
 
 	@Test
@@ -291,6 +321,17 @@ public class MvcUriComponentsBuilderTests {
 		UriComponents uriComponents = fromMethodName(MetaAnnotationController.class, "handleInput").build();
 
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/input");
+	}
+
+	@Test
+	public void fromMethodNameConfigurablePath() {
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addFirst(new MapPropertySource("test",
+				Map.of("method.test.mapping", "custom")));
+		initWebApplicationContext(WebConfig.class, environment);
+		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
+				"methodWithConfigurableMapping", "1").build();
+		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
 	}
 
 	@Test
@@ -522,7 +563,14 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	private void initWebApplicationContext(Class<?> configClass) {
+		initWebApplicationContext(configClass, null);
+	}
+
+	private void initWebApplicationContext(Class<?> configClass, @Nullable ConfigurableEnvironment environment) {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		if (environment != null) {
+			context.setEnvironment(environment);
+		}
 		context.setServletContext(new MockServletContext());
 		context.register(configClass);
 		context.refresh();
@@ -571,6 +619,11 @@ public class MvcUriComponentsBuilderTests {
 
 	@RequestMapping({"/persons", "/people"})
 	private class InvalidController {
+	}
+
+
+	@RequestMapping("/${context.test.mapping}")
+	interface ConfigurablePersonController {
 	}
 
 
@@ -634,6 +687,11 @@ public class MvcUriComponentsBuilderTests {
 
 		@GetMapping("/optional-param-with-name")
 		HttpEntity<Void> methodWithOptionalNamedParam(@RequestParam("search") Optional<String> q) {
+			return null;
+		}
+
+		@RequestMapping("/${method.test.mapping}/{id}/foo")
+		HttpEntity<Void> methodWithConfigurableMapping(@PathVariable String id) {
 			return null;
 		}
 	}
