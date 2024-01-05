@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,6 @@ class StreamConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void convertFromListToStream() throws NoSuchFieldException {
 		this.conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> list = Arrays.asList("1", "2", "3");
@@ -112,7 +111,6 @@ class StreamConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void convertFromArrayToStream() throws NoSuchFieldException {
 		Integer[] array = new Integer[] {1, 0, 1};
 		this.conversionService.addConverter(Integer.class, Boolean.class, source -> source == 1);
@@ -123,7 +121,6 @@ class StreamConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void convertFromListToRawStream() throws NoSuchFieldException {
 		List<String> list = Arrays.asList("1", "2", "3");
 		TypeDescriptor streamOfInteger = new TypeDescriptor(Types.class.getField("rawStream"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,8 +256,8 @@ class MapToMapConverterTests {
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
 		assertThat(converted).hasSize(2);
-		assertThat(converted.get("a")).isEqualTo(Arrays.asList("1"));
-		assertThat(converted.get("b")).isEqualTo(Arrays.asList("2"));
+		assertThat(converted.get("a")).isEqualTo(List.of("1"));
+		assertThat(converted.get("b")).isEqualTo(List.of("2"));
 	}
 
 	@Test

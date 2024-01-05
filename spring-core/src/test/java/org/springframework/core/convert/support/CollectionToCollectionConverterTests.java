@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,8 +143,8 @@ class CollectionToCollectionConverterTests {
 	@SuppressWarnings("unchecked")
 	void stringToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<>();
-		list.add(Arrays.asList("9,12"));
-		list.add(Arrays.asList("37,23"));
+		list.add(List.of("9,12"));
+		list.add(List.of("37,23"));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
 		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));

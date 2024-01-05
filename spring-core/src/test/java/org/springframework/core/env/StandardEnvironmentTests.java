@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -454,26 +454,22 @@ class StandardEnvironmentTests {
 	class MatchesProfilesTests {
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withEmptyArgumentList() {
 			assertThatIllegalArgumentException().isThrownBy(environment::matchesProfiles);
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withNullArgumentList() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles((String[]) null));
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withNullArgument() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles((String) null));
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", null));
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withEmptyArgument() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles(""));
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", ""));
@@ -481,13 +477,11 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withInvalidNotOperator() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", "!"));
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withInvalidCompoundExpressionGrouping() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 | p2 & p3"));
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 & p2 | p3"));
@@ -495,7 +489,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void activeProfileSetProgrammatically() {
 			assertThat(environment.matchesProfiles("p1", "p2")).isFalse();
 
@@ -510,7 +503,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void activeProfileSetViaProperty() {
 			assertThat(environment.matchesProfiles("p1")).isFalse();
 
@@ -519,7 +511,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void defaultProfile() {
 			assertThat(environment.matchesProfiles("pd")).isFalse();
 
@@ -532,7 +523,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withNotOperator() {
 			assertThat(environment.matchesProfiles("p1")).isFalse();
 			assertThat(environment.matchesProfiles("!p1")).isTrue();

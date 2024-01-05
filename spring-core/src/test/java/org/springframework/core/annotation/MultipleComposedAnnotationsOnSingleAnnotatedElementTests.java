@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 
 	@Test
 	@Disabled("Disabled since some Java 8 updates handle the bridge method differently")
-	void getMultipleComposedAnnotationsOnBridgeMethod() throws Exception {
+	void getMultipleComposedAnnotationsOnBridgeMethod() {
 		Set<Cacheable> cacheables = getAllMergedAnnotations(getBridgeMethod(), Cacheable.class);
 		assertThat(cacheables).isNotNull();
 		assertThat(cacheables).isEmpty();
@@ -178,7 +178,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	void findMultipleComposedAnnotationsOnBridgeMethod() throws Exception {
+	void findMultipleComposedAnnotationsOnBridgeMethod() {
 		assertFindAllMergedAnnotationsBehavior(getBridgeMethod());
 	}
 

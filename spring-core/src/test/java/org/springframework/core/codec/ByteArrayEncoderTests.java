@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class ByteArrayEncoderTests extends AbstractEncoderTests<ByteArrayEncoder> {
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(byte[].class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
@@ -57,7 +57,7 @@ class ByteArrayEncoderTests extends AbstractEncoderTests<ByteArrayEncoder> {
 
 	@Override
 	@Test
-	public void encode() {
+	protected void encode() {
 		Flux<byte[]> input = Flux.just(this.fooBytes, this.barBytes);
 
 		testEncodeAll(input, byte[].class, step -> step

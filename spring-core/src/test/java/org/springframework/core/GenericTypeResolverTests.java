@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,19 +183,19 @@ class GenericTypeResolverTests {
 	}
 
 	@Test
-	public void resolvePartiallySpecializedTypeVariables() {
+	void resolvePartiallySpecializedTypeVariables() {
 		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[0], TypeFixedBiGenericClass.class);
 		assertThat(resolved).isEqualTo(D.class);
 	}
 
 	@Test
-	public void resolveTransitiveTypeVariableWithDifferentName() {
+	void resolveTransitiveTypeVariableWithDifferentName() {
 		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[1], TypeFixedBiGenericClass.class);
 		assertThat(resolved).isEqualTo(E.class);
 	}
 
 	@Test
-	public void resolveMethodParameterWithNestedGenerics() {
+	void resolveMethodParameterWithNestedGenerics() {
 		Method method = method(WithMethodParameter.class, "nestedGenerics", List.class);
 		MethodParameter methodParameter = new MethodParameter(method, 0);
 		Type resolvedType = resolveType(methodParameter.getGenericParameterType(), WithMethodParameter.class);

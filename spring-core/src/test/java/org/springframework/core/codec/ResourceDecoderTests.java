@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 
 	@Override
 	@Test
-	public void canDecode() {
+	protected void canDecode() {
 		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
@@ -62,7 +62,7 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 
 	@Override
 	@Test
-	public void decode() {
+	protected void decode() {
 		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
 
 		testDecodeAll(input, Resource.class, step -> step
@@ -81,7 +81,7 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 
 	@Override
 	@Test
-	public void decodeToMono() {
+	protected void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
 		testDecodeToMonoAll(input, ResolvableType.forClass(Resource.class),
 				step -> step
@@ -103,7 +103,7 @@ class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 	}
 
 	@Test
-	public void decodeInputStreamResource() {
+	void decodeInputStreamResource() {
 		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
 		testDecodeAll(input, InputStreamResource.class, step -> step
 				.consumeNextWith(resource -> {

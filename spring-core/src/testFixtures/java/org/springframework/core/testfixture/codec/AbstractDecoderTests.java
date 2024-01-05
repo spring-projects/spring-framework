@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,21 +67,21 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 * Subclasses should implement this method to test {@link Decoder#canDecode}.
 	 */
 	@Test
-	public abstract void canDecode() throws Exception;
+	protected abstract void canDecode() throws Exception;
 
 	/**
 	 * Subclasses should implement this method to test {@link Decoder#decode}, possibly using
 	 * {@link #testDecodeAll} or other helper methods.
 	 */
 	@Test
-	public abstract void decode() throws Exception;
+	protected abstract void decode() throws Exception;
 
 	/**
 	 * Subclasses should implement this method to test {@link Decoder#decodeToMono}, possibly using
 	 * {@link #testDecodeToMonoAll}.
 	 */
 	@Test
-	public abstract void decodeToMono() throws Exception;
+	protected abstract void decodeToMono() throws Exception;
 
 	// Flux
 

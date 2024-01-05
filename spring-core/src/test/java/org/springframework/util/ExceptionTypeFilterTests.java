@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.util;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -28,7 +29,7 @@ class ExceptionTypeFilterTests {
 
 	@Test
 	void subClassMatch() {
-		ExceptionTypeFilter filter = new ExceptionTypeFilter(asList(RuntimeException.class), null, true);
+		ExceptionTypeFilter filter = new ExceptionTypeFilter(List.of(RuntimeException.class), null, true);
 		assertThat(filter.match(RuntimeException.class)).isTrue();
 		assertThat(filter.match(IllegalStateException.class)).isTrue();
 	}

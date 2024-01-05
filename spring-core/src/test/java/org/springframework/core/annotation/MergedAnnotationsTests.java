@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -415,7 +415,7 @@ class MergedAnnotationsTests {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(TxConfig.class).stream(
 				Transactional.class).collect(
 						MergedAnnotationCollectors.toMultiValueMap());
-		assertThat(map).contains(entry("value", Arrays.asList("TxConfig")));
+		assertThat(map).contains(entry("value", List.of("TxConfig")));
 	}
 
 	@Test
@@ -434,7 +434,7 @@ class MergedAnnotationsTests {
 				SubSubClassWithInheritedAnnotation.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).stream(Transactional.class).collect(
 						MergedAnnotationCollectors.toMultiValueMap());
-		assertThat(map).contains(entry("qualifier", Arrays.asList("transactionManager")));
+		assertThat(map).contains(entry("qualifier", List.of("transactionManager")));
 	}
 
 	@Test
@@ -443,7 +443,7 @@ class MergedAnnotationsTests {
 				SubSubClassWithInheritedComposedAnnotation.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).stream(Transactional.class).collect(
 						MergedAnnotationCollectors.toMultiValueMap());
-		assertThat(map).contains(entry("qualifier", Arrays.asList("composed1")));
+		assertThat(map).contains(entry("qualifier", List.of("composed1")));
 	}
 
 	/**
@@ -458,7 +458,7 @@ class MergedAnnotationsTests {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(DerivedTxConfig.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).stream(Transactional.class).collect(
 						MergedAnnotationCollectors.toMultiValueMap());
-		assertThat(map).contains(entry("value", Arrays.asList("DerivedTxConfig")));
+		assertThat(map).contains(entry("value", List.of("DerivedTxConfig")));
 	}
 
 	/**
@@ -855,7 +855,6 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
@@ -1731,7 +1730,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeWithImplicitAliases() throws Exception {
+	void synthesizeWithImplicitAliases() {
 		testSynthesisWithImplicitAliases(ValueImplicitAliasesTestConfigurationClass.class, "value");
 		testSynthesisWithImplicitAliases(Location1ImplicitAliasesTestConfigurationClass.class, "location1");
 		testSynthesisWithImplicitAliases(XmlImplicitAliasesTestConfigurationClass.class, "xmlFile");
@@ -1965,7 +1964,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void synthesizeFromMapWithImplicitAttributeAliases() throws Exception {
+	void synthesizeFromMapWithImplicitAttributeAliases() {
 		testSynthesisFromMapWithImplicitAliases("value");
 		testSynthesisFromMapWithImplicitAliases("location1");
 		testSynthesisFromMapWithImplicitAliases("location2");
