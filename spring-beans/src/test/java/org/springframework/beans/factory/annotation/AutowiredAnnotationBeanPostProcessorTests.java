@@ -119,6 +119,20 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	void processInjection() {
+		ResourceInjectionBean bean = new ResourceInjectionBean();
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		bpp.processInjection(bean);
+
+		assertThat(bean.getTestBean()).isSameAs(tb);
+		assertThat(bean.getTestBean2()).isSameAs(tb);
+	}
+
+	@Test
 	void resourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(ResourceInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
