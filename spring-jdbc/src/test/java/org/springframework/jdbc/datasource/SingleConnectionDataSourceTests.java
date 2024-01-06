@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ class SingleConnectionDataSourceTests {
 
 
 	@Test
-	@SuppressWarnings("resource")
 	void plainConnection() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, false);
 
@@ -57,7 +56,6 @@ class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void withSuppressClose() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, true);
 
@@ -72,7 +70,6 @@ class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void withRollbackBeforeClose() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource(connection, true);
 		ds.setRollbackBeforeClose(true);
@@ -83,7 +80,6 @@ class SingleConnectionDataSourceTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void withEnforcedAutoCommit() throws Exception {
 		SingleConnectionDataSource ds = new SingleConnectionDataSource() {
 			@Override

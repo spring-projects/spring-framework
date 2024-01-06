@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class BeanFactoryDataSourceLookupTests {
+class BeanFactoryDataSourceLookupTests {
 
 	private static final String DATASOURCE_BEAN_NAME = "dataSource";
 
 
 	@Test
-	public void testLookupSunnyDay() {
+	void testLookupSunnyDay() {
 		BeanFactory beanFactory = mock();
 
 		StubDataSource expectedDataSource = new StubDataSource();
@@ -55,7 +55,7 @@ public class BeanFactoryDataSourceLookupTests {
 	}
 
 	@Test
-	public void testLookupWhereBeanFactoryYieldsNonDataSourceType() throws Exception {
+	void testLookupWhereBeanFactoryYieldsNonDataSourceType() {
 		final BeanFactory beanFactory = mock();
 
 		given(beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class)).willThrow(
@@ -68,7 +68,7 @@ public class BeanFactoryDataSourceLookupTests {
 	}
 
 	@Test
-	public void testLookupWhereBeanFactoryHasNotBeenSupplied() throws Exception {
+	void testLookupWhereBeanFactoryHasNotBeenSupplied() {
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 		assertThatIllegalStateException().isThrownBy(() ->
 				lookup.getDataSource(DATASOURCE_BEAN_NAME));

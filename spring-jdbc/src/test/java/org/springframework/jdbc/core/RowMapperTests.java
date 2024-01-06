@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
  * @author Sam Brannen
  * @since 02.08.2004
  */
-public class RowMapperTests {
+class RowMapperTests {
 
 	private final Connection connection = mock();
 
@@ -61,7 +61,7 @@ public class RowMapperTests {
 	private List<TestBean> result;
 
 	@BeforeEach
-	public void setUp() throws SQLException {
+	void setUp() throws SQLException {
 		given(connection.createStatement()).willReturn(statement);
 		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
 		given(statement.executeQuery(anyString())).willReturn(resultSet);
@@ -76,12 +76,12 @@ public class RowMapperTests {
 	}
 
 	@AfterEach
-	public void verifyClosed() throws Exception {
+	void verifyClosed() throws Exception {
 		verify(resultSet).close();
 	}
 
 	@AfterEach
-	public void verifyResults() {
+	void verifyResults() {
 		assertThat(result).isNotNull();
 		assertThat(result).hasSize(2);
 		TestBean testBean1 = result.get(0);
@@ -93,19 +93,19 @@ public class RowMapperTests {
 	}
 
 	@Test
-	public void staticQueryWithRowMapper() throws SQLException {
+	void staticQueryWithRowMapper() throws SQLException {
 		result = template.query("some SQL", testRowMapper);
 		verify(statement).close();
 	}
 
 	@Test
-	public void preparedStatementCreatorWithRowMapper() throws SQLException {
+	void preparedStatementCreatorWithRowMapper() throws SQLException {
 		result = template.query(con -> preparedStatement, testRowMapper);
 		verify(preparedStatement).close();
 	}
 
 	@Test
-	public void preparedStatementSetterWithRowMapper() throws SQLException {
+	void preparedStatementSetterWithRowMapper() throws SQLException {
 		result = template.query("some SQL", ps -> ps.setString(1, "test"), testRowMapper);
 		verify(preparedStatement).setString(1, "test");
 		verify(preparedStatement).close();
@@ -121,7 +121,7 @@ public class RowMapperTests {
 	}
 
 	@Test
-	public void queryWithArgsAndTypesAndRowMapper() throws SQLException {
+	void queryWithArgsAndTypesAndRowMapper() throws SQLException {
 		result = template.query("some SQL",
 				new Object[] { "test1", "test2" },
 				new int[] { Types.VARCHAR, Types.VARCHAR },

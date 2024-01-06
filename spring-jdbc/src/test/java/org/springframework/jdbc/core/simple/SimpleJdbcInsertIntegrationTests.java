@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class SimpleJdbcInsertIntegrationTests {
 		class UnquotedIdentifiersInSchemaTests extends AbstractSimpleJdbcInsertIntegrationTests {
 
 			@Test
-			void retrieveColumnNamesFromMetadata() throws Exception {
+			void retrieveColumnNamesFromMetadata() {
 				SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
 						.withTableName("users")
 						.usingGeneratedKeyColumns("id");
@@ -80,7 +80,7 @@ class SimpleJdbcInsertIntegrationTests {
 			}
 
 			@Test  // gh-24013
-			void usingColumnsAndQuotedIdentifiers() throws Exception {
+			void usingColumnsAndQuotedIdentifiers() {
 				// NOTE: unquoted identifiers in H2/HSQL must be converted to UPPERCASE
 				// since that's how they are stored in the DB metadata.
 				SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
@@ -118,7 +118,7 @@ class SimpleJdbcInsertIntegrationTests {
 		class QuotedIdentifiersInSchemaTests extends AbstractSimpleJdbcInsertIntegrationTests {
 
 			@Test
-			void retrieveColumnNamesFromMetadata() throws Exception {
+			void retrieveColumnNamesFromMetadata() {
 				SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
 						.withTableName("Order")
 						.usingGeneratedKeyColumns("id");
@@ -134,7 +134,7 @@ class SimpleJdbcInsertIntegrationTests {
 			}
 
 			@Test  // gh-24013
-			void usingColumnsAndQuotedIdentifiers() throws Exception {
+			void usingColumnsAndQuotedIdentifiers() {
 				SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
 						.withoutTableColumnMetaDataAccess()
 						.withTableName("Order")
@@ -194,7 +194,7 @@ class SimpleJdbcInsertIntegrationTests {
 			}
 
 			@Test  // gh-24013
-			void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
+			void usingColumnsAndQuotedIdentifiersWithSchemaName() {
 				// NOTE: unquoted identifiers in H2/HSQL must be converted to UPPERCASE
 				// since that's how they are stored in the DB metadata.
 				SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
@@ -252,7 +252,7 @@ class SimpleJdbcInsertIntegrationTests {
 			}
 
 			@Test  // gh-24013
-			void usingColumnsAndQuotedIdentifiersWithSchemaName() throws Exception {
+			void usingColumnsAndQuotedIdentifiersWithSchemaName() {
 				SimpleJdbcInsert insert = new SimpleJdbcInsert(embeddedDatabase)
 						.withoutTableColumnMetaDataAccess()
 						.withSchemaName("My_Schema")

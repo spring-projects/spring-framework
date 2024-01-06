@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
  * @since 5.3
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManagerTests
  */
-public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTests<JdbcTransactionManager> {
+class JdbcTransactionManagerTests extends DataSourceTransactionManagerTests {
 
 	@Override
 	protected JdbcTransactionManager createTransactionManager(DataSource ds) {
@@ -53,7 +53,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 
 	@Override
 	@Test
-	public void testTransactionWithExceptionOnCommit() throws Exception {
+	protected void testTransactionWithExceptionOnCommit() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
 		TransactionTemplate tt = new TransactionTemplate(tm);
 
@@ -71,7 +71,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 	}
 
 	@Test
-	public void testTransactionWithDataAccessExceptionOnCommit() throws Exception {
+	void testTransactionWithDataAccessExceptionOnCommit() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
 		((JdbcTransactionManager) tm).setExceptionTranslator((task, sql, ex) -> new ConcurrencyFailureException(task));
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -90,7 +90,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 	}
 
 	@Test
-	public void testTransactionWithDataAccessExceptionOnCommitFromLazyExceptionTranslator() throws Exception {
+	void testTransactionWithDataAccessExceptionOnCommitFromLazyExceptionTranslator() throws Exception {
 		willThrow(new SQLException("Cannot commit", "40")).given(con).commit();
 		TransactionTemplate tt = new TransactionTemplate(tm);
 
@@ -109,7 +109,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 
 	@Override
 	@Test
-	public void testTransactionWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
+	protected void testTransactionWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
 
 		tm.setRollbackOnCommitFailure(true);
@@ -131,7 +131,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 
 	@Override
 	@Test
-	public void testTransactionWithExceptionOnRollback() throws Exception {
+	protected void testTransactionWithExceptionOnRollback() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 		willThrow(new SQLException("Cannot rollback")).given(con).rollback();
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -163,7 +163,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 	}
 
 	@Test
-	public void testTransactionWithDataAccessExceptionOnRollback() throws Exception {
+	void testTransactionWithDataAccessExceptionOnRollback() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 		willThrow(new SQLException("Cannot rollback")).given(con).rollback();
 		((JdbcTransactionManager) tm).setExceptionTranslator((task, sql, ex) -> new ConcurrencyFailureException(task));
@@ -187,7 +187,7 @@ public class JdbcTransactionManagerTests extends DataSourceTransactionManagerTes
 	}
 
 	@Test
-	public void testTransactionWithDataAccessExceptionOnRollbackFromLazyExceptionTranslator() throws Exception {
+	void testTransactionWithDataAccessExceptionOnRollbackFromLazyExceptionTranslator() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 		willThrow(new SQLException("Cannot rollback", "40")).given(con).rollback();
 		TransactionTemplate tt = new TransactionTemplate(tm);

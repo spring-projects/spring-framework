@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.mockito.BDDMockito.when;
  * @author Juergen Hoeller
  * @since 6.1.2
  */
-public class ShardingKeyDataSourceAdapterTests {
+class ShardingKeyDataSourceAdapterTests {
 
 	private final Connection connection = mock();
 
@@ -57,11 +57,11 @@ public class ShardingKeyDataSourceAdapterTests {
 
 	private final ShardingKeyProvider shardingKeyProvider = new ShardingKeyProvider() {
 		@Override
-		public ShardingKey getShardingKey() throws SQLException {
+		public ShardingKey getShardingKey() {
 			return shardingKey;
 		}
 		@Override
-		public ShardingKey getSuperShardingKey() throws SQLException {
+		public ShardingKey getSuperShardingKey() {
 			return superShardingKey;
 		}
 	};

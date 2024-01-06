@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  * @since 04.07.2003
  * @see org.springframework.jdbc.support.JdbcTransactionManagerTests
  */
-public class DataSourceTransactionManagerTests<T extends DataSourceTransactionManager> {
+public class DataSourceTransactionManagerTests {
 
 	protected DataSource ds = mock();
 
@@ -78,7 +78,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		tm = createTransactionManager(ds);
 		given(ds.getConnection()).willReturn(con);
 	}
@@ -88,7 +88,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@AfterEach
-	public void verifyTransactionSynchronizationManagerState() {
+	void verifyTransactionSynchronizationManagerState() {
 		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
@@ -97,32 +97,32 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 
 
 	@Test
-	public void testTransactionCommitWithAutoCommitTrue() throws Exception {
+	void testTransactionCommitWithAutoCommitTrue() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(true, false, false);
 	}
 
 	@Test
-	public void testTransactionCommitWithAutoCommitFalse() throws Exception {
+	void testTransactionCommitWithAutoCommitFalse() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(false, false, false);
 	}
 
 	@Test
-	public void testTransactionCommitWithAutoCommitTrueAndLazyConnection() throws Exception {
+	void testTransactionCommitWithAutoCommitTrueAndLazyConnection() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(true, true, false);
 	}
 
 	@Test
-	public void testTransactionCommitWithAutoCommitFalseAndLazyConnection() throws Exception {
+	void testTransactionCommitWithAutoCommitFalseAndLazyConnection() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(false, true, false);
 	}
 
 	@Test
-	public void testTransactionCommitWithAutoCommitTrueAndLazyConnectionAndStatementCreated() throws Exception {
+	void testTransactionCommitWithAutoCommitTrueAndLazyConnectionAndStatementCreated() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(true, true, true);
 	}
 
 	@Test
-	public void testTransactionCommitWithAutoCommitFalseAndLazyConnectionAndStatementCreated() throws Exception {
+	void testTransactionCommitWithAutoCommitFalseAndLazyConnectionAndStatementCreated() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(false, true, true);
 	}
 
@@ -184,32 +184,32 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitTrue() throws Exception {
+	void testTransactionRollbackWithAutoCommitTrue() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(true, false, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitFalse() throws Exception {
+	void testTransactionRollbackWithAutoCommitFalse() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(false, false, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnection() throws Exception {
+	void testTransactionRollbackWithAutoCommitTrueAndLazyConnection() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(true, true, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnection() throws Exception {
+	void testTransactionRollbackWithAutoCommitFalseAndLazyConnection() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(false, true, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnectionAndCreateStatement() throws Exception {
+	void testTransactionRollbackWithAutoCommitTrueAndLazyConnectionAndCreateStatement() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(true, true, true);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnectionAndCreateStatement() throws Exception {
+	void testTransactionRollbackWithAutoCommitFalseAndLazyConnectionAndCreateStatement() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(false, true, true);
 	}
 
@@ -268,7 +268,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionRollbackOnly() throws Exception {
+	void testTransactionRollbackOnly() {
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -302,12 +302,12 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testParticipatingTransactionWithRollbackOnly() throws Exception {
+	void testParticipatingTransactionWithRollbackOnly() throws Exception {
 		doTestParticipatingTransactionWithRollbackOnly(false);
 	}
 
 	@Test
-	public void testParticipatingTransactionWithRollbackOnlyAndFailEarly() throws Exception {
+	void testParticipatingTransactionWithRollbackOnlyAndFailEarly() throws Exception {
 		doTestParticipatingTransactionWithRollbackOnly(true);
 	}
 
@@ -376,7 +376,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testParticipatingTransactionWithIncompatibleIsolationLevel() throws Exception {
+	void testParticipatingTransactionWithIncompatibleIsolationLevel() throws Exception {
 		tm.setValidateExistingTransaction(true);
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -408,7 +408,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testParticipatingTransactionWithIncompatibleReadOnly() throws Exception {
+	void testParticipatingTransactionWithIncompatibleReadOnly() throws Exception {
 		willThrow(new SQLException("read-only not supported")).given(con).setReadOnly(true);
 		tm.setValidateExistingTransaction(true);
 
@@ -442,7 +442,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testParticipatingTransactionWithTransactionStartedFromSynch() throws Exception {
+	void testParticipatingTransactionWithTransactionStartedFromSynch() throws Exception {
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
@@ -481,7 +481,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testParticipatingTransactionWithDifferentConnectionObtainedFromSynch() throws Exception {
+	void testParticipatingTransactionWithDifferentConnectionObtainedFromSynch() throws Exception {
 		DataSource ds2 = mock();
 		final Connection con2 = mock();
 		given(ds2.getConnection()).willReturn(con2);
@@ -520,7 +520,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testParticipatingTransactionWithRollbackOnlyAndInnerSynch() throws Exception {
+	void testParticipatingTransactionWithRollbackOnlyAndInnerSynch() throws Exception {
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
 		DataSourceTransactionManager tm2 = createTransactionManager(ds);
 		// tm has no synch enabled (used at outer level), tm2 has synch enabled (inner level)
@@ -568,7 +568,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationRequiresNewWithExistingTransaction() throws Exception {
+	void testPropagationRequiresNewWithExistingTransaction() throws Exception {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -605,7 +605,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationRequiresNewWithExistingTransactionAndUnrelatedDataSource() throws Exception {
+	void testPropagationRequiresNewWithExistingTransactionAndUnrelatedDataSource() throws Exception {
 		Connection con2 = mock();
 		final DataSource ds2 = mock();
 		given(ds2.getConnection()).willReturn(con2);
@@ -654,7 +654,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationRequiresNewWithExistingTransactionAndUnrelatedFailingDataSource() throws Exception {
+	void testPropagationRequiresNewWithExistingTransactionAndUnrelatedFailingDataSource() throws Exception {
 		final DataSource ds2 = mock();
 		SQLException failure = new SQLException();
 		given(ds2.getConnection()).willThrow(failure);
@@ -698,7 +698,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationNotSupportedWithExistingTransaction() throws Exception {
+	void testPropagationNotSupportedWithExistingTransaction() throws Exception {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -739,7 +739,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationNeverWithExistingTransaction() throws Exception {
+	void testPropagationNeverWithExistingTransaction() throws Exception {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -769,7 +769,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationSupportsAndRequiresNew() throws Exception {
+	void testPropagationSupportsAndRequiresNew() throws Exception {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -805,7 +805,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testPropagationSupportsAndRequiresNewWithEarlyAccess() throws Exception {
+	void testPropagationSupportsAndRequiresNewWithEarlyAccess() throws Exception {
 		final Connection con1 = mock();
 		final Connection con2 = mock();
 		given(ds.getConnection()).willReturn(con1, con2);
@@ -850,7 +850,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithIsolationAndReadOnly() throws Exception {
+	void testTransactionWithIsolationAndReadOnly() throws Exception {
 		given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_UNCOMMITTED);
 		given(con.getAutoCommit()).willReturn(true);
 
@@ -871,7 +871,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithEnforceReadOnly() throws Exception {
+	void testTransactionWithEnforceReadOnly() throws Exception {
 		tm.setEnforceReadOnly(true);
 
 		given(con.getAutoCommit()).willReturn(true);
@@ -895,7 +895,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithLazyConnectionDataSourceAndStatement() throws Exception {
+	void testTransactionWithLazyConnectionDataSourceAndStatement() throws Exception {
 		LazyConnectionDataSourceProxy dsProxy = new LazyConnectionDataSourceProxy();
 		dsProxy.setTargetDataSource(ds);
 		dsProxy.setDefaultAutoCommit(true);
@@ -918,7 +918,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithLazyConnectionDataSourceNoStatement() throws Exception {
+	void testTransactionWithLazyConnectionDataSourceNoStatement() {
 		LazyConnectionDataSourceProxy dsProxy = new LazyConnectionDataSourceProxy();
 		dsProxy.setTargetDataSource(ds);
 		dsProxy.setDefaultAutoCommit(true);
@@ -931,7 +931,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithReadOnlyDataSourceAndStatement() throws Exception {
+	void testTransactionWithReadOnlyDataSourceAndStatement() throws Exception {
 		LazyConnectionDataSourceProxy dsProxy = new LazyConnectionDataSourceProxy();
 		dsProxy.setReadOnlyDataSource(ds);
 		dsProxy.setDefaultAutoCommit(false);
@@ -950,7 +950,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithReadOnlyDataSourceNoStatement() throws Exception {
+	void testTransactionWithReadOnlyDataSourceNoStatement() {
 		LazyConnectionDataSourceProxy dsProxy = new LazyConnectionDataSourceProxy();
 		dsProxy.setReadOnlyDataSource(ds);
 		dsProxy.setDefaultAutoCommit(false);
@@ -1058,7 +1058,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionAwareDataSourceProxy() throws Exception {
+	void testTransactionAwareDataSourceProxy() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.getWarnings()).willThrow(new SQLException());
 
@@ -1093,7 +1093,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionAwareDataSourceProxyWithLazyFalse() throws Exception {
+	void testTransactionAwareDataSourceProxyWithLazyFalse() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.getWarnings()).willThrow(new SQLException());
 
@@ -1129,7 +1129,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionAwareDataSourceProxyWithSuspension() throws Exception {
+	void testTransactionAwareDataSourceProxyWithSuspension() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1187,7 +1187,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionAwareDataSourceProxyWithSuspensionAndReobtaining() throws Exception {
+	void testTransactionAwareDataSourceProxyWithSuspensionAndReobtaining() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1249,7 +1249,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	 * Test behavior if the first operation on a connection (getAutoCommit) throws SQLException.
 	 */
 	@Test
-	public void testTransactionWithExceptionOnBegin() throws Exception {
+	void testTransactionWithExceptionOnBegin() throws Exception {
 		willThrow(new SQLException("Cannot begin")).given(con).getAutoCommit();
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1266,7 +1266,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithExceptionOnCommit() throws Exception {
+	protected void testTransactionWithExceptionOnCommit() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1283,7 +1283,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
+	protected void testTransactionWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
 
 		tm.setRollbackOnCommitFailure(true);
@@ -1302,7 +1302,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithExceptionOnRollback() throws Exception {
+	protected void testTransactionWithExceptionOnRollback() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
 		willThrow(new SQLException("Cannot rollback")).given(con).rollback();
 
@@ -1333,7 +1333,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithPropagationSupports() throws Exception {
+	void testTransactionWithPropagationSupports() {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -1352,7 +1352,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithPropagationNotSupported() throws Exception {
+	void testTransactionWithPropagationNotSupported() {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -1369,7 +1369,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithPropagationNever() throws Exception {
+	void testTransactionWithPropagationNever() {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NEVER);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -1386,12 +1386,12 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testExistingTransactionWithPropagationNested() throws Exception {
+	void testExistingTransactionWithPropagationNested() throws Exception {
 		doTestExistingTransactionWithPropagationNested(1);
 	}
 
 	@Test
-	public void testExistingTransactionWithPropagationNestedTwice() throws Exception {
+	void testExistingTransactionWithPropagationNestedTwice() throws Exception {
 		doTestExistingTransactionWithPropagationNested(2);
 	}
 
@@ -1444,7 +1444,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
+	void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
 		DatabaseMetaData md = mock();
 		Savepoint sp = mock();
 
@@ -1491,7 +1491,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testExistingTransactionWithPropagationNestedAndRequiredRollback() throws Exception {
+	void testExistingTransactionWithPropagationNestedAndRequiredRollback() throws Exception {
 		DatabaseMetaData md = mock();
 		Savepoint sp = mock();
 
@@ -1551,7 +1551,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testExistingTransactionWithPropagationNestedAndRequiredRollbackOnly() throws Exception {
+	void testExistingTransactionWithPropagationNestedAndRequiredRollbackOnly() throws Exception {
 		DatabaseMetaData md = mock();
 		Savepoint sp = mock();
 
@@ -1611,7 +1611,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testExistingTransactionWithManualSavepoint() throws Exception {
+	void testExistingTransactionWithManualSavepoint() throws Exception {
 		DatabaseMetaData md = mock();
 		Savepoint sp = mock();
 
@@ -1644,7 +1644,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
+	void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
 		DatabaseMetaData md = mock();
 		Savepoint sp = mock();
 
@@ -1676,7 +1676,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithPropagationNested() throws Exception {
+	void testTransactionWithPropagationNested() throws Exception {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
@@ -1702,7 +1702,7 @@ public class DataSourceTransactionManagerTests<T extends DataSourceTransactionMa
 	}
 
 	@Test
-	public void testTransactionWithPropagationNestedAndRollback() throws Exception {
+	void testTransactionWithPropagationNestedAndRollback() throws Exception {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();

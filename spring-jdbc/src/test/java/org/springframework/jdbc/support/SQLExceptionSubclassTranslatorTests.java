@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class SQLExceptionSubclassTranslatorTests {
+class SQLExceptionSubclassTranslatorTests {
 
 	@Test
-	public void exceptionClassTranslation() {
+	void exceptionClassTranslation() {
 		doTest(new SQLDataException("", "", 0), DataIntegrityViolationException.class);
 		doTest(new SQLFeatureNotSupportedException("", "", 0), InvalidDataAccessApiUsageException.class);
 		doTest(new SQLIntegrityConstraintViolationException("", "", 0), DataIntegrityViolationException.class);
@@ -72,7 +72,7 @@ public class SQLExceptionSubclassTranslatorTests {
 	}
 
 	@Test
-	public void fallbackStateTranslation() {
+	void fallbackStateTranslation() {
 		// Test fallback. We assume that no database will ever return this error code,
 		// but 07xxx will be bad grammar picked up by the fallback SQLState translator
 		doTest(new SQLException("", "07xxx", 666666666), BadSqlGrammarException.class);

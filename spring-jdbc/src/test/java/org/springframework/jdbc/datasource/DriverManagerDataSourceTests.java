@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Rod Johnson
  */
-public class DriverManagerDataSourceTests {
+class DriverManagerDataSourceTests {
 
 	private final Connection connection = mock();
 
 
 	@Test
-	public void standardUsage() throws Exception {
+	void standardUsage() throws Exception {
 		final String jdbcUrl = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
@@ -64,7 +64,7 @@ public class DriverManagerDataSourceTests {
 	}
 
 	@Test
-	public void usageWithConnectionProperties() throws Exception {
+	void usageWithConnectionProperties() throws Exception {
 		final String jdbcUrl = "url";
 
 		final Properties connProps = new Properties();
@@ -97,7 +97,7 @@ public class DriverManagerDataSourceTests {
 	}
 
 	@Test
-	public void usageWithConnectionPropertiesAndUserCredentials() throws Exception {
+	void usageWithConnectionPropertiesAndUserCredentials() throws Exception {
 		final String jdbcUrl = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
@@ -136,7 +136,7 @@ public class DriverManagerDataSourceTests {
 	}
 
 	@Test
-	public void invalidClassName() {
+	void invalidClassName() {
 		String bogusClassName = "foobar";
 		DriverManagerDataSource ds = new DriverManagerDataSource();
 		assertThatIllegalStateException().isThrownBy(

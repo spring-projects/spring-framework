@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
  * @author Keith Donald
  * @author Sam Brannen
  */
-public class EmbeddedDatabaseBuilderTests {
+class EmbeddedDatabaseBuilderTests {
 
 	private final EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(
 		getClass()));
 
 
 	@Test
-	public void addDefaultScripts() throws Exception {
+	void addDefaultScripts() {
 		doTwice(() -> {
 			EmbeddedDatabase db = new EmbeddedDatabaseBuilder()//
 			.addDefaultScripts()//
@@ -51,13 +51,13 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void addScriptWithBogusFileName() {
+	void addScriptWithBogusFileName() {
 		assertThatExceptionOfType(CannotReadScriptException.class).isThrownBy(
 				new EmbeddedDatabaseBuilder().addScript("bogus.sql")::build);
 	}
 
 	@Test
-	public void addScript() throws Exception {
+	void addScript() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.addScript("db-schema.sql")//
@@ -68,7 +68,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void addScripts() throws Exception {
+	void addScripts() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.addScripts("db-schema.sql", "db-test-data.sql")//
@@ -78,7 +78,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void addScriptsWithDefaultCommentPrefix() throws Exception {
+	void addScriptsWithDefaultCommentPrefix() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.addScripts("db-schema-comments.sql", "db-test-data.sql")//
@@ -88,7 +88,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void addScriptsWithCustomCommentPrefix() throws Exception {
+	void addScriptsWithCustomCommentPrefix() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.addScripts("db-schema-custom-comments.sql", "db-test-data.sql")//
@@ -99,7 +99,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void addScriptsWithCustomBlockComments() throws Exception {
+	void addScriptsWithCustomBlockComments() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.addScripts("db-schema-block-comments.sql", "db-test-data.sql")//
@@ -111,7 +111,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void setTypeToH2() throws Exception {
+	void setTypeToH2() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.setType(H2)//
@@ -122,7 +122,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void setTypeToDerbyAndIgnoreFailedDrops() throws Exception {
+	void setTypeToDerbyAndIgnoreFailedDrops() {
 		doTwice(() -> {
 			EmbeddedDatabase db = builder//
 			.setType(DERBY)//
@@ -133,7 +133,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void createSameSchemaTwiceWithoutUniqueDbNames() throws Exception {
+	void createSameSchemaTwiceWithoutUniqueDbNames() {
 		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))
 				.addScripts("db-schema-without-dropping.sql").build();
 		try {
@@ -146,7 +146,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
-	public void createSameSchemaTwiceWithGeneratedUniqueDbNames() throws Exception {
+	void createSameSchemaTwiceWithGeneratedUniqueDbNames() {
 		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
 		.addScripts("db-schema-without-dropping.sql", "db-test-data.sql")//
 		.generateUniqueName(true)//

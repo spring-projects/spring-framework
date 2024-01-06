@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.datasource.lookup;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.springframework.jdbc.datasource.AbstractDataSource;
 
@@ -31,12 +30,12 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 class StubDataSource extends AbstractDataSource {
 
 	@Override
-	public Connection getConnection() throws SQLException {
+	public Connection getConnection() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
+	public Connection getConnection(String username, String password) {
 		throw new UnsupportedOperationException();
 	}
 

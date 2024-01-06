@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class SimpleJdbcCallTests {
 		SimpleJdbcCall sproc = new SimpleJdbcCall(dataSource).withProcedureName(NO_SUCH_PROC);
 		try {
 			assertThatExceptionOfType(BadSqlGrammarException.class)
-				.isThrownBy(() -> sproc.execute())
+				.isThrownBy(sproc::execute)
 				.withCause(sqlException);
 		}
 		finally {
@@ -89,7 +89,7 @@ class SimpleJdbcCallTests {
 	}
 
 	@Test
-	void unnamedParameterHandling() throws Exception {
+	void unnamedParameterHandling() {
 		final String MY_PROC = "my_proc";
 		SimpleJdbcCall sproc = new SimpleJdbcCall(dataSource).withProcedureName(MY_PROC);
 		// Shouldn't succeed in adding unnamed parameter

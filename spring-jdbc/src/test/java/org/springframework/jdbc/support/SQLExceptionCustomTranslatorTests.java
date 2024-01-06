@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Thomas Risberg
  * @author Sam Brannen
  */
-public class SQLExceptionCustomTranslatorTests {
+class SQLExceptionCustomTranslatorTests {
 
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 
@@ -47,7 +47,7 @@ public class SQLExceptionCustomTranslatorTests {
 
 
 	@Test
-	public void badSqlGrammarException() {
+	void badSqlGrammarException() {
 		SQLException badSqlGrammarExceptionEx = new SQLDataException("", "", 1);
 		DataAccessException dae = sext.translate("task", "SQL", badSqlGrammarExceptionEx);
 		assertThat(dae.getCause()).isEqualTo(badSqlGrammarExceptionEx);
@@ -55,7 +55,7 @@ public class SQLExceptionCustomTranslatorTests {
 	}
 
 	@Test
-	public void dataAccessResourceException() {
+	void dataAccessResourceException() {
 		SQLException dataAccessResourceEx = new SQLDataException("", "", 2);
 		DataAccessException dae = sext.translate("task", "SQL", dataAccessResourceEx);
 		assertThat(dae.getCause()).isEqualTo(dataAccessResourceEx);
