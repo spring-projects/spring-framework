@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -757,7 +757,7 @@ public abstract class AnnotationUtils {
 	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
 	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}).
 	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
-	 * won't failure either (when attempted later on).
+	 * won't fail either (when attempted later on).
 	 * @param annotation the annotation to validate
 	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
 	 * @since 4.3.15
@@ -1059,8 +1059,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		catch (Throwable ex) {
-			rethrowAnnotationConfigurationException(ex);
-			handleIntrospectionFailure(annotation.getClass(), ex);
+			handleValueRetrievalFailure(annotation, ex);
 			return null;
 		}
 	}
@@ -1076,14 +1075,18 @@ public abstract class AnnotationUtils {
 	 * @return the value returned from the method invocation
 	 * @since 5.3.24
 	 */
-	static Object invokeAnnotationMethod(Method method, Object annotation) {
+	@Nullable
+	static Object invokeAnnotationMethod(Method method, @Nullable Object annotation) {
+		if (annotation == null) {
+			return null;
+		}
 		if (Proxy.isProxyClass(annotation.getClass())) {
 			try {
 				InvocationHandler handler = Proxy.getInvocationHandler(annotation);
 				return handler.invoke(annotation, method, null);
 			}
 			catch (Throwable ex) {
-				// ignore and fall back to reflection below
+				// Ignore and fall back to reflection below
 			}
 		}
 		return ReflectionUtils.invokeMethod(method, annotation);
@@ -1117,20 +1120,32 @@ public abstract class AnnotationUtils {
 	 * @see #rethrowAnnotationConfigurationException
 	 * @see IntrospectionFailureLogger
 	 */
-	static void handleIntrospectionFailure(@Nullable AnnotatedElement element, Throwable ex) {
+	static void handleIntrospectionFailure(AnnotatedElement element, Throwable ex) {
 		rethrowAnnotationConfigurationException(ex);
 		IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
 		boolean meta = false;
 		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
-			// Meta-annotation or (default) value lookup on an annotation type
+			// Meta-annotation introspection failure
 			logger = IntrospectionFailureLogger.DEBUG;
 			meta = true;
 		}
 		if (logger.isEnabled()) {
-			String message = meta ?
-					"Failed to meta-introspect annotation " :
-					"Failed to introspect annotations on ";
-			logger.log(message + element + ": " + ex);
+			logger.log("Failed to " + (meta ? "meta-introspect annotation " : "introspect annotations on ") +
+					element + ": " + ex);
+		}
+	}
+
+	/**
+	 * Handle the supplied value retrieval exception.
+	 * @param annotation the annotation instance from which to retrieve the value
+	 * @param ex the exception that we encountered
+	 * @see #handleIntrospectionFailure
+	 */
+	private static void handleValueRetrievalFailure(Annotation annotation, Throwable ex) {
+		rethrowAnnotationConfigurationException(ex);
+		IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
+		if (logger.isEnabled()) {
+			logger.log("Failed to retrieve value from " + annotation + ": " + ex);
 		}
 	}
 

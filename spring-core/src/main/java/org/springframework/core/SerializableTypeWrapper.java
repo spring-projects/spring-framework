@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,12 @@ final class SerializableTypeWrapper {
 				return result;
 			}
 
-			return ReflectionUtils.invokeMethod(method, this.provider.getType(), args);
+			Type type = this.provider.getType();
+			if (type instanceof TypeVariable<?> && method.getName().equals("getName")) {
+				// Avoid reflection for common comparison of type variables
+				return ((TypeVariable<?>) type).getName();
+			}
+			return ReflectionUtils.invokeMethod(method, type, args);
 		}
 	}
 

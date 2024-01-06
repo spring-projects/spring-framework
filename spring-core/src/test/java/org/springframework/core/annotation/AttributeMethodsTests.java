@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ class AttributeMethodsTests {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willThrow(TypeNotPresentException.class);
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
-		assertThat(attributes.isValid(annotation)).isFalse();
+		assertThat(attributes.canLoad(annotation)).isFalse();
 	}
 
 	@Test
@@ -121,7 +121,7 @@ class AttributeMethodsTests {
 		ClassValue annotation = mock(ClassValue.class);
 		given(annotation.value()).willReturn((Class) InputStream.class);
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
-		assertThat(attributes.isValid(annotation)).isTrue();
+		assertThat(attributes.canLoad(annotation)).isTrue();
 	}
 
 	@Test
