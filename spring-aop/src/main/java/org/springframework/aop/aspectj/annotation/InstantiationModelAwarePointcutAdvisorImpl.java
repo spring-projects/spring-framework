@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Internal implementation of AspectJPointcutAdvisor.
- * Note that there will be one instance of this advisor for each target method.
+ *
+ * <p>Note that there will be one instance of this advisor for each target method.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -293,7 +294,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		@Override
 		public boolean matches(Method method, Class<?> targetClass, Object... args) {
 			// This can match only on declared pointcut.
-			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass));
+			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass, args));
 		}
 
 		private boolean isAspectMaterialized() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,56 +38,67 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
-public class ArgumentBindingTests {
+class ArgumentBindingTests {
 
 	@Test
-	public void testBindingInPointcutUsedByAdvice() {
-		TestBean tb = new TestBean();
-		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
-		proxyFactory.addAspect(NamedPointcutWithArgs.class);
-
-		ITestBean proxiedTestBean = proxyFactory.getProxy();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				proxiedTestBean.setName("Supercalifragalisticexpialidocious"));
-	}
-
-	@Test
-	public void testAnnotationArgumentNameBinding() {
-		TransactionalBean tb = new TransactionalBean();
-		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
+	void annotationArgumentNameBinding() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TransactionalBean());
 		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
-
 		ITransactionalBean proxiedTestBean = proxyFactory.getProxy();
-		assertThatIllegalStateException().isThrownBy(
-				proxiedTestBean::doInTransaction);
+
+		assertThatIllegalStateException()
+				.isThrownBy(proxiedTestBean::doInTransaction)
+				.withMessage("Invoked with @Transactional");
 	}
 
 	@Test
-	public void testParameterNameDiscoverWithReferencePointcut() throws Exception {
+	void bindingInPointcutUsedByAdvice() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(NamedPointcutWithArgs.class);
+		ITestBean proxiedTestBean = proxyFactory.getProxy();
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> proxiedTestBean.setName("enigma"))
+				.withMessage("enigma");
+	}
+
+	@Test
+	void bindingWithDynamicAdvice() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(DynamicPointcutWithArgs.class);
+		ITestBean proxiedTestBean = proxyFactory.getProxy();
+
+		proxiedTestBean.applyName(1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> proxiedTestBean.applyName("enigma"))
+				.withMessage("enigma");
+	}
+
+	@Test
+	void parameterNameDiscoverWithReferencePointcut() throws Exception {
 		AspectJAdviceParameterNameDiscoverer discoverer =
 				new AspectJAdviceParameterNameDiscoverer("somepc(formal) && set(* *)");
 		discoverer.setRaiseExceptions(true);
-		Method methodUsedForParameterTypeDiscovery =
-				getClass().getMethod("methodWithOneParam", String.class);
-		String[] pnames = discoverer.getParameterNames(methodUsedForParameterTypeDiscovery);
-		assertThat(pnames.length).as("one parameter name").isEqualTo(1);
-		assertThat(pnames[0]).isEqualTo("formal");
+		Method method = getClass().getDeclaredMethod("methodWithOneParam", String.class);
+		assertThat(discoverer.getParameterNames(method)).containsExactly("formal");
 	}
 
 
-	public void methodWithOneParam(String aParam) {
+	@SuppressWarnings("unused")
+	private void methodWithOneParam(String aParam) {
 	}
 
 
-	public interface ITransactionalBean {
+	interface ITransactionalBean {
 
 		@Transactional
 		void doInTransaction();
 	}
 
 
-	public static class TransactionalBean implements ITransactionalBean {
+	static class TransactionalBean implements ITransactionalBean {
 
 		@Override
 		@Transactional
@@ -95,38 +106,46 @@ public class ArgumentBindingTests {
 		}
 	}
 
-}
 
-/**
- * Represents Spring's Transactional annotation without actually introducing the dependency
- */
-@Retention(RetentionPolicy.RUNTIME)
-@interface Transactional {
-}
+	/**
+	 * Mimics Spring's @Transactional annotation without actually introducing the dependency.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Transactional {
+	}
 
 
-@Aspect
-class PointcutWithAnnotationArgument {
+	@Aspect
+	static class PointcutWithAnnotationArgument {
 
-	@Around(value = "execution(* org.springframework..*.*(..)) && @annotation(transaction)")
-	public Object around(ProceedingJoinPoint pjp, Transactional transaction) throws Throwable {
-		System.out.println("Invoked with transaction " + transaction);
-		throw new IllegalStateException();
+		@Around("execution(* org.springframework..*.*(..)) && @annotation(transactional)")
+		public Object around(ProceedingJoinPoint pjp, Transactional transactional) throws Throwable {
+			throw new IllegalStateException("Invoked with @Transactional");
+		}
+	}
+
+
+	@Aspect
+	static class NamedPointcutWithArgs {
+
+		@Pointcut("execution(* *(..)) && args(s,..)")
+		public void pointcutWithArgs(String s) {}
+
+		@Around("pointcutWithArgs(aString)")
+		public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
+			throw new IllegalArgumentException(aString);
+		}
+	}
+
+
+	@Aspect("pertarget(execution(* *(..)))")
+	static class DynamicPointcutWithArgs {
+
+		@Around("execution(* *(..)) && args(java.lang.String)")
+		public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
+			throw new IllegalArgumentException(String.valueOf(pjp.getArgs()[0]));
+		}
 	}
 
 }
 
-
-@Aspect
-class NamedPointcutWithArgs {
-
-	@Pointcut("execution(* *(..)) && args(s,..)")
-	public void pointcutWithArgs(String s) {}
-
-	@Around("pointcutWithArgs(aString)")
-	public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
-		System.out.println("got '" + aString + "' at '" + pjp + "'");
-		throw new IllegalArgumentException(aString);
-	}
-
-}
