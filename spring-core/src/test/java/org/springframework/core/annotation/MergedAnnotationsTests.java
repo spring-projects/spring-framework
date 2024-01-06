@@ -412,8 +412,7 @@ class MergedAnnotationsTests {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(
 				SubClassWithInheritedAnnotation.class, SearchStrategy.INHERITED_ANNOTATIONS)
 				.stream(Transactional.class).collect(MergedAnnotationCollectors.toMultiValueMap());
-		assertThat(map).contains(
-				entry("qualifier", Arrays.asList("composed2", "transactionManager")));
+		assertThat(map).contains(entry("qualifier", List.of("composed2", "transactionManager")));
 	}
 
 	@Test
@@ -456,8 +455,7 @@ class MergedAnnotationsTests {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(
 				TxFromMultipleComposedAnnotations.class, SearchStrategy.INHERITED_ANNOTATIONS)
 				.stream(Transactional.class).collect(MergedAnnotationCollectors.toMultiValueMap());
-		assertThat(map).contains(
-				entry("value", Arrays.asList("TxInheritedComposed", "TxComposed")));
+		assertThat(map).contains(entry("value", List.of("TxInheritedComposed", "TxComposed")));
 	}
 
 	@Test
@@ -656,7 +654,7 @@ class MergedAnnotationsTests {
 	@Test
 	void getWithTypeHierarchyInheritedFromInterfaceMethod() throws Exception {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
-		MergedAnnotation<?> annotation = MergedAnnotations.from(method,SearchStrategy.TYPE_HIERARCHY).get(Order.class);
+		MergedAnnotation<?> annotation = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
 		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
 	}
@@ -1130,7 +1128,7 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getSuperClassSourceForTypesWithMultipleCandidateTypes() {
-		List<Class<? extends Annotation>> candidates = Arrays.asList(Transactional.class, Order.class);
+		List<Class<? extends Annotation>> candidates = List.of(Transactional.class, Order.class);
 		// no class-level annotation
 		assertThat(getSuperClassSourceWithTypeIn(NonAnnotatedInterface.class,
 				candidates)).isNull();
