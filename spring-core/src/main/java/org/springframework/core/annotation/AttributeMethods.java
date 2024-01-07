@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ final class AttributeMethods {
 		if (m1 != null && m2 != null) {
 			return m1.getName().compareTo(m2.getName());
 		}
-		return m1 != null ? -1 : 1;
+		return (m1 != null ? -1 : 1);
 	};
 
 
@@ -87,18 +87,26 @@ final class AttributeMethods {
 	/**
 	 * Determine if values from the given annotation can be safely accessed without
 	 * causing any {@link TypeNotPresentException TypeNotPresentExceptions}.
+	 * <p>This method is designed to cover Google App Engine's late arrival of such
+	 * exceptions for {@code Class} values (instead of the more typical early
+	 * {@code Class.getAnnotations() failure} on a regular JVM).
 	 * @param annotation the annotation to check
 	 * @return {@code true} if all values are present
 	 * @see #validate(Annotation)
 	 */
-	boolean isValid(Annotation annotation) {
+	boolean canLoad(Annotation annotation) {
 		assertAnnotation(annotation);
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
 					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
 				}
+				catch (IllegalStateException ex) {
+					// Plain invocation failure to expose -> leave up to attribute retrieval
+					// (if any) where such invocation failure will be logged eventually.
+				}
 				catch (Throwable ex) {
+					// TypeNotPresentException etc. -> annotation type not actually loadable.
 					return false;
 				}
 			}
@@ -108,13 +116,13 @@ final class AttributeMethods {
 
 	/**
 	 * Check if values from the given annotation can be safely accessed without causing
-	 * any {@link TypeNotPresentException TypeNotPresentExceptions}. In particular,
-	 * this method is designed to cover Google App Engine's late arrival of such
+	 * any {@link TypeNotPresentException TypeNotPresentExceptions}.
+	 * <p>This method is designed to cover Google App Engine's late arrival of such
 	 * exceptions for {@code Class} values (instead of the more typical early
-	 * {@code Class.getAnnotations() failure}).
+	 * {@code Class.getAnnotations() failure} on a regular JVM).
 	 * @param annotation the annotation to validate
 	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
-	 * @see #isValid(Annotation)
+	 * @see #canLoad(Annotation)
 	 */
 	void validate(Annotation annotation) {
 		assertAnnotation(annotation);
@@ -122,6 +130,9 @@ final class AttributeMethods {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
 					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
+				}
+				catch (IllegalStateException ex) {
+					throw ex;
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute value for " +
@@ -147,7 +158,7 @@ final class AttributeMethods {
 	@Nullable
 	Method get(String name) {
 		int index = indexOf(name);
-		return index != -1 ? this.attributeMethods[index] : null;
+		return (index != -1 ? this.attributeMethods[index] : null);
 	}
 
 	/**
