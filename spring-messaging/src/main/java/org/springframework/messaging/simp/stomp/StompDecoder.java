@@ -78,7 +78,7 @@ public class StompDecoder {
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
 	 * list of {@link Message Messages}. If the input buffer contains partial STOMP frame
 	 * content, or additional content with a partial STOMP frame, the buffer is
-	 * reset and {@code null} is returned.
+	 * reset and an empty list is returned.
 	 * @param byteBuffer the buffer to decode the STOMP frame from
 	 * @return the decoded messages, or an empty list if none
 	 * @throws StompConversionException raised in case of decoding issues
