@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
  *
  * @author Rossen Stoyanchev
  */
-public class RSocketServiceMethodTests {
+class RSocketServiceMethodTests {
 
 	private TestRSocket rsocket;
 
@@ -47,7 +47,7 @@ public class RSocketServiceMethodTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.rsocket = new TestRSocket();
 		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, RSocketStrategies.create());
 		this.proxyFactory = RSocketServiceProxyFactory.builder(requester).build();

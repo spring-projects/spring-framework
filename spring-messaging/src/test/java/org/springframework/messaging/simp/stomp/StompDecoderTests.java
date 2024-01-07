@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Andy Wilkinson
  * @author Stephane Maldini
  */
-public class StompDecoderTests {
+class StompDecoderTests {
 
 	private final StompDecoder decoder = new StompDecoder();
 
 
 	@Test
-	public void decodeFrameWithCrLfEols() {
+	void decodeFrameWithCrLfEols() {
 		Message<byte[]> frame = decode("DISCONNECT\r\n\r\n\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -50,7 +50,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithNoHeadersAndNoBody() {
+	void decodeFrameWithNoHeadersAndNoBody() {
 		Message<byte[]> frame = decode("DISCONNECT\n\n\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -60,7 +60,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithNoBody() {
+	void decodeFrameWithNoBody() {
 		String accept = "accept-version:1.1\n";
 		String host = "host:github.org\n";
 
@@ -77,7 +77,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrame() {
+	void decodeFrame() {
 		Message<byte[]> frame = decode("SEND\ndestination:test\n\nThe body of the message\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -91,7 +91,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithContentLength() {
+	void decodeFrameWithContentLength() {
 		Message<byte[]> message = decode("SEND\ncontent-length:23\n\nThe body of the message\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 
@@ -107,7 +107,7 @@ public class StompDecoderTests {
 	// SPR-11528
 
 	@Test
-	public void decodeFrameWithInvalidContentLength() {
+	void decodeFrameWithInvalidContentLength() {
 		Message<byte[]> message = decode("SEND\ncontent-length:-1\n\nThe body of the message\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 
@@ -121,7 +121,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithContentLengthZero() {
+	void decodeFrameWithContentLengthZero() {
 		Message<byte[]> frame = decode("SEND\ncontent-length:0\n\n\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -135,7 +135,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithNullOctectsInTheBody() {
+	void decodeFrameWithNullOctectsInTheBody() {
 		Message<byte[]> frame = decode("SEND\ncontent-length:23\n\nThe b\0dy \0f the message\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -149,7 +149,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithEscapedHeaders() {
+	void decodeFrameWithEscapedHeaders() {
 		Message<byte[]> frame = decode("DISCONNECT\na\\c\\r\\n\\\\b:alpha\\cbravo\\r\\n\\\\\n\n\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -177,7 +177,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameBodyNotAllowed() {
+	void decodeFrameBodyNotAllowed() {
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
 				decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0"));
 	}
@@ -194,7 +194,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeMultipleFramesFromSameBuffer() {
+	void decodeMultipleFramesFromSameBuffer() {
 		String frame1 = "SEND\ndestination:test\n\nThe body of the message\0";
 		String frame2 = "DISCONNECT\n\n\0";
 		ByteBuffer buffer = ByteBuffer.wrap((frame1 + frame2).getBytes());
@@ -224,48 +224,48 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrameWithIncompleteCommand() {
+	void decodeFrameWithIncompleteCommand() {
 		assertIncompleteDecode("MESSAG");
 	}
 
 	@Test
-	public void decodeFrameWithIncompleteHeader() {
+	void decodeFrameWithIncompleteHeader() {
 		assertIncompleteDecode("SEND\ndestination");
 		assertIncompleteDecode("SEND\ndestination:");
 		assertIncompleteDecode("SEND\ndestination:test");
 	}
 
 	@Test
-	public void decodeFrameWithoutNullOctetTerminator() {
+	void decodeFrameWithoutNullOctetTerminator() {
 		assertIncompleteDecode("SEND\ndestination:test\n");
 		assertIncompleteDecode("SEND\ndestination:test\n\n");
 		assertIncompleteDecode("SEND\ndestination:test\n\nThe body");
 	}
 
 	@Test
-	public void decodeFrameWithInsufficientContent() {
+	void decodeFrameWithInsufficientContent() {
 		assertIncompleteDecode("SEND\ncontent-length:23\n\nThe body of the mess");
 	}
 
 	@Test
-	public void decodeFrameWithIncompleteContentType() {
+	void decodeFrameWithIncompleteContentType() {
 		assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U");
 	}
 
 	@Test
-	public void decodeFrameWithInvalidContentType() {
+	void decodeFrameWithInvalidContentType() {
 		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
 				assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U\n\nThe body\0"));
 	}
 
 	@Test
-	public void decodeFrameWithIncorrectTerminator() {
+	void decodeFrameWithIncorrectTerminator() {
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
 				decode("SEND\ncontent-length:23\n\nThe body of the message*"));
 	}
 
 	@Test
-	public void decodeHeartbeat() {
+	void decodeHeartbeat() {
 		String frame = "\n";
 
 		ByteBuffer buffer = ByteBuffer.wrap(frame.getBytes());

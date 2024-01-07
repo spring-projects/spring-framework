@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,20 +39,20 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class BrokerMessageHandlerTests {
+class BrokerMessageHandlerTests {
 
 	private final TestBrokerMessageHandler handler = new TestBrokerMessageHandler();
 
 
 	@Test
-	public void startShouldUpdateIsRunning() {
+	void startShouldUpdateIsRunning() {
 		assertThat(this.handler.isRunning()).isFalse();
 		this.handler.start();
 		assertThat(this.handler.isRunning()).isTrue();
 	}
 
 	@Test
-	public void stopShouldUpdateIsRunning() {
+	void stopShouldUpdateIsRunning() {
 		this.handler.start();
 		assertThat(this.handler.isRunning()).isTrue();
 
@@ -61,20 +61,20 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void startAndStopShouldNotPublishBrokerAvailabilityEvents() {
+	void startAndStopShouldNotPublishBrokerAvailabilityEvents() {
 		this.handler.start();
 		this.handler.stop();
 		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.emptyList());
 	}
 
 	@Test
-	public void handleMessageWhenBrokerNotRunning() {
+	void handleMessageWhenBrokerNotRunning() {
 		this.handler.handleMessage(new GenericMessage<Object>("payload"));
 		assertThat(this.handler.messages).isEqualTo(Collections.emptyList());
 	}
 
 	@Test
-	public void publishBrokerAvailableEvent() {
+	void publishBrokerAvailableEvent() {
 		assertThat(this.handler.isBrokerAvailable()).isFalse();
 		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.emptyList());
 
@@ -85,7 +85,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void publishBrokerAvailableEventWhenAlreadyAvailable() {
+	void publishBrokerAvailableEventWhenAlreadyAvailable() {
 		this.handler.publishBrokerAvailableEvent();
 		this.handler.publishBrokerAvailableEvent();
 
@@ -93,7 +93,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void publishBrokerUnavailableEvent() {
+	void publishBrokerUnavailableEvent() {
 		this.handler.publishBrokerAvailableEvent();
 		assertThat(this.handler.isBrokerAvailable()).isTrue();
 
@@ -104,7 +104,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void publishBrokerUnavailableEventWhenAlreadyUnavailable() {
+	void publishBrokerUnavailableEventWhenAlreadyUnavailable() {
 		this.handler.publishBrokerAvailableEvent();
 		this.handler.publishBrokerUnavailableEvent();
 		this.handler.publishBrokerUnavailableEvent();
@@ -113,7 +113,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void checkDestination() {
+	void checkDestination() {
 		TestBrokerMessageHandler theHandler = new TestBrokerMessageHandler("/topic");
 		theHandler.start();
 
@@ -136,7 +136,7 @@ public class BrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void checkDestinationWithoutConfiguredPrefixes() {
+	void checkDestinationWithoutConfiguredPrefixes() {
 		this.handler.setUserDestinationPredicate(destination -> destination.startsWith("/user/"));
 		this.handler.start();
 

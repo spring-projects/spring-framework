@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,10 +92,10 @@ import static org.mockito.Mockito.mock;
  * @author Brian Clozel
  * @author Sebastien Deleuze
  */
-public class MessageBrokerConfigurationTests {
+class MessageBrokerConfigurationTests {
 
 	@Test
-	public void clientInboundChannel() {
+	void clientInboundChannel() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		TestChannel channel = context.getBean("clientInboundChannel", TestChannel.class);
@@ -108,7 +108,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void clientInboundChannelWithBrokerRelay() {
+	void clientInboundChannelWithBrokerRelay() {
 		ApplicationContext context = loadConfig(BrokerRelayConfig.class);
 
 		TestChannel channel = context.getBean("clientInboundChannel", TestChannel.class);
@@ -121,7 +121,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void clientInboundChannelCustomized() {
+	void clientInboundChannelCustomized() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		AbstractSubscribableChannel channel = context.getBean(
@@ -136,7 +136,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void clientOutboundChannelUsedByAnnotatedMethod() {
+	void clientOutboundChannelUsedByAnnotatedMethod() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		TestChannel channel = context.getBean("clientOutboundChannel", TestChannel.class);
@@ -161,7 +161,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void clientOutboundChannelUsedBySimpleBroker() {
+	void clientOutboundChannelUsedBySimpleBroker() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		TestChannel outboundChannel = context.getBean("clientOutboundChannel", TestChannel.class);
@@ -194,7 +194,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void clientOutboundChannelCustomized() {
+	void clientOutboundChannelCustomized() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		AbstractSubscribableChannel channel = context.getBean(
@@ -215,7 +215,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void brokerChannel() {
+	void brokerChannel() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		TestChannel channel = context.getBean("brokerChannel", TestChannel.class);
@@ -229,7 +229,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void brokerChannelWithBrokerRelay() {
+	void brokerChannelWithBrokerRelay() {
 		ApplicationContext context = loadConfig(BrokerRelayConfig.class);
 
 		TestChannel channel = context.getBean("brokerChannel", TestChannel.class);
@@ -241,7 +241,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void brokerChannelUsedByAnnotatedMethod() {
+	void brokerChannelUsedByAnnotatedMethod() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		TestChannel channel = context.getBean("brokerChannel", TestChannel.class);
@@ -265,7 +265,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void brokerChannelCustomized() {
+	void brokerChannelCustomized() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		AbstractSubscribableChannel channel = context.getBean(
@@ -282,7 +282,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void configureMessageConvertersDefault() {
+	void configureMessageConvertersDefault() {
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig();
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
@@ -298,7 +298,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void threadPoolSizeDefault() {
+	void threadPoolSizeDefault() {
 		ApplicationContext context = loadConfig(DefaultConfig.class);
 
 		String name = "clientInboundChannelExecutor";
@@ -317,7 +317,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void configureMessageConvertersCustom() {
+	void configureMessageConvertersCustom() {
 		final MessageConverter testConverter = mock();
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
@@ -334,7 +334,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void configureMessageConvertersCustomAndDefault() {
+	void configureMessageConvertersCustomAndDefault() {
 		final MessageConverter testConverter = mock();
 
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
@@ -356,7 +356,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void customArgumentAndReturnValueTypes() {
+	void customArgumentAndReturnValueTypes() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		SimpAnnotationMethodMessageHandler handler =
@@ -372,7 +372,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void simpValidatorDefault() {
+	void simpValidatorDefault() {
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {};
 		config.setApplicationContext(new StaticApplicationContext());
 
@@ -381,7 +381,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void simpValidatorCustom() {
+	void simpValidatorCustom() {
 		final Validator validator = mock();
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
@@ -394,7 +394,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void simpValidatorMvc() {
+	void simpValidatorMvc() {
 		StaticApplicationContext appCxt = new StaticApplicationContext();
 		appCxt.registerSingleton("mvcValidator", TestValidator.class);
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {};
@@ -405,7 +405,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void simpValidatorInjected() {
+	void simpValidatorInjected() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		SimpAnnotationMethodMessageHandler messageHandler =
@@ -415,7 +415,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void customPathMatcher() {
+	void customPathMatcher() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		SimpleBrokerMessageHandler broker = context.getBean(SimpleBrokerMessageHandler.class);
@@ -433,7 +433,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void customCacheLimit() {
+	void customCacheLimit() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		SimpleBrokerMessageHandler broker = context.getBean(SimpleBrokerMessageHandler.class);
@@ -442,7 +442,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void customUserRegistryOrder() {
+	void customUserRegistryOrder() {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		SimpUserRegistry registry = context.getBean(SimpUserRegistry.class);
@@ -451,7 +451,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void userBroadcasts() {
+	void userBroadcasts() {
 		ApplicationContext context = loadConfig(BrokerRelayConfig.class);
 
 		SimpUserRegistry userRegistry = context.getBean(SimpUserRegistry.class);
@@ -471,7 +471,7 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void userBroadcastsDisabledWithSimpleBroker() {
+	void userBroadcastsDisabledWithSimpleBroker() {
 		ApplicationContext context = loadConfig(SimpleBrokerConfig.class);
 
 		SimpUserRegistry registry = context.getBean(SimpUserRegistry.class);

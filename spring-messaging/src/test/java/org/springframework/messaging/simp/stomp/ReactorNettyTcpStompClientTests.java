@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class ReactorNettyTcpStompClientTests {
+class ReactorNettyTcpStompClientTests {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyTcpStompClientTests.class);
 
@@ -62,7 +62,7 @@ public class ReactorNettyTcpStompClientTests {
 
 
 	@BeforeEach
-	public void setup(TestInfo testInfo) throws Exception {
+	void setup(TestInfo testInfo) throws Exception {
 		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
 		TransportConnector stompConnector = createStompConnector();
@@ -97,7 +97,7 @@ public class ReactorNettyTcpStompClientTests {
 	}
 
 	@AfterEach
-	public void shutdown() throws Exception {
+	void shutdown() throws Exception {
 		try {
 			this.client.shutdown();
 			this.client2.shutdown();
@@ -116,12 +116,12 @@ public class ReactorNettyTcpStompClientTests {
 
 
 	@Test
-	public void publishSubscribeOnReactorNetty() throws Exception {
+	void publishSubscribeOnReactorNetty() throws Exception {
 		testPublishSubscribe(this.client);
 	}
 
 	@Test
-	public void publishSubscribeOnReactorNetty2() throws Exception {
+	void publishSubscribeOnReactorNetty2() throws Exception {
 		testPublishSubscribe(this.client2);
 	}
 

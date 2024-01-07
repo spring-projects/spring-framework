@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import static org.springframework.messaging.handler.annotation.MessagingPredicat
  * @author Juergen Hoeller
  * @since 4.0
  */
-public class HeaderMethodArgumentResolverTests {
+class HeaderMethodArgumentResolverTests {
 
 	private HeaderMethodArgumentResolver resolver;
 
@@ -53,7 +53,6 @@ public class HeaderMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("resource")
 	public void setup() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.refresh();
@@ -62,13 +61,13 @@ public class HeaderMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.resolvable.annot(headerPlain()).arg())).isTrue();
 		assertThat(this.resolver.supportsParameter(this.resolvable.annotNotPresent(Header.class).arg())).isFalse();
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader("param1", "foo").build();
 		Object result = this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message);
 		assertThat(result).isEqualTo("foo");
@@ -83,7 +82,7 @@ public class HeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNativeHeaderAmbiguity() throws Exception {
+	void resolveArgumentNativeHeaderAmbiguity() throws Exception {
 		TestMessageHeaderAccessor headers = new TestMessageHeaderAccessor();
 		headers.setHeader("param1", "foo");
 		headers.setNativeHeader("param1", "native-foo");
@@ -97,21 +96,21 @@ public class HeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNotFound() throws Exception {
+	void resolveArgumentNotFound() {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
 		assertThatExceptionOfType(MessageHandlingException.class).isThrownBy(() ->
 				this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message));
 	}
 
 	@Test
-	public void resolveArgumentDefaultValue() throws Exception {
+	void resolveArgumentDefaultValue() throws Exception {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
 		Object result = this.resolver.resolveArgument(this.resolvable.annot(header("name", "bar")).arg(), message);
 		assertThat(result).isEqualTo("bar");
 	}
 
 	@Test
-	public void resolveDefaultValueSystemProperty() throws Exception {
+	void resolveDefaultValueSystemProperty() throws Exception {
 		System.setProperty("systemProperty", "sysbar");
 		try {
 			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
@@ -125,7 +124,7 @@ public class HeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNameFromSystemProperty() throws Exception {
+	void resolveNameFromSystemProperty() throws Exception {
 		System.setProperty("systemProperty", "sysbar");
 		try {
 			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader("sysbar", "foo").build();
@@ -139,7 +138,7 @@ public class HeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalHeaderWithValue() throws Exception {
+	void resolveOptionalHeaderWithValue() throws Exception {
 		Message<String> message = MessageBuilder.withPayload("foo").setHeader("foo", "bar").build();
 		MethodParameter param = this.resolvable.annot(header("foo")).arg(Optional.class, String.class);
 		Object result = resolver.resolveArgument(param, message);
@@ -147,7 +146,7 @@ public class HeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalHeaderAsEmpty() throws Exception {
+	void resolveOptionalHeaderAsEmpty() throws Exception {
 		Message<String> message = MessageBuilder.withPayload("foo").build();
 		MethodParameter param = this.resolvable.annot(header("foo")).arg(Optional.class, String.class);
 		Object result = resolver.resolveArgument(param, message);

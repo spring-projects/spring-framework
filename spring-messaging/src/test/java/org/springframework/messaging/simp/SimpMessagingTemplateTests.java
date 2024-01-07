@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Rossen Stoyanchev
  */
-public class SimpMessagingTemplateTests {
+class SimpMessagingTemplateTests {
 
 	private SimpMessagingTemplate messagingTemplate;
 
@@ -51,14 +50,14 @@ public class SimpMessagingTemplateTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.messageChannel = new StubMessageChannel();
 		this.messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
 	}
 
 
 	@Test
-	public void convertAndSendToUser() {
+	void convertAndSendToUser() {
 		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
@@ -74,7 +73,7 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendToUserWithEncoding() {
+	void convertAndSendToUserWithEncoding() {
 		this.messagingTemplate.convertAndSendToUser("https://joe.openid.example.org/", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
@@ -94,8 +93,8 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendWithCustomHeader() {
-		Map<String, Object> headers = Collections.<String, Object>singletonMap("key", "value");
+	void convertAndSendWithCustomHeader() {
+		Map<String, Object> headers = Collections.singletonMap("key", "value");
 		this.messagingTemplate.convertAndSend("/foo", "data", headers);
 
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
@@ -105,11 +104,11 @@ public class SimpMessagingTemplateTests {
 
 		assertThat(headerAccessor).isNotNull();
 		assertThat(headerAccessor.toMap().get("key")).isNull();
-		assertThat(headerAccessor.getNativeHeader("key")).isEqualTo(Arrays.asList("value"));
+		assertThat(headerAccessor.getNativeHeader("key")).containsExactly("value");
 	}
 
 	@Test
-	public void convertAndSendWithCustomHeaderNonNative() {
+	void convertAndSendWithCustomHeaderNonNative() {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("key", "value");
 		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, new LinkedMultiValueMap<String, String>());
@@ -128,7 +127,7 @@ public class SimpMessagingTemplateTests {
 	// SPR-11868
 
 	@Test
-	public void convertAndSendWithCustomDestinationPrefix() {
+	void convertAndSendWithCustomDestinationPrefix() {
 		this.messagingTemplate.setUserDestinationPrefix("/prefix");
 		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
@@ -145,7 +144,7 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendWithMutableSimpMessageHeaders() {
+	void convertAndSendWithMutableSimpMessageHeaders() {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setHeader("key", "value");
 		accessor.setNativeHeader("fooNative", "barNative");
@@ -161,11 +160,11 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
-	public void processHeadersToSend() {
+	void processHeadersToSend() {
 		Map<String, Object> map = this.messagingTemplate.processHeadersToSend(null);
 
 		assertThat(map).isNotNull();
-		assertThat(MessageHeaders.class.isAssignableFrom(map.getClass())).as("Actual: " + map.getClass().toString()).isTrue();
+		assertThat(MessageHeaders.class.isAssignableFrom(map.getClass())).as("Actual: " + map.getClass()).isTrue();
 
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor((MessageHeaders) map, SimpMessageHeaderAccessor.class);
@@ -175,7 +174,7 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
-	public void doSendWithMutableHeaders() {
+	void doSendWithMutableHeaders() {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setHeader("key", "value");
 		accessor.setNativeHeader("fooNative", "barNative");
@@ -192,7 +191,7 @@ public class SimpMessagingTemplateTests {
 	}
 
 	@Test
-	public void doSendWithStompHeaders() {
+	void doSendWithStompHeaders() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 		accessor.setDestination("/user/queue/foo");
 		Message<?> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());

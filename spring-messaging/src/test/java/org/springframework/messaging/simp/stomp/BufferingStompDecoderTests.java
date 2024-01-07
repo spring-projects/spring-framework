@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rossen Stoyanchev
  * @since 4.0.3
  */
-public class BufferingStompDecoderTests {
+class BufferingStompDecoderTests {
 
-	private final StompDecoder STOMP_DECODER = new StompDecoder();
+	private static final StompDecoder STOMP_DECODER = new StompDecoder();
 
 
 	@Test
-	public void basic() throws InterruptedException {
+	void basic() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = "SEND\na:alpha\n\nMessage body\0";
 
@@ -53,7 +53,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void oneMessageInTwoChunks() throws InterruptedException {
+	void oneMessageInTwoChunks() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk1 = "SEND\na:alpha\n\nMessage";
 		String chunk2 = " body\0";
@@ -70,7 +70,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void twoMessagesInOneChunk() throws InterruptedException {
+	void twoMessagesInOneChunk() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = """
 				SEND
@@ -91,7 +91,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void oneFullAndOneSplitMessageContentLength() throws InterruptedException {
+	void oneFullAndOneSplitMessageContentLength() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		int contentLength = "Payload2a-Payload2b".getBytes().length;
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\ncontent-length:" + contentLength + "\n";
@@ -120,7 +120,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void oneFullAndOneSplitMessageNoContentLength() throws InterruptedException {
+	void oneFullAndOneSplitMessageNoContentLength() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\na:alpha\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
@@ -148,7 +148,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void oneFullAndOneSplitWithContentLengthExceedingBufferSize() throws InterruptedException {
+	void oneFullAndOneSplitWithContentLengthExceedingBufferSize() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\ncontent-length:129\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
@@ -165,7 +165,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void bufferSizeLimit() {
+	void bufferSizeLimit() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 10);
 		String payload = "SEND\na:alpha\n\nMessage body";
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
@@ -173,7 +173,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void incompleteCommand() {
+	void incompleteCommand() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = "MESSAG";
 
@@ -184,7 +184,7 @@ public class BufferingStompDecoderTests {
 	// SPR-13416
 
 	@Test
-	public void incompleteHeaderWithPartialEscapeSequence() throws Exception {
+	void incompleteHeaderWithPartialEscapeSequence() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String chunk = "SEND\na:long\\";
 
@@ -193,7 +193,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void invalidEscapeSequence() {
+	void invalidEscapeSequence() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String payload = "SEND\na:alpha\\x\\n\nMessage body\0";
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
@@ -201,7 +201,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	@Test
-	public void invalidEscapeSequenceWithSingleSlashAtEndOfHeaderValue() {
+	void invalidEscapeSequenceWithSingleSlashAtEndOfHeaderValue() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String payload = "SEND\na:alpha\\\n\nMessage body\0";
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->

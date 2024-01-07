@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-public class RSocketMessageHandlerTests {
+class RSocketMessageHandlerTests {
 
 	@Test
-	public void getRSocketStrategies() {
+	void getRSocketStrategies() {
 		RSocketMessageHandler handler = new RSocketMessageHandler();
 		handler.setDecoders(Collections.singletonList(new ByteArrayDecoder()));
 		handler.setEncoders(Collections.singletonList(new ByteArrayEncoder()));
@@ -77,7 +77,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void setRSocketStrategies() {
+	void setRSocketStrategies() {
 		RSocketStrategies strategies = RSocketStrategies.builder()
 				.encoder(new ByteArrayEncoder())
 				.decoder(new ByteArrayDecoder())
@@ -97,7 +97,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void getRSocketStrategiesReflectsCurrentState() {
+	void getRSocketStrategiesReflectsCurrentState() {
 
 		RSocketMessageHandler handler = new RSocketMessageHandler();
 
@@ -132,7 +132,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void metadataExtractorWithExplicitlySetDecoders() {
+	void metadataExtractorWithExplicitlySetDecoders() {
 		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
 
 		RSocketMessageHandler handler = new RSocketMessageHandler();
@@ -145,7 +145,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void mappings() {
+	void mappings() {
 		testMapping(new SimpleController(), "path");
 		testMapping(new TypeLevelMappingController(), "base.path");
 		testMapping(new HandleAllController());
@@ -175,7 +175,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void rejectConnectMappingMethodsThatCanReply() {
+	void rejectConnectMappingMethodsThatCanReply() {
 
 		RSocketMessageHandler handler = new RSocketMessageHandler();
 		handler.setHandlers(Collections.singletonList(new InvalidConnectMappingController()));
@@ -196,7 +196,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void ignoreFireAndForgetToHandlerThatCanReply() {
+	void ignoreFireAndForgetToHandlerThatCanReply() {
 
 		InteractionMismatchController controller = new InteractionMismatchController();
 
@@ -217,7 +217,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void rejectRequestResponseToStreamingHandler() {
+	void rejectRequestResponseToStreamingHandler() {
 
 		RSocketMessageHandler handler = new RSocketMessageHandler();
 		handler.setHandlers(Collections.singletonList(new InteractionMismatchController()));
@@ -238,7 +238,7 @@ public class RSocketMessageHandlerTests {
 	}
 
 	@Test
-	public void handleNoMatch() {
+	void handleNoMatch() {
 
 		testHandleNoMatch(FrameType.SETUP);
 		testHandleNoMatch(FrameType.METADATA_PUSH);

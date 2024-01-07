@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @see MessageReceivingTemplateTests
  */
-public class MessageRequestReplyTemplateTests {
+class MessageRequestReplyTemplateTests {
 
 	private TestMessagingTemplate template;
 
@@ -45,15 +45,15 @@ public class MessageRequestReplyTemplateTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.template = new TestMessagingTemplate();
 		this.postProcessor = new TestMessagePostProcessor();
-		this.headers = Collections.<String, Object>singletonMap("key", "value");
+		this.headers = Collections.singletonMap("key", "value");
 	}
 
 
 	@Test
-	public void sendAndReceive() {
+	void sendAndReceive() {
 		Message<?> requestMessage = new GenericMessage<Object>("request");
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setDefaultDestination("home");
@@ -66,13 +66,13 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void sendAndReceiveMissingDestination() {
+	void sendAndReceiveMissingDestination() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.template.sendAndReceive(new GenericMessage<Object>("request")));
 	}
 
 	@Test
-	public void sendAndReceiveToDestination() {
+	void sendAndReceiveToDestination() {
 		Message<?> requestMessage = new GenericMessage<Object>("request");
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setReceiveMessage(responseMessage);
@@ -84,7 +84,7 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void convertAndSend() {
+	void convertAndSend() {
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(responseMessage);
@@ -96,7 +96,7 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendToDestination() {
+	void convertAndSendToDestination() {
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setReceiveMessage(responseMessage);
 		String response = this.template.convertSendAndReceive("somewhere", "request", String.class);
@@ -107,7 +107,7 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendToDestinationWithHeaders() {
+	void convertAndSendToDestinationWithHeaders() {
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setReceiveMessage(responseMessage);
 		String response = this.template.convertSendAndReceive("somewhere", "request", this.headers, String.class);
@@ -119,7 +119,7 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendWithPostProcessor() {
+	void convertAndSendWithPostProcessor() {
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(responseMessage);
@@ -132,7 +132,7 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendToDestinationWithPostProcessor() {
+	void convertAndSendToDestinationWithPostProcessor() {
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setReceiveMessage(responseMessage);
 		String response = this.template.convertSendAndReceive("somewhere", "request", String.class, this.postProcessor);
@@ -144,7 +144,7 @@ public class MessageRequestReplyTemplateTests {
 	}
 
 	@Test
-	public void convertAndSendToDestinationWithHeadersAndPostProcessor() {
+	void convertAndSendToDestinationWithHeadersAndPostProcessor() {
 		Message<?> responseMessage = new GenericMessage<Object>("response");
 		this.template.setReceiveMessage(responseMessage);
 		String response = this.template.convertSendAndReceive("somewhere", "request", this.headers,

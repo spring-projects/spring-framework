@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class NativeMessageHeaderAccessorTests {
+class NativeMessageHeaderAccessorTests {
 
 	@Test
-	public void createFromNativeHeaderMap() {
+	void createFromNativeHeaderMap() {
 		MultiValueMap<String, String> inputNativeHeaders = new LinkedMultiValueMap<>();
 		inputNativeHeaders.add("foo", "bar");
 		inputNativeHeaders.add("bar", "baz");
@@ -54,7 +54,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void createFromMessage() {
+	void createFromMessage() {
 		MultiValueMap<String, String> inputNativeHeaders = new LinkedMultiValueMap<>();
 		inputNativeHeaders.add("foo", "bar");
 		inputNativeHeaders.add("bar", "baz");
@@ -75,7 +75,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void createFromMessageNull() {
+	void createFromMessageNull() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor((Message<?>) null);
 
 		Map<String, Object> actual = headerAccessor.toMap();
@@ -86,7 +86,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void createFromMessageAndModify() {
+	void createFromMessageAndModify() {
 
 		MultiValueMap<String, String> inputNativeHeaders = new LinkedMultiValueMap<>();
 		inputNativeHeaders.add("foo", "bar");
@@ -117,7 +117,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void setNativeHeader() {
+	void setNativeHeader() {
 		MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<>();
 		nativeHeaders.add("foo", "bar");
 
@@ -128,7 +128,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void setNativeHeaderNullValue() {
+	void setNativeHeaderNullValue() {
 		MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<>();
 		nativeHeaders.add("foo", "bar");
 
@@ -139,7 +139,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void setNativeHeaderLazyInit() {
+	void setNativeHeaderLazyInit() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.setNativeHeader("foo", "baz");
 
@@ -147,7 +147,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void setNativeHeaderLazyInitNullValue() {
+	void setNativeHeaderLazyInitNullValue() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.setNativeHeader("foo", null);
 
@@ -156,7 +156,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void setNativeHeaderImmutable() {
+	void setNativeHeaderImmutable() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.setNativeHeader("foo", "bar");
 		headerAccessor.setImmutable();
@@ -167,7 +167,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void addNativeHeader() {
+	void addNativeHeader() {
 		MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<>();
 		nativeHeaders.add("foo", "bar");
 
@@ -178,7 +178,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void addNativeHeaderNullValue() {
+	void addNativeHeaderNullValue() {
 		MultiValueMap<String, String> nativeHeaders = new LinkedMultiValueMap<>();
 		nativeHeaders.add("foo", "bar");
 
@@ -189,7 +189,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void addNativeHeaderLazyInit() {
+	void addNativeHeaderLazyInit() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", "bar");
 
@@ -197,7 +197,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void addNativeHeaderLazyInitNullValue() {
+	void addNativeHeaderLazyInitNullValue() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", null);
 
@@ -206,7 +206,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void addNativeHeaderImmutable() {
+	void addNativeHeaderImmutable() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", "bar");
 		headerAccessor.setImmutable();
@@ -217,7 +217,7 @@ public class NativeMessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void setImmutableIdempotent() {
+	void setImmutableIdempotent() {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", "bar");
 		headerAccessor.setImmutable();

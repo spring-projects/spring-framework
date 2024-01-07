@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @see org.springframework.web.socket.messaging.OrderedMessageSendingIntegrationTests
  */
-public class OrderedMessageChannelDecoratorTests {
+class OrderedMessageChannelDecoratorTests {
 
 	private static final Log logger = LogFactory.getLog(OrderedMessageChannelDecoratorTests.class);
 
@@ -52,7 +52,7 @@ public class OrderedMessageChannelDecoratorTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.executor = new ThreadPoolTaskExecutor();
 		this.executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
 		this.executor.setAllowCoreThreadTimeOut(true);
@@ -60,13 +60,13 @@ public class OrderedMessageChannelDecoratorTests {
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		this.executor.shutdown();
 	}
 
 
 	@Test
-	public void test() throws InterruptedException {
+	void test() throws InterruptedException {
 
 		int start = 1;
 		int end = 1000;
