@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,17 @@ class BridgeMethodResolverTests {
 		Method bridgeMethod = DateAdder.class.getMethod("add", Object.class);
 		assertThat(bridgeMethod.isBridge()).isTrue();
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
+		assertThat(bridgedMethod.isBridge()).isFalse();
+		assertThat(bridgedMethod.getName()).isEqualTo("add");
+		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);
+		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(Date.class);
+	}
+
+	@Test
+	void findBridgedMethodFromOriginalMethodInHierarchy() throws Exception {
+		Method originalMethod = Adder.class.getMethod("add", Object.class);
+		assertThat(originalMethod.isBridge()).isFalse();
+		Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, DateAdder.class);
 		assertThat(bridgedMethod.isBridge()).isFalse();
 		assertThat(bridgedMethod.getName()).isEqualTo("add");
 		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);

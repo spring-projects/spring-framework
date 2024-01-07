@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,12 +199,11 @@ public abstract class AopUtils {
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} doesn't implement it or is {@code null}
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
+	 * @see org.springframework.core.BridgeMethodResolver#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
 		Class<?> specificTargetClass = (targetClass != null ? ClassUtils.getUserClass(targetClass) : null);
-		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, specificTargetClass);
-		// If we are dealing with method with generic parameters, find the original method.
-		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
+		return BridgeMethodResolver.getMostSpecificMethod(method, specificTargetClass);
 	}
 
 	/**

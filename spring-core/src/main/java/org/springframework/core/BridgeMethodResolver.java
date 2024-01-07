@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,43 +50,70 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  */
 public final class BridgeMethodResolver {
 
-	private static final Map<Method, Method> cache = new ConcurrentReferenceHashMap<>();
+	private static final Map<Object, Method> cache = new ConcurrentReferenceHashMap<>();
 
 	private BridgeMethodResolver() {
 	}
 
 
 	/**
-	 * Find the original method for the supplied {@link Method bridge Method}.
+	 * Find the local original method for the supplied {@link Method bridge Method}.
 	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
 	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.
 	 * Callers are <strong>not</strong> required to check for bridging before calling this method.
-	 * @param bridgeMethod the method to introspect
+	 * @param bridgeMethod the method to introspect against its declaring class
 	 * @return the original method (either the bridged method or the passed-in method
 	 * if no more specific one could be found)
+	 * @see #getMostSpecificMethod(Method, Class)
 	 */
 	public static Method findBridgedMethod(Method bridgeMethod) {
-		if (!bridgeMethod.isBridge()) {
+		return resolveBridgeMethod(bridgeMethod, bridgeMethod.getDeclaringClass());
+	}
+
+	/**
+	 * Determine the most specific method for the supplied {@link Method bridge Method}
+	 * in the given class hierarchy, even if not available on the local declaring class.
+	 * <p>This is effectively a combination of {@link ClassUtils#getMostSpecificMethod}
+	 * and {@link #findBridgedMethod}, resolving the original method even if no bridge
+	 * method has been generated at the same class hierarchy level (a known difference
+	 * between the Eclipse compiler and regular javac).
+	 * @param bridgeMethod the method to introspect against the given target class
+	 * @param targetClass the target class to find methods on
+	 * @return the original method (either the bridged method or the passed-in method
+	 * if no more specific one could be found)
+	 * @since 6.1.3
+	 * @see #findBridgedMethod
+	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
+	 */
+	public static Method getMostSpecificMethod(Method bridgeMethod, @Nullable Class<?> targetClass) {
+		Method specificMethod = ClassUtils.getMostSpecificMethod(bridgeMethod, targetClass);
+		return resolveBridgeMethod(specificMethod,
+				(targetClass != null ? targetClass : specificMethod.getDeclaringClass()));
+	}
+
+	private static Method resolveBridgeMethod(Method bridgeMethod, Class<?> targetClass) {
+		boolean localBridge = (targetClass == bridgeMethod.getDeclaringClass());
+		if (!bridgeMethod.isBridge() && localBridge) {
 			return bridgeMethod;
 		}
-		Method bridgedMethod = cache.get(bridgeMethod);
+
+		Object cacheKey = (localBridge ? bridgeMethod : new MethodClassKey(bridgeMethod, targetClass));
+		Method bridgedMethod = cache.get(cacheKey);
 		if (bridgedMethod == null) {
 			// Gather all methods with matching name and parameter size.
 			List<Method> candidateMethods = new ArrayList<>();
-			MethodFilter filter = candidateMethod ->
-					isBridgedCandidateFor(candidateMethod, bridgeMethod);
-			ReflectionUtils.doWithMethods(bridgeMethod.getDeclaringClass(), candidateMethods::add, filter);
+			MethodFilter filter = (candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
+			ReflectionUtils.doWithMethods(targetClass, candidateMethods::add, filter);
 			if (!candidateMethods.isEmpty()) {
-				bridgedMethod = candidateMethods.size() == 1 ?
-						candidateMethods.get(0) :
-						searchCandidates(candidateMethods, bridgeMethod);
+				bridgedMethod = (candidateMethods.size() == 1 ? candidateMethods.get(0) :
+						searchCandidates(candidateMethods, bridgeMethod, targetClass));
 			}
 			if (bridgedMethod == null) {
 				// A bridge method was passed in but we couldn't find the bridged method.
 				// Let's proceed with the passed-in method and hope for the best...
 				bridgedMethod = bridgeMethod;
 			}
-			cache.put(bridgeMethod, bridgedMethod);
+			cache.put(cacheKey, bridgedMethod);
 		}
 		return bridgedMethod;
 	}
@@ -110,19 +137,19 @@ public final class BridgeMethodResolver {
 	 * @return the bridged method, or {@code null} if none found
 	 */
 	@Nullable
-	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
+	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod, Class<?> targetClass) {
 		if (candidateMethods.isEmpty()) {
 			return null;
 		}
 		Method previousMethod = null;
 		boolean sameSig = true;
 		for (Method candidateMethod : candidateMethods) {
-			if (isBridgeMethodFor(bridgeMethod, candidateMethod, bridgeMethod.getDeclaringClass())) {
+			if (isBridgeMethodFor(bridgeMethod, candidateMethod, targetClass)) {
 				return candidateMethod;
 			}
 			else if (previousMethod != null) {
-				sameSig = sameSig &&
-						Arrays.equals(candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
+				sameSig = sameSig && Arrays.equals(
+						candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
 			}
 			previousMethod = candidateMethod;
 		}
@@ -133,12 +160,12 @@ public final class BridgeMethodResolver {
 	 * Determines whether the bridge {@link Method} is the bridge for the
 	 * supplied candidate {@link Method}.
 	 */
-	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Class<?> declaringClass) {
-		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, declaringClass)) {
+	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Class<?> targetClass) {
+		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, targetClass)) {
 			return true;
 		}
 		Method method = findGenericDeclaration(bridgeMethod);
-		return (method != null && isResolvedTypeMatch(method, candidateMethod, declaringClass));
+		return (method != null && isResolvedTypeMatch(method, candidateMethod, targetClass));
 	}
 
 	/**
@@ -147,14 +174,14 @@ public final class BridgeMethodResolver {
 	 * are equal after resolving all types against the declaringType, otherwise
 	 * returns {@code false}.
 	 */
-	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
+	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> targetClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		if (genericParameters.length != candidateMethod.getParameterCount()) {
 			return false;
 		}
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
-			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, declaringClass);
+			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, targetClass);
 			Class<?> candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
@@ -163,7 +190,8 @@ public final class BridgeMethodResolver {
 				}
 			}
 			// A non-array type: compare the type itself.
-			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameter).equals(ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()))) {
+			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameter).equals(
+					ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()))) {
 				return false;
 			}
 		}
@@ -177,6 +205,10 @@ public final class BridgeMethodResolver {
 	 */
 	@Nullable
 	private static Method findGenericDeclaration(Method bridgeMethod) {
+		if (!bridgeMethod.isBridge()) {
+			return bridgeMethod;
+		}
+
 		// Search parent types for method that has same signature as bridge.
 		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
 		while (superclass != null && Object.class != superclass) {

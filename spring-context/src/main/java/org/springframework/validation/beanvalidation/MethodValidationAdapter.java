@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -264,8 +263,7 @@ public class MethodValidationAdapter implements MethodValidator {
 		catch (IllegalArgumentException ex) {
 			// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
 			// Let's try to find the bridged method on the implementation class...
-			Method mostSpecificMethod = ClassUtils.getMostSpecificMethod(method, target.getClass());
-			Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(mostSpecificMethod);
+			Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(method, target.getClass());
 			violations = execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
 		return violations;
