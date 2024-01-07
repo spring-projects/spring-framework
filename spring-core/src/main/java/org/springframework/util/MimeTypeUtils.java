@@ -254,7 +254,7 @@ public abstract class MimeTypeUtils {
 				nextIndex++;
 			}
 			String parameter = mimeType.substring(index + 1, nextIndex).trim();
-			if (parameter.length() > 0) {
+			if (!parameter.isEmpty()) {
 				if (parameters == null) {
 					parameters = new LinkedHashMap<>(4);
 				}

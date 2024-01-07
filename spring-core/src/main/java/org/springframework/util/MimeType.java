@@ -369,9 +369,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 						String thisSubtypeNoSuffix = getSubtype().substring(0, thisPlusIdx);
 						String thisSubtypeSuffix = getSubtype().substring(thisPlusIdx + 1);
 						String otherSubtypeSuffix = other.getSubtype().substring(otherPlusIdx + 1);
-						if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix)) {
-							return true;
-						}
+                        return thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix);
 					}
 				}
 			}

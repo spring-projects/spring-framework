@@ -40,7 +40,7 @@ abstract public class ConstructorDelegate {
       (ConstructorKey)KeyFactory.create(ConstructorKey.class, KeyFactory.CLASS_BY_NAME);
 
     interface ConstructorKey {
-        public Object newInstance(String declaring, String iface);
+        Object newInstance(String declaring, String iface);
     }
 
     protected ConstructorDelegate() {

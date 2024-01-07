@@ -145,7 +145,7 @@ implements CallbackGenerator
     private static void superHelper(CodeEmitter e, MethodInfo method, Context context)
     {
         if (TypeUtils.isAbstract(method.getModifiers())) {
-            e.throw_exception(ABSTRACT_METHOD_ERROR, method.toString() + " is abstract" );
+            e.throw_exception(ABSTRACT_METHOD_ERROR, method + " is abstract" );
         } else {
             e.load_this();
             context.emitLoadArgsAndInvoke(e, method);

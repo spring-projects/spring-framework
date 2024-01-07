@@ -168,11 +168,8 @@ public abstract class AnnotationUtils {
 		if (annotationName.startsWith("java.")) {
 			return true;
 		}
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
-			return false;
-		}
-		return true;
-	}
+        return !AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz);
+    }
 
 	/**
 	 * Get a single {@link Annotation} of {@code annotationType} from the supplied

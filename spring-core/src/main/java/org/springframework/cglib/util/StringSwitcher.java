@@ -46,7 +46,7 @@ abstract public class StringSwitcher {
       (StringSwitcherKey)KeyFactory.create(StringSwitcherKey.class);
 
     interface StringSwitcherKey {
-        public Object newInstance(String[] strings, int[] ints, boolean fixedInput);
+        Object newInstance(String[] strings, int[] ints, boolean fixedInput);
     }
 
     /**

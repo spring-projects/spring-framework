@@ -232,7 +232,7 @@ public class AntPathMatcher implements PathMatcher {
 			if ("**".equals(pattDir)) {
 				break;
 			}
-			if (!matchStrings(pattDir, pathDirs[pathIdxStart], uriTemplateVariables)) {
+			if (matchStrings(pattDir, pathDirs[pathIdxStart], uriTemplateVariables)) {
 				return false;
 			}
 			pattIdxStart++;
@@ -272,7 +272,7 @@ public class AntPathMatcher implements PathMatcher {
 			if (pattDir.equals("**")) {
 				break;
 			}
-			if (!matchStrings(pattDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
+			if (matchStrings(pattDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
 				return false;
 			}
 			if (pattIdxEnd == (pattDirs.length - 1)
@@ -316,7 +316,7 @@ public class AntPathMatcher implements PathMatcher {
 				for (int j = 0; j < patLength; j++) {
 					String subPat = pattDirs[pattIdxStart + j + 1];
 					String subStr = pathDirs[pathIdxStart + i + j];
-					if (!matchStrings(subPat, subStr, uriTemplateVariables)) {
+					if (matchStrings(subPat, subStr, uriTemplateVariables)) {
 						continue strLoop;
 					}
 				}
@@ -349,7 +349,7 @@ public class AntPathMatcher implements PathMatcher {
 				pos += skipped;
 				skipped = skipSegment(path, pos, pattDir);
 				if (skipped < pattDir.length()) {
-					return (skipped > 0 || (pattDir.length() > 0 && isWildcardChar(pattDir.charAt(0))));
+					return (skipped > 0 || (!pattDir.isEmpty() && isWildcardChar(pattDir.charAt(0))));
 				}
 				pos += skipped;
 			}
@@ -439,7 +439,7 @@ public class AntPathMatcher implements PathMatcher {
 	private boolean matchStrings(String pattern, String str,
 			@Nullable Map<String, String> uriTemplateVariables) {
 
-		return getStringMatcher(pattern).matchStrings(str, uriTemplateVariables);
+		return !getStringMatcher(pattern).matchStrings(str, uriTemplateVariables);
 	}
 
 	/**

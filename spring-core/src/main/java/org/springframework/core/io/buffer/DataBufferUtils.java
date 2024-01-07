@@ -553,12 +553,9 @@ public abstract class DataBufferUtils {
 							int start = buffer.readableByteCount() + (int)remainder;
 							DataBuffer split = buffer.split(start);
 							release(split);
-							return buffer;
-						}
-						else {
-							return buffer;
-						}
-					});
+                        }
+                        return buffer;
+                    });
 		}).doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 	}
 

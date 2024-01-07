@@ -26,7 +26,7 @@ public class WeakCacheKey<T> extends WeakReference<T> {
         }
         Object ours = get();
         Object theirs = weakCacheKey.get();
-        return ours != null && theirs != null && ours.equals(theirs);
+        return ours != null && ours.equals(theirs);
     }
 
     @Override

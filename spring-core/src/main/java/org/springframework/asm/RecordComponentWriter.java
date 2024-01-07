@@ -219,7 +219,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
    *
    * @param attributePrototypes a set of attribute prototypes.
    */
-  final void collectAttributePrototypes(final Attribute.Set attributePrototypes) {
+  void collectAttributePrototypes(final Attribute.Set attributePrototypes) {
     attributePrototypes.addAttributes(firstAttribute);
   }
 }

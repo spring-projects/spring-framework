@@ -63,13 +63,10 @@ abstract class ConversionUtils {
 			// yes
 			return true;
 		}
-		if (ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType())) {
-			// maybe
-			return true;
-		}
+        // maybe
+        return ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType());
 		// no
-		return false;
-	}
+    }
 
 	public static Class<?> getEnumType(Class<?> targetType) {
 		Class<?> enumType = targetType;

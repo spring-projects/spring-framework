@@ -244,10 +244,7 @@ public class ClassEmitter extends ClassTransformer {
             if ((value == null) ^ (other.value == null)) {
 				return false;
 			}
-            if (value != null && !value.equals(other.value)) {
-				return false;
-			}
-            return true;
+            return value == null || value.equals(other.value);
         }
 
         @Override

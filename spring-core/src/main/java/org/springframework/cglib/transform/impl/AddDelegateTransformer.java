@@ -42,9 +42,9 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
     private Type delegateType;
 
     /** Creates a new instance of AddDelegateTransformer */
-    public AddDelegateTransformer(Class delegateIf[], Class delegateImpl) {
+    public AddDelegateTransformer(Class[] delegateIf, Class delegateImpl) {
         try {
-            delegateImpl.getConstructor(new Class[]{ Object.class });
+            delegateImpl.getConstructor(Object.class);
             this.delegateIf = delegateIf;
             this.delegateImpl = delegateImpl;
             delegateType = Type.getType(delegateImpl);

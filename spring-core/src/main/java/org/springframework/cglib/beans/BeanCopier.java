@@ -53,7 +53,7 @@ abstract public class BeanCopier
 	  TypeUtils.parseSignature("Object convert(Object, Class, Object)");
 
 	interface BeanCopierKey {
-		public Object newInstance(String source, String target, boolean useConverter);
+		Object newInstance(String source, String target, boolean useConverter);
 	}
 
 	public static BeanCopier create(Class source, Class target, boolean useConverter) {

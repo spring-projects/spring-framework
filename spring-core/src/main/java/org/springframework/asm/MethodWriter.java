@@ -2027,7 +2027,7 @@ final class MethodWriter extends MethodVisitor {
     if (source != symbolTable.getSource()
         || descriptorIndex != this.descriptorIndex
         || signatureIndex != this.signatureIndex
-        || hasDeprecatedAttribute != ((accessFlags & Opcodes.ACC_DEPRECATED) != 0)) {
+        || hasDeprecatedAttribute == ((accessFlags & Opcodes.ACC_DEPRECATED) == 0)) {
       return false;
     }
     boolean needSyntheticAttribute =
@@ -2036,9 +2036,7 @@ final class MethodWriter extends MethodVisitor {
       return false;
     }
     if (exceptionsOffset == 0) {
-      if (numberOfExceptions != 0) {
-        return false;
-      }
+        return numberOfExceptions == 0;
     } else if (source.readUnsignedShort(exceptionsOffset) == numberOfExceptions) {
       int currentExceptionOffset = exceptionsOffset + 2;
       for (int i = 0; i < numberOfExceptions; ++i) {
@@ -2387,7 +2385,7 @@ final class MethodWriter extends MethodVisitor {
    *
    * @param attributePrototypes a set of attribute prototypes.
    */
-  final void collectAttributePrototypes(final Attribute.Set attributePrototypes) {
+  void collectAttributePrototypes(final Attribute.Set attributePrototypes) {
     attributePrototypes.addAttributes(firstAttribute);
     attributePrototypes.addAttributes(firstCodeAttribute);
   }

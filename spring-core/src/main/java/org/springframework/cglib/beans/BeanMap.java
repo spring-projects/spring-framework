@@ -76,7 +76,7 @@ abstract public class BeanMap implements Map {
 		  (BeanMapKey)KeyFactory.create(BeanMapKey.class, KeyFactory.CLASS_BY_NAME);
 
 		interface BeanMapKey {
-			public Object newInstance(Class type, int require);
+			Object newInstance(Class type, int require);
 		}
 
 		private Object bean;

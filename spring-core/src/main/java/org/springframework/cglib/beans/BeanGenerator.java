@@ -41,7 +41,7 @@ public class BeanGenerator extends AbstractClassGenerator
 	  (BeanGeneratorKey)KeyFactory.create(BeanGeneratorKey.class);
 
 	interface BeanGeneratorKey {
-		public Object newInstance(String superclass, Map props);
+		Object newInstance(String superclass, Map props);
 	}
 
 	private Class superclass;

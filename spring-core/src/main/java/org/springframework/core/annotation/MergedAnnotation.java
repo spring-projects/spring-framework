@@ -631,7 +631,7 @@ public interface MergedAnnotation<A extends Annotation> {
 		 */
 		ANNOTATION_TO_MAP;
 
-		protected final boolean isIn(Adapt... adaptations) {
+		final boolean isIn(Adapt... adaptations) {
 			for (Adapt candidate : adaptations) {
 				if (candidate == this) {
 					return true;

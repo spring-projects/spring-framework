@@ -44,7 +44,7 @@ public class CommonsLogWriter extends Writer {
 
 
 	public void write(char ch) {
-		if (ch == '\n' && this.buffer.length() > 0) {
+		if (!this.buffer.isEmpty()) {
 			logger.debug(this.buffer.toString());
 			this.buffer.setLength(0);
 		}

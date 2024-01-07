@@ -32,7 +32,7 @@ abstract public class BulkBean
 	  (BulkBeanKey)KeyFactory.create(BulkBeanKey.class);
 
 	interface BulkBeanKey {
-		public Object newInstance(String target, String[] getters, String[] setters, String[] types);
+		Object newInstance(String target, String[] getters, String[] setters, String[] types);
 	}
 
 	protected Class target;
