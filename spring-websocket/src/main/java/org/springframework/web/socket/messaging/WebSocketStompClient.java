@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
+import org.springframework.messaging.simp.stomp.SplittingStompEncoder;
 import org.springframework.messaging.simp.stomp.StompClientSupport;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
@@ -68,15 +69,23 @@ import org.springframework.web.util.UriComponentsBuilder;
  * SockJsClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Injae Kim
  * @since 4.2
  */
 public class WebSocketStompClient extends StompClientSupport implements SmartLifecycle {
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
+	/**
+	 * The default max size for in&outbound STOMP message.
+	 */
+	private static final int DEFAULT_MESSAGE_MAX_SIZE = 64 * 1024;
+
 	private final WebSocketClient webSocketClient;
 
-	private int inboundMessageSizeLimit = 64 * 1024;
+	private int inboundMessageSizeLimit = DEFAULT_MESSAGE_MAX_SIZE;
+
+	private int outboundMessageSizeLimit = DEFAULT_MESSAGE_MAX_SIZE;
 
 	private boolean autoStartup = true;
 
@@ -123,7 +132,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * Since a STOMP message can be received in multiple WebSocket messages,
 	 * buffering may be required and this property determines the maximum buffer
 	 * size per message.
-	 * <p>By default this is set to 64 * 1024 (64K).
+	 * <p>By default this is set to 64 * 1024 (64K), see {@link WebSocketStompClient#DEFAULT_MESSAGE_MAX_SIZE}.
 	 */
 	public void setInboundMessageSizeLimit(int inboundMessageSizeLimit) {
 		this.inboundMessageSizeLimit = inboundMessageSizeLimit;
@@ -134,6 +143,25 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 */
 	public int getInboundMessageSizeLimit() {
 		return this.inboundMessageSizeLimit;
+	}
+
+	/**
+	 * Configure the maximum size allowed for outbound STOMP message.
+	 * If STOMP message's size exceeds {@link WebSocketStompClient#outboundMessageSizeLimit},
+	 * STOMP message is split into multiple frames.
+	 * <p>By default this is set to 64 * 1024 (64K), see {@link WebSocketStompClient#DEFAULT_MESSAGE_MAX_SIZE}.
+	 * @since 6.2
+	 */
+	public void setOutboundMessageSizeLimit(int outboundMessageSizeLimit) {
+		this.outboundMessageSizeLimit = outboundMessageSizeLimit;
+	}
+
+	/**
+	 * Get the configured outbound message buffer size in bytes.
+	 * @since 6.2
+	 */
+	public int getOutboundMessageSizeLimit() {
+		return this.outboundMessageSizeLimit;
 	}
 
 	/**
@@ -374,7 +402,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final TcpConnectionHandler<byte[]> connectionHandler;
 
-		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
+		private final StompWebSocketMessageCodec codec =
+				new StompWebSocketMessageCodec(getInboundMessageSizeLimit(),getOutboundMessageSizeLimit());
 
 		@Nullable
 		private volatile WebSocketSession session;
@@ -462,7 +491,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			try {
 				WebSocketSession session = this.session;
 				Assert.state(session != null, "No WebSocketSession available");
-				session.sendMessage(this.codec.encode(message, session.getClass()));
+				for (WebSocketMessage<?> webSocketMessage : this.codec.encode(message, session.getClass())) {
+					session.sendMessage(webSocketMessage);
+				}
 				future.complete(null);
 			}
 			catch (Throwable ex) {
@@ -547,8 +578,11 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final BufferingStompDecoder bufferingDecoder;
 
-		public StompWebSocketMessageCodec(int messageSizeLimit) {
-			this.bufferingDecoder = new BufferingStompDecoder(DECODER, messageSizeLimit);
+		private final SplittingStompEncoder splittingEncoder;
+
+		public StompWebSocketMessageCodec(int inboundMessageSizeLimit, int outboundMessageSizeLimit) {
+			this.bufferingDecoder = new BufferingStompDecoder(DECODER, inboundMessageSizeLimit);
+			this.splittingEncoder = new SplittingStompEncoder(ENCODER, outboundMessageSizeLimit);
 		}
 
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
@@ -574,17 +608,21 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			return result;
 		}
 
-		public WebSocketMessage<?> encode(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
+		public List<WebSocketMessage<?>> encode(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			Assert.notNull(accessor, "No StompHeaderAccessor available");
 			byte[] payload = message.getPayload();
-			byte[] bytes = ENCODER.encode(accessor.getMessageHeaders(), payload);
+			List<byte[]> frames = splittingEncoder.encode(accessor.getMessageHeaders(), payload);
 
 			boolean useBinary = (payload.length > 0 &&
 					!(SockJsSession.class.isAssignableFrom(sessionType)) &&
 					MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(accessor.getContentType()));
 
-			return (useBinary ? new BinaryMessage(bytes) : new TextMessage(bytes));
+			List<WebSocketMessage<?>> messages = new ArrayList<>();
+			for (byte[] frame : frames) {
+				messages.add(useBinary ? new BinaryMessage(frame) : new TextMessage(frame));
+			}
+			return messages;
 		}
 	}
 
