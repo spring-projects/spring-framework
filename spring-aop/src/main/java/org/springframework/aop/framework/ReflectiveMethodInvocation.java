@@ -158,6 +158,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
+		// 若所有的增强方法调用完成，则调用被代理方法
 		// We start with an index of -1 and increment early.
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
@@ -170,18 +171,19 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			// been evaluated and found to match.
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
 			if (dm.matcher().matches(this.method, targetClass, this.arguments)) {
+				// 有了前面所有 Advice 统一包装成 MethodInterceptor，可以统一调用 invoke() 方法
 				return dm.interceptor().invoke(this);
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
-				return proceed();
+				return proceed(); // 忽略本次调用，路由到下次调用
 			}
 		}
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
-			// TODO 入口拦截器：org.springframework.transaction.interceptor.TransactionInterceptor.invoke
+			// TODO 事务入口拦截器，都会从这里链式调用触发：org.springframework.transaction.interceptor.TransactionInterceptor.invoke()
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}

@@ -120,10 +120,14 @@ public abstract class AopConfigUtils {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		// 优先判断是否存在默认入口类【internalAutoProxyCreator】的 BeanDefinition
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			// 注册的入口类不是默认入口类
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
+				// 查找当前注入接口的优先级
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
+				// 当前入口类对应的优先级，priority 数字越大，优先级越高
 				int requiredPriority = findPriorityForClass(cls);
 				if (currentPriority < requiredPriority) {
 					apcDefinition.setBeanClassName(cls.getName());
@@ -132,6 +136,7 @@ public abstract class AopConfigUtils {
 			return null;
 		}
 
+		// 封装到 Bean Definition 中，并注册到 BeanDefinitionRegistry 中
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
 		beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);

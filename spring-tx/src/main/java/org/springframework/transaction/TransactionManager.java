@@ -17,6 +17,8 @@
 package org.springframework.transaction;
 
 /**
+ * Spring 管理的基接口，作为子接口上层接口区分，并没有定义实际的事务行为能力
+ *
  * Marker interface for Spring transaction manager implementations,
  * either traditional or reactive.
  *

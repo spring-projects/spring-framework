@@ -20,6 +20,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * Spring AIO 调用链中拦截器的内部核心接口，所有类型的切面最终都会包装成此接口触发统一拦截
+ *
  * Intercepts calls on an interface on its way to the target. These
  * are nested "on top" of the target.
  *

@@ -419,7 +419,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return retVal;
 		}
 
-		else {
+		else { // 编程式事务
 			Object result;
 			final ThrowableHolder throwableHolder = new ThrowableHolder();
 
@@ -509,9 +509,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		else {
 			TransactionManager defaultTransactionManager = getTransactionManager();
 			if (defaultTransactionManager == null) {
+				// 先从缓存中拿
 				defaultTransactionManager = this.transactionManagerCache.get(DEFAULT_TRANSACTION_MANAGER_KEY);
 				if (defaultTransactionManager == null) {
+					// 从注入的实例中获取
 					defaultTransactionManager = this.beanFactory.getBean(TransactionManager.class);
+					// 设置事务管理器对象缓存
 					this.transactionManagerCache.putIfAbsent(
 							DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
 				}
@@ -606,6 +609,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
+				// 开启事务 ！！！
 				status = tm.getTransaction(txAttr);
 			}
 			else {
@@ -615,6 +619,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 		}
+		// 包装成事务信息，记录事务
 		return prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 	}
 

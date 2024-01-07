@@ -244,8 +244,11 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	@Override
 	protected Object doGetTransaction() {
+		// 创建事务对象
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
+		// 设置是否允许回滚点：只有 Nest 传播属性才为 true【嵌套事务】
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
+		// 数据库连接包装，第一次拿到的 conHolder 为空
 		ConnectionHolder conHolder =
 				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
 		txObject.setConnectionHolder(conHolder, false);
@@ -277,6 +280,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			con = txObject.getConnectionHolder().getConnection();
 
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+			// 设置事务对象隔离级别
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 			txObject.setReadOnly(definition.isReadOnly());
 
@@ -288,6 +292,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				if (logger.isDebugEnabled()) {
 					logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
 				}
+				// 设置手动提交
 				con.setAutoCommit(false);
 			}
 
