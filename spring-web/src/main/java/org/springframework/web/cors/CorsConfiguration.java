@@ -193,7 +193,7 @@ public class CorsConfiguration {
 	 * matched origin and not to {@code "*"} nor to the pattern.
 	 * Therefore, {@code allowedOriginPatterns} can be used in combination with
 	 * {@link #setAllowCredentials} and {@link #setAllowPrivateNetwork} set to
-	 * {@code true}
+	 * {@code true}.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
