@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.BeanDescriptor;
 import jakarta.validation.metadata.ConstraintDescriptor;
 
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -312,7 +313,13 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 				(invalidValue == violation.getLeafBean() || field.contains("[") || field.contains("."))) {
 			// Possibly a bean constraint with property path: retrieve the actual property value.
 			// However, explicitly avoid this for "address[]" style paths that we can't handle.
-			invalidValue = bindingResult.getRawFieldValue(field);
+			try {
+				invalidValue = bindingResult.getRawFieldValue(field);
+			}
+			catch (InvalidPropertyException ex) {
+				// Bean validation uses ValueExtractor's to unwrap container values
+				// in which cases we can't access the raw value.
+			}
 		}
 		return invalidValue;
 	}
