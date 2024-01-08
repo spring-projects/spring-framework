@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -416,16 +416,15 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DataBuffer.ByteBufferIterator readableByteBuffers() {
-		ByteBuffer readOnly = this.byteBuffer.asReadOnlyBuffer();
-		readOnly.clear().position(this.readPosition).limit(this.writePosition - this.readPosition);
+		ByteBuffer readOnly = this.byteBuffer.slice(this.readPosition, readableByteCount())
+				.asReadOnlyBuffer();
 		return new ByteBufferIterator(readOnly);
 	}
 
 	@Override
 	public DataBuffer.ByteBufferIterator writableByteBuffers() {
-		ByteBuffer duplicate = this.byteBuffer.duplicate();
-		duplicate.clear().position(this.writePosition).limit(this.capacity - this.writePosition);
-		return new ByteBufferIterator(duplicate);
+		ByteBuffer slice = this.byteBuffer.slice(this.writePosition, writableByteCount());
+		return new ByteBufferIterator(slice);
 	}
 
 	@Override
