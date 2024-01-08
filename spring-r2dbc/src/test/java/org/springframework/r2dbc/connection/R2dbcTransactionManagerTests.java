@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,12 @@ import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 import static org.mockito.BDDMockito.when;
 
 /**
- * Unit tests for {@link R2dbcTransactionManager}.
+ * Tests for {@link R2dbcTransactionManager}.
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
  */
-class R2dbcTransactionManagerUnitTests {
+class R2dbcTransactionManagerTests {
 
 	ConnectionFactory connectionFactoryMock = mock();
 
@@ -624,7 +624,7 @@ class R2dbcTransactionManagerUnitTests {
 
 	private static class TestTransactionSynchronization implements TransactionSynchronization {
 
-		private int status;
+		private final int status;
 
 		public boolean beforeCommitCalled;
 

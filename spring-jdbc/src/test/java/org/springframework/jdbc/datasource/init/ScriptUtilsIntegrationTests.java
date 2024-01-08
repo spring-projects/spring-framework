@@ -30,7 +30,7 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.executeSqlScr
  *
  * @author Sam Brannen
  * @since 4.0.3
- * @see ScriptUtilsUnitTests
+ * @see ScriptUtilsTests
  */
 class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationTests {
 

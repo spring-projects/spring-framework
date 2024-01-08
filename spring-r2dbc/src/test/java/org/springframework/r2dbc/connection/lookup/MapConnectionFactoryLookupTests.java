@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Unit tests for {@link MapConnectionFactoryLookup}.
+ * Tests for {@link MapConnectionFactoryLookup}.
  *
  * @author Mark Paluch
  */
-public class MapConnectionFactoryLookupUnitTests {
+class MapConnectionFactoryLookupTests {
 
 	private static final String CONNECTION_FACTORY_NAME = "connectionFactory";
 
 
 	@Test
-	public void getConnectionFactoriesReturnsUnmodifiableMap() {
+	void getConnectionFactoriesReturnsUnmodifiableMap() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 		Map<String, ConnectionFactory> connectionFactories = lookup.getConnectionFactories();
 
@@ -45,7 +45,7 @@ public class MapConnectionFactoryLookupUnitTests {
 	}
 
 	@Test
-	public void shouldLookupConnectionFactory() {
+	void shouldLookupConnectionFactory() {
 		Map<String, ConnectionFactory> connectionFactories = new HashMap<>();
 		DummyConnectionFactory expectedConnectionFactory = new DummyConnectionFactory();
 		connectionFactories.put(CONNECTION_FACTORY_NAME, expectedConnectionFactory);
@@ -58,7 +58,7 @@ public class MapConnectionFactoryLookupUnitTests {
 	}
 
 	@Test
-	public void addingConnectionFactoryPermitsOverride() {
+	void addingConnectionFactoryPermitsOverride() {
 		Map<String, ConnectionFactory> connectionFactories = new HashMap<>();
 		DummyConnectionFactory overriddenConnectionFactory = new DummyConnectionFactory();
 		DummyConnectionFactory expectedConnectionFactory = new DummyConnectionFactory();
@@ -84,7 +84,7 @@ public class MapConnectionFactoryLookupUnitTests {
 	}
 
 	@Test
-	public void getConnectionFactoryWhereSuppliedMapHasNoEntryForSpecifiedKey() {
+	void getConnectionFactoryWhereSuppliedMapHasNoEntryForSpecifiedKey() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 
 		assertThatThrownBy(

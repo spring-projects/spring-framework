@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,19 +35,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link NamedParameterUtils}.
+ * Tests for {@link NamedParameterUtils}.
  *
  * @author Mark Paluch
  * @author Jens Schauder
  * @author Anton Naydenov
  */
-public class NamedParameterUtilsUnitTests {
+class NamedParameterUtilsTests {
 
 	private final BindMarkersFactory BIND_MARKERS = BindMarkersFactory.indexed("$", 1);
 
 
 	@Test
-	public void shouldParseSql() {
+	void shouldParseSql() {
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(psql.getParameterNames()).containsExactly("a", "b", "c", "a");
@@ -66,7 +66,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void substituteNamedParameters() {
+	void substituteNamedParameters() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
 		namedParams.addValue("a", "a").addValue("b", "b").addValue("c", "c");
 
@@ -82,7 +82,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void substituteObjectArray() {
+	void substituteObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
 		namedParams.addValue("a",
 				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
@@ -95,7 +95,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void shouldBindObjectArray() {
+	void shouldBindObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
 		namedParams.addValue("a",
 				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
@@ -114,7 +114,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlContainingComments() {
+	void parseSqlContainingComments() {
 		String sql1 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
 
 		ParsedSql psql1 = NamedParameterUtils.parseSqlStatement(sql1);
@@ -133,7 +133,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithPostgresCasting() {
+	void parseSqlStatementWithPostgresCasting() {
 		String expectedSql = "select 'first name' from artists where id = $1 and birth_date=$2::timestamp";
 		String sql = "select 'first name' from artists where id = :id and birth_date=:birthDate::timestamp";
 
@@ -145,7 +145,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithPostgresContainedOperator() {
+	void parseSqlStatementWithPostgresContainedOperator() {
 		String expectedSql = "select 'first name' from artists where info->'stat'->'albums' = ?? $1 and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 
@@ -155,7 +155,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() {
+	void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() {
 		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 
@@ -165,7 +165,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() {
+	void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() {
 		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND $1 = 'Back in Black'";
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND :album = 'Back in Black'";
 
@@ -175,7 +175,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithEscapedColon() {
+	void parseSqlStatementWithEscapedColon() {
 		String expectedSql = "select '0\\:0' as a, foo from bar where baz < DATE($1 23:59:59) and baz = $2";
 		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
 
@@ -185,7 +185,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithBracketDelimitedParameterNames() {
+	void parseSqlStatementWithBracketDelimitedParameterNames() {
 		String expectedSql = "select foo from bar where baz = b$1$2z";
 		String sql = "select foo from bar where baz = b:{p1}:{p2}z";
 
@@ -195,7 +195,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() {
+	void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() {
 		String expectedSql = "select foo from bar where baz = b:{}z";
 		String sql = "select foo from bar where baz = b:{}z";
 
@@ -212,7 +212,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithSingleLetterInBrackets() {
+	void parseSqlStatementWithSingleLetterInBrackets() {
 		String expectedSql = "select foo from bar where baz = b$1z";
 		String sql = "select foo from bar where baz = b:{p}z";
 
@@ -222,7 +222,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithLogicalAnd() {
+	void parseSqlStatementWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(expectedSql);
@@ -230,21 +230,21 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void substituteNamedParametersWithLogicalAnd() {
+	void substituteNamedParametersWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 
 		assertThat(expand(expectedSql)).isEqualTo(expectedSql);
 	}
 
 	@Test
-	public void variableAssignmentOperator() {
+	void variableAssignmentOperator() {
 		String expectedSql = "x := 1";
 
 		assertThat(expand(expectedSql)).isEqualTo(expectedSql);
 	}
 
 	@Test
-	public void parseSqlStatementWithQuotedSingleQuote() {
+	void parseSqlStatementWithQuotedSingleQuote() {
 		String sql = "SELECT ':foo'':doo', :xxx FROM DUAL";
 
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
@@ -253,7 +253,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithQuotesAndCommentBefore() {
+	void parseSqlStatementWithQuotesAndCommentBefore() {
 		String sql = "SELECT /*:doo*/':foo', :xxx FROM DUAL";
 
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
@@ -262,7 +262,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void parseSqlStatementWithQuotesAndCommentAfter() {
+	void parseSqlStatementWithQuotesAndCommentAfter() {
 		String sql2 = "SELECT ':foo'/*:doo*/, :xxx FROM DUAL";
 
 		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
@@ -288,7 +288,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void shouldAllowParsingMultipleUseOfParameter() {
+	void shouldAllowParsingMultipleUseOfParameter() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
 		ParsedSql parsed = NamedParameterUtils.parseSqlStatement(sql);
@@ -298,7 +298,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void multipleEqualParameterReferencesBindsValueOnce() {
+	void multipleEqualParameterReferencesBindsValueOnce() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
 		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);
@@ -332,7 +332,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void multipleEqualCollectionParameterReferencesBindsValueOnce() {
+	void multipleEqualCollectionParameterReferencesBindsValueOnce() {
 		String sql = "SELECT * FROM person where name IN (:ids) or lastname IN (:ids)";
 
 		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);
@@ -373,7 +373,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void multipleEqualParameterReferencesForAnonymousMarkersBindsValueMultipleTimes() {
+	void multipleEqualParameterReferencesForAnonymousMarkersBindsValueMultipleTimes() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
 		BindMarkersFactory factory = BindMarkersFactory.anonymous("?");
@@ -410,7 +410,7 @@ public class NamedParameterUtilsUnitTests {
 	}
 
 	@Test
-	public void multipleEqualParameterReferencesBindsNullOnce() {
+	void multipleEqualParameterReferencesBindsNullOnce() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
 		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);

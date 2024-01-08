@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 import static org.mockito.BDDMockito.when;
 
 /**
- * Unit tests for {@link DefaultDatabaseClient}.
+ * Tests for {@link DefaultDatabaseClient}.
  *
  * @author Mark Paluch
  * @author Ferdinand Jacobs
@@ -68,7 +68,7 @@ import static org.mockito.BDDMockito.when;
  * @author Simon Baslé
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
-class DefaultDatabaseClientUnitTests {
+class DefaultDatabaseClientTests {
 
 	@Mock
 	private Connection connection;
@@ -499,21 +499,9 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 
-	static class ParameterBean {
-
-		private final String key;
-
-		public ParameterBean(String key) {
-			this.key = key;
-		}
-
-		public String getKey() {
-			return key;
-		}
-	}
+	record ParameterBean(String key) {}
 
 
-	record ParameterRecord(String key) {
-	}
+	record ParameterRecord(String key) {}
 
 }
