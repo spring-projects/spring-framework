@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link UnmodifiableMultiValueMap}.
+ * Tests for {@link UnmodifiableMultiValueMap}.
  *
  * @author Arjen Poutsma
  * @since 6.0

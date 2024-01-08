@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,7 @@ import org.springframework.beans.DirectFieldAccessor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver}.
+ * Tests for {@link GroovyMarkupViewResolver}.
  *
  * @author Brian Clozel
  */

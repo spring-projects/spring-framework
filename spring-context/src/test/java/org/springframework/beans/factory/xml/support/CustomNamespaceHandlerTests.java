@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for custom XML namespace handler implementations.
+ * Tests for custom XML namespace handler implementations.
  *
  * @author Rob Harrop
  * @author Rick Evans

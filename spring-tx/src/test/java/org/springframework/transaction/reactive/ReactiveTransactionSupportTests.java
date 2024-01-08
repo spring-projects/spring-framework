@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,22 +26,22 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.ReactiveTransactionManager;
-import org.springframework.transaction.TestTransactionExecutionListener;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.testfixture.TestTransactionExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for transactional support through {@link ReactiveTestTransactionManager}.
+ * Tests for transactional support through {@link ReactiveTestTransactionManager}.
  *
  * @author Mark Paluch
  */
-public class ReactiveTransactionSupportTests {
+class ReactiveTransactionSupportTests {
 
 	@Test
-	public void noExistingTransaction() {
+	void noExistingTransaction() {
 		ReactiveTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
@@ -62,7 +62,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void existingTransaction() {
+	void existingTransaction() {
 		ReactiveTransactionManager tm = new ReactiveTestTransactionManager(true, true);
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
@@ -88,7 +88,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void commitWithoutExistingTransaction() {
+	void commitWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -112,7 +112,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackWithoutExistingTransaction() {
+	void rollbackWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -136,7 +136,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackOnlyWithoutExistingTransaction() {
+	void rollbackOnlyWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -161,7 +161,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void commitWithExistingTransaction() {
+	void commitWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -185,7 +185,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackWithExistingTransaction() {
+	void rollbackWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -209,7 +209,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackOnlyWithExistingTransaction() {
+	void rollbackOnlyWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -233,7 +233,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplate() {
+	void transactionTemplate() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 
@@ -250,7 +250,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void transactionTemplateWithException() {
+	void transactionTemplateWithException() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		RuntimeException ex = new RuntimeException("Some application exception");
@@ -292,7 +292,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void beginFailure() {
+	void beginFailure() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, false);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -313,7 +313,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void commitFailure() {
+	void commitFailure() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, TransactionSystemException::new, null);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);
@@ -334,7 +334,7 @@ public class ReactiveTransactionSupportTests {
 	}
 
 	@Test
-	public void rollbackFailure() {
+	void rollbackFailure() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, null, TransactionSystemException::new);
 		TestTransactionExecutionListener tl = new TestTransactionExecutionListener();
 		tm.addListener(tl);

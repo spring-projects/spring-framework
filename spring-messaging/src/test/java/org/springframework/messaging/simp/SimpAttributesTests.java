@@ -28,7 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link SimpAttributes}.
+ * Tests for {@link SimpAttributes}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

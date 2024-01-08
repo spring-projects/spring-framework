@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link ReaderEditor} class.
+ * Tests for {@link ReaderEditor}.
  *
  * @author Juergen Hoeller
  * @since 4.2

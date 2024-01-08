@@ -40,7 +40,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link CharBufferDecoder}.
+ * Tests for {@link CharBufferDecoder}.
  *
  * @author Markus Heiden
  * @author Arjen Poutsma

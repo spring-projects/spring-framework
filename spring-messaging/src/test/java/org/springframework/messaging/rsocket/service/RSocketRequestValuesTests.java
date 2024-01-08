@@ -27,7 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link RSocketRequestValues}.
+ * Tests for {@link RSocketRequestValues}.
+ *
  * @author Rossen Stoyanchev
  */
 class RSocketRequestValuesTests {

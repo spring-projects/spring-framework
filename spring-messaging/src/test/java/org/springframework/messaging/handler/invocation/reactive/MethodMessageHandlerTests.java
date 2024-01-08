@@ -49,7 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link AbstractMethodMessageHandler}.
+ * Tests for {@link AbstractMethodMessageHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 class MethodMessageHandlerTests {

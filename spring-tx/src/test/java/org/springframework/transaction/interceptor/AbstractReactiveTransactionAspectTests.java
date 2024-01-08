@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		getNameMethod = TestBean.class.getMethod("getName");
 		setNameMethod = TestBean.class.getMethod("setName", String.class);
 		exceptionalMethod = TestBean.class.getMethod("exceptional", Throwable.class);
@@ -63,7 +63,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 
 	@Test
-	public void noTransaction() throws Exception {
+	void noTransaction() throws Exception {
 		ReactiveTransactionManager rtm = mock();
 
 		DefaultTestBean tb = new DefaultTestBean();
@@ -86,7 +86,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * Check that a transaction is created and committed.
 	 */
 	@Test
-	public void transactionShouldSucceed() throws Exception {
+	void transactionShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -112,7 +112,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * Check that two transactions are created and committed.
 	 */
 	@Test
-	public void twoTransactionsShouldSucceed() throws Exception {
+	void twoTransactionsShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas1 = new MapTransactionAttributeSource();
@@ -144,7 +144,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * Check that a transaction is created and committed.
 	 */
 	@Test
-	public void transactionShouldSucceedWithNotNew() throws Exception {
+	void transactionShouldSucceedWithNotNew() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -168,42 +168,42 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 
 	@Test
-	public void rollbackOnCheckedException() throws Throwable {
+	void rollbackOnCheckedException() throws Throwable {
 		doTestRollbackOnException(new Exception(), true, false);
 	}
 
 	@Test
-	public void noRollbackOnCheckedException() throws Throwable {
+	void noRollbackOnCheckedException() throws Throwable {
 		doTestRollbackOnException(new Exception(), false, false);
 	}
 
 	@Test
-	public void rollbackOnUncheckedException() throws Throwable {
+	void rollbackOnUncheckedException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), true, false);
 	}
 
 	@Test
-	public void noRollbackOnUncheckedException() throws Throwable {
+	void noRollbackOnUncheckedException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), false, false);
 	}
 
 	@Test
-	public void rollbackOnCheckedExceptionWithRollbackException() throws Throwable {
+	void rollbackOnCheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new Exception(), true, true);
 	}
 
 	@Test
-	public void noRollbackOnCheckedExceptionWithRollbackException() throws Throwable {
+	void noRollbackOnCheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new Exception(), false, true);
 	}
 
 	@Test
-	public void rollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
+	void rollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), true, true);
 	}
 
 	@Test
-	public void noRollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
+	void noRollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), false, true);
 	}
 
@@ -278,7 +278,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * Shouldn't invoke target method.
 	 */
 	@Test
-	public void cannotCreateTransaction() throws Exception {
+	void cannotCreateTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = getNameMethod;
@@ -311,7 +311,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * infrastructure exception was thrown to the client
 	 */
 	@Test
-	public void cannotCommitTransaction() throws Exception {
+	void cannotCommitTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = setNameMethod;

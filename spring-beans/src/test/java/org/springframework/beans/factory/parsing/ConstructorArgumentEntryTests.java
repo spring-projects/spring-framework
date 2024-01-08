@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link ConstructorArgumentEntry}.
+ * Tests for {@link ConstructorArgumentEntry}.
  *
  * @author Rick Evans
  * @author Chris Beams

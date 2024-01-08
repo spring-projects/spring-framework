@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * Unit tests for {@link AnnotationAsyncExecutionInterceptor}.
+ * Tests for {@link AnnotationAsyncExecutionInterceptor}.
  *
  * @author Chris Beams
  * @since 3.1.2

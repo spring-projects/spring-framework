@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @since 16.03.2003
  */
-public class TransactionInterceptorTests extends AbstractTransactionAspectTests {
+class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 
 	@Override
 	protected Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource[] tas) {
@@ -83,7 +83,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	 * PlatformTransactionManager is.
 	 */
 	@Test
-	public void serializableWithAttributeProperties() throws Exception {
+	void serializableWithAttributeProperties() throws Exception {
 		TransactionInterceptor ti = new TransactionInterceptor();
 		Properties props = new Properties();
 		props.setProperty("methodName", "PROPAGATION_REQUIRED");
@@ -99,7 +99,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void serializableWithCompositeSource() throws Exception {
+	void serializableWithCompositeSource() throws Exception {
 		NameMatchTransactionAttributeSource tas1 = new NameMatchTransactionAttributeSource();
 		Properties props = new Properties();
 		props.setProperty("methodName", "PROPAGATION_REQUIRED");
@@ -128,7 +128,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithNoBeanFactory() {
+	void determineTransactionManagerWithNoBeanFactory() {
 		PlatformTransactionManager transactionManager = mock();
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManager(transactionManager, null);
 
@@ -136,7 +136,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithNoBeanFactoryAndNoTransactionAttribute() {
+	void determineTransactionManagerWithNoBeanFactoryAndNoTransactionAttribute() {
 		PlatformTransactionManager transactionManager = mock();
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManager(transactionManager, null);
 
@@ -144,7 +144,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithNoTransactionAttribute() {
+	void determineTransactionManagerWithNoTransactionAttribute() {
 		BeanFactory beanFactory = mock();
 		TransactionInterceptor ti = simpleTransactionInterceptor(beanFactory);
 
@@ -152,7 +152,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithQualifierUnknown() {
+	void determineTransactionManagerWithQualifierUnknown() {
 		BeanFactory beanFactory = mock();
 		TransactionInterceptor ti = simpleTransactionInterceptor(beanFactory);
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
@@ -164,7 +164,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithQualifierAndDefault() {
+	void determineTransactionManagerWithQualifierAndDefault() {
 		BeanFactory beanFactory = mock();
 		PlatformTransactionManager transactionManager = mock();
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManager(transactionManager, beanFactory);
@@ -178,7 +178,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithQualifierAndDefaultName() {
+	void determineTransactionManagerWithQualifierAndDefaultName() {
 		BeanFactory beanFactory = mock();
 		associateTransactionManager(beanFactory, "defaultTransactionManager");
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManagerName(
@@ -193,7 +193,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithEmptyQualifierAndDefaultName() {
+	void determineTransactionManagerWithEmptyQualifierAndDefaultName() {
 		BeanFactory beanFactory = mock();
 		PlatformTransactionManager defaultTransactionManager
 				= associateTransactionManager(beanFactory, "defaultTransactionManager");
@@ -207,7 +207,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithQualifierSeveralTimes() {
+	void determineTransactionManagerWithQualifierSeveralTimes() {
 		BeanFactory beanFactory = mock();
 		TransactionInterceptor ti = simpleTransactionInterceptor(beanFactory);
 
@@ -226,7 +226,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerWithBeanNameSeveralTimes() {
+	void determineTransactionManagerWithBeanNameSeveralTimes() {
 		BeanFactory beanFactory = mock();
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManagerName(
 				"fooTransactionManager", beanFactory);
@@ -244,7 +244,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	}
 
 	@Test
-	public void determineTransactionManagerDefaultSeveralTimes() {
+	void determineTransactionManagerDefaultSeveralTimes() {
 		BeanFactory beanFactory = mock();
 		TransactionInterceptor ti = simpleTransactionInterceptor(beanFactory);
 

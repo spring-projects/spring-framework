@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for expressions accessing beans and factory beans.
+ * Tests for expressions accessing beans and factory beans.
  *
  * @author Andy Clement
  */

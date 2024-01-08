@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.StubMvcResult;
 
 /**
- * Unit tests for {@link HeaderResultMatchers}.
+ * Tests for {@link HeaderResultMatchers}.
+ *
  * @author Rossen Stoyanchev
  */
 public class HeaderResultMatchersTests {

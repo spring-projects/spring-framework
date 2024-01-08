@@ -55,7 +55,7 @@ import org.springframework.web.testfixture.method.ResolvableMethod;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link HandlerMethodValidationException}.
+ * Tests for {@link HandlerMethodValidationException}.
  *
  * @author Rossen Stoyanchev
  */

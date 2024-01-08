@@ -26,7 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link CachingDestinationResolverProxy}.
+ * Tests for {@link CachingDestinationResolverProxy}.
  *
  * @author Agim Emruli
  * @author Juergen Hoeller

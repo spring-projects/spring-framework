@@ -48,7 +48,8 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 import static org.springframework.util.MimeTypeUtils.TEXT_XML;
 
 /**
- * Unit tests for {@link DefaultMetadataExtractor}.
+ * Tests for {@link DefaultMetadataExtractor}.
+ *
  * @author Rossen Stoyanchev
  */
 class DefaultMetadataExtractorTests {

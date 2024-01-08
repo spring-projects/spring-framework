@@ -66,7 +66,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 
 /**
- * Unit tests for {@link HandlerMappingIntrospector}.
+ * Tests for {@link HandlerMappingIntrospector}.
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1

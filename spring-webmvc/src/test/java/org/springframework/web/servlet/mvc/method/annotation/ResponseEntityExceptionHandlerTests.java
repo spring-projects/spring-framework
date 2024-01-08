@@ -77,7 +77,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.mock;
 
 /**
- * Unit tests for {@link ResponseEntityExceptionHandler}.
+ * Tests for {@link ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze

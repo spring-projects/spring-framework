@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for property access.
+ * Tests for property access.
  *
  * @author Andy Clement
  * @author Juergen Hoeller

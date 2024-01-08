@@ -30,8 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.converter.DefaultContentTypeResolver}.
+ * Tests for {@link DefaultContentTypeResolver}.
  *
  * @author Rossen Stoyanchev
  */

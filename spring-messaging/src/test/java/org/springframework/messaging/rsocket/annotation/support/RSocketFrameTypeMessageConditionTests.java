@@ -30,7 +30,8 @@ import static org.springframework.messaging.rsocket.annotation.support.RSocketFr
 import static org.springframework.messaging.rsocket.annotation.support.RSocketFrameTypeMessageCondition.EMPTY_CONDITION;
 
 /**
- * Unit tests for {@link RSocketFrameTypeMessageCondition}.
+ * Tests for {@link RSocketFrameTypeMessageCondition}.
+ *
  * @author Rossen Stoyanchev
  */
 class RSocketFrameTypeMessageConditionTests {

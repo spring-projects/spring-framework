@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.springframework.test.context.web.ServletTestExecutionListener.
 import static org.springframework.test.context.web.ServletTestExecutionListener.RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE;
 
 /**
- * Unit tests for {@link ServletTestExecutionListener}.
+ * Tests for {@link ServletTestExecutionListener}.
  *
  * @author Sam Brannen
  * @author Phillip Webb

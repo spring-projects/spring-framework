@@ -34,7 +34,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link DefaultUserDestinationResolver}.
+ * Tests for {@link DefaultUserDestinationResolver}.
  *
  * @author Rossen Stoyanchev
  */

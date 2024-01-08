@@ -37,7 +37,7 @@ import static org.springframework.context.annotation.ScopedProxyMode.NO;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
 
 /**
- * Unit tests for {@link AnnotationScopeMetadataResolver}.
+ * Tests for {@link AnnotationScopeMetadataResolver}.
  *
  * @author Rick Evans
  * @author Chris Beams

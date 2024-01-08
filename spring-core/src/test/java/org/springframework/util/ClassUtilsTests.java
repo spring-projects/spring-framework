@@ -48,7 +48,7 @@ import org.springframework.tests.sample.objects.TestObject;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link ClassUtils}.
+ * Tests for {@link ClassUtils}.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller

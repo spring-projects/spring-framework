@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link StompClientSupport}.
+ * Tests for {@link StompClientSupport}.
  *
  * @author Rossen Stoyanchev
  */

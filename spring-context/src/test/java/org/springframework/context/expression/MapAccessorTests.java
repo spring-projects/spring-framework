@@ -29,7 +29,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for compilation of {@link MapAccessor}.
+ * Tests for {@link MapAccessor}.
  *
  * @author Andy Clement
  */

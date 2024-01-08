@@ -38,7 +38,7 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link StompHeaderAccessor}.
+ * Tests for {@link StompHeaderAccessor}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
- * Unit tests for {@link MethodBasedEvaluationContext}.
+ * Tests for {@link MethodBasedEvaluationContext}.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,13 +54,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * @author Juergen Hoeller
  * @since 23.04.2003
  */
-public class BeanFactoryTransactionTests {
+class BeanFactoryTransactionTests {
 
 	private DefaultListableBeanFactory factory;
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(
 				new ClassPathResource("transactionalBeanFactory.xml", getClass()));
@@ -68,7 +68,7 @@ public class BeanFactoryTransactionTests {
 
 
 	@Test
-	public void testGetsAreNotTransactionalWithProxyFactory1() {
+	void testGetsAreNotTransactionalWithProxyFactory1() {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory1");
 		assertThat(Proxy.isProxyClass(testBean.getClass())).as("testBean is a dynamic proxy").isTrue();
 		boolean condition = testBean instanceof TransactionalProxy;
@@ -77,7 +77,7 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() {
+	void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() {
 		this.factory.preInstantiateSingletons();
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
 		assertThat(Proxy.isProxyClass(testBean.getClass())).as("testBean is a dynamic proxy").isTrue();
@@ -87,7 +87,7 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() {
+	void testGetsAreNotTransactionalWithProxyFactory2Cglib() {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
 		assertThat(AopUtils.isCglibProxy(testBean)).as("testBean is CGLIB advised").isTrue();
 		boolean condition = testBean instanceof TransactionalProxy;
@@ -96,7 +96,7 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testProxyFactory2Lazy() {
+	void testProxyFactory2Lazy() {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Lazy");
 		assertThat(factory.containsSingleton("target")).isFalse();
 		assertThat(testBean.getAge()).isEqualTo(666);
@@ -104,7 +104,7 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testCglibTransactionProxyImplementsNoInterfaces() {
+	void testCglibTransactionProxyImplementsNoInterfaces() {
 		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("cglibNoInterfaces");
 		assertThat(AopUtils.isCglibProxy(ini)).as("testBean is CGLIB advised").isTrue();
 		boolean condition = ini instanceof TransactionalProxy;
@@ -121,7 +121,7 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testGetsAreNotTransactionalWithProxyFactory3() {
+	void testGetsAreNotTransactionalWithProxyFactory3() {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory3");
 		boolean condition = testBean instanceof DerivedTestBean;
 		assertThat(condition).as("testBean is a full proxy").isTrue();
@@ -184,7 +184,7 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testGetBeansOfTypeWithAbstract() {
+	void testGetBeansOfTypeWithAbstract() {
 		Map<String, ITestBean> beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
 		assertThat(beansOfType).isNotNull();
 	}
@@ -193,7 +193,7 @@ public class BeanFactoryTransactionTests {
 	 * Check that we fail gracefully if the user doesn't set any transaction attributes.
 	 */
 	@Test
-	public void testNoTransactionAttributeSource() {
+	void testNoTransactionAttributeSource() {
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() -> {
 				DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 				new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
@@ -205,7 +205,7 @@ public class BeanFactoryTransactionTests {
 	 * Test that we can set the target to a dynamic TargetSource.
 	 */
 	@Test
-	public void testDynamicTargetSource() {
+	void testDynamicTargetSource() {
 		// Install facade
 		CallCountingTransactionManager txMan = new CallCountingTransactionManager();
 		PlatformTransactionManagerFacade.delegate = txMan;

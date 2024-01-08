@@ -35,7 +35,7 @@ import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.when;
 
 /**
- * Unit tests for {@link BindingContext}.
+ * Tests for {@link BindingContext}.
  */
 public class BindingContextTests {
 

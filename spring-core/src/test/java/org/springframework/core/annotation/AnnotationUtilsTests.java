@@ -63,7 +63,7 @@ import static org.springframework.core.annotation.AnnotationUtils.isAnnotationMe
 import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 /**
- * Unit tests for {@link AnnotationUtils}.
+ * Tests for {@link AnnotationUtils}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

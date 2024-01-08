@@ -27,12 +27,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.IllegalTransactionStateException;
-import org.springframework.transaction.MockCallbackPreferringTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TestTransactionExecutionListener;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.testfixture.MockCallbackPreferringTransactionManager;
+import org.springframework.transaction.testfixture.TestTransactionExecutionListener;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

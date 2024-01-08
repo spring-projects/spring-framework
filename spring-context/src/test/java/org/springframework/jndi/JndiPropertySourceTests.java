@@ -25,7 +25,7 @@ import org.springframework.context.testfixture.jndi.SimpleNamingContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link JndiPropertySource}.
+ * Tests for {@link JndiPropertySource}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

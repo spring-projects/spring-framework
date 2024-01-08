@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for the {@link CharArrayPropertyEditor} class.
+ * Tests for {@link CharArrayPropertyEditor}.
  *
  * @author Rick Evans
  */

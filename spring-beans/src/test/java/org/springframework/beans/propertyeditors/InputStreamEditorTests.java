@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link InputStreamEditor} class.
+ * Tests for {@link InputStreamEditor}.
  *
  * @author Rick Evans
  * @author Chris Beams

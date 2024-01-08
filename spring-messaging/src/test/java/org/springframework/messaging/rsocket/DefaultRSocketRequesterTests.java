@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 
 /**
- * Unit tests for {@link DefaultRSocketRequester}.
+ * Tests for {@link DefaultRSocketRequester}.
  *
  * @author Rossen Stoyanchev
  */

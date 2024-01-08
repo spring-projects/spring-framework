@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 /**
- * Unit tests for the {@link TestExecutionListeners @TestExecutionListeners}
+ * Tests for the {@link TestExecutionListeners @TestExecutionListeners}
  * annotation, which verify:
  * <ul>
  * <li>Proper registering of {@linkplain TestExecutionListener listeners} in

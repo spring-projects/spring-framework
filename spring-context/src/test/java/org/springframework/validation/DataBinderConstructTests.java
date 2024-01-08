@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link DataBinder} with constructor binding.
+ * Tests for {@link DataBinder} with constructor binding.
  *
  * @author Rossen Stoyanchev
  */

@@ -28,7 +28,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for custom SQLException translation.
+ * Tests for custom SQLException translation.
  *
  * @author Thomas Risberg
  * @author Sam Brannen

@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 /**
- * Unit tests for {@link ServiceLocatorFactoryBean}.
+ * Tests for {@link ServiceLocatorFactoryBean}.
  *
  * @author Colin Sampaleanu
  * @author Rick Evans

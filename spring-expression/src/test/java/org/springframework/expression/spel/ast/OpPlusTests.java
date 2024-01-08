@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for SpEL's plus operator.
+ * Tests for SpEL's plus operator.
  *
  * @author Ivo Smid
  * @author Chris Beams

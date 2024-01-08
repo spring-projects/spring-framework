@@ -32,7 +32,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for aop namespace.
+ * Tests for {@link AopNamespaceHandler}.
  *
  * @author Rob Harrop
  * @author Chris Beams

@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for receiving operations in {@link AbstractMessagingTemplate}.
+ * Tests for receiving operations in {@link AbstractMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
  * @see MessageRequestReplyTemplateTests

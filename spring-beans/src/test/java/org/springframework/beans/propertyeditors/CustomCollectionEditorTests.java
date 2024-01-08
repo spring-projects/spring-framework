@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link CustomCollectionEditor} class.
+ * Tests for {@link CustomCollectionEditor}.
  *
  * @author Rick Evans
  * @author Chris Beams

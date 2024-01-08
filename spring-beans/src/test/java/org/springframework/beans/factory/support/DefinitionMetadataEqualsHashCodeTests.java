@@ -25,7 +25,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@code equals()} and {@code hashCode()} in bean definitions.
+ * Tests for {@code equals()} and {@code hashCode()} in bean definitions.
  *
  * @author Rob Harrop
  * @author Sam Brannen

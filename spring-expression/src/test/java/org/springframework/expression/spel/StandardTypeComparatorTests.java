@@ -27,7 +27,7 @@ import org.springframework.expression.spel.support.StandardTypeComparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for type comparison
+ * Tests for type comparison
  *
  * @author Andy Clement
  * @author Giovanni Dall'Oglio Risso

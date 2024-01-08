@@ -50,8 +50,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor}
- * processing the JSR-330 {@link jakarta.inject.Inject} annotation.
+ * Tests for {@link AutowiredAnnotationBeanPostProcessor} processing
+ * the JSR-330 {@link jakarta.inject.Inject} annotation.
  *
  * @author Juergen Hoeller
  * @since 3.0

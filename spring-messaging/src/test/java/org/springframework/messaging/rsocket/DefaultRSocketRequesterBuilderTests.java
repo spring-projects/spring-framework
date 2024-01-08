@@ -60,7 +60,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link DefaultRSocketRequesterBuilder}.
+ * Tests for {@link DefaultRSocketRequesterBuilder}.
  *
  * @author Brian Clozel
  */

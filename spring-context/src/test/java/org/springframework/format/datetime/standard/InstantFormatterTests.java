@@ -38,7 +38,7 @@ import static java.time.ZoneId.systemDefault;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link InstantFormatter}.
+ * Tests for {@link InstantFormatter}.
  *
  * @author Andrei Nevedomskii
  * @author Sam Brannen

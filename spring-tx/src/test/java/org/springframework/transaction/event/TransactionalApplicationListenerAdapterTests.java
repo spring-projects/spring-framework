@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 /**
  * @author Juergen Hoeller
  */
-public class TransactionalApplicationListenerAdapterTests {
+class TransactionalApplicationListenerAdapterTests {
 
 	@Test
-	public void invokesCompletionCallbackOnSuccess() {
+	void invokesCompletionCallbackOnSuccess() {
 		CapturingSynchronizationCallback callback = new CapturingSynchronizationCallback();
 		PayloadApplicationEvent<Object> event = new PayloadApplicationEvent<>(this, new Object());
 
@@ -48,7 +48,7 @@ public class TransactionalApplicationListenerAdapterTests {
 	}
 
 	@Test
-	public void invokesExceptionHandlerOnException() {
+	void invokesExceptionHandlerOnException() {
 		CapturingSynchronizationCallback callback = new CapturingSynchronizationCallback();
 		PayloadApplicationEvent<String> event = new PayloadApplicationEvent<>(this, "event");
 		RuntimeException ex = new RuntimeException("event");
@@ -70,7 +70,7 @@ public class TransactionalApplicationListenerAdapterTests {
 	}
 
 	@Test
-	public void useSpecifiedIdentifier() {
+	void useSpecifiedIdentifier() {
 		CapturingSynchronizationCallback callback = new CapturingSynchronizationCallback();
 		PayloadApplicationEvent<String> event = new PayloadApplicationEvent<>(this, "event");
 

@@ -36,7 +36,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PayloadUtils}.
+ * Tests for {@link PayloadUtils}.
  *
  * @author Rossen Stoyanchev
  * @since 5.2

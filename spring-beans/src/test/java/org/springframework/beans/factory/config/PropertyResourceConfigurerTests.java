@@ -49,7 +49,7 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ge
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
- * Unit tests for various {@link PropertyResourceConfigurer} implementations including:
+ * Tests for various {@link PropertyResourceConfigurer} implementations including:
  * {@link PropertyPlaceholderConfigurer}, {@link PropertyOverrideConfigurer} and
  * {@link PreferencesPlaceholderConfigurer}.
  *

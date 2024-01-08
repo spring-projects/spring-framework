@@ -23,7 +23,7 @@ import org.xml.sax.InputSource;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link DelegatingEntityResolver} class.
+ * Tests for {@link DelegatingEntityResolver}.
  *
  * @author Rick Evans
  * @author Chris Beams

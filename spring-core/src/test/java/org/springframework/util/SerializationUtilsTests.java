@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link SerializationUtils}.
+ * Tests for {@link SerializationUtils}.
  *
  * @author Dave Syer
  * @author Sam Brannen

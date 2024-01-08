@@ -27,7 +27,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link DestinationVariableArgumentResolver}.
+ * Tests for {@link DestinationVariableArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 class DestinationVariableArgumentResolverTests extends RSocketServiceArgumentResolverTestSupport {

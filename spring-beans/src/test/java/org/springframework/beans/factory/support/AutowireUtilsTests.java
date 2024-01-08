@@ -27,7 +27,7 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link AutowireUtils}.
+ * Tests for {@link AutowireUtils}.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
- * Unit tests for {@link CronTrigger}.
+ * Tests for {@link CronTrigger}.
  *
  * @author Dave Syer
  * @author Mark Fisher

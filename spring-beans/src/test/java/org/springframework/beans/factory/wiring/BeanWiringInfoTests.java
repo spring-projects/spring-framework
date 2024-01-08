@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the BeanWiringInfo class.
+ * Tests for {@link BeanWiringInfo}.
  *
  * @author Rick Evans
  * @author Sam Brannen

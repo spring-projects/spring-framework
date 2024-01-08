@@ -31,7 +31,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link org.springframework.messaging.simp.SimpSessionScope}.
+ * Tests for {@link SimpSessionScope}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

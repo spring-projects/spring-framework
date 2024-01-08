@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link ResourceBundleEditor} class.
+ * Tests for {@link ResourceBundleEditor}.
  *
  * @author Rick Evans
  * @author Chris Beams

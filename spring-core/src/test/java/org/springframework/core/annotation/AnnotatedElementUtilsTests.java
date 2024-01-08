@@ -69,7 +69,7 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.isAnnota
 import static org.springframework.core.annotation.AnnotationUtilsTests.asArray;
 
 /**
- * Unit tests for {@link AnnotatedElementUtils}.
+ * Tests for {@link AnnotatedElementUtils}.
  *
  * @author Sam Brannen
  * @author Rossen Stoyanchev

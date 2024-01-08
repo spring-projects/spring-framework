@@ -27,7 +27,7 @@ import org.springframework.core.io.Resource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link EncodedResource}.
+ * Tests for {@link EncodedResource}.
  *
  * @author Sam Brannen
  * @since 3.2.14

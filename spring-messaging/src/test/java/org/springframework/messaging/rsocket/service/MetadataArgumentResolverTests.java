@@ -28,7 +28,8 @@ import org.springframework.util.MimeTypeUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link MetadataArgumentResolver}.
+ * Tests for {@link MetadataArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 class MetadataArgumentResolverTests extends RSocketServiceArgumentResolverTestSupport {

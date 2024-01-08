@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,22 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Torsten Juergeleit
  * @author Juergen Hoeller
  */
-public class TxNamespaceHandlerEventTests {
+class TxNamespaceHandlerEventTests {
 
-	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
+	private final CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);
 		reader.loadBeanDefinitions(new ClassPathResource("txNamespaceHandlerTests.xml", getClass()));
 	}
 
 	@Test
-	public void componentEventReceived() {
+	void componentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("txAdvice");
 		assertThat(component).isInstanceOf(BeanComponentDefinition.class);
 	}

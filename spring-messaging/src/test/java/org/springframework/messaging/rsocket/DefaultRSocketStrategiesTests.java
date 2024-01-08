@@ -39,7 +39,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link RSocketStrategies}.
+ * Tests for {@link RSocketStrategies}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.2
  */

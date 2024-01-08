@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link AbstractDestinationResolvingMessagingTemplate}.
+ * Tests for {@link AbstractDestinationResolvingMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
  */

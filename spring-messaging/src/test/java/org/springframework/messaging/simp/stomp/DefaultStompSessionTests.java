@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link DefaultStompSession}.
+ * Tests for {@link DefaultStompSession}.
  *
  * @author Rossen Stoyanchev
  */

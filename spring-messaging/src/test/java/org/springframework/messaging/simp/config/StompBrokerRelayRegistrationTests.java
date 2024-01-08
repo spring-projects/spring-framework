@@ -27,8 +27,7 @@ import org.springframework.util.StringUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.simp.config.StompBrokerRelayRegistration}.
+ * Tests for {@link StompBrokerRelayRegistration}.
  *
  * @author Rossen Stoyanchev
  */

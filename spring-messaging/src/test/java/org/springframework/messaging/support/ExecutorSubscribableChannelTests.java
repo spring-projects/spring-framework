@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link ExecutorSubscribableChannel}.
+ * Tests for {@link ExecutorSubscribableChannel}.
  *
  * @author Phillip Webb
  */

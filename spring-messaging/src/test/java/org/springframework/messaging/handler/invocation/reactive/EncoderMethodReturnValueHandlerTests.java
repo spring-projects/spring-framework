@@ -34,7 +34,7 @@ import org.springframework.messaging.support.GenericMessage;
 import static org.springframework.messaging.handler.invocation.ResolvableMethod.on;
 
 /**
- * Unit tests for {@link AbstractEncoderMethodReturnValueHandler}.
+ * Tests for {@link AbstractEncoderMethodReturnValueHandler}.
  *
  * @author Rossen Stoyanchev
  */

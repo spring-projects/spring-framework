@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for {@link BufferingStompDecoder}.
+ * Tests for {@link BufferingStompDecoder}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3

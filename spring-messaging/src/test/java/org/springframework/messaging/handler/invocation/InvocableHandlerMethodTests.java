@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link InvocableHandlerMethod}.
+ * Tests for {@link InvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
  */

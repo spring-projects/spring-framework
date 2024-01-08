@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for SimpMessageHeaderAccessor.
+ * Tests for {@link SimpMessageHeaderAccessor}.
  *
  * @author Rossen Stoyanchev
  */

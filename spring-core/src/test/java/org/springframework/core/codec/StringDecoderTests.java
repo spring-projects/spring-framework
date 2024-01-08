@@ -40,7 +40,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link StringDecoder}.
+ * Tests for {@link StringDecoder}.
  *
  * @author Sebastien Deleuze
  * @author Brian Clozel

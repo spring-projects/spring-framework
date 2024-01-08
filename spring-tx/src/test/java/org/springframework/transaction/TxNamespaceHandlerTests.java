@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rob Harrop
  * @author Adrian Colyer
  */
-public class TxNamespaceHandlerTests {
+class TxNamespaceHandlerTests {
 
 	private ApplicationContext context;
 
@@ -47,7 +47,7 @@ public class TxNamespaceHandlerTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge");
 		this.setAgeMethod = ITestBean.class.getMethod("setAge", int.class);
@@ -55,13 +55,13 @@ public class TxNamespaceHandlerTests {
 
 
 	@Test
-	public void isProxy() {
+	void isProxy() {
 		ITestBean bean = getTestBean();
 		assertThat(AopUtils.isAopProxy(bean)).as("testBean is not a proxy").isTrue();
 	}
 
 	@Test
-	public void invokeTransactional() {
+	void invokeTransactional() {
 		ITestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
@@ -85,7 +85,7 @@ public class TxNamespaceHandlerTests {
 	}
 
 	@Test
-	public void rollbackRules() {
+	void rollbackRules() {
 		TransactionInterceptor txInterceptor = (TransactionInterceptor) context.getBean("txRollbackAdvice");
 		TransactionAttributeSource txAttrSource = txInterceptor.getTransactionAttributeSource();
 		TransactionAttribute txAttr = txAttrSource.getTransactionAttribute(getAgeMethod,ITestBean.class);

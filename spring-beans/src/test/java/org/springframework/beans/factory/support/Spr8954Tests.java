@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * Unit tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
+ * Tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
  * forces the predicted type of a FactoryBean, effectively preventing retrieval of the
  * bean from calls to #getBeansOfType(FactoryBean.class). The implementation of
  * {@link AbstractBeanFactory#isFactoryBean(String, RootBeanDefinition)} now ensures that

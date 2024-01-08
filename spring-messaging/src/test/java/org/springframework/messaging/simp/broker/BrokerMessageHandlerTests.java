@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler}.
+ * Tests for {@link org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
  */

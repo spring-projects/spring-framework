@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PropertySource} implementations.
+ * Tests for {@link PropertySource} implementations.
  *
  * @author Chris Beams
  * @since 3.1

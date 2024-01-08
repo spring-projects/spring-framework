@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link MethodInvokingFactoryBean} and {@link MethodInvokingBean}.
+ * Tests for {@link MethodInvokingFactoryBean} and {@link MethodInvokingBean}.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller

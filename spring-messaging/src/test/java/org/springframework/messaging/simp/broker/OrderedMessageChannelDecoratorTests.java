@@ -39,7 +39,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link OrderedMessageChannelDecorator}.
+ * Tests for {@link OrderedMessageChannelDecorator}.
+ *
  * @author Rossen Stoyanchev
  * @see org.springframework.web.socket.messaging.OrderedMessageSendingIntegrationTests
  */

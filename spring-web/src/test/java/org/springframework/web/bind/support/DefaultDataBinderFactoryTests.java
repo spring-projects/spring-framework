@@ -35,7 +35,7 @@ import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.when;
 
 /**
- * Unit tests for {@link DefaultDataBinderFactory}.
+ * Tests for {@link DefaultDataBinderFactory}.
  */
 public class DefaultDataBinderFactoryTests {
 

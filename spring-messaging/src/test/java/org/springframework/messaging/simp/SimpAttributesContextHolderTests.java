@@ -30,14 +30,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-
-
-
-
-
 /**
- * Unit tests for
- * {@link org.springframework.messaging.simp.SimpAttributesContextHolder}.
+ * Tests for {@link SimpAttributesContextHolder}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1

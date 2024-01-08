@@ -35,7 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link ParameterResolutionDelegate}.
+ * Tests for {@link ParameterResolutionDelegate}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller

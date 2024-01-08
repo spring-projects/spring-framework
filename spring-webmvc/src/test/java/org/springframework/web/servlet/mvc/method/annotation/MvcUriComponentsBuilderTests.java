@@ -77,7 +77,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.relativeTo;
 
 /**
- * Unit tests for {@link MvcUriComponentsBuilder}.
+ * Tests for {@link MvcUriComponentsBuilder}.
  *
  * @author Oliver Gierke
  * @author Dietrich Schulten

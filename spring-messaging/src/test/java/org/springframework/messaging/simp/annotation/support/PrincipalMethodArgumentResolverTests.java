@@ -31,7 +31,7 @@ import org.springframework.messaging.support.GenericMessage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PrincipalMethodArgumentResolver}.
+ * Tests for {@link PrincipalMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Johnny Lim

@@ -27,8 +27,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.converter.SimpleMessageConverter}.
+ * Tests for {@link SimpleMessageConverter}.
  *
  * @author Rossen Stoyanchev
  */

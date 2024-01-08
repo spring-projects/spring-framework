@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.within;
 
 /**
- * Unit tests for the various PropertyEditors in Spring.
+ * Tests for the various PropertyEditors in Spring.
  *
  * @author Juergen Hoeller
  * @author Rick Evans

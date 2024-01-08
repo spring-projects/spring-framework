@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link ValidationUtils}.
+ * Tests for {@link ValidationUtils}.
  *
  * @author Juergen Hoeller
  * @author Rick Evans

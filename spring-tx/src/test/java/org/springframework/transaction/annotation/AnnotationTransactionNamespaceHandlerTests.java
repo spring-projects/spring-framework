@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,18 +44,18 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class AnnotationTransactionNamespaceHandlerTests {
+class AnnotationTransactionNamespaceHandlerTests {
 
 	private final ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(
 			"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		this.context.close();
 	}
 
 	@Test
-	public void isProxy() throws Exception {
+	void isProxy() {
 		TransactionalTestBean bean = getTestBean();
 		assertThat(AopUtils.isAopProxy(bean)).as("testBean is not a proxy").isTrue();
 		Map<String, Object> services = this.context.getBeansWithAnnotation(Service.class);
@@ -63,7 +63,7 @@ public class AnnotationTransactionNamespaceHandlerTests {
 	}
 
 	@Test
-	public void invokeTransactional() throws Exception {
+	void invokeTransactional() {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
@@ -87,7 +87,7 @@ public class AnnotationTransactionNamespaceHandlerTests {
 	}
 
 	@Test
-	public void nonPublicMethodsNotAdvised() {
+	void nonPublicMethodsNotAdvised() {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
@@ -97,14 +97,14 @@ public class AnnotationTransactionNamespaceHandlerTests {
 	}
 
 	@Test
-	public void mBeanExportAlsoWorks() throws Exception {
+	void mBeanExportAlsoWorks() throws Exception {
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 		Object actual = server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]);
 		assertThat(actual).isEqualTo("done");
 	}
 
 	@Test
-	public void transactionalEventListenerRegisteredProperly() {
+	void transactionalEventListenerRegisteredProperly() {
 		assertThat(this.context.containsBean(TransactionManagementConfigUtils
 				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)).isTrue();
 		assertThat(this.context.getBeansOfType(TransactionalEventListenerFactory.class)).hasSize(1);

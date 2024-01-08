@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
- * Unit tests for {@link PropertyPathFactoryBean}.
+ * Tests for {@link PropertyPathFactoryBean}.
  *
  * @author Juergen Hoeller
  * @author Chris Beams

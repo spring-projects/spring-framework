@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * Unit tests for {@link PayloadMethodArgumentResolver}.
+ * Tests for {@link PayloadMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  */

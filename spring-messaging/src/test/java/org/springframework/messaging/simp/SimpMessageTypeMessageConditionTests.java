@@ -24,7 +24,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for SimpMessageTypeMessageCondition.
+ * Tests for {@link SimpMessageTypeMessageCondition}.
  *
  * @author Rossen Stoyanchev
  */

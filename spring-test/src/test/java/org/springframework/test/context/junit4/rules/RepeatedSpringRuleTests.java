@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public class RepeatedSpringRuleTests extends RepeatedSpringRunnerTests {
 	}
 
 	/**
-	 * Unit tests for claims raised in <a href="https://jira.spring.io/browse/SPR-6011" target="_blank">SPR-6011</a>.
+	 * Tests for claims raised in <a href="https://jira.spring.io/browse/SPR-6011" target="_blank">SPR-6011</a>.
 	 */
 	@Ignore("TestCase classes are run manually by the enclosing test class")
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {

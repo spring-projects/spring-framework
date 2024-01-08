@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link SimpleBrokerMessageHandler}.
+ * Tests for {@link SimpleBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

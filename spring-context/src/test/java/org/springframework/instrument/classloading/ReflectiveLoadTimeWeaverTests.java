@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for the {@link ReflectiveLoadTimeWeaver} class.
+ * Tests for {@link ReflectiveLoadTimeWeaver}.
  *
  * @author Rick Evans
  * @author Chris Beams

@@ -31,7 +31,7 @@ import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_
 import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
 
 /**
- * Unit tests for {@link StandardEnvironment}.
+ * Tests for {@link StandardEnvironment}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

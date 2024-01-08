@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PropertyAccessorUtils}.
+ * Tests for {@link PropertyAccessorUtils}.
  *
  * @author Juergen Hoeller
  * @author Chris Beams

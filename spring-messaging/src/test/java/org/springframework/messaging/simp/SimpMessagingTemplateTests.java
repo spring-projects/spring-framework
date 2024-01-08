@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link org.springframework.messaging.simp.SimpMessagingTemplate}.
+ * Tests for {@link SimpMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
  */

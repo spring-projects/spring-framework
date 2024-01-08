@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link CustomScopeConfigurer}.
+ * Tests for {@link CustomScopeConfigurer}.
  *
  * @author Rick Evans
  * @author Juergen Hoeller

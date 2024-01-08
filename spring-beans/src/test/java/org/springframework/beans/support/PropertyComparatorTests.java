@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PropertyComparator}.
+ * Tests for {@link PropertyComparator}.
  *
  * @author Keith Donald
  * @author Chris Beams

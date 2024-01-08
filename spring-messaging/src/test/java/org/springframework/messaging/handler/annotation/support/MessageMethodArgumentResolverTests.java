@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link MessageMethodArgumentResolver}.
+ * Tests for {@link MessageMethodArgumentResolver}.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for
+ * Tests for
  * {@link org.springframework.messaging.converter.AbstractMessageConverter}.
  *
  * @author Rossen Stoyanchev

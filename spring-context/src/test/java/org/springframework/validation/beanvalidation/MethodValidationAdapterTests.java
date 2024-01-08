@@ -41,7 +41,7 @@ import org.springframework.validation.method.ParameterValidationResult;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link MethodValidationAdapter}.
+ * Tests for {@link MethodValidationAdapter}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen

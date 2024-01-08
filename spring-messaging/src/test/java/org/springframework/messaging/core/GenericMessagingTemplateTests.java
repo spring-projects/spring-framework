@@ -46,7 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link GenericMessagingTemplate}.
+ * Tests for {@link GenericMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
  * @author Gary Russell

@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link AbstractMessageSendingTemplate}.
+ * Tests for {@link AbstractMessageSendingTemplate}.
  *
  * @author Rossen Stoyanchev
  */

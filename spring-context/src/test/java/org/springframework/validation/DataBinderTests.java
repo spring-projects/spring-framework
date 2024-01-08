@@ -72,7 +72,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
- * Unit tests for {@link DataBinder}.
+ * Tests for {@link DataBinder}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

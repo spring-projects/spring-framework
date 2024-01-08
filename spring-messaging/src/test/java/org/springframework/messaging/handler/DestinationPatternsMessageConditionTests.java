@@ -25,7 +25,7 @@ import org.springframework.util.AntPathMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link DestinationPatternsMessageCondition}.
+ * Tests for {@link DestinationPatternsMessageCondition}.
  *
  * @author Rossen Stoyanchev
  */
