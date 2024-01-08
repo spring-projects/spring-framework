@@ -38,7 +38,7 @@ The next example uses server-side configuration to register a custom authenticat
 interceptor. Note that an interceptor needs only to authenticate and set
 the user header on the CONNECT `Message`. Spring notes and saves the authenticated
 user and associate it with subsequent STOMP messages on the same session. The following
-example shows how register a custom authentication interceptor:
+example shows how to register a custom authentication interceptor:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
