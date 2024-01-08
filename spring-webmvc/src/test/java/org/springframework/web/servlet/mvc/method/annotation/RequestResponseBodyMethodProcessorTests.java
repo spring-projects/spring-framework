@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -765,6 +765,24 @@ class RequestResponseBodyMethodProcessorTests {
 		assertThat(value).isEqualTo("foo");
 	}
 
+	@Test  // gh-25788
+	void resolveArgumentTypeVariableWithAbstractMethod() throws Exception {
+		this.servletRequest.setContent("\"foo\"".getBytes(StandardCharsets.UTF_8));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		Method method = SubControllerImplementingAbstractMethod.class.getMethod("handle", Object.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new SubControllerImplementingAbstractMethod(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = List.of(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		assertThat(processor.supportsParameter(methodParameter)).isTrue();
+		String value = (String) processor.readWithMessageConverters(
+				this.request, methodParameter, methodParameter.getGenericParameterType());
+		assertThat(value).isEqualTo("foo");
+	}
+
 	private void assertContentDisposition(RequestResponseBodyMethodProcessor processor,
 			boolean expectContentDisposition, String requestURI, String comment) throws Exception {
 
@@ -1142,6 +1160,21 @@ class RequestResponseBodyMethodProcessorTests {
 
 
 	static class SubControllerImplementingInterface extends MyControllerImplementingInterface {
+
+		@Override
+		public String handle(String arg) {
+			return arg;
+		}
+	}
+
+
+	abstract static class MyControllerWithAbstractMethod<A> {
+
+		public abstract A handle(@RequestBody A arg);
+	}
+
+
+	static class SubControllerImplementingAbstractMethod extends MyControllerWithAbstractMethod<String> {
 
 		@Override
 		public String handle(String arg) {

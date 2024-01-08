@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -54,7 +53,7 @@ public class AnnotatedMethod {
 	private final MethodParameter[] parameters;
 
 	@Nullable
-	private volatile List<Annotation[][]> interfaceParameterAnnotations;
+	private volatile List<Annotation[][]> inheritedParameterAnnotations;
 
 
 	/**
@@ -77,7 +76,7 @@ public class AnnotatedMethod {
 		this.method = annotatedMethod.method;
 		this.bridgedMethod = annotatedMethod.bridgedMethod;
 		this.parameters = annotatedMethod.parameters;
-		this.interfaceParameterAnnotations = annotatedMethod.interfaceParameterAnnotations;
+		this.inheritedParameterAnnotations = annotatedMethod.inheritedParameterAnnotations;
 	}
 
 
@@ -164,18 +163,32 @@ public class AnnotatedMethod {
 		return AnnotatedElementUtils.hasAnnotation(this.method, annotationType);
 	}
 
-	private List<Annotation[][]> getInterfaceParameterAnnotations() {
-		List<Annotation[][]> parameterAnnotations = this.interfaceParameterAnnotations;
+	private List<Annotation[][]> getInheritedParameterAnnotations() {
+		List<Annotation[][]> parameterAnnotations = this.inheritedParameterAnnotations;
 		if (parameterAnnotations == null) {
 			parameterAnnotations = new ArrayList<>();
-			for (Class<?> ifc : ClassUtils.getAllInterfacesForClassAsSet(this.method.getDeclaringClass())) {
-				for (Method candidate : ifc.getMethods()) {
-					if (isOverrideFor(candidate)) {
-						parameterAnnotations.add(candidate.getParameterAnnotations());
+			Class<?> clazz = this.method.getDeclaringClass();
+			while (clazz != null) {
+				for (Class<?> ifc : clazz.getInterfaces()) {
+					for (Method candidate : ifc.getMethods()) {
+						if (isOverrideFor(candidate)) {
+							parameterAnnotations.add(candidate.getParameterAnnotations());
+						}
+					}
+				}
+				clazz = clazz.getSuperclass();
+				if (clazz == Object.class) {
+					clazz = null;
+				}
+				if (clazz != null) {
+					for (Method candidate : clazz.getMethods()) {
+						if (isOverrideFor(candidate)) {
+							parameterAnnotations.add(candidate.getParameterAnnotations());
+						}
 					}
 				}
 			}
-			this.interfaceParameterAnnotations = parameterAnnotations;
+			this.inheritedParameterAnnotations = parameterAnnotations;
 		}
 		return parameterAnnotations;
 	}
@@ -281,7 +294,7 @@ public class AnnotatedMethod {
 				anns = super.getParameterAnnotations();
 				int index = getParameterIndex();
 				if (index >= 0) {
-					for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {
+					for (Annotation[][] ifcAnns : getInheritedParameterAnnotations()) {
 						if (index < ifcAnns.length) {
 							Annotation[] paramAnns = ifcAnns[index];
 							if (paramAnns.length > 0) {
