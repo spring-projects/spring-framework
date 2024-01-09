@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,13 +334,15 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		Object targetObject = null;
 		Object thisObject = null;
 		try {
-			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
-			targetObject = mi.getThis();
-			if (!(mi instanceof ProxyMethodInvocation _pmi)) {
-				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+			MethodInvocation curr = ExposeInvocationInterceptor.currentInvocation();
+			if (curr.getMethod() == method) {
+				targetObject = curr.getThis();
+				if (!(curr instanceof ProxyMethodInvocation currPmi)) {
+					throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + curr);
+				}
+				pmi = currPmi;
+				thisObject = pmi.getProxy();
 			}
-			pmi = _pmi;
-			thisObject = pmi.getProxy();
 		}
 		catch (IllegalStateException ex) {
 			// No current invocation...
