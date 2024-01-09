@@ -28,6 +28,11 @@ JavaBeans `Introspector`. See
 {spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
 for details.
 
+| `spring.context.expression.maxLength`
+| The maximum length for
+xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
+expressions used in XML bean definitions, `@Value`, etc.
+
 | `spring.expression.compiler.mode`
 | The mode to use when compiling expressions for the
 xref:core/expressions/evaluation.adoc#expressions-compiler-configuration[Spring Expression Language].
