@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.function.Function;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -27,7 +28,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -102,7 +104,8 @@ public class RestClientResponseException extends RestClientException {
 	@Nullable
 	private static HttpHeaders copyHeaders(@Nullable HttpHeaders headers) {
 		if (headers != null) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(headers.size());
+			MultiValueMap<String, String> result =
+					CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH));
 			headers.forEach((name, values) -> values.forEach(value -> result.add(name, value)));
 			return HttpHeaders.readOnlyHttpHeaders(result);
 		}
