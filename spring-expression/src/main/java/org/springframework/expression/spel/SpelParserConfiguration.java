@@ -35,7 +35,7 @@ public class SpelParserConfiguration {
 	 * Default maximum length permitted for a SpEL expression.
 	 * @since 5.2.24
 	 */
-	private static final int DEFAULT_MAX_EXPRESSION_LENGTH = 10_000;
+	public static final int DEFAULT_MAX_EXPRESSION_LENGTH = 10_000;
 
 	/** System property to configure the default compiler mode for SpEL expression parsers: {@value}. */
 	public static final String SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME = "spring.expression.compiler.mode";

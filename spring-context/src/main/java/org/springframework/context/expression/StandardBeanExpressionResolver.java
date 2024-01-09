@@ -23,11 +23,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
+import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -54,6 +56,19 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.expression.spel.support.StandardEvaluationContext
  */
 public class StandardBeanExpressionResolver implements BeanExpressionResolver {
+
+	/**
+	 * Property name for the maximum length of a SpEL expression: {@value}.
+	 * @since 6.1.3
+	 * @see SpelParserConfiguration#SpelParserConfiguration(SpelCompilerMode, ClassLoader, boolean, boolean, int, int)
+	 */
+	public static final String EXPRESSION_MAX_LENGTH_PROPERTY_NAME = "spring.context.expression.maxLength";
+	private static final int expressionMaxLength;
+
+	static {
+		String expressionMaxLengthString = SpringProperties.getProperty(EXPRESSION_MAX_LENGTH_PROPERTY_NAME);
+		expressionMaxLength = expressionMaxLengthString != null ? Integer.parseInt(expressionMaxLengthString) : SpelParserConfiguration.DEFAULT_MAX_EXPRESSION_LENGTH;
+	}
 
 	/** Default expression prefix: "#{". */
 	public static final String DEFAULT_EXPRESSION_PREFIX = "#{";
@@ -92,7 +107,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 	 * Create a new {@code StandardBeanExpressionResolver} with default settings.
 	 */
 	public StandardBeanExpressionResolver() {
-		this.expressionParser = new SpelExpressionParser();
+		this.expressionParser = new SpelExpressionParser(new SpelParserConfiguration(null, null, false, false, Integer.MAX_VALUE, expressionMaxLength));
 	}
 
 	/**
@@ -101,7 +116,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 	 * @param beanClassLoader the factory's bean class loader
 	 */
 	public StandardBeanExpressionResolver(@Nullable ClassLoader beanClassLoader) {
-		this.expressionParser = new SpelExpressionParser(new SpelParserConfiguration(null, beanClassLoader));
+		this.expressionParser = new SpelExpressionParser(new SpelParserConfiguration(null, beanClassLoader, false, false, Integer.MAX_VALUE, expressionMaxLength));
 	}
 
 
