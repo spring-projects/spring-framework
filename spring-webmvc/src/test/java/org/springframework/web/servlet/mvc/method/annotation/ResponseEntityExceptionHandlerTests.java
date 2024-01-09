@@ -323,6 +323,15 @@ public class ResponseEntityExceptionHandlerTests {
 		testException(new MaxUploadSizeExceededException(1000));
 	}
 
+	@Test // gh-14287, gh-31541
+	void serverErrorWithoutBody() {
+		HttpStatusCode code = HttpStatusCode.valueOf(500);
+		Exception ex = new IllegalStateException("internal error");
+		this.exceptionHandler.handleExceptionInternal(ex, null, new HttpHeaders(), code, this.request);
+
+		assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
+	}
+
 	@Test
 	public void controllerAdvice() throws Exception {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
@@ -399,11 +408,6 @@ public class ResponseEntityExceptionHandlerTests {
 		try {
 			ResponseEntity<Object> entity = this.exceptionHandler.handleException(ex, this.request);
 			assertThat(entity).isNotNull();
-
-			// SPR-9653
-			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(entity.getStatusCode())) {
-				assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
-			}
 
 			// Verify DefaultHandlerExceptionResolver would set the same status
 			this.exceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
