@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-public class ExtractingResponseErrorHandlerTests {
+class ExtractingResponseErrorHandlerTests {
 
 	private ExtractingResponseErrorHandler errorHandler;
 
@@ -46,7 +46,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		HttpMessageConverter<Object> converter = new MappingJackson2HttpMessageConverter();
 		this.errorHandler = new ExtractingResponseErrorHandler(
 				Collections.singletonList(converter));
@@ -59,7 +59,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 
 	@Test
-	public void hasError() throws Exception {
+	void hasError() throws Exception {
 		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
@@ -71,7 +71,7 @@ public class ExtractingResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void hasErrorOverride() throws Exception {
+	void hasErrorOverride() throws Exception {
 		this.errorHandler.setSeriesMapping(Collections
 				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
@@ -86,7 +86,7 @@ public class ExtractingResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorStatusMatch() throws Exception {
+	void handleErrorStatusMatch() throws Exception {
 		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -102,7 +102,7 @@ public class ExtractingResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorSeriesMatch() throws Exception {
+	void handleErrorSeriesMatch() throws Exception {
 		given(this.response.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -118,7 +118,7 @@ public class ExtractingResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleNoMatch() throws Exception {
+	void handleNoMatch() throws Exception {
 		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -137,7 +137,7 @@ public class ExtractingResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleNoMatchOverride() throws Exception {
+	void handleNoMatchOverride() throws Exception {
 		this.errorHandler.setSeriesMapping(Collections
 				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 

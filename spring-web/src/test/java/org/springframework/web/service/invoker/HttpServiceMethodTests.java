@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ class HttpServiceMethodTests {
 		assertThat(voidEntity.getBody()).isNull();
 
 		List<String> list = service.getList();
-		assertThat(list).element(0).isEqualTo("exchangeForBody");
+		assertThat(list).containsExactly("exchangeForBody");
 	}
 
 	@Test
@@ -144,7 +144,7 @@ class HttpServiceMethodTests {
 		assertThat(bodySingle.blockingGet()).isEqualTo("exchangeForBodyMono");
 
 		Flowable<String> bodyFlow = service.getFlowableBody();
-		assertThat(bodyFlow.toList().blockingGet()).asList().containsExactly("exchange", "For", "Body", "Flux");
+		assertThat(bodyFlow.toList().blockingGet()).containsExactly("exchange", "For", "Body", "Flux");
 
 		Single<ResponseEntity<Void>> voidEntity = service.getVoidEntity();
 		assertThat(voidEntity.blockingGet().getBody()).isNull();

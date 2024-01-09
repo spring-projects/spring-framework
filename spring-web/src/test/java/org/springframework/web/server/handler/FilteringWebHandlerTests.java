@@ -43,13 +43,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class FilteringWebHandlerTests {
+class FilteringWebHandlerTests {
 
-	private static Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
+	private static final Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
 
 
 	@Test
-	public void multipleFilters() throws Exception {
+	void multipleFilters() {
 
 		TestFilter filter1 = new TestFilter();
 		TestFilter filter2 = new TestFilter();
@@ -67,7 +67,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void zeroFilters() throws Exception {
+	void zeroFilters() {
 
 		StubWebHandler targetHandler = new StubWebHandler();
 
@@ -79,7 +79,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void shortcircuitFilter() throws Exception {
+	void shortcircuitFilter() {
 
 		TestFilter filter1 = new TestFilter();
 		ShortcircuitingFilter filter2 = new ShortcircuitingFilter();
@@ -97,7 +97,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void asyncFilter() throws Exception {
+	void asyncFilter() {
 
 		AsyncFilter filter = new AsyncFilter();
 		StubWebHandler targetHandler = new StubWebHandler();
@@ -111,7 +111,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void handleErrorFromFilter() throws Exception {
+	void handleErrorFromFilter() {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();

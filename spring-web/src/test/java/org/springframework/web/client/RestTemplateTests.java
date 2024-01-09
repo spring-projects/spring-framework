@@ -105,7 +105,6 @@ class RestTemplateTests {
 
 	@Test // gh-29008
 	void defaultMessageConvertersWithKotlinSerialization() {
-		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
 		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(
@@ -127,7 +126,7 @@ class RestTemplateTests {
 	@Test
 	void setMessageConvertersPreconditions() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> template.setMessageConverters((List<HttpMessageConverter<?>>) null))
+				.isThrownBy(() -> template.setMessageConverters(null))
 				.withMessage("At least one HttpMessageConverter is required");
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> template.setMessageConverters(Arrays.asList(null, this.converter)))
@@ -524,9 +523,7 @@ class RestTemplateTests {
 					.map(Entry::getValue)
 					.toList();
 
-			assertThat(accepts).hasSize(1);
-			assertThat(accepts).element(0).asList().hasSize(1);
-			assertThat(accepts.get(0)).element(0).isEqualTo("application/json");
+			assertThat(accepts).singleElement().isEqualTo(List.of("application/json"));
 		}
 	}
 
@@ -655,7 +652,7 @@ class RestTemplateTests {
 	@SuppressWarnings("rawtypes")
 	void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock();
-		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
+		template.setMessageConverters(Collections.singletonList(converter));
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -766,7 +763,7 @@ class RestTemplateTests {
 		given(request.getHeaders()).willReturn(requestHeaders);
 	}
 
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());

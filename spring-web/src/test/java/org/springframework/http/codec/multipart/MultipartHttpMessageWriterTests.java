@@ -56,7 +56,7 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
+class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final MultipartHttpMessageWriter writer =
 			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());
@@ -65,7 +65,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA)).isTrue();
@@ -88,7 +88,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void writeMultipartFormData() throws Exception {
+	void writeMultipartFormData() throws Exception {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
 			@Override

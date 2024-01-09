@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.accept;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,13 +53,13 @@ class PathExtensionContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes).isEqualTo(Arrays.asList(new MediaType("text", "html")));
+		assertThat(mediaTypes).containsExactly(new MediaType("text", "html"));
 
 		Map<String, MediaType> mapping = Collections.singletonMap("HTML", MediaType.APPLICATION_XHTML_XML);
 		this.strategy = new PathExtensionContentNegotiationStrategy(mapping);
 		mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes).isEqualTo(Arrays.asList(new MediaType("application", "xhtml+xml")));
+		assertThat(mediaTypes).containsExactly(new MediaType("application", "xhtml+xml"));
 	}
 
 	@Test
@@ -69,7 +68,7 @@ class PathExtensionContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes).isEqualTo(Arrays.asList(new MediaType("application", "vnd.ms-excel")));
+		assertThat(mediaTypes).containsExactly(new MediaType("application", "vnd.ms-excel"));
 	}
 
 	@Test // SPR-8678

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Vedran Pavic
  */
-public class CharacterEncodingFilterTests {
+class CharacterEncodingFilterTests {
 
 	private static final String FILTER_NAME = "boot";
 
@@ -46,7 +46,7 @@ public class CharacterEncodingFilterTests {
 
 
 	@Test
-	public void forceEncodingAlwaysSetsEncoding() throws Exception {
+	void forceEncodingAlwaysSetsEncoding() throws Exception {
 		HttpServletRequest request = mock();
 		request.setCharacterEncoding(ENCODING);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
@@ -67,7 +67,7 @@ public class CharacterEncodingFilterTests {
 	}
 
 	@Test
-	public void encodingIfEmptyAndNotForced() throws Exception {
+	void encodingIfEmptyAndNotForced() throws Exception {
 		HttpServletRequest request = mock();
 		given(request.getCharacterEncoding()).willReturn(null);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
@@ -89,7 +89,7 @@ public class CharacterEncodingFilterTests {
 	}
 
 	@Test
-	public void doesNotIfEncodingIsNotEmptyAndNotForced() throws Exception {
+	void doesNotIfEncodingIsNotEmptyAndNotForced() throws Exception {
 		HttpServletRequest request = mock();
 		given(request.getCharacterEncoding()).willReturn(ENCODING);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
@@ -110,7 +110,7 @@ public class CharacterEncodingFilterTests {
 	}
 
 	@Test
-	public void withBeanInitialization() throws Exception {
+	void withBeanInitialization() throws Exception {
 		HttpServletRequest request = mock();
 		given(request.getCharacterEncoding()).willReturn(null);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
@@ -134,7 +134,7 @@ public class CharacterEncodingFilterTests {
 	}
 
 	@Test
-	public void withIncompleteInitialization() throws Exception {
+	void withIncompleteInitialization() throws Exception {
 		HttpServletRequest request = mock();
 		given(request.getCharacterEncoding()).willReturn(null);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
@@ -156,7 +156,7 @@ public class CharacterEncodingFilterTests {
 
 	// SPR-14240
 	@Test
-	public void setForceEncodingOnRequestOnly() throws Exception {
+	void setForceEncodingOnRequestOnly() throws Exception {
 		HttpServletRequest request = mock();
 		request.setCharacterEncoding(ENCODING);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);

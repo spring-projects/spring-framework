@@ -42,7 +42,7 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Denys Ivano
  */
-public class DefaultResponseErrorHandlerTests {
+class DefaultResponseErrorHandlerTests {
 
 	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
 
@@ -50,19 +50,19 @@ public class DefaultResponseErrorHandlerTests {
 
 
 	@Test
-	public void hasErrorTrue() throws Exception {
+	void hasErrorTrue() throws Exception {
 		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		assertThat(handler.hasError(response)).isTrue();
 	}
 
 	@Test
-	public void hasErrorFalse() throws Exception {
+	void hasErrorFalse() throws Exception {
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		assertThat(handler.hasError(response)).isFalse();
 	}
 
 	@Test
-	public void handleError() throws Exception {
+	void handleError() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
@@ -78,7 +78,7 @@ public class DefaultResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorIOException() throws Exception {
+	void handleErrorIOException() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
@@ -91,7 +91,7 @@ public class DefaultResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorNullResponse() throws Exception {
+	void handleErrorNullResponse() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
@@ -141,7 +141,7 @@ public class DefaultResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorForCustomClientError() throws Exception {
+	void handleErrorForCustomClientError() throws Exception {
 		HttpStatusCode statusCode = HttpStatusCode.valueOf(499);
 		String statusText = "Custom status code";
 
@@ -181,7 +181,7 @@ public class DefaultResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorForCustomServerError() throws Exception {
+	void handleErrorForCustomServerError() throws Exception {
 		HttpStatusCode statusCode = HttpStatusCode.valueOf(599);
 		String statusText = "Custom status code";
 

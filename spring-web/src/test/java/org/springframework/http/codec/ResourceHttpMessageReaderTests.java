@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ResourceHttpMessageReaderTests extends AbstractLeakCheckingTests {
+class ResourceHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private final ResourceHttpMessageReader reader = new ResourceHttpMessageReader();
 

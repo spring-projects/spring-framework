@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class HeaderContentNegotiationStrategyTests {
+class HeaderContentNegotiationStrategyTests {
 
 	private final HeaderContentNegotiationStrategy strategy = new HeaderContentNegotiationStrategy();
 
@@ -45,7 +45,7 @@ public class HeaderContentNegotiationStrategyTests {
 
 
 	@Test
-	public void resolveMediaTypes() throws Exception {
+	void resolveMediaTypes() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
@@ -70,7 +70,7 @@ public class HeaderContentNegotiationStrategyTests {
 	}
 
 	@Test
-	public void resolveMediaTypesParseError() throws Exception {
+	void resolveMediaTypesParseError() {
 		this.servletRequest.addHeader("Accept", "textplain; q=0.5");
 		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
 				this.strategy.resolveMediaTypes(this.webRequest));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class Jaxb2CollectionHttpMessageConverterTests {
+class Jaxb2CollectionHttpMessageConverterTests {
 
 	private Jaxb2CollectionHttpMessageConverter<?> converter;
 
@@ -61,7 +61,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		converter = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>();
 		rootElementListType = new ParameterizedTypeReference<List<RootElement>>() {}.getType();
 		rootElementSetType = new ParameterizedTypeReference<Set<RootElement>>() {}.getType();
@@ -71,7 +71,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(converter.canRead(rootElementListType, null, null)).isTrue();
 		assertThat(converter.canRead(rootElementSetType, null, null)).isTrue();
 		assertThat(converter.canRead(typeSetType, null, null)).isTrue();
@@ -179,7 +179,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 	}
 
 	@Test
-	public void testXmlBomb() throws Exception {
+	void testXmlBomb() {
 		// https://en.wikipedia.org/wiki/Billion_laughs
 		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
 		String content = """
@@ -218,7 +218,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		@XmlElement
 		public TestType type = new TestType();
 
-		@XmlElement(required=false)
+		@XmlElement(required = false)
 		public String external;
 
 		@Override

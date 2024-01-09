@@ -84,7 +84,7 @@ import static org.springframework.core.ResolvableType.forClass;
  *
  * @author Rossen Stoyanchev
  */
-public class ServerCodecConfigurerTests {
+class ServerCodecConfigurerTests {
 
 	private final ServerCodecConfigurer configurer = new DefaultServerCodecConfigurer();
 
@@ -92,7 +92,7 @@ public class ServerCodecConfigurerTests {
 
 
 	@Test
-	public void defaultReaders() {
+	void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertThat(readers).hasSize(19);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
@@ -117,7 +117,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultWriters() {
+	void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 		assertThat(writers).hasSize(19);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
@@ -142,7 +142,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void jackson2EncoderOverride() {
+	void jackson2EncoderOverride() {
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
@@ -159,7 +159,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void maxInMemorySize() {
+	void maxInMemorySize() {
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
 
@@ -190,7 +190,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void maxInMemorySizeWithCustomCodecs() {
+	void maxInMemorySizeWithCustomCodecs() {
 
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
@@ -212,7 +212,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void enableRequestLoggingDetails() {
+	void enableRequestLoggingDetails() {
 		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
@@ -226,7 +226,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void enableRequestLoggingDetailsWithCustomCodecs() {
+	void enableRequestLoggingDetailsWithCustomCodecs() {
 
 		this.configurer.registerDefaults(false);
 		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
@@ -241,7 +241,7 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
-	public void cloneConfigurer() {
+	void cloneConfigurer() {
 		ServerCodecConfigurer clone = this.configurer.clone();
 
 		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new DefaultPartHttpMessageReader());

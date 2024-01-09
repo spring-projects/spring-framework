@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,35 +40,35 @@ import static org.assertj.core.api.Assertions.within;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class MediaTypeTests {
+class MediaTypeTests {
 
 	@Test
-	public void testToString() throws Exception {
+	void testToString() {
 		MediaType mediaType = new MediaType("text", "plain", 0.7);
 		String result = mediaType.toString();
 		assertThat(result).as("Invalid toString() returned").isEqualTo("text/plain;q=0.7");
 	}
 
 	@Test
-	public void slashInType() {
+	void slashInType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MediaType("text/plain"));
 	}
 
 	@Test
-	public void slashInSubtype() {
+	void slashInSubtype() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MediaType("text", "/"));
 	}
 
 	@Test
-	public void getDefaultQualityValue() {
+	void getDefaultQualityValue() {
 		MediaType mediaType = new MediaType("text", "plain");
 		assertThat(mediaType.getQualityValue()).as("Invalid quality value").isCloseTo(1D, within(0D));
 	}
 
 	@Test
-	public void parseMediaType() throws Exception {
+	void parseMediaType() {
 		String s = "audio/*; q=0.2";
 		MediaType mediaType = MediaType.parseMediaType(s);
 		assertThat(mediaType.getType()).as("Invalid type").isEqualTo("audio");
@@ -77,73 +77,73 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void parseMediaTypeNoSubtype() {
+	void parseMediaTypeNoSubtype() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio"));
 	}
 
 	@Test
-	public void parseMediaTypeNoSubtypeSlash() {
+	void parseMediaTypeNoSubtypeSlash() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/"));
 	}
 
 	@Test
-	public void parseMediaTypeTypeRange() {
+	void parseMediaTypeTypeRange() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("*/json"));
 	}
 
 	@Test
-	public void parseMediaTypeIllegalType() {
+	void parseMediaTypeIllegalType() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio(/basic"));
 	}
 
 	@Test
-	public void parseMediaTypeIllegalSubtype() {
+	void parseMediaTypeIllegalSubtype() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/basic)"));
 	}
 
 	@Test
-	public void parseMediaTypeEmptyParameterAttribute() {
+	void parseMediaTypeEmptyParameterAttribute() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/*;=value"));
 	}
 
 	@Test
-	public void parseMediaTypeEmptyParameterValue() {
+	void parseMediaTypeEmptyParameterValue() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/*;attr="));
 	}
 
 	@Test
-	public void parseMediaTypeIllegalParameterAttribute() {
+	void parseMediaTypeIllegalParameterAttribute() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/*;attr<=value"));
 	}
 
 	@Test
-	public void parseMediaTypeIllegalParameterValue() {
+	void parseMediaTypeIllegalParameterValue() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/*;attr=v>alue"));
 	}
 
 	@Test
-	public void parseMediaTypeIllegalQualityFactor() {
+	void parseMediaTypeIllegalQualityFactor() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("audio/basic;q=1.1"));
 	}
 
 	@Test
-	public void parseMediaTypeIllegalCharset() {
+	void parseMediaTypeIllegalCharset() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("text/html; charset=foo-bar"));
 	}
 
 	@Test
-	public void parseURLConnectionMediaType() throws Exception {
+	void parseURLConnectionMediaType() {
 		String s = "*; q=.2";
 		MediaType mediaType = MediaType.parseMediaType(s);
 		assertThat(mediaType.getType()).as("Invalid type").isEqualTo("*");
@@ -152,7 +152,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void parseMediaTypes() throws Exception {
+	void parseMediaTypes() {
 		String s = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c";
 		List<MediaType> mediaTypes = MediaType.parseMediaTypes(s);
 		assertThat(mediaTypes).as("No media types returned").isNotNull();
@@ -171,7 +171,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
 		MediaType audioWave = new MediaType("audio", "wave");
@@ -206,7 +206,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void compareToConsistentWithEquals() {
+	void compareToConsistentWithEquals() {
 		MediaType m1 = MediaType.parseMediaType("text/html; q=0.7; charset=iso-8859-1");
 		MediaType m2 = MediaType.parseMediaType("text/html; charset=iso-8859-1; q=0.7");
 
@@ -222,7 +222,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void compareToCaseSensitivity() {
+	void compareToCaseSensitivity() {
 		MediaType m1 = new MediaType("audio", "basic");
 		MediaType m2 = new MediaType("Audio", "Basic");
 		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isEqualTo(0);
@@ -280,7 +280,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void specificityComparator() throws Exception {
+	void specificityComparator() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
 		MediaType audio = new MediaType("audio");
@@ -388,7 +388,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void qualityComparator() throws Exception {
+	void qualityComparator() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
 		MediaType audio = new MediaType("audio");
@@ -495,7 +495,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void testWithConversionService() {
+	void testWithConversionService() {
 		ConversionService conversionService = new DefaultConversionService();
 		assertThat(conversionService.canConvert(String.class, MediaType.class)).isTrue();
 		MediaType mediaType = MediaType.parseMediaType("application/xml");
@@ -503,7 +503,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void isConcrete() {
+	void isConcrete() {
 		assertThat(MediaType.TEXT_PLAIN.isConcrete()).as("text/plain not concrete").isTrue();
 		assertThat(MediaType.ALL.isConcrete()).as("*/* concrete").isFalse();
 		assertThat(new MediaType("text", "*").isConcrete()).as("text/* concrete").isFalse();
@@ -518,7 +518,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void sortBySpecificity() {
+	void sortBySpecificity() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
 		MediaType audio03 = new MediaType("audio", "*", 0.3);

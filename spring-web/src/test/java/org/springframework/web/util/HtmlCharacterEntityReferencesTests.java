@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,12 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Martin Kersten
  * @author Juergen Hoeller
  */
-public class HtmlCharacterEntityReferencesTests {
+class HtmlCharacterEntityReferencesTests {
 
 	private static final String DTD_FILE = "HtmlCharacterEntityReferences.dtd";
 
 	@Test
-	public void testSupportsAllCharacterEntityReferencesDefinedByHtml() {
+	void testSupportsAllCharacterEntityReferencesDefinedByHtml() {
 		HtmlCharacterEntityReferences references = new HtmlCharacterEntityReferences();
 		Map<Integer, String> charactersMap = getReferenceCharacterMap();
 		for (int character = 0; character < 10000; character++) {
@@ -80,7 +81,7 @@ public class HtmlCharacterEntityReferencesTests {
 
 	// SPR-9293
 	@Test
-	public void testConvertToReferenceUTF8() {
+	void testConvertToReferenceUTF8() {
 		HtmlCharacterEntityReferences entityReferences = new HtmlCharacterEntityReferences();
 		String utf8 = "UTF-8";
 		assertThat(entityReferences.convertToReference('<', utf8)).isEqualTo("&lt;");
@@ -118,7 +119,7 @@ public class HtmlCharacterEntityReferencesTests {
 				if (inputStream == null) {
 					throw new IOException("Cannot find definition resource [" + DTD_FILE + "]");
 				}
-				tokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(inputStream, "UTF-8")));
+				tokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
 			}
 			catch (IOException ex) {
 				throw new IllegalStateException("Failed to open definition resource [" + DTD_FILE + "]");

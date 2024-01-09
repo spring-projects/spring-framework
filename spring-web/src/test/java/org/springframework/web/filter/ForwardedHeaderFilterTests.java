@@ -49,7 +49,7 @@ import static org.mockito.Mockito.mock;
  * @author Rob Winch
  * @author Brian Clozel
  */
-public class ForwardedHeaderFilterTests {
+class ForwardedHeaderFilterTests {
 
 	private static final String FORWARDED = "forwarded";
 

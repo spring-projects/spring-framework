@@ -52,7 +52,7 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
  *
  * @author Rossen Stoyanchev
  */
-public class WebExchangeDataBinderTests {
+class WebExchangeDataBinderTests {
 
 	private TestBean testBean;
 
@@ -60,7 +60,7 @@ public class WebExchangeDataBinderTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.testBean = new TestBean();
 		this.binder = new WebExchangeDataBinder(this.testBean, "person");
 		this.binder.registerCustomEditor(ITestBean.class, new TestBeanPropertyEditor());
@@ -68,7 +68,7 @@ public class WebExchangeDataBinderTests {
 
 
 	@Test
-	public void testBindingWithNestedObjectCreation() {
+	void testBindingWithNestedObjectCreation() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("spouse", "someValue");
 		formData.add("spouse.name", "test");
@@ -79,7 +79,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldPrefixCausesFieldReset() {
+	void testFieldPrefixCausesFieldReset() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("_postProcessed", "visible");
 		formData.add("postProcessed", "on");
@@ -92,7 +92,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() {
+	void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() {
 		this.binder.setIgnoreUnknownFields(false);
 
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -116,7 +116,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldDefault() {
+	void testFieldDefault() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!postProcessed", "off");
 		formData.add("postProcessed", "on");
@@ -129,7 +129,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldDefaultPreemptsFieldMarker() {
+	void testFieldDefaultPreemptsFieldMarker() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!postProcessed", "on");
 		formData.add("_postProcessed", "visible");
@@ -147,7 +147,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testFieldDefaultNonBoolean() {
+	void testFieldDefaultNonBoolean() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!name", "anonymous");
 		formData.add("name", "Scott");
@@ -160,7 +160,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testWithCommaSeparatedStringArray() {
+	void testWithCommaSeparatedStringArray() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("stringArray", "bar");
 		formData.add("stringArray", "abc");
@@ -175,7 +175,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testBindingWithNestedObjectCreationAndWrongOrder() {
+	void testBindingWithNestedObjectCreationAndWrongOrder() {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("spouse.name", "test");
 		formData.add("spouse", "someValue");
@@ -186,7 +186,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testBindingWithQueryParams() {
+	void testBindingWithQueryParams() {
 		String url = "/path?spouse=someValue&spouse.name=test";
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(url));
 		this.binder.bind(exchange).block(Duration.ofSeconds(5));
@@ -196,7 +196,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testMultipart() {
+	void testMultipart() {
 
 		MultipartBean bean = new MultipartBean();
 		WebExchangeDataBinder binder = new WebExchangeDataBinder(bean);
@@ -222,7 +222,7 @@ public class WebExchangeDataBinderTests {
 	}
 
 	@Test
-	public void testMultipartDataClass() {
+	void testMultipartDataClass() {
 		WebExchangeDataBinder binder = new WebExchangeDataBinder(null);
 		binder.setTargetType(ResolvableType.forClass(MultipartDataClass.class));
 

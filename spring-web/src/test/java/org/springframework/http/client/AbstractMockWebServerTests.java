@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class AbstractMockWebServerTests {
 			new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		this.server = new MockWebServer();
 		this.server.setDispatcher(new TestDispatcher());
 		this.server.start();
@@ -54,13 +54,13 @@ public abstract class AbstractMockWebServerTests {
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		this.server.shutdown();
 	}
 
 	protected class TestDispatcher extends Dispatcher {
 		@Override
-		public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+		public MockResponse dispatch(RecordedRequest request) {
 			try {
 				if (request.getPath().equals("/echo")) {
 					assertThat(request.getHeader("Host"))

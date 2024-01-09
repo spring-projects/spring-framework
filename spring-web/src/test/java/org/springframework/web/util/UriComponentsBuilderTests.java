@@ -599,7 +599,7 @@ class UriComponentsBuilderTests {
 	void queryParamWithValueWithEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=baz").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=baz");
-		assertThat(uriComponents.getQueryParams().get("bar")).element(0).isEqualTo("baz");
+		assertThat(uriComponents.getQueryParams().get("bar")).containsExactly("baz");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,11 +168,11 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void getNoContentTypeHeader(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void getNoContentTypeHeader(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		byte[] bytes = template.getForObject(baseUrl + "/get/nocontenttype", byte[].class);
-		assertThat(bytes).as("Invalid content").isEqualTo(helloWorld.getBytes("UTF-8"));
+		assertThat(bytes).as("Invalid content").isEqualTo(helloWorld.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@ParameterizedRestTemplateTest
@@ -200,7 +200,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void postForLocation(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void postForLocation(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		URI location = template.postForLocation(baseUrl + "/{method}", helloWorld, "post");
@@ -208,7 +208,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void postForLocationEntity(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void postForLocationEntity(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
@@ -219,7 +219,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void postForObject(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void postForObject(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		String s = template.postForObject(baseUrl + "/{method}", helloWorld, String.class, "post");
@@ -227,7 +227,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void patchForObject(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void patchForObject(ClientHttpRequestFactory clientHttpRequestFactory) {
 		assumeFalse(clientHttpRequestFactory instanceof SimpleClientHttpRequestFactory,
 				"HttpURLConnection does not support the PATCH method");
 
@@ -277,7 +277,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void optionsForAllow(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void optionsForAllow(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		Set<HttpMethod> allowed = template.optionsForAllow(URI.create(baseUrl + "/get"));
@@ -285,7 +285,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void uri(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void uri(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		String result = template.getForObject(baseUrl + "/uri/{query}", String.class, "Z\u00fcrich");
@@ -306,7 +306,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void multipartMixed(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void multipartMixed(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -357,7 +357,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void exchangeGet(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void exchangeGet(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -369,7 +369,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void exchangePost(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void exchangePost(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -382,7 +382,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void jsonPostForObject(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void jsonPostForObject(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
@@ -399,7 +399,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest
-	void jsonPostForObjectWithJacksonView(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void jsonPostForObjectWithJacksonView(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
@@ -423,7 +423,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest  // SPR-13154
-	void jsonPostForObjectWithJacksonTypeInfoList(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void jsonPostForObjectWithJacksonTypeInfoList(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		List<ParentClass> list = new ArrayList<>();
@@ -440,7 +440,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@ParameterizedRestTemplateTest  // SPR-15015
-	void postWithoutBody(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
+	void postWithoutBody(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
 		assertThat(template.postForObject(baseUrl + "/jsonpost", null, String.class)).isNull();

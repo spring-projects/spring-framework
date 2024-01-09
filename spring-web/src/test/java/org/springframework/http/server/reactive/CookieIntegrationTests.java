@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final CookieHandler cookieHandler = new CookieHandler();
 
@@ -56,7 +56,6 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 
 		URI url = URI.create("http://localhost:" + port);
 		String header = "SID=31d4d96e407aad42; lang=en-US";
-		@SuppressWarnings("resource")
 		ResponseEntity<Void> response = new RestTemplate().exchange(
 				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
 
@@ -105,7 +104,7 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 	}
 
 
-	private class CookieHandler implements HttpHandler {
+	private static class CookieHandler implements HttpHandler {
 
 		private Map<String, List<HttpCookie>> requestCookies;
 

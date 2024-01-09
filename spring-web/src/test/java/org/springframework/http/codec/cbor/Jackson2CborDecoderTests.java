@@ -40,7 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  *
  * @author Sebastien Deleuze
  */
-public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborDecoder> {
+class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborDecoder> {
 
 	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");
 
@@ -56,7 +56,7 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborD
 
 	@Override
 	@Test
-	public void canDecode() {
+	protected void canDecode() {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), CBOR_MIME_TYPE)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
 
@@ -66,7 +66,7 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborD
 
 	@Override
 	@Test
-	public void decode() {
+	protected void decode() {
 		Flux<DataBuffer> input = Flux.just(this.pojo1, this.pojo2)
 				.map(this::writeObject)
 				.flatMap(this::dataBuffer);
@@ -90,7 +90,7 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborD
 
 	@Override
 	@Test
-	public void decodeToMono() {
+	protected void decodeToMono() {
 		List<Pojo> expected = Arrays.asList(pojo1, pojo2);
 
 		Flux<DataBuffer> input = Flux.just(expected)

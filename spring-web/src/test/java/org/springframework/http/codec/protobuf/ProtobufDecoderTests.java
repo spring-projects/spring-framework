@@ -45,7 +45,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  *
  * @author Sebastien Deleuze
  */
-public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
+class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	private final SecondMsg secondMsg = SecondMsg.newBuilder().setBlah(123).build();
 
@@ -61,7 +61,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 
 
 	@Test
-	public void extensionRegistryNull() {
+	void extensionRegistryNull() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new ProtobufDecoder(null));
 	}
 
@@ -86,7 +86,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test
-	public void decodeChunksToMono() {
+	void decodeChunksToMono() {
 		byte[] full = this.testMsg1.toByteArray();
 		byte[] chunk1 = Arrays.copyOfRange(full, 0, full.length / 2);
 		byte[] chunk2 = Arrays.copyOfRange(full, chunk1.length, full.length);
@@ -211,7 +211,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test
-	public void exceedMaxSize() {
+	void exceedMaxSize() {
 		this.decoder.setMaxMessageSize(1);
 		Mono<DataBuffer> input = dataBuffer(this.testMsg1);
 

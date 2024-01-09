@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,16 +46,16 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-public class ControllerAdviceBeanTests {
+class ControllerAdviceBeanTests {
 
 	@Test
-	public void constructorPreconditions() {
+	void constructorPreconditions() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new ControllerAdviceBean(null))
 			.withMessage("Bean must not be null");
 
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> new ControllerAdviceBean((String) null, null))
+			.isThrownBy(() -> new ControllerAdviceBean(null, null))
 			.withMessage("Bean name must contain text");
 
 		assertThatIllegalArgumentException()
@@ -72,7 +72,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void equalsHashCodeAndToStringForBeanName() {
+	void equalsHashCodeAndToStringForBeanName() {
 		String beanName = "myBean";
 		BeanFactory beanFactory = mock();
 		given(beanFactory.containsBean(beanName)).willReturn(true);
@@ -83,7 +83,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void equalsHashCodeAndToStringForBeanInstance() {
+	void equalsHashCodeAndToStringForBeanInstance() {
 		String toString = "beanInstance";
 		Object beanInstance = new Object() {
 			@Override
@@ -97,39 +97,39 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void orderedWithLowestPrecedenceByDefaultForBeanName() {
+	void orderedWithLowestPrecedenceByDefaultForBeanName() {
 		assertOrder(SimpleControllerAdvice.class, Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
-	public void orderedWithLowestPrecedenceByDefaultForBeanInstance() {
+	void orderedWithLowestPrecedenceByDefaultForBeanInstance() {
 		assertOrder(new SimpleControllerAdvice(), Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
-	public void orderedViaOrderedInterfaceForBeanName() {
+	void orderedViaOrderedInterfaceForBeanName() {
 		assertOrder(OrderedControllerAdvice.class, 42);
 	}
 
 	@Test
-	public void orderedViaOrderedInterfaceForBeanInstance() {
+	void orderedViaOrderedInterfaceForBeanInstance() {
 		assertOrder(new OrderedControllerAdvice(), 42);
 	}
 
 	@Test
-	public void orderedViaAnnotationForBeanName() {
+	void orderedViaAnnotationForBeanName() {
 		assertOrder(OrderAnnotationControllerAdvice.class, 100);
 		assertOrder(PriorityAnnotationControllerAdvice.class, 200);
 	}
 
 	@Test
-	public void orderedViaAnnotationForBeanInstance() {
+	void orderedViaAnnotationForBeanInstance() {
 		assertOrder(new OrderAnnotationControllerAdvice(), 100);
 		assertOrder(new PriorityAnnotationControllerAdvice(), 200);
 	}
 
 	@Test
-	public void shouldMatchAll() {
+	void shouldMatchAll() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new SimpleControllerAdvice());
 		assertApplicable("should match all", bean, AnnotatedController.class);
 		assertApplicable("should match all", bean, ImplementationController.class);
@@ -138,7 +138,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void basePackageSupport() {
+	void basePackageSupport() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new BasePackageSupport());
 		assertApplicable("base package support", bean, AnnotatedController.class);
 		assertApplicable("base package support", bean, ImplementationController.class);
@@ -147,7 +147,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void basePackageValueSupport() {
+	void basePackageValueSupport() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new BasePackageValueSupport());
 		assertApplicable("base package support", bean, AnnotatedController.class);
 		assertApplicable("base package support", bean, ImplementationController.class);
@@ -156,14 +156,14 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void annotationSupport() {
+	void annotationSupport() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new AnnotationSupport());
 		assertApplicable("annotation support", bean, AnnotatedController.class);
 		assertNotApplicable("this bean is not annotated", bean, InheritanceController.class);
 	}
 
 	@Test
-	public void markerClassSupport() {
+	void markerClassSupport() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new MarkerClassSupport());
 		assertApplicable("base package class support", bean, AnnotatedController.class);
 		assertApplicable("base package class support", bean, ImplementationController.class);
@@ -172,7 +172,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void shouldNotMatch() {
+	void shouldNotMatch() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new ShouldNotMatch());
 		assertNotApplicable("should not match", bean, AnnotatedController.class);
 		assertNotApplicable("should not match", bean, ImplementationController.class);
@@ -181,7 +181,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void assignableTypesSupport() {
+	void assignableTypesSupport() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new AssignableTypesSupport());
 		assertApplicable("controller implements assignable", bean, ImplementationController.class);
 		assertApplicable("controller inherits assignable", bean, InheritanceController.class);
@@ -190,7 +190,7 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	public void multipleMatch() {
+	void multipleMatch() {
 		ControllerAdviceBean bean = new ControllerAdviceBean(new MultipleSelectorsSupport());
 		assertApplicable("controller implements assignable", bean, ImplementationController.class);
 		assertApplicable("controller is annotated", bean, AnnotatedController.class);

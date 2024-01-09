@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ import static org.assertj.core.api.Assertions.within;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  */
-public class MappingJackson2HttpMessageConverterTests {
+class MappingJackson2HttpMessageConverterTests {
 
 	protected static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
@@ -69,7 +69,7 @@ public class MappingJackson2HttpMessageConverterTests {
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canRead(Map.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
@@ -78,7 +78,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void canReadWithObjectMapperRegistrationForType() {
+	void canReadWithObjectMapperRegistrationForType() {
 		MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
 		MediaType halFormsJsonMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
 
@@ -99,7 +99,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(Map.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
@@ -114,7 +114,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void getSupportedMediaTypes() {
+	void getSupportedMediaTypes() {
 		MediaType[] defaultMediaTypes = {MediaType.APPLICATION_JSON, MediaType.parseMediaType("application/*+json")};
 		assertThat(converter.getSupportedMediaTypes()).containsExactly(defaultMediaTypes);
 		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(defaultMediaTypes);
@@ -130,7 +130,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void readTyped() throws IOException {
+	void readTyped() throws IOException {
 		String body = "{" +
 				"\"bytes\":\"AQI=\"," +
 				"\"array\":[\"Foo\",\"Bar\"]," +
@@ -174,7 +174,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
+	void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
@@ -196,7 +196,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeWithBaseType() throws IOException {
+	void writeWithBaseType() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
@@ -218,7 +218,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeUTF16() throws IOException {
+	void writeUTF16() throws IOException {
 		MediaType contentType = new MediaType("application", "json", StandardCharsets.UTF_16BE);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
@@ -228,7 +228,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void readInvalidJson() throws IOException {
+	void readInvalidJson() {
 		String body = "FooBar";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
@@ -237,7 +237,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void readValidJsonWithUnknownProperty() throws IOException {
+	void readValidJsonWithUnknownProperty() throws IOException {
 		String body = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
@@ -349,7 +349,7 @@ public class MappingJackson2HttpMessageConverterTests {
 
 	// gh-24498
 	@Test
-	public void writeOptional() throws IOException {
+	void writeOptional() throws IOException {
 		ParameterizedTypeReference<Optional<MyParent>> optionalParent = new ParameterizedTypeReference<>() {};
 		Optional<MyParent> result = Optional.of(new Impl1());
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
@@ -360,7 +360,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void prettyPrint() throws Exception {
+	void prettyPrint() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		PrettyPrintBean bean = new PrettyPrintBean();
 		bean.setName("Jason");
@@ -374,7 +374,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void prettyPrintWithSse() throws Exception {
+	void prettyPrintWithSse() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		outputMessage.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
 		PrettyPrintBean bean = new PrettyPrintBean();
@@ -388,7 +388,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void prefixJson() throws Exception {
+	void prefixJson() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", null, outputMessage);
@@ -397,7 +397,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void prefixJsonCustom() throws Exception {
+	void prefixJsonCustom() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", null, outputMessage);
@@ -406,7 +406,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void fieldLevelJsonView() throws Exception {
+	void fieldLevelJsonView() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
@@ -424,7 +424,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void classLevelJsonView() throws Exception {
+	void classLevelJsonView() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
@@ -442,7 +442,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void filters() throws Exception {
+	void filters() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		JacksonFilteredBean bean = new JacksonFilteredBean();
 		bean.setProperty1("value");
@@ -533,7 +533,6 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void writeAscii() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Map<String,Object> body = new HashMap<>();
@@ -548,7 +547,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void readWithCustomized() throws IOException {
+	void readWithCustomized() throws IOException {
 		MappingJackson2HttpMessageConverterWithCustomization customizedConverter =
 				new MappingJackson2HttpMessageConverterWithCustomization();
 		String body = "{\"property\":\"Value1\"}";
@@ -565,7 +564,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeWithCustomized() throws IOException {
+	void writeWithCustomized() throws IOException {
 		MappingJackson2HttpMessageConverterWithCustomization customizedConverter =
 				new MappingJackson2HttpMessageConverterWithCustomization();
 		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
@@ -581,7 +580,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void repeatableWrites() throws IOException {
+	void repeatableWrites() throws IOException {
 		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
@@ -807,7 +806,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 	@JsonSubTypes(value = {@JsonSubTypes.Type(value = Impl1.class),
 			@JsonSubTypes.Type(value = Impl2.class)})
-	public static interface MyParent {
+	public interface MyParent {
 	}
 
 	public static class Impl1 implements MyParent {

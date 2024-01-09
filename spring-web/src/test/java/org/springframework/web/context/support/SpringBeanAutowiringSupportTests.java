@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class SpringBeanAutowiringSupportTests {
+class SpringBeanAutowiringSupportTests {
 
 	@Test
-	public void testProcessInjectionBasedOnServletContext() {
+	void testProcessInjectionBasedOnServletContext() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
 

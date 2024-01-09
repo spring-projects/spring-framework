@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -52,9 +51,8 @@ import static org.mockito.Mockito.mock;
  */
 class HttpMessageConverterExtractorTests {
 
-	@SuppressWarnings("unchecked")
 	private final HttpMessageConverter<String> converter = mock();
-	private final HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<>(String.class, asList(converter));
+	private final HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<>(String.class, List.of(converter));
 	private final MediaType contentType = MediaType.TEXT_PLAIN;
 	private final HttpHeaders responseHeaders = new HttpHeaders();
 	private final ClientHttpResponse response = mock();
@@ -63,7 +61,7 @@ class HttpMessageConverterExtractorTests {
 	@Test
 	void constructorPreconditions() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new HttpMessageConverterExtractor<>(String.class, (List<HttpMessageConverter<?>>) null))
+				.isThrownBy(() -> new HttpMessageConverterExtractor<>(String.class, null))
 				.withMessage("'messageConverters' must not be empty");
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new HttpMessageConverterExtractor<>(String.class, Arrays.asList(null, this.converter)))
@@ -149,7 +147,6 @@ class HttpMessageConverterExtractorTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void generics() throws IOException {
 		responseHeaders.setContentType(contentType);
 		String expected = "Foo";
@@ -157,7 +154,7 @@ class HttpMessageConverterExtractorTests {
 		Type type = reference.getType();
 
 		GenericHttpMessageConverter<String> converter = mock();
-		HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<List<String>>(type, asList(converter));
+		HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<List<String>>(type, List.of(converter));
 
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);

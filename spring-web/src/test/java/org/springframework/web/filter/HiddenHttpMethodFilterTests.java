@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,26 +34,26 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Brian Clozel
  */
-public class HiddenHttpMethodFilterTests {
+class HiddenHttpMethodFilterTests {
 
 	private final HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
 
 	@Test
-	public void filterWithParameter() throws IOException, ServletException {
+	void filterWithParameter() throws IOException, ServletException {
 		filterWithParameterForMethod("delete", "DELETE");
 		filterWithParameterForMethod("put", "PUT");
 		filterWithParameterForMethod("patch", "PATCH");
 	}
 
 	@Test
-	public void filterWithParameterDisallowedMethods() throws IOException, ServletException {
+	void filterWithParameterDisallowedMethods() throws IOException, ServletException {
 		filterWithParameterForMethod("trace", "POST");
 		filterWithParameterForMethod("head", "POST");
 		filterWithParameterForMethod("options", "POST");
 	}
 
 	@Test
-	public void filterWithNoParameter() throws IOException, ServletException {
+	void filterWithNoParameter() throws IOException, ServletException {
 		filterWithParameterForMethod(null, "POST");
 	}
 

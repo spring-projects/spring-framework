@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void responseBodyError(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
@@ -63,7 +62,6 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void handlingError(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
@@ -77,7 +75,6 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void emptyPathSegments(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 

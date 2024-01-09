@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rossen Stoyanchev
  */
-public class DeferredResultTests {
+class DeferredResultTests {
 
 	@Test
-	public void setResult() {
+	void setResult() {
 		DeferredResultHandler handler = mock();
 
 		DeferredResult<String> result = new DeferredResult<>();
@@ -43,7 +43,7 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void setResultTwice() {
+	void setResultTwice() {
 		DeferredResultHandler handler = mock();
 
 		DeferredResult<String> result = new DeferredResult<>();
@@ -56,7 +56,7 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void isSetOrExpired() {
+	void isSetOrExpired() {
 		DeferredResultHandler handler = mock();
 
 		DeferredResult<String> result = new DeferredResult<>();
@@ -72,7 +72,7 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void hasResult() {
+	void hasResult() {
 		DeferredResultHandler handler = mock();
 
 		DeferredResult<String> result = new DeferredResult<>();
@@ -87,7 +87,7 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void onCompletion() throws Exception {
+	void onCompletion() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 
 		DeferredResult<String> result = new DeferredResult<>();
@@ -100,7 +100,7 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void onTimeout() throws Exception {
+	void onTimeout() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 
 		DeferredResultHandler handler = mock();
@@ -117,7 +117,7 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void onError() throws Exception {
+	void onError() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 
 		DeferredResultHandler handler = mock();

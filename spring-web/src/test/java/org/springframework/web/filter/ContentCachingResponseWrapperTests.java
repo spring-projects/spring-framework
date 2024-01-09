@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ContentCachingResponseWrapperTests {
+class ContentCachingResponseWrapperTests {
 
 	@Test
 	void copyBodyToResponse() throws Exception {

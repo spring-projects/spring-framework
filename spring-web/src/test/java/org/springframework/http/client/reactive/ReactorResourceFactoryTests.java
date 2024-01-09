@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class ReactorResourceFactoryTests {
+class ReactorResourceFactoryTests {
 
 	private final ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 
@@ -156,7 +156,7 @@ public class ReactorResourceFactoryTests {
 
 		this.resourceFactory.destroy();
 
-		// Not managed (destroy has no impact)..
+		// Not managed (destroy has no impact)
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 	}
 

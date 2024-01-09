@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Greg Turnquist
  * @author Rossen Stoyanchev
  */
-public class HiddenHttpMethodFilterTests {
+class HiddenHttpMethodFilterTests {
 
 	private final HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
 
@@ -44,38 +44,38 @@ public class HiddenHttpMethodFilterTests {
 
 
 	@Test
-	public void filterWithParameter() {
+	void filterWithParameter() {
 		postForm("_method=DELETE").block(Duration.ZERO);
 		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.DELETE);
 	}
 
 	@Test
-	public void filterWithParameterMethodNotAllowed() {
+	void filterWithParameterMethodNotAllowed() {
 		postForm("_method=TRACE").block(Duration.ZERO);
 		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
-	public void filterWithNoParameter() {
+	void filterWithNoParameter() {
 		postForm("").block(Duration.ZERO);
 		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
-	public void filterWithEmptyStringParameter() {
+	void filterWithEmptyStringParameter() {
 		postForm("_method=").block(Duration.ZERO);
 		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
-	public void filterWithDifferentMethodParam() {
+	void filterWithDifferentMethodParam() {
 		this.filter.setMethodParamName("_foo");
 		postForm("_foo=DELETE").block(Duration.ZERO);
 		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.DELETE);
 	}
 
 	@Test
-	public void filterWithHttpPut() {
+	void filterWithHttpPut() {
 
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.put("/")

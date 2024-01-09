@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,24 +45,24 @@ import static org.mockito.Mockito.mock;
  * @author Kazuki Shimizu
  * @author Brian Clozel
  */
-public class ResourceHttpMessageConverterTests {
+class ResourceHttpMessageConverterTests {
 
 	private final ResourceHttpMessageConverter converter = new ResourceHttpMessageConverter();
 
 
 	@Test
-	public void canReadResource() {
+	void canReadResource() {
 		assertThat(converter.canRead(Resource.class, new MediaType("application", "octet-stream"))).isTrue();
 	}
 
 	@Test
-	public void canWriteResource() {
+	void canWriteResource() {
 		assertThat(converter.canWrite(Resource.class, new MediaType("application", "octet-stream"))).isTrue();
 		assertThat(converter.canWrite(Resource.class, MediaType.ALL)).isTrue();
 	}
 
 	@Test
-	public void shouldReadImageResource() throws IOException {
+	void shouldReadImageResource() throws IOException {
 		byte[] body = FileCopyUtils.copyToByteArray(getClass().getResourceAsStream("logo.jpg"));
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
@@ -101,7 +101,7 @@ public class ResourceHttpMessageConverterTests {
 	}
 
 	@Test
-	public void shouldWriteImageResource() throws IOException {
+	void shouldWriteImageResource() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("logo.jpg", getClass());
 		converter.write(body, null, outputMessage);

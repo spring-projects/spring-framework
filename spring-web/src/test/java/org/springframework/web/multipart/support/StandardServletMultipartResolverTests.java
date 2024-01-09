@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class StandardServletMultipartResolverTests {
+class StandardServletMultipartResolverTests {
 
 	@Test
-	public void isMultipartWithDefaultSetting() {
+	void isMultipartWithDefaultSetting() {
 		StandardServletMultipartResolver resolver = new StandardServletMultipartResolver();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/");
@@ -58,7 +58,7 @@ public class StandardServletMultipartResolverTests {
 	}
 
 	@Test
-	public void isMultipartWithStrictSetting() {
+	void isMultipartWithStrictSetting() {
 		StandardServletMultipartResolver resolver = new StandardServletMultipartResolver();
 		resolver.setStrictServletCompliance(true);
 

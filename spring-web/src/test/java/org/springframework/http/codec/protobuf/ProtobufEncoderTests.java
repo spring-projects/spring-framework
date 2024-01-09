@@ -41,7 +41,7 @@ import static org.springframework.core.ResolvableType.forClass;
  *
  * @author Sebastien Deleuze
  */
-public class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> {
+class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> {
 
 	private static final MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
@@ -58,7 +58,7 @@ public class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> 
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		assertThat(this.encoder.canEncode(forClass(Msg.class), null)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
@@ -68,7 +68,7 @@ public class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> 
 
 	@Override
 	@Test
-	public void encode() {
+	protected void encode() {
 		Mono<Message> input = Mono.just(this.msg1);
 
 		testEncodeAll(input, Msg.class, step -> step
@@ -88,7 +88,7 @@ public class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> 
 	}
 
 	@Test
-	public void encodeStream() {
+	void encodeStream() {
 		Flux<Message> input = Flux.just(this.msg1, this.msg2);
 
 		testEncodeAll(input, Msg.class, step -> step

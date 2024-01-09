@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.filter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class FormContentFilterTests {
+class FormContentFilterTests {
 
 	private final FormContentFilter filter = new FormContentFilter();
 
@@ -48,7 +49,7 @@ public class FormContentFilterTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.request = new MockHttpServletRequest("PUT", "/");
 		this.request.setContentType("application/x-www-form-urlencoded; charset=ISO-8859-1");
 		this.response = new MockHttpServletResponse();
@@ -57,10 +58,10 @@ public class FormContentFilterTests {
 
 
 	@Test
-	public void wrapPutPatchAndDeleteOnly() throws Exception {
+	void wrapPutPatchAndDeleteOnly() throws Exception {
 		for (HttpMethod method : HttpMethod.values()) {
 			MockHttpServletRequest request = new MockHttpServletRequest(method.name(), "/");
-			request.setContent("foo=bar".getBytes("ISO-8859-1"));
+			request.setContent("foo=bar".getBytes(StandardCharsets.ISO_8859_1));
 			request.setContentType("application/x-www-form-urlencoded; charset=ISO-8859-1");
 			this.filterChain = new MockFilterChain();
 			this.filter.doFilter(request, this.response, this.filterChain);
@@ -74,11 +75,11 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void wrapFormEncodedOnly() throws Exception {
+	void wrapFormEncodedOnly() throws Exception {
 		String[] contentTypes = new String[] {"text/plain", "multipart/form-data"};
 		for (String contentType : contentTypes) {
 			MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/");
-			request.setContent("".getBytes("ISO-8859-1"));
+			request.setContent("".getBytes(StandardCharsets.ISO_8859_1));
 			request.setContentType(contentType);
 			this.filterChain = new MockFilterChain();
 			this.filter.doFilter(request, this.response, this.filterChain);
@@ -87,8 +88,8 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void invalidMediaType() throws Exception {
-		this.request.setContent("".getBytes("ISO-8859-1"));
+	void invalidMediaType() throws Exception {
+		this.request.setContent("".getBytes(StandardCharsets.ISO_8859_1));
 		this.request.setContentType("foo");
 		this.filterChain = new MockFilterChain();
 		this.filter.doFilter(this.request, this.response, this.filterChain);
@@ -96,17 +97,17 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameter() throws Exception {
-		this.request.setContent("name=value".getBytes("ISO-8859-1"));
+	void getParameter() throws Exception {
+		this.request.setContent("name=value".getBytes(StandardCharsets.ISO_8859_1));
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 
 		assertThat(this.filterChain.getRequest().getParameter("name")).isEqualTo("value");
 	}
 
 	@Test
-	public void getParameterFromQueryString() throws Exception {
+	void getParameterFromQueryString() throws Exception {
 		this.request.addParameter("name", "value1");
-		this.request.setContent("name=value2".getBytes("ISO-8859-1"));
+		this.request.setContent("name=value2".getBytes(StandardCharsets.ISO_8859_1));
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 
 		assertThat(this.filterChain.getRequest()).as("Request not wrapped").isNotSameAs(this.request);
@@ -114,8 +115,8 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterNullValue() throws Exception {
-		this.request.setContent("name=value".getBytes("ISO-8859-1"));
+	void getParameterNullValue() throws Exception {
+		this.request.setContent("name=value".getBytes(StandardCharsets.ISO_8859_1));
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 
 		assertThat(this.filterChain.getRequest()).as("Request not wrapped").isNotSameAs(this.request);
@@ -123,10 +124,10 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterNames() throws Exception {
+	void getParameterNames() throws Exception {
 		this.request.addParameter("name1", "value1");
 		this.request.addParameter("name2", "value2");
-		this.request.setContent("name1=value1&name3=value3&name4=value4".getBytes("ISO-8859-1"));
+		this.request.setContent("name1=value1&name3=value3&name4=value4".getBytes(StandardCharsets.ISO_8859_1));
 
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 		List<String> names = Collections.list(this.filterChain.getRequest().getParameterNames());
@@ -136,11 +137,11 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterValues() throws Exception {
+	void getParameterValues() throws Exception {
 		this.request.setQueryString("name=value1&name=value2");
 		this.request.addParameter("name", "value1");
 		this.request.addParameter("name", "value2");
-		this.request.setContent("name=value3&name=value4".getBytes("ISO-8859-1"));
+		this.request.setContent("name=value3&name=value4".getBytes(StandardCharsets.ISO_8859_1));
 
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 		String[] values = this.filterChain.getRequest().getParameterValues("name");
@@ -150,11 +151,11 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterValuesFromQueryString() throws Exception {
+	void getParameterValuesFromQueryString() throws Exception {
 		this.request.setQueryString("name=value1&name=value2");
 		this.request.addParameter("name", "value1");
 		this.request.addParameter("name", "value2");
-		this.request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
+		this.request.setContent("anotherName=anotherValue".getBytes(StandardCharsets.ISO_8859_1));
 
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 		String[] values = this.filterChain.getRequest().getParameterValues("name");
@@ -164,10 +165,10 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterValuesFromFormContent() throws Exception {
+	void getParameterValuesFromFormContent() throws Exception {
 		this.request.addParameter("name", "value1");
 		this.request.addParameter("name", "value2");
-		this.request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
+		this.request.setContent("anotherName=anotherValue".getBytes(StandardCharsets.ISO_8859_1));
 
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 		String[] values = this.filterChain.getRequest().getParameterValues("anotherName");
@@ -177,10 +178,10 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterValuesInvalidName() throws Exception {
+	void getParameterValuesInvalidName() throws Exception {
 		this.request.addParameter("name", "value1");
 		this.request.addParameter("name", "value2");
-		this.request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
+		this.request.setContent("anotherName=anotherValue".getBytes(StandardCharsets.ISO_8859_1));
 
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 		String[] values = this.filterChain.getRequest().getParameterValues("noSuchParameter");
@@ -190,11 +191,11 @@ public class FormContentFilterTests {
 	}
 
 	@Test
-	public void getParameterMap() throws Exception {
+	void getParameterMap() throws Exception {
 		this.request.setQueryString("name=value1&name=value2");
 		this.request.addParameter("name", "value1");
 		this.request.addParameter("name", "value2");
-		this.request.setContent("name=value3&name4=value4".getBytes("ISO-8859-1"));
+		this.request.setContent("name=value3&name4=value4".getBytes(StandardCharsets.ISO_8859_1));
 
 		this.filter.doFilter(this.request, this.response, this.filterChain);
 		Map<String, String[]> parameters = this.filterChain.getRequest().getParameterMap();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
+class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private final FormHttpMessageReader reader = new FormHttpMessageReader();
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
@@ -74,7 +74,7 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void readFormAsMono() {
+	void readFormAsMono() {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.readMono(null, request, null).block();
@@ -82,14 +82,12 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertThat(values).as("Invalid result").hasSize(2);
-		assertThat(values).element(0).as("Invalid result").isEqualTo("value 2+1");
-		assertThat(values).element(1).as("Invalid result").isEqualTo("value 2+2");
+		assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test
-	public void readFormAsFlux() {
+	void readFormAsFlux() {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.read(null, request, null).single().block();
@@ -97,14 +95,12 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertThat(values).as("Invalid result").hasSize(2);
-		assertThat(values).element(0).as("Invalid result").isEqualTo("value 2+1");
-		assertThat(values).element(1).as("Invalid result").isEqualTo("value 2+2");
+		assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test
-	public void readFormError() {
+	void readFormError() {
 		DataBuffer fooBuffer = stringBuffer("name=value");
 		Flux<DataBuffer> body =
 				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));

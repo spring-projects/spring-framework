@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Sebastien Deleuze
  */
-public class CorsFilterTests {
+class CorsFilterTests {
 
 	private CorsFilter filter;
 

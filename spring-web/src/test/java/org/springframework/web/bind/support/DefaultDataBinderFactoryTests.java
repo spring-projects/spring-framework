@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.when;
 /**
  * Tests for {@link DefaultDataBinderFactory}.
  */
-public class DefaultDataBinderFactoryTests {
+class DefaultDataBinderFactoryTests {
 
 	@Test
 	void jakartaValidatorExcludedWhenMethodValidationApplicable() throws Exception {

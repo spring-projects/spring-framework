@@ -70,7 +70,7 @@ import static org.mockito.BDDMockito.when;
  *
  * @author Rossen Stoyanchev
  */
-public class ErrorResponseExceptionTests {
+class ErrorResponseExceptionTests {
 
 	private final MethodParameter methodParameter =
 			new MethodParameter(ResolvableMethod.on(getClass()).resolveMethod("handle"), 0);

@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class HandlerMethodValidationExceptionTests {
+class HandlerMethodValidationExceptionTests {
 
 	private static final Person person = new Person("Faustino1234");
 

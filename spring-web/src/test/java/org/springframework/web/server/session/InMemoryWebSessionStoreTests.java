@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rob Winch
  */
-public class InMemoryWebSessionStoreTests {
+class InMemoryWebSessionStoreTests {
 
 	private InMemoryWebSessionStore store = new InMemoryWebSessionStore();
 
 
 	@Test
-	public void startsSessionExplicitly() {
+	void startsSessionExplicitly() {
 		WebSession session = this.store.createWebSession().block();
 		assertThat(session).isNotNull();
 		session.start();
@@ -50,7 +50,7 @@ public class InMemoryWebSessionStoreTests {
 	}
 
 	@Test
-	public void startsSessionImplicitly() {
+	void startsSessionImplicitly() {
 		WebSession session = this.store.createWebSession().block();
 		assertThat(session).isNotNull();
 		session.start();
@@ -66,7 +66,7 @@ public class InMemoryWebSessionStoreTests {
 	}
 
 	@Test
-	public void retrieveExpiredSession() {
+	void retrieveExpiredSession() {
 		WebSession session = this.store.createWebSession().block();
 		assertThat(session).isNotNull();
 		session.getAttributes().put("foo", "bar");
@@ -84,7 +84,7 @@ public class InMemoryWebSessionStoreTests {
 	}
 
 	@Test
-	public void lastAccessTimeIsUpdatedOnRetrieve() {
+	void lastAccessTimeIsUpdatedOnRetrieve() {
 		WebSession session1 = this.store.createWebSession().block();
 		assertThat(session1).isNotNull();
 		String id = session1.getId();
@@ -131,7 +131,7 @@ public class InMemoryWebSessionStoreTests {
 	}
 
 	@Test
-	public void expirationCheckPeriod() {
+	void expirationCheckPeriod() {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.store);
 		Map<?,?> sessions = (Map<?, ?>) accessor.getPropertyValue("sessions");
@@ -151,7 +151,7 @@ public class InMemoryWebSessionStoreTests {
 	}
 
 	@Test
-	public void maxSessions() {
+	void maxSessions() {
 
 		IntStream.range(0, 10000).forEach(i -> insertSession());
 		assertThatIllegalStateException().isThrownBy(

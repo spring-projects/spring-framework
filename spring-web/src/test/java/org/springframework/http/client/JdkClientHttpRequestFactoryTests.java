@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Marten Deinum
  */
-public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Nullable
 	private static String originalPropertyValue;
@@ -61,13 +61,13 @@ public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactory
 
 	@Override
 	@Test
-	public void httpMethods() throws Exception {
+	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 
 	@Test
-	public void customizeDisallowedHeaders() throws IOException {
+	void customizeDisallowedHeaders() throws IOException {
 			ClientHttpRequest request = this.factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
 			request.getHeaders().set("Expect", "299");
 

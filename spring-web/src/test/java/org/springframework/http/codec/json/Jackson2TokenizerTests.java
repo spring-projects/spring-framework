@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
+class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 	private JsonFactory jsonFactory;
 
@@ -62,14 +62,14 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 
 	@BeforeEach
-	public void createParser() {
+	void createParser() {
 		this.jsonFactory = new JsonFactory();
 		this.objectMapper = new ObjectMapper(this.jsonFactory);
 	}
 
 
 	@Test
-	public void doNotTokenizeArrayElements() {
+	void doNotTokenizeArrayElements() {
 		testTokenize(
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), false);
@@ -118,7 +118,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void tokenizeArrayElements() {
+	void tokenizeArrayElements() {
 		testTokenize(
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), true);
@@ -251,7 +251,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void testLimit() {
+	void testLimit() {
 		List<String> source = asList(
 				"[",
 				"{", "\"id\":1,\"name\":\"Dan\"", "},",
@@ -272,7 +272,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void testLimitTokenized() {
+	void testLimitTokenized() {
 
 		List<String> source = asList(
 				"[",
@@ -298,7 +298,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void errorInStream() {
+	void errorInStream() {
 		DataBuffer buffer = stringBuffer("{\"id\":1,\"name\":");
 		Flux<DataBuffer> source = Flux.just(buffer).concatWith(Flux.error(new RuntimeException()));
 		Flux<TokenBuffer> result = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, true,
@@ -321,7 +321,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void useBigDecimalForFloats() {
+	void useBigDecimalForFloats() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("1E+2"));
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
 				source, this.jsonFactory, this.objectMapper, false, true, -1);
@@ -344,7 +344,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 	// gh-31747
 	@Test
-	public void compositeNettyBuffer() {
+	void compositeNettyBuffer() {
 		ByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
 		ByteBuf firstByteBuf = allocator.buffer();
 		firstByteBuf.writeBytes("{\"foo\": \"foofoo\"".getBytes(StandardCharsets.UTF_8));

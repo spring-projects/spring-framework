@@ -58,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class WebHttpHandlerBuilderTests {
+class WebHttpHandlerBuilderTests {
 
 	@Test  // SPR-15074
 	void orderedWebFilterBeans() {

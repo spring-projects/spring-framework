@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class HandlerTypePredicateTests {
+class HandlerTypePredicateTests {
 
 	@Test
-	public void forAnnotation() {
+	void forAnnotation() {
 
 		Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class);
 
@@ -43,7 +43,7 @@ public class HandlerTypePredicateTests {
 	}
 
 	@Test
-	public void forAnnotationWithException() {
+	void forAnnotationWithException() {
 
 		Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class)
 				.and(HandlerTypePredicate.forAssignableType(Special.class));

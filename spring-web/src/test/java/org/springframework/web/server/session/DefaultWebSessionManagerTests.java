@@ -69,7 +69,7 @@ class DefaultWebSessionManagerTests {
 
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		given(this.createSession.save()).willReturn(Mono.empty());
 		given(this.createSession.getId()).willReturn("create-session-id");
 		given(this.updateSession.getId()).willReturn("update-session-id");

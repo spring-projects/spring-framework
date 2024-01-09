@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ExceptionHandlingWebHandlerTests {
+class ExceptionHandlingWebHandlerTests {
 
 	private final WebHandler targetHandler = new StubWebHandler(new IllegalStateException("boo"));
 

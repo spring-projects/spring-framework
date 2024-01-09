@@ -33,23 +33,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class DefaultServerWebExchangeTests {
+class DefaultServerWebExchangeTests {
 
 	@Test
-	public void transformUrlDefault() {
+	void transformUrlDefault() {
 		ServerWebExchange exchange = createExchange();
 		assertThat(exchange.transformUrl("/foo")).isEqualTo("/foo");
 	}
 
 	@Test
-	public void transformUrlWithEncoder() {
+	void transformUrlWithEncoder() {
 		ServerWebExchange exchange = createExchange();
 		exchange.addUrlTransformer(s -> s + "?nonce=123");
 		assertThat(exchange.transformUrl("/foo")).isEqualTo("/foo?nonce=123");
 	}
 
 	@Test
-	public void transformUrlWithMultipleEncoders() {
+	void transformUrlWithMultipleEncoders() {
 		ServerWebExchange exchange = createExchange();
 		exchange.addUrlTransformer(s -> s + ";p=abc");
 		exchange.addUrlTransformer(s -> s + "?q=123");

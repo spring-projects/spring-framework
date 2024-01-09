@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,31 +45,31 @@ import static org.assertj.core.api.Assertions.within;
  * @author Roy Clarkson
  * @author Juergen Hoeller
  */
-public class GsonHttpMessageConverterTests {
+class GsonHttpMessageConverterTests {
 
 	private final GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(this.converter.canRead(Map.class, new MediaType("application", "json"))).isTrue();
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.converter.canWrite(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(this.converter.canWrite(Map.class, new MediaType("application", "json"))).isTrue();
 	}
 
 	@Test
-	public void canReadAndWriteMicroformats() {
+	void canReadAndWriteMicroformats() {
 		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
 		assertThat(this.converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
 	}
 
 	@Test
-	public void readTyped() throws IOException {
+	void readTyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
@@ -90,7 +90,7 @@ public class GsonHttpMessageConverterTests {
 	public void readUntyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
 		assertThat(result.get("string")).isEqualTo("Foo");
@@ -113,7 +113,7 @@ public class GsonHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
+	void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
@@ -136,7 +136,7 @@ public class GsonHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeWithBaseType() throws IOException {
+	void writeWithBaseType() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
@@ -159,7 +159,7 @@ public class GsonHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeUTF16() throws IOException {
+	void writeUTF16() throws IOException {
 		MediaType contentType = new MediaType("application", "json", StandardCharsets.UTF_16BE);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
@@ -169,7 +169,7 @@ public class GsonHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readInvalidJson() throws IOException {
+	void readInvalidJson() {
 		String body = "FooBar";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
@@ -259,7 +259,7 @@ public class GsonHttpMessageConverterTests {
 	}
 
 	@Test
-	public void prefixJson() throws IOException {
+	void prefixJson() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", null, outputMessage);
@@ -267,7 +267,7 @@ public class GsonHttpMessageConverterTests {
 	}
 
 	@Test
-	public void prefixJsonCustom() throws IOException {
+	void prefixJsonCustom() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", null, outputMessage);

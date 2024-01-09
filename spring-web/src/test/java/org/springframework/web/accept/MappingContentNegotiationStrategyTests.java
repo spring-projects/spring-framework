@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class MappingContentNegotiationStrategyTests {
+class MappingContentNegotiationStrategyTests {
 
 	@Test
-	public void resolveMediaTypes() throws Exception {
+	void resolveMediaTypes() throws Exception {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("json", mapping);
 
@@ -47,7 +47,7 @@ public class MappingContentNegotiationStrategyTests {
 	}
 
 	@Test
-	public void resolveMediaTypesNoMatch() throws Exception {
+	void resolveMediaTypesNoMatch() throws Exception {
 		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("blah", mapping);
 
@@ -57,7 +57,7 @@ public class MappingContentNegotiationStrategyTests {
 	}
 
 	@Test
-	public void resolveMediaTypesNoKey() throws Exception {
+	void resolveMediaTypesNoKey() throws Exception {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy(null, mapping);
 
@@ -67,7 +67,7 @@ public class MappingContentNegotiationStrategyTests {
 	}
 
 	@Test
-	public void resolveMediaTypesHandleNoMatch() throws Exception {
+	void resolveMediaTypesHandleNoMatch() throws Exception {
 		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("xml", mapping);
 

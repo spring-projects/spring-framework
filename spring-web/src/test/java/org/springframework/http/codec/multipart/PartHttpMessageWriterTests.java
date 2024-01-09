@@ -43,7 +43,7 @@ import static org.springframework.http.codec.multipart.MultipartHttpMessageWrite
  * @author Rossen Stoyanchev
  * @since 5.3
  */
-public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
+class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final PartHttpMessageWriter writer = new PartHttpMessageWriter();
 
@@ -51,7 +51,7 @@ public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_MIXED)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_RELATED)).isTrue();

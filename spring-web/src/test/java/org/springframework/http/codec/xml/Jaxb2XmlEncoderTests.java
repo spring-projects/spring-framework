@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
+class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
 
 	public Jaxb2XmlEncoderTests() {
 		super(new Jaxb2XmlEncoder());
@@ -54,7 +54,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.TEXT_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), new MediaType("application", "foo+xml"))).isTrue();
@@ -69,7 +69,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 
 	@Override
 	@Test
-	public void encode() {
+	protected void encode() {
 		Mono<Pojo> input = Mono.just(new Pojo("foofoo", "barbar"));
 
 		testEncode(input, Pojo.class, step -> step
@@ -80,7 +80,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 	}
 
 	@Test
-	public void encodeJaxbElement() {
+	void encodeJaxbElement() {
 		Mono<JAXBElement<Pojo>> input = Mono.just(new JAXBElement<>(new QName("baz"), Pojo.class,
 				new Pojo("foofoo", "barbar")));
 
@@ -92,13 +92,13 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 	}
 
 	@Test
-	public void encodeError() {
+	void encodeError() {
 		Flux<Pojo> input = Flux.error(RuntimeException::new);
 		testEncode(input, Pojo.class, step -> step.expectError(RuntimeException.class).verify());
 	}
 
 	@Test
-	public void encodeElementsWithCommonType() {
+	void encodeElementsWithCommonType() {
 		Mono<Container> input = Mono.just(new Container());
 
 		testEncode(input, Pojo.class, step -> step

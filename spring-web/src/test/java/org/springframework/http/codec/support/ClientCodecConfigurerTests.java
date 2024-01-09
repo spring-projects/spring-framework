@@ -86,7 +86,7 @@ import static org.springframework.core.ResolvableType.forClass;
  *
  * @author Rossen Stoyanchev
  */
-public class ClientCodecConfigurerTests {
+class ClientCodecConfigurerTests {
 
 	private final ClientCodecConfigurer configurer = new DefaultClientCodecConfigurer();
 
@@ -94,7 +94,7 @@ public class ClientCodecConfigurerTests {
 
 
 	@Test
-	public void defaultReaders() {
+	void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertThat(readers).hasSize(20);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
@@ -121,7 +121,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultWriters() {
+	void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 		assertThat(writers).hasSize(18);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
@@ -145,7 +145,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void jackson2CodecCustomization() {
+	void jackson2CodecCustomization() {
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
@@ -166,7 +166,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void objectMapperCustomization() {
+	void objectMapperCustomization() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		this.configurer.defaultCodecs().configureDefaultCodec(codec -> {
 			if (codec instanceof Jackson2CodecSupport) {
@@ -188,7 +188,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void maxInMemorySize() {
+	void maxInMemorySize() {
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
@@ -220,7 +220,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void enableLoggingRequestDetails() {
+	void enableLoggingRequestDetails() {
 		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
@@ -233,7 +233,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void clonedConfigurer() {
+	void clonedConfigurer() {
 		ClientCodecConfigurer clone = this.configurer.clone();
 
 		Jackson2JsonDecoder jackson2Decoder = new Jackson2JsonDecoder();
@@ -269,7 +269,7 @@ public class ClientCodecConfigurerTests {
 	}
 
 	@Test
-	public void cloneShouldNotBeImpactedByChangesToOriginal() {
+	void cloneShouldNotBeImpactedByChangesToOriginal() {
 
 		ClientCodecConfigurer clone = this.configurer.clone();
 

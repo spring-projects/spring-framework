@@ -103,7 +103,7 @@ class DefaultPathContainerTests {
 	private void testPathSegment(String rawValue, String valueToMatch, MultiValueMap<String, String> params) {
 		PathContainer container = PathContainer.parsePath(rawValue);
 
-		if ("".equals(rawValue)) {
+		if (rawValue.isEmpty()) {
 			assertThat(container.elements()).isEmpty();
 			return;
 		}

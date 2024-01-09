@@ -38,29 +38,29 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class FixedLocaleContextResolverTests {
+class FixedLocaleContextResolverTests {
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		Locale.setDefault(US);
 	}
 
 	@Test
-	public void resolveDefaultLocale() {
+	void resolveDefaultLocale() {
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver();
 		assertThat(resolver.resolveLocaleContext(exchange()).getLocale()).isEqualTo(US);
 		assertThat(resolver.resolveLocaleContext(exchange(CANADA)).getLocale()).isEqualTo(US);
 	}
 
 	@Test
-	public void resolveCustomizedLocale() {
+	void resolveCustomizedLocale() {
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver(FRANCE);
 		assertThat(resolver.resolveLocaleContext(exchange()).getLocale()).isEqualTo(FRANCE);
 		assertThat(resolver.resolveLocaleContext(exchange(CANADA)).getLocale()).isEqualTo(FRANCE);
 	}
 
 	@Test
-	public void resolveCustomizedAndTimeZoneLocale() {
+	void resolveCustomizedAndTimeZoneLocale() {
 		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver(FRANCE, timeZone);
 		TimeZoneAwareLocaleContext context = (TimeZoneAwareLocaleContext) resolver.resolveLocaleContext(exchange());

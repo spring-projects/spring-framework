@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class StandardServletEnvironmentTests {
+class StandardServletEnvironmentTests {
 
 	@Test
-	public void propertySourceOrder() throws Exception {
+	void propertySourceOrder() throws Exception {
 		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
 		ConfigurableEnvironment env = new StandardServletEnvironment();

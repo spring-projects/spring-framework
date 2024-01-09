@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
-	private Jackson2JsonDecoder jsonDecoder = new Jackson2JsonDecoder();
+	private final Jackson2JsonDecoder jsonDecoder = new Jackson2JsonDecoder();
 
 	private ServerSentEventHttpMessageReader reader = new ServerSentEventHttpMessageReader(this.jsonDecoder);
 

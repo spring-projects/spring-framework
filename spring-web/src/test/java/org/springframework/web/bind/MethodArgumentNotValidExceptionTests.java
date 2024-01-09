@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class MethodArgumentNotValidExceptionTests {
+class MethodArgumentNotValidExceptionTests {
 
 	@Test
 	void errorsToStringList() throws Exception {

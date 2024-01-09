@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.springframework.web.testfixture.method.MvcAnnotationPredicates
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class RequestParamMapMethodArgumentResolverTests {
+class RequestParamMapMethodArgumentResolverTests {
 
 	private RequestParamMapMethodArgumentResolver resolver = new RequestParamMapMethodArgumentResolver();
 
@@ -58,7 +58,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, String.class);
 		assertThat(resolver.supportsParameter(param)).isTrue();
 
@@ -73,7 +73,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMapOfString() throws Exception {
+	void resolveMapOfString() throws Exception {
 		String name = "foo";
 		String value = "bar";
 		request.addParameter(name, value);
@@ -88,7 +88,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMultiValueMapOfString() throws Exception {
+	void resolveMultiValueMapOfString() throws Exception {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";

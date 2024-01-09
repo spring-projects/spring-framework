@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test fixture with {@link SessionAttributesHandler}.
  * @author Rossen Stoyanchev
  */
-public class SessionAttributesHandlerTests {
+class SessionAttributesHandlerTests {
 
 	private final SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
@@ -48,7 +48,7 @@ public class SessionAttributesHandlerTests {
 
 
 	@Test
-	public void isSessionAttribute() throws Exception {
+	void isSessionAttribute() {
 		assertThat(sessionAttributesHandler.isHandlerSessionAttribute("attr1", String.class)).isTrue();
 		assertThat(sessionAttributesHandler.isHandlerSessionAttribute("attr2", String.class)).isTrue();
 		assertThat(sessionAttributesHandler.isHandlerSessionAttribute("simple", TestBean.class)).isTrue();
@@ -56,7 +56,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void retrieveAttributes() throws Exception {
+	void retrieveAttributes() {
 		sessionAttributeStore.storeAttribute(request, "attr1", "value1");
 		sessionAttributeStore.storeAttribute(request, "attr2", "value2");
 		sessionAttributeStore.storeAttribute(request, "attr3", new TestBean());
@@ -71,7 +71,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void cleanupAttributes() throws Exception {
+	void cleanupAttributes() {
 		sessionAttributeStore.storeAttribute(request, "attr1", "value1");
 		sessionAttributeStore.storeAttribute(request, "attr2", "value2");
 		sessionAttributeStore.storeAttribute(request, "attr3", new TestBean());
@@ -90,7 +90,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void storeAttributes() throws Exception {
+	void storeAttributes() {
 		ModelMap model = new ModelMap();
 		model.put("attr1", "value1");
 		model.put("attr2", "value2");

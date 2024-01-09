@@ -18,7 +18,6 @@ package org.springframework.http;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
@@ -53,7 +52,7 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class HttpHeadersTests {
+class HttpHeadersTests {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -152,7 +151,7 @@ public class HttpHeadersTests {
 	}
 
 	@Test
-	void location() throws URISyntaxException {
+	void location() {
 		URI location = URI.create("https://www.example.com/hotels");
 		headers.setLocation(location);
 		assertThat(headers.getLocation()).as("Invalid Location header").isEqualTo(location);
@@ -201,7 +200,7 @@ public class HttpHeadersTests {
 	void ifMatch() {
 		String ifMatch = "\"v2.6\"";
 		headers.setIfMatch(ifMatch);
-		assertThat(headers.getIfMatch()).element(0).as("Invalid If-Match header").isEqualTo(ifMatch);
+		assertThat(headers.getIfMatch()).containsExactly(ifMatch);
 		assertThat(headers.getFirst("If-Match")).as("Invalid If-Match header").isEqualTo("\"v2.6\"");
 	}
 
@@ -215,8 +214,7 @@ public class HttpHeadersTests {
 	void ifMatchMultipleHeaders() {
 		headers.add(HttpHeaders.IF_MATCH, "\"v2,0\"");
 		headers.add(HttpHeaders.IF_MATCH, "W/\"v2,1\", \"v2,2\"");
-		assertThat(headers.get(HttpHeaders.IF_MATCH)).element(0).as("Invalid If-Match header").isEqualTo("\"v2,0\"");
-		assertThat(headers.get(HttpHeaders.IF_MATCH)).element(1).as("Invalid If-Match header").isEqualTo("W/\"v2,1\", \"v2,2\"");
+		assertThat(headers.get(HttpHeaders.IF_MATCH)).containsExactly("\"v2,0\"", "W/\"v2,1\", \"v2,2\"");
 		assertThat(headers.getIfMatch()).contains("\"v2,0\"", "W/\"v2,1\"", "\"v2,2\"");
 	}
 
@@ -224,7 +222,7 @@ public class HttpHeadersTests {
 	void ifNoneMatch() {
 		String ifNoneMatch = "\"v2.6\"";
 		headers.setIfNoneMatch(ifNoneMatch);
-		assertThat(headers.getIfNoneMatch()).element(0).as("Invalid If-None-Match header").isEqualTo(ifNoneMatch);
+		assertThat(headers.getIfNoneMatch()).containsExactly(ifNoneMatch);
 		assertThat(headers.getFirst("If-None-Match")).as("Invalid If-None-Match header").isEqualTo("\"v2.6\"");
 	}
 
@@ -232,7 +230,7 @@ public class HttpHeadersTests {
 	void ifNoneMatchWildCard() {
 		String ifNoneMatch = "*";
 		headers.setIfNoneMatch(ifNoneMatch);
-		assertThat(headers.getIfNoneMatch()).element(0).as("Invalid If-None-Match header").isEqualTo(ifNoneMatch);
+		assertThat(headers.getIfNoneMatch()).containsExactly(ifNoneMatch);
 		assertThat(headers.getFirst("If-None-Match")).as("Invalid If-None-Match header").isEqualTo("*");
 	}
 
@@ -492,7 +490,7 @@ public class HttpHeadersTests {
 	}
 
 	@Test // SPR-15603
-	void acceptLanguageWithEmptyValue() throws Exception {
+	void acceptLanguageWithEmptyValue() {
 		this.headers.set(HttpHeaders.ACCEPT_LANGUAGE, "");
 		assertThat(this.headers.getAcceptLanguageAsLocales()).isEqualTo(Collections.emptyList());
 	}
@@ -657,7 +655,7 @@ public class HttpHeadersTests {
 		assertThat(headers.containsKey("Alpha")).as("Alpha should have been removed").isFalse();
 		assertThat(headers.containsKey("Bravo")).as("Bravo should be present").isTrue();
 		assertThat(headers.keySet()).containsOnly("Bravo");
-		assertThat(headers.entrySet()).containsOnly(entry("Bravo", Arrays.asList("banana")));
+		assertThat(headers.entrySet()).containsOnly(entry("Bravo", List.of("banana")));
 	}
 
 	@Test
@@ -671,7 +669,7 @@ public class HttpHeadersTests {
 		headers.keySet().removeIf(key -> key.equals(headerName));
 		assertThat(headers).isEmpty();
 		headers.add(headerName, headerValue);
-		assertThat(headers.get(headerName)).element(0).isEqualTo(headerValue);
+		assertThat(headers.get(headerName)).containsExactly(headerValue);
 	}
 
 	@Test
@@ -685,7 +683,7 @@ public class HttpHeadersTests {
 		headers.entrySet().removeIf(entry -> entry.getKey().equals(headerName));
 		assertThat(headers).isEmpty();
 		headers.add(headerName, headerValue);
-		assertThat(headers.get(headerName)).element(0).isEqualTo(headerValue);
+		assertThat(headers.get(headerName)).containsExactly(headerValue);
 	}
 
 	@Test

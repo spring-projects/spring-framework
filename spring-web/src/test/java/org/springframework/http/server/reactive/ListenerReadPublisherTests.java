@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  */
-public class ListenerReadPublisherTests {
+class ListenerReadPublisherTests {
 
 	private final TestListenerReadPublisher publisher = new TestListenerReadPublisher();
 
@@ -40,13 +40,13 @@ public class ListenerReadPublisherTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.publisher.subscribe(this.subscriber);
 	}
 
 
 	@Test
-	public void twoReads() {
+	void twoReads() {
 
 		this.subscriber.getSubscription().request(2);
 		this.publisher.onDataAvailable();

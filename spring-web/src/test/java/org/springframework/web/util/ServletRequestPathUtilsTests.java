@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ServletRequestPathUtilsTests {
+class ServletRequestPathUtilsTests {
 
 	@Test
 	void parseAndCache() {

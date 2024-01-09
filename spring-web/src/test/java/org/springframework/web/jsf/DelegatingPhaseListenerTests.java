@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  */
-public class DelegatingPhaseListenerTests {
+class DelegatingPhaseListenerTests {
 
 	private final MockFacesContext facesContext = new MockFacesContext();
 
@@ -47,7 +47,7 @@ public class DelegatingPhaseListenerTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void beforeAndAfterPhaseWithSingleTarget() {
+	void beforeAndAfterPhaseWithSingleTarget() {
 		TestListener target = new TestListener();
 		beanFactory.addBean("testListener", target);
 
@@ -63,7 +63,7 @@ public class DelegatingPhaseListenerTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void beforeAndAfterPhaseWithMultipleTargets() {
+	void beforeAndAfterPhaseWithMultipleTargets() {
 		TestListener target1 = new TestListener();
 		TestListener target2 = new TestListener();
 		beanFactory.addBean("testListener1", target1);

@@ -76,7 +76,6 @@ class RequestHeaderMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("resource")
 	void setup() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
@@ -197,7 +196,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	void notFound() throws Exception {
+	void notFound() {
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null));
 	}
@@ -256,16 +255,16 @@ class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	void uuidConversionWithEmptyValue() throws Exception {
+	void uuidConversionWithEmptyValue() {
 		uuidConversionWithEmptyOrBlankValue("");
 	}
 
 	@Test
-	void uuidConversionWithBlankValue() throws Exception {
+	void uuidConversionWithBlankValue() {
 		uuidConversionWithEmptyOrBlankValue("     ");
 	}
 
-	private void uuidConversionWithEmptyOrBlankValue(String uuid) throws Exception {
+	private void uuidConversionWithEmptyOrBlankValue(String uuid) {
 		servletRequest.addHeader("name", uuid);
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();

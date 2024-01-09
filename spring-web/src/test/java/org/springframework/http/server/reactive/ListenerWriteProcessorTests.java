@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class ListenerWriteProcessorTests {
+class ListenerWriteProcessorTests {
 
 	private final TestListenerWriteProcessor processor = new TestListenerWriteProcessor();
 
@@ -45,7 +45,7 @@ public class ListenerWriteProcessorTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.processor.subscribe(this.resultSubscriber);
 		this.processor.onSubscribe(this.subscription);
 		assertThat(subscription.getDemand()).isEqualTo(1);

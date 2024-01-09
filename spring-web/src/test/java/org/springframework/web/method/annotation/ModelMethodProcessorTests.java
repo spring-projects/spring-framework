@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ModelMethodProcessorTests {
+class ModelMethodProcessorTests {
 
 	private ModelMethodProcessor processor;
 
@@ -49,7 +49,7 @@ public class ModelMethodProcessorTests {
 	private NativeWebRequest webRequest;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		processor = new ModelMethodProcessor();
 		mavContainer = new ModelAndViewContainer();
 
@@ -61,22 +61,22 @@ public class ModelMethodProcessorTests {
 	}
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(processor.supportsParameter(paramModel)).isTrue();
 	}
 
 	@Test
-	public void supportsReturnType() {
+	void supportsReturnType() {
 		assertThat(processor.supportsReturnType(returnParamModel)).isTrue();
 	}
 
 	@Test
-	public void resolveArgumentValue() throws Exception {
+	void resolveArgumentValue() throws Exception {
 		assertThat(processor.resolveArgument(paramModel, mavContainer, webRequest, null)).isSameAs(mavContainer.getModel());
 	}
 
 	@Test
-	public void handleModelReturnValue() throws Exception {
+	void handleModelReturnValue() throws Exception {
 		mavContainer.addAttribute("attr1", "value1");
 		Model returnValue = new ExtendedModelMap();
 		returnValue.addAttribute("attr2", "value2");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class WebAsyncManagerTests {
 
 
 	@Test
-	void startAsyncProcessingWithoutAsyncWebRequest() throws Exception {
+	void startAsyncProcessingWithoutAsyncWebRequest() {
 		WebAsyncManager manager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
 
 		assertThatIllegalStateException()
@@ -261,7 +261,7 @@ class WebAsyncManagerTests {
 	}
 
 	@Test
-	void startCallableProcessingNullInput() throws Exception {
+	void startCallableProcessingNullInput() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> this.asyncManager.startCallableProcessing((Callable<?>) null))
 			.withMessage("Callable must not be null");
@@ -352,7 +352,7 @@ class WebAsyncManagerTests {
 	}
 
 	@Test
-	void startDeferredResultProcessingNullInput() throws Exception {
+	void startDeferredResultProcessingNullInput() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> this.asyncManager.startDeferredResultProcessing(null))
 			.withMessage("DeferredResult must not be null");
@@ -372,9 +372,9 @@ class WebAsyncManagerTests {
 	}
 
 
-	private final class StubCallable implements Callable<Object> {
+	private static final class StubCallable implements Callable<Object> {
 
-		private Object value;
+		private final Object value;
 
 		StubCallable(Object value) {
 			this.value = value;

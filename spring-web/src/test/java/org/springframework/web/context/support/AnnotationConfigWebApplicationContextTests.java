@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class AnnotationConfigWebApplicationContextTests {
+class AnnotationConfigWebApplicationContextTests {
 
 	@Test
-	@SuppressWarnings("resource")
 	public void registerSingleClass() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(Config.class);
@@ -44,7 +43,6 @@ public class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void configLocationWithSingleClass() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation(Config.class.getName());
@@ -55,7 +53,6 @@ public class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void configLocationWithBasePackage() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation("org.springframework.web.context.support");
@@ -66,7 +63,6 @@ public class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void withBeanNameGenerator() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {

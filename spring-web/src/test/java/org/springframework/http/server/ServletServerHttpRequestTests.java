@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -37,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class ServletServerHttpRequestTests {
+class ServletServerHttpRequestTests {
 
 	private ServletServerHttpRequest request;
 
@@ -58,7 +57,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	void getUriForSimplePath() throws URISyntaxException {
+	void getUriForSimplePath() {
 		URI uri = URI.create("https://example.com/path");
 		mockRequest.setScheme(uri.getScheme());
 		mockRequest.setServerName(uri.getHost());
@@ -69,7 +68,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	void getUriWithQueryString() throws URISyntaxException {
+	void getUriWithQueryString() {
 		URI uri = URI.create("https://example.com/path?query");
 		mockRequest.setScheme(uri.getScheme());
 		mockRequest.setServerName(uri.getHost());
@@ -80,7 +79,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test  // SPR-16414
-	void getUriWithQueryParam() throws URISyntaxException {
+	void getUriWithQueryParam() {
 		mockRequest.setScheme("https");
 		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
@@ -90,7 +89,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test  // SPR-16414
-	void getUriWithMalformedQueryParam() throws URISyntaxException {
+	void getUriWithMalformedQueryParam() {
 		mockRequest.setScheme("https");
 		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
@@ -100,7 +99,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test  // SPR-13876
-	void getUriWithEncoding() throws URISyntaxException {
+	void getUriWithEncoding() {
 		URI uri = URI.create("https://example.com/%E4%B8%AD%E6%96%87" +
 				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
 		mockRequest.setScheme(uri.getScheme());

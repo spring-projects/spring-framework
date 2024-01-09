@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
  * @author Rob Winch
  * @author Juergen Hoeller
  */
-public class RelativeRedirectFilterTests {
+class RelativeRedirectFilterTests {
 
 	private RelativeRedirectFilter filter = new RelativeRedirectFilter();
 

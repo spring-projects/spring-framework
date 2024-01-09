@@ -64,13 +64,13 @@ import static org.springframework.http.MediaType.TEXT_XML;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  */
-public class FormHttpMessageConverterTests {
+class FormHttpMessageConverterTests {
 
 	private final FormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertCanRead(MultiValueMap.class, null);
 		assertCanRead(APPLICATION_FORM_URLENCODED);
 
@@ -79,7 +79,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void cannotReadMultipart() {
+	void cannotReadMultipart() {
 		// Without custom multipart types supported
 		asssertCannotReadMultipart();
 
@@ -88,7 +88,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertCanWrite(APPLICATION_FORM_URLENCODED);
 		assertCanWrite(MULTIPART_FORM_DATA);
 		assertCanWrite(MULTIPART_MIXED);
@@ -99,7 +99,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void setSupportedMediaTypes() {
+	void setSupportedMediaTypes() {
 		this.converter.setSupportedMediaTypes(List.of(MULTIPART_FORM_DATA));
 		assertCannotWrite(MULTIPART_MIXED);
 
@@ -108,7 +108,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void addSupportedMediaTypes() {
+	void addSupportedMediaTypes() {
 		this.converter.setSupportedMediaTypes(List.of(MULTIPART_FORM_DATA));
 		assertCannotWrite(MULTIPART_MIXED);
 
@@ -117,7 +117,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readForm() throws Exception {
+	void readForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
 		inputMessage.getHeaders().setContentType(
@@ -127,14 +127,12 @@ public class FormHttpMessageConverterTests {
 		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertThat(values).as("Invalid result").hasSize(2);
-		assertThat(values).element(0).as("Invalid result").isEqualTo("value 2+1");
-		assertThat(values).element(1).as("Invalid result").isEqualTo("value 2+2");
+		assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test
-	public void writeForm() throws IOException {
+	void writeForm() throws IOException {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -152,7 +150,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeMultipart() throws Exception {
+	void writeMultipart() throws Exception {
 
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("name 1", "value 1");
@@ -230,7 +228,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeMultipartWithSourceHttpMessageConverter() throws Exception {
+	void writeMultipartWithSourceHttpMessageConverter() throws Exception {
 
 		converter.setPartConverters(List.of(
 				new StringHttpMessageConverter(),
@@ -356,7 +354,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeMultipartCharset() throws Exception {
+	void writeMultipartCharset() throws Exception {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
@@ -436,7 +434,7 @@ public class FormHttpMessageConverterTests {
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			return new ByteArrayInputStream(body);
 		}
 

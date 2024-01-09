@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Juergen Hoeller
  */
-public class RequestScopedProxyTests {
+class RequestScopedProxyTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.beanFactory.registerScope("request", new RequestScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("requestScopedProxyTests.xml", getClass()));
@@ -55,7 +55,7 @@ public class RequestScopedProxyTests {
 
 
 	@Test
-	public void testGetFromScope() {
+	void testGetFromScope() {
 		String name = "requestScopedObject";
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
@@ -80,7 +80,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetFromScopeThroughDynamicProxy() {
+	void testGetFromScopeThroughDynamicProxy() {
 		String name = "requestScopedProxy";
 		ITestBean bean = (ITestBean) this.beanFactory.getBean(name);
 		// assertTrue(AopUtils.isJdkDynamicProxy(bean));
@@ -105,7 +105,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testDestructionAtRequestCompletion() {
+	void testDestructionAtRequestCompletion() {
 		String name = "requestScopedDisposableObject";
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
@@ -131,7 +131,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetFromFactoryBeanInScope() {
+	void testGetFromFactoryBeanInScope() {
 		String name = "requestScopedFactoryBean";
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
@@ -153,7 +153,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetInnerBeanFromScope() {
+	void testGetInnerBeanFromScope() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("outerBean");
 		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 		assertThat(AopUtils.isCglibProxy(bean.getSpouse())).isTrue();
@@ -177,7 +177,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void testGetAnonymousInnerBeanFromScope() {
+	void testGetAnonymousInnerBeanFromScope() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("outerBean");
 		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 		assertThat(AopUtils.isCglibProxy(bean.getSpouse())).isTrue();
@@ -204,7 +204,7 @@ public class RequestScopedProxyTests {
 	}
 
 	@Test
-	public void scopeNotAvailable() {
+	void scopeNotAvailable() {
 		assertThatExceptionOfType(ScopeNotActiveException.class).isThrownBy(
 				() -> this.beanFactory.getBean(CountingTestBean.class).absquatulate());
 
