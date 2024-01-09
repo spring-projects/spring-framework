@@ -19,6 +19,7 @@ of the classpath -- for example, deployed within the application's JAR file.
 The following table lists all currently supported Spring properties.
 
 .Supported Spring Properties
+[cols="1,1", stripes=odd]
 |===
 | Name | Description
 
