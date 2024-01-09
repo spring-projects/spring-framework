@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1571,7 +1571,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result;
 	}
 
-	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps, int rowsExpected) throws SQLException {
+	private void storeGeneratedKeys(KeyHolder generatedKeyHolder, PreparedStatement ps, int rowsExpected)
+			throws SQLException {
+
 		List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
 		ResultSet keys = ps.getGeneratedKeys();
 		if (keys != null) {
@@ -1586,7 +1588,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	private PreparedStatementCallback<int[]> getPreparedStatementCallback(BatchPreparedStatementSetter pss, @Nullable KeyHolder generatedKeyHolder) {
+	private PreparedStatementCallback<int[]> getPreparedStatementCallback(BatchPreparedStatementSetter pss,
+			@Nullable KeyHolder generatedKeyHolder) {
 		return ps -> {
 			try {
 				int batchSize = pss.getBatchSize();
@@ -1665,8 +1668,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				case "isClosed" -> false;
 				// Handle getTargetConnection method: return underlying Connection.
 				case "getTargetConnection" -> this.target;
-				case "unwrap" -> (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
-				case "isWrapperFor" -> (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
+				case "unwrap" ->
+						(((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
+				case "isWrapperFor" ->
+						(((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
 				default -> {
 					try {
 						// Invoke method on target Connection.
