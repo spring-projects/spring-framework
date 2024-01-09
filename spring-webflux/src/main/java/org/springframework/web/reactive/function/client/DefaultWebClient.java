@@ -195,6 +195,18 @@ final class DefaultWebClient implements WebClient {
 		return response.releaseBody().onErrorComplete().then(Mono.error(ex));
 	}
 
+	private static URI getUriToLog(URI uri) {
+		if (StringUtils.hasText(uri.getQuery())) {
+			try {
+				uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+			}
+			catch (URISyntaxException ex) {
+				// ignore
+			}
+		}
+		return uri;
+	}
+
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
@@ -457,7 +469,7 @@ final class DefaultWebClient implements WebClient {
 				observationContext.setRequest(request);
 				Mono<ClientResponse> responseMono = filterFunction.apply(exchangeFunction)
 						.exchange(request)
-						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
+						.checkpoint("Request to " + this.httpMethod.name() + " " + getUriToLog(request.url()) + " [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
 				if (this.contextModifier != null) {
 					responseMono = responseMono.contextWrite(this.contextModifier);
@@ -696,18 +708,6 @@ final class DefaultWebClient implements WebClient {
 				}
 			}
 			return null;
-		}
-
-		private static URI getUriToLog(URI uri) {
-			if (StringUtils.hasText(uri.getQuery())) {
-				try {
-					uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
-				}
-				catch (URISyntaxException ex) {
-					// ignore
-				}
-			}
-			return uri;
 		}
 
 
