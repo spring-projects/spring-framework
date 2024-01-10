@@ -1078,31 +1078,34 @@ underlying HTTP client, which operates at a lower level and provides more contro
 
 
 [[rest-http-interface-exceptions]]
-=== Exception Handling
-In order to provide a custom way of handling errors, you can register response
-status handlers on the underlying HTTP clients.
+=== Error Handling
+
+To customize error response handling, you need to configure the underlying HTTP client.
 
 For `RestClient`:
 
-By default, `RestClient` raises `RestClientException` for 4xx and 5xx HTTP status codes. To customize this, you can register a response status handler that applies to all responses performed through the client:
+By default, `RestClient` raises `RestClientException` for 4xx and 5xx HTTP status codes.
+To customize this, register a response status handler that applies to all responses
+performed through the client:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    RestClient restClient = RestClient.builder()
-			.defaultStatusHandler(HttpStatusCode::isError,
-            (request, response) -> ...)
-            .build();
+	RestClient restClient = RestClient.builder()
+			.defaultStatusHandler(HttpStatusCode::isError, (request, response) -> ...)
+			.build();
 
-    RestClientAdapter clientAdapter = RestClientAdapter.create(restClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory
-            .builderFor(clientAdapter).build();
+	RestClientAdapter adapter = RestClientAdapter.create(restClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 ----
 
-For more details and options, such as suppressing error status codes, see the Javadoc of `defaultStatusHandler` in `RestClient.Builder`.
+For more details and options, such as suppressing error status codes, see the Javadoc of
+`defaultStatusHandler` in `RestClient.Builder`.
 
 For `WebClient`:
 
-By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status codes. To customize this, you can register a response status handler that applies to all responses performed through the client:
+By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status codes.
+To customize this, register a response status handler that applies to all responses
+performed through the client:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -1110,25 +1113,28 @@ By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP
 			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
 			.build();
 
-	WebClientAdapter clientAdapter = WebClientAdapter.create(webClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory
-			.builder(clientAdapter).build();
+	WebClientAdapter adapter = WebClientAdapter.create(webClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(adapter).build();
 ----
 
-For more details and options, such as suppressing error status codes, see the Javadoc of `defaultStatusHandler` in `WebClient.Builder`.
+For more details and options, such as suppressing error status codes, see the Javadoc of
+`defaultStatusHandler` in `WebClient.Builder`.
 
 For `RestTemplate`:
 
-By default, `RestTemplate` raises `RestClientException` for 4xx and 5xx HTTP status codes. To customize this, you can register an error handler that applies to all responses performed through the client:
+By default, `RestTemplate` raises `RestClientException` for 4xx and 5xx HTTP status codes.
+To customize this, register an error handler that applies to all responses
+performed through the client:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
     RestTemplate restTemplate = new RestTemplate();
-    restTemplate.setErrorHandler(aCustomErrorHandler);
+    restTemplate.setErrorHandler(myErrorHandler);
 
-    RestTemplateAdapter clientAdapter = RestTemplateAdapter.create(restTemplate);
-    HttpServiceProxyFactory factory = HttpServiceProxyFactory
-            .builderFor(clientAdapter).build();
+    RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+    HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 ----
 
-For more details and options, see the Javadoc of `setErrorHandler` in `RestTemplate`.
+For more details and options, see the Javadoc of `setErrorHandler` in `RestTemplate` and
+the `ResponseErrorHandler` hierarchy.
+
