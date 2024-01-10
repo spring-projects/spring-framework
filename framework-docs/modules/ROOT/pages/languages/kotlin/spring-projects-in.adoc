@@ -97,6 +97,9 @@ does not require the `kotlin-noarg` plugin if the module uses Spring Data object
 [[injecting-dependencies]]
 == Injecting Dependencies
 
+[[favor-constructor-injection]]
+=== Favor constructor injection
+
 Our recommendation is to try to favor constructor injection with `val` read-only (and
 non-nullable when possible) {kotlin-docs}/properties.html[properties],
 as the following example shows:
@@ -130,7 +133,41 @@ as the following example shows:
 	}
 ----
 
+[[internal-functions-name-mangling]]
+=== Internal functions name mangling
 
+Kotlin functions with the `internal` {kotlin-docs}/visibility-modifiers.html#class-members[visibility modifier] have
+their names mangled when compiled to JVM bytecode, which has a side effect when injecting dependencies by name.
+
+For example, this Kotlin class:
+[source,kotlin,indent=0]
+----
+@Configuration
+class SampleConfiguration {
+
+	@Bean
+	internal fun sampleBean() = SampleBean()
+}
+----
+
+Translates to this Java representation of the compiled JVM bytecode:
+[source,java,indent=0]
+----
+@Configuration
+@Metadata(/* ... */)
+public class SampleConfiguration {
+
+	@Bean
+	@NotNull
+	public SampleBean sampleBean$demo_kotlin_internal_test() {
+        return new SampleBean();
+	}
+}
+----
+
+As a consequence, the related bean name represented as a Kotlin string is `"sampleBean\$demo_kotlin_internal_test"`,
+instead of `"sampleBean"` for the regular `public` function use-case. Make sure to use the mangled name when injecting
+such bean by name.
 
 [[injecting-configuration-properties]]
 == Injecting Configuration Properties
