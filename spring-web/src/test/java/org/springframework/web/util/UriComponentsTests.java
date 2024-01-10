@@ -102,6 +102,12 @@ class UriComponentsTests {
 	}
 
 	@Test
+	void toUriStringWithPortVariable() {
+		String url = "http://localhost:{port}/first";
+		assertThat(UriComponentsBuilder.fromUriString(url).build().toUriString()).isEqualTo(url);
+	}
+
+	@Test
 	void expand() {
 		UriComponents uri = UriComponentsBuilder.fromUriString("https://example.com").path("/{foo} {bar}").build();
 		uri = uri.expand("1 2", "3 4");
@@ -165,12 +171,6 @@ class UriComponentsTests {
 			.withMessage("The port must be an integer: XXX");
 		assertThatIllegalStateException()
 			.isThrownBy(uriComponents::toUri)
-			.withMessage("The port must be an integer: XXX");
-		assertThatIllegalStateException()
-			.isThrownBy(uriComponents::toUriString)
-			.withMessage("The port must be an integer: XXX");
-		assertThatIllegalStateException()
-			.isThrownBy(uriComponents::toString)
 			.withMessage("The port must be an integer: XXX");
 	}
 
