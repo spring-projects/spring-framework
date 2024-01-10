@@ -4,7 +4,7 @@
 Projection lets a collection drive the evaluation of a sub-expression, and the result is
 a new collection. The syntax for projection is `.![projectionExpression]`. For example,
 suppose we have a list of inventors but want the list of cities where they were born.
-Effectively, we want to evaluate 'placeOfBirth.city' for every entry in the inventor
+Effectively, we want to evaluate `placeOfBirth.city` for every entry in the inventor
 list. The following example uses projection to do so:
 
 [tabs]
