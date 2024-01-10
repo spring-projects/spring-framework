@@ -86,7 +86,7 @@ class HandlerMethodTests {
 
 	private static HandlerMethod getHandlerMethod(Object target, String methodName) {
 		Method method = ClassUtils.getMethod(target.getClass(), methodName, (Class<?>[]) null);
-		return new HandlerMethod(target, method);
+		return new HandlerMethod(target, method).createWithValidateFlags();
 	}
 
 
