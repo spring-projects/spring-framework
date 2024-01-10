@@ -562,12 +562,15 @@ Kotlin::
 == `@HttpExchange`
 [.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
 
-As an alternative to  `@RequestMapping`, you can also handle requests with `@HttpExchange`
-methods. Such methods are declared on an
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] and can be used as
-a client via `HttpServiceProxyFactory` or implemented by a server `@Controller`.
-
-For example:
+While `@HttpExchange` was initially created for client use, the
+`@HttpExchange`-annotated interfaces have been designed to constitute
+HTTP service contracts, neutral to client or server.
+To facilitate that, it's possible handle requests with
+`@HttpExchange`-annotated methods in place of
+`@RequestMapping`-annotated ones. Such methods are declared on an
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface]
+and can be used as a client via `HttpServiceProxyFactory` or implemented by
+a server `@Controller`, like so:
 
 [tabs]
 ======
@@ -575,16 +578,23 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-	@RestController
 	@HttpExchange("/persons")
-	class PersonController {
+	interface PersonService {
 
 		@GetExchange("/{id}")
+		Person getPerson(@PathVariable Long id);
+
+		@PostExchange
+		void add(@RequestBody Person person);
+	}
+
+	@RestController
+	class PersonController implements PersonService {
+
 		public Person getPerson(@PathVariable Long id) {
 			// ...
 		}
 
-		@PostExchange
 		@ResponseStatus(HttpStatus.CREATED)
 		public void add(@RequestBody Person person) {
 			// ...
@@ -596,25 +606,37 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	@RestController
 	@HttpExchange("/persons")
-	class PersonController {
+    interface PersonService {
 
-		@GetExchange("/{id}")
-		fun getPerson(@PathVariable id: Long): Person {
-			// ...
-		}
+        @GetExchange("/{id}")
+        fun getPerson(@PathVariable id: Long): Person
 
-		@PostExchange
-		@ResponseStatus(HttpStatus.CREATED)
-		fun add(@RequestBody person: Person) {
-			// ...
-		}
-	}
+        @PostExchange
+        fun add(@RequestBody person: Person)
+    }
+
+    @RestController
+    class PersonController : PersonService {
+
+        override fun getPerson(@PathVariable id: Long): Person {
+        // ...
+        }
+
+        @ResponseStatus(HttpStatus.CREATED)
+        override fun add(@RequestBody person: Person) {
+        // ...
+        }
+    }
 ----
 ======
 
-There some differences between `@HttpExchange` and `@RequestMapping` since the
+TIP: A shared interface between client and server may also provide an easy way
+for clients to access server APIs and keep up with the changes. While, due to
+increased coupling, it won't be a good fit for a public API, it may be useful
+in the case of an internal API.
+
+There are some differences between `@HttpExchange` and `@RequestMapping` since the
 former needs to remain suitable for client and server use. For example, while
 `@RequestMapping` can be declared to handle any number of paths and each path can
 be a pattern, `@HttpExchange` must be declared with a single, concrete path. There are
