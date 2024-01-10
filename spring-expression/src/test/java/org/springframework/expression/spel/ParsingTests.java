@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,31 +177,27 @@ class ParsingTests {
 					"(#fact={|n| ($n <= 1) ? 1 : ($n * #fact(($n - 1))) };#fact(5))");
 		}
 
-		@Disabled("Unsupported syntax/feature")
 		@Test
 		void projection() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.!{#isEven()}");
+			parseCheck("{1,2,3,4,5,6,7,8,9,10}.![#isEven()]");
 		}
 
-		@Disabled("Unsupported syntax/feature")
 		@Test
 		void selection() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}",
-					"{1,2,3,4,5,6,7,8,9,10}.?{(#isEven(#this) == 'y')}");
+			parseCheck("{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this) == 'y']",
+					"{1,2,3,4,5,6,7,8,9,10}.?[(#isEven(#this) == 'y')]");
 		}
 
-		@Disabled("Unsupported syntax/feature")
 		@Test
 		void selectionFirst() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.^{#isEven(#this) == 'y'}",
-					"{1,2,3,4,5,6,7,8,9,10}.^{(#isEven(#this) == 'y')}");
+			parseCheck("{1,2,3,4,5,6,7,8,9,10}.^[#isEven(#this) == 'y']",
+					"{1,2,3,4,5,6,7,8,9,10}.^[(#isEven(#this) == 'y')]");
 		}
 
-		@Disabled("Unsupported syntax/feature")
 		@Test
 		void selectionLast() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.${#isEven(#this) == 'y'}",
-					"{1,2,3,4,5,6,7,8,9,10}.${(#isEven(#this) == 'y')}");
+			parseCheck("{1,2,3,4,5,6,7,8,9,10}.$[#isEven(#this) == 'y']",
+					"{1,2,3,4,5,6,7,8,9,10}.$[(#isEven(#this) == 'y')]");
 		}
 	}
 
