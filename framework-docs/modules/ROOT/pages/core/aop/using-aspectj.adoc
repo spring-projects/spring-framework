@@ -533,6 +533,11 @@ standard AspectJ. The following example shows the `aop.xml` file:
 	</aspectj>
 ----
 
+NOTE: It is recommended to only weave specific classes (typically those in the
+application packages, as shown in the `aop.xml` example above) in order
+to avoid side effects such as AspectJ dump files and warnings.
+This is also a best practice from an efficiency perspective.
+
 Now we can move on to the Spring-specific portion of the configuration. We need
 to configure a `LoadTimeWeaver` (explained later). This load-time weaver is the
 essential component responsible for weaving the aspect configuration in one or
@@ -714,10 +719,29 @@ Furthermore, the compiled aspect classes need to be available on the classpath.
 
 
 [[aop-aj-ltw-aop_dot_xml]]
-=== 'META-INF/aop.xml'
+=== `META-INF/aop.xml`
 
 The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.xml`
 files that are on the Java classpath (either directly or, more typically, in jar files).
+For example:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+	<aspectj>
+
+		<weaver>
+			<!-- only weave classes in our application-specific packages -->
+			<include within="com.xyz.*"/>
+		</weaver>
+
+	</aspectj>
+----
+
+NOTE: It is recommended to only weave specific classes (typically those in the
+application packages, as shown in the `aop.xml` example above) in order
+to avoid side effects such as AspectJ dump files and warnings.
+This is also a best practice from an efficiency perspective.
 
 The structure and contents of this file is detailed in the LTW part of the
 {aspectj-docs-devguide}/ltw-configuration.html[AspectJ reference
