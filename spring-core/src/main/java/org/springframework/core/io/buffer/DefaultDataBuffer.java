@@ -37,6 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Brian Clozel
+ * @author Injae Kim
  * @since 5.0
  * @see DefaultDataBufferFactory
  */
@@ -81,12 +82,12 @@ public class DefaultDataBuffer implements DataBuffer {
 	/**
 	 * Directly exposes the native {@code ByteBuffer} that this buffer is based
 	 * on also updating the {@code ByteBuffer's} position and limit to match
-	 * the current {@link #readPosition()} and {@link #readableByteCount()}.
+	 * the current {@link #readPosition()} and {@link #writePosition()}.
 	 * @return the wrapped byte buffer
 	 */
 	public ByteBuffer getNativeBuffer() {
 		this.byteBuffer.position(this.readPosition);
-		this.byteBuffer.limit(readableByteCount());
+		this.byteBuffer.limit(this.writePosition);
 		return this.byteBuffer;
 	}
 
