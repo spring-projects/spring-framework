@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -54,7 +53,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -193,18 +191,6 @@ final class DefaultWebClient implements WebClient {
 
 	private static <T> Mono<T> releaseIfNotConsumed(ClientResponse response, Throwable ex) {
 		return response.releaseBody().onErrorComplete().then(Mono.error(ex));
-	}
-
-	private static URI getUriToLog(URI uri) {
-		if (StringUtils.hasText(uri.getQuery())) {
-			try {
-				uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
-			}
-			catch (URISyntaxException ex) {
-				// ignore
-			}
-		}
-		return uri;
 	}
 
 
@@ -469,7 +455,9 @@ final class DefaultWebClient implements WebClient {
 				observationContext.setRequest(request);
 				Mono<ClientResponse> responseMono = filterFunction.apply(exchangeFunction)
 						.exchange(request)
-						.checkpoint("Request to " + this.httpMethod.name() + " " + getUriToLog(request.url()) + " [DefaultWebClient]")
+						.checkpoint("Request to " +
+								WebClientUtils.getRequestDescription(request.method(), request.url()) +
+								" [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
 				if (this.contextModifier != null) {
 					responseMono = responseMono.contextWrite(this.contextModifier);
@@ -704,7 +692,8 @@ final class DefaultWebClient implements WebClient {
 					}
 					Mono<T> result = exMono.flatMap(Mono::error);
 					return result.checkpoint(statusCode + " from " +
-							this.httpMethod + " " + getUriToLog(this.uri) + " [DefaultWebClient]");
+							WebClientUtils.getRequestDescription(this.httpMethod, this.uri) +
+							" [DefaultWebClient]");
 				}
 			}
 			return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -32,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Exceptions that contain actual HTTP response data.
@@ -101,20 +98,8 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	private static String initMessage(HttpStatusCode status, String reasonPhrase, @Nullable HttpRequest request) {
-		return status.value() + " " + reasonPhrase +
-				(request != null ? " from " + request.getMethod() + " " + getUriToLog(request.getURI()) : "");
-	}
-
-	private static URI getUriToLog(URI uri) {
-		if (StringUtils.hasText(uri.getQuery())) {
-			try {
-				uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
-			}
-			catch (URISyntaxException ex) {
-				// ignore
-			}
-		}
-		return uri;
+		return status.value() + " " + reasonPhrase + (request != null ?
+				" from " + WebClientUtils.getRequestDescription(request.getMethod(), request.getURI()) : "");
 	}
 
 	/**
