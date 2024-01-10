@@ -75,7 +75,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "10.12.5"
+		toolVersion = "10.12.7"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
