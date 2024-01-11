@@ -167,7 +167,7 @@ public class SampleConfiguration {
 
 As a consequence, the related bean name represented as a Kotlin string is `"sampleBean\$demo_kotlin_internal_test"`,
 instead of `"sampleBean"` for the regular `public` function use-case. Make sure to use the mangled name when injecting
-such bean by name.
+such bean by name, or add `@JvmName("sampleBean")` to disable name mangling.
 
 [[injecting-configuration-properties]]
 == Injecting Configuration Properties
