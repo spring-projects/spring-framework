@@ -63,7 +63,7 @@ import static org.mockito.BDDMockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class ResponseEntityExceptionHandlerTests {
+class ResponseEntityExceptionHandlerTests {
 
 	private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
@@ -110,12 +110,12 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void handlerMethodValidationException() {
+	void handlerMethodValidationException() {
 		testException(new HandlerMethodValidationException(mock(MethodValidationResult.class)));
 	}
 
 	@Test
-	public void methodValidationException() {
+	void methodValidationException() {
 		MethodValidationException ex = new MethodValidationException(mock(MethodValidationResult.class));
 		ResponseEntity<?> entity = this.exceptionHandler.handleException(ex, this.exchange).block();
 

@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.when;
 /**
  * Tests for {@link BindingContext}.
  */
-public class BindingContextTests {
+class BindingContextTests {
 
 	@Test
 	void jakartaValidatorExcludedWhenMethodValidationApplicable() {

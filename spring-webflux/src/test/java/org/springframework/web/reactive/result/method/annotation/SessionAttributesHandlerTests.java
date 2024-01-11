@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test fixture with {@link SessionAttributesHandler}.
  * @author Rossen Stoyanchev
  */
-public class SessionAttributesHandlerTests {
+class SessionAttributesHandlerTests {
 
 	private final SessionAttributesHandler sessionAttributesHandler =
 			new SessionAttributesHandler(TestController.class);
 
 
 	@Test
-	public void isSessionAttribute() {
+	void isSessionAttribute() {
 		assertThat(this.sessionAttributesHandler.isHandlerSessionAttribute("attr1", String.class)).isTrue();
 		assertThat(this.sessionAttributesHandler.isHandlerSessionAttribute("attr2", String.class)).isTrue();
 		assertThat(this.sessionAttributesHandler.isHandlerSessionAttribute("simple", TestBean.class)).isTrue();
@@ -49,7 +49,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void retrieveAttributes() {
+	void retrieveAttributes() {
 		WebSession session = new MockWebSession();
 		session.getAttributes().put("attr1", "value1");
 		session.getAttributes().put("attr2", "value2");
@@ -65,7 +65,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void cleanupAttributes() {
+	void cleanupAttributes() {
 		WebSession session = new MockWebSession();
 		session.getAttributes().put("attr1", "value1");
 		session.getAttributes().put("attr2", "value2");
@@ -85,7 +85,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void storeAttributes() {
+	void storeAttributes() {
 
 		ModelMap model = new ModelMap();
 		model.put("attr1", "value1");

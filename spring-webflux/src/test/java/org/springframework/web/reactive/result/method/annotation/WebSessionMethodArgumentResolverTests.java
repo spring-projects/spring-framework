@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSessionMethodArgumentResolverTests {
+class WebSessionMethodArgumentResolverTests {
 
 	private final WebSessionMethodArgumentResolver resolver =
 			new WebSessionMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -46,7 +46,7 @@ public class WebSessionMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(WebSession.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, WebSession.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Single.class, WebSession.class))).isTrue();
@@ -54,7 +54,7 @@ public class WebSessionMethodArgumentResolverTests {
 
 
 	@Test
-	public void resolverArgument() {
+	void resolverArgument() {
 
 		BindingContext context = new BindingContext();
 		WebSession session = mock();

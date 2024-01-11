@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,19 +53,19 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class ControllerAdviceTests {
+class ControllerAdviceTests {
 
 	private final MockServerWebExchange exchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test
-	public void resolveExceptionGlobalHandler() throws Exception {
+	void resolveExceptionGlobalHandler() throws Exception {
 		testException(new IllegalAccessException(), "SecondControllerAdvice: IllegalAccessException");
 	}
 
 	@Test
-	public void resolveExceptionGlobalHandlerOrdered() throws Exception {
+	void resolveExceptionGlobalHandlerOrdered() throws Exception {
 		testException(new IllegalStateException(), "OneControllerAdvice: IllegalStateException");
 	}
 
@@ -75,13 +75,13 @@ public class ControllerAdviceTests {
 	}
 
 	@Test
-	public void resolveExceptionWithAssertionError() throws Exception {
+	void resolveExceptionWithAssertionError() throws Exception {
 		AssertionError error = new AssertionError("argh");
 		testException(error, error.toString());
 	}
 
 	@Test
-	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
+	void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
 		AssertionError rootCause = new AssertionError("argh");
 		FatalBeanException cause = new FatalBeanException("wrapped", rootCause);
 		Exception exception = new Exception(cause);
@@ -100,7 +100,7 @@ public class ControllerAdviceTests {
 	}
 
 	@Test
-	public void modelAttributeAdvice() throws Exception {
+	void modelAttributeAdvice() throws Exception {
 		ApplicationContext context = new AnnotationConfigApplicationContext(TestConfig.class);
 		RequestMappingHandlerAdapter adapter = createAdapter(context);
 		TestController controller = context.getBean(TestController.class);
@@ -113,7 +113,7 @@ public class ControllerAdviceTests {
 	}
 
 	@Test
-	public void initBinderAdvice() throws Exception {
+	void initBinderAdvice() throws Exception {
 		ApplicationContext context = new AnnotationConfigApplicationContext(TestConfig.class);
 		RequestMappingHandlerAdapter adapter = createAdapter(context);
 		TestController controller = context.getBean(TestController.class);

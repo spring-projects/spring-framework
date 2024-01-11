@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class DelegatingWebFluxConfigurationTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
 		given(webFluxConfigurer.getValidator()).willReturn(null);
@@ -81,7 +81,7 @@ public class DelegatingWebFluxConfigurationTests {
 
 
 	@Test
-	public void requestMappingHandlerMapping() {
+	void requestMappingHandlerMapping() {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		delegatingConfig.requestMappingHandlerMapping(delegatingConfig.webFluxContentTypeResolver());
 
@@ -91,7 +91,7 @@ public class DelegatingWebFluxConfigurationTests {
 	}
 
 	@Test
-	public void requestMappingHandlerAdapter() {
+	void requestMappingHandlerAdapter() {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		ReactiveAdapterRegistry reactiveAdapterRegistry = delegatingConfig.webFluxAdapterRegistry();
 		ServerCodecConfigurer serverCodecConfigurer = delegatingConfig.serverCodecConfigurer();
@@ -116,7 +116,7 @@ public class DelegatingWebFluxConfigurationTests {
 	}
 
 	@Test
-	public void resourceHandlerMapping() {
+	void resourceHandlerMapping() {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		willAnswer(invocation -> {
 			ResourceHandlerRegistry registry = invocation.getArgument(0);
@@ -142,7 +142,7 @@ public class DelegatingWebFluxConfigurationTests {
 	}
 
 	@Test
-	public void responseBodyResultHandler() {
+	void responseBodyResultHandler() {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		delegatingConfig.responseBodyResultHandler(
 				delegatingConfig.webFluxAdapterRegistry(),
@@ -154,7 +154,7 @@ public class DelegatingWebFluxConfigurationTests {
 	}
 
 	@Test
-	public void viewResolutionResultHandler() {
+	void viewResolutionResultHandler() {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		delegatingConfig.viewResolutionResultHandler(delegatingConfig.webFluxAdapterRegistry(),
 				delegatingConfig.webFluxContentTypeResolver());

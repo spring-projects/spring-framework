@@ -53,7 +53,7 @@ public class EncodedResourceResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		Cache cache = new ConcurrentMapCache("resourceCache");
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
@@ -73,7 +73,7 @@ public class EncodedResourceResolverTests {
 
 
 	@Test
-	public void resolveGzipped(GzippedFiles gzippedFiles) {
+	void resolveGzipped(GzippedFiles gzippedFiles) {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("").header("Accept-Encoding", "gzip"));
@@ -93,7 +93,7 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	public void resolveGzippedWithVersion(GzippedFiles gzippedFiles) {
+	void resolveGzippedWithVersion(GzippedFiles gzippedFiles) {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("").header("Accept-Encoding", "gzip"));
@@ -108,7 +108,7 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	public void resolveFromCacheWithEncodingVariants(GzippedFiles gzippedFiles) {
+	void resolveFromCacheWithEncodingVariants(GzippedFiles gzippedFiles) {
 
 		// 1. Resolve, and cache .gz variant
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
@@ -68,7 +67,7 @@ class AttributesTestVisitor implements RouterFunctions.Visitor {
 	public void route(RequestPredicate predicate, HandlerFunction<?> handlerFunction) {
 		Stream<Map<String, Object>> current = Optional.ofNullable(attributes).stream();
 		Stream<Map<String, Object>> nested = nestedAttributes.stream().filter(Objects::nonNull);
-		routerFunctionsAttributes.add(Stream.concat(current, nested).collect(Collectors.toUnmodifiableList()));
+		routerFunctionsAttributes.add(Stream.concat(current, nested).toList());
 		attributes = null;
 	}
 

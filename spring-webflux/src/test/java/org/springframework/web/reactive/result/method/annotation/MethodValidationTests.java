@@ -77,7 +77,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class MethodValidationTests {
+class MethodValidationTests {
 
 	private static final Person mockPerson = mock(Person.class);
 

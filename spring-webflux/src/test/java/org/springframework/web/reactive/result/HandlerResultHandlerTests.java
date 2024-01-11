@@ -45,7 +45,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
  *
  * @author Rossen Stoyanchev
  */
-public class HandlerResultHandlerTests {
+class HandlerResultHandlerTests {
 
 	private final TestResultHandler resultHandler = new TestResultHandler();
 

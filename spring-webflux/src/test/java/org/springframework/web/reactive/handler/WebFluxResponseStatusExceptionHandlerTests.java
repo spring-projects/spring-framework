@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  */
-public class WebFluxResponseStatusExceptionHandlerTests extends AbstractResponseStatusExceptionHandlerTests {
+class WebFluxResponseStatusExceptionHandlerTests extends AbstractResponseStatusExceptionHandlerTests {
 
 	@Override
 	protected ResponseStatusExceptionHandler createResponseStatusExceptionHandler() {
@@ -42,14 +42,14 @@ public class WebFluxResponseStatusExceptionHandlerTests extends AbstractResponse
 
 
 	@Test
-	public void handleAnnotatedException() {
+	void handleAnnotatedException() {
 		Throwable ex = new CustomException();
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.I_AM_A_TEAPOT);
 	}
 
 	@Test
-	public void handleNestedAnnotatedException() {
+	void handleNestedAnnotatedException() {
 		Throwable ex = new Exception(new CustomException());
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.I_AM_A_TEAPOT);

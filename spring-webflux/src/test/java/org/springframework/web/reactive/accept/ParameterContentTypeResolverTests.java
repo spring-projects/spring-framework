@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Rossen Stoyanchev
  */
-public class ParameterContentTypeResolverTests {
+class ParameterContentTypeResolverTests {
 
 	@Test
-	public void noKey() {
+	void noKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
@@ -48,14 +48,14 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	@Test
-	public void noMatchForKey() {
+	void noMatchForKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
 				resolver.resolveMediaTypes(createExchange("blah")));
 	}
 
 	@Test
-	public void resolveKeyFromRegistrations() {
+	void resolveKeyFromRegistrations() {
 		ServerWebExchange exchange = createExchange("html");
 
 		Map<String, MediaType> mapping = Collections.emptyMap();
@@ -70,7 +70,7 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveKeyThroughMediaTypeFactory() {
+	void resolveKeyThroughMediaTypeFactory() {
 		ServerWebExchange exchange = createExchange("xls");
 		RequestedContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);

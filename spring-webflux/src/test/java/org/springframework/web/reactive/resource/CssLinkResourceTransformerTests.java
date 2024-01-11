@@ -165,7 +165,7 @@ class CssLinkResourceTransformerTests {
 	}
 
 	@Test // https://github.com/spring-projects/spring-framework/issues/22602
-	void transformEmptyUrlFunction() throws Exception {
+	void transformEmptyUrlFunction() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/empty_url_function.css"));
 		Resource css = getResource("empty_url_function.css");
 		String expected = """

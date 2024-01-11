@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class CachingResourceResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 
 		this.cache = new ConcurrentMapCache("resourceCache");
 
@@ -70,7 +69,7 @@ public class CachingResourceResolverTests {
 
 
 	@Test
-	public void resolveResourceInternal() {
+	void resolveResourceInternal() {
 		Resource expected = new ClassPathResource("test/bar.css", getClass());
 		MockServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		Resource actual = this.chain.resolveResource(exchange, "bar.css", this.locations).block(TIMEOUT);
@@ -80,7 +79,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceInternalFromCache() {
+	void resolveResourceInternalFromCache() {
 		Resource expected = mock();
 		this.cache.put(resourceKey("bar.css"), expected);
 
@@ -91,13 +90,13 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceInternalNoMatch() {
+	void resolveResourceInternalNoMatch() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		assertThat(this.chain.resolveResource(exchange, "invalid.css", this.locations).block(TIMEOUT)).isNull();
 	}
 
 	@Test
-	public void resolverUrlPath() {
+	void resolverUrlPath() {
 		String expected = "/foo.css";
 		String actual = this.chain.resolveUrlPath(expected, this.locations).block(TIMEOUT);
 
@@ -105,7 +104,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolverUrlPathFromCache() {
+	void resolverUrlPathFromCache() {
 		String expected = "cached-imaginary.css";
 		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css", expected);
 		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations).block(TIMEOUT);
@@ -114,12 +113,12 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolverUrlPathNoMatch() {
+	void resolverUrlPathNoMatch() {
 		assertThat(this.chain.resolveUrlPath("invalid.css", this.locations).block(TIMEOUT)).isNull();
 	}
 
 	@Test
-	public void resolveResourceAcceptEncodingInCacheKey(GzippedFiles gzippedFiles) throws IOException {
+	void resolveResourceAcceptEncodingInCacheKey(GzippedFiles gzippedFiles) {
 
 		String file = "bar.css";
 		gzippedFiles.create(file);
@@ -152,7 +151,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoAcceptEncoding() {
+	void resolveResourceNoAcceptEncoding() {
 		String file = "bar.css";
 		MockServerWebExchange exchange = MockServerWebExchange.from(get(file));
 		Resource expected = this.chain.resolveResource(exchange, file, this.locations).block(TIMEOUT);
@@ -164,7 +163,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceMatchingEncoding() {
+	void resolveResourceMatchingEncoding() {
 		Resource resource = mock();
 		Resource gzipped = mock();
 		this.cache.put(resourceKey("bar.css"), resource);

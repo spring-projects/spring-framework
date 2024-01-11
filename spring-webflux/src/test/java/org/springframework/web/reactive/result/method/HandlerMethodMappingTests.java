@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class HandlerMethodMappingTests {
+class HandlerMethodMappingTests {
 
 	private MyHandlerMethodMapping mapping;
 
@@ -66,7 +66,7 @@ public class HandlerMethodMappingTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.mapping = new MyHandlerMethodMapping();
 		this.handler = new MyHandler();
 		this.method1 = handler.getClass().getMethod("handlerMethod1");
@@ -75,14 +75,14 @@ public class HandlerMethodMappingTests {
 
 
 	@Test
-	public void registerDuplicates() {
+	void registerDuplicates() {
 		this.mapping.registerMapping("foo", this.handler, this.method1);
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.mapping.registerMapping("foo", this.handler, this.method2));
 	}
 
 	@Test
-	public void directMatch() {
+	void directMatch() {
 		this.mapping.registerMapping("/foo", this.handler, this.method1);
 		this.mapping.registerMapping("/fo*", this.handler, this.method2);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
@@ -93,7 +93,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void patternMatch() {
+	void patternMatch() {
 		this.mapping.registerMapping("/fo*", this.handler, this.method1);
 		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
@@ -103,7 +103,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void ambiguousMatch() {
+	void ambiguousMatch() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
@@ -113,7 +113,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() throws Exception {
+	public void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 
@@ -146,7 +146,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void registerMapping() {
+	void registerMapping() {
 		String key1 = "/foo";
 		String key2 = "/foo*";
 		this.mapping.registerMapping(key1, this.handler, this.method1);
@@ -156,7 +156,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void registerMappingWithSameMethodAndTwoHandlerInstances() {
+	void registerMappingWithSameMethodAndTwoHandlerInstances() {
 		String key1 = "foo";
 		String key2 = "bar";
 		MyHandler handler1 = new MyHandler();
@@ -168,7 +168,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void unregisterMapping() {
+	void unregisterMapping() {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));

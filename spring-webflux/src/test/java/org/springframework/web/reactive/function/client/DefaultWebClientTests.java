@@ -73,7 +73,7 @@ public class DefaultWebClientTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
@@ -83,7 +83,7 @@ public class DefaultWebClientTests {
 
 
 	@Test
-	public void basic() {
+	void basic() {
 		this.builder.build().get().uri("/path")
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
 
@@ -94,7 +94,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void uriBuilder() {
+	void uriBuilder() {
 		this.builder.build().get()
 				.uri(builder -> builder.path("/path").queryParam("q", "12").build())
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
@@ -115,7 +115,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void uriBuilderWithPathOverride() {
+	void uriBuilderWithPathOverride() {
 		this.builder.build().get()
 				.uri(builder -> builder.replacePath("/path").build())
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
@@ -125,7 +125,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void requestHeaderAndCookie() {
+	void requestHeaderAndCookie() {
 		this.builder.build().get().uri("/path").accept(MediaType.APPLICATION_JSON)
 				.cookies(cookies -> cookies.add("id", "123"))	// SPR-16178
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
@@ -165,7 +165,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void httpRequest() {
+	void httpRequest() {
 		this.builder.build().get().uri("/path")
 				.httpRequest(httpRequest -> {})
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
@@ -175,7 +175,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void defaultHeaderAndCookie() {
+	void defaultHeaderAndCookie() {
 		WebClient client = this.builder
 				.defaultHeader("Accept", "application/json")
 				.defaultCookie("id", "123")
@@ -190,7 +190,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void defaultHeaderAndCookieOverrides() {
+	void defaultHeaderAndCookieOverrides() {
 		WebClient client = this.builder
 				.defaultHeader("Accept", "application/json")
 				.defaultCookie("id", "123")
@@ -207,7 +207,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void defaultHeaderAndCookieCopies() {
+	void defaultHeaderAndCookieCopies() {
 		WebClient client1 = this.builder
 				.defaultHeader("Accept", "application/json")
 				.defaultCookie("id", "123")
@@ -234,7 +234,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void defaultRequest() {
+	void defaultRequest() {
 		ThreadLocal<String> context = new NamedThreadLocal<>("foo");
 
 		Map<String, Object> actual = new HashMap<>();
@@ -261,7 +261,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void bodyObjectPublisher() {
+	void bodyObjectPublisher() {
 		Mono<Void> mono = Mono.empty();
 		WebClient client = this.builder.build();
 
@@ -270,7 +270,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void mutateDoesCopy() {
+	void mutateDoesCopy() {
 		// First, build the clients
 
 		WebClient.Builder builder = WebClient.builder()
@@ -327,7 +327,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void withStringAttribute() {
+	void withStringAttribute() {
 		Map<String, Object> actual = new HashMap<>();
 		ExchangeFilterFunction filter = (request, next) -> {
 			actual.putAll(request.attributes());
@@ -346,7 +346,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void withNullAttribute() {
+	void withNullAttribute() {
 		Map<String, Object> actual = new HashMap<>();
 		ExchangeFilterFunction filter = (request, next) -> {
 			actual.putAll(request.attributes());
@@ -365,7 +365,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void uriTemplateAttribute() {
+	void uriTemplateAttribute() {
 		testUriTemplateAttribute(client -> client.get().uri("/{id}", 1), "/base/{id}");
 		testUriTemplateAttribute(client -> client.get().uri("/{id}", Map.of("id", 1)), "/base/{id}");
 		testUriTemplateAttribute(client -> client.get().uri("/{id}", builder -> builder.build(1)), "/base/{id}");
@@ -389,7 +389,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void apply() {
+	void apply() {
 		WebClient client = this.builder
 				.apply(builder -> builder
 						.defaultHeader("Accept", "application/json")
@@ -404,7 +404,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void switchToErrorOnEmptyClientResponseMono() {
+	void switchToErrorOnEmptyClientResponseMono() {
 		ExchangeFunction exchangeFunction = mock();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.empty());
 		WebClient client = WebClient.builder().baseUrl("/base").exchangeFunction(exchangeFunction).build();
@@ -414,7 +414,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void shouldApplyFiltersAtSubscription() {
+	void shouldApplyFiltersAtSubscription() {
 		WebClient client = this.builder
 				.filter((request, next) ->
 					next.exchange(ClientRequest
@@ -449,7 +449,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void onStatusHandlerRegisteredGlobally() {
+	void onStatusHandlerRegisteredGlobally() {
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
@@ -466,7 +466,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
-	public void onStatusHandlerRegisteredGloballyHaveLowerPrecedence() {
+	void onStatusHandlerRegisteredGloballyHaveLowerPrecedence() {
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
@@ -483,7 +483,6 @@ public class DefaultWebClientTests {
 	}
 
 	@Test // gh-23880
-	@SuppressWarnings("unchecked")
 	public void onStatusHandlersDefaultHandlerIsLast() {
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();

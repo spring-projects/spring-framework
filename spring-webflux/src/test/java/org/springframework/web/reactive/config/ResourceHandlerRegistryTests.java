@@ -149,8 +149,8 @@ class ResourceHandlerRegistryTests {
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).hasSize(2);
-		assertThat(transformers).element(0).isInstanceOf(CachingResourceTransformer.class);
-		assertThat(transformers).element(1).isEqualTo(mockTransformer);
+		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
+		assertThat(transformers.get(1)).isEqualTo(mockTransformer);
 		Mockito.verify(mockTransformer).setResourceUrlProvider(resourceUrlProvider);
 	}
 
@@ -191,7 +191,6 @@ class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void resourceChainWithOverrides() {
 		CachingResourceResolver cachingResolver = mock();
 		VersionResourceResolver versionResolver = mock();
@@ -211,16 +210,11 @@ class ResourceHandlerRegistryTests {
 
 		ResourceWebHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers).hasSize(4);
-		assertThat(resolvers).element(0).isSameAs(cachingResolver);
-		assertThat(resolvers).element(1).isSameAs(versionResolver);
-		assertThat(resolvers).element(2).isSameAs(webjarsResolver);
-		assertThat(resolvers).element(3).isSameAs(pathResourceResolver);
+		assertThat(resolvers).containsExactly(
+				cachingResolver, versionResolver, webjarsResolver, pathResourceResolver);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers).hasSize(2);
-		assertThat(transformers).element(0).isSameAs(cachingTransformer);
-		assertThat(transformers).element(1).isSameAs(cssLinkTransformer);
+		assertThat(transformers).containsExactly(cachingTransformer, cssLinkTransformer);
 	}
 
 	@Test

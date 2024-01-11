@@ -44,13 +44,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class AbstractViewTests {
+class AbstractViewTests {
 
 	private MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test
-	public void resolveAsyncAttributes() {
+	void resolveAsyncAttributes() {
 
 		TestBean testBean1 = new TestBean("Bean1");
 		TestBean testBean2 = new TestBean("Bean2");

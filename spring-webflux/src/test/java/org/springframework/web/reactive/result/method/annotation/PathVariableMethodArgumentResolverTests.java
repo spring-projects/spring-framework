@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class PathVariableMethodArgumentResolverTests {
+class PathVariableMethodArgumentResolverTests {
 
 	private PathVariableMethodArgumentResolver resolver;
 
@@ -62,7 +62,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolver = new PathVariableMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
@@ -75,7 +75,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.paramNamedString)).isTrue();
 		assertThat(this.resolver.supportsParameter(this.paramString)).isFalse();
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -84,7 +84,7 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgument() {
+	void resolveArgument() {
 		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "value");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
@@ -96,7 +96,7 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNotRequired() {
+	void resolveArgumentNotRequired() {
 		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "value");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
@@ -108,7 +108,7 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentWrappedAsOptional() {
+	void resolveArgumentWrappedAsOptional() {
 		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "value");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
@@ -123,7 +123,7 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void handleMissingValue() {
+	void handleMissingValue() {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
 		StepVerifier.create(mono)
@@ -133,7 +133,7 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void nullIfNotRequired() {
+	void nullIfNotRequired() {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
 		StepVerifier.create(mono)
@@ -143,7 +143,7 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void wrapEmptyWithOptional() {
+	void wrapEmptyWithOptional() {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
 

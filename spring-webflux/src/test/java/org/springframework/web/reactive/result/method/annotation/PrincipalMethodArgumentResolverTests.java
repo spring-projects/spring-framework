@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class PrincipalMethodArgumentResolverTests {
+class PrincipalMethodArgumentResolverTests {
 
 	private final PrincipalMethodArgumentResolver resolver =
 			new PrincipalMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -46,7 +46,7 @@ public class PrincipalMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Principal.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, Principal.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Single.class, Principal.class))).isTrue();
@@ -54,7 +54,7 @@ public class PrincipalMethodArgumentResolverTests {
 
 
 	@Test
-	public void resolverArgument() {
+	void resolverArgument() {
 		Principal user = () -> "Joe";
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 				.mutate().principal(Mono.just(user)).build();

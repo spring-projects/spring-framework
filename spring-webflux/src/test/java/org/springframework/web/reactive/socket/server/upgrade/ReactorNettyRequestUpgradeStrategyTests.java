@@ -26,7 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ReactorNettyRequestUpgradeStrategyTests {
+class ReactorNettyRequestUpgradeStrategyTests {
 
 	@Test // gh-25315
 	void defaultWebSocketSpecBuilderIsUniquePerRequest() {

@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class ScriptTemplateViewResolverTests {
+class ScriptTemplateViewResolverTests {
 
 	@Test
-	public void viewClass() throws Exception {
+	void viewClass() {
 		ScriptTemplateViewResolver resolver = new ScriptTemplateViewResolver();
 		assertThat(resolver.requiredViewClass()).isEqualTo(ScriptTemplateView.class);
 		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(resolver);

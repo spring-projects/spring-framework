@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketUpgradeHandlerPredicateTests {
+class WebSocketUpgradeHandlerPredicateTests {
 
 	private final WebSocketUpgradeHandlerPredicate predicate = new WebSocketUpgradeHandlerPredicate();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,26 +39,26 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Sebastien Deleuze
  */
-public class RedirectViewTests {
+class RedirectViewTests {
 
 	private MockServerWebExchange exchange;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/context/path").contextPath("/context"));
 	}
 
 
 	@Test
-	public void noUrlSet() throws Exception {
+	void noUrlSet() {
 		RedirectView rv = new RedirectView(null);
 		assertThatIllegalArgumentException().isThrownBy(
 				rv::afterPropertiesSet);
 	}
 
 	@Test
-	public void defaultStatusCode() {
+	void defaultStatusCode() {
 		String url = "https://url.somewhere.com";
 		RedirectView view = new RedirectView(url);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
@@ -67,7 +67,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void customStatusCode() {
+	void customStatusCode() {
 		String url = "https://url.somewhere.com";
 		RedirectView view = new RedirectView(url, HttpStatus.FOUND);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
@@ -76,7 +76,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void contextRelative() {
+	void contextRelative() {
 		String url = "/test.html";
 		RedirectView view = new RedirectView(url);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
@@ -84,7 +84,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void contextRelativeQueryParam() {
+	void contextRelativeQueryParam() {
 		String url = "/test.html?id=1";
 		RedirectView view = new RedirectView(url);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
@@ -92,7 +92,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void remoteHost() {
+	void remoteHost() {
 		RedirectView view = new RedirectView("");
 
 		assertThat(view.isRemoteHost("https://url.somewhere.com")).isFalse();
@@ -107,7 +107,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void expandUriTemplateVariablesFromModel() {
+	void expandUriTemplateVariablesFromModel() {
 		String url = "https://url.somewhere.com?foo={foo}";
 		Map<String, String> model = Collections.singletonMap("foo", "bar");
 		RedirectView view = new RedirectView(url);
@@ -116,7 +116,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void expandUriTemplateVariablesFromExchangeAttribute() {
+	void expandUriTemplateVariablesFromExchangeAttribute() {
 		String url = "https://url.somewhere.com?foo={foo}";
 		Map<String, String> attributes = Collections.singletonMap("foo", "bar");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, attributes);
@@ -126,7 +126,7 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void propagateQueryParams() throws Exception {
+	void propagateQueryParams() {
 		RedirectView view = new RedirectView("https://url.somewhere.com?foo=bar#bazz");
 		view.setPropagateQuery(true);
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://url.somewhere.com?a=b&c=d"));

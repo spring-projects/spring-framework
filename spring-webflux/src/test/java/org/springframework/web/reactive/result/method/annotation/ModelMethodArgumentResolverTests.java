@@ -39,7 +39,7 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  *
  * @author Rossen Stoyanchev
  */
-public class ModelMethodArgumentResolverTests {
+class ModelMethodArgumentResolverTests {
 
 	private final ModelMethodArgumentResolver resolver =
 			new ModelMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -50,7 +50,7 @@ public class ModelMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.resolvable.arg(Model.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(
@@ -62,7 +62,7 @@ public class ModelMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgument() {
+	void resolveArgument() {
 		testResolveArgument(this.resolvable.arg(Model.class));
 		testResolveArgument(this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class));
 		testResolveArgument(this.resolvable.arg(ModelMap.class));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -86,7 +86,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	private void doTest(String url, String expected) throws Exception {
+	private void doTest(String url, String expected) {
 		assertThat(performGet(url, new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
@@ -115,14 +115,14 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	}
 
 	@Test
-	public void globalExceptionHandlerWithHandlerNotFound() throws Exception {
+	void globalExceptionHandlerWithHandlerNotFound() throws Exception {
 		startServer(new ReactorHttpServer());
 
 		assertThatExceptionOfType(HttpStatusCodeException.class)
 				.isThrownBy(() -> performGet("/no-such-handler", new HttpHeaders(), String.class))
 				.satisfies(ex -> {
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-					assertThat(ex.getResponseBodyAsString()).isEqualTo("" +
+					assertThat(ex.getResponseBodyAsString()).isEqualTo(
 							"{\"type\":\"about:blank\"," +
 							"\"title\":\"Not Found\"," +
 							"\"status\":404," +
@@ -131,7 +131,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	}
 
 	@Test
-	public void globalExceptionHandlerWithMissingRequestParameter() throws Exception {
+	void globalExceptionHandlerWithMissingRequestParameter() throws Exception {
 		startServer(new ReactorHttpServer());
 
 		assertThatExceptionOfType(HttpStatusCodeException.class)
@@ -198,7 +198,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		}
 
 		@GetMapping(path = "/SPR-16318", produces = "text/plain")
-		public Mono<String> handleTextPlain() throws Exception {
+		public Mono<String> handleTextPlain() {
 			return Mono.error(new Spr16318Exception());
 		}
 

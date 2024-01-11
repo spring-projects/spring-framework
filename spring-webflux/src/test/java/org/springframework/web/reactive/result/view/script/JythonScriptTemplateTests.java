@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class JythonScriptTemplateTests {
+class JythonScriptTemplateTests {
 
 	@Test
-	public void renderTemplate() throws Exception {
+	void renderTemplate() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("title", "Layout example");
 		model.put("body", "This is the body");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class DispatcherHandlerErrorTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(TestConfig.class);
 		context.refresh();
@@ -88,7 +88,7 @@ public class DispatcherHandlerErrorTests {
 
 
 	@Test
-	public void noHandler() {
+	void noHandler() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/does-not-exist"));
 		Mono<Void> mono = this.dispatcherHandler.handle(exchange);
 
@@ -106,7 +106,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void noStaticResource() {
+	void noStaticResource() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(StaticResourceConfig.class);
 		context.refresh();
@@ -128,7 +128,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void controllerReturnsMonoError() {
+	void controllerReturnsMonoError() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/error-signal"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -138,7 +138,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void controllerThrowsException() {
+	void controllerThrowsException() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/raise-exception"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -148,7 +148,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void unknownReturnType() {
+	void unknownReturnType() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-return-type"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -161,7 +161,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void responseBodyMessageConversionError() {
+	void responseBodyMessageConversionError() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.post("/request-body").accept(APPLICATION_JSON).body("body"));
 
@@ -173,7 +173,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void requestBodyError() {
+	void requestBodyError() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.post("/request-body").body(Mono.error(EXCEPTION)));
 
@@ -185,7 +185,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void webExceptionHandler() {
+	void webExceptionHandler() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-argument-type"));
 
 		List<WebExceptionHandler> handlers = Collections.singletonList(new ServerError500ExceptionHandler());

@@ -34,19 +34,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class ContentBasedVersionStrategyTests {
+class ContentBasedVersionStrategyTests {
 
 	private ContentVersionStrategy strategy = new ContentVersionStrategy();
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		VersionResourceResolver versionResourceResolver = new VersionResourceResolver();
 		versionResourceResolver.setStrategyMap(Collections.singletonMap("/**", this.strategy));
 	}
 
 	@Test
-	public void extractVersion() {
+	void extractVersion() {
 		String hash = "7fbe76cdac6093784895bb4989203e5a";
 		String path = "font-awesome/css/font-awesome.min-" + hash + ".css";
 
@@ -55,7 +55,7 @@ public class ContentBasedVersionStrategyTests {
 	}
 
 	@Test
-	public void removeVersion() {
+	void removeVersion() {
 		String hash = "7fbe76cdac6093784895bb4989203e5a";
 		String path = "font-awesome/css/font-awesome.min%s%s.css";
 
@@ -63,7 +63,7 @@ public class ContentBasedVersionStrategyTests {
 	}
 
 	@Test
-	public void getResourceVersion() throws Exception {
+	void getResourceVersion() throws Exception {
 		Resource expected = new ClassPathResource("test/bar.css", getClass());
 		String hash = DigestUtils.md5DigestAsHex(FileCopyUtils.copyToByteArray(expected.getInputStream()));
 
@@ -71,7 +71,7 @@ public class ContentBasedVersionStrategyTests {
 	}
 
 	@Test
-	public void addVersionToUrl() {
+	void addVersionToUrl() {
 		assertThat(this.strategy.addVersion("test/bar.css", "123")).isEqualTo("test/bar-123.css");
 	}
 

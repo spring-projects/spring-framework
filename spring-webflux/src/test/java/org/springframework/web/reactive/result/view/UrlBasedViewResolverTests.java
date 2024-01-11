@@ -39,20 +39,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-public class UrlBasedViewResolverTests {
+class UrlBasedViewResolverTests {
 
 	private final UrlBasedViewResolver resolver = new UrlBasedViewResolver();
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.refresh();
 		this.resolver.setApplicationContext(context);
 	}
 
 	@Test
-	public void urlBasedViewResolverOverridesCustomRequestContextAttributeWithNonNullValue() throws Exception {
+	void urlBasedViewResolverOverridesCustomRequestContextAttributeWithNonNullValue() {
 		assertThat(new TestView().getRequestContextAttribute())
 			.as("requestContextAttribute when instantiated directly")
 			.isEqualTo("testRequestContext");
@@ -73,7 +73,7 @@ public class UrlBasedViewResolverTests {
 	}
 
 	@Test
-	public void urlBasedViewResolverDoesNotOverrideCustomRequestContextAttributeWithNull() throws Exception {
+	void urlBasedViewResolverDoesNotOverrideCustomRequestContextAttributeWithNull() {
 		assertThat(new TestView().getRequestContextAttribute())
 			.as("requestContextAttribute when instantiated directly")
 			.isEqualTo("testRequestContext");
@@ -93,7 +93,7 @@ public class UrlBasedViewResolverTests {
 	}
 
 	@Test
-	public void viewNames() throws Exception {
+	void viewNames() {
 		this.resolver.setViewClass(TestView.class);
 		this.resolver.setViewNames("my*");
 
@@ -105,7 +105,7 @@ public class UrlBasedViewResolverTests {
 	}
 
 	@Test
-	public void redirectView() throws Exception {
+	void redirectView() {
 		Mono<View> mono = this.resolver.resolveViewName("redirect:foo", Locale.US);
 
 		StepVerifier.create(mono)
@@ -120,7 +120,7 @@ public class UrlBasedViewResolverTests {
 	}
 
 	@Test
-	public void customizedRedirectView() throws Exception {
+	void customizedRedirectView() {
 		this.resolver.setRedirectViewProvider(url -> new RedirectView(url, HttpStatus.FOUND));
 		Mono<View> mono = this.resolver.resolveViewName("redirect:foo", Locale.US);
 
@@ -143,7 +143,7 @@ public class UrlBasedViewResolverTests {
 		}
 
 		@Override
-		public boolean checkResourceExists(Locale locale) throws Exception {
+		public boolean checkResourceExists(Locale locale) {
 			return true;
 		}
 

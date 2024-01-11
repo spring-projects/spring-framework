@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,9 +325,7 @@ class BodyExtractorsTests {
 					assertThat(form).as("Invalid result").hasSize(3);
 					assertThat(form.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 					List<String> values = form.get("name 2");
-					assertThat(values).as("Invalid result").hasSize(2);
-					assertThat(values).element(0).as("Invalid result").isEqualTo("value 2+1");
-					assertThat(values).element(1).as("Invalid result").isEqualTo("value 2+2");
+					assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
 					assertThat(form.getFirst("name 3")).as("Invalid result").isNull();
 				})
 				.expectComplete()

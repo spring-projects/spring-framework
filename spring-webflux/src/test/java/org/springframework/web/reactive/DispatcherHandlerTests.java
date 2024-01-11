@@ -48,7 +48,7 @@ import static org.mockito.Mockito.withSettings;
  *
  * @author Rossen Stoyanchev
  */
-public class DispatcherHandlerTests {
+class DispatcherHandlerTests {
 
 	private static final MethodParameter RETURN_TYPE =
 			ResolvableMethod.on(DispatcherHandler.class).named("handle").resolveReturnType();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,10 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Arjen Poutsma
  */
-public class DefaultRenderingResponseTests {
+class DefaultRenderingResponseTests {
 
 	@Test
-	public void create() {
+	void create() {
 		String name = "foo";
 		Mono<RenderingResponse> result = RenderingResponse.create(name).build();
 		StepVerifier.create(result)
@@ -70,7 +70,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void headers() {
+	void headers() {
 		HttpHeaders headers = new HttpHeaders();
 		Mono<RenderingResponse> result = RenderingResponse.create("foo").headers(headers).build();
 		StepVerifier.create(result)
@@ -81,7 +81,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttribute() {
+	void modelAttribute() {
 		Mono<RenderingResponse> result = RenderingResponse.create("foo")
 				.modelAttribute("foo", "bar").build();
 		StepVerifier.create(result)
@@ -91,7 +91,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttributeConventions() {
+	void modelAttributeConventions() {
 		Mono<RenderingResponse> result = RenderingResponse.create("foo")
 				.modelAttribute("bar").build();
 		StepVerifier.create(result)
@@ -101,7 +101,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttributes() {
+	void modelAttributes() {
 		Map<String, String> model = Collections.singletonMap("foo", "bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("foo")
 				.modelAttributes(model).build();
@@ -112,7 +112,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttributesConventions() {
+	void modelAttributesConventions() {
 		Set<String> model = Collections.singleton("bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("foo")
 				.modelAttributes(model).build();
@@ -123,7 +123,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void cookies() {
+	void cookies() {
 		MultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
 		newCookies.add("name", ResponseCookie.from("name", "value").build());
 		Mono<RenderingResponse> result =
@@ -136,7 +136,7 @@ public class DefaultRenderingResponseTests {
 
 
 	@Test
-	public void render() {
+	void render() {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("view").modelAttributes(model).build();
 
@@ -160,7 +160,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void writeTo() {
+	void writeTo() {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
 		RenderingResponse renderingResponse = RenderingResponse.create("view")
 				.status(HttpStatus.FOUND)
@@ -195,7 +195,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void defaultContentType() {
+	void defaultContentType() {
 		Mono<RenderingResponse> result = RenderingResponse.create("view").build();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
@@ -228,7 +228,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void notModifiedEtag() {
+	void notModifiedEtag() {
 		String etag = "\"foo\"";
 		RenderingResponse responseMono = RenderingResponse.create("bar")
 				.header(HttpHeaders.ETAG, etag)
@@ -250,9 +250,9 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void notModifiedLastModified() {
+	void notModifiedLastModified() {
 		ZonedDateTime now = ZonedDateTime.now();
-		ZonedDateTime oneMinuteBeforeNow = now.minus(1, ChronoUnit.MINUTES);
+		ZonedDateTime oneMinuteBeforeNow = now.minusMinutes(1);
 
 		RenderingResponse responseMono = RenderingResponse.create("bar")
 				.header(HttpHeaders.LAST_MODIFIED, DateTimeFormatter.RFC_1123_DATE_TIME.format(oneMinuteBeforeNow))

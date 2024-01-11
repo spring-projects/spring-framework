@@ -58,7 +58,7 @@ import static org.springframework.web.testfixture.method.MvcAnnotationPredicates
  *
  * @author Rossen Stoyanchev
  */
-public class RequestBodyMethodArgumentResolverTests {
+class RequestBodyMethodArgumentResolverTests {
 
 	private RequestBodyMethodArgumentResolver resolver;
 
@@ -66,7 +66,7 @@ public class RequestBodyMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 		this.resolver = new RequestBodyMethodArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
@@ -74,7 +74,7 @@ public class RequestBodyMethodArgumentResolverTests {
 
 
 	@Test
-	public void supports() {
+	void supports() {
 		MethodParameter param;
 
 		param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
@@ -85,7 +85,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void stringBody() {
+	void stringBody() {
 		String body = "line1";
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		String value = resolveValue(param, body);
@@ -94,14 +94,14 @@ public class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithString() {
+	void emptyBodyWithString() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		assertThatExceptionOfType(ServerWebInputException.class).isThrownBy(() ->
 				resolveValueWithEmptyBody(param));
 	}
 
 	@Test
-	public void emptyBodyWithStringNotRequired() {
+	void emptyBodyWithStringNotRequired() {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(String.class);
 		String body = resolveValueWithEmptyBody(param);
 
@@ -149,7 +149,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithSingle() {
+	void emptyBodyWithSingle() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Single.class, String.class);
 		Single<String> single = resolveValueWithEmptyBody(param);
 		StepVerifier.create(single.toFlowable())
@@ -166,7 +166,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithMaybe() {
+	void emptyBodyWithMaybe() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Maybe.class, String.class);
 		Maybe<String> maybe = resolveValueWithEmptyBody(param);
 		StepVerifier.create(maybe.toFlowable())
@@ -183,7 +183,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithObservable() {
+	void emptyBodyWithObservable() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Observable.class, String.class);
 		Observable<String> observable = resolveValueWithEmptyBody(param);
 		StepVerifier.create(observable.toFlowable(BackpressureStrategy.BUFFER))
@@ -200,7 +200,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithCompletableFuture() {
+	void emptyBodyWithCompletableFuture() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(CompletableFuture.class, String.class);
 		CompletableFuture<String> future = resolveValueWithEmptyBody(param);
 		future.whenComplete((text, ex) -> {

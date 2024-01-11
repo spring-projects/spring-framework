@@ -33,13 +33,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Rossen Stoyanchev
  */
-public class HeaderContentTypeResolverTests {
+class HeaderContentTypeResolverTests {
 
 	private final HeaderContentTypeResolver resolver = new HeaderContentTypeResolver();
 
 
 	@Test
-	public void resolveMediaTypes() throws Exception {
+	void resolveMediaTypes() {
 		String header = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c";
 		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(
 				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
@@ -52,7 +52,7 @@ public class HeaderContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveMediaTypesParseError() throws Exception {
+	void resolveMediaTypesParseError() {
 		String header = "textplain; q=0.5";
 		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
 				this.resolver.resolveMediaTypes(

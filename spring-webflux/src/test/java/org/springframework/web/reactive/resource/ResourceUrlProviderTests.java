@@ -46,7 +46,7 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class ResourceUrlProviderTests {
+class ResourceUrlProviderTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
@@ -129,7 +129,6 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test  // SPR-12592
-	@SuppressWarnings("resource")
 	void initializeOnce() {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());

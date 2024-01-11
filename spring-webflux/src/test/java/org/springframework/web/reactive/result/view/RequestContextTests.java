@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestContextTests {
+class RequestContextTests {
 
 	private final MockServerWebExchange exchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/foo/path").contextPath("/foo"));
@@ -44,19 +44,19 @@ public class RequestContextTests {
 
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		this.applicationContext = new GenericApplicationContext();
 		this.applicationContext.refresh();
 	}
 
 	@Test
-	public void testGetContextUrl() throws Exception {
+	void testGetContextUrl() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		assertThat(context.getContextUrl("bar")).isEqualTo("/foo/bar");
 	}
 
 	@Test
-	public void testGetContextUrlWithMap() throws Exception {
+	void testGetContextUrlWithMap() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -65,7 +65,7 @@ public class RequestContextTests {
 	}
 
 	@Test
-	public void testGetContextUrlWithMapEscaping() throws Exception {
+	void testGetContextUrlWithMapEscaping() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");

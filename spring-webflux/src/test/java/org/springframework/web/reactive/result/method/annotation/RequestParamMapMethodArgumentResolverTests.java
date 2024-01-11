@@ -42,7 +42,7 @@ import static org.springframework.web.testfixture.method.MvcAnnotationPredicates
  *
  * @author Rossen Stoyanchev
  */
-public class RequestParamMapMethodArgumentResolverTests {
+class RequestParamMapMethodArgumentResolverTests {
 
 	private final RequestParamMapMethodArgumentResolver resolver =
 			new RequestParamMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -51,7 +51,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
@@ -70,7 +70,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMapArgumentWithQueryString() {
+	void resolveMapArgumentWithQueryString() {
 		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		Object result= resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/path?foo=bar")));
 		boolean condition = result instanceof Map;
@@ -79,7 +79,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMultiValueMapArgument() {
+	void resolveMultiValueMapArgument() {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?foo=bar&foo=baz"));
 		Object result= resolve(param, exchange);

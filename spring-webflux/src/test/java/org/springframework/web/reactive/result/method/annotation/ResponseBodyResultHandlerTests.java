@@ -64,13 +64,13 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class ResponseBodyResultHandlerTests {
+class ResponseBodyResultHandlerTests {
 
 	private ResponseBodyResultHandler resultHandler;
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
 		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writerList.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
@@ -83,7 +83,7 @@ public class ResponseBodyResultHandlerTests {
 
 
 	@Test
-	public void supports() {
+	void supports() {
 		Object controller = new TestController();
 		Method method;
 
@@ -96,7 +96,7 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	@Test
-	public void supportsRestController() {
+	void supportsRestController() {
 		Object controller = new TestRestController();
 		Method method;
 
@@ -156,7 +156,7 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	@Test
-	public void defaultOrder() {
+	void defaultOrder() {
 		assertThat(this.resultHandler.getOrder()).isEqualTo(100);
 	}
 

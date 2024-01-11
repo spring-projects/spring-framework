@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,17 +135,12 @@ class WebClientObservationTests {
 
 	@Test
 	void setsCurrentObservationInReactorContext() {
-		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
-			@Override
-			public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction chain) {
-				return chain.exchange(request).contextWrite(context -> {
-					Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
-					assertThat(currentObservation).isNotNull();
-					assertThat(currentObservation.getContext()).isInstanceOf(ClientRequestObservationContext.class);
-					return context;
-				});
-			}
-		};
+		ExchangeFilterFunction assertionFilter = (request, chain) -> chain.exchange(request).contextWrite(context -> {
+			Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
+			assertThat(currentObservation).isNotNull();
+			assertThat(currentObservation.getContext()).isInstanceOf(ClientRequestObservationContext.class);
+			return context;
+		});
 		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
 				.retrieve().bodyToMono(Void.class)
 				.block(Duration.ofSeconds(10));
@@ -154,17 +149,14 @@ class WebClientObservationTests {
 
 	@Test
 	void setsCurrentObservationContextAsRequestAttribute() {
-		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
-			@Override
-			public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction chain) {
-				Optional<ClientRequestObservationContext> observationContext = ClientRequestObservationContext.findCurrent(request);
-				assertThat(observationContext).isPresent();
-				return chain.exchange(request).contextWrite(context -> {
-					Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
-					assertThat(currentObservation.getContext()).isEqualTo(observationContext.get());
-					return context;
-				});
-			}
+		ExchangeFilterFunction assertionFilter = (request, chain) -> {
+			Optional<ClientRequestObservationContext> observationContext = ClientRequestObservationContext.findCurrent(request);
+			assertThat(observationContext).isPresent();
+			return chain.exchange(request).contextWrite(context -> {
+				Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
+				assertThat(currentObservation.getContext()).isEqualTo(observationContext.get());
+				return context;
+			});
 		};
 		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
 				.retrieve().bodyToMono(Void.class)
@@ -211,7 +203,7 @@ class WebClientObservationTests {
 
 	static class MockClientHeaders implements ClientResponse.Headers {
 
-		private HttpHeaders headers = new HttpHeaders();
+		private final HttpHeaders headers = new HttpHeaders();
 
 		@Override
 		public OptionalLong contentLength() {

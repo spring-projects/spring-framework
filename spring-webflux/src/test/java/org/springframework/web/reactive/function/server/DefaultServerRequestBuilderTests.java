@@ -40,10 +40,10 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
-public class DefaultServerRequestBuilderTests {
+class DefaultServerRequestBuilderTests {
 
 	@Test
-	public void from() {
+	void from() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("https://example.com")
 				.header("foo", "bar")
 				.build();

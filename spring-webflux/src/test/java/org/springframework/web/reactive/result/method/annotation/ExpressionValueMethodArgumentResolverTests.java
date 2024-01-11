@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class ExpressionValueMethodArgumentResolverTests {
+class ExpressionValueMethodArgumentResolverTests {
 
 	private ExpressionValueMethodArgumentResolver resolver;
 
@@ -51,8 +51,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("resource")
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
@@ -66,12 +65,12 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.paramSystemProperty)).isTrue();
 	}
 
 	@Test
-	public void doesNotSupport() {
+	void doesNotSupport() {
 		assertThat(this.resolver.supportsParameter(this.paramNotSupported)).isFalse();
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.supportsParameter(this.paramAlsoNotSupported))
@@ -79,7 +78,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveSystemProperty() {
+	void resolveSystemProperty() {
 		System.setProperty("systemProperty", "22");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(

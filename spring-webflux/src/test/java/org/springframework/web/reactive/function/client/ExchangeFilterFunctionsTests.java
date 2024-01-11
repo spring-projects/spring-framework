@@ -44,13 +44,13 @@ import static org.mockito.Mockito.mock;
  *
  * @author Arjen Poutsma
  */
-public class ExchangeFilterFunctionsTests {
+class ExchangeFilterFunctionsTests {
 
 	private static final URI DEFAULT_URL = URI.create("https://example.com");
 
 
 	@Test
-	public void andThen() {
+	void andThen() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock();
 		ExchangeFunction exchange = r -> Mono.just(response);
@@ -60,7 +60,6 @@ public class ExchangeFilterFunctionsTests {
 			assertThat(filtersInvoked[0]).isFalse();
 			assertThat(filtersInvoked[1]).isFalse();
 			filtersInvoked[0] = true;
-			assertThat(filtersInvoked[1]).isFalse();
 			return n.exchange(r);
 		};
 		ExchangeFilterFunction filter2 = (r, n) -> {
@@ -80,7 +79,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void apply() {
+	void apply() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock();
 		ExchangeFunction exchange = r -> Mono.just(response);
@@ -99,7 +98,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void basicAuthenticationUsernamePassword() {
+	void basicAuthenticationUsernamePassword() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock();
 
@@ -116,7 +115,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void basicAuthenticationInvalidCharacters() {
+	void basicAuthenticationInvalidCharacters() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ExchangeFunction exchange = r -> Mono.just(mock());
 
@@ -163,7 +162,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void statusHandlerMatch() {
+	void statusHandlerMatch() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock();
 		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
@@ -181,7 +180,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void statusHandlerNoMatch() {
+	void statusHandlerNoMatch() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock();
 		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
@@ -197,7 +196,7 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	@Test
-	public void limitResponseSize() {
+	void limitResponseSize() {
 		DataBuffer b1 = dataBuffer("foo");
 		DataBuffer b2 = dataBuffer("bar");
 		DataBuffer b3 = dataBuffer("baz");

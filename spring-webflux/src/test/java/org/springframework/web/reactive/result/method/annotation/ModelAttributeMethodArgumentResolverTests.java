@@ -341,7 +341,7 @@ class ModelAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	void validationErrorWithoutBindingForSingle() throws Exception {
+	void validationErrorWithoutBindingForSingle() {
 		MethodParameter parameter = this.testMethod.annotPresent(ModelAttribute.class).arg(Single.class, ValidatedPojo.class);
 
 		testValidationErrorWithoutBinding(parameter, resolvedArgumentMono -> {

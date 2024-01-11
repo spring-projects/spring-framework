@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 /**
  * @author Arjen Poutsma
  */
-public class RouterFunctionTests {
+class RouterFunctionTests {
 
 	@Test
-	public void and() {
+	void and() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction1 = request -> Mono.empty();
 		RouterFunction<ServerResponse> routerFunction2 = request -> Mono.just(handlerFunction);
@@ -58,7 +58,7 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void andOther() {
+	void andOther() {
 		HandlerFunction<ServerResponse> handlerFunction =
 				request -> ServerResponse.ok().bodyValue("42");
 		RouterFunction<?> routerFunction1 = request -> Mono.empty();
@@ -79,7 +79,7 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void andRoute() {
+	void andRoute() {
 		RouterFunction<ServerResponse> routerFunction1 = request -> Mono.empty();
 		RequestPredicate requestPredicate = request -> true;
 
@@ -97,7 +97,7 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void filter() {
+	void filter() {
 		Mono<String> stringMono = Mono.just("42");
 		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction =
 				request -> EntityResponse.fromPublisher(stringMono, String.class).build();
@@ -133,7 +133,7 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void attributes() {
+	void attributes() {
 		RouterFunction<ServerResponse> route = RouterFunctions.route(
 				GET("/atts/1"), request -> ServerResponse.ok().build())
 				.withAttribute("foo", "bar")

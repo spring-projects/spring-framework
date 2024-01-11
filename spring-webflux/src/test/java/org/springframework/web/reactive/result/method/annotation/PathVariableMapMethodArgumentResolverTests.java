@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class PathVariableMapMethodArgumentResolverTests {
+class PathVariableMapMethodArgumentResolverTests {
 
 	private PathVariableMapMethodArgumentResolver resolver;
 
@@ -55,7 +55,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolver = new PathVariableMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
@@ -67,7 +67,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(resolver.supportsParameter(paramMap)).isTrue();
 		assertThat(resolver.supportsParameter(paramNamedMap)).isFalse();
 		assertThat(resolver.supportsParameter(paramMapNoAnnot)).isFalse();
@@ -77,7 +77,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name1", "value1");
 		uriTemplateVars.put("name2", "value2");
@@ -90,7 +90,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNoUriVars() throws Exception {
+	void resolveArgumentNoUriVars() {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new BindingContext(), this.exchange);
 		Object result = mono.block();
 

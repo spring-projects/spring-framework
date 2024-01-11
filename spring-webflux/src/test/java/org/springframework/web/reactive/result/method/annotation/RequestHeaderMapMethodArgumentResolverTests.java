@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestHeaderMapMethodArgumentResolverTests {
+class RequestHeaderMapMethodArgumentResolverTests {
 
 	private RequestHeaderMapMethodArgumentResolver resolver;
 
@@ -55,7 +55,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
@@ -69,7 +69,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(resolver.supportsParameter(paramMap)).as("Map parameter not supported").isTrue();
 		assertThat(resolver.supportsParameter(paramMultiValueMap)).as("MultiValueMap parameter not supported").isTrue();
 		assertThat(resolver.supportsParameter(paramHttpHeaders)).as("HttpHeaders parameter not supported").isTrue();
@@ -80,7 +80,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMapArgument() {
+	void resolveMapArgument() {
 		String name = "foo";
 		String value = "bar";
 		Map<String, String> expected = Collections.singletonMap(name, value);
@@ -116,7 +116,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveHttpHeadersArgument() {
+	void resolveHttpHeadersArgument() {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";

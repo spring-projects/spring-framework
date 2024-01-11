@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class ServerWebExchangeMethodArgumentResolverTests {
+class ServerWebExchangeMethodArgumentResolverTests {
 
 	private final ServerWebExchangeMethodArgumentResolver resolver =
 			new ServerWebExchangeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -57,7 +57,7 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ServerWebExchange.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class))).isTrue();
@@ -76,7 +76,7 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgument() {
+	void resolveArgument() {
 		testResolveArgument(this.testMethod.arg(ServerWebExchange.class), this.exchange);
 		testResolveArgument(this.testMethod.arg(ServerHttpRequest.class), this.exchange.getRequest());
 		testResolveArgument(this.testMethod.arg(ServerHttpResponse.class), this.exchange.getResponse());
@@ -91,7 +91,7 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveUriComponentsBuilder() {
+	void resolveUriComponentsBuilder() {
 		MethodParameter param = this.testMethod.arg(UriComponentsBuilder.class);
 		Object value = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block();
 

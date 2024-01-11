@@ -61,7 +61,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class ModelInitializerTests {
+class ModelInitializerTests {
 
 	private static final Duration TIMEOUT = Duration.ofMillis(5000);
 
@@ -72,7 +72,7 @@ public class ModelInitializerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		ArgumentResolverConfigurer resolverConfigurer = new ArgumentResolverConfigurer();
@@ -87,7 +87,7 @@ public class ModelInitializerTests {
 
 
 	@Test
-	public void initBinderMethod() {
+	void initBinderMethod() {
 		Validator validator = mock();
 
 		TestController controller = new TestController();
@@ -104,7 +104,7 @@ public class ModelInitializerTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void modelAttributeMethods() {
+	void modelAttributeMethods() {
 		TestController controller = new TestController();
 		InitBinderBindingContext context = getBindingContext(controller);
 
@@ -132,7 +132,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void saveModelAttributeToSession() {
+	void saveModelAttributeToSession() {
 		TestController controller = new TestController();
 		InitBinderBindingContext context = getBindingContext(controller);
 
@@ -150,7 +150,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void retrieveModelAttributeFromSession() {
+	void retrieveModelAttributeFromSession() {
 		WebSession session = this.exchange.getSession().block(TIMEOUT);
 		assertThat(session).isNotNull();
 
@@ -170,7 +170,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void requiredSessionAttributeMissing() {
+	void requiredSessionAttributeMissing() {
 		TestController controller = new TestController();
 		InitBinderBindingContext context = getBindingContext(controller);
 
@@ -182,7 +182,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void clearModelAttributeFromSession() {
+	void clearModelAttributeFromSession() {
 		WebSession session = this.exchange.getSession().block(TIMEOUT);
 		assertThat(session).isNotNull();
 

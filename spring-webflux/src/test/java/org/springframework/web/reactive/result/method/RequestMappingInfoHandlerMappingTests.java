@@ -82,7 +82,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class RequestMappingInfoHandlerMappingTests {
+class RequestMappingInfoHandlerMappingTests {
 
 	private static final HandlerMethod handlerMethod = new HandlerMethod(new TestController(),
 			ClassUtils.getMethod(TestController.class, "dummy"));
@@ -91,14 +91,14 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());
 	}
 
 
 	@Test
-	public void getHandlerDirectMatch() {
+	void getHandlerDirectMatch() {
 		Method expected = on(TestController.class).annot(getMapping("/foo").params()).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -107,7 +107,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerGlobMatch() {
+	void getHandlerGlobMatch() {
 		Method expected = on(TestController.class).annot(requestMapping("/ba*").method(GET, HEAD)).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/bar"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -116,7 +116,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerEmptyPathMatch() {
+	void getHandlerEmptyPathMatch() {
 		Method expected = on(TestController.class).annot(requestMapping("")).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -124,7 +124,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerBestMatch() {
+	void getHandlerBestMatch() {
 		Method expected = on(TestController.class).annot(getMapping("/foo").params("p")).resolveMethod();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/foo?p=anything"));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
@@ -133,7 +133,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerRequestMethodNotAllowed() {
+	void getHandlerRequestMethodNotAllowed() {
 		ServerWebExchange exchange = MockServerWebExchange.from(post("/bar"));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
@@ -159,7 +159,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerTestInvalidContentType() {
+	void getHandlerTestInvalidContentType() {
 		MockServerHttpRequest request = put("/person/1").header("content-type", "bogus").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
@@ -185,7 +185,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerHttpOptions() {
+	void getHandlerHttpOptions() {
 		List<HttpMethod> allMethodExceptTrace = new ArrayList<>(Arrays.asList(HttpMethod.values()));
 		allMethodExceptTrace.remove(HttpMethod.TRACE);
 
@@ -198,7 +198,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void getHandlerProducibleMediaTypesAttribute() {
+	void getHandlerProducibleMediaTypesAttribute() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/content").accept(MediaType.APPLICATION_XML));
 		this.handlerMapping.getHandler(exchange).block();
 
@@ -247,7 +247,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchBestMatchingPatternAttribute() {
+	void handleMatchBestMatchingPatternAttribute() {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
 		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
@@ -260,7 +260,6 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
 	public void handleMatchBestMatchingPatternAttributeInObservationContext() {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
@@ -280,7 +279,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchMatrixVariables() {
+	void handleMatchMatrixVariables() {
 		MultiValueMap<String, String> matrixVariables;
 		Map<String, String> uriVariables;
 
@@ -313,7 +312,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handleMatchMatrixVariablesDecoding() {
+	void handleMatchMatrixVariablesDecoding() {
 		MockServerHttpRequest request = method(HttpMethod.GET, URI.create("/cars;mvar=a%2Fb")).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		handleMatch(exchange, "/{cars}");
@@ -327,7 +326,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	public void handlePatchUnsupportedMediaType() {
+	void handlePatchUnsupportedMediaType() {
 		MockServerHttpRequest request = MockServerHttpRequest.patch("/qux")
 				.header("content-type", "application/xml")
 				.build();

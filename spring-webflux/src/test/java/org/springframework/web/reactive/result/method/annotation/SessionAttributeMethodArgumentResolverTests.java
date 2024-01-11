@@ -61,7 +61,6 @@ class SessionAttributeMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("resource")
 	void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();

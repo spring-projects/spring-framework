@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ControllerMethodResolverTests {
+class ControllerMethodResolverTests {
 
 	private ControllerMethodResolver methodResolver;
 
@@ -62,7 +62,7 @@ public class ControllerMethodResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		ArgumentResolverConfigurer resolvers = new ArgumentResolverConfigurer();
 		resolvers.addCustomResolver(new CustomArgumentResolver());
 		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
@@ -85,7 +85,7 @@ public class ControllerMethodResolverTests {
 
 
 	@Test
-	public void requestMappingArgumentResolvers() {
+	void requestMappingArgumentResolvers() {
 		InvocableHandlerMethod invocable = this.methodResolver.getRequestMappingMethod(this.handlerMethod);
 		List<HandlerMethodArgumentResolver> resolvers = invocable.getResolvers();
 
@@ -123,7 +123,7 @@ public class ControllerMethodResolverTests {
 	}
 
 	@Test
-	public void modelAttributeArgumentResolvers() {
+	void modelAttributeArgumentResolvers() {
 		List<InvocableHandlerMethod> methods = this.methodResolver.getModelAttributeMethods(this.handlerMethod);
 
 		assertThat(methods).as("Expected one each from Controller + ControllerAdvice").hasSize(2);
@@ -160,7 +160,7 @@ public class ControllerMethodResolverTests {
 	}
 
 	@Test
-	public void initBinderArgumentResolvers() {
+	void initBinderArgumentResolvers() {
 		List<SyncInvocableHandlerMethod> methods =
 				this.methodResolver.getInitBinderMethods(this.handlerMethod);
 
@@ -190,7 +190,7 @@ public class ControllerMethodResolverTests {
 	}
 
 	@Test
-	public void exceptionHandlerArgumentResolvers() {
+	void exceptionHandlerArgumentResolvers() {
 		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(
 				new ResponseStatusException(HttpStatus.BAD_REQUEST, "reason"), this.handlerMethod);
 
@@ -225,7 +225,7 @@ public class ControllerMethodResolverTests {
 	}
 
 	@Test
-	public void exceptionHandlerFromControllerAdvice() {
+	void exceptionHandlerFromControllerAdvice() {
 		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(
 				new IllegalStateException("reason"), this.handlerMethod);
 

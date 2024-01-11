@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class ResourceTransformerSupportTests {
+class ResourceTransformerSupportTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
@@ -50,7 +50,7 @@ public class ResourceTransformerSupportTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		PathResourceResolver pathResolver = new PathResourceResolver();
@@ -78,7 +78,7 @@ public class ResourceTransformerSupportTests {
 
 
 	@Test
-	public void resolveUrlPath() {
+	void resolveUrlPath() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
 		String resourcePath = "/resources/bar.css";
 		Resource resource = getResource("main.css");
@@ -89,7 +89,7 @@ public class ResourceTransformerSupportTests {
 	}
 
 	@Test
-	public void resolveUrlPathWithRelativePath() {
+	void resolveUrlPathWithRelativePath() {
 		Resource resource = getResource("main.css");
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		String actual = this.transformer.resolveUrlPath("bar.css", exchange, resource, this.chain).block(TIMEOUT);
@@ -98,7 +98,7 @@ public class ResourceTransformerSupportTests {
 	}
 
 	@Test
-	public void resolveUrlPathWithRelativePathInParentDirectory() {
+	void resolveUrlPathWithRelativePathInParentDirectory() {
 		Resource resource = getResource("images/image.png");
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		String actual = this.transformer.resolveUrlPath("../bar.css", exchange, resource, this.chain).block(TIMEOUT);
@@ -107,7 +107,7 @@ public class ResourceTransformerSupportTests {
 	}
 
 	@Test
-	public void toAbsolutePath() {
+	void toAbsolutePath() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
 		String absolute = this.transformer.toAbsolutePath("img/image.png", exchange);
 		assertThat(absolute).isEqualTo("/resources/img/image.png");

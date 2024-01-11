@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpMessageWriterViewTests {
+class HttpMessageWriterViewTests {
 
 	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 
@@ -54,7 +54,7 @@ public class HttpMessageWriterViewTests {
 
 
 	@Test
-	public void supportedMediaTypes() {
+	void supportedMediaTypes() {
 		assertThat(this.view.getSupportedMediaTypes()).containsExactly(
 				MediaType.APPLICATION_JSON,
 				MediaType.parseMediaType("application/*+json"),
@@ -62,7 +62,7 @@ public class HttpMessageWriterViewTests {
 	}
 
 	@Test
-	public void singleMatch() throws Exception {
+	void singleMatch() throws Exception {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", Collections.singleton("bar1"));
 		this.model.addAttribute("foo2", Collections.singleton("bar2"));
@@ -72,7 +72,7 @@ public class HttpMessageWriterViewTests {
 	}
 
 	@Test
-	public void noMatch() throws Exception {
+	void noMatch() throws Exception {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", "bar1");
 
@@ -80,7 +80,7 @@ public class HttpMessageWriterViewTests {
 	}
 
 	@Test
-	public void noMatchBecauseNotSupported() throws Exception {
+	void noMatchBecauseNotSupported() throws Exception {
 		this.view = new HttpMessageWriterView(new Jaxb2XmlEncoder());
 		this.view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
 		this.model.addAttribute("foo1", "bar1");
@@ -89,7 +89,7 @@ public class HttpMessageWriterViewTests {
 	}
 
 	@Test
-	public void multipleMatches() throws Exception {
+	void multipleMatches() throws Exception {
 		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", Collections.singleton("bar1"));
 		this.model.addAttribute("foo2", Collections.singleton("bar2"));
@@ -99,7 +99,7 @@ public class HttpMessageWriterViewTests {
 	}
 
 	@Test
-	public void multipleMatchesNotSupported() throws Exception {
+	void multipleMatchesNotSupported() throws Exception {
 		this.view = new HttpMessageWriterView(CharSequenceEncoder.allMimeTypes());
 		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
@@ -111,7 +111,7 @@ public class HttpMessageWriterViewTests {
 	}
 
 	@Test
-	public void render() throws Exception {
+	void render() throws Exception {
 		Map<String, String> pojoData = new LinkedHashMap<>();
 		pojoData.put("foo", "f");
 		pojoData.put("bar", "b");

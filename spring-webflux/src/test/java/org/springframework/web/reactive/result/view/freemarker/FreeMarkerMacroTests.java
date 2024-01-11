@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 5.2
  */
-public class FreeMarkerMacroTests {
+class FreeMarkerMacroTests {
 
 	private static final String TEMPLATE_FILE = "test-macro.ftl";
 
@@ -73,7 +73,7 @@ public class FreeMarkerMacroTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		this.templateLoaderPath = Files.createTempDirectory("webflux-").toAbsolutePath();
 
 		this.applicationContext.refresh();
@@ -84,7 +84,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void springMacroRequestContextIsAutomaticallyExposedAsModelAttribute() throws Exception {
+	void springMacroRequestContextIsAutomaticallyExposedAsModelAttribute() throws Exception {
 		storeTemplateInTempDir("<@spring.bind \"testBean.name\"/>\nHi ${spring.status.value}");
 
 		FreeMarkerView view = new FreeMarkerView() {
@@ -116,7 +116,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void name() throws Exception {
+	void name() throws Exception {
 		testMacroOutput("NAME", "Darren");
 	}
 
@@ -134,57 +134,57 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void message() throws Exception {
+	void message() throws Exception {
 		testMacroOutput("MESSAGE", "Howdy Mundo");
 	}
 
 	@Test
-	public void defaultMessage() throws Exception {
+	void defaultMessage() throws Exception {
 		testMacroOutput("DEFAULTMESSAGE", "hi planet");
 	}
 
 	@Test
-	public void messageArgs() throws Exception {
+	void messageArgs() throws Exception {
 		testMacroOutput("MESSAGEARGS", "Howdy[World]");
 	}
 
 	@Test
-	public void messageArgsWithDefaultMessage() throws Exception {
+	void messageArgsWithDefaultMessage() throws Exception {
 		testMacroOutput("MESSAGEARGSWITHDEFAULTMESSAGE", "Hi");
 	}
 
 	@Test
-	public void url() throws Exception {
+	void url() throws Exception {
 		testMacroOutput("URL", "/springtest/aftercontext.html");
 	}
 
 	@Test
-	public void urlParams() throws Exception {
+	void urlParams() throws Exception {
 		testMacroOutput("URLPARAMS", "/springtest/aftercontext/bar?spam=bucket");
 	}
 
 	@Test
-	public void formInput() throws Exception {
+	void formInput() throws Exception {
 		testMacroOutput("FORM1", "<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	public void formInputWithCss() throws Exception {
+	void formInputWithCss() throws Exception {
 		testMacroOutput("FORM2", "<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\" >");
 	}
 
 	@Test
-	public void formTextarea() throws Exception {
+	void formTextarea() throws Exception {
 		testMacroOutput("FORM3", "<textarea id=\"name\" name=\"name\" >Darren</textarea>");
 	}
 
 	@Test
-	public void formTextareaWithCustomRowsAndColumns() throws Exception {
+	void formTextareaWithCustomRowsAndColumns() throws Exception {
 		testMacroOutput("FORM4", "<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>");
 	}
 
 	@Test
-	public void formSingleSelectFromMap() throws Exception {
+	void formSingleSelectFromMap() throws Exception {
 		testMacroOutput("FORM5",
 				"<select id=\"name\" name=\"name\" >", //
 				"<option value=\"Rob&amp;Harrop\">Rob Harrop</option>", //
@@ -195,7 +195,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void formSingleSelectFromList() throws Exception {
+	void formSingleSelectFromList() throws Exception {
 		testMacroOutput("FORM14",
 				"<select id=\"name\" name=\"name\" >", //
 				"<option value=\"Rob Harrop\">Rob Harrop</option>", //
@@ -206,7 +206,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void formMultiSelect() throws Exception {
+	void formMultiSelect() throws Exception {
 		testMacroOutput("FORM6",
 				"<select multiple=\"multiple\" id=\"spouses\" name=\"spouses\" >", //
 				"<option value=\"Rob&amp;Harrop\">Rob Harrop</option>", //
@@ -217,7 +217,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void formRadioButtons() throws Exception {
+	void formRadioButtons() throws Exception {
 		testMacroOutput("FORM7",
 				"<input type=\"radio\" id=\"name0\" name=\"name\" value=\"Rob&amp;Harrop\" >", //
 				"<label for=\"name0\">Rob Harrop</label>", //
@@ -230,28 +230,28 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void formCheckboxForStringProperty() throws Exception {
+	void formCheckboxForStringProperty() throws Exception {
 		testMacroOutput("FORM15",
 				"<input type=\"hidden\" name=\"_name\" value=\"on\"/>",
 				"<input type=\"checkbox\" id=\"name\" name=\"name\" />");
 	}
 
 	@Test
-	public void formCheckboxForBooleanProperty() throws Exception {
+	void formCheckboxForBooleanProperty() throws Exception {
 		testMacroOutput("FORM16",
 				"<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>",
 				"<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"checked\" />");
 	}
 
 	@Test
-	public void formCheckboxForNestedPath() throws Exception {
+	void formCheckboxForNestedPath() throws Exception {
 		testMacroOutput("FORM18",
 				"<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>",
 				"<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />");
 	}
 
 	@Test
-	public void formCheckboxForStringArray() throws Exception {
+	void formCheckboxForStringArray() throws Exception {
 		testMacroOutput("FORM8",
 				"<input type=\"checkbox\" id=\"stringArray0\" name=\"stringArray\" value=\"Rob&amp;Harrop\" >", //
 				"<label for=\"stringArray0\">Rob Harrop</label>", //
@@ -265,37 +265,37 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	public void formPasswordInput() throws Exception {
+	void formPasswordInput() throws Exception {
 		testMacroOutput("FORM9",
 				"<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >");
 	}
 
 	@Test
-	public void formHiddenInput() throws Exception {
+	void formHiddenInput() throws Exception {
 		testMacroOutput("FORM10",
 				"<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	public void formInputText() throws Exception {
+	void formInputText() throws Exception {
 		testMacroOutput("FORM11",
 				"<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	public void formInputHidden() throws Exception {
+	void formInputHidden() throws Exception {
 		testMacroOutput("FORM12",
 				"<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	public void formInputPassword() throws Exception {
+	void formInputPassword() throws Exception {
 		testMacroOutput("FORM13",
 				"<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >");
 	}
 
 	@Test
-	public void forInputWithNestedPath() throws Exception {
+	void forInputWithNestedPath() throws Exception {
 		testMacroOutput("FORM17",
 				"<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >");
 	}

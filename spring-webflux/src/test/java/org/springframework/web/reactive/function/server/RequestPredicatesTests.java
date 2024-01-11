@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class RequestPredicatesTests {
+class RequestPredicatesTests {
 
 
 	@Test
-	public void all() {
+	void all() {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		MockServerWebExchange mockExchange = MockServerWebExchange.from(mockRequest);
 		RequestPredicate predicate = RequestPredicates.all();
@@ -47,7 +47,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void method() {
+	void method() {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 
 		HttpMethod httpMethod = HttpMethod.GET;
@@ -61,7 +61,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void methodCorsPreFlight() {
+	void methodCorsPreFlight() {
 		RequestPredicate predicate = RequestPredicates.method(HttpMethod.PUT);
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.options("https://example.com")
@@ -82,7 +82,7 @@ public class RequestPredicatesTests {
 
 
 	@Test
-	public void methods() {
+	void methods() {
 		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
@@ -98,7 +98,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void allMethods() {
+	void allMethods() {
 		RequestPredicate predicate = RequestPredicates.GET("/p*");
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com/path").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
@@ -136,7 +136,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void path() {
+	void path() {
 		URI uri = URI.create("https://localhost/path");
 		RequestPredicate predicate = RequestPredicates.path("/p*");
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get(uri.toString()).build();
@@ -149,7 +149,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathNoLeadingSlash() {
+	void pathNoLeadingSlash() {
 		RequestPredicate predicate = RequestPredicates.path("p*");
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com/path").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
@@ -157,7 +157,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathEncoded() {
+	void pathEncoded() {
 		URI uri = URI.create("https://localhost/foo%20bar");
 		RequestPredicate predicate = RequestPredicates.path("/foo bar");
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
@@ -166,7 +166,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathPredicates() {
+	void pathPredicates() {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setCaseSensitive(false);
 		Function<String, RequestPredicate> pathPredicates = RequestPredicates.pathPredicates(parser);
@@ -178,7 +178,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathWithContext() {
+	void pathWithContext() {
 		RequestPredicate predicate = RequestPredicates.path("/p*");
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/context/path")
 				.contextPath("/context").build();
@@ -187,7 +187,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void headers() {
+	void headers() {
 		String name = "MyHeader";
 		String value = "MyValue";
 		RequestPredicate predicate =
@@ -207,7 +207,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void headersCors() {
+	void headersCors() {
 		RequestPredicate predicate = RequestPredicates.headers(headers -> false);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.options("https://example.com")
 				.header("Origin", "https://example.com")
@@ -219,7 +219,7 @@ public class RequestPredicatesTests {
 
 
 	@Test
-	public void contentType() {
+	void contentType() {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
@@ -236,7 +236,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void accept() {
+	void accept() {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.accept(json);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
@@ -253,7 +253,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathExtension() {
+	void pathExtension() {
 		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
 
 		URI uri = URI.create("https://localhost/file.txt");
@@ -276,7 +276,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void queryParam() {
+	void queryParam() {
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
 				.queryParam("foo", "bar").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
