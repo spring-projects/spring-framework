@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Mark Fisher
  */
-public class ServletContextAwareProcessorTests {
+class ServletContextAwareProcessorTests {
 
 	@Test
-	public void servletContextAwareWithServletContext() {
+	void servletContextAwareWithServletContext() {
 		ServletContext servletContext = new MockServletContext();
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext);
 		ServletContextAwareBean bean = new ServletContextAwareBean();
@@ -44,7 +44,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletContextAwareWithServletConfig() {
+	void servletContextAwareWithServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletConfig servletConfig = new MockServletConfig(servletContext);
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletConfig);
@@ -56,7 +56,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletContextAwareWithServletContextAndServletConfig() {
+	void servletContextAwareWithServletContextAndServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletConfig servletConfig = new MockServletConfig(servletContext);
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext, servletConfig);
@@ -68,7 +68,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletContextAwareWithNullServletContextAndNonNullServletConfig() {
+	void servletContextAwareWithNullServletContextAndNonNullServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletConfig servletConfig = new MockServletConfig(servletContext);
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(null, servletConfig);
@@ -80,7 +80,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletContextAwareWithNonNullServletContextAndNullServletConfig() {
+	void servletContextAwareWithNonNullServletContextAndNullServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext, null);
 		ServletContextAwareBean bean = new ServletContextAwareBean();
@@ -91,7 +91,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletContextAwareWithNullServletContext() {
+	void servletContextAwareWithNullServletContext() {
 		ServletContext servletContext = null;
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext);
 		ServletContextAwareBean bean = new ServletContextAwareBean();
@@ -101,7 +101,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletConfigAwareWithServletContextOnly() {
+	void servletConfigAwareWithServletContextOnly() {
 		ServletContext servletContext = new MockServletContext();
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext);
 		ServletConfigAwareBean bean = new ServletConfigAwareBean();
@@ -111,7 +111,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletConfigAwareWithServletConfig() {
+	void servletConfigAwareWithServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletConfig servletConfig = new MockServletConfig(servletContext);
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletConfig);
@@ -123,7 +123,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletConfigAwareWithServletContextAndServletConfig() {
+	void servletConfigAwareWithServletContextAndServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletConfig servletConfig = new MockServletConfig(servletContext);
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext, servletConfig);
@@ -135,7 +135,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletConfigAwareWithNullServletContextAndNonNullServletConfig() {
+	void servletConfigAwareWithNullServletContextAndNonNullServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletConfig servletConfig = new MockServletConfig(servletContext);
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(null, servletConfig);
@@ -147,7 +147,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletConfigAwareWithNonNullServletContextAndNullServletConfig() {
+	void servletConfigAwareWithNonNullServletContextAndNullServletConfig() {
 		ServletContext servletContext = new MockServletContext();
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext, null);
 		ServletConfigAwareBean bean = new ServletConfigAwareBean();
@@ -157,7 +157,7 @@ public class ServletContextAwareProcessorTests {
 	}
 
 	@Test
-	public void servletConfigAwareWithNullServletContext() {
+	void servletConfigAwareWithNullServletContext() {
 		ServletContext servletContext = null;
 		ServletContextAwareProcessor processor = new ServletContextAwareProcessor(servletContext);
 		ServletConfigAwareBean bean = new ServletConfigAwareBean();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  */
-public class SimpleMappingExceptionResolverTests {
+class SimpleMappingExceptionResolverTests {
 
 	private SimpleMappingExceptionResolver exceptionResolver;
 	private MockHttpServletRequest request;
@@ -45,9 +45,9 @@ public class SimpleMappingExceptionResolverTests {
 	private Exception genericException;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		exceptionResolver = new SimpleMappingExceptionResolver();
-		handler1 = new String();
+		handler1 = "";
 		handler2 = new Object();
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
@@ -56,13 +56,13 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void setOrder() {
+	void setOrder() {
 		exceptionResolver.setOrder(2);
 		assertThat(exceptionResolver.getOrder()).isEqualTo(2);
 	}
 
 	@Test
-	public void defaultErrorView() {
+	void defaultErrorView() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertThat(mav.getViewName()).isEqualTo("default-view");
@@ -70,7 +70,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void defaultErrorViewDifferentHandler() {
+	void defaultErrorViewDifferentHandler() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
@@ -78,7 +78,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void defaultErrorViewDifferentHandlerClass() {
+	void defaultErrorViewDifferentHandlerClass() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setMappedHandlerClasses(String.class);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
@@ -86,7 +86,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void nullExceptionAttribute() {
+	void nullExceptionAttribute() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setExceptionAttribute(null);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
@@ -95,7 +95,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void nullExceptionMappings() {
+	void nullExceptionMappings() {
 		exceptionResolver.setExceptionMappings(null);
 		exceptionResolver.setDefaultErrorView("default-view");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
@@ -103,14 +103,14 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void noDefaultStatusCode() {
+	void noDefaultStatusCode() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 	}
 
 	@Test
-	public void setDefaultStatusCode() {
+	void setDefaultStatusCode() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setDefaultStatusCode(HttpServletResponse.SC_BAD_REQUEST);
 		exceptionResolver.resolveException(request, response, handler1, genericException);
@@ -118,7 +118,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void noDefaultStatusCodeInInclude() {
+	void noDefaultStatusCodeInInclude() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setDefaultStatusCode(HttpServletResponse.SC_BAD_REQUEST);
 		request.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "some path");
@@ -127,7 +127,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void specificStatusCode() {
+	void specificStatusCode() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setDefaultStatusCode(HttpServletResponse.SC_BAD_REQUEST);
 		Properties statusCodes = new Properties();
@@ -138,7 +138,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void simpleExceptionMapping() {
+	void simpleExceptionMapping() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
 		exceptionResolver.setWarnLogCategory("HANDLER_EXCEPTION");
@@ -148,7 +148,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void exactExceptionMappingWithHandlerSpecified() {
+	void exactExceptionMappingWithHandlerSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
@@ -158,7 +158,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void exactExceptionMappingWithHandlerClassSpecified() {
+	void exactExceptionMappingWithHandlerClassSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
 		exceptionResolver.setMappedHandlerClasses(String.class);
@@ -168,7 +168,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void exactExceptionMappingWithHandlerInterfaceSpecified() {
+	void exactExceptionMappingWithHandlerInterfaceSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
 		exceptionResolver.setMappedHandlerClasses(Comparable.class);
@@ -178,7 +178,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void simpleExceptionMappingWithHandlerSpecifiedButWrongHandler() {
+	void simpleExceptionMappingWithHandlerSpecifiedButWrongHandler() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
@@ -188,7 +188,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void simpleExceptionMappingWithHandlerClassSpecifiedButWrongHandler() {
+	void simpleExceptionMappingWithHandlerClassSpecifiedButWrongHandler() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
 		exceptionResolver.setMappedHandlerClasses(String.class);
@@ -198,7 +198,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void simpleExceptionMappingWithExclusion() {
+	void simpleExceptionMappingWithExclusion() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
 		exceptionResolver.setExceptionMappings(props);
@@ -208,7 +208,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void missingExceptionInMapping() {
+	void missingExceptionInMapping() {
 		Properties props = new Properties();
 		props.setProperty("SomeFooThrowable", "error");
 		exceptionResolver.setWarnLogCategory("HANDLER_EXCEPTION");
@@ -218,7 +218,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void twoMappings() {
+	void twoMappings() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
 		props.setProperty("AnotherException", "another-error");
@@ -229,7 +229,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void twoMappingsOneShortOneLong() {
+	void twoMappingsOneShortOneLong() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
 		props.setProperty("AnotherException", "another-error");
@@ -240,7 +240,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void twoMappingsOneShortOneLongThrowOddException() {
+	void twoMappingsOneShortOneLongThrowOddException() {
 		Exception oddException = new SomeOddException();
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
@@ -252,7 +252,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void twoMappingsThrowOddExceptionUseLongExceptionMapping() {
+	void twoMappingsThrowOddExceptionUseLongExceptionMapping() {
 		Exception oddException = new SomeOddException();
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
@@ -264,7 +264,7 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 	@Test
-	public void threeMappings() {
+	void threeMappings() {
 		Exception oddException = new AnotherOddException();
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");

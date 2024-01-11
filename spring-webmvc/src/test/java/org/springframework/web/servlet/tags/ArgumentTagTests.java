@@ -33,14 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Nicholas Williams
  */
-public class ArgumentTagTests extends AbstractTagTests {
+class ArgumentTagTests extends AbstractTagTests {
 
 	private ArgumentTag tag;
 
 	private MockArgumentSupportTag parent;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		PageContext context = createPageContext();
 		parent = new MockArgumentSupportTag();
 		tag = new ArgumentTag();
@@ -49,7 +49,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void argumentWithStringValue() throws JspException {
+	void argumentWithStringValue() throws JspException {
 		tag.setValue("value1");
 
 		int action = tag.doEndTag();
@@ -59,7 +59,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void argumentWithImplicitNullValue() throws JspException {
+	void argumentWithImplicitNullValue() throws JspException {
 		int action = tag.doEndTag();
 
 		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
@@ -67,7 +67,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void argumentWithExplicitNullValue() throws JspException {
+	void argumentWithExplicitNullValue() throws JspException {
 		tag.setValue(null);
 
 		int action = tag.doEndTag();
@@ -77,7 +77,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void argumentWithBodyValue() throws JspException {
+	void argumentWithBodyValue() throws JspException {
 		tag.setBodyContent(new MockBodyContent("value2",
 				new MockHttpServletResponse()));
 
@@ -88,7 +88,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void argumentWithValueThenReleaseThenBodyValue() throws JspException {
+	void argumentWithValueThenReleaseThenBodyValue() throws JspException {
 		tag.setValue("value3");
 
 		int action = tag.doEndTag();
@@ -111,7 +111,7 @@ public class ArgumentTagTests extends AbstractTagTests {
 	}
 
 	@SuppressWarnings("serial")
-	private class MockArgumentSupportTag extends TagSupport implements ArgumentAware {
+	private static class MockArgumentSupportTag extends TagSupport implements ArgumentAware {
 
 		Object argument;
 

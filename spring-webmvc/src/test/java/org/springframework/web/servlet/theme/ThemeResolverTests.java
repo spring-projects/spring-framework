@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,22 +61,22 @@ public class ThemeResolverTests {
 	}
 
 	@Test
-	public void fixedThemeResolver() {
+	void fixedThemeResolver() {
 		internalTest(new FixedThemeResolver(), false, AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
 	}
 
 	@Test
-	public void cookieThemeResolver() {
+	void cookieThemeResolver() {
 		internalTest(new CookieThemeResolver(), true, AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
 	}
 
 	@Test
-	public void sessionThemeResolver() {
+	void sessionThemeResolver() {
 		internalTest(new SessionThemeResolver(), true,AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
 	}
 
 	@Test
-	public void sessionThemeResolverWithDefault() {
+	void sessionThemeResolverWithDefault() {
 		SessionThemeResolver tr = new SessionThemeResolver();
 		tr.setDefaultThemeName(DEFAULT_TEST_THEME_NAME);
 		internalTest(tr, true, DEFAULT_TEST_THEME_NAME);

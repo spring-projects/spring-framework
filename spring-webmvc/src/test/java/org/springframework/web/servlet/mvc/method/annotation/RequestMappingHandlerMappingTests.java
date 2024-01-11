@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ import static org.mockito.Mockito.mock;
  * @author Sam Brannen
  * @author Olga Maciaszek-Sharma
  */
-public class RequestMappingHandlerMappingTests {
+class RequestMappingHandlerMappingTests {
 
 	@SuppressWarnings("unused")
 	static Stream<Arguments> pathPatternsArguments() {
@@ -353,12 +353,10 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(info).isNotNull();
 
 		Set<String> paths = info.getPatternValues();
-		assertThat(paths).hasSize(1);
-		assertThat(paths).element(0).isEqualTo(path);
+		assertThat(paths).containsExactly(path);
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-		assertThat(methods).hasSize(1);
-		assertThat(methods).element(0).isEqualTo(requestMethod);
+		assertThat(methods).containsExactly(requestMethod);
 
 		return info;
 	}

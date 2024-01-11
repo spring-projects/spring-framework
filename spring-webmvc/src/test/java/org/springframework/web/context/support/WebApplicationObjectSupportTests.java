@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Chris Beams
  * @since 28.08.2003
  */
-public class WebApplicationObjectSupportTests {
+class WebApplicationObjectSupportTests {
 
 	@Test
-	@SuppressWarnings("resource")
 	public void testWebApplicationObjectSupport() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -50,7 +49,6 @@ public class WebApplicationObjectSupportTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void testWebApplicationObjectSupportWithWrongContext() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));

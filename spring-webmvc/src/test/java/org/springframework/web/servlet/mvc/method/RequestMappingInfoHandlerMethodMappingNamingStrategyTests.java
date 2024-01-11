@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
+class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
 
 	@Test
-	public void getNameExplicit() {
+	void getNameExplicit() {
 		Method method = ClassUtils.getMethod(TestController.class, "handle");
 		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
 
@@ -48,7 +48,7 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
 	}
 
 	@Test
-	public void getNameConvention() {
+	void getNameConvention() {
 		Method method = ClassUtils.getMethod(TestController.class, "handle");
 		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
 

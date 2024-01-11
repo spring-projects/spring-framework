@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Keith Donald
  */
-public class EvalTagTests extends AbstractTagTests {
+class EvalTagTests extends AbstractTagTests {
 
 	private EvalTag tag;
 
@@ -48,7 +48,7 @@ public class EvalTagTests extends AbstractTagTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		context = createPageContext();
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
@@ -60,7 +60,7 @@ public class EvalTagTests extends AbstractTagTests {
 
 
 	@Test
-	public void printScopedAttributeResult() throws Exception {
+	void printScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.method()");
 		int action = tag.doStartTag();
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
@@ -70,7 +70,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void printNullAsEmptyString() throws Exception {
+	void printNullAsEmptyString() throws Exception {
 		tag.setExpression("bean.null");
 		int action = tag.doStartTag();
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
@@ -80,7 +80,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void printFormattedScopedAttributeResult() throws Exception {
+	void printFormattedScopedAttributeResult() throws Exception {
 		PercentStyleFormatter formatter = new PercentStyleFormatter();
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
@@ -91,7 +91,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void printHtmlEscapedAttributeResult() throws Exception {
+	void printHtmlEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.html()");
 		tag.setHtmlEscape(true);
 		int action = tag.doStartTag();
@@ -102,7 +102,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void printJavaScriptEscapedAttributeResult() throws Exception {
+	void printJavaScriptEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.js()");
 		tag.setJavaScriptEscape(true);
 		int action = tag.doStartTag();
@@ -113,7 +113,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void setFormattedScopedAttributeResult() throws Exception {
+	void setFormattedScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.formattable");
 		tag.setVar("foo");
 		int action = tag.doStartTag();
@@ -135,7 +135,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void accessUsingBeanSyntax() throws Exception {
+	void accessUsingBeanSyntax() throws Exception {
 		GenericApplicationContext wac = (GenericApplicationContext)
 				context.getRequest().getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		wac.getDefaultListableBeanFactory().registerSingleton("bean2", context.getRequest().getAttribute("bean"));
@@ -149,7 +149,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void environmentAccess() throws Exception {
+	void environmentAccess() throws Exception {
 		Map<String, Object> map = new HashMap<>();
 		map.put("key.foo", "value.foo");
 		GenericApplicationContext wac = (GenericApplicationContext)
@@ -165,7 +165,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void mapAccess() throws Exception {
+	void mapAccess() throws Exception {
 		tag.setExpression("bean.map.key");
 		int action = tag.doStartTag();
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);

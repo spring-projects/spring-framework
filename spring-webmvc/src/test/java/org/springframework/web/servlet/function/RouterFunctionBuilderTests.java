@@ -121,7 +121,7 @@ class RouterFunctionBuilderTests {
 	}
 
 	@Test
-	public void resourcesCaching() {
+	void resourcesCaching() {
 		Resource resource = new ClassPathResource("/org/springframework/web/servlet/function/");
 		assertThat(resource.exists()).isTrue();
 
@@ -204,7 +204,7 @@ class RouterFunctionBuilderTests {
 	}
 
 	@Test
-	public void multipleOnErrors() {
+	void multipleOnErrors() {
 		RouterFunction<ServerResponse> route = RouterFunctions.route()
 				.GET("/error", request -> {
 					throw new IOException();
@@ -237,7 +237,7 @@ class RouterFunctionBuilderTests {
 	}
 
 	@Test
-	public void attributes() {
+	void attributes() {
 		RouterFunction<ServerResponse> route = RouterFunctions.route()
 				.GET("/atts/1", request -> ServerResponse.ok().build())
 				.withAttribute("foo", "bar")

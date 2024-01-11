@@ -54,7 +54,7 @@ class VersionResourceResolverTests {
 
 
 	@Test
-	void resolveResourceExisting() throws Exception {
+	void resolveResourceExisting() {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(expected);
@@ -67,7 +67,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test
-	void resolveResourceNoVersionStrategy() throws Exception {
+	void resolveResourceNoVersionStrategy() {
 		String file = "missing.css";
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
 
@@ -78,7 +78,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test
-	void resolveResourceNoVersionInPath() throws Exception {
+	void resolveResourceNoVersionInPath() {
 		String file = "bar.css";
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
 		given(this.versionStrategy.extractVersion(file)).willReturn("");
@@ -91,7 +91,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test
-	void resolveResourceNoResourceAfterVersionRemoved() throws Exception {
+	void resolveResourceNoResourceAfterVersionRemoved() {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -107,7 +107,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test
-	void resolveResourceVersionDoesNotMatch() throws Exception {
+	void resolveResourceVersionDoesNotMatch() {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -125,7 +125,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test
-	void resolveResourceSuccess() throws Exception {
+	void resolveResourceSuccess() {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -147,7 +147,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test
-	void getStrategyForPath() throws Exception {
+	void getStrategyForPath() {
 		Map<String, VersionStrategy> strategies = new HashMap<>();
 		VersionStrategy jsStrategy = mock();
 		VersionStrategy catchAllStrategy = mock();
@@ -163,7 +163,7 @@ class VersionResourceResolverTests {
 
 	// SPR-13883
 	@Test
-	void shouldConfigureFixedPrefixAutomatically() throws Exception {
+	void shouldConfigureFixedPrefixAutomatically() {
 		this.resolver.addFixedVersionStrategy("fixedversion", "/js/**", "/css/**", "/fixedversion/css/**");
 
 		assertThat(this.resolver.getStrategyMap()).hasSize(4);
@@ -174,7 +174,7 @@ class VersionResourceResolverTests {
 	}
 
 	@Test // SPR-15372
-	void resolveUrlPathNoVersionStrategy() throws Exception {
+	void resolveUrlPathNoVersionStrategy() {
 		given(this.chain.resolveUrlPath("/foo.css", this.locations)).willReturn("/foo.css");
 		String resolved = this.resolver.resolveUrlPathInternal("/foo.css", this.locations, this.chain);
 		assertThat(resolved).isEqualTo("/foo.css");

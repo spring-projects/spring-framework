@@ -68,7 +68,6 @@ class RequestResponseBodyAdviceChainTests {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void requestBodyAdvice() throws IOException {
 		RequestBodyAdvice requestAdvice = mock();
 		ResponseBodyAdvice<String> responseAdvice = mock();
@@ -91,7 +90,6 @@ class RequestResponseBodyAdviceChainTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void responseBodyAdvice() {
 		RequestBodyAdvice requestAdvice = mock();
 		ResponseBodyAdvice<String> responseAdvice = mock();

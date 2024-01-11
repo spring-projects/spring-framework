@@ -83,7 +83,7 @@ import static org.mockito.BDDMockito.mock;
  * @author Sebastien Deleuze
  * @author Yanming Zhou
  */
-public class ResponseEntityExceptionHandlerTests {
+class ResponseEntityExceptionHandlerTests {
 
 	private final ResponseEntityExceptionHandler exceptionHandler = new ApplicationExceptionHandler();
 
@@ -98,7 +98,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
+	void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
 
 		ExceptionHandler annotation = ResponseEntityExceptionHandler.class
 				.getMethod("handleException", Exception.class, WebRequest.class)
@@ -114,7 +114,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void httpRequestMethodNotSupported() {
+	void httpRequestMethodNotSupported() {
 		ResponseEntity<Object> entity =
 				testException(new HttpRequestMethodNotSupportedException("GET", List.of("POST", "DELETE")));
 
@@ -122,7 +122,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void httpMediaTypeNotSupported() {
+	void httpMediaTypeNotSupported() {
 		ResponseEntity<Object> entity = testException(new HttpMediaTypeNotSupportedException(
 				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
 
@@ -131,7 +131,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void patchHttpMediaTypeNotSupported() {
+	void patchHttpMediaTypeNotSupported() {
 		this.servletRequest = new MockHttpServletRequest("PATCH", "/");
 		this.request = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
@@ -148,28 +148,28 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void httpMediaTypeNotAcceptable() {
+	void httpMediaTypeNotAcceptable() {
 		testException(new HttpMediaTypeNotAcceptableException(""));
 	}
 
 	@Test
-	public void missingPathVariable() throws NoSuchMethodException {
+	void missingPathVariable() throws NoSuchMethodException {
 		testException(new MissingPathVariableException("param",
 				new MethodParameter(getClass().getDeclaredMethod("handle", String.class), 0)));
 	}
 
 	@Test
-	public void missingServletRequestParameter() {
+	void missingServletRequestParameter() {
 		testException(new MissingServletRequestParameterException("param", "type"));
 	}
 
 	@Test
-	public void servletRequestBindingException() {
+	void servletRequestBindingException() {
 		testException(new ServletRequestBindingException("message"));
 	}
 
 	@Test
-	public void errorResponseProblemDetailViaMessageSource() {
+	void errorResponseProblemDetailViaMessageSource() {
 		try {
 			Locale locale = Locale.UK;
 			LocaleContextHolder.setLocale(locale);
@@ -226,17 +226,17 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void conversionNotSupported() {
+	void conversionNotSupported() {
 		testException(new ConversionNotSupportedException(new Object(), Object.class, null));
 	}
 
 	@Test
-	public void typeMismatch() {
+	void typeMismatch() {
 		testException(new TypeMismatchException("foo", String.class));
 	}
 
 	@Test
-	public void typeMismatchWithProblemDetailViaMessageSource() {
+	void typeMismatchWithProblemDetailViaMessageSource() {
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
 
@@ -266,39 +266,39 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void httpMessageNotWritable() {
+	void httpMessageNotWritable() {
 		testException(new HttpMessageNotWritableException(""));
 	}
 
 	@Test
-	public void methodArgumentNotValid() throws Exception {
+	void methodArgumentNotValid() throws Exception {
 		testException(new MethodArgumentNotValidException(
 				new MethodParameter(getClass().getDeclaredMethod("handle", String.class), 0),
 				new MapBindingResult(Collections.emptyMap(), "name")));
 	}
 
 	@Test
-	public void handlerMethodValidationException() {
+	void handlerMethodValidationException() {
 		testException(new HandlerMethodValidationException(mock(MethodValidationResult.class)));
 	}
 
 	@Test
-	public void methodValidationException() {
+	void methodValidationException() {
 		testException(new MethodValidationException(mock(MethodValidationResult.class)));
 	}
 
 	@Test
-	public void missingServletRequestPart() {
+	void missingServletRequestPart() {
 		testException(new MissingServletRequestPartException("partName"));
 	}
 
 	@Test
-	public void bindException() {
+	void bindException() {
 		testException(new BindException(new Object(), "name"));
 	}
 
 	@Test
-	public void noHandlerFoundException() {
+	void noHandlerFoundException() {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED); // gh-29626
 
@@ -309,17 +309,17 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void noResourceFoundException() {
+	void noResourceFoundException() {
 		testException(new NoResourceFoundException(HttpMethod.GET, "/resource"));
 	}
 
 	@Test
-	public void asyncRequestTimeoutException() {
+	void asyncRequestTimeoutException() {
 		testException(new AsyncRequestTimeoutException());
 	}
 
 	@Test
-	public void maxUploadSizeExceededException() {
+	void maxUploadSizeExceededException() {
 		testException(new MaxUploadSizeExceededException(1000));
 	}
 
@@ -333,7 +333,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void controllerAdvice() throws Exception {
+	void controllerAdvice() throws Exception {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
 		ctx.refresh();
@@ -351,7 +351,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void controllerAdviceWithNestedException() {
+	void controllerAdviceWithNestedException() {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
 		ctx.refresh();
@@ -368,7 +368,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void controllerAdviceWithinDispatcherServlet() throws Exception {
+	void controllerAdviceWithinDispatcherServlet() throws Exception {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 		ctx.registerSingleton("controller", ExceptionThrowingController.class);
 		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);
@@ -384,7 +384,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void controllerAdviceWithNestedExceptionWithinDispatcherServlet() throws Exception {
+	void controllerAdviceWithNestedExceptionWithinDispatcherServlet() throws Exception {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 		ctx.registerSingleton("controller", NestedExceptionThrowingController.class);
 		ctx.registerSingleton("exceptionHandler", ApplicationExceptionHandler.class);

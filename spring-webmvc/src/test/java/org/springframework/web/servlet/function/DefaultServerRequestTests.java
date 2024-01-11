@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,13 +266,11 @@ class DefaultServerRequestTests {
 				List.of(new MappingJackson2HttpMessageConverter()));
 
 		List<String> result = request.body(new ParameterizedTypeReference<>() {});
-		assertThat(result).hasSize(2);
-		assertThat(result).element(0).isEqualTo("foo");
-		assertThat(result).element(1).isEqualTo("bar");
+		assertThat(result).containsExactly("foo", "bar");
 	}
 
 	@Test
-	void bodyUnacceptable() throws Exception {
+	void bodyUnacceptable() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		servletRequest.setContent("foo".getBytes(UTF_8));
@@ -358,7 +356,7 @@ class DefaultServerRequestTests {
 	}
 
 	@Test
-	void bindError() throws BindException {
+	void bindError() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addParameter("foo", "FOO");
 
@@ -371,7 +369,7 @@ class DefaultServerRequestTests {
 
 
 	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestamp(String method) throws Exception {
+	void checkNotModifiedTimestamp(String method) {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, now.toEpochMilli());

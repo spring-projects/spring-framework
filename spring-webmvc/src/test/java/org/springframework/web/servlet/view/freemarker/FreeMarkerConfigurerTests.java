@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
  * @author Issam El-atif
  * @author Sam Brannen
  */
-public class FreeMarkerConfigurerTests {
+class FreeMarkerConfigurerTests {
 
 	private final FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
 
 	@Test
-	public void freeMarkerConfigurerWithConfigLocation() {
+	void freeMarkerConfigurerWithConfigLocation() {
 		freeMarkerConfigurer.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
@@ -54,7 +54,7 @@ public class FreeMarkerConfigurerTests {
 	}
 
 	@Test
-	public void freeMarkerConfigurerWithResourceLoaderPath() throws Exception {
+	void freeMarkerConfigurerWithResourceLoaderPath() throws Exception {
 		freeMarkerConfigurer.setTemplateLoaderPath("file:/mydir");
 		freeMarkerConfigurer.afterPropertiesSet();
 		Configuration cfg = freeMarkerConfigurer.getConfiguration();

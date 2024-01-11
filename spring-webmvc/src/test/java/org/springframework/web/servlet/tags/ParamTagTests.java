@@ -35,21 +35,21 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Scott Andrews
  * @author Nicholas Williams
  */
-public class ParamTagTests extends AbstractTagTests {
+class ParamTagTests extends AbstractTagTests {
 
 	private final ParamTag tag = new ParamTag();
 
 	private MockParamSupportTag parent = new MockParamSupportTag();
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		PageContext context = createPageContext();
 		tag.setPageContext(context);
 		tag.setParent(parent);
 	}
 
 	@Test
-	public void paramWithNameAndValue() throws JspException {
+	void paramWithNameAndValue() throws JspException {
 		tag.setName("name");
 		tag.setValue("value");
 
@@ -61,7 +61,7 @@ public class ParamTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void paramWithBodyValue() throws JspException {
+	void paramWithBodyValue() throws JspException {
 		tag.setName("name");
 		tag.setBodyContent(new MockBodyContent("value", new MockHttpServletResponse()));
 
@@ -73,7 +73,7 @@ public class ParamTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void paramWithImplicitNullValue() throws JspException {
+	void paramWithImplicitNullValue() throws JspException {
 		tag.setName("name");
 
 		int action = tag.doEndTag();
@@ -84,7 +84,7 @@ public class ParamTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void paramWithExplicitNullValue() throws JspException {
+	void paramWithExplicitNullValue() throws JspException {
 		tag.setName("name");
 		tag.setValue(null);
 
@@ -96,7 +96,7 @@ public class ParamTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void paramWithValueThenReleaseThenBodyValue() throws JspException {
+	void paramWithValueThenReleaseThenBodyValue() throws JspException {
 		tag.setName("name1");
 		tag.setValue("value1");
 
@@ -122,7 +122,7 @@ public class ParamTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void paramWithNoParent() throws Exception {
+	void paramWithNoParent() {
 		tag.setName("name");
 		tag.setValue("value");
 		tag.setParent(null);
@@ -131,7 +131,7 @@ public class ParamTagTests extends AbstractTagTests {
 	}
 
 	@SuppressWarnings("serial")
-	private class MockParamSupportTag extends TagSupport implements ParamAware {
+	private static class MockParamSupportTag extends TagSupport implements ParamAware {
 
 		private Param param;
 

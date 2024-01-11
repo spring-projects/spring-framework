@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,7 +61,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  *
  * @author Rossen Stoyanchev
  */
-public class ReactiveTypeHandlerTests {
+class ReactiveTypeHandlerTests {
 
 	private ReactiveTypeHandler handler;
 
@@ -74,7 +73,7 @@ public class ReactiveTypeHandlerTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 		factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = factoryBean.getObject();
@@ -95,13 +94,13 @@ public class ReactiveTypeHandlerTests {
 
 
 	@Test
-	public void supportsType() throws Exception {
+	void supportsType() {
 		assertThat(this.handler.isReactiveType(Mono.class)).isTrue();
 		assertThat(this.handler.isReactiveType(Single.class)).isTrue();
 	}
 
 	@Test
-	public void doesNotSupportType() throws Exception {
+	void doesNotSupportType() {
 		assertThat(this.handler.isReactiveType(String.class)).isFalse();
 	}
 
@@ -154,7 +153,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void deferredResultSubscriberWithOneValue() throws Exception {
+	void deferredResultSubscriberWithOneValue() throws Exception {
 
 		// Mono
 		Sinks.One<String> sink = Sinks.one();
@@ -178,7 +177,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void deferredResultSubscriberWithNoValues() throws Exception {
+	void deferredResultSubscriberWithNoValues() throws Exception {
 		Sinks.One<String> sink = Sinks.one();
 		testDeferredResultSubscriber(sink.asMono(), Mono.class, forClass(String.class),
 				() -> sink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST),
@@ -186,7 +185,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void deferredResultSubscriberWithMultipleValues() throws Exception {
+	void deferredResultSubscriberWithMultipleValues() throws Exception {
 
 		// JSON must be preferred for Flux<String> -> List<String> or else we stream
 		this.servletRequest.addHeader("Accept", "application/json");
@@ -203,7 +202,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void deferredResultSubscriberWithError() throws Exception {
+	void deferredResultSubscriberWithError() throws Exception {
 
 		IllegalStateException ex = new IllegalStateException();
 
@@ -220,7 +219,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void mediaTypes() throws Exception {
+	void mediaTypes() throws Exception {
 
 		// Media type from request
 		this.servletRequest.addHeader("Accept", "text/event-stream");
@@ -243,7 +242,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeServerSentEvents() throws Exception {
+	void writeServerSentEvents() throws Exception {
 
 		this.servletRequest.addHeader("Accept", "text/event-stream");
 		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
@@ -261,7 +260,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeServerSentEventsWithBuilder() throws Exception {
+	void writeServerSentEventsWithBuilder() throws Exception {
 
 		ResolvableType type = ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class);
 
@@ -280,7 +279,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeStreamJson() throws Exception {
+	void writeStreamJson() throws Exception {
 
 		this.servletRequest.addHeader("Accept", "application/x-ndjson");
 
@@ -305,7 +304,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeStreamJsonWithVendorSubtype() throws Exception {
+	void writeStreamJsonWithVendorSubtype() throws Exception {
 		this.servletRequest.addHeader("Accept", "application/vnd.myapp.v1+x-ndjson");
 
 		Sinks.Many<Bar> sink = Sinks.many().unicast().onBackpressureBuffer();
@@ -331,7 +330,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeStreamJsonWithWildcardSubtype() throws Exception {
+	void writeStreamJsonWithWildcardSubtype() throws Exception {
 		this.servletRequest.addHeader("Accept", "application/*+x-ndjson");
 
 		Sinks.Many<Bar> sink = Sinks.many().unicast().onBackpressureBuffer();
@@ -357,7 +356,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeText() throws Exception {
+	void writeText() throws Exception {
 
 		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
 		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(String.class));
@@ -374,7 +373,7 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
-	public void writeFluxOfString() throws Exception {
+	void writeFluxOfString() throws Exception {
 
 		// Default to "text/plain"
 		testEmitterContentType("text/plain");
@@ -462,12 +461,12 @@ public class ReactiveTypeHandlerTests {
 		}
 
 		@Override
-		public void send(Object data, MediaType mediaType) throws IOException {
+		public void send(Object data, MediaType mediaType) {
 			this.values.add(data);
 		}
 
 		@Override
-		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) throws IOException {
+		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) {
 			items.forEach(item -> this.values.add(item.getData()));
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,10 +111,10 @@ import static org.springframework.web.servlet.DispatcherServlet.THEME_RESOLVER_B
  * @author Sam Brannen
  * @author Marten Deinum
  */
-public class WebMvcConfigurationSupportTests {
+class WebMvcConfigurationSupportTests {
 
 	@Test
-	public void requestMappingHandlerMapping() throws Exception {
+	void requestMappingHandlerMapping() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class, ScopedController.class, ScopedProxyController.class);
 		RequestMappingHandlerMapping handlerMapping = context.getBean(RequestMappingHandlerMapping.class);
 		assertThat(handlerMapping.getOrder()).isEqualTo(0);
@@ -133,7 +133,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void emptyHandlerMappings() {
+	void emptyHandlerMappings() {
 		ApplicationContext context = initContext(WebConfig.class);
 
 		Map<String, HandlerMapping> handlerMappings = context.getBeansOfType(HandlerMapping.class);
@@ -152,7 +152,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void beanNameHandlerMapping() throws Exception {
+	void beanNameHandlerMapping() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class);
 		BeanNameUrlHandlerMapping handlerMapping = context.getBean(BeanNameUrlHandlerMapping.class);
 		assertThat(handlerMapping.getOrder()).isEqualTo(2);
@@ -169,7 +169,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void requestMappingHandlerAdapter() {
+	void requestMappingHandlerAdapter() {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
@@ -209,7 +209,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void uriComponentsContributor() {
+	void uriComponentsContributor() {
 		ApplicationContext context = initContext(WebConfig.class);
 		CompositeUriComponentsContributor uriComponentsContributor = context.getBean(
 				MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,
@@ -254,7 +254,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void customArgumentResolvers() {
+	void customArgumentResolvers() {
 		ApplicationContext context = initContext(CustomArgumentResolverConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		HandlerExceptionResolverComposite composite = context.getBean(HandlerExceptionResolverComposite.class);
@@ -280,7 +280,7 @@ public class WebMvcConfigurationSupportTests {
 
 
 	@Test
-	public void mvcViewResolver() {
+	void mvcViewResolver() {
 		ApplicationContext context = initContext(WebConfig.class);
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
@@ -291,7 +291,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void mvcViewResolverWithExistingResolver() throws Exception {
+	void mvcViewResolverWithExistingResolver() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class, ViewResolverConfig.class);
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
@@ -302,7 +302,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void mvcViewResolverWithOrderSet() {
+	void mvcViewResolverWithOrderSet() {
 		ApplicationContext context = initContext(CustomViewResolverOrderConfig.class);
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
@@ -313,7 +313,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultPathMatchConfiguration() {
+	void defaultPathMatchConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
 		UrlPathHelper urlPathHelper = context.getBean(UrlPathHelper.class);
 		PathMatcher pathMatcher = context.getBean(PathMatcher.class);
@@ -324,7 +324,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultLocaleResolverConfiguration() {
+	void defaultLocaleResolverConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
 		LocaleResolver localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
 
@@ -344,7 +344,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultFlashMapManagerConfiguration() {
+	void defaultFlashMapManagerConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
 		FlashMapManager flashMapManager = context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 
@@ -353,7 +353,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultRequestToViewNameConfiguration() throws Exception {
+	void defaultRequestToViewNameConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestToViewNameTranslator requestToViewNameTranslator;
 		requestToViewNameTranslator = context.getBean(REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME,

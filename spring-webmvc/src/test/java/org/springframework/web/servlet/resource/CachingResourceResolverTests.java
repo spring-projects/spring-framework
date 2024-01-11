@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +49,7 @@ public class CachingResourceResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 
 		this.cache = new ConcurrentMapCache("resourceCache");
 
@@ -65,7 +64,7 @@ public class CachingResourceResolverTests {
 
 
 	@Test
-	public void resolveResourceInternal() {
+	void resolveResourceInternal() {
 		Resource expected = new ClassPathResource("test/bar.css", getClass());
 		Resource actual = this.chain.resolveResource(null, "bar.css", this.locations);
 
@@ -74,7 +73,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceInternalFromCache() {
+	void resolveResourceInternalFromCache() {
 		Resource expected = mock();
 		this.cache.put(resourceKey("bar.css"), expected);
 		Resource actual = this.chain.resolveResource(null, "bar.css", this.locations);
@@ -83,12 +82,12 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceInternalNoMatch() {
+	void resolveResourceInternalNoMatch() {
 		assertThat(this.chain.resolveResource(null, "invalid.css", this.locations)).isNull();
 	}
 
 	@Test
-	public void resolverUrlPath() {
+	void resolverUrlPath() {
 		String expected = "/foo.css";
 		String actual = this.chain.resolveUrlPath(expected, this.locations);
 
@@ -96,7 +95,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolverUrlPathFromCache() {
+	void resolverUrlPathFromCache() {
 		String expected = "cached-imaginary.css";
 		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css", expected);
 		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations);
@@ -105,12 +104,12 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolverUrlPathNoMatch() {
+	void resolverUrlPathNoMatch() {
 		assertThat(this.chain.resolveUrlPath("invalid.css", this.locations)).isNull();
 	}
 
 	@Test
-	public void resolveResourceAcceptEncodingInCacheKey(GzippedFiles gzippedFiles) throws IOException {
+	void resolveResourceAcceptEncodingInCacheKey(GzippedFiles gzippedFiles) {
 
 		String file = "bar.css";
 		gzippedFiles.create(file);
@@ -143,7 +142,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoAcceptEncoding() {
+	void resolveResourceNoAcceptEncoding() {
 		String file = "bar.css";
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", file);
 		Resource expected = this.chain.resolveResource(request, file, this.locations);
@@ -155,7 +154,7 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceMatchingEncoding() {
+	void resolveResourceMatchingEncoding() {
 		Resource resource = mock();
 		Resource gzipped = mock();
 		this.cache.put(resourceKey("bar.css"), resource);

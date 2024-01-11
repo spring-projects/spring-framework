@@ -61,7 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
-public class DefaultHandlerExceptionResolverTests {
+class DefaultHandlerExceptionResolverTests {
 
 	private final DefaultHandlerExceptionResolver exceptionResolver = new DefaultHandlerExceptionResolver();
 
@@ -71,13 +71,13 @@ public class DefaultHandlerExceptionResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		exceptionResolver.setWarnLogCategory(exceptionResolver.getClass().getName());
 	}
 
 
 	@Test
-	public void handleHttpRequestMethodNotSupported() {
+	void handleHttpRequestMethodNotSupported() {
 		HttpRequestMethodNotSupportedException ex =
 				new HttpRequestMethodNotSupportedException("GET", Arrays.asList("POST", "PUT"));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -88,7 +88,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleHttpMediaTypeNotSupported() {
+	void handleHttpMediaTypeNotSupported() {
 		HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(new MediaType("text", "plain"),
 				Collections.singletonList(new MediaType("application", "pdf")));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -99,7 +99,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void patchHttpMediaTypeNotSupported() {
+	void patchHttpMediaTypeNotSupported() {
 		HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
 				new MediaType("text", "plain"),
 				Collections.singletonList(new MediaType("application", "pdf")),
@@ -113,7 +113,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleMissingPathVariable() throws NoSuchMethodException {
+	void handleMissingPathVariable() throws NoSuchMethodException {
 		Method method = getClass().getMethod("handle", String.class);
 		MethodParameter parameter = new MethodParameter(method, 0);
 		MissingPathVariableException ex = new MissingPathVariableException("foo", parameter);
@@ -125,7 +125,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleMissingServletRequestParameter() {
+	void handleMissingServletRequestParameter() {
 		MissingServletRequestParameterException ex = new MissingServletRequestParameterException("foo", "bar");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -135,7 +135,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleServletRequestBindingException() {
+	void handleServletRequestBindingException() {
 		String message = "Missing required value - header, cookie, or pathvar";
 		ServletRequestBindingException ex = new ServletRequestBindingException(message);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -145,7 +145,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleTypeMismatch() {
+	void handleTypeMismatch() {
 		TypeMismatchException ex = new TypeMismatchException("foo", String.class);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -164,7 +164,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleHttpMessageNotWritable() {
+	void handleHttpMessageNotWritable() {
 		HttpMessageNotWritableException ex = new HttpMessageNotWritableException("foo");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -173,7 +173,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleMethodArgumentNotValid() throws Exception {
+	void handleMethodArgumentNotValid() throws Exception {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
 		errors.rejectValue("name", "invalid");
 		MethodParameter parameter = new MethodParameter(this.getClass().getMethod("handle", String.class), 0);
@@ -185,7 +185,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleMissingServletRequestPartException() {
+	void handleMissingServletRequestPartException() {
 		MissingServletRequestPartException ex = new MissingServletRequestPartException("name");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -197,7 +197,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleBindException() {
+	void handleBindException() {
 		BindException ex = new BindException(new Object(), "name");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -206,7 +206,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleNoHandlerFoundException() {
+	void handleNoHandlerFoundException() {
 		ServletServerHttpRequest req = new ServletServerHttpRequest(
 				new MockHttpServletRequest("GET","/resource"));
 		NoHandlerFoundException ex = new NoHandlerFoundException(req.getMethod().name(),
@@ -218,7 +218,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleNoResourceFoundException() {
+	void handleNoResourceFoundException() {
 		NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/resource");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -227,7 +227,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleConversionNotSupportedException() {
+	void handleConversionNotSupportedException() {
 		ConversionNotSupportedException ex =
 				new ConversionNotSupportedException(new Object(), String.class, new Exception());
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -249,7 +249,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleMaxUploadSizeExceededException() {
+	void handleMaxUploadSizeExceededException() {
 		MaxUploadSizeExceededException ex = new MaxUploadSizeExceededException(1000);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -259,7 +259,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void customModelAndView() {
+	void customModelAndView() {
 		ModelAndView expected = new ModelAndView();
 
 		HandlerExceptionResolver resolver = new DefaultHandlerExceptionResolver() {

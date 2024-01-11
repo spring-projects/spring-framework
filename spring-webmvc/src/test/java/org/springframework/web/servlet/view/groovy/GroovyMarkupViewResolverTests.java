@@ -29,10 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Brian Clozel
  */
-public class GroovyMarkupViewResolverTests {
+class GroovyMarkupViewResolverTests {
 
 	@Test
-	public void viewClass() throws Exception {
+	void viewClass() {
 		GroovyMarkupViewResolver resolver = new GroovyMarkupViewResolver();
 		assertThat(resolver.requiredViewClass()).isEqualTo(GroovyMarkupView.class);
 		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(resolver);
@@ -41,7 +41,7 @@ public class GroovyMarkupViewResolverTests {
 	}
 
 	@Test
-	public void cacheKey() throws Exception {
+	void cacheKey() {
 		GroovyMarkupViewResolver resolver = new GroovyMarkupViewResolver();
 		String cacheKey = (String) resolver.getCacheKey("test", Locale.US);
 		assertThat(cacheKey).isNotNull();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class RedirectViewUriTemplateTests {
 	private MockHttpServletResponse response;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 		this.request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
@@ -115,7 +115,7 @@ class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	void uriTemplateNullValue() throws Exception {
+	void uriTemplateNullValue() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), this.request, this.response));
 	}

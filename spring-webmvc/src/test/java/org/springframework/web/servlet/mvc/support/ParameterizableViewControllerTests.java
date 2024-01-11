@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class ParameterizableViewControllerTests {
+class ParameterizableViewControllerTests {
 
 	private final ParameterizableViewController controller = new ParameterizableViewController();
 
@@ -44,20 +44,20 @@ public class ParameterizableViewControllerTests {
 
 
 	@Test
-	public void defaultViewName() throws Exception {
+	void defaultViewName() throws Exception {
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
 		assertThat(modelAndView.getViewName()).isNull();
 	}
 
 	@Test
-	public void viewName() throws Exception {
+	void viewName() throws Exception {
 		this.controller.setViewName("view");
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
 		assertThat(modelAndView.getViewName()).isEqualTo("view");
 	}
 
 	@Test
-	public void viewNameAndStatus() throws Exception {
+	void viewNameAndStatus() throws Exception {
 		this.controller.setViewName("view");
 		this.controller.setStatusCode(HttpStatus.NOT_FOUND);
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
@@ -66,7 +66,7 @@ public class ParameterizableViewControllerTests {
 	}
 
 	@Test
-	public void viewNameAndStatus204() throws Exception {
+	void viewNameAndStatus204() throws Exception {
 		this.controller.setStatusCode(HttpStatus.NO_CONTENT);
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
 		assertThat(modelAndView).isNull();
@@ -74,7 +74,7 @@ public class ParameterizableViewControllerTests {
 	}
 
 	@Test
-	public void redirectStatus() throws Exception {
+	void redirectStatus() throws Exception {
 		this.controller.setStatusCode(HttpStatus.PERMANENT_REDIRECT);
 		this.controller.setViewName("/foo");
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
@@ -85,7 +85,7 @@ public class ParameterizableViewControllerTests {
 	}
 
 	@Test
-	public void redirectStatusWithRedirectPrefix() throws Exception {
+	void redirectStatusWithRedirectPrefix() throws Exception {
 		this.controller.setStatusCode(HttpStatus.PERMANENT_REDIRECT);
 		this.controller.setViewName("redirect:/foo");
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
@@ -96,7 +96,7 @@ public class ParameterizableViewControllerTests {
 	}
 
 	@Test
-	public void redirectView() throws Exception {
+	void redirectView() throws Exception {
 		RedirectView view = new RedirectView("/foo");
 		this.controller.setView(view);
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);
@@ -104,7 +104,7 @@ public class ParameterizableViewControllerTests {
 	}
 
 	@Test
-	public void statusOnly() throws Exception {
+	void statusOnly() throws Exception {
 		this.controller.setStatusCode(HttpStatus.NOT_FOUND);
 		this.controller.setStatusOnly(true);
 		ModelAndView modelAndView = this.controller.handleRequest(this.request, this.response);

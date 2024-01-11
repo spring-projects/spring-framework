@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @author Rossen Stoyanchev
  */
-public class ResponseStatusExceptionResolverTests {
+class ResponseStatusExceptionResolverTests {
 
 	private final ResponseStatusExceptionResolver exceptionResolver = new ResponseStatusExceptionResolver();
 
@@ -58,34 +58,34 @@ public class ResponseStatusExceptionResolverTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		exceptionResolver.setWarnLogCategory(exceptionResolver.getClass().getName());
 	}
 
 
 	@Test
-	public void statusCode() {
+	void statusCode() {
 		StatusCodeException ex = new StatusCodeException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, null);
 	}
 
 	@Test
-	public void statusCodeFromComposedResponseStatus() {
+	void statusCodeFromComposedResponseStatus() {
 		StatusCodeFromComposedResponseStatusException ex = new StatusCodeFromComposedResponseStatusException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, null);
 	}
 
 	@Test
-	public void statusCodeAndReason() {
+	void statusCodeAndReason() {
 		StatusCodeAndReasonException ex = new StatusCodeAndReasonException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 410, "You suck!");
 	}
 
 	@Test
-	public void statusCodeAndReasonMessage() {
+	void statusCodeAndReasonMessage() {
 		Locale locale = Locale.CHINESE;
 		LocaleContextHolder.setLocale(locale);
 		try {
@@ -103,7 +103,7 @@ public class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test
-	public void notAnnotated() {
+	void notAnnotated() {
 		Exception ex = new Exception();
 		exceptionResolver.resolveException(request, response, null, ex);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -119,7 +119,7 @@ public class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test
-	public void responseStatusException() {
+	void responseStatusException() {
 		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, null);

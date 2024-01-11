@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class ServletCookieValueMethodArgumentResolverTests {
+class ServletCookieValueMethodArgumentResolverTests {
 
 	private ServletCookieValueMethodArgumentResolver resolver;
 
@@ -50,7 +50,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		resolver = new ServletCookieValueMethodArgumentResolver(null);
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -62,7 +62,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 
 
 	@Test
-	public void resolveCookieArgument() throws Exception {
+	void resolveCookieArgument() throws Exception {
 		Cookie expected = new Cookie("name", "foo");
 		request.setCookies(expected);
 
@@ -71,7 +71,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveCookieStringArgument() throws Exception {
+	void resolveCookieStringArgument() throws Exception {
 		Cookie cookie = new Cookie("name", "foo");
 		request.setCookies(cookie);
 

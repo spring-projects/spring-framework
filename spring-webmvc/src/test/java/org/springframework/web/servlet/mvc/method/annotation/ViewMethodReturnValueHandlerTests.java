@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ViewMethodReturnValueHandlerTests {
+class ViewMethodReturnValueHandlerTests {
 
 	private ViewMethodReturnValueHandler handler;
 
@@ -48,7 +48,7 @@ public class ViewMethodReturnValueHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.handler = new ViewMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
@@ -56,12 +56,12 @@ public class ViewMethodReturnValueHandlerTests {
 
 
 	@Test
-	public void supportsReturnType() throws Exception {
+	void supportsReturnType() throws Exception {
 		assertThat(this.handler.supportsReturnType(createReturnValueParam("view"))).isTrue();
 	}
 
 	@Test
-	public void returnView() throws Exception {
+	void returnView() throws Exception {
 		InternalResourceView view = new InternalResourceView("testView");
 		this.handler.handleReturnValue(view, createReturnValueParam("view"), this.mavContainer, this.webRequest);
 
@@ -69,7 +69,7 @@ public class ViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void returnViewRedirect() throws Exception {
+	void returnViewRedirect() throws Exception {
 		RedirectView redirectView = new RedirectView("testView");
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);

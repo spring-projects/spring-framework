@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.assertj.core.api.StringAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -30,20 +31,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class PathPatternsRequestConditionTests {
+class PathPatternsRequestConditionTests {
 
 	private static final PathPatternParser parser = new PathPatternParser();
 
 
 	@Test
 	void prependSlash() {
-		assertThat(createCondition("foo").getPatternValues()).element(0)
-				.isEqualTo("/foo");
+		assertThat(createCondition("foo").getPatternValues()).containsExactly("/foo");
 	}
 
 	@Test
 	void prependNonEmptyPatternsOnly() {
-		assertThat(createCondition("").getPatternValues()).element(0).asString()
+		assertThat(createCondition("").getPatternValues(), StringAssert.class).element(0)
 				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
@@ -138,7 +138,7 @@ public class PathPatternsRequestConditionTests {
 		PathPatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatternValues()).element(0).as("Should match by default").isEqualTo("/foo");
+		assertThat(match.getPatternValues()).containsExactly("/foo");
 
 		PathPatternParser strictParser = new PathPatternParser();
 		strictParser.setMatchOptionalTrailingSeparator(false);

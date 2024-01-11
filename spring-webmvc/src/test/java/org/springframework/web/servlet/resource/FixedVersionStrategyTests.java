@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  */
-public class FixedVersionStrategyTests {
+class FixedVersionStrategyTests {
 
 	private static final String VERSION = "1df341f";
 
@@ -39,30 +39,30 @@ public class FixedVersionStrategyTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.strategy = new FixedVersionStrategy(VERSION);
 	}
 
 
 	@Test
-	public void emptyPrefixVersion() {
+	void emptyPrefixVersion() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new FixedVersionStrategy("  "));
 	}
 
 	@Test
-	public void extractVersion() {
+	void extractVersion() {
 		assertThat(this.strategy.extractVersion(VERSION + "/" + PATH)).isEqualTo(VERSION);
 		assertThat(this.strategy.extractVersion(PATH)).isNull();
 	}
 
 	@Test
-	public void removeVersion() {
+	void removeVersion() {
 		assertThat(this.strategy.removeVersion(VERSION + "/" + PATH, VERSION)).isEqualTo(("/" + PATH));
 	}
 
 	@Test
-	public void addVersion() {
+	void addVersion() {
 		assertThat(this.strategy.addVersion("/" + PATH, VERSION)).isEqualTo((VERSION + "/" + PATH));
 	}
 

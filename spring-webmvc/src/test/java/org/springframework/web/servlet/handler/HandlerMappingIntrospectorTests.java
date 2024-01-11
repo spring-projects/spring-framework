@@ -71,7 +71,7 @@ import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTE
  * @author Rossen Stoyanchev
  * @since 4.3.1
  */
-public class HandlerMappingIntrospectorTests {
+class HandlerMappingIntrospectorTests {
 
 	@Test
 	void detectHandlerMappings() {

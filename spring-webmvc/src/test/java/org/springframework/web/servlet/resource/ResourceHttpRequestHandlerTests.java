@@ -572,7 +572,7 @@ class ResourceHttpRequestHandlerTests {
 
 
 		@BeforeEach
-		void setup() throws Exception {
+		void setup() {
 			TestServletContext servletContext = new TestServletContext();
 			this.handler = new ResourceHttpRequestHandler();
 			this.handler.setLocations(List.of(testResource, testAlternatePathResource, webjarsResource));

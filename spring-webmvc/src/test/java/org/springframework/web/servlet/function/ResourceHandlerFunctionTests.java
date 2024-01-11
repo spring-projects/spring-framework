@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ResourceHandlerFunctionTests {
+class ResourceHandlerFunctionTests {
 
 	private final Resource resource = new ClassPathResource("response.txt", getClass());
 
@@ -57,7 +57,7 @@ public class ResourceHandlerFunctionTests {
 	private ResourceHttpMessageConverter messageConverter;
 
 	@BeforeEach
-	public void createContext() {
+	void createContext() {
 		this.messageConverter = new ResourceHttpMessageConverter();
 		ResourceRegionHttpMessageConverter regionConverter = new ResourceRegionHttpMessageConverter();
 		this.context = () -> Arrays.asList(messageConverter, regionConverter);
@@ -65,7 +65,7 @@ public class ResourceHandlerFunctionTests {
 
 
 	@Test
-	public void get() throws IOException, ServletException {
+	void get() throws IOException, ServletException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
@@ -89,7 +89,7 @@ public class ResourceHandlerFunctionTests {
 	}
 
 	@Test
-	public void getRange() throws IOException, ServletException {
+	void getRange() throws IOException, ServletException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addHeader("Range", "bytes=0-5");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
@@ -118,7 +118,7 @@ public class ResourceHandlerFunctionTests {
 	}
 
 	@Test
-	public void getInvalidRange() throws IOException, ServletException {
+	void getInvalidRange() throws IOException, ServletException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addHeader("Range", "bytes=0-10, 0-10, 0-10, 0-10, 0-10, 0-10");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
@@ -144,7 +144,7 @@ public class ResourceHandlerFunctionTests {
 	}
 
 	@Test
-	public void head() throws IOException, ServletException {
+	void head() throws IOException, ServletException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("HEAD", "/", true);
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 
@@ -168,7 +168,7 @@ public class ResourceHandlerFunctionTests {
 	}
 
 	@Test
-	public void options() throws ServletException, IOException {
+	void options() throws ServletException, IOException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("OPTIONS", "/", true);
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(messageConverter));
 

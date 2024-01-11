@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rick Evans
  * @author Jeremy Grelle
  */
-public class InputTagTests extends AbstractFormTagTests {
+class InputTagTests extends AbstractFormTagTests {
 
 	private InputTag tag;
 
@@ -70,7 +70,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 
 	@Test
-	public void simpleBind() throws Exception {
+	void simpleBind() throws Exception {
 		this.tag.setPath("name");
 
 		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
@@ -84,7 +84,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void simpleBindTagWithinForm() throws Exception {
+	void simpleBindTagWithinForm() throws Exception {
 		BindTag bindTag = new BindTag();
 		bindTag.setPath("name");
 		bindTag.setPageContext(getPageContext());
@@ -95,7 +95,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void simpleBindWithHtmlEscaping() throws Exception {
+	void simpleBindWithHtmlEscaping() throws Exception {
 		final String NAME = "Rob \"I Love Mangos\" Harrop";
 		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
 
@@ -117,7 +117,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void complexBind() throws Exception {
+	void complexBind() throws Exception {
 		this.tag.setPath("spouse.name");
 
 		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
@@ -133,7 +133,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withAllAttributes() throws Exception {
+	void withAllAttributes() throws Exception {
 		String title = "aTitle";
 		String id = "123";
 		String size = "12";
@@ -239,7 +239,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withNestedBind() throws Exception {
+	void withNestedBind() throws Exception {
 		NestedPathTag nestedPathTag = new NestedPathTag();
 		nestedPathTag.setPath("spouse.");
 		nestedPathTag.setPageContext(getPageContext());
@@ -258,7 +258,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withNestedBindTagWithinForm() throws Exception {
+	void withNestedBindTagWithinForm() throws Exception {
 		NestedPathTag nestedPathTag = new NestedPathTag();
 		nestedPathTag.setPath("spouse.");
 		nestedPathTag.setPageContext(getPageContext());
@@ -274,7 +274,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withErrors() throws Exception {
+	void withErrors() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setCssClass("good");
 		this.tag.setCssErrorClass("bad");
@@ -296,7 +296,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void disabledFalse() throws Exception {
+	void disabledFalse() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setDisabled(false);
 		this.tag.doStartTag();
@@ -306,7 +306,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withCustomBinder() throws Exception {
+	void withCustomBinder() throws Exception {
 		this.tag.setPath("myFloat");
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.rob, COMMAND_NAME);
@@ -323,11 +323,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertValueAttribute(output, "12.34f");
 	}
 
-	/**
-	 * See SPR-3127 (https://opensource.atlassian.com/projects/spring/browse/SPR-3127)
-	 */
-	@Test
-	public void readOnlyAttributeRenderingWhenReadonlyIsTrue() throws Exception {
+	@Test // SPR-3127
+	void readOnlyAttributeRenderingWhenReadonlyIsTrue() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setReadonly(true);
 
@@ -343,7 +340,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void dynamicTypeAttribute() throws JspException {
+	void dynamicTypeAttribute() throws JspException {
 		this.tag.setPath("myFloat");
 		this.tag.setDynamicAttribute(null, "type", "number");
 
@@ -358,14 +355,14 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void dynamicTypeRadioAttribute() throws JspException {
+	void dynamicTypeRadioAttribute() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.tag.setDynamicAttribute(null, "type", "radio"))
 			.withMessage("Attribute type=\"radio\" is not allowed");
 	}
 
 	@Test
-	public void dynamicTypeCheckboxAttribute() throws JspException {
+	void dynamicTypeCheckboxAttribute() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.tag.setDynamicAttribute(null, "type", "checkbox"))
 			.withMessage("Attribute type=\"checkbox\" is not allowed");
@@ -379,7 +376,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertThat(output).as("Tag not opened properly").startsWith("<input ");
 	}
 
-	@SuppressWarnings("serial")
 	protected InputTag createTag(final Writer writer) {
 		return new InputTag() {
 			@Override

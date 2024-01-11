@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,9 +204,7 @@ class RequestMappingInfoTests {
 		Collections.shuffle(list);
 		list.sort(comparator);
 
-		assertThat(list).element(0).isEqualTo(oneMethodOneParam);
-		assertThat(list).element(1).isEqualTo(oneMethod);
-		assertThat(list).element(2).isEqualTo(noMethods);
+		assertThat(list).containsExactly(oneMethodOneParam, oneMethod, noMethods);
 	}
 
 	@Test
@@ -226,9 +224,7 @@ class RequestMappingInfoTests {
 		Collections.shuffle(list);
 		list.sort(comparator);
 
-		assertThat(list).element(0).isEqualTo(headMethod);
-		assertThat(list).element(1).isEqualTo(getMethod);
-		assertThat(list).element(2).isEqualTo(noMethods);
+		assertThat(list).containsExactly(headMethod, getMethod, noMethods);
 	}
 
 	@PathPatternsParameterizedTest

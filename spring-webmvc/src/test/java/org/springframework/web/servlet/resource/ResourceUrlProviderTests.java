@@ -46,7 +46,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class ResourceUrlProviderTests {
+class ResourceUrlProviderTests {
 
 	private final List<Resource> locations = new ArrayList<>();
 
@@ -117,7 +117,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test // SPR-12647
-	void bestPatternMatch() throws Exception {
+	void bestPatternMatch() {
 		ResourceHttpRequestHandler otherHandler = new ResourceHttpRequestHandler();
 		otherHandler.setLocations(this.locations);
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
@@ -138,8 +138,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test // SPR-12592
-	@SuppressWarnings("resource")
-	void initializeOnce() throws Exception {
+	void initializeOnce() {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(HandlerMappingConfiguration.class);
@@ -151,7 +150,6 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void initializeOnCurrentContext() {
 		AnnotationConfigWebApplicationContext parentContext = new AnnotationConfigWebApplicationContext();
 		parentContext.setServletContext(new MockServletContext());

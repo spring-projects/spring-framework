@@ -72,7 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see HandlerMethodAnnotationDetectionTests
  * @see RequestMappingHandlerAdapterIntegrationTests
  */
-public class RequestMappingHandlerAdapterTests {
+class RequestMappingHandlerAdapterTests {
 
 	private static int RESOLVER_COUNT;
 
@@ -101,7 +101,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.webAppContext = new StaticWebApplicationContext();
 		this.handlerAdapter = new RequestMappingHandlerAdapter();
 		this.handlerAdapter.setApplicationContext(this.webAppContext);
@@ -111,7 +111,7 @@ public class RequestMappingHandlerAdapterTests {
 
 
 	@Test
-	public void cacheControlWithoutSessionAttributes() throws Exception {
+	void cacheControlWithoutSessionAttributes() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod(new TestController(), "handle");
 		this.handlerAdapter.setCacheSeconds(100);
 		this.handlerAdapter.afterPropertiesSet();
@@ -121,7 +121,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void cacheControlWithSessionAttributes() throws Exception {
+	void cacheControlWithSessionAttributes() throws Exception {
 		SessionAttributeController handler = new SessionAttributeController();
 		this.handlerAdapter.setCacheSeconds(100);
 		this.handlerAdapter.afterPropertiesSet();
@@ -131,7 +131,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void setAlwaysUseRedirectAttributes() throws Exception {
+	void setAlwaysUseRedirectAttributes() throws Exception {
 		HandlerMethodArgumentResolver redirectAttributesResolver = new RedirectAttributesMethodArgumentResolver();
 		HandlerMethodArgumentResolver modelResolver = new ModelMethodProcessor();
 		HandlerMethodReturnValueHandler viewHandler = new ViewNameMethodReturnValueHandler();
@@ -149,7 +149,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void setCustomArgumentResolvers() throws Exception {
+	void setCustomArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.handlerAdapter.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
@@ -159,7 +159,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void setArgumentResolvers() throws Exception {
+	void setArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.handlerAdapter.setArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
@@ -168,7 +168,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void setInitBinderArgumentResolvers() throws Exception {
+	void setInitBinderArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.handlerAdapter.setInitBinderArgumentResolvers(Collections.singletonList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
@@ -177,7 +177,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void setCustomReturnValueHandlers() {
+	void setCustomReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
 		this.handlerAdapter.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.handlerAdapter.afterPropertiesSet();
@@ -187,7 +187,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void setReturnValueHandlers() {
+	void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
 		this.handlerAdapter.setReturnValueHandlers(Collections.singletonList(handler));
 		this.handlerAdapter.afterPropertiesSet();
@@ -196,7 +196,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void modelAttributeAdvice() throws Exception {
+	void modelAttributeAdvice() throws Exception {
 		this.webAppContext.registerSingleton("maa", ModelAttributeAdvice.class);
 		this.webAppContext.refresh();
 
@@ -209,7 +209,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void prototypeControllerAdvice() throws Exception {
+	void prototypeControllerAdvice() throws Exception {
 		this.webAppContext.registerPrototype("maa", ModelAttributeAdvice.class);
 		this.webAppContext.refresh();
 
@@ -222,7 +222,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void modelAttributeAdviceInParentContext() throws Exception {
+	void modelAttributeAdviceInParentContext() throws Exception {
 		StaticWebApplicationContext parent = new StaticWebApplicationContext();
 		parent.registerSingleton("maa", ModelAttributeAdvice.class);
 		parent.refresh();
@@ -238,7 +238,7 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
-	public void modelAttributePackageNameAdvice() throws Exception {
+	void modelAttributePackageNameAdvice() throws Exception {
 		this.webAppContext.registerSingleton("mapa", ModelAttributePackageAdvice.class);
 		this.webAppContext.registerSingleton("manupa", ModelAttributeNotUsedPackageAdvice.class);
 		this.webAppContext.refresh();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,29 +46,29 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class ViewResolutionIntegrationTests {
+class ViewResolutionIntegrationTests {
 
 	@Test
-	public void freemarker() throws Exception {
+	void freemarker() throws Exception {
 		MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
 		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 	@Test
-	public void groovyMarkup() throws Exception {
+	void groovyMarkup() throws Exception {
 		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
 		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 	@Test
-	public void freemarkerInvalidConfig() throws Exception {
+	void freemarkerInvalidConfig() {
 		assertThatRuntimeException()
 			.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
 			.withMessageContaining("In addition to a FreeMarker view resolver ");
 	}
 
 	@Test
-	public void groovyMarkupInvalidConfig() throws Exception {
+	void groovyMarkupInvalidConfig() {
 		assertThatRuntimeException()
 			.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
 			.withMessageContaining("In addition to a Groovy markup view resolver ");
@@ -77,7 +77,7 @@ public class ViewResolutionIntegrationTests {
 	// SPR-12013
 
 	@Test
-	public void existingViewResolver() throws Exception {
+	void existingViewResolver() throws Exception {
 		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
 		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}

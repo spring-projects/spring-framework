@@ -53,7 +53,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class ResourceHandlerRegistryTests {
+class ResourceHandlerRegistryTests {
 
 	private ResourceHandlerRegistry registry;
 
@@ -63,7 +63,7 @@ public class ResourceHandlerRegistryTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 		appContext.refresh();
 
@@ -82,13 +82,13 @@ public class ResourceHandlerRegistryTests {
 
 
 	@Test
-	public void noResourceHandlers() {
+	void noResourceHandlers() {
 		this.registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(), new MockServletContext());
 		assertThat(this.registry.getHandlerMapping()).isNull();
 	}
 
 	@Test
-	public void mapPathToLocation() throws Exception {
+	void mapPathToLocation() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/testStylesheet.css");
@@ -100,7 +100,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void cachePeriod() {
+	void cachePeriod() {
 		assertThat(getHandler("/resources/**").getCacheSeconds()).isEqualTo(-1);
 
 		this.registration.setCachePeriod(0);
@@ -108,7 +108,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void cacheControl() {
+	void cacheControl() {
 		assertThat(getHandler("/resources/**").getCacheControl()).isNull();
 
 		this.registration.setCacheControl(CacheControl.noCache().cachePrivate());
@@ -117,7 +117,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void order() {
+	void order() {
 		assertThat(registry.getHandlerMapping().getOrder()).isEqualTo(Integer.MAX_VALUE -1);
 
 		registry.setOrder(0);
@@ -125,13 +125,13 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void hasMappingForPattern() {
+	void hasMappingForPattern() {
 		assertThat(this.registry.hasMappingForPattern("/resources/**")).isTrue();
 		assertThat(this.registry.hasMappingForPattern("/whatever")).isFalse();
 	}
 
 	@Test
-	public void resourceChain() {
+	void resourceChain() {
 		ResourceResolver mockResolver = mock();
 		ResourceTransformer mockTransformer = mock();
 		this.registration.resourceChain(true).addResolver(mockResolver).addTransformer(mockTransformer);
@@ -153,7 +153,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void resourceChainWithoutCaching() {
+	void resourceChainWithoutCaching() {
 		this.registration.resourceChain(false);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
@@ -167,7 +167,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void resourceChainWithVersionResolver() {
+	void resourceChainWithVersionResolver() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver()
 				.addFixedVersionStrategy("fixed", "/**/*.js")
 				.addContentVersionStrategy("/**");
@@ -189,7 +189,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void resourceChainWithOverrides() {
+	void resourceChainWithOverrides() {
 		CachingResourceResolver cachingResolver = mock();
 		VersionResourceResolver versionResolver = mock();
 		WebJarsResourceResolver webjarsResolver = mock();
@@ -208,20 +208,15 @@ public class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers).hasSize(4);
-		assertThat(resolvers).element(0).isSameAs(cachingResolver);
-		assertThat(resolvers).element(1).isSameAs(versionResolver);
-		assertThat(resolvers).element(2).isSameAs(webjarsResolver);
-		assertThat(resolvers).element(3).isSameAs(pathResourceResolver);
+		assertThat(resolvers).containsExactly(
+				cachingResolver, versionResolver, webjarsResolver, pathResourceResolver);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers).hasSize(2);
-		assertThat(transformers).element(0).isSameAs(cachingTransformer);
-		assertThat(transformers).element(1).isSameAs(cssLinkTransformer);
+		assertThat(transformers).containsExactly(cachingTransformer, cssLinkTransformer);
 	}
 
 	@Test
-	public void urlResourceWithCharset() {
+	void urlResourceWithCharset() {
 		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp");
 		this.registration.resourceChain(true);
 
@@ -236,7 +231,7 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	public void lastModifiedDisabled() {
+	void lastModifiedDisabled() {
 		this.registration.setUseLastModified(false);
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		assertThat(handler.isUseLastModified()).isFalse();

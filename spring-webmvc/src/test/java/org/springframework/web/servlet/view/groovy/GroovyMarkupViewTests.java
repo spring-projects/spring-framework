@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class GroovyMarkupViewTests {
 
 
 	@Test
-	void missingGroovyMarkupConfig() throws Exception {
+	void missingGroovyMarkupConfig() {
 		GroovyMarkupView view = new GroovyMarkupView();
 		given(this.webAppContext.getBeansOfType(GroovyMarkupConfig.class, true, false))
 				.willReturn(new HashMap<>());
@@ -76,7 +76,7 @@ class GroovyMarkupViewTests {
 	}
 
 	@Test
-	void customTemplateEngine() throws Exception {
+	void customTemplateEngine() {
 		GroovyMarkupView view = new GroovyMarkupView();
 		view.setTemplateEngine(new TestTemplateEngine());
 		view.setApplicationContext(this.webAppContext);
@@ -88,7 +88,7 @@ class GroovyMarkupViewTests {
 	}
 
 	@Test
-	void detectTemplateEngine() throws Exception {
+	void detectTemplateEngine() {
 		GroovyMarkupView view = new GroovyMarkupView();
 		view.setTemplateEngine(new TestTemplateEngine());
 		view.setApplicationContext(this.webAppContext);

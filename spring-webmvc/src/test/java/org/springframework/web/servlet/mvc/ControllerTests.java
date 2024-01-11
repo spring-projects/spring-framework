@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ import static org.mockito.Mockito.verify;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class ControllerTests {
+class ControllerTests {
 
 	@Test
-	public void parameterizableViewController() throws Exception {
+	void parameterizableViewController() throws Exception {
 		String viewName = "viewName";
 		ParameterizableViewController pvc = new ParameterizableViewController();
 		pvc.setViewName(viewName);
@@ -58,21 +58,21 @@ public class ControllerTests {
 	}
 
 	@Test
-	public void servletForwardingController() throws Exception {
+	void servletForwardingController() throws Exception {
 		ServletForwardingController sfc = new ServletForwardingController();
 		sfc.setServletName("action");
 		doTestServletForwardingController(sfc, false);
 	}
 
 	@Test
-	public void servletForwardingControllerWithInclude() throws Exception {
+	void servletForwardingControllerWithInclude() throws Exception {
 		ServletForwardingController sfc = new ServletForwardingController();
 		sfc.setServletName("action");
 		doTestServletForwardingController(sfc, true);
 	}
 
 	@Test
-	public void servletForwardingControllerWithBeanName() throws Exception {
+	void servletForwardingControllerWithBeanName() throws Exception {
 		ServletForwardingController sfc = new ServletForwardingController();
 		sfc.setBeanName("action");
 		doTestServletForwardingController(sfc, false);
@@ -109,7 +109,7 @@ public class ControllerTests {
 	}
 
 	@Test
-	public void servletWrappingController() throws Exception {
+	void servletWrappingController() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/somePath");
 		HttpServletResponse response = new MockHttpServletResponse();
 
@@ -137,7 +137,7 @@ public class ControllerTests {
 	}
 
 	@Test
-	public void servletWrappingControllerWithBeanName() throws Exception {
+	void servletWrappingControllerWithBeanName() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/somePath");
 		HttpServletResponse response = new MockHttpServletResponse();
 

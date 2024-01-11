@@ -25,7 +25,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public class RequestAttributeMethodArgumentResolverTests extends AbstractRequestAttributesArgumentResolverTests {
+class RequestAttributeMethodArgumentResolverTests extends AbstractRequestAttributesArgumentResolverTests {
 
 	@Override
 	protected HandlerMethodArgumentResolver createResolver() {

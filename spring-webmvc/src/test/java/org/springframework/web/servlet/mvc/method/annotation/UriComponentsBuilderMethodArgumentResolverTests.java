@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class UriComponentsBuilderMethodArgumentResolverTests {
+class UriComponentsBuilderMethodArgumentResolverTests {
 
 	private UriComponentsBuilderMethodArgumentResolver resolver;
 
@@ -49,7 +49,7 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolver = new UriComponentsBuilderMethodArgumentResolver();
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
@@ -63,14 +63,14 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() throws Exception {
+	void supportsParameter() throws Exception {
 		assertThat(this.resolver.supportsParameter(this.builderParam)).isTrue();
 		assertThat(this.resolver.supportsParameter(this.servletBuilderParam)).isTrue();
 		assertThat(this.resolver.supportsParameter(this.intParam)).isFalse();
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 		this.servletRequest.setContextPath("/myapp");
 		this.servletRequest.setServletPath("/main");
 		this.servletRequest.setPathInfo("/accounts");

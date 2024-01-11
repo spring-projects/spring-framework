@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultServletHandlerConfigurerTests {
+class DefaultServletHandlerConfigurerTests {
 
 	private DefaultServletHandlerConfigurer configurer;
 
@@ -46,7 +46,7 @@ public class DefaultServletHandlerConfigurerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		response = new MockHttpServletResponse();
 		servletContext = new DispatchingMockServletContext();
 		configurer = new DefaultServletHandlerConfigurer(servletContext);
@@ -54,12 +54,12 @@ public class DefaultServletHandlerConfigurerTests {
 
 
 	@Test
-	public void notEnabled() {
+	void notEnabled() {
 		assertThat(configurer.buildHandlerMapping()).isNull();
 	}
 
 	@Test
-	public void enable() throws Exception {
+	void enable() throws Exception {
 		configurer.enable();
 		SimpleUrlHandlerMapping mapping = configurer.buildHandlerMapping();
 		HttpRequestHandler handler = (DefaultServletHttpRequestHandler) mapping.getUrlMap().get("/**");
@@ -77,7 +77,7 @@ public class DefaultServletHandlerConfigurerTests {
 	}
 
 	@Test
-	public void enableWithServletName() throws Exception {
+	void enableWithServletName() throws Exception {
 		configurer.enable("defaultServlet");
 		SimpleUrlHandlerMapping mapping = configurer.buildHandlerMapping();
 		HttpRequestHandler handler = (DefaultServletHttpRequestHandler) mapping.getUrlMap().get("/**");

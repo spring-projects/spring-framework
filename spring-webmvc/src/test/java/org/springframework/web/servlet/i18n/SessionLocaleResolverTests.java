@@ -65,14 +65,14 @@ class SessionLocaleResolverTests {
 	}
 
 	@Test
-	void resolveLocaleWithoutSession() throws Exception {
+	void resolveLocaleWithoutSession() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		assertThat(resolver.resolveLocale(request)).isEqualTo(request.getLocale());
 	}
 
 	@Test
-	void resolveLocaleWithoutSessionAndDefaultLocale() throws Exception {
+	void resolveLocaleWithoutSessionAndDefaultLocale() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		resolver.setDefaultLocale(Locale.GERMAN);
@@ -81,7 +81,7 @@ class SessionLocaleResolverTests {
 	}
 
 	@Test
-	void setLocaleToNullLocale() throws Exception {
+	void setLocaleToNullLocale() {
 		request.addPreferredLocale(Locale.TAIWAN);
 		request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, Locale.GERMAN);
 

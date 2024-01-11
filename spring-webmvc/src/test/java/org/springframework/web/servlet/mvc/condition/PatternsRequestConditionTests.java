@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.Collections;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.assertj.core.api.StringAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -35,13 +36,12 @@ class PatternsRequestConditionTests {
 
 	@Test
 	void prependSlash() {
-		assertThat(new PatternsRequestCondition("foo").getPatterns()).element(0)
-				.isEqualTo("/foo");
+		assertThat(new PatternsRequestCondition("foo").getPatterns()).containsExactly("/foo");
 	}
 
 	@Test
 	void prependNonEmptyPatternsOnly() {
-		assertThat(new PatternsRequestCondition("").getPatterns()).element(0).asString()
+		assertThat(new PatternsRequestCondition("").getPatterns(), StringAssert.class).element(0)
 				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
@@ -122,7 +122,7 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).element(0).isEqualTo("/{foo}.*");
+		assertThat(match.getPatterns()).containsExactly("/{foo}.*");
 
 		useSuffixPatternMatch = false;
 		condition = new PatternsRequestCondition(
@@ -130,7 +130,7 @@ class PatternsRequestConditionTests {
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).element(0).isEqualTo("/{foo}");
+		assertThat(match.getPatterns()).containsExactly("/{foo}");
 	}
 
 	@Test // SPR-8410
@@ -143,13 +143,13 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).element(0).isEqualTo("/jobs/{jobName}");
+		assertThat(match.getPatterns()).containsExactly("/jobs/{jobName}");
 
 		request = initRequest("/jobs/my.job.json");
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).element(0).isEqualTo("/jobs/{jobName}.json");
+		assertThat(match.getPatterns()).containsExactly("/jobs/{jobName}.json");
 	}
 
 	@Test
@@ -177,13 +177,13 @@ class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).element(0).as("Should match by default").isEqualTo("/foo/");
+		assertThat(match.getPatterns()).containsExactly("/foo/");
 
 		condition = new PatternsRequestCondition(new String[] {"/foo"}, true, null);
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).element(0)
+		assertThat(match.getPatterns(), StringAssert.class).element(0)
 				.as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)")
 				.isEqualTo("/foo/");
 

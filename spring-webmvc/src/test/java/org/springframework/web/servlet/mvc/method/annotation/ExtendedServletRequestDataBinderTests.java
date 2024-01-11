@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
@@ -35,32 +34,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ExtendedServletRequestDataBinderTests {
+class ExtendedServletRequestDataBinderTests {
 
 	private MockHttpServletRequest request;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.request = new MockHttpServletRequest();
 	}
 
 	@Test
-	public void createBinder() throws Exception {
+	void createBinder() {
 		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "nameValue");
 		uriTemplateVars.put("age", "25");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
 		TestBean target = new TestBean();
-		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
-		((ServletRequestDataBinder) binder).bind(request);
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
+		binder.bind(request);
 
 		assertThat(target.getName()).isEqualTo("nameValue");
 		assertThat(target.getAge()).isEqualTo(25);
 	}
 
 	@Test
-	public void uriTemplateVarAndRequestParam() throws Exception {
+	void uriTemplateVarAndRequestParam() {
 		request.addParameter("age", "35");
 
 		Map<String, String> uriTemplateVars = new HashMap<>();
@@ -69,18 +68,18 @@ public class ExtendedServletRequestDataBinderTests {
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
 		TestBean target = new TestBean();
-		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
-		((ServletRequestDataBinder) binder).bind(request);
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
+		binder.bind(request);
 
 		assertThat(target.getName()).isEqualTo("nameValue");
 		assertThat(target.getAge()).isEqualTo(35);
 	}
 
 	@Test
-	public void noUriTemplateVars() throws Exception {
+	void noUriTemplateVars() {
 		TestBean target = new TestBean();
-		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
-		((ServletRequestDataBinder) binder).bind(request);
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
+		binder.bind(request);
 
 		assertThat(target.getName()).isNull();
 		assertThat(target.getAge()).isEqualTo(0);

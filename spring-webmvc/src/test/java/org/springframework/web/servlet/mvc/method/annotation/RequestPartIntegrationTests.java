@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,13 +144,13 @@ class RequestPartIntegrationTests {
 
 
 	@Test
-	void standardMultipartResolver() throws Exception {
+	void standardMultipartResolver() {
 		testCreate(baseUrl + "/standard-resolver/test", "Jason");
 		testCreate(baseUrl + "/standard-resolver/test", "Arjen");
 	}
 
 	@Test  // SPR-13319
-	void standardMultipartResolverWithEncodedFileName() throws Exception {
+	void standardMultipartResolverWithEncodedFileName() {
 		String boundaryText = MimeTypeUtils.generateMultipartBoundaryString();
 		Map<String, String> params = Collections.singletonMap("boundary", boundaryText);
 

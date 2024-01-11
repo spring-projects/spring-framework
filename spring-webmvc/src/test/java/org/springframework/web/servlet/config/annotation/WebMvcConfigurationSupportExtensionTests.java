@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 /**
  * A test fixture with a subclass of {@link WebMvcConfigurationSupport} that also
  * implements the various {@link WebMvcConfigurer} extension points.
- *
+ * <p>
  * The former doesn't implement the latter but the two must have compatible
  * callback method signatures to support moving from simple to advanced
  * configuration -- i.e. dropping @EnableWebMvc + WebMvcConfigurer and extending
@@ -105,7 +105,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class WebMvcConfigurationSupportExtensionTests {
+class WebMvcConfigurationSupportExtensionTests {
 
 	private TestWebMvcConfigurationSupport config;
 
@@ -113,7 +113,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.context = new StaticWebApplicationContext();
 		this.context.setServletContext(new MockServletContext(new FileSystemResourceLoader()));
 		this.context.registerSingleton("controller", TestController.class);
@@ -125,7 +125,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
-	public void handlerMappings() throws Exception {
+	void handlerMappings() throws Exception {
 		RequestMappingHandlerMapping rmHandlerMapping = this.config.requestMappingHandlerMapping(
 				this.config.mvcContentNegotiationManager(),
 				this.config.mvcConversionService(), this.config.mvcResourceUrlProvider());
@@ -199,7 +199,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void requestMappingHandlerAdapter() {
+	void requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcValidator());
@@ -245,7 +245,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
-	public void webBindingInitializer() throws Exception {
+	void webBindingInitializer() {
 		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcValidator());
@@ -295,7 +295,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
-	public void exceptionResolvers() throws Exception {
+	void exceptionResolvers() {
 		List<HandlerExceptionResolver> resolvers = ((HandlerExceptionResolverComposite)
 				this.config.handlerExceptionResolver(null)).getExceptionResolvers();
 
@@ -306,7 +306,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void viewResolvers() throws Exception {
+	void viewResolvers() {
 		ViewResolverComposite viewResolver = (ViewResolverComposite) this.config.mvcViewResolver(
 				this.config.mvcContentNegotiationManager());
 		assertThat(viewResolver.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
@@ -333,10 +333,10 @@ public class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
-	public void crossOrigin() {
+	void crossOrigin() {
 		Map<String, CorsConfiguration> configs = this.config.getCorsConfigurations();
 		assertThat(configs).hasSize(1);
-		assertThat(configs.get("/resources/**").getAllowedOrigins()).element(0).isEqualTo("*");
+		assertThat(configs.get("/resources/**").getAllowedOrigins()).containsExactly("*");
 	}
 
 
@@ -432,7 +432,6 @@ public class WebMvcConfigurationSupportExtensionTests {
 			registry.addInterceptor(new LocaleChangeInterceptor());
 		}
 
-		@SuppressWarnings("serial")
 		@Override
 		public MessageCodesResolver getMessageCodesResolver() {
 			return new DefaultMessageCodesResolver() {
@@ -473,10 +472,10 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	}
 
-	private class TestPathHelper extends UrlPathHelper {
+	private static class TestPathHelper extends UrlPathHelper {
 	}
 
-	private class TestPathMatcher extends AntPathMatcher {
+	private static class TestPathMatcher extends AntPathMatcher {
 	}
 
 
