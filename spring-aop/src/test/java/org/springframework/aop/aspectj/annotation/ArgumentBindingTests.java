@@ -119,7 +119,7 @@ class ArgumentBindingTests {
 	static class PointcutWithAnnotationArgument {
 
 		@Around("execution(* org.springframework..*.*(..)) && @annotation(transactional)")
-		public Object around(ProceedingJoinPoint pjp, Transactional transactional) throws Throwable {
+		public Object around(ProceedingJoinPoint pjp, Transactional transactional) {
 			throw new IllegalStateException("Invoked with @Transactional");
 		}
 	}
@@ -132,7 +132,7 @@ class ArgumentBindingTests {
 		public void pointcutWithArgs(String s) {}
 
 		@Around("pointcutWithArgs(aString)")
-		public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
+		public Object doAround(ProceedingJoinPoint pjp, String aString) {
 			throw new IllegalArgumentException(aString);
 		}
 	}
@@ -142,7 +142,7 @@ class ArgumentBindingTests {
 	static class DynamicPointcutWithArgs {
 
 		@Around("execution(* *(..)) && args(java.lang.String)")
-		public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
+		public Object doAround(ProceedingJoinPoint pjp) {
 			throw new IllegalArgumentException(String.valueOf(pjp.getArgs()[0]));
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class ScopedProxyAutowireTests {
+class ScopedProxyAutowireTests {
 
 	@Test
-	public void testScopedProxyInheritsAutowireCandidateFalse() {
+	void testScopedProxyInheritsAutowireCandidateFalse() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(ScopedProxyAutowireTests.class, "scopedAutowireFalse.xml"));
@@ -48,7 +48,7 @@ public class ScopedProxyAutowireTests {
 	}
 
 	@Test
-	public void testScopedProxyReplacesAutowireCandidateTrue() {
+	void testScopedProxyReplacesAutowireCandidateTrue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(ScopedProxyAutowireTests.class, "scopedAutowireTrue.xml"));

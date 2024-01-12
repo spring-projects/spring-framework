@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,14 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class RegexpMethodPointcutAdvisorIntegrationTests {
+class RegexpMethodPointcutAdvisorIntegrationTests {
 
 	private static final Resource CONTEXT =
 			qualifiedResource(RegexpMethodPointcutAdvisorIntegrationTests.class, "context.xml");
 
 
 	@Test
-	public void testSinglePattern() throws Throwable {
+	void testSinglePattern() throws Throwable {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		ITestBean advised = (ITestBean) bf.getBean("settersAdvised");
@@ -62,7 +62,7 @@ public class RegexpMethodPointcutAdvisorIntegrationTests {
 	}
 
 	@Test
-	public void testMultiplePatterns() throws Throwable {
+	void testMultiplePatterns() throws Throwable {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		// This is a CGLIB proxy, so we can proxy it to the target class
@@ -86,7 +86,7 @@ public class RegexpMethodPointcutAdvisorIntegrationTests {
 	}
 
 	@Test
-	public void testSerialization() throws Throwable {
+	void testSerialization() throws Throwable {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		// This is a CGLIB proxy, so we can proxy it to the target class

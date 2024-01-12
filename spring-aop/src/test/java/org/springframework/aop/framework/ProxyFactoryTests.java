@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,10 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Chris Beams
  * @since 14.05.2003
  */
-public class ProxyFactoryTests {
+class ProxyFactoryTests {
 
 	@Test
-	public void testIndexOfMethods() {
+	void testIndexOfMethods() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
@@ -76,7 +76,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testRemoveAdvisorByReference() {
+	void testRemoveAdvisorByReference() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
@@ -96,7 +96,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testRemoveAdvisorByIndex() {
+	void testRemoveAdvisorByIndex() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
@@ -144,7 +144,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testReplaceAdvisor() {
+	void testReplaceAdvisor() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
@@ -173,7 +173,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testAddRepeatedInterface() {
+	void testAddRepeatedInterface() {
 		TimeStamped tst = () -> {
 			throw new UnsupportedOperationException("getTimeStamp");
 		};
@@ -186,7 +186,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testGetsAllInterfaces() {
+	void testGetsAllInterfaces() {
 		// Extend to get new interface
 		class TestBeanSubclass extends TestBean implements Comparable<Object> {
 			@Override
@@ -220,10 +220,10 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testInterceptorInclusionMethods() {
+	void testInterceptorInclusionMethods() {
 		class MyInterceptor implements MethodInterceptor {
 			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
+			public Object invoke(MethodInvocation invocation) {
 				throw new UnsupportedOperationException();
 			}
 		}
@@ -244,9 +244,9 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testSealedInterfaceExclusion() {
+	void testSealedInterfaceExclusion() {
 		// String implements ConstantDesc on JDK 12+, sealed as of JDK 17
-		ProxyFactory factory = new ProxyFactory(new String());
+		ProxyFactory factory = new ProxyFactory("");
 		NopInterceptor di = new NopInterceptor();
 		factory.addAdvice(0, di);
 		Object proxy = factory.getProxy();
@@ -257,7 +257,7 @@ public class ProxyFactoryTests {
 	 * Should see effect immediately on behavior.
 	 */
 	@Test
-	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
+	void testCanAddAndRemoveAspectInterfacesOnSingleton() {
 		ProxyFactory config = new ProxyFactory(new TestBean());
 
 		assertThat(config.getProxy()).as("Shouldn't implement TimeStamped before manipulation")
@@ -304,7 +304,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testProxyTargetClassWithInterfaceAsTarget() {
+	void testProxyTargetClassWithInterfaceAsTarget() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(ITestBean.class);
 		Object proxy = pf.getProxy();
@@ -320,7 +320,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testProxyTargetClassWithConcreteClassAsTarget() {
+	void testProxyTargetClassWithConcreteClassAsTarget() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(TestBean.class);
 		Object proxy = pf.getProxy();
@@ -347,7 +347,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testInterfaceProxiesCanBeOrderedThroughAnnotations() {
+	void testInterfaceProxiesCanBeOrderedThroughAnnotations() {
 		Object proxy1 = new ProxyFactory(new A()).getProxy();
 		Object proxy2 = new ProxyFactory(new B()).getProxy();
 		List<Object> list = new ArrayList<>(2);
@@ -359,7 +359,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testTargetClassProxiesCanBeOrderedThroughAnnotations() {
+	void testTargetClassProxiesCanBeOrderedThroughAnnotations() {
 		ProxyFactory pf1 = new ProxyFactory(new A());
 		pf1.setProxyTargetClass(true);
 		ProxyFactory pf2 = new ProxyFactory(new B());
@@ -375,7 +375,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testInterceptorWithoutJoinpoint() {
+	void testInterceptorWithoutJoinpoint() {
 		final TestBean target = new TestBean("tb");
 		ITestBean proxy = ProxyFactory.getProxy(ITestBean.class, (MethodInterceptor) invocation -> {
 			assertThat(invocation.getThis()).isNull();
@@ -385,7 +385,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testCharSequenceProxy() {
+	void testCharSequenceProxy() {
 		CharSequence target = "test";
 		ProxyFactory pf = new ProxyFactory(target);
 		ClassLoader cl = target.getClass().getClassLoader();
@@ -395,7 +395,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testDateProxy() {
+	void testDateProxy() {
 		Date target = new Date();
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.setProxyTargetClass(true);
@@ -406,14 +406,14 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	public void testJdbcSavepointProxy() throws SQLException {
+	void testJdbcSavepointProxy() throws SQLException {
 		Savepoint target = new Savepoint() {
 			@Override
-			public int getSavepointId() throws SQLException {
+			public int getSavepointId() {
 				return 1;
 			}
 			@Override
-			public String getSavepointName() throws SQLException {
+			public String getSavepointName() {
 				return "sp";
 			}
 		};

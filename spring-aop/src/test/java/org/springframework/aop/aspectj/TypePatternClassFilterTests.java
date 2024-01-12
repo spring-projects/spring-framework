@@ -51,7 +51,7 @@ class TypePatternClassFilterTests {
 	}
 
 	@Test
-	void invocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
+	void invocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() {
 		assertThatIllegalStateException().isThrownBy(() -> new TypePatternClassFilter().matches(String.class));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class ThreadLocalTargetSourceTests {
+class ThreadLocalTargetSourceTests {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
@@ -60,7 +60,7 @@ public class ThreadLocalTargetSourceTests {
 	 * with one another.
 	 */
 	@Test
-	public void testUseDifferentManagedInstancesInSameThread() {
+	void testUseDifferentManagedInstancesInSameThread() {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertThat(apartment.getCount()).isEqualTo(INITIAL_COUNT);
 		apartment.doWork();
@@ -72,7 +72,7 @@ public class ThreadLocalTargetSourceTests {
 	}
 
 	@Test
-	public void testReuseInSameThread() {
+	void testReuseInSameThread() {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertThat(apartment.getCount()).isEqualTo(INITIAL_COUNT);
 		apartment.doWork();
@@ -86,7 +86,7 @@ public class ThreadLocalTargetSourceTests {
 	 * Relies on introduction.
 	 */
 	@Test
-	public void testCanGetStatsViaMixin() {
+	void testCanGetStatsViaMixin() {
 		ThreadLocalTargetSourceStats stats = (ThreadLocalTargetSourceStats) beanFactory.getBean("apartment");
 		// +1 because creating target for stats call counts
 		assertThat(stats.getInvocationCount()).isEqualTo(1);
@@ -104,7 +104,7 @@ public class ThreadLocalTargetSourceTests {
 	}
 
 	@Test
-	public void testNewThreadHasOwnInstance() throws InterruptedException {
+	void testNewThreadHasOwnInstance() throws InterruptedException {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertThat(apartment.getCount()).isEqualTo(INITIAL_COUNT);
 		apartment.doWork();
@@ -144,7 +144,7 @@ public class ThreadLocalTargetSourceTests {
 	 * Test for SPR-1442. Destroyed target should re-associated with thread and not throw NPE.
 	 */
 	@Test
-	public void testReuseDestroyedTarget() {
+	void testReuseDestroyedTarget() {
 		ThreadLocalTargetSource source = (ThreadLocalTargetSource)this.beanFactory.getBean("threadLocalTs");
 
 		// try first time

@@ -34,10 +34,10 @@ import static org.mockito.Mockito.verify;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class SimpleTraceInterceptorTests {
+class SimpleTraceInterceptorTests {
 
 	@Test
-	public void testSunnyDayPathLogsCorrectly() throws Throwable {
+	void testSunnyDayPathLogsCorrectly() throws Throwable {
 		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.getThis()).willReturn(this);
@@ -51,7 +51,7 @@ public class SimpleTraceInterceptorTests {
 	}
 
 	@Test
-	public void testExceptionPathStillLogsCorrectly() throws Throwable {
+	void testExceptionPathStillLogsCorrectly() throws Throwable {
 		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.getThis()).willReturn(this);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ import static org.mockito.Mockito.mock;
 class DelegatingIntroductionInterceptorTests {
 
 	@Test
-	void testNullTarget() throws Exception {
+	void testNullTarget() {
 		// Shouldn't accept null target
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingIntroductionInterceptor(null));
 	}
 
 	@Test
-	void testIntroductionInterceptorWithDelegation() throws Exception {
+	void testIntroductionInterceptorWithDelegation() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(TimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -70,7 +70,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testIntroductionInterceptorWithInterfaceHierarchy() throws Exception {
+	void testIntroductionInterceptorWithInterfaceHierarchy() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(SubTimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -86,7 +86,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testIntroductionInterceptorWithSuperInterface() throws Exception {
+	void testIntroductionInterceptorWithSuperInterface() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(TimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -107,7 +107,7 @@ class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		class Tester implements TimeStamped, ITester {
 			@Override
-			public void foo() throws Exception {
+			public void foo() {
 			}
 			@Override
 			public long getTimeStamp() {
@@ -138,7 +138,7 @@ class DelegatingIntroductionInterceptorTests {
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
 			@Override
-			public void foo() throws Exception {
+			public void foo() {
 			}
 			@Override
 			public long getTimeStamp() {
@@ -177,9 +177,8 @@ class DelegatingIntroductionInterceptorTests {
 		assertThat(o).isNotInstanceOf(TimeStamped.class);
 	}
 
-	@SuppressWarnings("serial")
 	@Test
-	void testIntroductionInterceptorDoesntReplaceToString() throws Exception {
+	void testIntroductionInterceptorDoesNotReplaceToString() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(TimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -246,7 +245,7 @@ class DelegatingIntroductionInterceptorTests {
 
 	// Test when target implements the interface: should get interceptor by preference.
 	@Test
-	void testIntroductionMasksTargetImplementation() throws Exception {
+	void testIntroductionMasksTargetImplementation() {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {

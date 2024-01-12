@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Sebastien Deleuze
  */
-public class AopUtilsTests {
+class AopUtilsTests {
 
 	@Test
-	public void testPointcutCanNeverApply() {
+	void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			@Override
 			public boolean matches(Method method, @Nullable Class<?> clazzy) {
@@ -54,13 +54,13 @@ public class AopUtilsTests {
 	}
 
 	@Test
-	public void testPointcutAlwaysApplies() {
+	void testPointcutAlwaysApplies() {
 		assertThat(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), Object.class)).isTrue();
 		assertThat(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), TestBean.class)).isTrue();
 	}
 
 	@Test
-	public void testPointcutAppliesToOneMethodOnObject() {
+	void testPointcutAppliesToOneMethodOnObject() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			@Override
 			public boolean matches(Method method, @Nullable Class<?> clazz) {
@@ -80,7 +80,7 @@ public class AopUtilsTests {
 	 * that's subverted the singleton construction limitation.
 	 */
 	@Test
-	public void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
+	void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
 		assertThat(SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE)).isSameAs(MethodMatcher.TRUE);
 		assertThat(SerializationTestUtils.serializeAndDeserialize(ClassFilter.TRUE)).isSameAs(ClassFilter.TRUE);
 		assertThat(SerializationTestUtils.serializeAndDeserialize(Pointcut.TRUE)).isSameAs(Pointcut.TRUE);
@@ -91,7 +91,7 @@ public class AopUtilsTests {
 	}
 
 	@Test
-	public void testInvokeJoinpointUsingReflection() throws Throwable {
+	void testInvokeJoinpointUsingReflection() throws Throwable {
 		String name = "foo";
 		TestBean testBean = new TestBean(name);
 		Method method = ReflectionUtils.findMethod(TestBean.class, "getName");

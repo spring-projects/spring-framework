@@ -29,31 +29,31 @@ import static org.mockito.Mockito.mock;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class DefaultScopedObjectTests {
+class DefaultScopedObjectTests {
 
 	private static final String GOOD_BEAN_NAME = "foo";
 
 
 	@Test
-	public void testCtorWithNullBeanFactory() throws Exception {
+	void testCtorWithNullBeanFactory() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 			new DefaultScopedObject(null, GOOD_BEAN_NAME));
 	}
 
 	@Test
-	public void testCtorWithNullTargetBeanName() throws Exception {
+	void testCtorWithNullTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName(null));
 	}
 
 	@Test
-	public void testCtorWithEmptyTargetBeanName() throws Exception {
+	void testCtorWithEmptyTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName(""));
 	}
 
 	@Test
-	public void testCtorWithJustWhitespacedTargetBeanName() throws Exception {
+	void testCtorWithJustWhitespacedTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName("   "));
 	}

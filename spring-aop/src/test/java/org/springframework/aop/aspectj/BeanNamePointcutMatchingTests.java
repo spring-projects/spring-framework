@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public class BeanNamePointcutMatchingTests {
+class BeanNamePointcutMatchingTests {
 
 	@Test
-	public void testMatchingPointcuts() {
+	void testMatchingPointcuts() {
 		assertMatch("someName", "bean(someName)");
 
 		// Spring bean names are less restrictive compared to AspectJ names (methods, types etc.)
@@ -66,7 +66,7 @@ public class BeanNamePointcutMatchingTests {
 	}
 
 	@Test
-	public void testNonMatchingPointcuts() {
+	void testNonMatchingPointcuts() {
 		assertMisMatch("someName", "bean(someNamex)");
 		assertMisMatch("someName", "bean(someX*Name)");
 
@@ -87,7 +87,6 @@ public class BeanNamePointcutMatchingTests {
 	}
 
 	private static boolean matches(final String beanName, String pcExpression) {
-		@SuppressWarnings("serial")
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut() {
 			@Override
 			protected String getCurrentProxiedBeanName() {

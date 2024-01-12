@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Chris Beams
  * @since 03.09.2004
  */
-public class PrototypeTargetTests {
+class PrototypeTargetTests {
 
 	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetTests.class, "context.xml");
 
 
 	@Test
-	public void testPrototypeProxyWithPrototypeTarget() {
+	void testPrototypeProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
@@ -52,7 +52,7 @@ public class PrototypeTargetTests {
 	}
 
 	@Test
-	public void testSingletonProxyWithPrototypeTarget() {
+	void testSingletonProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
