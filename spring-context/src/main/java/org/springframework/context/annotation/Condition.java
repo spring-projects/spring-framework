@@ -32,7 +32,14 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * over conditions that interact with {@code @Configuration} beans, consider implementing
  * the {@link ConfigurationCondition} interface.
  *
+ * <p>Multiple conditions on a given class or on a given method will be ordered
+ * according to the semantics of Spring's {@link org.springframework.core.Ordered}
+ * interface and {@link org.springframework.core.annotation.Order @Order} annotation.
+ * See {@link org.springframework.core.annotation.AnnotationAwareOrderComparator}
+ * for details.
+ *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 4.0
  * @see ConfigurationCondition
  * @see Conditional
