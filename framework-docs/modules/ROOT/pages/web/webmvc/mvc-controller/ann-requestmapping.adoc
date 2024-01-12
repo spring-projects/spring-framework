@@ -562,15 +562,19 @@ Kotlin::
 == `@HttpExchange`
 [.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
 
-While `@HttpExchange` was initially created for client use, the
-`@HttpExchange`-annotated interfaces have been designed to constitute
-HTTP service contracts, neutral to client or server.
-To facilitate that, it's possible handle requests with
-`@HttpExchange`-annotated methods in place of
-`@RequestMapping`-annotated ones. Such methods are declared on an
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface]
-and can be used as a client via `HttpServiceProxyFactory` or implemented by
-a server `@Controller`, like so:
+While the main purpose of `@HttpExchange` is to abstract HTTP client code with a
+generated proxy, the
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] on which
+such annotations are placed is a contract neutral to client vs server use.
+In addition to simplifying client code, there are also cases where an HTTP Interface
+may be a convenient way for servers to expose their API for client access. This leads
+to increased coupling between client and server and is often not a good choice,
+especially for public API's, but may be exactly the goal for an internal API.
+It is an approach commonly used in Spring Cloud, and it is why `@HttpExchange` is
+supported as an alternative to `@RequestMapping` for server side handling in
+controller classes.
+
+For example:
 
 [tabs]
 ======
@@ -607,41 +611,37 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@HttpExchange("/persons")
-    interface PersonService {
+	interface PersonService {
 
-        @GetExchange("/{id}")
-        fun getPerson(@PathVariable id: Long): Person
+		@GetExchange("/{id}")
+		fun getPerson(@PathVariable id: Long): Person
 
-        @PostExchange
-        fun add(@RequestBody person: Person)
-    }
+		@PostExchange
+		fun add(@RequestBody person: Person)
+	}
 
-    @RestController
-    class PersonController : PersonService {
+	@RestController
+	class PersonController : PersonService {
 
-        override fun getPerson(@PathVariable id: Long): Person {
-        // ...
-        }
+		override fun getPerson(@PathVariable id: Long): Person {
+			// ...
+		}
 
-        @ResponseStatus(HttpStatus.CREATED)
-        override fun add(@RequestBody person: Person) {
-        // ...
-        }
-    }
+		@ResponseStatus(HttpStatus.CREATED)
+		override fun add(@RequestBody person: Person) {
+			// ...
+		}
+	}
 ----
 ======
 
-TIP: A shared interface between client and server may also provide an easy way
-for clients to access server APIs and keep up with the changes. While, due to
-increased coupling, it won't be a good fit for a public API, it may be useful
-in the case of an internal API.
+`@HttpExchange` and `@RequestMapping` have differences.
+`@RequestMapping` can map to any number of requests by path patterns, HTTP methods,
+and more, while `@HttpExchange` declares a single endpoint with a concrete HTTP method,
+path, and content types.
 
-There are some differences between `@HttpExchange` and `@RequestMapping` since the
-former needs to remain suitable for client and server use. For example, while
-`@RequestMapping` can be declared to handle any number of paths and each path can
-be a pattern, `@HttpExchange` must be declared with a single, concrete path. There are
-also differences in the supported method parameters. Generally, `@HttpExchange` supports
-a subset of method parameters that `@RequestMapping` does, excluding any parameters that
-are server side only. For details see the list of supported method parameters for
-xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[HTTP interface] and for
+For method parameters and returns values, generally, `@HttpExchange` supports a
+subset of the method parameters that `@RequestMapping` does. Notably, it excludes any
+server-side specific parameter types. For details, see the list for
+xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
 xref:web/webmvc/mvc-controller/ann-methods/arguments.adoc[@RequestMapping].
