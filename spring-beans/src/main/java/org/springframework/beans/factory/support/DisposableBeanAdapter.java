@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,7 +272,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			if (destroyMethod != null) {
 				return destroyMethod;
 			}
-			for (Class<?> beanInterface : beanClass.getInterfaces()) {
+			for (Class<?> beanInterface : ClassUtils.getAllInterfacesForClass(beanClass)) {
 				destroyMethod = findDestroyMethod(beanInterface, methodName);
 				if (destroyMethod != null) {
 					return destroyMethod;
