@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,14 @@ import org.springframework.web.util.UriTemplateHandler;
  * API for synchronous HTTP access. For asynchronous and streaming scenarios,
  * consider the reactive
  * {@link org.springframework.web.reactive.function.client.WebClient}.
+ *
+ * <p>{@code RestTemplate} and {@code RestClient} share the same infrastructure
+ * (i.e. {@linkplain ClientHttpRequestFactory request factories}, request
+ * {@linkplain org.springframework.http.client.ClientHttpRequestInterceptor interceptors} and
+ * {@linkplain org.springframework.http.client.ClientHttpRequestInitializer initializers},
+ * {@linkplain HttpMessageConverter message converters},
+ * etc.), so any improvements made therein are shared as well.
+ * However, {@code RestClient} is the focus for new higher-level features.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
