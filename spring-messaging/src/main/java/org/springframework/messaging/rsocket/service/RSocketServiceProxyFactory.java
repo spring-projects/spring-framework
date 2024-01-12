@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.rsocket.service;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.framework.ReflectiveMethodInvocationUtils;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -46,6 +45,7 @@ import org.springframework.util.StringValueResolver;
  * {@link Builder Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author Injae Kim
  * @since 6.0
  */
 public final class RSocketServiceProxyFactory {
@@ -253,11 +253,9 @@ public final class RSocketServiceProxyFactory {
 			if (serviceMethod != null) {
 				return serviceMethod.invoke(invocation.getArguments());
 			}
-			if (method.isDefault()) {
-				if (invocation instanceof ReflectiveMethodInvocation reflectiveMethodInvocation) {
-					Object proxy = reflectiveMethodInvocation.getProxy();
-					return InvocationHandler.invokeDefault(proxy, method, invocation.getArguments());
-				}
+			Object invokeDefaultMethod = ReflectiveMethodInvocationUtils.invokeDefaultMethod(invocation);
+			if (invokeDefaultMethod != null) {
+				return invokeDefaultMethod;
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}

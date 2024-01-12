@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.framework.ReflectiveMethodInvocationUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -49,6 +48,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * {@link Builder Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author Injae Kim
  * @since 6.0
  * @see org.springframework.web.client.support.RestClientAdapter
  * @see org.springframework.web.reactive.function.client.support.WebClientAdapter
@@ -302,11 +302,9 @@ public final class HttpServiceProxyFactory {
 						resolveCoroutinesArguments(invocation.getArguments()) : invocation.getArguments();
 				return httpServiceMethod.invoke(arguments);
 			}
-			if (method.isDefault()) {
-				if (invocation instanceof ReflectiveMethodInvocation reflectiveMethodInvocation) {
-					Object proxy = reflectiveMethodInvocation.getProxy();
-					return InvocationHandler.invokeDefault(proxy, method, invocation.getArguments());
-				}
+			Object invokeDefaultMethod = ReflectiveMethodInvocationUtils.invokeDefaultMethod(invocation);
+			if (invokeDefaultMethod != null) {
+				return invokeDefaultMethod;
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
