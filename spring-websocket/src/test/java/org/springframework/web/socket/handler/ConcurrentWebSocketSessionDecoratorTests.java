@@ -36,11 +36,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings("resource")
-public class ConcurrentWebSocketSessionDecoratorTests {
+class ConcurrentWebSocketSessionDecoratorTests {
 
 	@Test
-	public void send() throws IOException {
+	void send() throws IOException {
 
 		TestWebSocketSession session = new TestWebSocketSession();
 		session.setOpen(true);
@@ -51,8 +50,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		TextMessage textMessage = new TextMessage("payload");
 		decorator.sendMessage(textMessage);
 
-		assertThat(session.getSentMessages()).hasSize(1);
-		assertThat(session.getSentMessages()).element(0).isEqualTo(textMessage);
+		assertThat(session.getSentMessages()).containsExactly(textMessage);
 
 		assertThat(decorator.getBufferSize()).isEqualTo(0);
 		assertThat(decorator.getTimeSinceSendStarted()).isEqualTo(0);
@@ -60,7 +58,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	@Test
-	public void sendAfterBlockedSend() throws IOException, InterruptedException {
+	void sendAfterBlockedSend() throws IOException, InterruptedException {
 
 		BlockingWebSocketSession session = new BlockingWebSocketSession();
 		session.setOpen(true);
@@ -84,7 +82,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	@Test
-	public void sendTimeLimitExceeded() throws InterruptedException {
+	void sendTimeLimitExceeded() throws InterruptedException {
 
 		BlockingWebSocketSession session = new BlockingWebSocketSession();
 		session.setId("123");
@@ -95,7 +93,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 
 		sendBlockingMessage(decorator);
 
-		// Exceed send time..
+		// Exceed send time
 		Thread.sleep(200);
 
 		TextMessage payload = new TextMessage("payload");
@@ -106,7 +104,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	@Test
-	public void sendBufferSizeExceeded() throws IOException, InterruptedException {
+	void sendBufferSizeExceeded() throws IOException, InterruptedException {
 
 		BlockingWebSocketSession session = new BlockingWebSocketSession();
 		session.setId("123");
@@ -154,7 +152,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	@Test
-	public void closeStatusNormal() throws Exception {
+	void closeStatusNormal() throws Exception {
 
 		BlockingWebSocketSession session = new BlockingWebSocketSession();
 		session.setOpen(true);
@@ -168,7 +166,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	@Test
-	public void closeStatusChangesToSessionNotReliable() throws Exception {
+	void closeStatusChangesToSessionNotReliable() throws Exception {
 
 		BlockingWebSocketSession session = new BlockingWebSocketSession();
 		session.setId("123");

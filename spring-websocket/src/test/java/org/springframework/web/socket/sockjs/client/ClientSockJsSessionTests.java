@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.sockjs.client;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
@@ -79,7 +78,7 @@ class ClientSockJsSessionTests {
 	}
 
 	@Test
-	void handleFrameOpenWhenStatusNotNew() throws Exception {
+	void handleFrameOpenWhenStatusNotNew() {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThat(this.session.isOpen()).isTrue();
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
@@ -183,7 +182,7 @@ class ClientSockJsSessionTests {
 	}
 
 	@Test
-	void closeWithNullStatus() throws Exception {
+	void closeWithNullStatus() {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> this.session.close(null))
@@ -191,7 +190,7 @@ class ClientSockJsSessionTests {
 	}
 
 	@Test
-	void closeWithStatusOutOfRange() throws Exception {
+	void closeWithStatusOutOfRange() {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> this.session.close(new CloseStatus(2999, "reason")))
@@ -225,12 +224,12 @@ class ClientSockJsSessionTests {
 		}
 
 		@Override
-		protected void sendInternal(TextMessage textMessage) throws IOException {
+		protected void sendInternal(TextMessage textMessage) {
 			this.sentMessage = textMessage;
 		}
 
 		@Override
-		protected void disconnect(CloseStatus status) throws IOException {
+		protected void disconnect(CloseStatus status) {
 			this.disconnectStatus = status;
 		}
 

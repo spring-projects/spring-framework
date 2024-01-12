@@ -33,17 +33,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketHttpHeadersTests {
+class WebSocketHttpHeadersTests {
 
 	private WebSocketHttpHeaders headers;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		headers = new WebSocketHttpHeaders();
 	}
 
 	@Test
-	public void parseWebSocketExtensions() {
+	void parseWebSocketExtensions() {
 		List<String> extensions = new ArrayList<>();
 		extensions.add("x-foo-extension, x-bar-extension");
 		extensions.add("x-test-extension");

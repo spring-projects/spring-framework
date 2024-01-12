@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class DefaultSimpUserRegistryTests {
+class DefaultSimpUserRegistryTests {
 
 	@Test
-	public void addOneSessionId() {
+	void addOneSessionId() {
 		TestPrincipal user = new TestPrincipal("joe");
 		Message<byte[]> message = createMessage(SimpMessageType.CONNECT_ACK, "123");
 		SessionConnectedEvent event = new SessionConnectedEvent(this, message, user);
@@ -61,7 +61,7 @@ public class DefaultSimpUserRegistryTests {
 	}
 
 	@Test
-	public void addMultipleSessionIds() {
+	void addMultipleSessionIds() {
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -88,7 +88,7 @@ public class DefaultSimpUserRegistryTests {
 	}
 
 	@Test
-	public void removeSessionIds() {
+	void removeSessionIds() {
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -122,7 +122,7 @@ public class DefaultSimpUserRegistryTests {
 	}
 
 	@Test
-	public void findSubscriptions() throws Exception {
+	void findSubscriptions() {
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -154,7 +154,7 @@ public class DefaultSimpUserRegistryTests {
 	}
 
 	@Test
-	public void nullSessionId() throws Exception {
+	void nullSessionId() {
 		DefaultSimpUserRegistry registry = new DefaultSimpUserRegistry();
 
 		TestPrincipal user = new TestPrincipal("joe");

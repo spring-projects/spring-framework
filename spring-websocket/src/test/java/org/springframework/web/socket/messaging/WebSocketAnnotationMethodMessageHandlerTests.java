@@ -42,7 +42,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketAnnotationMethodMessageHandlerTests {
+class WebSocketAnnotationMethodMessageHandlerTests {
 
 	private TestWebSocketAnnotationMethodMessageHandler messageHandler;
 
@@ -50,7 +50,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		this.applicationContext = new StaticApplicationContext();
 		this.applicationContext.registerSingleton("controller", TestController.class);
 		this.applicationContext.registerSingleton("controllerAdvice", TestControllerAdvice.class);
@@ -65,7 +65,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	public void globalException() throws Exception {
+	void globalException() {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
 		headers.setSessionId("session1");
 		headers.setSessionAttributes(new ConcurrentHashMap<>());

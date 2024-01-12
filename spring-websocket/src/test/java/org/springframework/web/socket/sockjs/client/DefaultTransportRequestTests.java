@@ -51,7 +51,6 @@ class DefaultTransportRequestTests {
 
 	private CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
 
-	@SuppressWarnings("unchecked")
 	private BiConsumer<WebSocketSession, Throwable> connectCallback = mock();
 
 	private TestTransport webSocketTransport = new TestTransport("WebSocketTestTransport");

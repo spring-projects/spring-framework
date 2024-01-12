@@ -64,7 +64,7 @@ class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTests<TestW
 
 
 	@Test
-	void isActive() throws Exception {
+	void isActive() {
 		assertThat(this.session.isActive()).isFalse();
 
 		this.session.initializeDelegateSession(this.webSocketSession);
@@ -85,7 +85,7 @@ class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTests<TestW
 
 	@Test
 	@SuppressWarnings("resource")
-	void afterSessionInitializedOpenFrameFirst() throws Exception {
+	void afterSessionInitializedOpenFrameFirst() {
 		TextWebSocketHandler handler = new TextWebSocketHandler() {
 			@Override
 			public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -123,7 +123,7 @@ class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTests<TestW
 	}
 
 	@Test
-	void sendMessageInternal() throws Exception {
+	void sendMessageInternal() {
 		this.session.initializeDelegateSession(this.webSocketSession);
 		this.session.sendMessageInternal("x");
 

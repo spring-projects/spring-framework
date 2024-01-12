@@ -36,10 +36,10 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class SockJsWebSocketHandlerTests {
+class SockJsWebSocketHandlerTests {
 
 	@Test
-	public void getSubProtocols() throws Exception {
+	void getSubProtocols() {
 		SubscribableChannel channel = mock();
 		SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(channel, channel);
 		StompSubProtocolHandler stompHandler = new StompSubProtocolHandler();
@@ -54,7 +54,7 @@ public class SockJsWebSocketHandlerTests {
 	}
 
 	@Test
-	public void getSubProtocolsNone() throws Exception {
+	void getSubProtocolsNone() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		TaskScheduler scheduler = mock();
 		DefaultSockJsService service = new DefaultSockJsService(scheduler);

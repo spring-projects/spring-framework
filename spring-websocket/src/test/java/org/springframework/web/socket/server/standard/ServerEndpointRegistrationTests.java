@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ServerEndpointRegistrationTests {
+class ServerEndpointRegistrationTests {
 
 
 	@Test
-	public void endpointPerConnection() throws Exception {
+	void endpointPerConnection() throws Exception {
 
-		@SuppressWarnings("resource")
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
 		ServerEndpointRegistration registration = new ServerEndpointRegistration("/path", EchoEndpoint.class);
@@ -52,7 +51,7 @@ public class ServerEndpointRegistrationTests {
 	}
 
 	@Test
-	public void endpointSingleton() throws Exception {
+	void endpointSingleton() throws Exception {
 
 		EchoEndpoint endpoint = new EchoEndpoint(new EchoService());
 		ServerEndpointRegistration registration = new ServerEndpointRegistration("/path", endpoint);
@@ -67,7 +66,7 @@ public class ServerEndpointRegistrationTests {
 	static class Config {
 
 		@Bean
-		public EchoService echoService() {
+		EchoService echoService() {
 			return new EchoService();
 		}
 	}

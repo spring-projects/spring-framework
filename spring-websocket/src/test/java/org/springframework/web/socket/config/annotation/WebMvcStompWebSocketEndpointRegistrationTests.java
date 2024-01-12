@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,8 +185,8 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(requestHandler.getWebSocketHandler()).isNotNull();
 		assertThat(requestHandler.getHandshakeHandler()).isSameAs(handshakeHandler);
 		assertThat(requestHandler.getHandshakeInterceptors()).hasSize(2);
-		assertThat(requestHandler.getHandshakeInterceptors()).element(0).isEqualTo(interceptor);
-		assertThat(requestHandler.getHandshakeInterceptors().get(1).getClass()).isEqualTo(OriginHandshakeInterceptor.class);
+		assertThat(requestHandler.getHandshakeInterceptors().get(0)).isEqualTo(interceptor);
+		assertThat(requestHandler.getHandshakeInterceptors().get(1)).isInstanceOf(OriginHandshakeInterceptor.class);
 	}
 
 	@Test
@@ -209,8 +209,8 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(requestHandler.getWebSocketHandler()).isNotNull();
 		assertThat(requestHandler.getHandshakeHandler()).isSameAs(handshakeHandler);
 		assertThat(requestHandler.getHandshakeInterceptors()).hasSize(2);
-		assertThat(requestHandler.getHandshakeInterceptors()).element(0).isEqualTo(interceptor);
-		assertThat(requestHandler.getHandshakeInterceptors().get(1).getClass()).isEqualTo(OriginHandshakeInterceptor.class);
+		assertThat(requestHandler.getHandshakeInterceptors().get(0)).isEqualTo(interceptor);
+		assertThat(requestHandler.getHandshakeInterceptors().get(1)).isInstanceOf(OriginHandshakeInterceptor.class);
 	}
 
 	@Test
@@ -239,8 +239,8 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		WebSocketTransportHandler transportHandler = (WebSocketTransportHandler) handlers.get(TransportType.WEBSOCKET);
 		assertThat(transportHandler.getHandshakeHandler()).isSameAs(handshakeHandler);
 		assertThat(sockJsService.getHandshakeInterceptors()).hasSize(2);
-		assertThat(sockJsService.getHandshakeInterceptors()).element(0).isEqualTo(interceptor);
-		assertThat(sockJsService.getHandshakeInterceptors().get(1).getClass()).isEqualTo(OriginHandshakeInterceptor.class);
+		assertThat(sockJsService.getHandshakeInterceptors().get(0)).isEqualTo(interceptor);
+		assertThat(sockJsService.getHandshakeInterceptors().get(1)).isInstanceOf(OriginHandshakeInterceptor.class);
 	}
 
 	@Test
@@ -271,8 +271,8 @@ class WebMvcStompWebSocketEndpointRegistrationTests {
 		WebSocketTransportHandler transportHandler = (WebSocketTransportHandler) handlers.get(TransportType.WEBSOCKET);
 		assertThat(transportHandler.getHandshakeHandler()).isSameAs(handshakeHandler);
 		assertThat(sockJsService.getHandshakeInterceptors()).hasSize(2);
-		assertThat(sockJsService.getHandshakeInterceptors()).element(0).isEqualTo(interceptor);
-		assertThat(sockJsService.getHandshakeInterceptors().get(1).getClass()).isEqualTo(OriginHandshakeInterceptor.class);
+		assertThat(sockJsService.getHandshakeInterceptors().get(0)).isEqualTo(interceptor);
+		assertThat(sockJsService.getHandshakeInterceptors().get(1)).isInstanceOf(OriginHandshakeInterceptor.class);
 		assertThat(sockJsService.getAllowedOrigins()).contains(origin);
 	}
 

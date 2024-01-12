@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 		}
 
 		@Bean
-		public TestHandler serverHandler() {
+		TestHandler serverHandler() {
 			return new TestHandler();
 		}
 	}
@@ -103,10 +103,10 @@ class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 
 	private static class TestHandler extends AbstractWebSocketHandler {
 
-		private CountDownLatch connectLatch = new CountDownLatch(1);
+		private final CountDownLatch connectLatch = new CountDownLatch(1);
 
 		@Override
-		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		public void afterConnectionEstablished(WebSocketSession session) {
 			this.connectLatch.countDown();
 		}
 	}

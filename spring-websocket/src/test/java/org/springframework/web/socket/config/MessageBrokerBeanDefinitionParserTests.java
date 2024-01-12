@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,13 +101,13 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * @author Artem Bilan
  * @author Rossen Stoyanchev
  */
-public class MessageBrokerBeanDefinitionParserTests {
+class MessageBrokerBeanDefinitionParserTests {
 
 	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 
 	@Test
-	public void simpleBroker() throws Exception {
+	void simpleBroker() throws Exception {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
 		HandlerMapping hm = this.appContext.getBean(HandlerMapping.class);
@@ -231,7 +231,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void stompBrokerRelay() {
+	void stompBrokerRelay() {
 		loadBeanDefinitions("websocket-config-broker-relay.xml");
 
 		HandlerMapping hm = this.appContext.getBean(HandlerMapping.class);
@@ -319,7 +319,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void annotationMethodMessageHandler() {
+	void annotationMethodMessageHandler() {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
 		SimpAnnotationMethodMessageHandler annotationMethodMessageHandler =
@@ -355,7 +355,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void customChannels() {
+	void customChannels() {
 		loadBeanDefinitions("websocket-config-broker-customchannels.xml");
 
 		SimpAnnotationMethodMessageHandler annotationMethodMessageHandler =
@@ -393,7 +393,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void customArgumentAndReturnValueTypes() {
+	void customArgumentAndReturnValueTypes() {
 		loadBeanDefinitions("websocket-config-broker-custom-argument-and-return-value-types.xml");
 
 		SimpAnnotationMethodMessageHandler handler = this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
@@ -410,7 +410,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void messageConverters() {
+	void messageConverters() {
 		loadBeanDefinitions("websocket-config-broker-converters.xml");
 
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
@@ -421,7 +421,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void messageConvertersDefaultsOff() {
+	void messageConvertersDefaultsOff() {
 		loadBeanDefinitions("websocket-config-broker-converters-defaults-off.xml");
 
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
@@ -478,7 +478,7 @@ class CustomArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) {
 		return null;
 	}
 }
@@ -492,7 +492,7 @@ class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) {
 	}
 }
 

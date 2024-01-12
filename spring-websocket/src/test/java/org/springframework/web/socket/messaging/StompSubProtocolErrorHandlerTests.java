@@ -33,19 +33,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class StompSubProtocolErrorHandlerTests {
+class StompSubProtocolErrorHandlerTests {
 
 	private StompSubProtocolErrorHandler handler;
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		this.handler = new StompSubProtocolErrorHandler();
 	}
 
 
 	@Test
-	public void handleClientMessageProcessingError() throws Exception {
+	void handleClientMessageProcessingError() {
 
 		Exception ex = new Exception("fake exception");
 		Message<byte[]> actual = this.handler.handleClientMessageProcessingError(null, ex);
@@ -59,7 +59,7 @@ public class StompSubProtocolErrorHandlerTests {
 	}
 
 	@Test
-	public void handleClientMessageProcessingErrorWithReceipt() throws Exception {
+	void handleClientMessageProcessingErrorWithReceipt() {
 
 		String receiptId = "123";
 		StompHeaderAccessor clientHeaderAccessor = StompHeaderAccessor.create(StompCommand.SEND);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class SpringConfiguratorTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.servletContext = new MockServletContext();
 
 		this.webAppContext = new AnnotationConfigWebApplicationContext();
@@ -57,26 +57,26 @@ public class SpringConfiguratorTests {
 	}
 
 	@AfterEach
-	public void destroy() {
+	void destroy() {
 		this.contextLoader.closeWebApplicationContext(this.servletContext);
 	}
 
 
 	@Test
-	public void getEndpointPerConnection() throws Exception {
+	void getEndpointPerConnection() throws Exception {
 		PerConnectionEchoEndpoint endpoint = this.configurator.getEndpointInstance(PerConnectionEchoEndpoint.class);
 		assertThat(endpoint).isNotNull();
 	}
 
 	@Test
-	public void getEndpointSingletonByType() throws Exception {
+	void getEndpointSingletonByType() throws Exception {
 		EchoEndpoint expected = this.webAppContext.getBean(EchoEndpoint.class);
 		EchoEndpoint actual = this.configurator.getEndpointInstance(EchoEndpoint.class);
 		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
-	public void getEndpointSingletonByComponentName() throws Exception {
+	void getEndpointSingletonByComponentName() throws Exception {
 		ComponentEchoEndpoint expected = this.webAppContext.getBean(ComponentEchoEndpoint.class);
 		ComponentEchoEndpoint actual = this.configurator.getEndpointInstance(ComponentEchoEndpoint.class);
 		assertThat(actual).isSameAs(expected);
@@ -88,12 +88,12 @@ public class SpringConfiguratorTests {
 	static class Config {
 
 		@Bean
-		public EchoEndpoint javaConfigEndpoint() {
+		EchoEndpoint javaConfigEndpoint() {
 			return new EchoEndpoint(echoService());
 		}
 
 		@Bean
-		public EchoService echoService() {
+		EchoService echoService() {
 			return new EchoService();
 		}
 	}

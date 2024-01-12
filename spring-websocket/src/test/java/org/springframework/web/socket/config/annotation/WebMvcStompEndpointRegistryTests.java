@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class WebMvcStompEndpointRegistryTests {
+class WebMvcStompEndpointRegistryTests {
 
 	private WebMvcStompEndpointRegistry endpointRegistry;
 
@@ -47,7 +47,7 @@ public class WebMvcStompEndpointRegistryTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		SubscribableChannel inChannel = mock();
 		SubscribableChannel outChannel = mock();
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
@@ -59,7 +59,7 @@ public class WebMvcStompEndpointRegistryTests {
 
 
 	@Test
-	public void stompProtocolHandler() {
+	void stompProtocolHandler() {
 		this.endpointRegistry.addEndpoint("/stomp");
 
 		Map<String, SubProtocolHandler> protocolHandlers = webSocketHandler.getProtocolHandlerMap();
@@ -70,7 +70,7 @@ public class WebMvcStompEndpointRegistryTests {
 	}
 
 	@Test
-	public void handlerMapping() {
+	void handlerMapping() {
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
 		assertThat(hm.getUrlMap()).isEmpty();
 
@@ -90,7 +90,7 @@ public class WebMvcStompEndpointRegistryTests {
 	}
 
 	@Test
-	public void errorHandler() throws Exception {
+	void errorHandler() {
 		StompSubProtocolErrorHandler errorHandler = mock();
 		this.endpointRegistry.setErrorHandler(errorHandler);
 		this.endpointRegistry.addEndpoint("/stompOverWebSocket");

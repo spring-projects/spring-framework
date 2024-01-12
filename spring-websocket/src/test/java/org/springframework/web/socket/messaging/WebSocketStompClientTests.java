@@ -86,7 +86,7 @@ class WebSocketStompClientTests {
 
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		WebSocketClient webSocketClient = mock();
 		this.stompClient = new TestWebSocketStompClient(webSocketClient);
 		this.stompClient.setTaskScheduler(this.taskScheduler);
@@ -100,7 +100,7 @@ class WebSocketStompClientTests {
 
 
 	@Test
-	void webSocketHandshakeFailure() throws Exception {
+	void webSocketHandshakeFailure() {
 		connect();
 
 		IllegalStateException handshakeFailure = new IllegalStateException("simulated exception");
@@ -229,7 +229,7 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
-	void heartbeatDefaultValue() throws Exception {
+	void heartbeatDefaultValue() {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock());
 		assertThat(stompClient.getDefaultHeartbeat()).isEqualTo(new long[] {0, 0});
 
@@ -238,7 +238,7 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
-	void heartbeatDefaultValueWithScheduler() throws Exception {
+	void heartbeatDefaultValueWithScheduler() {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock());
 		stompClient.setTaskScheduler(mock());
 		assertThat(stompClient.getDefaultHeartbeat()).isEqualTo(new long[] {10000, 10000});
@@ -248,7 +248,7 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
-	void heartbeatDefaultValueSetWithoutScheduler() throws Exception {
+	void heartbeatDefaultValueSetWithoutScheduler() {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock());
 		stompClient.setDefaultHeartbeat(new long[] {5, 5});
 		assertThatIllegalStateException().isThrownBy(() ->

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void readMessagesBadContent() throws Exception {
+	void readMessagesBadContent() {
 		this.servletRequest.setContent("".getBytes(UTF_8));
 		handleRequestAndExpectFailure();
 
@@ -61,7 +61,7 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void readMessagesNoSession() throws Exception {
+	void readMessagesNoSession() {
 		WebSocketHandler webSocketHandler = mock();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new XhrReceivingTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null));
@@ -93,11 +93,11 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 		transportHandler.initialize(new StubSockJsServiceConfig());
 		transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 
-		assertThat(this.response.getHeaders().getContentType().toString()).isEqualTo("text/plain;charset=UTF-8");
+		assertThat(this.response.getHeaders().getContentType()).hasToString("text/plain;charset=UTF-8");
 		verify(wsHandler).handleMessage(session, new TextMessage("x"));
 	}
 
-	private void handleRequestAndExpectFailure() throws Exception {
+	private void handleRequestAndExpectFailure() {
 		resetResponse();
 
 		WebSocketHandler wsHandler = mock();

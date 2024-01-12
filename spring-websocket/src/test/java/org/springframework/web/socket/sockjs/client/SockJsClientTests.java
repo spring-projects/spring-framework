@@ -17,7 +17,6 @@
 package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +57,7 @@ class SockJsClientTests {
 
 	private final XhrTestTransport xhrTransport = new XhrTestTransport("XhrTestTransport");
 
-	@SuppressWarnings({ "deprecation", "unchecked" })
+	@SuppressWarnings("deprecation")
 	private org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession> connectCallback = mock();
 
 	private SockJsClient sockJsClient = new SockJsClient(List.of(this.webSocketTransport, this.xhrTransport));
@@ -83,7 +82,7 @@ class SockJsClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void connectWebSocketDisabled() throws URISyntaxException {
+	void connectWebSocketDisabled() {
 		setupInfoRequest(false);
 		this.sockJsClient.doHandshake(handler, URL);
 		assertThat(this.webSocketTransport.invoked()).isFalse();
@@ -162,7 +161,7 @@ class SockJsClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void connectInfoRequestFailure() throws URISyntaxException {
+	void connectInfoRequestFailure() {
 		HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE);
 		given(this.infoReceiver.executeInfoRequest(any(), any())).willThrow(exception);
 		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
