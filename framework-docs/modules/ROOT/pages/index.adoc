@@ -18,7 +18,7 @@ WebSocket, RSocket.
 xref:integration.adoc[Integration] :: REST Clients, JMS, JCA, JMX,
 Email, Tasks, Scheduling, Caching, Observability, JVM Checkpoint Restore.
 xref:languages.adoc[Languages] :: Kotlin, Groovy, Dynamic Languages.
-xref:testing/appendix.adoc[Appendix] :: Spring properties.
+xref:appendix.adoc[Appendix] :: Spring properties.
 {spring-framework-wiki}[Wiki] :: What's New,
 Upgrade Notes, Supported Versions, additional cross-version information.
 
