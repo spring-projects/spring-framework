@@ -18,6 +18,7 @@ asciidoc:
     # FIXME: The package is not renamed
     chomp: 'all'
     fold: 'all'
+    table-stripes: 'odd'
     include-java: 'example$docs-src/main/java/org/springframework/docs'
     spring-site: 'https://spring.io'
     spring-site-blog: '{spring-site}/blog'
