@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 /**
  * Tests for {@link SimpleAliasRegistry}.
@@ -49,10 +49,6 @@ class SimpleAliasRegistryTests {
 	private static final String ALIAS1 = "alias1";
 	private static final String ALIAS2 = "alias2";
 	private static final String ALIAS3 = "alias3";
-	// TODO Determine if we can make SimpleAliasRegistry.resolveAliases() reliable.
-	// See https://github.com/spring-projects/spring-framework/issues/32024.
-	// When ALIAS4 is changed to "test", various tests fail due to the iteration
-	// order of the entries in the aliasMap in SimpleAliasRegistry.
 	private static final String ALIAS4 = "alias4";
 	private static final String ALIAS5 = "alias5";
 
@@ -94,7 +90,21 @@ class SimpleAliasRegistryTests {
 	}
 
 	@Test
-	void removeAlias() {
+	void removeNullAlias() {
+		assertThatNullPointerException().isThrownBy(() -> registry.removeAlias(null));
+	}
+
+	@Test
+	void removeNonExistentAlias() {
+		String alias = NICKNAME;
+		assertDoesNotHaveAlias(REAL_NAME, alias);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> registry.removeAlias(alias))
+				.withMessage("No alias '%s' registered", alias);
+	}
+
+	@Test
+	void removeExistingAlias() {
 		registerAlias(REAL_NAME, NICKNAME);
 		assertHasAlias(REAL_NAME, NICKNAME);
 
@@ -213,35 +223,37 @@ class SimpleAliasRegistryTests {
 						"It is already registered for name '%s'.", ALIAS2, ALIAS1, NAME1, NAME2);
 	}
 
-	@Test
-	void resolveAliasesWithComplexPlaceholderReplacement() {
+	@ParameterizedTest
+	@ValueSource(strings = {"alias4", "test", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
+	void resolveAliasesWithComplexPlaceholderReplacementWithAliasSwitching(String aliasX) {
 		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
 			ALIAS3, ALIAS1,
-			ALIAS4, ALIAS5,
+			aliasX, ALIAS5,
 			ALIAS5, ALIAS2
 		));
 
+		// Since SimpleAliasRegistry ensures that aliases are processed in declaration
+		// order, we need to register ALIAS5 *before* aliasX to support our use case.
 		registerAlias(NAME3, ALIAS3);
-		registerAlias(NAME4, ALIAS4);
 		registerAlias(NAME5, ALIAS5);
+		registerAlias(NAME4, aliasX);
 
 		// Original state:
-		// WARNING: Based on ConcurrentHashMap iteration order!
 		// ALIAS3 -> NAME3
 		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
+		// aliasX -> NAME4
 
 		// State after processing original entry (ALIAS3 -> NAME3):
 		// ALIAS1 -> NAME3
 		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
+		// aliasX -> NAME4
 
 		// State after processing original entry (ALIAS5 -> NAME5):
 		// ALIAS1 -> NAME3
 		// ALIAS2 -> NAME5
-		// ALIAS4 -> NAME4
+		// aliasX -> NAME4
 
-		// State after processing original entry (ALIAS4 -> NAME4):
+		// State after processing original entry (aliasX -> NAME4):
 		// ALIAS1 -> NAME3
 		// ALIAS2 -> NAME5
 		// ALIAS5 -> NAME4
@@ -252,72 +264,24 @@ class SimpleAliasRegistryTests {
 		assertThat(registry.getAliases(NAME5)).containsExactly(ALIAS2);
 	}
 
-	// TODO Remove this test once we have implemented reliable processing in SimpleAliasRegistry.resolveAliases().
-	// See https://github.com/spring-projects/spring-framework/issues/32024.
-	// This method effectively duplicates the @ParameterizedTest version below,
-	// with aliasX hard coded to ALIAS4; however, this method also hard codes
-	// a different outcome that passes based on ConcurrentHashMap iteration order!
-	@Test
-	void resolveAliasesWithComplexPlaceholderReplacementAndNameSwitching() {
-		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
-			NAME3, NAME4,
-			NAME4, NAME3,
-			ALIAS3, ALIAS1,
-			ALIAS4, ALIAS5,
-			ALIAS5, ALIAS2
-		));
-
-		registerAlias(NAME3, ALIAS3);
-		registerAlias(NAME4, ALIAS4);
-		registerAlias(NAME5, ALIAS5);
-
-		// Original state:
-		// WARNING: Based on ConcurrentHashMap iteration order!
-		// ALIAS3 -> NAME3
-		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
-
-		// State after processing original entry (ALIAS3 -> NAME3):
-		// ALIAS1 -> NAME4
-		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
-
-		// State after processing original entry (ALIAS5 -> NAME5):
-		// ALIAS1 -> NAME4
-		// ALIAS2 -> NAME5
-		// ALIAS4 -> NAME4
-
-		// State after processing original entry (ALIAS4 -> NAME4):
-		// ALIAS1 -> NAME4
-		// ALIAS2 -> NAME5
-		// ALIAS5 -> NAME3
-
-		registry.resolveAliases(valueResolver);
-		assertThat(registry.getAliases(NAME3)).containsExactly(ALIAS5);
-		assertThat(registry.getAliases(NAME4)).containsExactly(ALIAS1);
-		assertThat(registry.getAliases(NAME5)).containsExactly(ALIAS2);
-	}
-
-	@Disabled("Fails for some values unless alias registration order is honored")
 	@ParameterizedTest  // gh-32024
 	@ValueSource(strings = {"alias4", "test", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
-	void resolveAliasesWithComplexPlaceholderReplacementAndNameSwitching(String aliasX) {
+	void resolveAliasesWithComplexPlaceholderReplacementWithAliasAndNameSwitching(String aliasX) {
 		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
-			NAME3, NAME4,
-			NAME4, NAME3,
 			ALIAS3, ALIAS1,
 			aliasX, ALIAS5,
-			ALIAS5, ALIAS2
+			ALIAS5, ALIAS2,
+			NAME3, NAME4,
+			NAME4, NAME3
 		));
 
-		// If SimpleAliasRegistry ensures that aliases are processed in declaration
+		// Since SimpleAliasRegistry ensures that aliases are processed in declaration
 		// order, we need to register ALIAS5 *before* aliasX to support our use case.
 		registerAlias(NAME3, ALIAS3);
 		registerAlias(NAME5, ALIAS5);
 		registerAlias(NAME4, aliasX);
 
 		// Original state:
-		// WARNING: Based on LinkedHashMap iteration order!
 		// ALIAS3 -> NAME3
 		// ALIAS5 -> NAME5
 		// aliasX -> NAME4
