@@ -192,36 +192,24 @@ class SimpleAliasRegistryTests {
 	}
 
 	@Test
-	void resolveAliasesWithComplexPlaceholderReplacementAndConfigurationError() {
-		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
-			NAME3, NAME4,
-			ALIAS3, ALIAS4,
-			ALIAS4, ALIAS5
-		));
+	void resolveAliasesWithPlaceholderReplacementConflict() {
+		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(ALIAS1, ALIAS2));
 
-		registerAlias(NAME3, ALIAS3);
-		registerAlias(NAME4, ALIAS4);
-		registerAlias(NAME5, ALIAS5);
+		registerAlias(NAME1, ALIAS1);
+		registerAlias(NAME2, ALIAS2);
 
 		// Original state:
-		// WARNING: Based on ConcurrentHashMap iteration order!
-		// ALIAS3 -> NAME3
-		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
+		// ALIAS1 -> NAME1
+		// ALIAS2 -> NAME2
 
-		// State after processing original entry (ALIAS3 -> NAME3):
-		// Note that duplicate entry (ALIAS4 -> NAME4) gets removed.
-		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
-
-		// State after processing original entry (ALIAS4 -> NAME4):
-		// ALIAS5 -> NAME5
-		// ALIAS4 -> NAME4
-		// ALIAS5 -> NAME4 --> Conflict: entry for ALIAS5 already exists
+		// State after processing original entry (ALIAS1 -> NAME1):
+		// ALIAS2 -> NAME1 --> Conflict: entry for ALIAS2 already exists
+		// ALIAS2 -> NAME2
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> registry.resolveAliases(valueResolver))
-				.withMessageStartingWith("Cannot register resolved alias");
+				.withMessage("Cannot register resolved alias '%s' (original: '%s') for name '%s': " +
+						"It is already registered for name '%s'.", ALIAS2, ALIAS1, NAME1, NAME2);
 	}
 
 	@Test

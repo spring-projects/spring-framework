@@ -172,7 +172,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 						throw new IllegalStateException(
 								"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
 								"') for name '" + resolvedName + "': It is already registered for name '" +
-								registeredName + "'.");
+								existingName + "'.");
 					}
 					checkForAliasCircle(resolvedName, resolvedAlias);
 					this.aliasMap.remove(alias);
