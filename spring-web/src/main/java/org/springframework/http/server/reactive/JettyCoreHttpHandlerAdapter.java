@@ -21,16 +21,20 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.*;
+import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.*;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
@@ -41,21 +45,35 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
  *
+ * Adapt {@link HttpHandler} to the Jetty {@link org.eclipse.jetty.server.Handler} abstraction.
+ *
  * @author Greg Wilkins
- * @since 6.0
+ * @author Lachlan Roberts
+ * @since 6.1.4
  */
 public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 
 	private final HttpHandler httpHandler;
+	private final DataBufferFactory dataBufferFactory;
 
 	public JettyCoreHttpHandlerAdapter(HttpHandler httpHandler) {
 		this.httpHandler = httpHandler;
+
+		// We do not make a DataBufferFactory over the servers ByteBufferPool, because we only ever use
+		// wrap and there should never be any allocation done by the factory.  Also there is no release semantic
+		// available.
+		dataBufferFactory = new DefaultDataBufferFactory()
+		{
+			@Override
+			public DefaultDataBuffer allocateBuffer(int initialCapacity) {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 	@Override
@@ -69,6 +87,7 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 
 					@Override
 					public void onNext(Void unused) {
+						// we can ignore the void as we only seek onError or onComplete
 					}
 
 					@Override
@@ -84,10 +103,16 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 		return true;
 	}
 
-	private static class JettyCoreServerHttpRequest implements ServerHttpRequest {
+	private class JettyCoreServerHttpRequest implements ServerHttpRequest {
+		private final static MultiValueMap<String, String> EMPTY_QUERY = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
+		private final static MultiValueMap<String, HttpCookie> EMPTY_COOKIES = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
 		private final Request request;
 		private final HttpHeaders headers;
 		private final RequestPath path;
+		@Nullable
+		private URI uri;
+		@Nullable
+		MultiValueMap<String, String> queryParameters;
 		@Nullable
 		private MultiValueMap<String, HttpCookie> cookies;
 
@@ -109,18 +134,18 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 
 		@Override
 		public URI getURI() {
-			return request.getHttpURI().toURI();
+			if (uri == null)
+				uri = request.getHttpURI().toURI();
+			return uri;
 		}
 
 		@Override
 		public Flux<DataBuffer> getBody() {
-			Flow.Publisher<Content.Chunk> flowPublisher = Content.Source.asPublisher(request);
-			// TODO convert the Flow.Publisher into a org.reactivestreams.Publisher
-			org.reactivestreams.Publisher publisher = null;
-			// TODO convert the Publisher to a Flux
-			Flux<Content.Chunk> chunks = Flux.from(publisher);
-			// TODO map the chunks to DataBuffers
-			return chunks.map(chunk -> null);
+			// We access the request body as a Flow.Publisher, which is wrapped as an org.reactivestreams.Publisher and
+			// then wrapped as a Flux.   The chunks are converted to DataBuffers with simple wrapping and will be released
+			// by the Flow.Publisher on return from onNext, so that any retention of the data must be done by a copy within
+			// the call to onNext.
+			return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(request))).map(chunk -> dataBufferFactory.wrap(chunk.getByteBuffer()));
 		}
 
 		@Override
@@ -135,18 +160,33 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 
 		@Override
 		public MultiValueMap<String, String> getQueryParams() {
-			return null;
+			if (queryParameters == null)
+			{
+				String query = request.getHttpURI().getQuery();
+				if (StringUtil.isBlank(query))
+					queryParameters = EMPTY_QUERY;
+				else {
+					MultiMap<String> map = new MultiMap<>();
+					UrlEncoded.decodeUtf8To(query, 0, query.length(), map);
+					queryParameters = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(map));
+				}
+			}
+			return queryParameters;
 		}
 
 		@Override
 		public MultiValueMap<String, HttpCookie> getCookies() {
 			if (cookies == null) {
-				LinkedHashMap<String, List<HttpCookie>> map = new LinkedHashMap<>();
-				for (org.eclipse.jetty.http.HttpCookie c : Request.getCookies(request)) {
-					List<HttpCookie> list = map.computeIfAbsent(c.getName(), k -> new ArrayList<>());
-					list.add(new HttpCookie(c.getName(), c.getValue()));
+				List<org.eclipse.jetty.http.HttpCookie> httpCookies = Request.getCookies(request);
+				if (httpCookies.isEmpty())
+					cookies = EMPTY_COOKIES;
+				else {
+					cookies = new LinkedMultiValueMap<>();
+					for (org.eclipse.jetty.http.HttpCookie c : httpCookies) {
+						cookies.add(c.getName(), new HttpCookie(c.getName(), c.getValue()));
+					}
+					cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 				}
-				cookies = new LinkedMultiValueMap<>(map);
 			}
 			return cookies;
 		}
