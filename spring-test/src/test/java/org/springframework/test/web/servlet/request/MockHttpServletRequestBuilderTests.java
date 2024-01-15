@@ -366,8 +366,7 @@ class MockHttpServletRequestBuilderTests {
 		List<String> contentTypes = Collections.list(request.getHeaders("Content-Type"));
 
 		assertThat(contentType).isEqualTo("text/html");
-		assertThat(contentTypes).hasSize(1);
-		assertThat(contentTypes).element(0).isEqualTo("text/html");
+		assertThat(contentTypes).containsExactly("text/html");
 	}
 
 	@Test
@@ -379,8 +378,7 @@ class MockHttpServletRequestBuilderTests {
 		List<String> contentTypes = Collections.list(request.getHeaders("Content-Type"));
 
 		assertThat(contentType).isEqualTo("text/html");
-		assertThat(contentTypes).hasSize(1);
-		assertThat(contentTypes).element(0).isEqualTo("text/html");
+		assertThat(contentTypes).containsExactly("text/html");
 	}
 
 	@Test // gh-2079
@@ -433,9 +431,7 @@ class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		List<String> headers = Collections.list(request.getHeaders("foo"));
 
-		assertThat(headers).hasSize(2);
-		assertThat(headers).element(0).isEqualTo("bar");
-		assertThat(headers).element(1).isEqualTo("baz");
+		assertThat(headers).containsExactly("bar", "baz");
 	}
 
 	@Test
@@ -448,9 +444,7 @@ class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		List<String> headers = Collections.list(request.getHeaders("foo"));
 
-		assertThat(headers).hasSize(2);
-		assertThat(headers).element(0).isEqualTo("bar");
-		assertThat(headers).element(1).isEqualTo("baz");
+		assertThat(headers).containsExactly("bar", "baz");
 		assertThat(request.getHeader("Content-Type")).isEqualTo(MediaType.APPLICATION_JSON.toString());
 	}
 

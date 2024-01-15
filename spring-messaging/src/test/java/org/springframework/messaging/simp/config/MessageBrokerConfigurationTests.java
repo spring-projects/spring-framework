@@ -287,11 +287,8 @@ class MessageBrokerConfigurationTests {
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
-		assertThat(converters).hasSize(4);
-		assertThat(converters).element(0).isInstanceOf(StringMessageConverter.class);
-		assertThat(converters).element(1).isInstanceOf(ByteArrayMessageConverter.class);
-		assertThat(converters).element(2).isInstanceOf(KotlinSerializationJsonMessageConverter.class);
-		assertThat(converters).element(3).isInstanceOf(MappingJackson2MessageConverter.class);
+		assertThat(converters).hasExactlyElementsOfTypes(StringMessageConverter.class, ByteArrayMessageConverter.class,
+				KotlinSerializationJsonMessageConverter.class, MappingJackson2MessageConverter.class);
 
 		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(3)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);

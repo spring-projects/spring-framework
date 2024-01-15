@@ -59,7 +59,6 @@ class EventPublicationTests {
 	@Test
 	void defaultsEventReceived() {
 		List<DefaultsDefinition> defaultsList = this.eventListener.getDefaults();
-		assertThat(defaultsList).isNotEmpty();
 		assertThat(defaultsList).element(0).isInstanceOf(DocumentDefaultsDefinition.class);
 		DocumentDefaultsDefinition defaults = (DocumentDefaultsDefinition) defaultsList.get(0);
 		assertThat(defaults.getLazyInit()).isEqualTo("true");

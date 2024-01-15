@@ -697,10 +697,8 @@ class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	private static void assertListener(MockMBeanExporterListener listener) throws MalformedObjectNameException {
 		ObjectName desired = ObjectNameManager.getInstance(OBJECT_NAME);
-		assertThat(listener.getRegistered()).as("Incorrect number of registrations").hasSize(1);
-		assertThat(listener.getUnregistered()).as("Incorrect number of unregistrations").hasSize(1);
-		assertThat(listener.getRegistered()).element(0).as("Incorrect ObjectName in register").isEqualTo(desired);
-		assertThat(listener.getUnregistered()).element(0).as("Incorrect ObjectName in unregister").isEqualTo(desired);
+		assertThat(listener.getRegistered()).singleElement().isEqualTo(desired);
+		assertThat(listener.getUnregistered()).singleElement().isEqualTo(desired);
 	}
 
 

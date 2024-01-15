@@ -47,10 +47,10 @@ class InterceptingHttpAccessorTests {
 
 		);
 		accessor.setInterceptors(interceptors);
-
-		assertThat(accessor.getInterceptors()).element(0).isInstanceOf(FirstClientHttpRequestInterceptor.class);
-		assertThat(accessor.getInterceptors()).element(1).isInstanceOf(SecondClientHttpRequestInterceptor.class);
-		assertThat(accessor.getInterceptors()).element(2).isInstanceOf(ThirdClientHttpRequestInterceptor.class);
+		assertThat(accessor.getInterceptors()).hasExactlyElementsOfTypes(
+				FirstClientHttpRequestInterceptor.class,
+				SecondClientHttpRequestInterceptor.class,
+				ThirdClientHttpRequestInterceptor.class);
 	}
 
 

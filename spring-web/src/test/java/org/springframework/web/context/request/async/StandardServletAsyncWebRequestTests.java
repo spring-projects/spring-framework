@@ -68,8 +68,7 @@ class StandardServletAsyncWebRequestTests {
 		MockAsyncContext context = (MockAsyncContext) this.request.getAsyncContext();
 		assertThat(context).isNotNull();
 		assertThat(context.getTimeout()).as("Timeout value not set").isEqualTo((44 * 1000));
-		assertThat(context.getListeners()).hasSize(1);
-		assertThat(context.getListeners()).element(0).isSameAs(this.asyncRequest);
+		assertThat(context.getListeners()).containsExactly(this.asyncRequest);
 	}
 
 	@Test

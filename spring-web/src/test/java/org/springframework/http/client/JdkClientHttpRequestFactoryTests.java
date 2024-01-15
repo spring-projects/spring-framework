@@ -39,13 +39,13 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 	private static String originalPropertyValue;
 
 	@BeforeAll
-	public static void setProperty() {
+	static void setProperty() {
 		originalPropertyValue = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
 		System.setProperty("jdk.httpclient.allowRestrictedHeaders", "expect");
 	}
 
 	@AfterAll
-	public static void restoreProperty() {
+	static void restoreProperty() {
 		if (originalPropertyValue != null) {
 			System.setProperty("jdk.httpclient.allowRestrictedHeaders", originalPropertyValue);
 		}

@@ -52,7 +52,7 @@ class DestinationPatternsMessageConditionTests {
 	@Test
 	void prependNonEmptyPatternsOnly() {
 		DestinationPatternsMessageCondition c = condition("");
-		assertThat(c.getPatterns()).element(0).asString().isEmpty();
+		assertThat(c.getPatterns()).containsOnly("");
 	}
 
 	@Test

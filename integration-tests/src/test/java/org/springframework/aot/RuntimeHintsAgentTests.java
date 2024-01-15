@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  */
 @EnabledIfRuntimeHintsAgent
-public class RuntimeHintsAgentTests {
+class RuntimeHintsAgentTests {
 
 	private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
@@ -58,7 +58,7 @@ public class RuntimeHintsAgentTests {
 
 
 	@BeforeAll
-	public static void classSetup() throws NoSuchMethodException {
+	static void classSetup() throws NoSuchMethodException {
 		defaultConstructor = String.class.getConstructor();
 		toStringMethod = String.class.getMethod("toString");
 		privateGreetMethod = PrivateClass.class.getDeclaredMethod("greet");

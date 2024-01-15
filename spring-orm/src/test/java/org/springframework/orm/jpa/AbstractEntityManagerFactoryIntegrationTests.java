@@ -116,7 +116,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 	}
 
 	@AfterAll
-	public static void closeContext() {
+	static void closeContext() {
 		if (applicationContext != null) {
 			applicationContext.close();
 			applicationContext = null;

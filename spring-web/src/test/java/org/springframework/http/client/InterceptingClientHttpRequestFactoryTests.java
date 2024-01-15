@@ -103,9 +103,7 @@ class InterceptingClientHttpRequestFactoryTests {
 			@Override
 			protected ClientHttpResponse executeInternal() {
 				List<String> headerValues = getHeaders().get(headerName);
-				assertThat(headerValues).hasSize(2);
-				assertThat(headerValues).element(0).isEqualTo(headerValue);
-				assertThat(headerValues).element(1).isEqualTo(otherValue);
+				assertThat(headerValues).containsExactly(headerValue, otherValue);
 				return responseMock;
 			}
 		};

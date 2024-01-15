@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -1374,11 +1375,8 @@ class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("new java.util.ArrayList(#root)");
 		Object value = expr.getValue(coll);
-		assertThat(value).isInstanceOf(ArrayList.class);
-		@SuppressWarnings("rawtypes")
-		ArrayList<?> list = (ArrayList) value;
-		assertThat(list).element(0).isEqualTo("one");
-		assertThat(list).element(1).isEqualTo("two");
+		assertThat(value).isInstanceOf(ArrayList.class)
+				.asInstanceOf(InstanceOfAssertFactories.list(String.class)).containsExactly("one", "two");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.util.ArrayList;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.testfixture.io.SerializationTestUtils;
@@ -65,7 +66,7 @@ class AutoPopulatingListTests {
 		String helloWorld = "Hello World!";
 		list.add(10, null);
 		list.add(11, helloWorld);
-		assertThat(list).element(11).isEqualTo(helloWorld);
+		assertThat(list).element(11, InstanceOfAssertFactories.STRING).isEqualTo(helloWorld);
 
 		boolean condition3 = list.get(10) instanceof TestObject;
 		assertThat(condition3).isTrue();

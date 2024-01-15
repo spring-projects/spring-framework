@@ -89,7 +89,7 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
 
 		Map<String, List<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
-		assertThat(requestCookies.size()).isEqualTo(2);
+		assertThat(requestCookies).hasSize(2);
 		assertThat(requestCookies.get("SID")).extracting(HttpCookie::getValue).containsExactly("31d4d96e407aad42");
 		assertThat(requestCookies.get("lang")).extracting(HttpCookie::getValue).containsExactly("en-US", "zh-CN");
 	}

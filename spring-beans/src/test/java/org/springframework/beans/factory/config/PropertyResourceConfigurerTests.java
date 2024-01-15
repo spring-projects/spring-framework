@@ -400,12 +400,11 @@ class PropertyResourceConfigurerTests {
 		assertThat(tb1.getSpouse()).isEqualTo(tb2);
 		assertThat(tb1.getSomeMap()).hasSize(1);
 		assertThat(tb1.getSomeMap().get("myKey")).isEqualTo("myValue");
-		assertThat(tb2.getStringArray()).hasSize(2);
-		assertThat(tb2.getStringArray()[0]).isEqualTo(System.getProperty("os.name"));
-		assertThat(tb2.getStringArray()[1]).isEqualTo("98");
-		assertThat(tb2.getFriends()).hasSize(2);
-		assertThat(tb2.getFriends()).element(0).isEqualTo("na98me");
-		assertThat(tb2.getFriends().toArray()[1]).isEqualTo(tb2);
+		assertThat(tb2.getStringArray()).containsExactly(System.getProperty("os.name"), "98");
+		assertThat(tb2.getFriends()).satisfiesExactly(
+				zero -> assertThat(zero).isInstanceOfSatisfying(
+						String.class, value -> assertThat(value).isEqualTo("na98me")),
+				one -> assertThat(one).isEqualTo(tb2));
 		assertThat(tb2.getSomeSet()).hasSize(3);
 		assertThat(tb2.getSomeSet().contains("na98me")).isTrue();
 		assertThat(tb2.getSomeSet().contains(tb2)).isTrue();

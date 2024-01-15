@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,9 +66,7 @@ class CollectionUtilsTests {
 		list.add("value3");
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertThat(list).element(0).isEqualTo("value3");
-		assertThat(list).element(1).isEqualTo("value1");
-		assertThat(list).element(2).isEqualTo("value2");
+		assertThat(list).containsExactly("value3", "value1", "value2");
 	}
 
 	@Test
@@ -78,9 +76,7 @@ class CollectionUtilsTests {
 		list.add(3);
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertThat(list).element(0).isEqualTo(3);
-		assertThat(list).element(1).isEqualTo(1);
-		assertThat(list).element(2).isEqualTo(2);
+		assertThat(list).containsExactly(3, 1, 2);
 	}
 
 	@Test

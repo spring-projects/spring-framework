@@ -195,9 +195,7 @@ class InjectAnnotationBeanPostProcessorTests {
 		ConstructorsCollectionResourceInjectionBean bean = (ConstructorsCollectionResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean3()).isNull();
 		assertThat(bean.getTestBean4()).isSameAs(tb);
-		assertThat(bean.getNestedTestBeans()).hasSize(2);
-		assertThat(bean.getNestedTestBeans()).element(0).isSameAs(ntb1);
-		assertThat(bean.getNestedTestBeans()).element(1).isSameAs(ntb2);
+		assertThat(bean.getNestedTestBeans()).containsExactly(ntb1, ntb2);
 	}
 
 	@Test
@@ -530,8 +528,8 @@ class InjectAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
 
 		OptionalListFieldInjectionBean bean = (OptionalListFieldInjectionBean) bf.getBean("annotatedBean");
-		assertThat(bean.getTestBean()).isPresent();
-		assertThat(bean.getTestBean().get()).element(0).isSameAs(bf.getBean("testBean"));
+		assertThat(bean.getTestBean()).hasValueSatisfying(list ->
+				assertThat(list).containsExactly(bf.getBean("testBean", TestBean.class)));
 	}
 
 	@Test
@@ -548,8 +546,8 @@ class InjectAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
 
 		OptionalListMethodInjectionBean bean = (OptionalListMethodInjectionBean) bf.getBean("annotatedBean");
-		assertThat(bean.getTestBean()).isPresent();
-		assertThat(bean.getTestBean().get()).element(0).isSameAs(bf.getBean("testBean"));
+		assertThat(bean.getTestBean()).hasValueSatisfying(list ->
+				assertThat(list).containsExactly(bf.getBean("testBean", TestBean.class)));
 	}
 
 	@Test

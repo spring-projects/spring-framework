@@ -44,7 +44,7 @@ class SerializableBeanFactoryMemoryLeakTests {
 	 */
 	@BeforeAll
 	@AfterAll
-	public static void zeroOutFactoryCount() throws Exception {
+	static void zeroOutFactoryCount() throws Exception {
 		getSerializableFactoryMap().clear();
 	}
 

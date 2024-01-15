@@ -69,7 +69,7 @@ class AsyncResultTests {
 				values.add(ex);
 			}
 		});
-		assertThat(values).element(0).isSameAs(ex);
+		assertThat(values).singleElement().isSameAs(ex);
 		assertThatExceptionOfType(ExecutionException.class)
 			.isThrownBy(future::get)
 			.withCause(ex);
@@ -98,7 +98,7 @@ class AsyncResultTests {
 		final Set<Throwable> values = new HashSet<>(1);
 		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
 		future.addCallback(result -> new AssertionError("Success callback not expected: " + result), values::add);
-		assertThat(values).element(0).isSameAs(ex);
+		assertThat(values).singleElement().isSameAs(ex);
 		assertThatExceptionOfType(ExecutionException.class)
 			.isThrownBy(future::get)
 			.withCause(ex);

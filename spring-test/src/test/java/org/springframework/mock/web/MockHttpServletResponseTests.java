@@ -259,13 +259,11 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test
-	void httpHeaderNameCasingIsPreserved() throws Exception {
+	void httpHeaderNameCasingIsPreserved() {
 		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");
 		Collection<String> responseHeaders = response.getHeaderNames();
-		assertThat(responseHeaders).isNotNull();
-		assertThat(responseHeaders).hasSize(1);
-		assertThat(responseHeaders).element(0).as("HTTP header casing not being preserved").isEqualTo(headerName);
+		assertThat(responseHeaders).containsExactly(headerName);
 	}
 
 	@Test
@@ -400,8 +398,8 @@ class MockHttpServletResponseTests {
 	void addDateHeader() {
 		response.addDateHeader(LAST_MODIFIED, 1437472800000L);
 		response.addDateHeader(LAST_MODIFIED, 1437472801000L);
-		assertThat(response.getHeaders(LAST_MODIFIED)).element(0).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
-		assertThat(response.getHeaders(LAST_MODIFIED)).element(1).isEqualTo("Tue, 21 Jul 2015 10:00:01 GMT");
+		assertThat(response.getHeaders(LAST_MODIFIED)).containsExactly(
+				"Tue, 21 Jul 2015 10:00:00 GMT", "Tue, 21 Jul 2015 10:00:01 GMT");
 	}
 
 	@Test

@@ -167,10 +167,9 @@ class PrintingResultHandlerTests {
 
 		// Manually validate cookie values since maxAge changes...
 		List<String> cookieValues = this.response.getHeaders("Set-Cookie");
-		assertThat(cookieValues).hasSize(2);
-		assertThat(cookieValues).element(0).isEqualTo("cookie=cookieValue");
-		assertThat(cookieValues).element(1).asString().as("Actual: " + cookieValues.get(1))
-				.startsWith("enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires=");
+		assertThat(cookieValues).satisfiesExactly(
+				zero -> assertThat(zero).isEqualTo("cookie=cookieValue"),
+				one -> assertThat(one).startsWith("enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires="));
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");

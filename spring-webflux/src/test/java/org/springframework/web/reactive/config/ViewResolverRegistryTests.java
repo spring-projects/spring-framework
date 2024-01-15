@@ -88,8 +88,7 @@ class ViewResolverRegistryTests {
 		View view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 		this.registry.defaultViews(view);
 
-		assertThat(this.registry.getDefaultViews()).hasSize(1);
-		assertThat(this.registry.getDefaultViews()).element(0).isSameAs(view);
+		assertThat(this.registry.getDefaultViews()).containsExactly(view);
 	}
 
 	@Test  // SPR-16431

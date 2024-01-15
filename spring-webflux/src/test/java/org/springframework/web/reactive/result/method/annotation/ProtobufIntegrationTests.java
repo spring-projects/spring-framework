@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,8 +113,8 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 				.uri("/message-stream")
 				.exchangeToFlux(response -> {
 					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
-					assertThat(response.headers().header("X-Protobuf-Schema")).element(0).isEqualTo("sample.proto");
-					assertThat(response.headers().header("X-Protobuf-Message")).element(0).isEqualTo("Msg");
+					assertThat(response.headers().header("X-Protobuf-Schema")).containsExactly("sample.proto");
+					assertThat(response.headers().header("X-Protobuf-Message")).containsExactly("Msg");
 					return response.bodyToFlux(Msg.class);
 				});
 

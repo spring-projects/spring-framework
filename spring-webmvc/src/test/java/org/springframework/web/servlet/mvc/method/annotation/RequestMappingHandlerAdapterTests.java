@@ -90,7 +90,7 @@ class RequestMappingHandlerAdapterTests {
 
 
 	@BeforeAll
-	public static void setupOnce() {
+	static void setupOnce() {
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 		adapter.setApplicationContext(new StaticWebApplicationContext());
 		adapter.afterPropertiesSet();

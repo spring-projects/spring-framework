@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -573,9 +572,10 @@ class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
-		assertThat(gb.getGenericProperty()).element(0).isEqualTo(10);
-		assertThat(gb.getGenericListProperty().get(0)).containsExactly(20);
-		assertThat(gb.getGenericListProperty().get(1)).containsExactly(30);
+		assertThat(gb.getGenericProperty()).singleElement().isEqualTo(10);
+		assertThat(gb.getGenericListProperty()).satisfiesExactly(
+				zero -> assertThat(zero).containsExactly(20),
+				first -> assertThat(first).containsExactly(30));
 	}
 
 	@Test
@@ -782,8 +782,10 @@ class BeanFactoryGenericsTests {
 				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
 
 		NumberBean nb = bf.getBean(NumberBean.class);
-		assertThat(nb.getDoubleStore()).isSameAs(bf.getBean("store1"));
-		assertThat(nb.getFloatStore()).isSameAs(bf.getBean("store2"));
+		NumberStore<?> store1 = bf.getBean("store1", NumberStore.class);
+		assertThat(nb.getDoubleStore()).isSameAs(store1);
+		NumberStore<?> store2 = bf.getBean("store2", NumberStore.class);
+		assertThat(nb.getFloatStore()).isSameAs(store2);
 
 		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
 		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
@@ -798,54 +800,36 @@ class BeanFactoryGenericsTests {
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(numberStoreProvider::getObject);
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(numberStoreProvider::getIfAvailable);
 		assertThat(numberStoreProvider.getIfUnique()).isNull();
-		assertThat(doubleStoreProvider.getObject()).isSameAs(bf.getBean("store1"));
-		assertThat(doubleStoreProvider.getIfAvailable()).isSameAs(bf.getBean("store1"));
-		assertThat(doubleStoreProvider.getIfUnique()).isSameAs(bf.getBean("store1"));
-		assertThat(floatStoreProvider.getObject()).isSameAs(bf.getBean("store2"));
-		assertThat(floatStoreProvider.getIfAvailable()).isSameAs(bf.getBean("store2"));
-		assertThat(floatStoreProvider.getIfUnique()).isSameAs(bf.getBean("store2"));
+		assertThat(doubleStoreProvider.getObject()).isSameAs(store1);
+		assertThat(doubleStoreProvider.getIfAvailable()).isSameAs(store1);
+		assertThat(doubleStoreProvider.getIfUnique()).isSameAs(store1);
+		assertThat(floatStoreProvider.getObject()).isSameAs(store2);
+		assertThat(floatStoreProvider.getIfAvailable()).isSameAs(store2);
+		assertThat(floatStoreProvider.getIfUnique()).isSameAs(store2);
 
 		List<NumberStore<?>> resolved = new ArrayList<>();
 		for (NumberStore<?> instance : numberStoreProvider) {
 			resolved.add(instance);
 		}
-		assertThat(resolved).hasSize(2);
-		assertThat(resolved).element(0).isSameAs(bf.getBean("store1"));
-		assertThat(resolved).element(1).isSameAs(bf.getBean("store2"));
-
-		resolved = numberStoreProvider.stream().toList();
-		assertThat(resolved).hasSize(2);
-		assertThat(resolved).element(0).isSameAs(bf.getBean("store1"));
-		assertThat(resolved).element(1).isSameAs(bf.getBean("store2"));
-
-		resolved = numberStoreProvider.orderedStream().toList();
-		assertThat(resolved).hasSize(2);
-		assertThat(resolved).element(0).isSameAs(bf.getBean("store2"));
-		assertThat(resolved).element(1).isSameAs(bf.getBean("store1"));
+		assertThat(resolved).containsExactly(store1, store2);
+		assertThat(numberStoreProvider.stream()).containsExactly(store1, store2);
+		assertThat(numberStoreProvider.orderedStream()).containsExactly(store2, store1);
 
 		resolved = new ArrayList<>();
 		for (NumberStore<Double> instance : doubleStoreProvider) {
 			resolved.add(instance);
 		}
-		assertThat(resolved).containsExactly(bf.getBean("store1", NumberStore.class));
-
-		resolved = doubleStoreProvider.stream().collect(Collectors.toList());
-		assertThat(resolved).containsExactly(bf.getBean("store1", NumberStore.class));
-
-		resolved = doubleStoreProvider.orderedStream().collect(Collectors.toList());
-		assertThat(resolved).containsExactly(bf.getBean("store1", NumberStore.class));
+		assertThat(resolved).containsExactly(store1);
+		assertThat(doubleStoreProvider.stream()).singleElement().isEqualTo(store1);
+		assertThat(doubleStoreProvider.orderedStream()).singleElement().isEqualTo(store1);
 
 		resolved = new ArrayList<>();
 		for (NumberStore<Float> instance : floatStoreProvider) {
 			resolved.add(instance);
 		}
-		assertThat(resolved).containsExactly(bf.getBean("store2", NumberStore.class));
-
-		resolved = floatStoreProvider.stream().collect(Collectors.toList());
-		assertThat(resolved).containsExactly(bf.getBean("store2", NumberStore.class));
-
-		resolved = floatStoreProvider.orderedStream().collect(Collectors.toList());
-		assertThat(resolved).containsExactly(bf.getBean("store2", NumberStore.class));
+		assertThat(resolved).containsExactly(store2);
+		assertThat(floatStoreProvider.stream()).singleElement().isEqualTo(store2);
+		assertThat(floatStoreProvider.orderedStream()).singleElement().isEqualTo(store2);
 	}
 
 	@Test
@@ -862,10 +846,8 @@ class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("store2", bd2);
 
 		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
-		List<NumberStore<?>> resolved = numberStoreProvider.orderedStream().toList();
-		assertThat(resolved).hasSize(2);
-		assertThat(resolved).element(0).isSameAs(bf.getBean("store2"));
-		assertThat(resolved).element(1).isSameAs(bf.getBean("store1"));
+		assertThat(numberStoreProvider.orderedStream()).containsExactly(
+				bf.getBean("store2", NumberStore.class), bf.getBean("store1", NumberStore.class));
 	}
 
 

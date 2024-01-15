@@ -131,10 +131,7 @@ class CollectionMergingTests {
 	void mergeListWithInnerBeanAsListElementInConstructor() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListOfRefsInConstructor");
 		List<?> list = bean.getSomeList();
-		assertThat(list).isNotNull();
-		assertThat(list).hasSize(3);
-		assertThat(list).element(2).isNotNull();
-		assertThat(list.get(2)).isInstanceOf(TestBean.class);
+		assertThat(list).hasSize(3).element(2).isInstanceOf(TestBean.class);
 	}
 
 	@Test

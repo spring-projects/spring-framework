@@ -96,7 +96,7 @@ class RSocketClientToServerIntegrationTests {
 	}
 
 	@AfterAll
-	public static void tearDownOnce() {
+	static void tearDownOnce() {
 		requester.rsocketClient().dispose();
 		server.dispose();
 	}

@@ -490,16 +490,13 @@ class ClassPathBeanDefinitionScannerTests {
 		assertThat(fooService.foo(123)).isEqualTo("bar");
 		assertThat(fooService.lookupFoo(123)).isEqualTo("bar");
 		assertThat(fooService.beanFactory).isSameAs(context.getDefaultListableBeanFactory());
-		assertThat(fooService.listableBeanFactory).hasSize(2);
-		assertThat(fooService.listableBeanFactory).element(0).isSameAs(context.getDefaultListableBeanFactory());
-		assertThat(fooService.listableBeanFactory).element(1).isSameAs(myBf);
+		assertThat(fooService.listableBeanFactory).containsExactly(context.getDefaultListableBeanFactory(), myBf);
 		assertThat(fooService.resourceLoader).isSameAs(context);
 		assertThat(fooService.resourcePatternResolver).isSameAs(context);
 		assertThat(fooService.eventPublisher).isSameAs(context);
 		assertThat(fooService.messageSource).isSameAs(ms);
 		assertThat(fooService.context).isSameAs(context);
-		assertThat(fooService.configurableContext).hasSize(1);
-		assertThat(fooService.configurableContext[0]).isSameAs(context);
+		assertThat(fooService.configurableContext).containsExactly(context);
 		assertThat(fooService.genericContext).isSameAs(context);
 	}
 

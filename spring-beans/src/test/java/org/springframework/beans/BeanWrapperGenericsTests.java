@@ -94,8 +94,8 @@ class BeanWrapperGenericsTests {
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
 		bw.setPropertyValue("resourceList", input);
-		assertThat(gb.getResourceList()).element(0).isEqualTo(new UrlResource("http://localhost:8080"));
-		assertThat(gb.getResourceList()).element(1).isEqualTo(new UrlResource("http://localhost:9090"));
+		assertThat(gb.getResourceList()).containsExactly(new UrlResource("http://localhost:8080"),
+				new UrlResource("http://localhost:9090"));
 	}
 
 	@Test
@@ -104,7 +104,7 @@ class BeanWrapperGenericsTests {
 		gb.setResourceList(new ArrayList<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("resourceList[0]", "http://localhost:8080");
-		assertThat(gb.getResourceList()).element(0).isEqualTo(new UrlResource("http://localhost:8080"));
+		assertThat(gb.getResourceList()).containsExactly(new UrlResource("http://localhost:8080"));
 	}
 
 	@Test

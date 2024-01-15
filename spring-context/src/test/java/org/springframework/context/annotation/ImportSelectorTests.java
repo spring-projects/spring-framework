@@ -126,8 +126,7 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
-		assertThat(TestImportGroup.imports).hasSize(1);
-		assertThat(TestImportGroup.imports.values()).element(0).asInstanceOf(LIST).hasSize(2);
+		assertThat(TestImportGroup.imports.values()).singleElement().asInstanceOf(LIST).hasSize(2);
 	}
 
 	@Test

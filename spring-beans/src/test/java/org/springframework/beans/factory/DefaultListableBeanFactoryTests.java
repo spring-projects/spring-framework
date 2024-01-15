@@ -655,9 +655,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerSingleton("string2", "B");
 
 		TestBean self = (TestBean) lbf.getBean("self");
-		assertThat(self.getStringArray()).hasSize(2);
-		assertThat(self.getStringArray()).contains("A");
-		assertThat(self.getStringArray()).contains("B");
+		assertThat(self.getStringArray()).containsOnly("A","B");
 	}
 
 	@Test
@@ -2237,10 +2235,10 @@ class DefaultListableBeanFactoryTests {
 
 		ObjectProvider<TestBean> testBeanProvider = lbf.getBeanProvider(ResolvableType.forClass(TestBean.class));
 		List<TestBean> resolved = testBeanProvider.orderedStream().toList();
-		assertThat(resolved.size()).isEqualTo(3);
-		assertThat(resolved).element(0).isSameAs(lbf.getBean("highPriorityTestBean"));
-		assertThat(resolved).element(1).isSameAs(lbf.getBean("lowPriorityTestBean"));
-		assertThat(resolved).element(2).isSameAs(lbf.getBean("plainTestBean"));
+		assertThat(resolved).containsExactly(
+				lbf.getBean("highPriorityTestBean", TestBean.class),
+				lbf.getBean("lowPriorityTestBean", TestBean.class),
+				lbf.getBean("plainTestBean", TestBean.class));
 	}
 
 	@Test

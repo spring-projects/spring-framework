@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -132,9 +133,8 @@ class PropertiesEditorTests {
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
-		assertThat(p.size()).as("contains 3 entries, not " + p.size()).isEqualTo(3);
-		assertThat(p.get("foo").equals("bar")).as("foo is bar").isTrue();
-		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
+		assertThat(p).contains(entry("foo", "bar"), entry("me", "mi"));
+		assertThat(p).hasSize(3);
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.servlet.http.Part;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -378,9 +379,8 @@ class RequestParamMethodArgumentResolverTests {
 				.annotNotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
 
 		Object actual = resolver.resolveArgument(param, null, webRequest, null);
-		boolean condition = actual instanceof List;
-		assertThat(condition).isTrue();
-		assertThat(((List<?>) actual)).element(0).isEqualTo(expected);
+		assertThat(actual).isInstanceOf(List.class).asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly(expected);
 	}
 
 	@Test

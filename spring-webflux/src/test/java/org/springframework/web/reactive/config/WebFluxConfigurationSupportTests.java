@@ -67,7 +67,6 @@ import org.springframework.web.reactive.result.method.annotation.RequestMappingH
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.HttpMessageWriterView;
-import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
@@ -259,11 +258,9 @@ class WebFluxConfigurationSupportTests {
 		assertThat(resolvers).hasSize(1);
 		assertThat(resolvers.get(0).getClass()).isEqualTo(FreeMarkerViewResolver.class);
 
-		List<View> views = handler.getDefaultViews();
-		assertThat(views).hasSize(1);
-
 		MimeType type = MimeTypeUtils.parseMimeType("application/json");
-		assertThat(views.get(0).getSupportedMediaTypes()).element(0).isEqualTo(type);
+		assertThat(handler.getDefaultViews()).singleElement().satisfies(view ->
+				assertThat(view.getSupportedMediaTypes()).element(0).isEqualTo(type));
 	}
 
 	@Test
