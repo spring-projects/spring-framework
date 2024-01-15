@@ -79,12 +79,10 @@ class AnnotationConfigContextLoaderTests {
 				AnnotatedFooConfigInnerClassTestCase.class, EMPTY_STRING_ARRAY,
 				new Class<?>[] {AnnotatedFooConfigInnerClassTestCase.FooConfig.class},
 				EMPTY_STRING_ARRAY, contextLoader);
-		ApplicationContext context = contextLoader.loadContextForAotProcessing(mergedConfig);
-		assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
-		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-		assertThat(cac.isActive()).as("ApplicationContext is active").isFalse();
+		ConfigurableApplicationContext context = contextLoader.loadContextForAotProcessing(mergedConfig);
+		assertThat(context.isActive()).as("ApplicationContext is active").isFalse();
 		assertThat(Arrays.stream(context.getBeanDefinitionNames())).anyMatch(name -> name.contains("FooConfig"));
-		cac.close();
+		context.close();
 	}
 
 	@Test

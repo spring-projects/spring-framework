@@ -99,12 +99,12 @@ class DelegatingSmartContextLoaderTests {
 		}
 
 		@Test
-		void loadContextWithNullConfig() throws Exception {
+		void loadContextWithNullConfig() {
 			assertThatIllegalArgumentException().isThrownBy(() -> loader.loadContext((MergedContextConfiguration) null));
 		}
 
 		@Test
-		void loadContextWithoutLocationsAndConfigurationClasses() throws Exception {
+		void loadContextWithoutLocationsAndConfigurationClasses() {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 					getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
 			assertThatIllegalStateException()
@@ -117,7 +117,7 @@ class DelegatingSmartContextLoaderTests {
 		 * @since 4.1
 		 */
 		@Test
-		void loadContextWithLocationsAndConfigurationClasses() throws Exception {
+		void loadContextWithLocationsAndConfigurationClasses() {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
 					new String[] {"test.xml"}, new Class<?>[] {getClass()}, EMPTY_STRING_ARRAY, loader);
 			assertThatIllegalStateException()

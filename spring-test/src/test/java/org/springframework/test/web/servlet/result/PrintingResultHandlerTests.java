@@ -145,7 +145,6 @@ class PrintingResultHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
 	void printResponse() throws Exception {
 		Cookie enigmaCookie = new Cookie("enigma", "42");
 		enigmaCookie.setHttpOnly(true);

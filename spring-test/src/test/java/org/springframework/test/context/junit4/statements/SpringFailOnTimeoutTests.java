@@ -42,13 +42,13 @@ public class SpringFailOnTimeoutTests {
 
 
 	@Test
-	public void nullNextStatement() throws Throwable {
+	public void nullNextStatement() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SpringFailOnTimeout(null, 1));
 	}
 
 	@Test
-	public void negativeTimeout() throws Throwable {
+	public void negativeTimeout() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SpringFailOnTimeout(statement, -1));
 	}

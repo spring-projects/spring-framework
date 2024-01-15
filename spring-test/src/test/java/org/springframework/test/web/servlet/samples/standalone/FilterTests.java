@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ public class FilterTests {
 		}
 	}
 
-	private class ContinueFilter extends OncePerRequestFilter {
+	private static class ContinueFilter extends OncePerRequestFilter {
 
 		@Override
 		protected void doFilterInternal(HttpServletRequest request,
@@ -212,11 +212,11 @@ public class FilterTests {
 		}
 	}
 
-	private class RedirectFilter extends OncePerRequestFilter {
+	private static class RedirectFilter extends OncePerRequestFilter {
 
 		@Override
 		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) throws ServletException, IOException {
+				FilterChain filterChain) throws IOException {
 
 			response.sendRedirect("/login");
 		}

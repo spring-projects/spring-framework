@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,31 +62,31 @@ class MethodLevelDirtiesContextTests {
 
 	@Test
 	@Order(1)
-	void basics() throws Exception {
+	void basics() {
 		performAssertions(1);
 	}
 
 	@Test
 	@Order(2)
 	@DirtiesContext(methodMode = BEFORE_METHOD)
-	void dirtyContextBeforeTestMethod() throws Exception {
+	void dirtyContextBeforeTestMethod() {
 		performAssertions(2);
 	}
 
 	@Test
 	@Order(3)
 	@DirtiesContext
-	void dirtyContextAfterTestMethod() throws Exception {
+	void dirtyContextAfterTestMethod() {
 		performAssertions(2);
 	}
 
 	@Test
 	@Order(4)
-	void backToBasics() throws Exception {
+	void backToBasics() {
 		performAssertions(3);
 	}
 
-	private void performAssertions(int expectedContextCreationCount) throws Exception {
+	private void performAssertions(int expectedContextCreationCount) {
 		assertThat(this.context).as("context must not be null").isNotNull();
 		assertThat(this.context.isActive()).as("context must be active").isTrue();
 

@@ -51,7 +51,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testNodeMatcherNoMatch() throws Exception {
+	public void testNodeMatcherNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/bar", null).node(Matchers.nullValue()).match(this.request));
 	}
@@ -62,7 +62,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testExistsNoMatch() throws Exception {
+	public void testExistsNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/Bar", null).exists().match(this.request));
 	}
@@ -73,7 +73,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testDoesNotExistNoMatch() throws Exception {
+	public void testDoesNotExistNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/bar", null).doesNotExist().match(this.request));
 	}
@@ -84,7 +84,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testNodeCountNoMatch() throws Exception {
+	public void testNodeCountNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/bar", null).nodeCount(1).match(this.request));
 	}
@@ -95,7 +95,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testStringNoMatch() throws Exception {
+	public void testStringNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/bar[1]", null).string("112").match(this.request));
 	}
@@ -106,7 +106,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testNumberNoMatch() throws Exception {
+	public void testNumberNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/bar[1]", null).number(111.1).match(this.request));
 	}
@@ -117,7 +117,7 @@ public class XpathRequestMatchersTests {
 	}
 
 	@Test
-	public void testBooleanNoMatch() throws Exception {
+	public void testBooleanNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathRequestMatchers("/foo/bar[2]", null).booleanValue(false).match(this.request));
 	}

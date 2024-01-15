@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class TestContextConcurrencyTests {
 
-	private static Set<String> expectedMethods = stream(TestCase.class.getDeclaredMethods())
+	private static final Set<String> expectedMethods = stream(TestCase.class.getDeclaredMethods())
 			.map(Method::getName)
 			.collect(toCollection(TreeSet::new));
 
@@ -122,7 +122,7 @@ class TestContextConcurrencyTests {
 
 
 		@Override
-		public void beforeTestMethod(TestContext testContext) throws Exception {
+		public void beforeTestMethod(TestContext testContext) {
 			String name = testContext.getTestMethod().getName();
 			actualMethods.add(name);
 			testContext.setAttribute("method", name);
@@ -130,7 +130,7 @@ class TestContextConcurrencyTests {
 		}
 
 		@Override
-		public void afterTestMethod(TestContext testContext) throws Exception {
+		public void afterTestMethod(TestContext testContext) {
 			assertThat(testContext.getAttribute("method")).isEqualTo(this.methodName.get());
 		}
 

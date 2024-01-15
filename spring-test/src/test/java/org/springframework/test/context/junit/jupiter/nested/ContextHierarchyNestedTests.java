@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ class ContextHierarchyNestedTests {
 
 
 		@Test
-		void nestedTest() throws Exception {
+		void nestedTest() {
 			assertThat(this.context).as("local ApplicationContext").isNotNull();
 			assertThat(this.context.getParent()).as("parent ApplicationContext").isNull();
 
@@ -107,7 +107,7 @@ class ContextHierarchyNestedTests {
 
 
 		@Test
-		void nestedTest() throws Exception {
+		void nestedTest() {
 			assertThat(this.context).as("local ApplicationContext").isNotNull();
 			assertThat(this.context.getParent()).as("parent ApplicationContext").isNotNull();
 
@@ -135,7 +135,7 @@ class ContextHierarchyNestedTests {
 
 
 			@Test
-			void nestedTest() throws Exception {
+			void nestedTest() {
 				assertThat(this.context).as("local ApplicationContext").isNotNull();
 				assertThat(this.context.getParent()).as("parent ApplicationContext").isNotNull();
 
@@ -160,7 +160,7 @@ class ContextHierarchyNestedTests {
 
 
 				@Test
-				void nestedTest() throws Exception {
+				void nestedTest() {
 					assertThat(this.context).as("local ApplicationContext").isNotNull();
 					assertThat(this.context.getParent()).as("parent ApplicationContext").isNotNull();
 					assertThat(this.context.getParent().getParent()).as("grandparent ApplicationContext").isNotNull();

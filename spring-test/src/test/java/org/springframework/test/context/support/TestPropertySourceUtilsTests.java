@@ -184,7 +184,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullContext() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableApplicationContext) null, FOO_LOCATIONS))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(null, FOO_LOCATIONS))
 			.withMessageContaining("'context' must not be null");
 	}
 
@@ -198,7 +198,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullEnvironment() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(), FOO_LOCATIONS))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(null, mock(), FOO_LOCATIONS))
 			.withMessageContaining("'environment' must not be null");
 	}
 
@@ -287,7 +287,6 @@ class TestPropertySourceUtilsTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	void addInlinedPropertiesToEnvironmentWithEmptyProperty() {
 		ConfigurableEnvironment environment = new MockEnvironment();
 		MutablePropertySources propertySources = environment.getPropertySources();
@@ -296,8 +295,8 @@ class TestPropertySourceUtilsTests {
 		addInlinedPropertiesToEnvironment(environment, "  ");
 		assertThat(propertySources).hasSize(1);
 		PropertySource<?> propertySource = propertySources.get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySource).isInstanceOf(MapPropertySource.class);
-		assertThat(((MapPropertySource) propertySource).getSource()).isEmpty();
+		assertThat(propertySource).isInstanceOfSatisfying(MapPropertySource.class,
+				mps -> assertThat(mps.getSource()).isEmpty());
 	}
 
 	@Test

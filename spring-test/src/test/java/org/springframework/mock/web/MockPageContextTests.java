@@ -35,7 +35,7 @@ class MockPageContextTests {
 	private final MockPageContext ctx = new MockPageContext();
 
 	@Test
-	void setAttributeWithNoScopeUsesPageScope() throws Exception {
+	void setAttributeWithNoScopeUsesPageScope() {
 		ctx.setAttribute(key, value);
 		assertThat(ctx.getAttribute(key, PageContext.PAGE_SCOPE)).isEqualTo(value);
 		assertThat(ctx.getAttribute(key, PageContext.APPLICATION_SCOPE)).isNull();
@@ -44,7 +44,7 @@ class MockPageContextTests {
 	}
 
 	@Test
-	void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() throws Exception {
+	void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() {
 		ctx.setAttribute(key, value, PageContext.APPLICATION_SCOPE);
 		ctx.removeAttribute(key);
 

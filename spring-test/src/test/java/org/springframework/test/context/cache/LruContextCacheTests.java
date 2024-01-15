@@ -155,7 +155,6 @@ class LruContextCacheTests {
 		return new MergedContextConfiguration(null, null, new Class<?>[] { clazz }, null, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
 		assertThat(cache).extracting("contextMap", as(map(MergedContextConfiguration.class, ApplicationContext.class)))
 				.satisfies(contextMap -> {

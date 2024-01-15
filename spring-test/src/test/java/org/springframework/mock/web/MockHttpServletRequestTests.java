@@ -114,7 +114,7 @@ class MockHttpServletRequestTests {
 	}
 
 	@Test
-	void getContentAsStringWithoutSettingCharacterEncoding() throws IOException {
+	void getContentAsStringWithoutSettingCharacterEncoding() {
 		assertThatIllegalStateException().isThrownBy(
 				request::getContentAsString)
 			.withMessageContaining("Cannot get content as a String for a null character encoding");
@@ -145,14 +145,14 @@ class MockHttpServletRequestTests {
 	}
 
 	@Test  // SPR-16505
-	void getInputStreamTwice() throws IOException {
+	void getInputStreamTwice() {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());
 		request.setContent(bytes);
 		assertThat(request.getInputStream()).isSameAs(request.getInputStream());
 	}
 
 	@Test  // SPR-16499
-	void getReaderAfterGettingInputStream() throws IOException {
+	void getReaderAfterGettingInputStream() {
 		request.getInputStream();
 		assertThatIllegalStateException().isThrownBy(
 				request::getReader)

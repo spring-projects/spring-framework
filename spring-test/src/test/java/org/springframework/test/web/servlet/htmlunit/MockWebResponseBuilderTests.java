@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void constructorWithNullResponse() throws Exception {
+	public void constructorWithNullResponse() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockWebResponseBuilder(0L, new WebRequest(new URL("http://company.example:80/test/this/here")), null));
 	}

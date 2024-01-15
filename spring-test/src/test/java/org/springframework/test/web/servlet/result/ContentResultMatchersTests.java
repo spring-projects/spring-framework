@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void typeNoMatch() throws Exception {
+	void typeNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().contentType("text/plain").match(getStubMvcResult(CONTENT)));
 	}
@@ -49,7 +49,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void stringNoMatch() throws Exception {
+	void stringNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().encoding("bogus").match(getStubMvcResult(CONTENT)));
 	}
@@ -61,7 +61,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void stringMatcherNoMatch() throws Exception {
+	void stringMatcherNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().string(Matchers.equalTo("bogus")).match(getStubMvcResult(CONTENT)));
 	}
@@ -72,7 +72,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void bytesNoMatch() throws Exception {
+	void bytesNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().bytes("bogus".getBytes()).match(getStubMvcResult(CONTENT)));
 	}
@@ -90,13 +90,13 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void jsonLenientNoMatch() throws Exception {
+	void jsonLenientNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().json("{\n\"fooo\":\"bar\"\n}").match(getStubMvcResult(CONTENT)));
 	}
 
 	@Test
-	void jsonStrictNoMatch() throws Exception {
+	void jsonStrictNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().json("{\"foo\":\"bar\",   \"foo array\":[\"bar\",\"foo\"]}", true).match(getStubMvcResult(CONTENT)));
 	}

@@ -157,7 +157,7 @@ class MergedSqlConfigTests {
 	}
 
 	@Test
-	void globalConfigWithEmptyCommentPrefix() throws Exception {
+	void globalConfigWithEmptyCommentPrefix() {
 		SqlConfig sqlConfig = GlobalConfigWithWithEmptyCommentPrefixClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()
@@ -166,7 +166,7 @@ class MergedSqlConfigTests {
 	}
 
 	@Test
-	void globalConfigWithEmptyCommentPrefixes() throws Exception {
+	void globalConfigWithEmptyCommentPrefixes() {
 		SqlConfig sqlConfig = GlobalConfigWithWithEmptyCommentPrefixesClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()
@@ -175,7 +175,7 @@ class MergedSqlConfigTests {
 	}
 
 	@Test
-	void globalConfigWithDuplicatedCommentPrefixes() throws Exception {
+	void globalConfigWithDuplicatedCommentPrefixes() {
 		SqlConfig sqlConfig = GlobalConfigWithWithDuplicatedCommentPrefixesClass.class.getAnnotation(SqlConfig.class);
 
 		assertThatIllegalArgumentException()

@@ -32,7 +32,7 @@ class GenericXmlWebContextLoaderTests {
 
 
 	@Test
-	void configMustNotContainAnnotatedClasses() throws Exception {
+	void configMustNotContainAnnotatedClasses() {
 		GenericXmlWebContextLoader loader = new GenericXmlWebContextLoader();
 		@SuppressWarnings("deprecation")
 		WebMergedContextConfiguration mergedConfig = new WebMergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,

@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -99,7 +98,7 @@ public class RepeatedSpringRunnerTests {
 	@TestExecutionListeners({})
 	public abstract static class AbstractRepeatedTestCase {
 
-		protected void incrementInvocationCount() throws IOException {
+		protected void incrementInvocationCount() {
 			invocationCount.incrementAndGet();
 		}
 	}
@@ -108,7 +107,7 @@ public class RepeatedSpringRunnerTests {
 
 		@Test
 		@Timed(millis = 10000)
-		public void nonAnnotated() throws Exception {
+		public void nonAnnotated() {
 			incrementInvocationCount();
 		}
 	}
@@ -118,7 +117,7 @@ public class RepeatedSpringRunnerTests {
 		@Test
 		@Repeat
 		@Timed(millis = 10000)
-		public void defaultRepeatValue() throws Exception {
+		public void defaultRepeatValue() {
 			incrementInvocationCount();
 		}
 	}
@@ -128,7 +127,7 @@ public class RepeatedSpringRunnerTests {
 		@Test
 		@Repeat(-5)
 		@Timed(millis = 10000)
-		public void negativeRepeatValue() throws Exception {
+		public void negativeRepeatValue() {
 			incrementInvocationCount();
 		}
 	}
@@ -137,7 +136,7 @@ public class RepeatedSpringRunnerTests {
 
 		@Test
 		@Repeat(5)
-		public void repeatedFiveTimes() throws Exception {
+		public void repeatedFiveTimes() {
 			incrementInvocationCount();
 		}
 	}
@@ -151,7 +150,7 @@ public class RepeatedSpringRunnerTests {
 
 		@Test
 		@RepeatedFiveTimes
-		public void repeatedFiveTimes() throws Exception {
+		public void repeatedFiveTimes() {
 			incrementInvocationCount();
 		}
 	}
@@ -165,7 +164,7 @@ public class RepeatedSpringRunnerTests {
 		@Test
 		@Timed(millis = 1000)
 		@Repeat(5)
-		public void repeatedFiveTimesButDoesNotExceedTimeout() throws Exception {
+		public void repeatedFiveTimesButDoesNotExceedTimeout() {
 			incrementInvocationCount();
 		}
 

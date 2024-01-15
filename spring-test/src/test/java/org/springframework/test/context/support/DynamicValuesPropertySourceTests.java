@@ -30,19 +30,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DynamicValuesPropertySourceTests {
 
-	@SuppressWarnings("serial")
 	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource("test",
 			Map.of("a", () -> "A", "b", () -> "B"));
 
 
 	@Test
-	void getPropertyReturnsSuppliedProperty() throws Exception {
+	void getPropertyReturnsSuppliedProperty() {
 		assertThat(this.source.getProperty("a")).isEqualTo("A");
 		assertThat(this.source.getProperty("b")).isEqualTo("B");
 	}
 
 	@Test
-	void getPropertyWhenMissingReturnsNull() throws Exception {
+	void getPropertyWhenMissingReturnsNull() {
 		assertThat(this.source.getProperty("c")).isNull();
 	}
 

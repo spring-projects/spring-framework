@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
-
-import java.io.IOException;
 
 import com.gargoylesoftware.htmlunit.util.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,7 +66,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	void mockMvcSetupWithCustomDriverDelegate() throws Exception {
+	void mockMvcSetupWithCustomDriverDelegate() {
 		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
@@ -76,7 +74,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	void mockMvcSetupWithDefaultDriverDelegate() throws Exception {
+	void mockMvcSetupWithDefaultDriverDelegate() {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed("http://localhost/test");
@@ -95,7 +93,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test // SPR-14066
-	void cookieManagerShared() throws Exception {
+	void cookieManagerShared() {
 		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
@@ -107,11 +105,11 @@ class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 
-	private void assertMockMvcUsed(String url) throws Exception {
+	private void assertMockMvcUsed(String url) {
 		assertThat(get(url)).contains(EXPECTED_BODY);
 	}
 
-	private String get(String url) throws IOException {
+	private String get(String url) {
 		this.driver.get(url);
 		return this.driver.getPageSource();
 	}

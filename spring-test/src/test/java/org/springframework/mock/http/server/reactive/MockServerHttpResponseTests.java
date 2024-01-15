@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MockServerHttpResponseTests {
 
 	@Test
-	void cookieHeaderSet() throws Exception {
+	void cookieHeaderSet() {
 
 		ResponseCookie foo11 = ResponseCookie.from("foo1", "bar1").build();
 		ResponseCookie foo12 = ResponseCookie.from("foo1", "bar2").build();

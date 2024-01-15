@@ -93,8 +93,7 @@ class StatusAssertionTests {
 		assertions.is1xxInformational();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test
@@ -105,8 +104,7 @@ class StatusAssertionTests {
 		assertions.is2xxSuccessful();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is5xxServerError());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is5xxServerError);
 	}
 
 	@Test
@@ -117,8 +115,7 @@ class StatusAssertionTests {
 		assertions.is3xxRedirection();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test
@@ -129,8 +126,7 @@ class StatusAssertionTests {
 		assertions.is4xxClientError();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test
@@ -141,8 +137,7 @@ class StatusAssertionTests {
 		assertions.is5xxServerError();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test

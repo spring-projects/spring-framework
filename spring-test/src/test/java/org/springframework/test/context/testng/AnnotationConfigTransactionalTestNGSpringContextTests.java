@@ -127,7 +127,7 @@ class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@BeforeMethod
-	void setUp() throws Exception {
+	void setUp() {
 		numSetUpCalls++;
 		if (isActualTransactionActive()) {
 			numSetUpCallsInTransaction++;
@@ -144,7 +144,7 @@ class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@AfterMethod
-	void tearDown() throws Exception {
+	void tearDown() {
 		numTearDownCalls++;
 		if (isActualTransactionActive()) {
 			numTearDownCallsInTransaction++;

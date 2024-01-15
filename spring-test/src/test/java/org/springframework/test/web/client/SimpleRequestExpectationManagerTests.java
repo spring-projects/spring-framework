@@ -48,7 +48,7 @@ class SimpleRequestExpectationManagerTests {
 
 
 	@Test
-	void unexpectedRequest() throws Exception {
+	void unexpectedRequest() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> this.manager.validateRequest(createRequest(GET, "/foo")))
 			.withMessage("""
@@ -58,7 +58,7 @@ class SimpleRequestExpectationManagerTests {
 	}
 
 	@Test
-	void zeroExpectedRequests() throws Exception {
+	void zeroExpectedRequests() {
 		this.manager.verify();
 	}
 
@@ -94,7 +94,7 @@ class SimpleRequestExpectationManagerTests {
 		this.manager.expectRequest(min(1), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> this.manager.verify())
+			.isThrownBy(this.manager::verify)
 			.withMessage("""
 					Further request(s) expected leaving 1 unsatisfied expectation(s).
 					1 request(s) executed:
@@ -144,7 +144,7 @@ class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> this.manager.verify())
+			.isThrownBy(this.manager::verify)
 			.withMessageContaining("""
 					3 request(s) executed:
 					GET /foo
@@ -154,7 +154,7 @@ class SimpleRequestExpectationManagerTests {
 	}
 
 	@Test
-	void repeatedRequestsNotInOrder() throws Exception {
+	void repeatedRequestsNotInOrder() {
 		this.manager.expectRequest(twice(), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.expectRequest(twice(), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.expectRequest(twice(), requestTo("/baz")).andExpect(method(GET)).andRespond(withSuccess());

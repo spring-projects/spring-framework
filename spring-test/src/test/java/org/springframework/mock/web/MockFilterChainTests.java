@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,13 +62,13 @@ class MockFilterChainTests {
 	}
 
 	@Test
-	void doFilterNullRequest() throws Exception {
+	void doFilterNullRequest() {
 		MockFilterChain chain = new MockFilterChain();
 		assertThatIllegalArgumentException().isThrownBy(() -> chain.doFilter(null, this.response));
 	}
 
 	@Test
-	void doFilterNullResponse() throws Exception {
+	void doFilterNullResponse() {
 		MockFilterChain chain = new MockFilterChain();
 		assertThatIllegalArgumentException().isThrownBy(() -> chain.doFilter(this.request, null));
 	}
@@ -143,7 +143,7 @@ class MockFilterChainTests {
 		}
 
 		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
+		public void init(FilterConfig filterConfig) {
 		}
 
 		@Override

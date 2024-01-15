@@ -45,33 +45,33 @@ public class MockMvcResultMatchersTests {
 	}
 
 	@Test
-	public void redirectNonMatching() throws Exception {
+	public void redirectNonMatching() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> redirectedUrl("/resource/2").match(redirectedUrlStub("/resource/1")))
 			.withMessageEndingWith("expected:</resource/2> but was:</resource/1>");
 	}
 
 	@Test
-	public void redirectNonMatchingBecauseNotRedirect() throws Exception {
+	public void redirectNonMatchingBecauseNotRedirect() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> redirectedUrl("/resource/1").match(forwardedUrlStub("/resource/1")))
 			.withMessageEndingWith("expected:</resource/1> but was:<null>");
 	}
 
 	@Test
-	public void redirectWithUrlTemplate() throws Exception {
+	public void redirectWithUrlTemplate() {
 		assertThatCode(() -> redirectedUrlTemplate("/orders/{orderId}/items/{itemId}", 1, 2).match(redirectedUrlStub("/orders/1/items/2")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	public void redirectWithMatchingPattern() throws Exception {
+	public void redirectWithMatchingPattern() {
 		assertThatCode(() -> redirectedUrlPattern("/resource/*").match(redirectedUrlStub("/resource/1")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	public void redirectWithNonMatchingPattern() throws Exception {
+	public void redirectWithNonMatchingPattern() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> redirectedUrlPattern("/resource/").match(redirectedUrlStub("/resource/1")))
 			.withMessage("'/resource/' is not an Ant-style path pattern");
@@ -105,25 +105,25 @@ public class MockMvcResultMatchersTests {
 	}
 
 	@Test
-	public void forwardWithQueryString() throws Exception {
+	public void forwardWithQueryString() {
 		assertThatCode(() -> forwardedUrl("/api/resource/1?arg=value").match(forwardedUrlStub("/api/resource/1?arg=value")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	public void forwardWithUrlTemplate() throws Exception {
+	public void forwardWithUrlTemplate() {
 		assertThatCode(() -> forwardedUrlTemplate("/orders/{orderId}/items/{itemId}", 1, 2).match(forwardedUrlStub("/orders/1/items/2")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	public void forwardWithMatchingPattern() throws Exception {
+	public void forwardWithMatchingPattern() {
 		assertThatCode(() -> forwardedUrlPattern("/api/**/?").match(forwardedUrlStub("/api/resource/1")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	public void forwardWithNonMatchingPattern() throws Exception {
+	public void forwardWithNonMatchingPattern() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> forwardedUrlPattern("/resource/").match(forwardedUrlStub("/resource/1")))
 			.withMessage("'/resource/' is not an Ant-style path pattern");

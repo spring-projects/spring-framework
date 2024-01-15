@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class MultipartControllerTests {
 
 
 	@Test
-	public void multipartRequestWithSingleFile() throws Exception {
+	public void multipartRequestWithSingleFile() {
 
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
@@ -88,7 +88,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithFileArray() throws Exception {
+	public void multipartRequestWithFileArray() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -112,7 +112,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFile() throws Exception {
+	public void multipartRequestWithOptionalFile() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -128,7 +128,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileNotPresent() throws Exception {
+	public void multipartRequestWithOptionalFileNotPresent() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -142,7 +142,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileArray() throws Exception {
+	public void multipartRequestWithOptionalFileArray() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -159,7 +159,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileArrayNotPresent() throws Exception {
+	public void multipartRequestWithOptionalFileArrayNotPresent() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -173,7 +173,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileList() throws Exception {
+	public void multipartRequestWithOptionalFileList() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -190,7 +190,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileListNotPresent() throws Exception {
+	public void multipartRequestWithOptionalFileListNotPresent() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -204,7 +204,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithServletParts() throws Exception {
+	public void multipartRequestWithServletParts() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -220,7 +220,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWrapped() throws Exception {
+	public void multipartRequestWrapped() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();

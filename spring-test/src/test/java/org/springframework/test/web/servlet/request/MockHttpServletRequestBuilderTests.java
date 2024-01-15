@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.request;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,7 +95,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test  // SPR-13435
-	void requestUriWithDoubleSlashes() throws URISyntaxException {
+	void requestUriWithDoubleSlashes() {
 		this.builder = new MockHttpServletRequestBuilder(GET, URI.create("/test//currentlyValid/0"));
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
@@ -311,7 +310,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test  // SPR-13801
-	void requestParameterFromMultiValueMap() throws Exception {
+	void requestParameterFromMultiValueMap() {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("foo", "bar");
 		params.add("foo", "baz");
@@ -324,7 +323,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	void requestParameterFromRequestBodyFormData() throws Exception {
+	void requestParameterFromRequestBodyFormData() {
 		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class MockMvcWebConnectionTests {
 	}
 
 	@Test
-	public void contextPathEmpty() throws IOException {
+	public void contextPathEmpty() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 		// Empty context path (root context) should not match to a URL with a context path
 		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
@@ -89,15 +89,13 @@ public class MockMvcWebConnectionTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void contextPathDoesNotStartWithSlash() throws IOException {
+	public void contextPathDoesNotStartWithSlash() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockMvcWebConnection(this.mockMvc, this.webClient, "context"));
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void contextPathEndsWithSlash() throws IOException {
+	public void contextPathEndsWithSlash() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockMvcWebConnection(this.mockMvc, this.webClient, "/context/"));
 	}

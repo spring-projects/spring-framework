@@ -49,7 +49,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testContentTypeNoMatch1() throws Exception {
+	public void testContentTypeNoMatch1() {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -57,7 +57,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testContentTypeNoMatch2() throws Exception {
+	public void testContentTypeNoMatch2() {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->

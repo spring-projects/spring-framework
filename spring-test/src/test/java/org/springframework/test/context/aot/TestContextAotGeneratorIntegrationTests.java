@@ -292,7 +292,7 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 		assertThat(messageService.generateMessage()).isEqualTo(expectedMessage);
 	}
 
-	private void assertContextForJdbcTests(ApplicationContext context) throws Exception {
+	private void assertContextForJdbcTests(ApplicationContext context) {
 		assertThat(context.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
 		assertThat(context.getBean(DataSource.class)).as("DataSource").isNotNull();
 	}

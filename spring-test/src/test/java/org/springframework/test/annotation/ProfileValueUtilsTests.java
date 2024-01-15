@@ -46,11 +46,11 @@ class ProfileValueUtilsTests {
 		System.setProperty(NAME, VALUE);
 	}
 
-	private void assertClassIsEnabled(Class<?> testClass) throws Exception {
+	private void assertClassIsEnabled(Class<?> testClass) {
 		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(testClass)).as("Test class [" + testClass + "] should be enabled.").isTrue();
 	}
 
-	private void assertClassIsDisabled(Class<?> testClass) throws Exception {
+	private void assertClassIsDisabled(Class<?> testClass) {
 		assertThat(ProfileValueUtils.isTestEnabledInThisEnvironment(testClass)).as("Test class [" + testClass + "] should be disabled.").isFalse();
 	}
 
@@ -81,7 +81,7 @@ class ProfileValueUtilsTests {
 	// -------------------------------------------------------------------
 
 	@Test
-	void isTestEnabledInThisEnvironmentForProvidedClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedClass() {
 		assertClassIsEnabled(NonAnnotated.class);
 		assertClassIsEnabled(EnabledAnnotatedSingleValue.class);
 		assertClassIsEnabled(EnabledAnnotatedMultiValue.class);

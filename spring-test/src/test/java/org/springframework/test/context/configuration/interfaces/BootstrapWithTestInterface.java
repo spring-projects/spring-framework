@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.context.configuration.interfaces;
 import java.util.List;
 
 import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.configuration.interfaces.BootstrapWithTestInterface.CustomTestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
@@ -38,9 +37,8 @@ interface BootstrapWithTestInterface {
 
 		@Override
 		protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
-			return singletonList(
-				(ContextCustomizerFactory) (testClass, configAttributes) -> (ContextCustomizer) (context,
-						mergedConfig) -> context.getBeanFactory().registerSingleton("foo", "foo"));
+			return singletonList((testClass, configAttributes) ->
+					(context,mergedConfig) -> context.getBeanFactory().registerSingleton("foo", "foo"));
 		}
 	}
 

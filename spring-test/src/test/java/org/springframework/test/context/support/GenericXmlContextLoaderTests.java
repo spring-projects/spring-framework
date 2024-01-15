@@ -35,7 +35,7 @@ class GenericXmlContextLoaderTests {
 
 
 	@Test
-	void configMustNotContainAnnotatedClasses() throws Exception {
+	void configMustNotContainAnnotatedClasses() {
 		GenericXmlContextLoader loader = new GenericXmlContextLoader();
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
 			new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class HandlerAssertionTests {
 	}
 
 	@Test
-	public void methodCallOnNonMock() throws Exception {
+	public void methodCallOnNonMock() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/")).andExpect(handler().methodCall("bogus")))
 			.withMessageContaining("The supplied object [bogus] is not an instance of")

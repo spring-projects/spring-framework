@@ -135,7 +135,7 @@ class SqlScriptsTestExecutionListenerTests {
 				.withMessage("@SQL execution phase AFTER_TEST_CLASS cannot be used on methods");
 	}
 
-	private void assertExceptionContains(String msg) throws Exception {
+	private void assertExceptionContains(String msg) {
 		assertThatIllegalStateException()
 				.isThrownBy(() -> listener.beforeTestMethod(testContext))
 				.withMessageContaining(msg);

@@ -325,7 +325,7 @@ class DirtiesContextTestExecutionListenerTests {
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
-	private void assertAfterMethod(Class<?> clazz) throws NoSuchMethodException, Exception {
+	private void assertAfterMethod(Class<?> clazz) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("test"));
 		beforeListener.beforeTestMethod(testContext);
