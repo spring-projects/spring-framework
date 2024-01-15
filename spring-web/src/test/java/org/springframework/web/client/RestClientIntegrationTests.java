@@ -64,6 +64,7 @@ import static org.junit.jupiter.api.Named.named;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Injae Kim
  */
 class RestClientIntegrationTests {
 
@@ -856,6 +857,35 @@ class RestClientIntegrationTests {
 		expectRequestCount(2);
 	}
 
+	@ParameterizedRestClientTest
+	void defaultRequest(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response ->
+				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+
+		String result = this.restClient.mutate()
+				.defaultRequest(spec -> spec
+						.header("X-Test-Header-Default", "testDefaultValue")
+						.header("X-Test-Header", "testDefaultValueShouldBeOverride"))
+				.build()
+				.get()
+				.uri("/greeting")
+				.header("X-Test-Header", "testHeaderValue")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeader("X-Test-Header-Default")).isEqualTo("testDefaultValue");
+			assertThat(request.getHeader("X-Test-Header")).isEqualTo("testHeaderValue");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+			assertThat(request.getPath()).isEqualTo("/greeting");
+		});
+	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();

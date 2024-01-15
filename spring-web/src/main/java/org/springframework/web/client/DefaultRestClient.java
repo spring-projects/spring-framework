@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Injae Kim
  * @since 6.1
  * @see RestClient#create()
  * @see RestClient#create(String)
@@ -99,6 +100,9 @@ final class DefaultRestClient implements RestClient {
 	@Nullable
 	private final HttpHeaders defaultHeaders;
 
+	@Nullable
+	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
+
 	private final List<StatusHandler> defaultStatusHandlers;
 
 	private final DefaultRestClientBuilder builder;
@@ -116,6 +120,7 @@ final class DefaultRestClient implements RestClient {
 			@Nullable List<ClientHttpRequestInitializer> initializers,
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
+			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable List<StatusHandler> statusHandlers,
 			List<HttpMessageConverter<?>> messageConverters,
 			ObservationRegistry observationRegistry,
@@ -127,6 +132,7 @@ final class DefaultRestClient implements RestClient {
 		this.interceptors = interceptors;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
+		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
 		this.observationRegistry = observationRegistry;
@@ -452,6 +458,9 @@ final class DefaultRestClient implements RestClient {
 			URI uri = null;
 			try {
 				uri = initUri();
+				if (defaultRequest != null) {
+					defaultRequest.accept(this);
+				}
 				HttpHeaders headers = initHeaders();
 				ClientHttpRequest clientRequest = createRequest(uri);
 				clientRequest.getHeaders().addAll(headers);

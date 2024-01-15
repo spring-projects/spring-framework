@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link RestClient.Builder}.
  *
  * @author Arjen Poutsma
+ * @author Injae Kim
  * @since 6.1
  */
 final class DefaultRestClientBuilder implements RestClient.Builder {
@@ -371,6 +372,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return new DefaultRestClient(requestFactory,
 				this.interceptors, this.initializers, uriBuilderFactory,
 				defaultHeaders,
+				this.defaultRequest,
 				this.statusHandlers,
 				messageConverters,
 				this.observationRegistry,
