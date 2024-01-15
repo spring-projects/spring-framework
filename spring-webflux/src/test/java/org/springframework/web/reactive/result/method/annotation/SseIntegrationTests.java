@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -51,12 +52,6 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -127,7 +122,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedSseTest
 	void sseAsEvent(HttpServer httpServer, ClientHttpConnector connector) throws Exception {
-		assumeTrue(httpServer instanceof JettyHttpServer);
+		assumeTrue(httpServer instanceof JettyHttpServer || httpServer instanceof JettyCoreHttpServer);
 
 		startServer(httpServer, connector);
 
@@ -305,6 +300,9 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			args(new JettyHttpServer(), new ReactorClientHttpConnector()),
 			args(new JettyHttpServer(), new JettyClientHttpConnector()),
 			args(new JettyHttpServer(), new HttpComponentsClientHttpConnector()),
+			args(new JettyCoreHttpServer(), new ReactorClientHttpConnector()),
+			args(new JettyCoreHttpServer(), new JettyClientHttpConnector()),
+			args(new JettyCoreHttpServer(), new HttpComponentsClientHttpConnector()),
 			args(new ReactorHttpServer(), new ReactorClientHttpConnector()),
 			args(new ReactorHttpServer(), new JettyClientHttpConnector()),
 			args(new ReactorHttpServer(), new HttpComponentsClientHttpConnector()),

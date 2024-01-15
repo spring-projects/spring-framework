@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -85,8 +86,8 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		// but an application can apply CompactPathRule via RewriteHandler:
 		// https://www.eclipse.org/jetty/documentation/jetty-11/programming_guide.php
 
-		HttpStatus expectedStatus =
-				(httpServer instanceof JettyHttpServer ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+		HttpStatus expectedStatus = (httpServer instanceof JettyHttpServer  || httpServer instanceof JettyCoreHttpServer
+				? HttpStatus.BAD_REQUEST : HttpStatus.OK);
 
 		assertThat(response.getStatusCode()).isEqualTo(expectedStatus);
 	}
