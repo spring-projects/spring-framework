@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,21 @@
 
 package org.springframework.test.util;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -40,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Craig Andrews
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public class JsonPathExpectationsHelper {
@@ -48,17 +56,42 @@ public class JsonPathExpectationsHelper {
 
 	private final JsonPath jsonPath;
 
+	private final Configuration configuration;
+
+	/**
+	 * Construct a new {@code JsonPathExpectationsHelper}.
+	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
+	 * @param configuration the {@link Configuration} to use or {@code null} to use the
+	 * {@linkplain Configuration#defaultConfiguration() default configuration}
+	 * @since 6.2
+	 */
+	public JsonPathExpectationsHelper(String expression, @Nullable Configuration configuration) {
+		Assert.hasText(expression, "expression must not be null or empty");
+		this.expression = expression;
+		this.jsonPath = JsonPath.compile(this.expression);
+		this.configuration = (configuration != null) ? configuration : Configuration.defaultConfiguration();
+	}
+
+	/**
+	 * Construct a new {@code JsonPathExpectationsHelper} using the
+	 * {@linkplain Configuration#defaultConfiguration() default configuration}.
+	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
+	 * @since 6.2
+	 */
+	public JsonPathExpectationsHelper(String expression) {
+		this(expression, (Configuration) null);
+	}
 
 	/**
 	 * Construct a new {@code JsonPathExpectationsHelper}.
 	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
 	 * @param args arguments to parameterize the {@code JsonPath} expression with,
 	 * using formatting specifiers defined in {@link String#format(String, Object...)}
+	 * @deprecated in favor of calling {@link String#formatted(Object...)} upfront
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public JsonPathExpectationsHelper(String expression, Object... args) {
-		Assert.hasText(expression, "expression must not be null or empty");
-		this.expression = String.format(expression, args);
-		this.jsonPath = JsonPath.compile(this.expression);
+		this(expression.formatted(args), (Configuration) null);
 	}
 
 
@@ -83,9 +116,25 @@ public class JsonPathExpectationsHelper {
 	 * @param targetType the expected type of the resulting value
 	 * @since 4.3.3
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> void assertValue(String content, Matcher<? super T> matcher, Class<T> targetType) {
-		T value = (T) evaluateJsonPath(content, targetType);
+		T value = evaluateJsonPath(content, targetType);
+		MatcherAssert.assertThat("JSON path \"" + this.expression + "\"", value, matcher);
+	}
+
+	/**
+	 * An overloaded variant of {@link #assertValue(String, Matcher)} that also
+	 * accepts a target type for the resulting value that allows generic types
+	 * to be defined.
+	 * <p>This must be used with a {@link Configuration} that defines a more
+	 * elaborate {@link MappingProvider} as the default one cannot handle
+	 * generic types.
+	 * @param content the JSON content
+	 * @param matcher the matcher with which to assert the result
+	 * @param targetType the expected type of the resulting value
+	 * @since 6.2
+	 */
+	public <T> void assertValue(String content, Matcher<? super T> matcher, ParameterizedTypeReference<T> targetType) {
+		T value = evaluateJsonPath(content, targetType);
 		MatcherAssert.assertThat("JSON path \"" + this.expression + "\"", value, matcher);
 	}
 
@@ -296,7 +345,7 @@ public class JsonPathExpectationsHelper {
 	@Nullable
 	public Object evaluateJsonPath(String content) {
 		try {
-			return this.jsonPath.read(content);
+			return this.jsonPath.read(content, this.configuration);
 		}
 		catch (Throwable ex) {
 			throw new AssertionError("No value at JSON path \"" + this.expression + "\"", ex);
@@ -306,19 +355,32 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Variant of {@link #evaluateJsonPath(String)} with a target type.
 	 * <p>This can be useful for matching numbers reliably for example coercing an
-	 * integer into a double.
+	 * integer into a double or when the configured {@link MappingProvider} can
+	 * handle more complex object structures.
 	 * @param content the content to evaluate against
+	 * @param targetType the requested target type
 	 * @return the result of the evaluation
 	 * @throws AssertionError if the evaluation fails
 	 */
-	public Object evaluateJsonPath(String content, Class<?> targetType) {
-		try {
-			return JsonPath.parse(content).read(this.expression, targetType);
-		}
-		catch (Throwable ex) {
-			String message = "No value at JSON path \"" + this.expression + "\"";
-			throw new AssertionError(message, ex);
-		}
+	public <T> T evaluateJsonPath(String content, Class<T> targetType) {
+		return evaluateExpression(content, context -> context.read(this.expression, targetType));
+	}
+
+	/**
+	 * Variant of {@link #evaluateJsonPath(String)} with a target type that has
+	 * generics.
+	 * <p>This must be used with a {@link Configuration} that defines a more
+	 * elaborate {@link MappingProvider} as the default one cannot handle
+	 * generic types.
+	 * @param content the content to evaluate against
+	 * @param targetType the requested target type
+	 * @return the result of the evaluation
+	 * @throws AssertionError if the evaluation fails
+	 * @since 6.2
+	 */
+	public <T> T evaluateJsonPath(String content, ParameterizedTypeReference<T> targetType) {
+		return evaluateExpression(content, context ->
+				context.read(this.expression, new TypeRefAdapter<>(targetType)));
 	}
 
 	@Nullable
@@ -334,6 +396,35 @@ public class JsonPathExpectationsHelper {
 
 	private boolean pathIsIndefinite() {
 		return !this.jsonPath.isDefinite();
+	}
+
+	private <T> T evaluateExpression(String content, Function<DocumentContext, T> action) {
+		try {
+			DocumentContext context = JsonPath.parse(content, this.configuration);
+			return action.apply(context);
+		}
+		catch (Throwable ex) {
+			String message = "Failed to evaluate JSON path \"" + this.expression + "\"";
+			throw new AssertionError(message, ex);
+		}
+	}
+
+
+	/**
+	 * Adapt JSONPath {@link TypeRef} to {@link ParameterizedTypeReference}.
+	 */
+	private static final class TypeRefAdapter<T> extends TypeRef<T> {
+
+		private final Type type;
+
+		TypeRefAdapter(ParameterizedTypeReference<T> typeReference) {
+			this.type = typeReference.getType();
+		}
+
+		@Override
+		public Type getType() {
+			return this.type;
+		}
 	}
 
 }

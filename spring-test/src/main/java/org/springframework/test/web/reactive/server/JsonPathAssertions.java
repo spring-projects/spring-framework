@@ -22,6 +22,7 @@ import org.hamcrest.Matcher;
 
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
+import org.springframework.util.Assert;
 
 /**
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions.
@@ -41,9 +42,10 @@ public class JsonPathAssertions {
 
 
 	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression, Object... args) {
+		Assert.hasText(expression, "expression must not be null or empty");
 		this.bodySpec = spec;
 		this.content = content;
-		this.pathHelper = new JsonPathExpectationsHelper(expression, args);
+		this.pathHelper = new JsonPathExpectationsHelper(expression.formatted(args));
 	}
 
 
@@ -181,10 +183,9 @@ public class JsonPathAssertions {
 	 * Consume the result of the JSONPath evaluation and provide a target class.
 	 * @since 6.2
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> WebTestClient.BodyContentSpec value(Class<T> targetType, Consumer<T> consumer) {
-		Object value = this.pathHelper.evaluateJsonPath(this.content, targetType);
-		consumer.accept((T) value);
+		T value = this.pathHelper.evaluateJsonPath(this.content, targetType);
+		consumer.accept(value);
 		return this.bodySpec;
 	}
 
