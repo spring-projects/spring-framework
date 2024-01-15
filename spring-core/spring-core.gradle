@@ -81,6 +81,7 @@ dependencies {
 	optional("io.smallrye.reactive:mutiny")
 	optional("net.sf.jopt-simple:jopt-simple")
 	optional("org.aspectj:aspectjweaver")
+	optional("org.eclipse.jetty:jetty-io")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")

@@ -27,6 +27,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,8 +88,8 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		// but an application can apply CompactPathRule via RewriteHandler:
 		// https://www.eclipse.org/jetty/documentation/jetty-11/programming_guide.php
 
-		HttpStatus expectedStatus =
-				(httpServer instanceof JettyHttpServer ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+		HttpStatus expectedStatus = (httpServer instanceof JettyHttpServer || httpServer instanceof JettyCoreHttpServer
+				? HttpStatus.BAD_REQUEST : HttpStatus.OK);
 
 		assertThat(response.getStatusCode()).isEqualTo(expectedStatus);
 	}

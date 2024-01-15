@@ -19,12 +19,15 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.websocket.api.Configurable;
+import org.eclipse.jetty.websocket.api.exceptions.WebSocketException;
+import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
+import org.eclipse.jetty.websocket.server.WebSocketCreator;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -42,19 +45,18 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A WebSocket {@code RequestUpgradeStrategy} for Jetty 12 EE10.
+ * A WebSocket {@code RequestUpgradeStrategy} for Jetty 12 Core.
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4
  */
-public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
+public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Nullable
 	private Consumer<Configurable> webSocketConfigurer;
 
 	@Nullable
-	private JettyWebSocketServerContainer serverContainer;
-
+	private ServerWebSocketContainer serverContainer;
 
 	/**
 	 * Add a callback to configure WebSocket server parameters on
@@ -66,7 +68,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 				this.webSocketConfigurer.andThen(webSocketConfigurer) : webSocketConfigurer);
 	}
 
-
 	@Override
 	public Mono<Void> upgrade(
 			ServerWebExchange exchange, WebSocketHandler handler,
@@ -75,9 +76,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		HttpServletRequest servletRequest = ServerHttpRequestDecorator.getNativeRequest(request);
-		HttpServletResponse servletResponse = ServerHttpResponseDecorator.getNativeResponse(response);
-		ServletContext servletContext = servletRequest.getServletContext();
+		Request jettyRequest = ServerHttpRequestDecorator.getNativeRequest(request);
+		Response jettyResponse = ServerHttpResponseDecorator.getNativeResponse(response);
 
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory factory = response.bufferFactory();
@@ -89,28 +89,33 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 							ContextWebSocketHandler.decorate(handler, contextView),
 							session -> new JettyWebSocketSession(session, handshakeInfo, factory));
 
-					JettyWebSocketCreator webSocketCreator = (upgradeRequest, upgradeResponse) -> {
+					WebSocketCreator webSocketCreator = (upgradeRequest, upgradeResponse, callback) -> {
 						if (subProtocol != null) {
 							upgradeResponse.setAcceptedSubProtocol(subProtocol);
 						}
 						return adapter;
 					};
 
-					JettyWebSocketServerContainer container = getWebSocketServerContainer(servletContext);
+					Callback.Completable callback = new Callback.Completable();
+					Mono<Void> mono = Mono.fromFuture(callback);
+					ServerWebSocketContainer container = getWebSocketServerContainer(jettyRequest);
 					try {
-						container.upgrade(webSocketCreator, servletRequest, servletResponse);
+						if (!container.upgrade(webSocketCreator, jettyRequest, jettyResponse, callback)) {
+							throw new WebSocketException("request could not be upgraded to websocket");
+						}
 					}
-					catch (Exception ex) {
-						return Mono.error(ex);
+					catch (WebSocketException ex) {
+						callback.failed(ex);
 					}
 
-					return Mono.empty();
+					return mono;
 				}));
 	}
 
-	private JettyWebSocketServerContainer getWebSocketServerContainer(ServletContext servletContext) {
+	private ServerWebSocketContainer getWebSocketServerContainer(Request jettyRequest) {
 		if (this.serverContainer == null) {
-			JettyWebSocketServerContainer container = JettyWebSocketServerContainer.getContainer(servletContext);
+			Server server = jettyRequest.getConnectionMetaData().getConnector().getServer();
+			ServerWebSocketContainer container = ServerWebSocketContainer.get(server.getContext());
 			if (this.webSocketConfigurer != null) {
 				this.webSocketConfigurer.accept(container);
 			}

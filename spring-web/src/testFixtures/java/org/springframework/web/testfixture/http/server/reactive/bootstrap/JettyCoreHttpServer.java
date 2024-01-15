@@ -16,48 +16,46 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
 
-import org.springframework.http.server.reactive.JettyHttpHandlerAdapter;
-import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
+import org.springframework.http.server.reactive.JettyCoreHttpHandlerAdapter;
 
 /**
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Greg Wilkins
+ * @since 6.2
  */
-public class JettyHttpServer extends AbstractHttpServer {
+public class JettyCoreHttpServer extends AbstractHttpServer {
+
+	protected Log logger = LogFactory.getLog(getClass().getName());
+
+	private ArrayByteBufferPool byteBufferPool;
 
 	private Server jettyServer;
 
-	private ServletContextHandler contextHandler;
-
-
 	@Override
-	protected void initServer() throws Exception {
-
-		this.jettyServer = new Server();
-
-		ServletHttpHandlerAdapter servlet = createServletAdapter();
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		servletHolder.setAsyncSupported(true);
-
-		this.contextHandler = new ServletContextHandler("", false, false);
-		this.contextHandler.addServlet(servletHolder, "/");
-		this.contextHandler.addServletContainerInitializer(new JettyWebSocketServletContainerInitializer());
+	protected void initServer() {
+		if (logger.isTraceEnabled())
+			this.byteBufferPool = new ArrayByteBufferPool.Tracking();
+		this.jettyServer = new Server(null, null, byteBufferPool);
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);
 		connector.setHost(getHost());
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
-		this.jettyServer.setHandler(this.contextHandler);
+		this.jettyServer.setHandler(createHandlerAdapter());
+
+		ServerWebSocketContainer.ensure(jettyServer);
 	}
 
-	private ServletHttpHandlerAdapter createServletAdapter() {
-		return new JettyHttpHandlerAdapter(resolveHttpHandler());
+	private JettyCoreHttpHandlerAdapter createHandlerAdapter() {
+		return new JettyCoreHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 	@Override
@@ -67,12 +65,21 @@ public class JettyHttpServer extends AbstractHttpServer {
 	}
 
 	@Override
-	protected void stopInternal() throws Exception {
+	protected void stopInternal() {
+		boolean wasRunning = this.jettyServer.isRunning();
 		try {
 			this.jettyServer.stop();
 		}
 		catch (Exception ex) {
 			// ignore
+		}
+
+		// TODO remove this or make debug only
+		if (wasRunning && this.byteBufferPool instanceof ArrayByteBufferPool.Tracking tracking) {
+			if (!tracking.getLeaks().isEmpty()) {
+				System.err.println("Leaks:\n" + tracking.dumpLeaks());
+				throw new IllegalStateException("LEAKS");
+			}
 		}
 	}
 
@@ -80,17 +87,12 @@ public class JettyHttpServer extends AbstractHttpServer {
 	protected void resetInternal() {
 		try {
 			if (this.jettyServer.isRunning()) {
-				this.jettyServer.stop();
+				stopInternal();
 			}
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
+			this.jettyServer.destroy();
 		}
 		finally {
-			this.jettyServer.destroy();
 			this.jettyServer = null;
-			this.contextHandler = null;
 		}
 	}
-
 }

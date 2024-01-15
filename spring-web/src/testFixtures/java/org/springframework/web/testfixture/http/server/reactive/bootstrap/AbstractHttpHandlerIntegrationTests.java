@@ -126,6 +126,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	static Stream<Named<HttpServer>> httpServers() {
 		return Stream.of(
 				named("Jetty", new JettyHttpServer()),
+				named("Jetty Core", new JettyCoreHttpServer()),
 				named("Reactor Netty", new ReactorHttpServer()),
 				named("Tomcat", new TomcatHttpServer()),
 				named("Undertow", new UndertowHttpServer())
