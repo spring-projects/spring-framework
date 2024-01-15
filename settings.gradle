@@ -1,5 +1,6 @@
 pluginManagement {
 	repositories {
+		maven { url "https://maven.aliyun.com/repository/public" }
 		mavenCentral()
 		gradlePluginPortal()
 		maven { url "https://repo.spring.io/release" }
@@ -55,3 +56,6 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'spring-demo'
+include 'spring-demo'
+
