@@ -14,5 +14,6 @@ public class BeanAnnotationTest {
 		init();
 		RelationDemo relationDemo = (RelationDemo) applicationContext.getBean("relationDemo");
 		System.out.println(relationDemo.getEventDemo());
+		System.out.println(relationDemo.getEventDemo().getName());
 	}
 }
