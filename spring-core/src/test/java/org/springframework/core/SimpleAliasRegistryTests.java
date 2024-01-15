@@ -50,6 +50,7 @@ class SimpleAliasRegistryTests {
 	private static final String ALIAS2 = "alias2";
 	private static final String ALIAS3 = "alias3";
 	// TODO Determine if we can make SimpleAliasRegistry.resolveAliases() reliable.
+	// See https://github.com/spring-projects/spring-framework/issues/32024.
 	// When ALIAS4 is changed to "test", various tests fail due to the iteration
 	// order of the entries in the aliasMap in SimpleAliasRegistry.
 	private static final String ALIAS4 = "alias4";
@@ -252,6 +253,7 @@ class SimpleAliasRegistryTests {
 	}
 
 	// TODO Remove this test once we have implemented reliable processing in SimpleAliasRegistry.resolveAliases().
+	// See https://github.com/spring-projects/spring-framework/issues/32024.
 	// This method effectively duplicates the @ParameterizedTest version below,
 	// with aliasX hard coded to ALIAS4; however, this method also hard codes
 	// a different outcome that passes based on ConcurrentHashMap iteration order!
@@ -297,7 +299,7 @@ class SimpleAliasRegistryTests {
 	}
 
 	@Disabled("Fails for some values unless alias registration order is honored")
-	@ParameterizedTest
+	@ParameterizedTest  // gh-32024
 	@ValueSource(strings = {"alias4", "test", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
 	void resolveAliasesWithComplexPlaceholderReplacementAndNameSwitching(String aliasX) {
 		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
