@@ -247,43 +247,6 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 			this.request = request;
 			this.response = response;
 			headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
-			request.addHttpStreamWrapper(s -> new HttpStream.Wrapper(s)
-			{
-				@Override
-				public void send(MetaData.Request metaDataRequest, @Nullable MetaData.Response metaDataResponse, boolean last, ByteBuffer content, Callback callback) {
-
-					if (metaDataResponse != null)
-						request.getContext().run(JettyCoreServerHttpResponse.this::onCommit, request);
-					if (last)
-						callback = Callback.from(callback, JettyCoreServerHttpResponse.this::onLast);
-
-					super.send(metaDataRequest, metaDataResponse, last, content, callback);
-				}
-
-				@Override
-				public void succeeded() {
-					super.succeeded();
-					onCompleted(null);
-				}
-
-				@Override
-				public void failed(Throwable x) {
-					super.failed(x);
-					onCompleted(x);
-				}
-			});
-		}
-
-		private void onCommit() {
-			// TODO call all the beforeCommit actions
-		}
-
-		private void onLast() {
-
-		}
-
-		private void onCompleted(@Nullable Throwable failure) {
-			// TODO trigger any setComplete Monos
 		}
 
 		@Override
@@ -299,7 +262,7 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 
 		@Override
 		public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-			// TODO
+			// TODO See UndertowServerHttpResponse as an example
 		}
 
 		@Override

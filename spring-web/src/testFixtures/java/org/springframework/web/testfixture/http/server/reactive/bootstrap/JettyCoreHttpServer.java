@@ -59,14 +59,7 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 	@Override
 	protected void stopInternal() {
 		try {
-			if (this.jettyServer.isRunning()) {
-				// Do not configure a large stop timeout. For example, setting a stop timeout
-				// of 5000 adds an additional 1-2 seconds to the runtime of each test using
-				// the Jetty sever, resulting in 2-4 extra minutes of overall build time.
-				this.jettyServer.setStopTimeout(100);
-				this.jettyServer.stop();
-				this.jettyServer.destroy();
-			}
+			this.jettyServer.stop();
 		}
 		catch (Exception ex) {
 			// ignore
@@ -77,10 +70,10 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 	protected void resetInternal() {
 		try {
 			stopInternal();
+			this.jettyServer.destroy();
 		}
 		finally {
 			this.jettyServer = null;
 		}
 	}
-
 }
