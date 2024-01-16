@@ -18,8 +18,10 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.function.Consumer;
 
+import com.jayway.jsonpath.Configuration;
 import org.hamcrest.Matcher;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.util.Assert;
@@ -28,6 +30,7 @@ import org.springframework.util.Assert;
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 5.0
  * @see <a href="https://github.com/jayway/JsonPath">https://github.com/jayway/JsonPath</a>
  * @see JsonPathExpectationsHelper
@@ -41,11 +44,12 @@ public class JsonPathAssertions {
 	private final JsonPathExpectationsHelper pathHelper;
 
 
-	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression, Object... args) {
+	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression,
+			@Nullable Configuration configuration) {
 		Assert.hasText(expression, "expression must not be null or empty");
 		this.bodySpec = spec;
 		this.content = content;
-		this.pathHelper = new JsonPathExpectationsHelper(expression.formatted(args));
+		this.pathHelper = new JsonPathExpectationsHelper(expression, configuration);
 	}
 
 
@@ -169,6 +173,15 @@ public class JsonPathAssertions {
 	}
 
 	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, ParameterizedTypeReference)}.
+	 * @since 6.2
+	 */
+	public <T> WebTestClient.BodyContentSpec value(ParameterizedTypeReference<T> targetType, Matcher<? super T> matcher) {
+		this.pathHelper.assertValue(this.content, matcher, targetType);
+		return this.bodySpec;
+	}
+
+	/**
 	 * Consume the result of the JSONPath evaluation.
 	 * @since 5.1
 	 */
@@ -197,6 +210,16 @@ public class JsonPathAssertions {
 	@Deprecated(since = "6.2", forRemoval = true)
 	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer, Class<T> targetType) {
 		return value(targetType, consumer);
+	}
+
+	/**
+	 * Consume the result of the JSONPath evaluation and provide a parameterized type.
+	 * @since 6.2
+	 */
+	public <T> WebTestClient.BodyContentSpec value(ParameterizedTypeReference<T> targetType, Consumer<T> consumer) {
+		T value = this.pathHelper.evaluateJsonPath(this.content, targetType);
+		consumer.accept(value);
+		return this.bodySpec;
 	}
 
 	@Override

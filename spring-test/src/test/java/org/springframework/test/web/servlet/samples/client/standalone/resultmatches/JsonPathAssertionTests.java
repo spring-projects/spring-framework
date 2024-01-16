@@ -64,12 +64,12 @@ public class JsonPathAssertionTests {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
-				.jsonPath(composerByName, "Johann Sebastian Bach").exists()
-				.jsonPath(composerByName, "Johannes Brahms").exists()
-				.jsonPath(composerByName, "Edvard Grieg").exists()
-				.jsonPath(composerByName, "Robert Schumann").exists()
-				.jsonPath(performerByName, "Vladimir Ashkenazy").exists()
-				.jsonPath(performerByName, "Yehudi Menuhin").exists()
+				.jsonPath(composerByName.formatted("Johann Sebastian Bach")).exists()
+				.jsonPath(composerByName.formatted("Johannes Brahms")).exists()
+				.jsonPath(composerByName.formatted("Edvard Grieg")).exists()
+				.jsonPath(composerByName.formatted("Robert Schumann")).exists()
+				.jsonPath(performerByName.formatted("Vladimir Ashkenazy")).exists()
+				.jsonPath(performerByName.formatted("Yehudi Menuhin")).exists()
 				.jsonPath("$.composers[0]").exists()
 				.jsonPath("$.composers[1]").exists()
 				.jsonPath("$.composers[2]").exists()
@@ -117,16 +117,13 @@ public class JsonPathAssertionTests {
 
 	@Test
 	public void hamcrestMatcherWithParameterizedJsonPath() {
-		String composerName = "$.composers[%s].name";
-		String performerName = "$.performers[%s].name";
-
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
-				.jsonPath(composerName, 0).value(startsWith("Johann"))
-				.jsonPath(performerName, 0).value(endsWith("Ashkenazy"))
-				.jsonPath(performerName, 1).value(containsString("di Me"))
-				.jsonPath(composerName, 1).value(is(in(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))));
+				.jsonPath("$.composers[0].name").value(startsWith("Johann"))
+				.jsonPath("$.performers[0].name").value(endsWith("Ashkenazy"))
+				.jsonPath("$.performers[1].name").value(containsString("di Me"))
+				.jsonPath("$.composers[1].name").value(is(in(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))));
 	}
 
 
