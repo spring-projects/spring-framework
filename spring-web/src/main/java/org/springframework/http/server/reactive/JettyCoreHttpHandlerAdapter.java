@@ -57,14 +57,13 @@ import java.util.regex.Matcher;
 import static org.springframework.http.server.reactive.AbstractServerHttpRequest.QUERY_PATTERN;
 
 /**
- *
  * Adapt {@link HttpHandler} to the Jetty {@link org.eclipse.jetty.server.Handler} abstraction.
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
  * @since 6.1.4
  */
-public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
+public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 
 	private final HttpHandler httpHandler;
 	private final DataBufferFactory dataBufferFactory;
