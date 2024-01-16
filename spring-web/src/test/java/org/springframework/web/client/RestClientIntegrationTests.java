@@ -856,6 +856,50 @@ class RestClientIntegrationTests {
 		expectRequestCount(2);
 	}
 
+	@ParameterizedRestClientTest
+	void defaultHeaders(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		RestClient headersClient = this.restClient.mutate()
+				.defaultHeaders(headers -> headers.add("foo", "bar"))
+				.build();
+
+		String result = headersClient.get()
+				.uri("/greeting")
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
+	}
+
+	@ParameterizedRestClientTest
+	void defaultRequest(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		RestClient headersClient = this.restClient.mutate()
+				.defaultRequest(request -> request.header("foo", "bar"))
+				.build();
+
+		String result = headersClient.get()
+				.uri("/greeting")
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
+	}
+
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();
