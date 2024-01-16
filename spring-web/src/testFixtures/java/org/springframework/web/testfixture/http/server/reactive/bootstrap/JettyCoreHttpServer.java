@@ -43,6 +43,7 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
 		this.jettyServer.setHandler(createHandlerAdapter());
+		// TODO add websocket upgrade handler
 	}
 
 	private JettyCoreHttpHandlerAdapter createHandlerAdapter() {

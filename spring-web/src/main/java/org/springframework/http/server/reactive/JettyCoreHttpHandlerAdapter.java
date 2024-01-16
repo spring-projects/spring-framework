@@ -37,16 +37,22 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+
+import static org.springframework.http.server.reactive.AbstractServerHttpRequest.QUERY_PATTERN;
 
 /**
  *
@@ -166,9 +172,15 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 				if (StringUtil.isBlank(query))
 					queryParameters = EMPTY_QUERY;
 				else {
-					MultiMap<String> map = new MultiMap<>();
-					UrlEncoded.decodeUtf8To(query, 0, query.length(), map);
-					queryParameters = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(map));
+					queryParameters = new LinkedMultiValueMap<>();
+					Matcher matcher = QUERY_PATTERN.matcher(query);
+					while (matcher.find()) {
+						String name = URLDecoder.decode(matcher.group(1), StandardCharsets.UTF_8);
+						String eq = matcher.group(2);
+						String value = matcher.group(3);
+						value = (value != null ? URLDecoder.decode(value, StandardCharsets.UTF_8) : (StringUtils.hasLength(eq) ? "" : null));
+						queryParameters.add(name, value);
+					}
 				}
 			}
 			return queryParameters;
@@ -304,19 +316,19 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 		@Override
 		public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 			// TODO
-			return null;
+			return Mono.empty();
 		}
 
 		@Override
 		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 			// TODO
-			return null;
+			return Mono.empty();
 		}
 
 		@Override
 		public Mono<Void> setComplete() {
 			// TODO
-			return null;
+			return Mono.empty();
 		}
 
 		@Override
