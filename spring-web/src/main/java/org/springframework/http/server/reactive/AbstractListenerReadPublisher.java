@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Subclasses can call this method to delegate a contain notification when
+	 * Subclasses can call this method to delegate a container notification when
 	 * all data has been read.
 	 */
 	public void onAllDataRead() {
@@ -362,6 +362,12 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 				publisher.errorPending = ex;
 				publisher.handlePendingCompletionOrError();
 			}
+
+			@Override
+			<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
+				publisher.completionPending = true;
+				publisher.handlePendingCompletionOrError();
+			}
 		},
 
 		NO_DEMAND {
@@ -433,6 +439,13 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 			@Override
 			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable ex) {
 				publisher.errorPending = ex;
+				publisher.handlePendingCompletionOrError();
+			}
+
+			@Override
+			<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
+				publisher.discardData();
+				publisher.completionPending = true;
 				publisher.handlePendingCompletionOrError();
 			}
 		},

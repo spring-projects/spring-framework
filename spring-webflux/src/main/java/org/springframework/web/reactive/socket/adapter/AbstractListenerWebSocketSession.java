@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,8 +290,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected void discardData() {
+			Queue<Object> queue = this.pendingMessages;
+			this.pendingMessages = Queues.empty().get(); // prevent further reading
 			while (true) {
-				WebSocketMessage message = (WebSocketMessage) this.pendingMessages.poll();
+				WebSocketMessage message = (WebSocketMessage) queue.poll();
 				if (message == null) {
 					return;
 				}
