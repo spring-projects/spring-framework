@@ -71,15 +71,9 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract {
 		this.httpHandler = httpHandler;
 
 		// We do not make a DataBufferFactory over the servers ByteBufferPool, because we only ever use
-		// wrap and there should never be any allocation done by the factory.  Also there is no release semantic
-		// available.
-		dataBufferFactory = new DefaultDataBufferFactory()
-		{
-			@Override
-			public DefaultDataBuffer allocateBuffer(int initialCapacity) {
-				throw new UnsupportedOperationException();
-			}
-		};
+		// wrap and there should rarely be any allocation done by the factory.  Also, there is no release semantic
+		// available so we could not do retainable buffers anyway.
+		dataBufferFactory = new DefaultDataBufferFactory();
 	}
 
 	@Override
