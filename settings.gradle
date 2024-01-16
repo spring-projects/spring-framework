@@ -1,6 +1,6 @@
 plugins {
 	id "com.gradle.enterprise" version "3.14"
-	id "io.spring.ge.conventions" version "0.0.13"
+	id "io.spring.ge.conventions" version "0.0.15"
 	id "org.gradle.toolchains.foojay-resolver-convention" version "0.7.0"
 }
 
