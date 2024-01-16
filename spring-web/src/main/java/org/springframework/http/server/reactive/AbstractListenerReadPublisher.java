@@ -72,8 +72,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	@Nullable
 	private volatile Subscriber<? super T> subscriber;
 
+	/** Flag to defer transition to COMPLETED briefly while SUBSCRIBING or READING. */
 	private volatile boolean completionPending;
 
+	/** Flag to defer transition to COMPLETED briefly while SUBSCRIBING or READING. */
 	@Nullable
 	private volatile Throwable errorPending;
 
@@ -123,8 +125,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Subclasses can call this method to delegate a container notification when
-	 * all data has been read.
+	 * Subclasses can call this method to signal onComplete, delegating a
+	 * notification from the container when all data has been read.
 	 */
 	public void onAllDataRead() {
 		State state = this.state.get();
@@ -135,7 +137,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Subclasses can call this to delegate container error notifications.
+	 * Subclasses can call this to signal onError, delegating a
+	 * notification from the container for an error.
 	 */
 	public final void onError(Throwable ex) {
 		State state = this.state.get();
@@ -183,10 +186,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	// Private methods for use in State...
 
 	/**
-	 * Read and publish data one at a time until there is no more data, no more
-	 * demand, or perhaps we completed meanwhile.
-	 * @return {@code true} if there is more demand; {@code false} if there is
-	 * no more demand or we have completed.
+	 * Read and publish data one by one until there are no more items
+	 * to read (i.e. input queue drained), or there is no more demand.
+	 * @return {@code true} if there is demand but no more to read, or
+	 * {@code false} if there is more to read but lack of demand.
 	 */
 	private boolean readAndPublish() throws IOException {
 		long r;
@@ -269,7 +272,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 
 		@Override
-		public final void request(long n) {
+		public void request(long n) {
 			if (rsReadLogger.isTraceEnabled()) {
 				rsReadLogger.trace(getLogPrefix() + "request " + (n != Long.MAX_VALUE ? n : "Long.MAX_VALUE"));
 			}
@@ -277,7 +280,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		}
 
 		@Override
-		public final void cancel() {
+		public void cancel() {
 			State state = AbstractListenerReadPublisher.this.state.get();
 			if (rsReadLogger.isTraceEnabled()) {
 				rsReadLogger.trace(getLogPrefix() + "cancel [" + state + "]");
@@ -288,7 +291,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 
 	/**
-	 * Represents a state for the {@link Publisher} to be in.
+	 * The states that a read {@link Publisher} transitions through.
 	 * <p><pre>
 	 *        UNSUBSCRIBED
 	 *             |

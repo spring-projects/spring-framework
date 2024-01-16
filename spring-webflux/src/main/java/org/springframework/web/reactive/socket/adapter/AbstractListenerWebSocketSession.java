@@ -112,7 +112,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		return (canSuspendReceiving() ? Flux.from(this.receivePublisher) :
+		return (canSuspendReceiving() ?
+				Flux.from(this.receivePublisher) :
 				Flux.from(this.receivePublisher).onBackpressureBuffer(RECEIVE_BUFFER_SIZE));
 	}
 
@@ -240,6 +241,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 
+	/**
+	 * Read publisher for inbound WebSocket messages.
+	 */
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
 		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
@@ -269,7 +273,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		@Nullable
-		protected WebSocketMessage read() throws IOException {
+		protected WebSocketMessage read() {
 			return (WebSocketMessage) this.pendingMessages.poll();
 		}
 
@@ -304,7 +308,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 
 	/**
-	 * Processor to send web socket messages.
+	 * Write processor for outbound WebSocket messages.
 	 */
 	protected final class WebSocketSendProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
 
