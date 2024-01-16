@@ -256,7 +256,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@Deprecated
 	public WebTestClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
 		if (this.strategiesConfigurers == null) {
 			this.strategiesConfigurers = new ArrayList<>(4);

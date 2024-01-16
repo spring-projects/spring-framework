@@ -186,16 +186,13 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
 		@Nullable
-		private Consumer<ClientHttpRequest> httpRequestConsumer;
-
-		@Nullable
 		private String uriTemplate;
 
 		private final String requestId;
 
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
-			this.requestId = String.valueOf(requestIndex.incrementAndGet());
+			this.requestId = String.valueOf(DefaultWebTestClient.this.requestIndex.incrementAndGet());
 			this.headers = new HttpHeaders();
 			this.headers.add(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
 		}
@@ -203,19 +200,19 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
 			this.uriTemplate = uriTemplate;
-			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
+			return uri(DefaultWebTestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
 			this.uriTemplate = uriTemplate;
-			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
+			return uri(DefaultWebTestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
 			this.uriTemplate = null;
-			return uri(uriFunction.apply(uriBuilderFactory.builder()));
+			return uri(uriFunction.apply(DefaultWebTestClient.this.uriBuilderFactory.builder()));
 		}
 
 		@Override
@@ -358,10 +355,10 @@ class DefaultWebTestClient implements WebTestClient {
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
 
-			ClientResponse response = exchangeFunction.exchange(request).block(getResponseTimeout());
+			ClientResponse response = DefaultWebTestClient.this.exchangeFunction.exchange(request).block(getResponseTimeout());
 			Assert.state(response != null, "No ClientResponse");
 
-			ExchangeResult result = wiretapConnector.getExchangeResult(
+			ExchangeResult result = DefaultWebTestClient.this.wiretapConnector.getExchangeResult(
 					this.requestId, this.uriTemplate, getResponseTimeout());
 
 			return new DefaultResponseSpec(result, response,
@@ -369,34 +366,28 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
-			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
+			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headersToUse -> {
-						if (!CollectionUtils.isEmpty(defaultHeaders)) {
-							headersToUse.putAll(defaultHeaders);
+						if (!CollectionUtils.isEmpty(DefaultWebTestClient.this.defaultHeaders)) {
+							headersToUse.putAll(DefaultWebTestClient.this.defaultHeaders);
 						}
 						if (!CollectionUtils.isEmpty(this.headers)) {
 							headersToUse.putAll(this.headers);
 						}
 					})
 					.cookies(cookiesToUse -> {
-						if (!CollectionUtils.isEmpty(defaultCookies)) {
-							cookiesToUse.putAll(defaultCookies);
+						if (!CollectionUtils.isEmpty(DefaultWebTestClient.this.defaultCookies)) {
+							cookiesToUse.putAll(DefaultWebTestClient.this.defaultCookies);
 						}
 						if (!CollectionUtils.isEmpty(this.cookies)) {
 							cookiesToUse.putAll(this.cookies);
 						}
 					})
 					.attributes(attributes -> attributes.putAll(this.attributes));
-
-			if (this.httpRequestConsumer != null) {
-				builder.httpRequest(this.httpRequestConsumer);
-			}
-
-			return builder;
 		}
 
 		private URI initUri() {
-			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
+			return (this.uri != null ? this.uri : DefaultWebTestClient.this.uriBuilderFactory.expand(""));
 		}
 
 	}
@@ -520,9 +511,7 @@ class DefaultWebTestClient implements WebTestClient {
 				// that is not a RuntimeException, but since ExceptionCollector may
 				// throw a checked Exception, we handle this to appease the compiler
 				// and in case someone uses a "sneaky throws" technique.
-				AssertionError assertionError = new AssertionError(ex.getMessage());
-				assertionError.initCause(ex);
-				throw assertionError;
+				throw new AssertionError(ex.getMessage(), ex);
 			}
 			return this;
 		}

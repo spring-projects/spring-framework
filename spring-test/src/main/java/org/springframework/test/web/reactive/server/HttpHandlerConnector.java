@@ -60,7 +60,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class HttpHandlerConnector implements ClientHttpConnector {
 
-	private static Log logger = LogFactory.getLog(HttpHandlerConnector.class);
+	private static final Log logger = LogFactory.getLog(HttpHandlerConnector.class);
 
 	private final HttpHandler handler;
 
