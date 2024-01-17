@@ -462,11 +462,6 @@ transparently for request mapping. Controller methods do not need to change.
 A response wrapper, applied in `jakarta.servlet.http.HttpServlet`, ensures a `Content-Length`
 header is set to the number of bytes written (without actually writing to the response).
 
-`@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) are implicitly mapped to
-and support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
-that, instead of writing the body, the number of bytes are counted and the `Content-Length`
-header is set.
-
 By default, HTTP OPTIONS is handled by setting the `Allow` response header to the list of HTTP
 methods listed in all `@RequestMapping` methods that have matching URL patterns.
 
