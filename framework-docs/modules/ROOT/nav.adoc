@@ -421,7 +421,7 @@
 *** xref:integration/cache/specific-config.adoc[]
 ** xref:integration/observability.adoc[]
 ** xref:integration/checkpoint-restore.adoc[]
-** xref:integration/class-data-sharing.adoc[]
+** xref:integration/cds.adoc[]
 ** xref:integration/appendix.adoc[]
 * xref:languages.adoc[]
 ** xref:languages/kotlin.adoc[]
