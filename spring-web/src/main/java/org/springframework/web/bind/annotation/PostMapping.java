@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,13 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>Specifically, {@code @PostMapping} is a <em>composed annotation</em> that
  * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.POST)}.
+ *
+ * <p><strong>NOTE:</strong> This annotation cannot be used in conjunction with
+ * other {@code @RequestMapping} annotations that are declared on the same method.
+ * If multiple {@code @RequestMapping} annotations are detected on the same method,
+ * a warning will be logged, and only the first mapping will be used. This applies
+ * to {@code @RequestMapping} as well as composed {@code @RequestMapping} annotations
+ * such as {@code @GetMapping}, {@code @PutMapping}, etc.
  *
  * @author Sam Brannen
  * @since 4.3

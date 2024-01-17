@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,6 +59,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
+ * @author Sam Brannen
  */
 class RequestMappingHandlerMappingTests {
 
@@ -231,7 +231,9 @@ class RequestMappingHandlerMappingTests {
 
 
 	@Controller @SuppressWarnings("unused")
+	// gh-31962: The presence of multiple @RequestMappings is intentional.
 	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ExtraRequestMapping
 	static class ComposedAnnotationController {
 
 		@RequestMapping
@@ -250,7 +252,10 @@ class RequestMappingHandlerMappingTests {
 		public void post(@RequestBody(required = false) Foo foo) {
 		}
 
-		@PutMapping("/put")
+		// gh-31962: The presence of multiple @RequestMappings is intentional.
+		@PatchMapping("/put")
+		@RequestMapping(path = "/put", method = RequestMethod.PUT) // local @RequestMapping overrides meta-annotations
+		@PostMapping("/put")
 		public void put() {
 		}
 
@@ -264,6 +269,13 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	private static class Foo {
+	}
+
+
+	@RequestMapping
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ExtraRequestMapping {
 	}
 
 

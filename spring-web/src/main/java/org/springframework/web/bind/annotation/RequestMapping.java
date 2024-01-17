@@ -54,6 +54,13 @@ import org.springframework.core.annotation.AliasFor;
  * {@link PutMapping @PutMapping}, {@link DeleteMapping @DeleteMapping}, or
  * {@link PatchMapping @PatchMapping}.
  *
+ * <p><strong>NOTE:</strong> This annotation cannot be used in conjunction with
+ * other {@code @RequestMapping} annotations that are declared on the same element
+ * (class, interface, or method). If multiple {@code @RequestMapping} annotations
+ * are detected on the same element, a warning will be logged, and only the first
+ * mapping will be used. This also applies to composed {@code @RequestMapping}
+ * annotations such as {@code @GetMapping}, {@code @PostMapping}, etc.
+ *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations &mdash; such
  * as {@code @RequestMapping} and {@code @SessionAttributes} &mdash; on

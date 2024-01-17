@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,23 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -182,9 +187,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
 
-		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
-		if (requestMapping != null) {
-			return createRequestMappingInfo(requestMapping, customCondition);
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY,
+				RepeatableContainers.none());
+		List<AnnotationDescriptor<RequestMapping>> requestMappings = mergedAnnotations.stream(RequestMapping.class)
+				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+				.map(AnnotationDescriptor::new)
+				.distinct()
+				.toList();
+
+		if (!requestMappings.isEmpty()) {
+			if (requestMappings.size() > 1 && logger.isWarnEnabled()) {
+				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
+							.formatted(element, requestMappings));
+			}
+			return createRequestMappingInfo(requestMappings.get(0).annotation, customCondition);
 		}
 
 		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(element, HttpExchange.class);
@@ -412,6 +428,34 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		else {
 			return value;
 		}
+	}
+
+	private static class AnnotationDescriptor<A extends Annotation> {
+
+		private final A annotation;
+		private final Annotation source;
+
+		AnnotationDescriptor(MergedAnnotation<A> mergedAnnotation) {
+			this.annotation = mergedAnnotation.synthesize();
+			this.source = (mergedAnnotation.getDistance() > 0 ?
+					mergedAnnotation.getRoot().synthesize() : this.annotation);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return (obj instanceof AnnotationDescriptor<?> that && this.annotation.equals(that.annotation));
+		}
+
+		@Override
+		public int hashCode() {
+			return this.annotation.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return this.source.toString();
+		}
+
 	}
 
 }

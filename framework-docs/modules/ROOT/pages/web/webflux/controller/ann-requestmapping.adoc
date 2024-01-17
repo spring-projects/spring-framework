@@ -28,6 +28,12 @@ because, arguably, most controller methods should be mapped to a specific HTTP m
 using `@RequestMapping`, which, by default, matches to all HTTP methods. At the same time, a
 `@RequestMapping` is still needed at the class level to express shared mappings.
 
+NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
+annotations that are declared on the same element (class, interface, or method). If
+multiple `@RequestMapping` annotations are detected on the same element, a warning will
+be logged, and only the first mapping will be used. This also applies to composed
+`@RequestMapping` annotations such as `@GetMapping`, `@PostMapping`, etc.
+
 The following example uses type and method level mappings:
 
 [tabs]
@@ -438,6 +444,12 @@ examples of composed annotations. They are provided, because, arguably, most
 controller methods should be mapped to a specific HTTP method versus using `@RequestMapping`,
 which, by default, matches to all HTTP methods. If you need an example of how to implement
 a composed annotation, look at how those are declared.
+
+NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
+annotations that are declared on the same element (class, interface, or method). If
+multiple `@RequestMapping` annotations are detected on the same element, a warning will
+be logged, and only the first mapping will be used. This also applies to composed
+`@RequestMapping` annotations such as `@GetMapping`, `@PostMapping`, etc.
 
 Spring WebFlux also supports custom request mapping attributes with custom request matching
 logic. This is a more advanced option that requires sub-classing
