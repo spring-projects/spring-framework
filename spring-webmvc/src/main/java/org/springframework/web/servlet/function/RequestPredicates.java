@@ -107,6 +107,7 @@ public abstract class RequestPredicates {
 	 * against the given path pattern.
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate path(String pattern) {
 		Assert.notNull(pattern, "'pattern' must not be null");
@@ -169,6 +170,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is GET and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate GET(String pattern) {
 		return method(HttpMethod.GET).and(path(pattern));
@@ -180,6 +182,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is HEAD and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate HEAD(String pattern) {
 		return method(HttpMethod.HEAD).and(path(pattern));
@@ -191,6 +194,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is POST and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate POST(String pattern) {
 		return method(HttpMethod.POST).and(path(pattern));
@@ -202,6 +206,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is PUT and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate PUT(String pattern) {
 		return method(HttpMethod.PUT).and(path(pattern));
@@ -213,6 +218,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is PATCH and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate PATCH(String pattern) {
 		return method(HttpMethod.PATCH).and(path(pattern));
@@ -224,6 +230,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is DELETE and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate DELETE(String pattern) {
 		return method(HttpMethod.DELETE).and(path(pattern));
@@ -235,6 +242,7 @@ public abstract class RequestPredicates {
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is OPTIONS and if the given pattern
 	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
 	public static RequestPredicate OPTIONS(String pattern) {
 		return method(HttpMethod.OPTIONS).and(path(pattern));
@@ -341,6 +349,7 @@ public abstract class RequestPredicates {
 		 * Receive notification of a path predicate.
 		 * @param pattern the path pattern that makes up the predicate
 		 * @see RequestPredicates#path(String)
+		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
 		void path(String pattern);
 
