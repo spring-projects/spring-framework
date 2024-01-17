@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,17 +41,17 @@ public abstract class AbstractCacheTests<T extends Cache> {
 
 
 	@Test
-	public void testCacheName() throws Exception {
+	protected void testCacheName() {
 		assertThat(getCache().getName()).isEqualTo(CACHE_NAME);
 	}
 
 	@Test
-	public void testNativeCache() throws Exception {
+	protected void testNativeCache() {
 		assertThat(getCache().getNativeCache()).isSameAs(getNativeCache());
 	}
 
 	@Test
-	public void testCachePut() throws Exception {
+	protected void testCachePut() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -75,7 +75,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	public void testCachePutIfAbsent() throws Exception {
+	protected void testCachePutIfAbsent() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -90,7 +90,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	public void testCacheRemove() throws Exception {
+	protected void testCacheRemove() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -101,7 +101,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	public void testCacheClear() throws Exception {
+	protected void testCacheClear() {
 		T cache = getCache();
 
 		assertThat(cache.get("enescu")).isNull();
@@ -114,12 +114,12 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	public void testCacheGetCallable() {
+	protected void testCacheGetCallable() {
 		doTestCacheGetCallable("test");
 	}
 
 	@Test
-	public void testCacheGetCallableWithNull() {
+	protected void testCacheGetCallableWithNull() {
 		doTestCacheGetCallable(null);
 	}
 
@@ -135,12 +135,12 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	public void testCacheGetCallableNotInvokedWithHit() {
+	protected void testCacheGetCallableNotInvokedWithHit() {
 		doTestCacheGetCallableNotInvokedWithHit("existing");
 	}
 
 	@Test
-	public void testCacheGetCallableNotInvokedWithHitNull() {
+	protected void testCacheGetCallableNotInvokedWithHitNull() {
 		doTestCacheGetCallableNotInvokedWithHit(null);
 	}
 
@@ -157,7 +157,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	public void testCacheGetCallableFail() {
+	protected void testCacheGetCallableFail() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -179,7 +179,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	 * invocations.
 	 */
 	@Test
-	public void testCacheGetSynchronized() throws InterruptedException {
+	protected void testCacheGetSynchronized() throws InterruptedException {
 		T cache = getCache();
 		final AtomicInteger counter = new AtomicInteger();
 		final List<Object> results = new CopyOnWriteArrayList<>();

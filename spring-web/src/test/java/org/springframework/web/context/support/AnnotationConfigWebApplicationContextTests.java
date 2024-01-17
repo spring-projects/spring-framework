@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotationConfigWebApplicationContextTests {
 
 	@Test
-	public void registerSingleClass() {
+	void registerSingleClass() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(Config.class);
 		ctx.refresh();
@@ -43,7 +43,7 @@ class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
-	public void configLocationWithSingleClass() {
+	void configLocationWithSingleClass() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation(Config.class.getName());
 		ctx.refresh();
@@ -53,7 +53,7 @@ class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
-	public void configLocationWithBasePackage() {
+	void configLocationWithBasePackage() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation("org.springframework.web.context.support");
 		ctx.refresh();
@@ -63,7 +63,7 @@ class AnnotationConfigWebApplicationContextTests {
 	}
 
 	@Test
-	public void withBeanNameGenerator() {
+	void withBeanNameGenerator() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {
 			@Override

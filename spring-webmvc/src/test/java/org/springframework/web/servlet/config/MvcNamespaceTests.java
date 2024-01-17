@@ -272,7 +272,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test  // gh-25290
-	public void testDefaultConfigWithBeansInParentContext() {
+	void testDefaultConfigWithBeansInParentContext() {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		parent.registerSingleton("localeResolver", CookieLocaleResolver.class);
 		parent.registerSingleton("themeResolver", CookieThemeResolver.class);
@@ -376,7 +376,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testResources() throws Exception {
+	void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
@@ -439,7 +439,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
-	public void testResourcesWithResolversTransformers() {
+	void testResourcesWithResolversTransformers() {
 		loadBeanDefinitions("mvc-config-resources-chain.xml");
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
@@ -484,7 +484,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
-	public void testResourcesWithResolversTransformersCustom() {
+	void testResourcesWithResolversTransformersCustom() {
 		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml");
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);

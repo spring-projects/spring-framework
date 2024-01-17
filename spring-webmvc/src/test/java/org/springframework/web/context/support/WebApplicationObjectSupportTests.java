@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class WebApplicationObjectSupportTests {
 
 	@Test
-	public void testWebApplicationObjectSupport() {
+	void testWebApplicationObjectSupport() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		File tempDir = new File("");
@@ -49,7 +49,7 @@ class WebApplicationObjectSupportTests {
 	}
 
 	@Test
-	public void testWebApplicationObjectSupportWithWrongContext() {
+	void testWebApplicationObjectSupportWithWrongContext() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));
 		WebApplicationObjectSupport wao = (WebApplicationObjectSupport) ac.getBean("test");
@@ -58,7 +58,7 @@ class WebApplicationObjectSupportTests {
 	}
 
 
-	public static class TestWebApplicationObject extends WebApplicationObjectSupport {
+	static class TestWebApplicationObject extends WebApplicationObjectSupport {
 	}
 
 }

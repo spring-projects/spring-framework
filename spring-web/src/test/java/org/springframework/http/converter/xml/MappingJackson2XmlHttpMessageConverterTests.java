@@ -193,7 +193,7 @@ class MappingJackson2XmlHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readNonUnicode() throws Exception {
+	void readNonUnicode() throws Exception {
 		String body = "<MyBean>" +
 				"<string>føø bår</string>" +
 				"</MyBean>";

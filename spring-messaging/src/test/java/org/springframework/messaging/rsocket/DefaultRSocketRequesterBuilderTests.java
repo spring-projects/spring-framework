@@ -81,7 +81,7 @@ class DefaultRSocketRequesterBuilderTests {
 
 
 	@Test
-	public void rsocketConnectorConfigurer() {
+	void rsocketConnectorConfigurer() {
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock();
 		RSocketRequester.builder()
 				.rsocketConnector(this.connectorConfigurer)

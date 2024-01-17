@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	protected void setup() {
 		this.handler = createResponseStatusExceptionHandler();
 	}
 
@@ -61,21 +61,21 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 
 
 	@Test
-	public void handleResponseStatusException() {
+	protected void handleResponseStatusException() {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
-	public void handleNestedResponseStatusException() {
+	protected void handleNestedResponseStatusException() {
 		Throwable ex = new Exception(new ResponseStatusException(HttpStatus.BAD_REQUEST, ""));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test // gh-23741
-	public void handleMethodNotAllowed() {
+	protected void handleMethodNotAllowed() {
 		Throwable ex = new MethodNotAllowedException(HttpMethod.PATCH, Arrays.asList(HttpMethod.POST, HttpMethod.PUT));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 
@@ -85,7 +85,7 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 	}
 
 	@Test // gh-23741
-	public void handleResponseStatusExceptionWithHeaders() {
+	protected void handleResponseStatusExceptionWithHeaders() {
 		Throwable ex = new NotAcceptableStatusException(Arrays.asList(MediaType.TEXT_PLAIN, MediaType.TEXT_HTML));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 
@@ -95,14 +95,14 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 	}
 
 	@Test
-	public void unresolvedException() {
+	protected void unresolvedException() {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertThat(actual).isSameAs(expected)).verify();
 	}
 
 	@Test  // SPR-16231
-	public void responseCommitted() {
+	protected void responseCommitted() {
 		Throwable ex = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops");
 		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
 		Mono<Void> mono = this.exchange.getResponse().setComplete()

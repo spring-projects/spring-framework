@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class RequestAndSessionScopedBeanTests {
 
 	@Test
-	public void testPutBeanInRequest() {
+	void testPutBeanInRequest() {
 		String targetBeanName = "target";
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -70,7 +70,7 @@ class RequestAndSessionScopedBeanTests {
 	}
 
 	@Test
-	public void testPutBeanInSession() {
+	void testPutBeanInSession() {
 		String targetBeanName = "target";
 		HttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));

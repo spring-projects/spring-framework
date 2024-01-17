@@ -82,7 +82,7 @@ class AnnotationDrivenTests {
 	}
 
 	@Test
-	public void serializableWithPreviousUsage() throws Exception {
+	void serializableWithPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service.setSomething("someName");
@@ -91,7 +91,7 @@ class AnnotationDrivenTests {
 	}
 
 	@Test
-	public void serializableWithoutPreviousUsage() throws Exception {
+	void serializableWithoutPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service = SerializationTestUtils.serializeAndDeserialize(service);

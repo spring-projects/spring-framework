@@ -222,7 +222,7 @@ class EnableTransactionManagementTests {
 	 * get loaded -- or in this case, attempted to be loaded at which point the test fails.
 	 */
 	@Test
-	public void proxyTypeAspectJCausesRegistrationOfAnnotationTransactionAspect() {
+	void proxyTypeAspectJCausesRegistrationOfAnnotationTransactionAspect() {
 		// should throw CNFE when trying to load AnnotationTransactionAspect.
 		// Do you actually have org.springframework.aspects on the classpath?
 		assertThatException()

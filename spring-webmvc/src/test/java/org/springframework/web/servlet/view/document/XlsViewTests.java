@@ -50,7 +50,7 @@ class XlsViewTests {
 
 
 	@Test
-	public void testXls() throws Exception {
+	void testXls() throws Exception {
 		View excelView = new AbstractXlsView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, Workbook workbook,
@@ -73,7 +73,7 @@ class XlsViewTests {
 	}
 
 	@Test
-	public void testXlsxView() throws Exception {
+	void testXlsxView() throws Exception {
 		View excelView = new AbstractXlsxView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, Workbook workbook,
@@ -96,7 +96,7 @@ class XlsViewTests {
 	}
 
 	@Test
-	public void testXlsxStreamingView() throws Exception {
+	void testXlsxStreamingView() throws Exception {
 		View excelView = new AbstractXlsxStreamingView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, Workbook workbook,

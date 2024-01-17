@@ -377,7 +377,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void nestedInlineLists() {
+	void nestedInlineLists() {
 		Object o = null;
 
 		expression = parser.parseExpression("{{1,2,3},{4,5,6},{7,8,9}}");

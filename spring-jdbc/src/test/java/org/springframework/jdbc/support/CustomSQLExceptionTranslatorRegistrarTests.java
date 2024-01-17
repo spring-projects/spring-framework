@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CustomSQLExceptionTranslatorRegistrarTests {
 
 	@Test
-	public void customErrorCodeTranslation() {
+	void customErrorCodeTranslation() {
 		new ClassPathXmlApplicationContext("test-custom-translators-context.xml",
 				CustomSQLExceptionTranslatorRegistrarTests.class);
 

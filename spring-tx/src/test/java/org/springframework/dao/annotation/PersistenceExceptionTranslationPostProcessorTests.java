@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class PersistenceExceptionTranslationPostProcessorTests {
 
 	@Test
-	public void proxiesCorrectly() {
+	void proxiesCorrectly() {
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.registerBeanDefinition("translator",
 				new RootBeanDefinition(PersistenceExceptionTranslationPostProcessor.class));

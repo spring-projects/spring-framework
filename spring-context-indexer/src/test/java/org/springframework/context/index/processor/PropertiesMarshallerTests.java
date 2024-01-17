@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Vedran Pavic
  */
-public class PropertiesMarshallerTests {
+class PropertiesMarshallerTests {
 
 	@Test
-	public void readWrite() throws IOException {
+	void readWrite() throws IOException {
 		CandidateComponentsMetadata metadata = new CandidateComponentsMetadata();
 		metadata.add(createItem("com.foo", "first", "second"));
 		metadata.add(createItem("com.bar", "first"));
@@ -51,7 +51,7 @@ public class PropertiesMarshallerTests {
 	}
 
 	@Test
-	public void metadataIsWrittenDeterministically() throws IOException {
+	void metadataIsWrittenDeterministically() throws IOException {
 		CandidateComponentsMetadata metadata = new CandidateComponentsMetadata();
 		metadata.add(createItem("com.b", "type"));
 		metadata.add(createItem("com.c", "type"));
@@ -59,7 +59,7 @@ public class PropertiesMarshallerTests {
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		PropertiesMarshaller.write(metadata, outputStream);
-		String contents = new String(outputStream.toByteArray(), StandardCharsets.ISO_8859_1);
+		String contents = outputStream.toString(StandardCharsets.ISO_8859_1);
 		assertThat(contents.split(System.lineSeparator())).containsExactly("com.a=type", "com.b=type", "com.c=type");
 	}
 

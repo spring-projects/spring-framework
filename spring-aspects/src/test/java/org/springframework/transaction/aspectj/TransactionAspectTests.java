@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class TransactionAspectTests {
+class TransactionAspectTests {
 
 	private final CallCountingTransactionManager txManager = new CallCountingTransactionManager();
 
@@ -56,7 +56,7 @@ public class TransactionAspectTests {
 
 
 	@Test
-	public void testCommitOnAnnotatedClass() throws Throwable {
+	void testCommitOnAnnotatedClass() throws Throwable {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		annotationOnlyOnClassWithNoInterface.echo(null);
@@ -64,7 +64,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void commitOnAnnotatedProtectedMethod() throws Throwable {
+	void commitOnAnnotatedProtectedMethod() {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		beanWithAnnotatedProtectedMethod.doInTransaction();
@@ -72,7 +72,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void commitOnAnnotatedPrivateMethod() throws Throwable {
+	void commitOnAnnotatedPrivateMethod() {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		beanWithAnnotatedPrivateMethod.doSomething();
@@ -80,7 +80,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void commitOnNonAnnotatedNonPublicMethodInTransactionalType() throws Throwable {
+	void commitOnNonAnnotatedNonPublicMethodInTransactionalType() {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		annotationOnlyOnClassWithNoInterface.nonTransactionalMethod();
@@ -88,7 +88,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void commitOnAnnotatedMethod() throws Throwable {
+	void commitOnAnnotatedMethod() throws Throwable {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		methodAnnotationOnly.echo(null);
@@ -96,7 +96,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void notTransactional() throws Throwable {
+	void notTransactional() {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		new NotTransactional().noop();
@@ -104,7 +104,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void defaultCommitOnAnnotatedClass() throws Throwable {
+	void defaultCommitOnAnnotatedClass() {
 		Exception ex = new Exception();
 		assertThatException()
 			.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false))
@@ -112,7 +112,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void defaultRollbackOnAnnotatedClass() throws Throwable {
+	void defaultRollbackOnAnnotatedClass() {
 		RuntimeException ex = new RuntimeException();
 		assertThatRuntimeException()
 			.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true))
@@ -120,7 +120,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void defaultCommitOnSubclassOfAnnotatedClass() throws Throwable {
+	void defaultCommitOnSubclassOfAnnotatedClass() {
 		Exception ex = new Exception();
 		assertThatException()
 			.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false))
@@ -128,7 +128,7 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void defaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() throws Throwable {
+	void defaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() {
 		Exception ex = new Exception();
 		assertThatException()
 			.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false))
@@ -136,13 +136,13 @@ public class TransactionAspectTests {
 	}
 
 	@Test
-	public void noCommitOnImplementationOfAnnotatedInterface() throws Throwable {
+	void noCommitOnImplementationOfAnnotatedInterface() {
 		Exception ex = new Exception();
 		testNotTransactional(() -> new ImplementsAnnotatedInterface().echo(ex), ex);
 	}
 
 	@Test
-	public void noRollbackOnImplementationOfAnnotatedInterface() throws Throwable {
+	void noRollbackOnImplementationOfAnnotatedInterface() {
 		Exception rollbackProvokingException = new RuntimeException();
 		testNotTransactional(() -> new ImplementsAnnotatedInterface().echo(rollbackProvokingException),
 				rollbackProvokingException);
@@ -164,7 +164,7 @@ public class TransactionAspectTests {
 		}
 	}
 
-	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) throws Throwable {
+	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		assertThatExceptionOfType(Throwable.class)

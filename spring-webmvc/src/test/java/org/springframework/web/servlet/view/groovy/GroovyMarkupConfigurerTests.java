@@ -96,7 +96,7 @@ class GroovyMarkupConfigurerTests {
 	}
 
 	@Test
-	public void parentLoader() throws Exception {
+	void parentLoader() throws Exception {
 
 		this.configurer.setApplicationContext(this.applicationContext);
 

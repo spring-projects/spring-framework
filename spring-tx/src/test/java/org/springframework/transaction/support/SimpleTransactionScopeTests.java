@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class SimpleTransactionScopeTests {
 
 	@Test
-	public void getFromScope() {
+	void getFromScope() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.getBeanFactory().registerScope("tx", new SimpleTransactionScope());
 

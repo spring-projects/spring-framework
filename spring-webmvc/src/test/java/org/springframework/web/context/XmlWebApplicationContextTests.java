@@ -74,7 +74,7 @@ class XmlWebApplicationContextTests extends AbstractApplicationContextTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void environmentMerge() {
+	void environmentMerge() {
 		assertThat(this.root.getEnvironment().acceptsProfiles("rootProfile1")).isTrue();
 		assertThat(this.root.getEnvironment().acceptsProfiles("wacProfile1")).isFalse();
 		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("rootProfile1")).isTrue();
@@ -82,8 +82,7 @@ class XmlWebApplicationContextTests extends AbstractApplicationContextTests {
 	}
 
 	/**
-	 * Overridden as we can't trust superclass method
-	 * @see org.springframework.context.testfixture.AbstractApplicationContextTests#testEvents()
+	 * Overridden as we can't trust superclass method.
 	 */
 	@Override
 	protected void doTestEvents(TestApplicationListener listener, TestApplicationListener parentListener,
@@ -95,12 +94,12 @@ class XmlWebApplicationContextTests extends AbstractApplicationContextTests {
 
 	@Test
 	@Override
-	public void count() {
+	protected void count() {
 		assertThat(this.applicationContext.getBeanDefinitionCount()).as("should have 14 beans").isEqualTo(14);
 	}
 
 	@Test
-	public void withoutMessageSource() {
+	void withoutMessageSource() {
 		MockServletContext sc = new MockServletContext("");
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
 		wac.setParent(root);

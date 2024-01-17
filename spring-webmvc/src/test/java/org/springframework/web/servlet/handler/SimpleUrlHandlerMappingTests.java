@@ -46,7 +46,7 @@ import static org.springframework.web.servlet.HandlerMapping.PATH_WITHIN_HANDLER
 class SimpleUrlHandlerMappingTests {
 
 	@Test
-	public void handlerBeanNotFound() {
+	void handlerBeanNotFound() {
 		MockServletContext sc = new MockServletContext("");
 		XmlWebApplicationContext root = new XmlWebApplicationContext();
 		root.setServletContext(sc);

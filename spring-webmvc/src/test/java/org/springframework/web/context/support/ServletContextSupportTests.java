@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class ServletContextSupportTests {
 
 	@Test
-	public void testServletContextAttributeFactoryBean() {
+	void testServletContextAttributeFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute("myAttr", "myValue");
 
@@ -60,7 +60,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	public void testServletContextAttributeFactoryBeanWithAttributeNotFound() {
+	void testServletContextAttributeFactoryBeanWithAttributeNotFound() {
 		MockServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -76,7 +76,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	public void testServletContextParameterFactoryBean() {
+	void testServletContextParameterFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("myParam", "myValue");
 
@@ -92,7 +92,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	public void testServletContextParameterFactoryBeanWithAttributeNotFound() {
+	void testServletContextParameterFactoryBeanWithAttributeNotFound() {
 		MockServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
