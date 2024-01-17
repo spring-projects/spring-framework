@@ -486,8 +486,8 @@ attributes with a narrower, more specific purpose.
 `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping` are
 examples of composed annotations. They are provided because, arguably, most
 controller methods should be mapped to a specific HTTP method versus using `@RequestMapping`,
-which, by default, matches to all HTTP methods. If you need an example of composed
-annotations, look at how those are declared.
+which, by default, matches to all HTTP methods. If you need an example of how to implement
+a composed annotation, look at how those are declared.
 
 Spring MVC also supports custom request-mapping attributes with custom request-matching
 logic. This is a more advanced option that requires subclassing
