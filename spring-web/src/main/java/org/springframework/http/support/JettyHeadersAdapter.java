@@ -16,12 +16,7 @@
 
 package org.springframework.http.support;
 
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
@@ -43,6 +38,8 @@ import org.springframework.util.MultiValueMap;
 public final class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpFields headers;
+	@Nullable
+	private final HttpFields.Mutable mutable;
 
 
 	/**
@@ -53,6 +50,7 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	public JettyHeadersAdapter(HttpFields headers) {
 		Assert.notNull(headers, "Headers must not be null");
 		this.headers = headers;
+		this.mutable = headers instanceof HttpFields.Mutable m ? m : null;
 	}
 
 
@@ -119,22 +117,36 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String headerName && this.headers.contains(headerName));
+		return (key instanceof String name && this.headers.contains(name));
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String searchString &&
-				this.headers.stream().anyMatch(field -> field.contains(searchString)));
+		if (value instanceof String searchString) {
+			for (HttpField field : this.headers) {
+				if (field.contains(searchString)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Nullable
 	@Override
 	public List<String> get(Object key) {
-		if (containsKey(key)) {
-			return this.headers.getValuesList((String) key);
+		List<String> list = null;
+		if (key instanceof String name) {
+			for (HttpField f : this.headers) {
+				if (f.is(name)) {
+					if (list == null) {
+						list = new ArrayList<>();
+					}
+					list.add(f.getValue());
+				}
+			}
 		}
-		return null;
+		return list;
 	}
 
 	@Nullable
@@ -142,7 +154,21 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	public List<String> put(String key, List<String> value) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> oldValues = get(key);
-		mutableHttpFields.put(key, value);
+		switch (value.size()) {
+			case 0 -> {
+				if (oldValues != null) {
+					mutableHttpFields.remove(key);
+				}
+			}
+			case 1 -> {
+				if (oldValues == null) {
+					mutableHttpFields.add(key, value.get(0));
+				} else {
+					mutableHttpFields.put(key, value.get(0));
+				}
+			}
+			default -> mutableHttpFields.put(key, value);
+		}
 		return oldValues;
 	}
 
@@ -150,12 +176,21 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	@Override
 	public List<String> remove(Object key) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
+		List<String> list = null;
 		if (key instanceof String name) {
-			List<String> oldValues = get(key);
-			mutableHttpFields.remove(name);
-			return oldValues;
+			for (ListIterator<HttpField> i = mutableHttpFields.listIterator(); i.hasNext();)
+			{
+			    HttpField f = i.next();
+				if (f.is(name)) {
+					if (list == null) {
+						list = new ArrayList<>();
+					}
+					list.add(f.getValue());
+					i.remove();
+				}
+			}
 		}
-		return null;
+		return list;
 	}
 
 	@Override
@@ -195,15 +230,11 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	}
 
 	private HttpFields.Mutable mutableFields() {
-		if (this.headers instanceof HttpFields.Mutable mutableHttpFields) {
-			return mutableHttpFields;
-		}
-		else {
+		if (mutable == null) {
 			throw new IllegalStateException("Immutable headers");
 		}
+		return mutable;
 	}
-
-
 
 	@Override
 	public String toString() {

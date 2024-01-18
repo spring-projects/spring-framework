@@ -16,8 +16,11 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,10 +31,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.*;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
 
 /**
  * Integration tests related to the use of context paths.
@@ -40,15 +45,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ContextPathIntegrationTests {
 
-	@Test
-	void multipleWebFluxApps() throws Exception {
+	static Stream<Named<HttpServer>> httpServers() {
+		return Stream.of(
+				named("Jetty", new JettyHttpServer()),
+				named("Jetty Core", new JettyCoreHttpServer()),
+				named("Reactor Netty", new ReactorHttpServer()),
+				named("Tomcat", new TomcatHttpServer()),
+				named("Undertow", new UndertowHttpServer())
+		);
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("httpServers")
+	void multipleWebFluxApps(AbstractHttpServer server) throws Exception {
 		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext(WebAppConfig.class);
 		AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(WebAppConfig.class);
 
 		HttpHandler webApp1Handler = WebHttpHandlerBuilder.applicationContext(context1).build();
 		HttpHandler webApp2Handler = WebHttpHandlerBuilder.applicationContext(context2).build();
 
-		ReactorHttpServer server = new ReactorHttpServer();
 		server.registerHttpHandler("/webApp1", webApp1Handler);
 		server.registerHttpHandler("/webApp2", webApp2Handler);
 		server.afterPropertiesSet();

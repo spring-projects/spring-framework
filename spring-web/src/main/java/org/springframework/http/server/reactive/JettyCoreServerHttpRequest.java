@@ -141,9 +141,8 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 				cookies = EMPTY_COOKIES;
 			else {
 				cookies = new LinkedMultiValueMap<>();
-				for (org.eclipse.jetty.http.HttpCookie c : httpCookies) {
+				for (org.eclipse.jetty.http.HttpCookie c : httpCookies)
 					cookies.add(c.getName(), new HttpCookie(c.getName(), c.getValue()));
-				}
 				cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 			}
 		}
