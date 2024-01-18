@@ -55,8 +55,9 @@ import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
- * {@link RequestMappingInfo} instances from class-level and method-level
- * {@link RequestMapping @RequestMapping} annotations.
+ * {@link RequestMappingInfo} instances from type-level and method-level
+ * {@link RequestMapping @RequestMapping} and {@link HttpExchange @HttpExchange}
+ * annotations.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -84,9 +85,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Configure path prefixes to apply to controller methods.
 	 * <p>Prefixes are used to enrich the mappings of every {@code @RequestMapping}
-	 * method whose controller type is matched by a corresponding
-	 * {@code Predicate} in the map. The prefix for the first matching predicate
-	 * is used, assuming the input map has predictable order.
+	 * method and {@code @HttpExchange} method whose controller type is matched
+	 * by a corresponding {@code Predicate} in the map. The prefix for the first
+	 * matching predicate is used, assuming the input map has predictable order.
 	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
 	 * HandlerTypePredicate} to group controllers.
 	 * @param prefixes a map with path prefixes as key
@@ -149,10 +150,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Uses method and type-level @{@link RequestMapping} annotations to create
-	 * the RequestMappingInfo.
-	 * @return the created RequestMappingInfo, or {@code null} if the method
-	 * does not have a {@code @RequestMapping} annotation.
+	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
+	 * and {@link HttpExchange @HttpExchange} annotations to create the
+	 * {@link RequestMappingInfo}.
+	 * @return the created {@code RequestMappingInfo}, or {@code null} if the method
+	 * does not have a {@code @RequestMapping} or {@code @HttpExchange} annotation
 	 * @see #getCustomMethodCondition(Method)
 	 * @see #getCustomTypeCondition(Class)
 	 */
@@ -214,7 +216,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Protected method to provide a custom type-level request condition.
-	 * The custom {@link RequestCondition} can be of any type so long as the
+	 * <p>The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
 	 * <p>Consider extending
@@ -233,7 +235,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Protected method to provide a custom method-level request condition.
-	 * The custom {@link RequestCondition} can be of any type so long as the
+	 * <p>The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
 	 * <p>Consider extending
@@ -252,7 +254,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Create a {@link RequestMappingInfo} from the supplied
-	 * {@link RequestMapping @RequestMapping} annotation, or meta-annotation,
+	 * {@link RequestMapping @RequestMapping} annotation, meta-annotation,
 	 * or synthesized result of merging annotation attributes within an
 	 * annotation hierarchy.
 	 */
@@ -277,7 +279,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Create a {@link RequestMappingInfo} from the supplied
-	 * {@link HttpExchange @HttpExchange} annotation, or meta-annotation,
+	 * {@link HttpExchange @HttpExchange} annotation, meta-annotation,
 	 * or synthesized result of merging annotation attributes within an
 	 * annotation hierarchy.
 	 * @since 6.1
