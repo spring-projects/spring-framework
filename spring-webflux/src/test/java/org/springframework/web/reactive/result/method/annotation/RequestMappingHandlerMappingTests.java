@@ -48,10 +48,12 @@ import org.springframework.web.reactive.result.condition.PatternsRequestConditio
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
+import org.springframework.web.service.annotation.PutExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -152,6 +154,38 @@ class RequestMappingHandlerMappingTests {
 	@Test
 	void patchMapping() {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
+	}
+
+	@Test  // gh-32049
+	void httpExchangeWithMultipleAnnotationsAtClassLevel() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MultipleClassLevelAnnotationsHttpExchangeController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					"Multiple @HttpExchange annotations found on " + controllerClass,
+					"@" + HttpExchange.class.getName(),
+					"@" + ExtraHttpExchange.class.getName()
+				);
+	}
+
+	@Test  // gh-32049
+	void httpExchangeWithMultipleAnnotationsAtMethodLevel() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MultipleMethodLevelAnnotationsHttpExchangeController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					"Multiple @HttpExchange annotations found on " + method,
+					"@" + PostExchange.class.getName(),
+					"@" + PutExchange.class.getName()
+				);
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -311,6 +345,29 @@ class RequestMappingHandlerMappingTests {
 
 		@PostExchange(url = "/custom", contentType = "application/json", accept = "text/plain;charset=UTF-8")
 		public void customValuesExchange(){}
+	}
+
+	@HttpExchange("/exchange")
+	@ExtraHttpExchange
+	static class MultipleClassLevelAnnotationsHttpExchangeController {
+
+		@PostExchange("/post")
+		void post() {}
+	}
+
+
+	static class MultipleMethodLevelAnnotationsHttpExchangeController {
+
+		@PostExchange("/post")
+		@PutExchange("/post")
+		void post() {}
+	}
+
+
+	@HttpExchange
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ExtraHttpExchange {
 	}
 
 }

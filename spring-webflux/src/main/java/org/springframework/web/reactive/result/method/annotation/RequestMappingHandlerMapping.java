@@ -200,9 +200,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return createRequestMappingInfo(requestMappings.get(0).annotation, customCondition);
 		}
 
-		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(element, HttpExchange.class);
-		if (httpExchange != null) {
-			return createRequestMappingInfo(httpExchange, customCondition);
+		List<AnnotationDescriptor<HttpExchange>> httpExchanges = getAnnotationDescriptors(
+				mergedAnnotations, HttpExchange.class);
+		if (!httpExchanges.isEmpty()) {
+			Assert.state(httpExchanges.size() == 1,
+					() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
+							.formatted(element, httpExchanges));
+			return createRequestMappingInfo(httpExchanges.get(0).annotation, customCondition);
 		}
 
 		return null;

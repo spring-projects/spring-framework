@@ -48,6 +48,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
+import org.springframework.web.service.annotation.PutExchange;
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.MediaTypeExpression;
@@ -58,6 +59,7 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -276,6 +278,38 @@ class RequestMappingHandlerMappingTests {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
+	@Test  // gh-32049
+	void httpExchangeWithMultipleAnnotationsAtClassLevel() throws NoSuchMethodException {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = MultipleClassLevelAnnotationsHttpExchangeController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					"Multiple @HttpExchange annotations found on " + controllerClass,
+					"@" + HttpExchange.class.getName(),
+					"@" + ExtraHttpExchange.class.getName()
+				);
+	}
+
+	@Test  // gh-32049
+	void httpExchangeWithMultipleAnnotationsAtMethodLevel() throws NoSuchMethodException {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = MultipleMethodLevelAnnotationsHttpExchangeController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					"Multiple @HttpExchange annotations found on " + method,
+					"@" + PostExchange.class.getName(),
+					"@" + PutExchange.class.getName()
+				);
+	}
+
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
@@ -434,6 +468,30 @@ class RequestMappingHandlerMappingTests {
 
 		@PostExchange(url = "/custom", contentType = "application/json", accept = "text/plain;charset=UTF-8")
 		public void customValuesExchange(){}
+	}
+
+
+	@HttpExchange("/exchange")
+	@ExtraHttpExchange
+	static class MultipleClassLevelAnnotationsHttpExchangeController {
+
+		@PostExchange("/post")
+		void post() {}
+	}
+
+
+	static class MultipleMethodLevelAnnotationsHttpExchangeController {
+
+		@PostExchange("/post")
+		@PutExchange("/post")
+		void post() {}
+	}
+
+
+	@HttpExchange
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ExtraHttpExchange {
 	}
 
 
