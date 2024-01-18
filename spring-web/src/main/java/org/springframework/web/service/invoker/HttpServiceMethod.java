@@ -16,6 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
@@ -32,7 +33,11 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotationPredicates;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -54,6 +59,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Olga Maciaszek-Sharma
+ * @author Sam Brannen
  * @since 6.0
  */
 final class HttpServiceMethod {
@@ -145,7 +151,7 @@ final class HttpServiceMethod {
 
 	/**
 	 * Factory for {@link HttpRequestValues} with values extracted from the type
-	 * and method-level {@link HttpExchange @HttpRequest} annotations.
+	 * and method-level {@link HttpExchange @HttpExchange} annotations.
 	 */
 	private record HttpRequestValuesInitializer(
 			@Nullable HttpMethod httpMethod, @Nullable String url,
@@ -177,10 +183,20 @@ final class HttpServiceMethod {
 				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver,
 				Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
-			HttpExchange typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
-			HttpExchange methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
+			List<AnnotationDescriptor> methodHttpExchanges = getAnnotationDescriptors(method);
+			Assert.state(!methodHttpExchanges.isEmpty(),
+					() -> "Expected @HttpExchange annotation on method " + method);
+			Assert.state(methodHttpExchanges.size() == 1,
+					() -> "Multiple @HttpExchange annotations found on method %s, but only one is allowed: %s"
+							.formatted(method, methodHttpExchanges));
 
-			Assert.notNull(methodAnnotation, () -> "Expected @HttpRequest annotation on method " + method.toGenericString());
+			List<AnnotationDescriptor> typeHttpExchanges = getAnnotationDescriptors(containingClass);
+			Assert.state(typeHttpExchanges.size() <= 1,
+					() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
+							.formatted(containingClass, typeHttpExchanges));
+
+			HttpExchange methodAnnotation = methodHttpExchanges.get(0).httpExchange;
+			HttpExchange typeAnnotation = (!typeHttpExchanges.isEmpty() ? typeHttpExchanges.get(0).httpExchange : null);
 
 			HttpMethod httpMethod = initHttpMethod(typeAnnotation, methodAnnotation);
 			String url = initUrl(typeAnnotation, methodAnnotation, embeddedValueResolver);
@@ -262,6 +278,43 @@ final class HttpServiceMethod {
 
 			return null;
 		}
+
+		private static List<AnnotationDescriptor> getAnnotationDescriptors(AnnotatedElement element) {
+			return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
+					.stream(HttpExchange.class)
+					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+					.map(AnnotationDescriptor::new)
+					.distinct()
+					.toList();
+		}
+
+
+		private static class AnnotationDescriptor {
+
+			private final HttpExchange httpExchange;
+			private final MergedAnnotation<?> root;
+
+			AnnotationDescriptor(MergedAnnotation<HttpExchange> mergedAnnotation) {
+				this.httpExchange = mergedAnnotation.synthesize();
+				this.root = mergedAnnotation.getRoot();
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				return (obj instanceof AnnotationDescriptor that && this.httpExchange.equals(that.httpExchange));
+			}
+
+			@Override
+			public int hashCode() {
+				return this.httpExchange.hashCode();
+			}
+
+			@Override
+			public String toString() {
+				return this.root.synthesize().toString();
+			}
+		}
+
 	}
 
 
