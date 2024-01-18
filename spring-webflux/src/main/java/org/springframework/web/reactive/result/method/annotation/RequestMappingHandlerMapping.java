@@ -433,12 +433,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private static class AnnotationDescriptor<A extends Annotation> {
 
 		private final A annotation;
-		private final Annotation source;
+		private final MergedAnnotation<?> root;
 
 		AnnotationDescriptor(MergedAnnotation<A> mergedAnnotation) {
 			this.annotation = mergedAnnotation.synthesize();
-			this.source = (mergedAnnotation.getDistance() > 0 ?
-					mergedAnnotation.getRoot().synthesize() : this.annotation);
+			this.root = mergedAnnotation.getRoot();
 		}
 
 		@Override
@@ -453,7 +452,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 		@Override
 		public String toString() {
-			return this.source.toString();
+			return this.root.synthesize().toString();
 		}
 
 	}
