@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,20 @@ import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Annotation to declare a method on an HTTP service interface as an HTTP
- * endpoint. The endpoint details are defined statically through attributes of
+ * endpoint. Endpoint details are defined statically through attributes of
  * the annotation, as well as through the input method argument types.
  *
- * <p>Supported at the type level to express common attributes, to be inherited
- * by all methods, such as a base URL path.
+ * <p>An HTTP service interface can be passed to
+ * {@link org.springframework.web.service.invoker.HttpServiceProxyFactory}
+ * to create a client proxy. It can also be implemented by an
+ * {@link org.springframework.stereotype.Controller @Controller} for server
+ * handling. For more details in comparison to {@code @RequestMapping}, see the
+ * <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html#mvc-ann-httpexchange-annotation">reference docs</a>.
  *
- * <p>At the method level, it's more common to use one of the following HTTP method
- * specific, shortcut annotations, each of which is itself <em>meta-annotated</em>
- * with {@code HttpExchange}:
+ * <p>Supported at the type level to express common attributes, to be inherited
+ * by all methods, such as a base URL path. At the method level, it's more common
+ * to use one of the following HTTP method specific, shortcut annotations, each
+ * of which is itself <em>meta-annotated</em> with {@code HttpExchange}:
  *
  * <ul>
  * <li>{@link GetExchange}
