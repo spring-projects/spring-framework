@@ -71,11 +71,11 @@ class RequestMappingHandlerMappingTests {
 
 	@SuppressWarnings("unused")
 	static Stream<Arguments> pathPatternsArguments() {
-		RequestMappingHandlerMapping mapping1 = new RequestMappingHandlerMapping();
 		StaticWebApplicationContext wac1 = new StaticWebApplicationContext();
-		mapping1.setApplicationContext(wac1);
-
 		StaticWebApplicationContext wac2 = new StaticWebApplicationContext();
+
+		RequestMappingHandlerMapping mapping1 = new RequestMappingHandlerMapping();
+		mapping1.setApplicationContext(wac1);
 
 		RequestMappingHandlerMapping mapping2 = new RequestMappingHandlerMapping();
 		mapping2.setPatternParser(null);
@@ -86,8 +86,7 @@ class RequestMappingHandlerMappingTests {
 
 	@Test
 	void builderConfiguration() {
-		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
-		mapping.setApplicationContext(new StaticWebApplicationContext());
+		RequestMappingHandlerMapping mapping = createMapping();
 
 		RequestMappingInfo.BuilderConfiguration config = mapping.getBuilderConfiguration();
 		assertThat(config).isNotNull();
@@ -99,22 +98,20 @@ class RequestMappingHandlerMappingTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void useRegisteredSuffixPatternMatch() {
-
-		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
-		handlerMapping.setApplicationContext(new StaticWebApplicationContext());
+		RequestMappingHandlerMapping mapping = createMapping();
 
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy =
 				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
-		handlerMapping.setContentNegotiationManager(manager);
-		handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		handlerMapping.afterPropertiesSet();
+		mapping.setContentNegotiationManager(manager);
+		mapping.setUseRegisteredSuffixPatternMatch(true);
+		mapping.afterPropertiesSet();
 
-		assertThat(handlerMapping.useSuffixPatternMatch()).isTrue();
-		assertThat(handlerMapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(handlerMapping.getFileExtensions()).isEqualTo(Collections.singletonList("json"));
+		assertThat(mapping.useSuffixPatternMatch()).isTrue();
+		assertThat(mapping.useRegisteredSuffixPatternMatch()).isTrue();
+		assertThat(mapping.getFileExtensions()).isEqualTo(Collections.singletonList("json"));
 	}
 
 	@Test
@@ -150,25 +147,24 @@ class RequestMappingHandlerMappingTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void suffixPatternMatchSettings() {
-		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+		RequestMappingHandlerMapping mapping = createMapping();
 
-		assertThat(handlerMapping.useSuffixPatternMatch()).isFalse();
-		assertThat(handlerMapping.useRegisteredSuffixPatternMatch()).isFalse();
+		assertThat(mapping.useSuffixPatternMatch()).isFalse();
+		assertThat(mapping.useRegisteredSuffixPatternMatch()).isFalse();
 
-		handlerMapping.setUseRegisteredSuffixPatternMatch(false);
-		assertThat(handlerMapping.useSuffixPatternMatch())
+		mapping.setUseRegisteredSuffixPatternMatch(false);
+		assertThat(mapping.useSuffixPatternMatch())
 				.as("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch")
 				.isFalse();
 
-		handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		assertThat(handlerMapping.useSuffixPatternMatch())
+		mapping.setUseRegisteredSuffixPatternMatch(true);
+		assertThat(mapping.useSuffixPatternMatch())
 				.as("'true' registeredSuffixPatternMatch should enable suffixPatternMatch")
 				.isTrue();
 	}
 
 	@PathPatternsParameterizedTest
 	void resolveEmbeddedValuesInPatterns(RequestMappingHandlerMapping mapping) {
-
 		mapping.setEmbeddedValueResolver(
 				value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value
 		);
@@ -181,7 +177,6 @@ class RequestMappingHandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void pathPrefix(RequestMappingHandlerMapping mapping) throws Exception {
-
 		mapping.setEmbeddedValueResolver(value -> "/${prefix}".equals(value) ? "/api" : value);
 		mapping.setPathPrefixes(Collections.singletonMap(
 				"/${prefix}", HandlerTypePredicate.forAnnotation(RestController.class)));
@@ -226,7 +221,6 @@ class RequestMappingHandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void resolveRequestMappingViaComposedAnnotation(RequestMappingHandlerMapping mapping) {
-
 		RequestMappingInfo info = assertComposedAnnotationMapping(
 				mapping, "postJson", "/postJson", RequestMethod.POST);
 
@@ -285,9 +279,7 @@ class RequestMappingHandlerMappingTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
-		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
-		mapping.setApplicationContext(new StaticWebApplicationContext());
-		mapping.afterPropertiesSet();
+		RequestMappingHandlerMapping mapping = createMapping();
 
 		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(
 				HttpExchangeController.class.getMethod("defaultValuesExchange"),
@@ -307,9 +299,7 @@ class RequestMappingHandlerMappingTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void httpExchangeWithCustomValues() throws Exception {
-		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
-		mapping.setApplicationContext(new StaticWebApplicationContext());
-		mapping.afterPropertiesSet();
+		RequestMappingHandlerMapping mapping = createMapping();
 
 		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(
 				HttpExchangeController.class.getMethod("customValuesExchange"),
@@ -332,9 +322,15 @@ class RequestMappingHandlerMappingTests {
 				.containsOnly(MediaType.valueOf("text/plain;charset=UTF-8"));
 	}
 
-	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
+	private static RequestMappingHandlerMapping createMapping() {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+		return mapping;
+	}
+
+	private static RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
+		RequestMappingHandlerMapping mapping = createMapping();
 
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
@@ -342,7 +338,7 @@ class RequestMappingHandlerMappingTests {
 		return assertComposedAnnotationMapping(mapping, methodName, path, requestMethod);
 	}
 
-	private RequestMappingInfo assertComposedAnnotationMapping(
+	private static RequestMappingInfo assertComposedAnnotationMapping(
 			RequestMappingHandlerMapping mapping, String methodName, String path, RequestMethod requestMethod) {
 
 		Class<?> clazz = ComposedAnnotationController.class;

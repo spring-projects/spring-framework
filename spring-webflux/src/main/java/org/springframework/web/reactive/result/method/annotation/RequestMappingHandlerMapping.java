@@ -189,16 +189,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 		MergedAnnotations mergedAnnotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY,
 				RepeatableContainers.none());
-		List<AnnotationDescriptor<RequestMapping>> requestMappings = mergedAnnotations.stream(RequestMapping.class)
-				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
-				.map(AnnotationDescriptor::new)
-				.distinct()
-				.toList();
 
+		List<AnnotationDescriptor<RequestMapping>> requestMappings = getAnnotationDescriptors(
+				mergedAnnotations, RequestMapping.class);
 		if (!requestMappings.isEmpty()) {
 			if (requestMappings.size() > 1 && logger.isWarnEnabled()) {
 				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
-							.formatted(element, requestMappings));
+						.formatted(element, requestMappings));
 			}
 			return createRequestMappingInfo(requestMappings.get(0).annotation, customCondition);
 		}
@@ -428,6 +425,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		else {
 			return value;
 		}
+	}
+
+	private static <A extends Annotation> List<AnnotationDescriptor<A>> getAnnotationDescriptors(
+			MergedAnnotations mergedAnnotations, Class<A> annotationType) {
+
+		return mergedAnnotations.stream(annotationType)
+				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+				.map(AnnotationDescriptor::new)
+				.distinct()
+				.toList();
 	}
 
 	private static class AnnotationDescriptor<A extends Annotation> {
