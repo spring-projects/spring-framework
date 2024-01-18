@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,8 +138,7 @@ final class HttpServiceMethod {
 			int index = i;
 			Assert.state(resolved, () ->
 					"Could not resolve parameter [" + this.parameters[index].getParameterIndex() + "] in " +
-							this.parameters[index].getExecutable().toGenericString() +
-							(StringUtils.hasText("No suitable resolver") ? ": " + "No suitable resolver" : ""));
+							this.parameters[index].getExecutable().toGenericString() + ": No suitable resolver");
 		}
 	}
 
