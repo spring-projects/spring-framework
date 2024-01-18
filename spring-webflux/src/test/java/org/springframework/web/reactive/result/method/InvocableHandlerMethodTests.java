@@ -88,6 +88,7 @@ class InvocableHandlerMethodTests {
 	void resolveNoArgs() {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::noArgs).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
+
 		assertHandlerResultValue(mono, "success");
 	}
 
@@ -95,9 +96,10 @@ class InvocableHandlerMethodTests {
 	void cannotResolveArg() {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
-		assertThatIllegalStateException().isThrownBy(
-				mono::block)
-			.withMessage("Could not resolve parameter [0] in " + method.toGenericString() + ": No suitable resolver");
+
+		assertThatIllegalStateException()
+			.isThrownBy(mono::block)
+			.withMessage("Could not resolve parameter [0] in %s: No suitable resolver", method.toGenericString());
 	}
 
 	@Test
@@ -123,8 +125,8 @@ class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
-		assertThatExceptionOfType(UnsupportedMediaTypeStatusException.class).isThrownBy(
-				mono::block)
+		assertThatExceptionOfType(UnsupportedMediaTypeStatusException.class)
+			.isThrownBy(mono::block)
 			.withMessage("415 UNSUPPORTED_MEDIA_TYPE \"boo\"");
 	}
 
@@ -133,8 +135,9 @@ class InvocableHandlerMethodTests {
 		this.resolvers.add(stubResolver(1));
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
-		assertThatIllegalStateException().isThrownBy(
-				mono::block)
+
+		assertThatIllegalStateException()
+			.isThrownBy(mono::block)
 			.withCauseInstanceOf(IllegalArgumentException.class)
 			.withMessageContaining("Controller [")
 			.withMessageContaining("Method [")
@@ -147,8 +150,8 @@ class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::exceptionMethod).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
-		assertThatIllegalStateException().isThrownBy(
-				mono::block)
+		assertThatIllegalStateException()
+			.isThrownBy(mono::block)
 			.withMessage("boo");
 	}
 

@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -179,32 +178,30 @@ final class HttpServiceMethod {
 				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver,
 				Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
-			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
-			HttpExchange annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
+			HttpExchange typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
+			HttpExchange methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
 
-			Assert.notNull(annot2, "Expected HttpRequest annotation");
+			Assert.notNull(methodAnnotation, () -> "Expected @HttpRequest annotation on method " + method.toGenericString());
 
-			HttpMethod httpMethod = initHttpMethod(annot1, annot2);
-			String url = initUrl(annot1, annot2, embeddedValueResolver);
-			MediaType contentType = initContentType(annot1, annot2);
-			List<MediaType> acceptableMediaTypes = initAccept(annot1, annot2);
+			HttpMethod httpMethod = initHttpMethod(typeAnnotation, methodAnnotation);
+			String url = initUrl(typeAnnotation, methodAnnotation, embeddedValueResolver);
+			MediaType contentType = initContentType(typeAnnotation, methodAnnotation);
+			List<MediaType> acceptableMediaTypes = initAccept(typeAnnotation, methodAnnotation);
 
 			return new HttpRequestValuesInitializer(
 					httpMethod, url, contentType, acceptableMediaTypes, requestValuesSupplier);
 		}
 
 		@Nullable
-		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
-
-			String value1 = (typeAnnot != null ? typeAnnot.method() : null);
-			String value2 = annot.method();
-
-			if (StringUtils.hasText(value2)) {
-				return HttpMethod.valueOf(value2);
+		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+			String methodLevelMethod = methodAnnotation.method();
+			if (StringUtils.hasText(methodLevelMethod)) {
+				return HttpMethod.valueOf(methodLevelMethod);
 			}
 
-			if (StringUtils.hasText(value1)) {
-				return HttpMethod.valueOf(value1);
+			String typeLevelMethod = (typeAnnotation != null ? typeAnnotation.method() : null);
+			if (StringUtils.hasText(typeLevelMethod)) {
+				return HttpMethod.valueOf(typeLevelMethod);
 			}
 
 			return null;
@@ -212,64 +209,60 @@ final class HttpServiceMethod {
 
 		@Nullable
 		private static String initUrl(
-				@Nullable HttpExchange typeAnnot, HttpExchange annot, @Nullable StringValueResolver embeddedValueResolver) {
+				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
+				@Nullable StringValueResolver embeddedValueResolver) {
 
-			String url1 = (typeAnnot != null ? typeAnnot.url() : null);
-			String url2 = annot.url();
+			String typeLevelUrl = (typeAnnotation != null ? typeAnnotation.url() : null);
+			String methodLevelUrl = methodAnnotation.url();
 
 			if (embeddedValueResolver != null) {
-				url1 = (url1 != null ? embeddedValueResolver.resolveStringValue(url1) : null);
-				url2 = embeddedValueResolver.resolveStringValue(url2);
+				typeLevelUrl = (typeLevelUrl != null ? embeddedValueResolver.resolveStringValue(typeLevelUrl) : null);
+				methodLevelUrl = embeddedValueResolver.resolveStringValue(methodLevelUrl);
 			}
 
-			boolean hasUrl1 = StringUtils.hasText(url1);
-			boolean hasUrl2 = StringUtils.hasText(url2);
+			boolean hasTypeLevelUrl = StringUtils.hasText(typeLevelUrl);
+			boolean hasMethodLevelUrl = StringUtils.hasText(methodLevelUrl);
 
-			if (hasUrl1 && hasUrl2) {
-				return (url1 + (!url1.endsWith("/") && !url2.startsWith("/") ? "/" : "") + url2);
+			if (hasTypeLevelUrl && hasMethodLevelUrl) {
+				return (typeLevelUrl + (!typeLevelUrl.endsWith("/") && !methodLevelUrl.startsWith("/") ? "/" : "") + methodLevelUrl);
 			}
 
-			if (!hasUrl1 && !hasUrl2) {
+			if (!hasTypeLevelUrl && !hasMethodLevelUrl) {
 				return null;
 			}
 
-			return (hasUrl2 ? url2 : url1);
+			return (hasMethodLevelUrl ? methodLevelUrl : typeLevelUrl);
 		}
 
 		@Nullable
-		private static MediaType initContentType(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
-
-			String value1 = (typeAnnot != null ? typeAnnot.contentType() : null);
-			String value2 = annot.contentType();
-
-			if (StringUtils.hasText(value2)) {
-				return MediaType.parseMediaType(value2);
+		private static MediaType initContentType(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+			String methodLevelContentType = methodAnnotation.contentType();
+			if (StringUtils.hasText(methodLevelContentType)) {
+				return MediaType.parseMediaType(methodLevelContentType);
 			}
 
-			if (StringUtils.hasText(value1)) {
-				return MediaType.parseMediaType(value1);
+			String typeLevelContentType = (typeAnnotation != null ? typeAnnotation.contentType() : null);
+			if (StringUtils.hasText(typeLevelContentType)) {
+				return MediaType.parseMediaType(typeLevelContentType);
 			}
 
 			return null;
 		}
 
 		@Nullable
-		private static List<MediaType> initAccept(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
-
-			String[] value1 = (typeAnnot != null ? typeAnnot.accept() : null);
-			String[] value2 = annot.accept();
-
-			if (!ObjectUtils.isEmpty(value2)) {
-				return MediaType.parseMediaTypes(Arrays.asList(value2));
+		private static List<MediaType> initAccept(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+			String[] methodLevelAccept = methodAnnotation.accept();
+			if (!ObjectUtils.isEmpty(methodLevelAccept)) {
+				return MediaType.parseMediaTypes(List.of(methodLevelAccept));
 			}
 
-			if (!ObjectUtils.isEmpty(value1)) {
-				return MediaType.parseMediaTypes(Arrays.asList(value1));
+			String[] typeLevelAccept = (typeAnnotation != null ? typeAnnotation.accept() : null);
+			if (!ObjectUtils.isEmpty(typeLevelAccept)) {
+				return MediaType.parseMediaTypes(List.of(typeLevelAccept));
 			}
 
 			return null;
 		}
-
 	}
 
 
@@ -351,6 +344,7 @@ final class HttpServiceMethod {
 			@Nullable ReactiveAdapter returnTypeAdapter,
 			boolean blockForOptional, @Nullable Duration blockTimeout) implements ResponseFunction {
 
+		@Override
 		@Nullable
 		public Object execute(HttpRequestValues requestValues) {
 
