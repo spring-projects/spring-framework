@@ -32,6 +32,7 @@ asciidoc:
   sourcemap: true
 urls:
   latest_version_segment: ''
+  redirect_facility: httpd
 runtime:
   log:
     failure_level: warn
