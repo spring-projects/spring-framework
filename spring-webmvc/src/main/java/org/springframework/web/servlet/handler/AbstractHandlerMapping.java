@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,13 +157,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @param patternParser the parser to use
 	 * @since 5.3
 	 */
-	public void setPatternParser(PathPatternParser patternParser) {
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
 		this.patternParser = patternParser;
 	}
 
 	/**
 	 * Return the {@link #setPatternParser(PathPatternParser) configured}
-	 * {@code PathPatternParser}, or {@code null}.
+	 * {@code PathPatternParser}, or {@code null} otherwise which indicates that
+	 * String pattern matching with {@link AntPathMatcher} is enabled instead.
 	 * @since 5.3
 	 */
 	@Nullable

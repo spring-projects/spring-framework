@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
 	@Override
-	public void setPatternParser(PathPatternParser patternParser) {
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
 		Assert.state(this.mappingRegistry.getRegistrations().isEmpty(),
 				"PathPatternParser must be set before the initialization of " +
 						"request mappings through InitializingBean#afterPropertiesSet.");
@@ -567,6 +567,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * A registry that maintains all mappings to handler methods, exposing methods
 	 * to perform lookups and providing concurrent access.
+	 *
 	 * <p>Package-private for testing purposes.
 	 */
 	class MappingRegistry {

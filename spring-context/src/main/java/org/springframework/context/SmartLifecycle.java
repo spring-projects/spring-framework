@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	/**
 	 * Return the phase that this lifecycle object is supposed to run in.
 	 * <p>The default implementation returns {@link #DEFAULT_PHASE} in order to
-	 * let {@code stop()} callbacks execute after regular {@code Lifecycle}
+	 * let {@code stop()} callbacks execute before regular {@code Lifecycle}
 	 * implementations.
 	 * @see #isAutoStartup()
 	 * @see #start()
