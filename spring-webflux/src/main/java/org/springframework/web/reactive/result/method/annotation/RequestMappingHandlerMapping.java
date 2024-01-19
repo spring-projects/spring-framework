@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -186,6 +187,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		RequestMappingInfo requestMappingInfo = null;
 		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
 
@@ -199,19 +201,22 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
 						.formatted(element, requestMappings));
 			}
-			return createRequestMappingInfo(requestMappings.get(0).annotation, customCondition);
+			requestMappingInfo = createRequestMappingInfo(requestMappings.get(0).annotation, customCondition);
 		}
 
 		List<AnnotationDescriptor<HttpExchange>> httpExchanges = getAnnotationDescriptors(
 				mergedAnnotations, HttpExchange.class);
 		if (!httpExchanges.isEmpty()) {
+			Assert.state(requestMappingInfo == null,
+					() -> "%s is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed: %s"
+							.formatted(element, Stream.of(requestMappings, httpExchanges).flatMap(List::stream).toList()));
 			Assert.state(httpExchanges.size() == 1,
 					() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
 							.formatted(element, httpExchanges));
-			return createRequestMappingInfo(httpExchanges.get(0).annotation, customCondition);
+			requestMappingInfo = createRequestMappingInfo(httpExchanges.get(0).annotation, customCondition);
 		}
 
-		return null;
+		return requestMappingInfo;
 	}
 
 	/**

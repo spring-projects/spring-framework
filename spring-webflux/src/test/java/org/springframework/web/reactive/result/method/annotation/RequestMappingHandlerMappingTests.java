@@ -188,6 +188,40 @@ class RequestMappingHandlerMappingTests {
 				);
 	}
 
+	@Test  // gh-32065
+	void httpExchangeWithMixedAnnotationsAtClassLevel() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MixedClassLevelAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					controllerClass.getName(),
+					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
+					"@" + RequestMapping.class.getName(),
+					"@" + HttpExchange.class.getName()
+				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeWithMixedAnnotationsAtMethodLevel() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MixedMethodLevelAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					method.toString(),
+					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
+					"@" + PostMapping.class.getName(),
+					"@" + PostExchange.class.getName()
+				);
+	}
+
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
@@ -360,6 +394,26 @@ class RequestMappingHandlerMappingTests {
 
 		@PostExchange("/post")
 		@PutExchange("/post")
+		void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/api")
+	@HttpExchange("/api")
+	static class MixedClassLevelAnnotationsController {
+
+		@PostExchange("/post")
+		void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/api")
+	static class MixedMethodLevelAnnotationsController {
+
+		@PostMapping("/post")
+		@PostExchange("/post")
 		void post() {}
 	}
 
