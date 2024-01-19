@@ -18,6 +18,7 @@ package org.springframework.mail.javamail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -72,7 +73,7 @@ class JavaMailSenderTests {
 		simpleMessage.setTo("you@mail.org");
 		simpleMessage.setCc("he@mail.org", "she@mail.org");
 		simpleMessage.setBcc("us@mail.org", "them@mail.org");
-		Date sentDate = new GregorianCalendar(2004, 1, 1).getTime();
+		Date sentDate = new GregorianCalendar(2004, Calendar.FEBRUARY, 1).getTime();
 		simpleMessage.setSentDate(sentDate);
 		simpleMessage.setSubject("my subject");
 		simpleMessage.setText("my text");
@@ -305,7 +306,7 @@ class JavaMailSenderTests {
 		MimeMessage mimeMessage = sender.createMimeMessage();
 		mimeMessage.setSubject("custom");
 		mimeMessage.setRecipient(RecipientType.TO, new InternetAddress("you@mail.org"));
-		mimeMessage.setSentDate(new GregorianCalendar(2005, 3, 1).getTime());
+		mimeMessage.setSentDate(new GregorianCalendar(2005, Calendar.APRIL, 1).getTime());
 		sender.send(mimeMessage);
 
 		assertThat(sender.transport.getConnectedHost()).isEqualTo("host");
@@ -523,7 +524,7 @@ class JavaMailSenderTests {
 				throw new MessagingException("No sentDate specified");
 			}
 			if (message.getSubject() != null && message.getSubject().contains("custom")) {
-				assertThat(message.getSentDate()).isEqualTo(new GregorianCalendar(2005, 3, 1).getTime());
+				assertThat(message.getSentDate()).isEqualTo(new GregorianCalendar(2005, Calendar.APRIL, 1).getTime());
 			}
 			this.sentMessages.add(message);
 		}
