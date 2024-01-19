@@ -456,6 +456,39 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 	}
 
+	/**
+	 * Un-register the given mapping.
+	 * <p>This method may be invoked at runtime after initialization has completed.
+	 * @param urlPath the mapping to unregister
+	 */
+	public void unregisterHandler(String urlPath) throws IllegalArgumentException {
+		Assert.notNull(urlPath, "URL path must not be null");
+		Object mappedHandler = this.handlerMap.get(urlPath);
+		if (mappedHandler != null) {
+			if (urlPath.equals("/")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unregistered root mapping.");
+				}
+				setRootHandler(null);
+			}
+			else if (urlPath.equals("/*")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unregistered default mapping.");
+				}
+				setDefaultHandler(null);
+			}
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unregistered mapping \"" + urlPath + "\"");
+				}
+				this.handlerMap.remove(urlPath);
+				if(getPatternParser() != null) {
+					this.pathPatternHandlerMap.remove(getPatternParser().parse(urlPath));
+				}
+			}
+		}
+	}
+
 	private String getHandlerDescription(Object handler) {
 		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
 	}
