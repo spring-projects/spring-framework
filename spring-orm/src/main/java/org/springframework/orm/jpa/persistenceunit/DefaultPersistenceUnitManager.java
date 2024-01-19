@@ -238,7 +238,7 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Set the {@link ManagedClassNameFilter} to apply on entity classes discovered
 	 * using {@linkplain #setPackagesToScan(String...) classpath scanning}.
-	 * @param managedClassNameFilter the predicate to filter entity classes
+	 * @param managedClassNameFilter a predicate to filter entity classes
 	 * @since 6.1.4
 	 */
 	public void setManagedClassNameFilter(ManagedClassNameFilter managedClassNameFilter) {

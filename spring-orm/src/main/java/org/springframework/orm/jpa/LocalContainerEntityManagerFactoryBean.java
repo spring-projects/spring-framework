@@ -204,8 +204,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	/**
 	 * Set the {@link ManagedClassNameFilter} to apply on entity classes discovered
 	 * using {@linkplain #setPackagesToScan(String...) classpath scanning}.
-	 * @param managedClassNameFilter the predicate to filter entity classes
+	 * @param managedClassNameFilter a predicate to filter entity classes
 	 * @since 6.1.4
+	 * @see DefaultPersistenceUnitManager#setManagedClassNameFilter
 	 */
 	public void setManagedClassNameFilter(ManagedClassNameFilter managedClassNameFilter) {
 		this.internalPersistenceUnitManager.setManagedClassNameFilter(managedClassNameFilter);

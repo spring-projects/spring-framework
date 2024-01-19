@@ -83,17 +83,26 @@ public final class PersistenceManagedTypesScanner {
 	private final ManagedClassNameFilter managedClassNameFilter;
 
 
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 */
+	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
+		this(resourceLoader, null);
+	}
+
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 * @param managedClassNameFilter an optional predicate to filter entity classes
+	 * @since 6.1.4
+	 */
 	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader,
 			@Nullable ManagedClassNameFilter managedClassNameFilter) {
 
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
-		this.managedClassNameFilter = (managedClassNameFilter != null ? managedClassNameFilter
-				: className -> true);
-	}
-
-	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
-		this(resourceLoader, null);
+		this.managedClassNameFilter = (managedClassNameFilter != null ? managedClassNameFilter : className -> true);
 	}
 
 
@@ -126,13 +135,12 @@ public final class PersistenceManagedTypesScanner {
 			String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
 			Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+			MetadataReaderFactory factory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 			for (Resource resource : resources) {
 				try {
-					MetadataReader reader = readerFactory.getMetadataReader(resource);
+					MetadataReader reader = factory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
-					if (matchesEntityTypeFilter(reader, readerFactory)
-							&& this.managedClassNameFilter.matches(className)) {
+					if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
 						scanResult.managedClassNames.add(className);
 						if (scanResult.persistenceUnitRootUrl == null) {
 							URL url = resource.getURL();
@@ -168,9 +176,9 @@ public final class PersistenceManagedTypesScanner {
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
 	 */
-	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
+	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory factory) throws IOException {
 		for (TypeFilter filter : entityTypeFilters) {
-			if (filter.match(reader, readerFactory)) {
+			if (filter.match(reader, factory)) {
 				return true;
 			}
 		}

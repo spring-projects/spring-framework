@@ -22,12 +22,13 @@ package org.springframework.orm.jpa.persistenceunit;
  *
  * @author Stephane Nicoll
  * @since 6.1.4
+ * @see DefaultPersistenceUnitManager#setManagedClassNameFilter
  */
 @FunctionalInterface
 public interface ManagedClassNameFilter {
 
 	/**
-	 * Test if the given clas name matches the filter.
+	 * Test if the given class name matches the filter.
 	 * @param className the fully qualified class name of the persistent type to test
 	 * @return {@code true} if the class name matches
 	 */
