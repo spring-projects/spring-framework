@@ -28,8 +28,8 @@ antora {
 			'@antora/atlas-extension': '1.0.0-alpha.1',
 			'@antora/collector-extension': '1.0.0-alpha.3',
 			'@asciidoctor/tabs': '1.0.0-beta.3',
-			'@opendevise/antora-release-line-extension': '1.0.0-alpha.2',
-			'@springio/antora-extensions': '1.3.0',
+			'@opendevise/antora-release-line-extension': '1.0.0',
+			'@springio/antora-extensions': '1.8.2',
 			'@springio/asciidoctor-extensions': '1.0.0-alpha.9'
 	]
 }
