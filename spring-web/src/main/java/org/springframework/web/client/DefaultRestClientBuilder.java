@@ -32,6 +32,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.InterceptingClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -177,7 +178,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.statusHandlers = new ArrayList<>();
 		this.statusHandlers.add(StatusHandler.fromErrorHandler(restTemplate.getErrorHandler()));
 
-		this.requestFactory = restTemplate.getRequestFactory();
+		this.requestFactory = getRequestFactory(restTemplate);
 		this.messageConverters = new ArrayList<>(restTemplate.getMessageConverters());
 
 		if (!CollectionUtils.isEmpty(restTemplate.getInterceptors())) {
@@ -188,6 +189,16 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		}
 		this.observationRegistry = restTemplate.getObservationRegistry();
 		this.observationConvention = restTemplate.getObservationConvention();
+	}
+
+	private static ClientHttpRequestFactory getRequestFactory(RestTemplate restTemplate) {
+		ClientHttpRequestFactory requestFactory = restTemplate.getRequestFactory();
+		if (requestFactory instanceof InterceptingClientHttpRequestFactory interceptingClientHttpRequestFactory) {
+			return interceptingClientHttpRequestFactory.getDelegate();
+		}
+		else {
+			return requestFactory;
+		}
 	}
 
 
