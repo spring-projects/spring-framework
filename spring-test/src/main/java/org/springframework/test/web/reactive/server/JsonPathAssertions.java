@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,8 +148,19 @@ public class JsonPathAssertions {
 
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
-	 * @since 5.1
+	 * @since 6.2
 	 */
+	public <T> WebTestClient.BodyContentSpec value(Class<T> targetType, Matcher<? super T> matcher) {
+		this.pathHelper.assertValue(this.content, matcher, targetType);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
+	 * @since 5.1
+	 * @deprecated in favor of {@link #value(Class, Matcher)}
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public <T> WebTestClient.BodyContentSpec value(Matcher<? super T> matcher, Class<T> targetType) {
 		this.pathHelper.assertValue(this.content, matcher, targetType);
 		return this.bodySpec;
@@ -168,15 +179,24 @@ public class JsonPathAssertions {
 
 	/**
 	 * Consume the result of the JSONPath evaluation and provide a target class.
-	 * @since 5.1
+	 * @since 6.2
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer, Class<T> targetType) {
+	public <T> WebTestClient.BodyContentSpec value(Class<T> targetType, Consumer<T> consumer) {
 		Object value = this.pathHelper.evaluateJsonPath(this.content, targetType);
 		consumer.accept((T) value);
 		return this.bodySpec;
 	}
 
+	/**
+	 * Consume the result of the JSONPath evaluation and provide a target class.
+	 * @since 5.1
+	 * @deprecated in favor of {@link #value(Class, Consumer)}
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
+	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer, Class<T> targetType) {
+		return value(targetType, consumer);
+	}
 
 	@Override
 	public boolean equals(@Nullable Object obj) {
