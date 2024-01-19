@@ -404,13 +404,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	/**
 	 * Register the specified handler for the given URL path.
+	 * <p>This method may be invoked at runtime after initialization has completed.
 	 * @param urlPath the URL the bean should be mapped to
 	 * @param handler the handler instance or handler bean name String
 	 * (a bean name will automatically be resolved into the corresponding handler bean)
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
-	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
+	public void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPath, "URL path must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
 		Object resolvedHandler = handler;
@@ -451,6 +452,39 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				}
 				if (logger.isTraceEnabled()) {
 					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Un-register the given mapping.
+	 * <p>This method may be invoked at runtime after initialization has completed.
+	 * @param urlPath the mapping to unregister
+	 */
+	public void unregisterHandler(String urlPath) throws IllegalArgumentException {
+		Assert.notNull(urlPath, "URL path must not be null");
+		Object mappedHandler = this.handlerMap.get(urlPath);
+		if (mappedHandler != null) {
+			if (urlPath.equals("/")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unregistered root mapping.");
+				}
+				setRootHandler(null);
+			}
+			else if (urlPath.equals("/*")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unregistered default mapping.");
+				}
+				setDefaultHandler(null);
+			}
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unregistered mapping \"" + urlPath + "\"");
+				}
+				this.handlerMap.remove(urlPath);
+				if(getPatternParser() != null) {
+					this.pathPatternHandlerMap.remove(getPatternParser().parse(urlPath));
 				}
 			}
 		}
