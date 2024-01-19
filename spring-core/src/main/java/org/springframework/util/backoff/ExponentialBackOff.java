@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.util.backoff;
+
+import java.util.StringJoiner;
 
 import org.springframework.util.Assert;
 
@@ -212,6 +214,16 @@ public class ExponentialBackOff implements BackOff {
 					"or equal to 1. A multiplier of 1 is equivalent to a fixed interval.");
 	}
 
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", ExponentialBackOff.class.getSimpleName() + "{", "}")
+				.add("initialInterval=" + this.initialInterval)
+				.add("multiplier=" + this.multiplier)
+				.add("maxInterval=" + this.maxInterval)
+				.add("maxElapsedTime=" + this.maxElapsedTime)
+				.add("maxAttempts=" + this.maxAttempts)
+				.toString();
+	}
 
 	private class ExponentialBackOffExecution implements BackOffExecution {
 
@@ -255,11 +267,12 @@ public class ExponentialBackOff implements BackOff {
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder("ExponentialBackOff{");
-			sb.append("currentInterval=").append(this.currentInterval < 0 ? "n/a" : this.currentInterval + "ms");
-			sb.append(", multiplier=").append(getMultiplier());
-			sb.append('}');
-			return sb.toString();
+			String currentIntervalDescription = this.currentInterval < 0 ? "n/a" : this.currentInterval + "ms";
+			return new StringJoiner(", ", ExponentialBackOffExecution.class.getSimpleName() + "{", "}")
+					.add("currentInterval=" + currentIntervalDescription)
+					.add("multiplier=" + getMultiplier())
+					.add("attempts=" + this.attempts)
+					.toString();
 		}
 	}
 

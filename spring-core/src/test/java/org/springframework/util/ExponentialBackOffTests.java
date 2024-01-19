@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,14 +127,14 @@ class ExponentialBackOffTests {
 	}
 
 	@Test
-	void toStringContent() {
+	void executionToStringContent() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		BackOffExecution execution = backOff.start();
-		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=n/a, multiplier=2.0}");
+		assertThat(execution.toString()).isEqualTo("ExponentialBackOffExecution{currentInterval=n/a, multiplier=2.0, attempts=0}");
 		execution.nextBackOff();
-		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=2000ms, multiplier=2.0}");
+		assertThat(execution.toString()).isEqualTo("ExponentialBackOffExecution{currentInterval=2000ms, multiplier=2.0, attempts=1}");
 		execution.nextBackOff();
-		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=4000ms, multiplier=2.0}");
+		assertThat(execution.toString()).isEqualTo("ExponentialBackOffExecution{currentInterval=4000ms, multiplier=2.0, attempts=2}");
 	}
 
 	@Test
