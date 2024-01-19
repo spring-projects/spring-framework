@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -560,12 +560,12 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			}
 		}
 
-		if (statusCode.equals(HttpStatus.INTERNAL_SERVER_ERROR)) {
-			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
-		}
-
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
 			body = errorResponse.updateAndGetBody(this.messageSource, LocaleContextHolder.getLocale());
+		}
+
+		if (statusCode.equals(HttpStatus.INTERNAL_SERVER_ERROR) && body == null) {
+			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
 		}
 
 		return createResponseEntity(body, headers, statusCode, request);

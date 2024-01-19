@@ -1,4 +1,4 @@
-FROM ubuntu:jammy-20231211.1
+FROM ubuntu:jammy-20240111
 
 ADD setup.sh /setup.sh
 ADD get-jdk-url.sh /get-jdk-url.sh
@@ -6,6 +6,5 @@ RUN ./setup.sh
 
 ENV JAVA_HOME /opt/openjdk/java17
 ENV JDK17 /opt/openjdk/java17
-ENV JDK20 /opt/openjdk/java20
 
 ENV PATH $JAVA_HOME/bin:$PATH

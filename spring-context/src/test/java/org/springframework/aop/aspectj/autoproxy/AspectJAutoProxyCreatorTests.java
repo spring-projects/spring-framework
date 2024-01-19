@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,16 +220,16 @@ class AspectJAutoProxyCreatorTests {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
 			testBean1 = context.getBean(TestBean.class);
 			assertThat(AopUtils.isCglibProxy(testBean1)).as("CGLIB proxy").isTrue();
-			assertThat(testBean1.getClass().getInterfaces())
-				.containsExactlyInAnyOrder(Factory.class, SpringProxy.class, Advised.class);
+			assertThat(testBean1.getClass().getInterfaces()).containsExactlyInAnyOrder(
+					Factory.class, SpringProxy.class, Advised.class);
 		}
 
 		// Round #2
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(configClass)) {
 			testBean2 = context.getBean(TestBean.class);
 			assertThat(AopUtils.isCglibProxy(testBean2)).as("CGLIB proxy").isTrue();
-			assertThat(testBean2.getClass().getInterfaces())
-				.containsExactlyInAnyOrder(Factory.class, SpringProxy.class, Advised.class);
+			assertThat(testBean2.getClass().getInterfaces()).containsExactlyInAnyOrder(
+					Factory.class, SpringProxy.class, Advised.class);
 		}
 
 		assertThat(testBean1.getClass()).isSameAs(testBean2.getClass());
@@ -344,8 +344,8 @@ class AspectJAutoProxyCreatorTests {
 			Supplier<String> supplier = context.getBean(Supplier.class);
 			assertThat(AopUtils.isAopProxy(supplier)).as("AOP proxy").isTrue();
 			assertThat(AopUtils.isJdkDynamicProxy(supplier)).as("JDK Dynamic proxy").isTrue();
-			assertThat(supplier.getClass().getInterfaces())
-				.containsExactlyInAnyOrder(Supplier.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+			assertThat(supplier.getClass().getInterfaces()).containsExactlyInAnyOrder(
+					Supplier.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
 			assertThat(supplier.get()).isEqualTo("advised: lambda");
 		}
 	}
@@ -357,26 +357,14 @@ class AspectJAutoProxyCreatorTests {
 			MessageGenerator messageGenerator = context.getBean(MessageGenerator.class);
 			assertThat(AopUtils.isAopProxy(messageGenerator)).as("AOP proxy").isTrue();
 			assertThat(AopUtils.isJdkDynamicProxy(messageGenerator)).as("JDK Dynamic proxy").isTrue();
-			assertThat(messageGenerator.getClass().getInterfaces())
-				.containsExactlyInAnyOrder(MessageGenerator.class, Mixin.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+			assertThat(messageGenerator.getClass().getInterfaces()).containsExactlyInAnyOrder(
+					MessageGenerator.class, Mixin.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
 			assertThat(messageGenerator.generateMessage()).isEqualTo("mixin: lambda");
 		}
 	}
 
-	/**
-	 * Returns a new {@link ClassPathXmlApplicationContext} for the file ending in <var>fileSuffix</var>.
-	 */
 	private ClassPathXmlApplicationContext newContext(String fileSuffix) {
-		return new ClassPathXmlApplicationContext(qName(fileSuffix), getClass());
-	}
-
-	/**
-	 * Returns the relatively qualified name for <var>fileSuffix</var>.
-	 * e.g. for a fileSuffix='foo.xml', this method will return
-	 * 'AspectJAutoProxyCreatorTests-foo.xml'
-	 */
-	private String qName(String fileSuffix) {
-		return String.format("%s-%s", getClass().getSimpleName(), fileSuffix);
+		return new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-" + fileSuffix, getClass());
 	}
 
 }
@@ -416,7 +404,6 @@ class DummyAspectWithParameter {
 	public Object test(ProceedingJoinPoint pjp, int age) throws Throwable {
 		return pjp.proceed();
 	}
-
 }
 
 class DummyFactoryBean implements FactoryBean<Object> {
@@ -435,7 +422,6 @@ class DummyFactoryBean implements FactoryBean<Object> {
 	public boolean isSingleton() {
 		throw new UnsupportedOperationException();
 	}
-
 }
 
 @Aspect
@@ -591,7 +577,6 @@ class UnreliableBean {
 		}
 		return this.calls;
 	}
-
 }
 
 @SuppressWarnings("serial")
@@ -607,7 +592,6 @@ class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	public boolean matches(Method method, @Nullable Class<?> targetClass) {
 		return ITestBean.class.isAssignableFrom(targetClass);
 	}
-
 }
 
 abstract class AbstractProxyTargetClassConfig {
@@ -661,6 +645,7 @@ class PerTargetProxyTargetClassTrueConfig {
 
 @FunctionalInterface
 interface MessageGenerator {
+
 	String generateMessage();
 }
 
@@ -678,7 +663,6 @@ class MixinIntroductionInterceptor implements IntroductionInterceptor {
 	public boolean implementsInterface(Class<?> intf) {
 		return Mixin.class.isAssignableFrom(intf);
 	}
-
 }
 
 @SuppressWarnings("serial")
@@ -708,7 +692,6 @@ class MixinAdvisor extends AbstractPointcutAdvisor implements IntroductionAdviso
 	public void validateInterfaces() {
 		/* no-op */
 	}
-
 }
 
 abstract class AbstractMixinConfig {
@@ -722,7 +705,6 @@ abstract class AbstractMixinConfig {
 	MixinAdvisor mixinAdvisor() {
 		return new MixinAdvisor();
 	}
-
 }
 
 @Configuration(proxyBeanMethods = false)
