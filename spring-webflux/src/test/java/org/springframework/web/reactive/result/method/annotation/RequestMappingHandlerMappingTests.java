@@ -222,6 +222,36 @@ class RequestMappingHandlerMappingTests {
 				);
 	}
 
+	@Test  // gh-32065
+	void httpExchangeAnnotationsOverriddenAtClassLevel() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = ClassLevelOverriddenHttpExchangeAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, controllerClass);
+
+		assertThat(info).isNotNull();
+		assertThat(info.getPatternsCondition()).isNotNull();
+		assertThat(info.getPatternsCondition().getPatterns()).extracting(PathPattern::getPatternString)
+				.containsOnly("/controller/postExchange");
+	}
+
+	@Test  // gh-32065
+	void httpExchangeAnnotationsOverriddenAtMethodLevel() throws NoSuchMethodException {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MethodLevelOverriddenHttpExchangeAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, controllerClass);
+
+		assertThat(info).isNotNull();
+		assertThat(info.getPatternsCondition()).isNotNull();
+		assertThat(info.getPatternsCondition().getPatterns()).extracting(PathPattern::getPatternString)
+				.containsOnly("/controller/postMapping");
+	}
+
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
@@ -415,6 +445,33 @@ class RequestMappingHandlerMappingTests {
 		@PostMapping("/post")
 		@PostExchange("/post")
 		void post() {}
+	}
+
+	@HttpExchange("/service")
+	interface Service {
+
+		@PostExchange("/postExchange")
+		void post();
+
+	}
+
+
+	@Controller
+	@RequestMapping("/controller")
+	static class ClassLevelOverriddenHttpExchangeAnnotationsController implements Service {
+
+		@Override
+		public void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/controller")
+	static class MethodLevelOverriddenHttpExchangeAnnotationsController implements Service {
+
+		@PostMapping("/postMapping")
+		@Override
+		public void post() {}
 	}
 
 
