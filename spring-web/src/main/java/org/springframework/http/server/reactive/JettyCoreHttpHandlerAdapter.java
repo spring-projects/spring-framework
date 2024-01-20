@@ -27,7 +27,7 @@ import org.springframework.core.io.buffer.*;
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
- * @since 6.1.4
+ * @since 6.2
  */
 public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 

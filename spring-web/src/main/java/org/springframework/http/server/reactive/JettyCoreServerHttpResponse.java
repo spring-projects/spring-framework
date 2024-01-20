@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
- * @since 6.1.4
+ * @since 6.2
  */
 class JettyCoreServerHttpResponse implements ServerHttpResponse {
 	enum State {
