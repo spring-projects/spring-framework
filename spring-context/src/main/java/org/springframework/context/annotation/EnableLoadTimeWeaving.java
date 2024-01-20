@@ -165,7 +165,7 @@ public @interface EnableLoadTimeWeaving {
 		 * is present in the classpath. If there is no such resource, then AspectJ
 		 * load-time weaving will be switched off.
 		 */
-		AUTODETECT;
-	}
+		AUTODETECT
+  }
 
 }
