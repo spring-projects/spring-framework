@@ -58,14 +58,16 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(encoder.canEncode(pojoType, MediaType.APPLICATION_NDJSON)).isTrue()
 	}
 
 	@Test
 	override fun encode() {
 		val input = Flux.just(
-				Pojo("foo", "bar"),
-				Pojo("foofoo", "barbar"),
-				Pojo("foofoofoo", "barbarbar")
+			Pojo("foo", "bar"),
+			Pojo("foofoo", "barbar"),
+			Pojo("foofoofoo", "barbarbar")
 		)
 		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
 			.consumeNextWith(expectString("[" +
@@ -75,6 +77,26 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
 			.verifyComplete()
 		})
+	}
+	@Test
+	fun encodeStream() {
+		val input = Flux.just(
+				Pojo("foo", "bar"),
+				Pojo("foofoo", "barbar"),
+				Pojo("foofoofoo", "barbarbar")
+		)
+		testEncodeAll(
+			input,
+			ResolvableType.forClass(Pojo::class.java),
+			MediaType.APPLICATION_NDJSON,
+			null
+		) { step: FirstStep<DataBuffer?> ->
+			step
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
+				.verifyComplete()
+		}
 	}
 
 	@Test
