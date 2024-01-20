@@ -93,7 +93,7 @@ public class FieldProviderTransformer extends ClassEmitterTransformer {
     private void generate() throws Exception {
         final String[] names = (String[])fields.keySet().toArray(new String[fields.size()]);
 
-        int indexes[] = new int[names.length];
+        int[] indexes = new int[names.length];
         for (int i = 0; i < indexes.length; i++) {
             indexes[i] = i;
         }
