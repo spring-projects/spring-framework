@@ -356,14 +356,14 @@ class FormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	private String getFormTag(String output) {
-		int inputStart = output.indexOf("<", 1);
-		int inputEnd = output.lastIndexOf(">", output.length() - 2);
+		int inputStart = output.indexOf('<', 1);
+		int inputEnd = output.lastIndexOf('>', output.length() - 2);
 		return output.substring(0, inputStart) + output.substring(inputEnd + 1);
 	}
 
 	private String getInputTag(String output) {
-		int inputStart = output.indexOf("<", 1);
-		int inputEnd = output.lastIndexOf(">", output.length() - 2);
+		int inputStart = output.indexOf('<', 1);
+		int inputEnd = output.lastIndexOf('>', output.length() - 2);
 		return output.substring(inputStart, inputEnd + 1);
 	}
 

@@ -444,7 +444,7 @@ class ValueCodeGeneratorTests {
 				.map(line -> line.substring("import".length(), line.length() - 1))
 				.map(String::trim).toList();
 		int start = code.indexOf("value = ");
-		int end = code.indexOf(";", start);
+		int end = code.indexOf(';', start);
 		return new ValueCode(code.substring(start + "value = ".length(), end), imports);
 	}
 

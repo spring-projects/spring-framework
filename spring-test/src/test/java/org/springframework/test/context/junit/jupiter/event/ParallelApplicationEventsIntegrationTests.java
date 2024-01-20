@@ -102,7 +102,7 @@ class ParallelApplicationEventsIntegrationTests {
 		testEvents.assertStatistics(stats -> stats.started(13).succeeded(13).failed(0));
 
 		Set<String> testNames = payloads.stream()//
-				.map(payload -> payload.substring(0, payload.indexOf("-")))//
+				.map(payload -> payload.substring(0, payload.indexOf('-')))//
 				.collect(Collectors.toSet());
 
 		assertThat(payloads).hasSize(10);

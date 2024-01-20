@@ -335,7 +335,7 @@ public class FreeMarkerMacroTests {
 	private static String fetchMacro(String name) throws Exception {
 		for (String macro : loadMacros()) {
 			if (macro.startsWith(name)) {
-				return macro.substring(macro.indexOf("\n")).trim();
+				return macro.substring(macro.indexOf('\n')).trim();
 			}
 		}
 		return null;
