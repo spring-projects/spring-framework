@@ -21,6 +21,8 @@ import kotlinx.serialization.json.Json;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.KotlinSerializationStringEncoder;
 
+import java.util.List;
+
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
@@ -42,7 +44,9 @@ public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEnc
 	}
 
 	public KotlinSerializationJsonEncoder(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"),
+				MediaType.APPLICATION_NDJSON);
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
 	}
 
 }

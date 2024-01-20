@@ -16,8 +16,7 @@
 
 package org.springframework.http.codec;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.StringFormat;
@@ -95,13 +94,20 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
-		return Flux.error(new UnsupportedOperationException());
+		return Flux.defer(() -> {
+			KSerializer<Object> serializer = serializer(elementType);
+			if (serializer == null) {
+				return Mono.error(new DecodingException("Could not find KSerializer for " + elementType));
+			}
+			return this.stringDecoder
+					.decode(inputStream, elementType, mimeType, hints)
+					.map(string -> format().decodeFromString(serializer, string));
+		});
 	}
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 										@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
 		return Mono.defer(() -> {
 			KSerializer<Object> serializer = serializer(elementType);
 			if (serializer == null) {

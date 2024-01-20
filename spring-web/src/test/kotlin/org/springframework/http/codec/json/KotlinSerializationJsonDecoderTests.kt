@@ -63,6 +63,8 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 		assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClass(BigDecimal::class.java), MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_NDJSON)).isTrue()
 	}
 
 	@Test
@@ -71,6 +73,23 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 		StepVerifier
 				.create(output)
 				.expectError(UnsupportedOperationException::class.java)
+	}
+
+
+	@Test
+	fun decodeStream() {
+		val input = Flux.concat(
+			stringBuffer("{\"bar\":\"b1\",\"foo\":\"f1\"}\n"),
+			stringBuffer("{\"bar\":\"b2\",\"foo\":\"f2\"}\n")
+		)
+
+		testDecodeAll(input, ResolvableType.forClass(Pojo::class.java), { step: FirstStep<Any> ->
+			step
+				.expectNext(Pojo("f1", "b1"))
+				.expectNext(Pojo("f2", "b2"))
+				.expectComplete()
+				.verify()
+		}, null, null)
 	}
 
 	@Test

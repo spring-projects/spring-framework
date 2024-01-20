@@ -46,7 +46,8 @@ public class KotlinSerializationJsonDecoder extends KotlinSerializationStringDec
 	}
 
 	public KotlinSerializationJsonDecoder(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"),
+				MediaType.APPLICATION_NDJSON);
 	}
 
 }
