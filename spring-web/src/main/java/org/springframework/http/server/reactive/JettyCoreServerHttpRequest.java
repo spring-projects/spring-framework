@@ -49,8 +49,7 @@ import static org.springframework.http.server.reactive.AbstractServerHttpRequest
  * Adapt an Eclipse Jetty {@link Request} to a {@link org.springframework.http.server.ServerHttpRequest}
  *
  * @author Greg Wilkins
- * @author Lachlan Roberts
- * @since 6.1.4
+ * @since 6.2
  */
 class JettyCoreServerHttpRequest implements ServerHttpRequest {
 	private final static MultiValueMap<String, String> EMPTY_QUERY = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
