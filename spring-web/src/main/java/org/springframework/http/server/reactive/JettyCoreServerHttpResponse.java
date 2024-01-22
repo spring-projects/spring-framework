@@ -264,7 +264,18 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie)
 				cookies.add(httpResponseCookie.getName(), httpResponseCookie.getResponseCookie());
 		}
-		return cookies;
+
+		// TODO: when cookies are added to this list they should be added to the response.
+		//  Maybe something like this ?
+		return new LinkedMultiValueMap<>(cookies)
+		{
+			@Override
+			public void add(String key, ResponseCookie value)
+			{
+				super.add(key, value);
+				addCookie(value);
+			}
+		};
 	}
 
 	@Override
