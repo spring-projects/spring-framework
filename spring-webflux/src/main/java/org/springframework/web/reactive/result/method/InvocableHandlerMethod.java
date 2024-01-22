@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 5.0
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -86,6 +87,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	@Nullable
 	private MethodValidator methodValidator;
+
+	@Nullable
+	private Class<?>[] validationGroups;
 
 
 	/**
@@ -166,7 +170,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
-			Class<?>[] groups = getValidationGroups();
+			Class<?>[] groups = this.validationGroups;
+			if (groups == null) {
+				groups = this.validationGroups = getValidationGroups();
+			}
 			if (shouldValidateArguments() && this.methodValidator != null) {
 				this.methodValidator.applyArgumentValidation(
 						getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
