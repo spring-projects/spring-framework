@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -65,6 +66,16 @@ public final class WebAsyncManager {
 			new SimpleAsyncTaskExecutor(WebAsyncManager.class.getSimpleName());
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
+
+	/**
+	 * Log category to use for network failure after a client has gone away.
+	 * @see DisconnectedClientHelper
+	 */
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.server.DisconnectedClient";
+
+	private static final DisconnectedClientHelper disconnectedClientHelper =
+			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
 			new TimeoutCallableProcessingInterceptor();
@@ -370,9 +381,13 @@ public final class WebAsyncManager {
 			return;
 		}
 
+		if (result instanceof Exception ex && disconnectedClientHelper.checkAndLogClientDisconnectedException(ex)) {
+			return;
+		}
+
 		if (logger.isDebugEnabled()) {
-			boolean isError = result instanceof Throwable;
-			logger.debug("Async " + (isError ? "error" : "result set") + ", dispatch to " + formatRequestUri());
+			logger.debug("Async " + (this.errorHandlingInProgress ? "error" : "result set") +
+					", dispatch to " + formatRequestUri());
 		}
 		this.asyncWebRequest.dispatch();
 	}
