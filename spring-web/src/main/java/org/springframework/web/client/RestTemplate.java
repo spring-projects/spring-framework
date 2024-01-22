@@ -855,7 +855,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		Observation observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(this.observationConvention,
 				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry).start();
 		ClientHttpResponse response = null;
-		try {
+		try (Observation.Scope scope = observation.openScope()){
 			if (requestCallback != null) {
 				requestCallback.doWithRequest(request);
 			}
@@ -869,7 +869,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			observation.error(exception);
 			throw exception;
 		}
-		catch (RestClientException exc) {
+		catch (Throwable exc) {
 			observation.error(exc);
 			throw exc;
 		}
