@@ -103,8 +103,22 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body)
 	{
 		return Flux.from(body)
-				.flatMap(this::mySend, 1)
+				.flatMap(this::sendDataBuffer, 1)
 				.then();
+	}
+
+	@Override
+	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+		return Flux.from(body)
+				.flatMap(this::writeWith, 1)
+				.then();
+	}
+
+	@Override
+	public Mono<Void> setComplete() {
+		Callback.Completable callback = new Callback.Completable();
+		response.write(true, BufferUtil.EMPTY_BUFFER, callback);
+		return Mono.fromFuture(callback);
 	}
 
 	@Override
@@ -178,14 +192,14 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		}
 	}
 
-	private Mono<Void> mySend(DataBuffer dataBuffer) {
+	private Mono<Void> sendDataBuffer(DataBuffer dataBuffer) {
 
 		if (committed.compareAndSet(false, true))
 		{
 			if (!this.commitActions.isEmpty())
 			{
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-					.then(Mono.defer(() -> mySend(dataBuffer)))
+					.then(Mono.defer(() -> sendDataBuffer(dataBuffer)))
 					.doOnError(t -> getHeaders().clearContentHeaders());
 			}
 		}
@@ -219,20 +233,6 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			}
 		}.iterate();
 
-		return Mono.fromFuture(callback);
-	}
-
-	@Override
-	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return Flux.from(body)
-			.flatMap(this::writeWith, 1)
-			.then();
-	}
-
-	@Override
-	public Mono<Void> setComplete() {
-		Callback.Completable callback = new Callback.Completable();
-		response.write(true, BufferUtil.EMPTY_BUFFER, callback);
 		return Mono.fromFuture(callback);
 	}
 
