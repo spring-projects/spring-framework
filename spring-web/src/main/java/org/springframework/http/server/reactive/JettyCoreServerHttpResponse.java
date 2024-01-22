@@ -16,13 +16,24 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.server.HttpCookieUtils;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.BufferUtil;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.IteratingCallback;
 import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
@@ -30,12 +41,8 @@ import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 /**
  * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}
@@ -45,11 +52,10 @@ import java.util.function.Supplier;
  * @since 6.2
  */
 class JettyCoreServerHttpResponse implements ServerHttpResponse {
-	enum State {
-		OPEN, COMMITTED, LAST, COMPLETED
-	}
+	private final AtomicBoolean committed = new AtomicBoolean(false);
 
-	private final AtomicReference<State> state = new AtomicReference<>(State.OPEN);
+	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
+
 	private final Request request;
 	private final Response response;
 	private final HttpHeaders headers;
@@ -67,13 +73,12 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		// TODO
-		return null;
+		return DefaultDataBufferFactory.sharedInstance;
 	}
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		// TODO See UndertowServerHttpResponse as an example
+		commitActions.add(action);
 	}
 
 	@Override
@@ -82,21 +87,69 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		// TODO
-		return Mono.empty();
+	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body)
+	{
+		return Flux.from(body)
+				.flatMap(this::mySend, 1)
+				.then();
+	}
+
+	private Mono<Void> mySend(DataBuffer dataBuffer) {
+
+		if (committed.compareAndSet(false, true))
+		{
+			if (!this.commitActions.isEmpty())
+			{
+				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
+					.then(Mono.defer(() -> mySend(dataBuffer)))
+					.doOnError(t -> getHeaders().clearContentHeaders());
+			}
+		}
+
+		@SuppressWarnings("resource")
+		DataBuffer.ByteBufferIterator byteBufferIterator = dataBuffer.readableByteBuffers();
+		Callback.Completable callback = new Callback.Completable();
+		new IteratingCallback()
+		{
+			@Override
+			protected Action process()
+			{
+				if (!byteBufferIterator.hasNext())
+					return Action.SUCCEEDED;
+				response.write(false, byteBufferIterator.next(), this);
+				return Action.SCHEDULED;
+			}
+
+			@Override
+			protected void onCompleteSuccess()
+			{
+				byteBufferIterator.close();
+				callback.complete(null);
+			}
+
+			@Override
+			protected void onCompleteFailure(Throwable cause)
+			{
+				byteBufferIterator.close();
+				callback.failed(cause);
+			}
+		}.iterate();
+
+		return Mono.fromFuture(callback);
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		// TODO
-		return Mono.empty();
+		return Flux.from(body)
+			.flatMap(this::writeWith, 1)
+			.then();
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		// TODO
-		return Mono.empty();
+		Callback.Completable callback = new Callback.Completable();
+		response.write(true, BufferUtil.EMPTY_BUFFER, callback);
+		return Mono.fromFuture(callback);
 	}
 
 	@Override
