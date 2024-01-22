@@ -16,6 +16,13 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +31,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.io.ByteBufferPool;
+import org.eclipse.jetty.io.Content;
+import org.eclipse.jetty.io.RetainableByteBuffer;
 import org.eclipse.jetty.server.HttpCookieUtils;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.IteratingCallback;
 import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -37,6 +48,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -51,7 +63,8 @@ import reactor.core.publisher.Mono;
  * @author Lachlan Roberts
  * @since 6.2
  */
-class JettyCoreServerHttpResponse implements ServerHttpResponse {
+class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage
+{
 	private final AtomicBoolean committed = new AtomicBoolean(false);
 
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
@@ -92,6 +105,77 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse {
 		return Flux.from(body)
 				.flatMap(this::mySend, 1)
 				.then();
+	}
+
+	@Override
+	public Mono<Void> writeWith(Path file, long position, long count)
+	{
+		Callback.Completable callback = new Callback.Completable();
+		Mono<Void> mono = Mono.fromFuture(callback);
+		try
+		{
+			// TODO: Why does this say possible blocking call?
+			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
+			new ContentWriterIteratingCallback(channel, response, callback).iterate();
+		}
+		catch (Throwable t)
+		{
+			callback.failed(t);
+		}
+		return mono;
+	}
+
+	private static class ContentWriterIteratingCallback extends IteratingCallback
+	{
+		private final ReadableByteChannel source;
+		private final Content.Sink sink;
+		private final Callback callback;
+		private final RetainableByteBuffer buffer;
+
+		public ContentWriterIteratingCallback(ReadableByteChannel content, Response target, Callback callback) throws IOException
+		{
+			this.source = content;
+			this.sink = target;
+			this.callback = callback;
+			ByteBufferPool bufferPool = target.getRequest().getComponents().getByteBufferPool();
+			int outputBufferSize = target.getRequest().getConnectionMetaData().getHttpConfiguration().getOutputBufferSize();
+			boolean useOutputDirectByteBuffers = target.getRequest().getConnectionMetaData().getHttpConfiguration().isUseOutputDirectByteBuffers();
+			this.buffer = bufferPool.acquire(outputBufferSize, useOutputDirectByteBuffers);
+		}
+
+		@Override
+		protected Action process() throws Throwable
+		{
+			if (!source.isOpen())
+				return Action.SUCCEEDED;
+
+			ByteBuffer byteBuffer = buffer.getByteBuffer();
+			BufferUtil.clearToFill(byteBuffer);
+			int read = source.read(byteBuffer);
+			if (read == -1)
+			{
+				IO.close(source);
+				sink.write(true, BufferUtil.EMPTY_BUFFER, this);
+				return Action.SCHEDULED;
+			}
+			BufferUtil.flipToFlush(byteBuffer, 0);
+			sink.write(false, byteBuffer, this);
+			return Action.SCHEDULED;
+		}
+
+		@Override
+		protected void onCompleteSuccess()
+		{
+			buffer.release();
+			callback.succeeded();
+		}
+
+		@Override
+		protected void onCompleteFailure(Throwable x)
+		{
+			buffer.release();
+			callback.failed(x);
+		}
 	}
 
 	private Mono<Void> mySend(DataBuffer dataBuffer) {
