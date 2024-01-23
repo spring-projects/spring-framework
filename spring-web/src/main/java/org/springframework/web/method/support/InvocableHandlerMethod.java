@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	@Nullable
 	private MethodValidator methodValidator;
 
+	private Class<?>[] validationGroups = EMPTY_GROUPS;
+
 
 	/**
 	 * Create an instance from a {@code HandlerMethod}.
@@ -149,6 +151,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
 		this.methodValidator = methodValidator;
+		this.validationGroups = (methodValidator != null ?
+				methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 
@@ -180,17 +184,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
 
-		Class<?>[] groups = getValidationGroups();
 		if (shouldValidateArguments() && this.methodValidator != null) {
 			this.methodValidator.applyArgumentValidation(
-					getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
+					getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
 		}
 
 		Object returnValue = doInvoke(args);
 
 		if (shouldValidateReturnValue() && this.methodValidator != null) {
 			this.methodValidator.applyReturnValueValidation(
-					getBean(), getBridgedMethod(), getReturnType(), returnValue, groups);
+					getBean(), getBridgedMethod(), getReturnType(), returnValue, this.validationGroups);
 		}
 
 		return returnValue;
@@ -236,11 +239,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return args;
-	}
-
-	private Class<?>[] getValidationGroups() {
-		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
-				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 	/**
