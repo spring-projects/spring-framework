@@ -145,68 +145,6 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		return mono;
 	}
 
-	private static class ContentWriterIteratingCallback extends IteratingCallback
-	{
-		private final SeekableByteChannel source;
-		private final Content.Sink sink;
-		private final Callback callback;
-		private final RetainableByteBuffer buffer;
-		private final long length;
-		private long totalRead = 0;
-
-		public ContentWriterIteratingCallback(SeekableByteChannel content, long position, long count, Response target, Callback callback) throws IOException
-		{
-			this.source = content;
-			this.sink = target;
-			this.callback = callback;
-			this.length = count;
-			source.position(position);
-
-			ByteBufferPool bufferPool = target.getRequest().getComponents().getByteBufferPool();
-			int outputBufferSize = target.getRequest().getConnectionMetaData().getHttpConfiguration().getOutputBufferSize();
-			boolean useOutputDirectByteBuffers = target.getRequest().getConnectionMetaData().getHttpConfiguration().isUseOutputDirectByteBuffers();
-			this.buffer = bufferPool.acquire(outputBufferSize, useOutputDirectByteBuffers);
-		}
-
-		@Override
-		protected Action process() throws Throwable
-		{
-			if (!source.isOpen() || totalRead == length)
-				return Action.SUCCEEDED;
-
-			ByteBuffer byteBuffer = buffer.getByteBuffer();
-			BufferUtil.clearToFill(byteBuffer);
-			byteBuffer.limit((int)Math.min(buffer.capacity(), length - totalRead));
-			int read = source.read(byteBuffer);
-			if (read == -1)
-			{
-				IO.close(source);
-				sink.write(true, BufferUtil.EMPTY_BUFFER, this);
-				return Action.SCHEDULED;
-			}
-			totalRead += read;
-			BufferUtil.flipToFlush(byteBuffer, 0);
-			sink.write(false, byteBuffer, this);
-			return Action.SCHEDULED;
-		}
-
-		@Override
-		protected void onCompleteSuccess()
-		{
-			buffer.release();
-			IO.close(source);
-			callback.succeeded();
-		}
-
-		@Override
-		protected void onCompleteFailure(Throwable x)
-		{
-			buffer.release();
-			IO.close(source);
-			callback.failed(x);
-		}
-	}
-
 	@Nullable
 	private Mono<Void> ensureCommitted()
 	{
@@ -215,9 +153,9 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			if (!this.commitActions.isEmpty())
 			{
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-						.concatWith(Mono.fromRunnable(this::doCommit))
-						.then()
-						.doOnError(t -> getHeaders().clearContentHeaders());
+					.concatWith(Mono.fromRunnable(this::doCommit))
+					.then()
+					.doOnError(t -> getHeaders().clearContentHeaders());
 			}
 
 			doCommit();
@@ -232,11 +170,8 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		{
 			// TODO: are we doubling up on cookies already existing in response?
 			cookies.values().stream()
-					.flatMap(List::stream)
-					.forEach(cookie ->
-					{
-						Response.addCookie(response, new HttpResponseCookie(cookie));
-					});
+				.flatMap(List::stream)
+				.forEach(cookie -> Response.addCookie(response, new HttpResponseCookie(cookie)));
 		}
 	}
 
@@ -394,6 +329,68 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		@Override
 		public Map<String, String> getAttributes() {
 			return Collections.emptyMap();
+		}
+	}
+
+	private static class ContentWriterIteratingCallback extends IteratingCallback
+	{
+		private final SeekableByteChannel source;
+		private final Content.Sink sink;
+		private final Callback callback;
+		private final RetainableByteBuffer buffer;
+		private final long length;
+		private long totalRead = 0;
+
+		public ContentWriterIteratingCallback(SeekableByteChannel content, long position, long count, Response target, Callback callback) throws IOException
+		{
+			this.source = content;
+			this.sink = target;
+			this.callback = callback;
+			this.length = count;
+			source.position(position);
+
+			ByteBufferPool bufferPool = target.getRequest().getComponents().getByteBufferPool();
+			int outputBufferSize = target.getRequest().getConnectionMetaData().getHttpConfiguration().getOutputBufferSize();
+			boolean useOutputDirectByteBuffers = target.getRequest().getConnectionMetaData().getHttpConfiguration().isUseOutputDirectByteBuffers();
+			this.buffer = bufferPool.acquire(outputBufferSize, useOutputDirectByteBuffers);
+		}
+
+		@Override
+		protected Action process() throws Throwable
+		{
+			if (!source.isOpen() || totalRead == length)
+				return Action.SUCCEEDED;
+
+			ByteBuffer byteBuffer = buffer.getByteBuffer();
+			BufferUtil.clearToFill(byteBuffer);
+			byteBuffer.limit((int)Math.min(buffer.capacity(), length - totalRead));
+			int read = source.read(byteBuffer);
+			if (read == -1)
+			{
+				IO.close(source);
+				sink.write(true, BufferUtil.EMPTY_BUFFER, this);
+				return Action.SCHEDULED;
+			}
+			totalRead += read;
+			BufferUtil.flipToFlush(byteBuffer, 0);
+			sink.write(false, byteBuffer, this);
+			return Action.SCHEDULED;
+		}
+
+		@Override
+		protected void onCompleteSuccess()
+		{
+			buffer.release();
+			IO.close(source);
+			callback.succeeded();
+		}
+
+		@Override
+		protected void onCompleteFailure(Throwable x)
+		{
+			buffer.release();
+			IO.close(source);
+			callback.failed(x);
 		}
 	}
 }
