@@ -99,7 +99,7 @@ class HttpServiceMethodTests {
 		assertThat(voidEntity.getBody()).isNull();
 
 		List<String> list = service.getList();
-		assertThat(list).containsExactly("exchangeForBody");
+		assertThat(list).containsOnly("exchangeForBody");
 	}
 
 	@Test
@@ -183,7 +183,7 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -201,7 +201,7 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/base");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
-		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_CBOR);
+		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_CBOR);
 
 		service.performPost();
 
@@ -209,7 +209,7 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/base/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test  // gh-32049

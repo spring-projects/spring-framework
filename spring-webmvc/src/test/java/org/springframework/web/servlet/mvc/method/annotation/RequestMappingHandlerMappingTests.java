@@ -143,7 +143,7 @@ class RequestMappingHandlerMappingTests {
 		mapping.setApplicationContext(wac);
 		mapping.afterPropertiesSet();
 
-		assertThat(extensions).isEqualTo(Collections.singleton("json"));
+		assertThat(extensions).containsOnly("json");
 	}
 
 	@Test
@@ -167,14 +167,12 @@ class RequestMappingHandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void resolveEmbeddedValuesInPatterns(RequestMappingHandlerMapping mapping) {
-		mapping.setEmbeddedValueResolver(
-				value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value
-		);
+		mapping.setEmbeddedValueResolver(value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value);
 
-		String[] patterns = new String[] { "/foo", "/${pattern}/bar" };
+		String[] patterns = { "/foo", "/${pattern}/bar" };
 		String[] result = mapping.resolveEmbeddedValuesInPatterns(patterns);
 
-		assertThat(result).isEqualTo(new String[] { "/foo", "/foo/bar" });
+		assertThat(result).containsExactly("/foo", "/foo/bar");
 	}
 
 	@PathPatternsParameterizedTest
@@ -188,7 +186,7 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingInfo info = mapping.getMappingForMethod(method, UserController.class);
 
 		assertThat(info).isNotNull();
-		assertThat(info.getPatternValues()).isEqualTo(Collections.singleton("/api/user/{id}"));
+		assertThat(info.getPatternValues()).containsOnly("/api/user/{id}");
 	}
 
 	@PathPatternsParameterizedTest // gh-23907
@@ -226,10 +224,11 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingInfo info = assertComposedAnnotationMapping(
 				mapping, "postJson", "/postJson", RequestMethod.POST);
 
-		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString())
-				.isEqualTo(MediaType.APPLICATION_JSON_VALUE);
-		assertThat(info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString())
-				.isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		Set<MediaType> consumableMediaTypes = info.getConsumesCondition().getConsumableMediaTypes();
+		Set<MediaType> producibleMediaTypes = info.getProducesCondition().getProducibleMediaTypes();
+
+		assertThat(consumableMediaTypes).singleElement().hasToString(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(producibleMediaTypes).singleElement().hasToString(MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Test // SPR-14988
@@ -237,7 +236,7 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
-		assertThat(condition.getConsumableMediaTypes()).isEqualTo(Collections.singleton(MediaType.APPLICATION_XML));
+		assertThat(condition.getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_XML);
 	}
 
 	@PathPatternsParameterizedTest // gh-22010
@@ -458,10 +457,10 @@ class RequestMappingHandlerMappingTests {
 		assertThat(info).isNotNull();
 
 		Set<String> paths = info.getPatternValues();
-		assertThat(paths).containsExactly(path);
+		assertThat(paths).containsOnly(path);
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-		assertThat(methods).containsExactly(requestMethod);
+		assertThat(methods).containsOnly(requestMethod);
 
 		return info;
 	}
