@@ -16,11 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
-import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.util.*;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.springframework.core.io.buffer.*;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 
 /**
  * Adapt {@link HttpHandler} to the Jetty {@link org.eclipse.jetty.server.Handler} abstraction.
@@ -46,7 +49,7 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 
 	@Override
 	public boolean handle(Request request, Response response, Callback callback) throws Exception {
-		httpHandler.handle(new JettyCoreServerHttpRequest(dataBufferFactory, request), new JettyCoreServerHttpResponse(request, response))
+		httpHandler.handle(new JettyCoreServerHttpRequest(dataBufferFactory, request), new JettyCoreServerHttpResponse(response))
 				.subscribe(new Subscriber<>() {
 					@Override
 					public void onSubscribe(Subscription s) {
