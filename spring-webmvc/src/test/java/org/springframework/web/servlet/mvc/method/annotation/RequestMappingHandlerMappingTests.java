@@ -289,8 +289,8 @@ class RequestMappingHandlerMappingTests {
 				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + controllerClass,
-					"@" + HttpExchange.class.getName(),
-					"@" + ExtraHttpExchange.class.getName()
+					HttpExchange.class.getSimpleName(),
+					ExtraHttpExchange.class.getSimpleName()
 				);
 	}
 
@@ -305,8 +305,8 @@ class RequestMappingHandlerMappingTests {
 				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + method,
-					"@" + PostExchange.class.getName(),
-					"@" + PutExchange.class.getName()
+					PostExchange.class.getSimpleName(),
+					PutExchange.class.getSimpleName()
 				);
 	}
 
@@ -322,8 +322,8 @@ class RequestMappingHandlerMappingTests {
 				.withMessageContainingAll(
 					controllerClass.getName(),
 					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
-					"@" + RequestMapping.class.getName(),
-					"@" + HttpExchange.class.getName()
+					RequestMapping.class.getSimpleName(),
+					HttpExchange.class.getSimpleName()
 				);
 	}
 
@@ -339,8 +339,8 @@ class RequestMappingHandlerMappingTests {
 				.withMessageContainingAll(
 					method.toString(),
 					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
-					"@" + PostMapping.class.getName(),
-					"@" + PostExchange.class.getName()
+					PostMapping.class.getSimpleName(),
+					PostExchange.class.getSimpleName()
 				);
 	}
 
