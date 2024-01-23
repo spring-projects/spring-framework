@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
  */
 @SuppressWarnings("rawtypes")
 class BridgeMethodResolverTests {
@@ -95,6 +96,13 @@ class BridgeMethodResolverTests {
 		assertThat(bridgedMethod.getName()).isEqualTo("add");
 		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);
 		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(Date.class);
+	}
+
+	@Test
+	void findBridgedMethodFromOriginalMethodNotInHierarchy() throws Exception {
+		Method originalMethod = Adder.class.getMethod("add", Object.class);
+		Method mostSpecificMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, FakeAdder.class);
+		assertThat(mostSpecificMethod).isSameAs(originalMethod);
 	}
 
 	@Test
@@ -401,6 +409,13 @@ class BridgeMethodResolverTests {
 	public static class DateAdder extends AbstractDateAdder {
 
 		@Override
+		public void add(Date date) {
+		}
+	}
+
+
+	public static class FakeAdder {
+
 		public void add(Date date) {
 		}
 	}
