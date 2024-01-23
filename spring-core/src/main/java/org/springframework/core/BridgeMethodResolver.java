@@ -86,6 +86,10 @@ public final class BridgeMethodResolver {
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method bridgeMethod, @Nullable Class<?> targetClass) {
+		if (targetClass != null && !bridgeMethod.getDeclaringClass().isAssignableFrom(targetClass)) {
+			return bridgeMethod;
+		}
+
 		Method specificMethod = ClassUtils.getMostSpecificMethod(bridgeMethod, targetClass);
 		return resolveBridgeMethod(specificMethod,
 				(targetClass != null ? targetClass : specificMethod.getDeclaringClass()));

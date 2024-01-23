@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -346,32 +347,35 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		RequestMappingInfo requestMappingInfo = null;
 		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
 
-		MergedAnnotations mergedAnnotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY,
-				RepeatableContainers.none());
+		List<AnnotationDescriptor> descriptors = getAnnotationDescriptors(element);
 
-		List<AnnotationDescriptor<RequestMapping>> requestMappings = getAnnotationDescriptors(
-				mergedAnnotations, RequestMapping.class);
+		List<AnnotationDescriptor> requestMappings = descriptors.stream()
+				.filter(desc -> desc.annotation instanceof RequestMapping).toList();
 		if (!requestMappings.isEmpty()) {
 			if (requestMappings.size() > 1 && logger.isWarnEnabled()) {
 				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
 						.formatted(element, requestMappings));
 			}
-			return createRequestMappingInfo(requestMappings.get(0).annotation, customCondition);
+			requestMappingInfo = createRequestMappingInfo((RequestMapping) requestMappings.get(0).annotation, customCondition);
 		}
 
-		List<AnnotationDescriptor<HttpExchange>> httpExchanges = getAnnotationDescriptors(
-				mergedAnnotations, HttpExchange.class);
+		List<AnnotationDescriptor> httpExchanges = descriptors.stream()
+				.filter(desc -> desc.annotation instanceof HttpExchange).toList();
 		if (!httpExchanges.isEmpty()) {
+			Assert.state(requestMappingInfo == null,
+					() -> "%s is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed: %s"
+							.formatted(element, Stream.of(requestMappings, httpExchanges).flatMap(List::stream).toList()));
 			Assert.state(httpExchanges.size() == 1,
 					() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
 							.formatted(element, httpExchanges));
-			return createRequestMappingInfo(httpExchanges.get(0).annotation, customCondition);
+			requestMappingInfo = createRequestMappingInfo((HttpExchange) httpExchanges.get(0).annotation, customCondition);
 		}
 
-		return null;
+		return requestMappingInfo;
 	}
 
 	/**
@@ -612,29 +616,29 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 	}
 
-	private static <A extends Annotation> List<AnnotationDescriptor<A>> getAnnotationDescriptors(
-			MergedAnnotations mergedAnnotations, Class<A> annotationType) {
-
-		return mergedAnnotations.stream(annotationType)
+	private static List<AnnotationDescriptor> getAnnotationDescriptors(AnnotatedElement element) {
+		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
+				.stream()
+				.filter(MergedAnnotationPredicates.typeIn(RequestMapping.class, HttpExchange.class))
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 				.map(AnnotationDescriptor::new)
 				.distinct()
 				.toList();
 	}
 
-	private static class AnnotationDescriptor<A extends Annotation> {
+	private static class AnnotationDescriptor {
 
-		private final A annotation;
+		private final Annotation annotation;
 		private final MergedAnnotation<?> root;
 
-		AnnotationDescriptor(MergedAnnotation<A> mergedAnnotation) {
+		AnnotationDescriptor(MergedAnnotation<Annotation> mergedAnnotation) {
 			this.annotation = mergedAnnotation.synthesize();
 			this.root = mergedAnnotation.getRoot();
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return (obj instanceof AnnotationDescriptor<?> that && this.annotation.equals(that.annotation));
+			return (obj instanceof AnnotationDescriptor that && this.annotation.equals(that.annotation));
 		}
 
 		@Override

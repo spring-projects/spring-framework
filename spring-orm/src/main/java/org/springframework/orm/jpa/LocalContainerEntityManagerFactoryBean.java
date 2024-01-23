@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.lookup.SingleDataSourceLookup;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
+import org.springframework.orm.jpa.persistenceunit.ManagedClassNameFilter;
 import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
@@ -198,6 +199,17 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.internalPersistenceUnitManager.setPackagesToScan(packagesToScan);
+	}
+
+	/**
+	 * Set the {@link ManagedClassNameFilter} to apply on entity classes discovered
+	 * using {@linkplain #setPackagesToScan(String...) classpath scanning}.
+	 * @param managedClassNameFilter a predicate to filter entity classes
+	 * @since 6.1.4
+	 * @see DefaultPersistenceUnitManager#setManagedClassNameFilter
+	 */
+	public void setManagedClassNameFilter(ManagedClassNameFilter managedClassNameFilter) {
+		this.internalPersistenceUnitManager.setManagedClassNameFilter(managedClassNameFilter);
 	}
 
 	/**

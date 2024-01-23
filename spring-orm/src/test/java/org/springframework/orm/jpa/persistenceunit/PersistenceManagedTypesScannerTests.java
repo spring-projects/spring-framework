@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
@@ -28,6 +30,11 @@ import org.springframework.orm.jpa.domain.Person;
 import org.springframework.orm.jpa.domain2.entity.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Tests for {@link PersistenceManagedTypesScanner}.
@@ -36,7 +43,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class PersistenceManagedTypesScannerTests {
 
-	private final PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(new DefaultResourceLoader());
+	public static final DefaultResourceLoader RESOURCE_LOADER = new DefaultResourceLoader();
+
+	private final PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(RESOURCE_LOADER);
 
 	@Test
 	void scanPackageWithOnlyEntities() {
@@ -44,6 +53,29 @@ class PersistenceManagedTypesScannerTests {
 		assertThat(managedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
 				Person.class.getName(), DriversLicense.class.getName(), Employee.class.getName(),
 				EmployeeLocationConverter.class.getName());
+		assertThat(managedTypes.getManagedPackages()).isEmpty();
+	}
+
+	@Test
+	void scanPackageInvokesManagedClassNamesFilter() {
+		ManagedClassNameFilter filter = mock(ManagedClassNameFilter.class);
+		given(filter.matches(anyString())).willReturn(true);
+		new PersistenceManagedTypesScanner(RESOURCE_LOADER, filter)
+				.scan("org.springframework.orm.jpa.domain");
+		verify(filter).matches(Person.class.getName());
+		verify(filter).matches(DriversLicense.class.getName());
+		verify(filter).matches(Employee.class.getName());
+		verify(filter).matches(EmployeeLocationConverter.class.getName());
+		verifyNoMoreInteractions(filter);
+	}
+
+	@Test
+	void scanPackageWithUseManagedClassNamesFilter() {
+		List<String> candidates = List.of(Person.class.getName(), DriversLicense.class.getName());
+		PersistenceManagedTypes managedTypes = new PersistenceManagedTypesScanner(
+				RESOURCE_LOADER, candidates::contains).scan("org.springframework.orm.jpa.domain");
+		assertThat(managedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
+				Person.class.getName(), DriversLicense.class.getName());
 		assertThat(managedTypes.getManagedPackages()).isEmpty();
 	}
 
@@ -65,7 +97,20 @@ class PersistenceManagedTypesScannerTests {
 				"com.example.domain.Person", "com.example.domain.Address");
 		assertThat(managedTypes.getManagedPackages()).containsExactlyInAnyOrder(
 				"com.example.domain");
+	}
 
+	@Test
+	void scanPackageUsesIndexAndClassNameFilterIfPresent() {
+		List<String> candidates = List.of("com.example.domain.Address");
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(
+				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
+						new ClassPathResource("test-spring.components", getClass())));
+		PersistenceManagedTypes managedTypes = new PersistenceManagedTypesScanner(
+				resourceLoader, candidates::contains).scan("com.example");
+		assertThat(managedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
+				"com.example.domain.Address");
+		assertThat(managedTypes.getManagedPackages()).containsExactlyInAnyOrder(
+				"com.example.domain");
 	}
 
 }

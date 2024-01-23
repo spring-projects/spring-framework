@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,10 +80,29 @@ public final class PersistenceManagedTypesScanner {
 	@Nullable
 	private final CandidateComponentsIndex componentsIndex;
 
+	private final ManagedClassNameFilter managedClassNameFilter;
 
+
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 */
 	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
+		this(resourceLoader, null);
+	}
+
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 * @param managedClassNameFilter an optional predicate to filter entity classes
+	 * @since 6.1.4
+	 */
+	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader,
+			@Nullable ManagedClassNameFilter managedClassNameFilter) {
+
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
+		this.managedClassNameFilter = (managedClassNameFilter != null ? managedClassNameFilter : className -> true);
 	}
 
 
@@ -107,7 +126,7 @@ public final class PersistenceManagedTypesScanner {
 			for (AnnotationTypeFilter filter : entityTypeFilters) {
 				candidates.addAll(this.componentsIndex.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
 			}
-			scanResult.managedClassNames.addAll(candidates);
+			scanResult.managedClassNames.addAll(candidates.stream().filter(this.managedClassNameFilter::matches).toList());
 			scanResult.managedPackages.addAll(this.componentsIndex.getCandidateTypes(pkg, "package-info"));
 			return;
 		}
@@ -116,12 +135,12 @@ public final class PersistenceManagedTypesScanner {
 			String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
 			Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+			MetadataReaderFactory factory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 			for (Resource resource : resources) {
 				try {
-					MetadataReader reader = readerFactory.getMetadataReader(resource);
+					MetadataReader reader = factory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
-					if (matchesFilter(reader, readerFactory)) {
+					if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
 						scanResult.managedClassNames.add(className);
 						if (scanResult.persistenceUnitRootUrl == null) {
 							URL url = resource.getURL();
@@ -157,9 +176,9 @@ public final class PersistenceManagedTypesScanner {
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
 	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
+	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory factory) throws IOException {
 		for (TypeFilter filter : entityTypeFilters) {
-			if (filter.match(reader, readerFactory)) {
+			if (filter.match(reader, factory)) {
 				return true;
 			}
 		}

@@ -289,8 +289,8 @@ class RequestMappingHandlerMappingTests {
 				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + controllerClass,
-					"@" + HttpExchange.class.getName(),
-					"@" + ExtraHttpExchange.class.getName()
+					HttpExchange.class.getSimpleName(),
+					ExtraHttpExchange.class.getSimpleName()
 				);
 	}
 
@@ -305,9 +305,85 @@ class RequestMappingHandlerMappingTests {
 				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + method,
-					"@" + PostExchange.class.getName(),
-					"@" + PutExchange.class.getName()
+					PostExchange.class.getSimpleName(),
+					PutExchange.class.getSimpleName()
 				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeWithMixedAnnotationsAtClassLevel() throws NoSuchMethodException {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = MixedClassLevelAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					controllerClass.getName(),
+					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
+					RequestMapping.class.getSimpleName(),
+					HttpExchange.class.getSimpleName()
+				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeWithMixedAnnotationsAtMethodLevel() throws NoSuchMethodException {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = MixedMethodLevelAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					method.toString(),
+					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
+					PostMapping.class.getSimpleName(),
+					PostExchange.class.getSimpleName()
+				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeAnnotationsOverriddenAtClassLevel() throws NoSuchMethodException {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = ClassLevelOverriddenHttpExchangeAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, controllerClass);
+
+		assertThat(info).isNotNull();
+		assertThat(info.getActivePatternsCondition()).isNotNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/service/postExchange");
+		initRequestPath(mapping, request);
+		assertThat(info.getActivePatternsCondition().getMatchingCondition(request)).isNull();
+
+		request = new MockHttpServletRequest("POST", "/controller/postExchange");
+		initRequestPath(mapping, request);
+		assertThat(info.getActivePatternsCondition().getMatchingCondition(request)).isNotNull();
+	}
+
+	@Test  // gh-32065
+	void httpExchangeAnnotationsOverriddenAtMethodLevel() throws NoSuchMethodException {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = MethodLevelOverriddenHttpExchangeAnnotationsController.class;
+		Method method = controllerClass.getDeclaredMethod("post");
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, controllerClass);
+
+		assertThat(info).isNotNull();
+		assertThat(info.getActivePatternsCondition()).isNotNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/service/postExchange");
+		initRequestPath(mapping, request);
+		assertThat(info.getActivePatternsCondition().getMatchingCondition(request)).isNull();
+
+		request = new MockHttpServletRequest("POST", "/controller/postMapping");
+		initRequestPath(mapping, request);
+		assertThat(info.getActivePatternsCondition().getMatchingCondition(request)).isNotNull();
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -485,6 +561,54 @@ class RequestMappingHandlerMappingTests {
 		@PostExchange("/post")
 		@PutExchange("/post")
 		void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/api")
+	@HttpExchange("/api")
+	static class MixedClassLevelAnnotationsController {
+
+		@PostExchange("/post")
+		void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/api")
+	static class MixedMethodLevelAnnotationsController {
+
+		@PostMapping("/post")
+		@PostExchange("/post")
+		void post() {}
+	}
+
+
+	@HttpExchange("/service")
+	interface Service {
+
+		@PostExchange("/postExchange")
+		void post();
+
+	}
+
+
+	@Controller
+	@RequestMapping("/controller")
+	static class ClassLevelOverriddenHttpExchangeAnnotationsController implements Service {
+
+		@Override
+		public void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/controller")
+	static class MethodLevelOverriddenHttpExchangeAnnotationsController implements Service {
+
+		@PostMapping("/postMapping")
+		@Override
+		public void post() {}
 	}
 
 

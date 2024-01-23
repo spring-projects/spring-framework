@@ -220,8 +220,8 @@ class HttpServiceMethodTests {
 				.isThrownBy(() -> this.proxyFactory.createClient(serviceInterface))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + serviceInterface,
-					"@" + HttpExchange.class.getName(),
-					"@" + ExtraHttpExchange.class.getName()
+					HttpExchange.class.getSimpleName(),
+					ExtraHttpExchange.class.getSimpleName()
 				);
 	}
 
@@ -234,8 +234,8 @@ class HttpServiceMethodTests {
 				.isThrownBy(() -> this.proxyFactory.createClient(serviceInterface))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on method " + method,
-					"@" + PostExchange.class.getName(),
-					"@" + PutExchange.class.getName()
+					PostExchange.class.getSimpleName(),
+					PutExchange.class.getSimpleName()
 				);
 	}
 

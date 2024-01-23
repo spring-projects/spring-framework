@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public @interface DirtiesContext {
 		 * The associated {@code ApplicationContext} will be marked as
 		 * <em>dirty</em> after the corresponding test method.
 		 */
-		AFTER_METHOD;
+		AFTER_METHOD
 	}
 
 
@@ -178,7 +178,7 @@ public @interface DirtiesContext {
 		 * The associated {@code ApplicationContext} will be marked as
 		 * <em>dirty</em> after the test class.
 		 */
-		AFTER_CLASS;
+		AFTER_CLASS
 	}
 
 
@@ -212,7 +212,7 @@ public @interface DirtiesContext {
 		 * at the lowest level in the context hierarchy that is visible from the
 		 * current test.
 		 */
-		CURRENT_LEVEL;
+		CURRENT_LEVEL
 	}
 
 }

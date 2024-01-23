@@ -23,7 +23,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Collections;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +31,7 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -44,7 +44,6 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.MediaTypeExpression;
-import org.springframework.web.reactive.result.condition.PatternsRequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
@@ -87,16 +86,16 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	void pathPrefix() throws Exception {
+	void pathPrefix() {
 		this.handlerMapping.setEmbeddedValueResolver(value -> "/${prefix}".equals(value) ? "/api" : value);
 		this.handlerMapping.setPathPrefixes(Collections.singletonMap(
 				"/${prefix}", HandlerTypePredicate.forAnnotation(RestController.class)));
 
-		Method method = UserController.class.getMethod("getUser");
+		Method method = ReflectionUtils.findMethod(UserController.class, "getUser");
 		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, UserController.class);
 
 		assertThat(info).isNotNull();
-		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton(new PathPatternParser().parse("/api/user/{id}")));
+		assertThat(info.getPatternsCondition().getPatterns()).containsOnly(new PathPatternParser().parse("/api/user/{id}"));
 	}
 
 	@Test
@@ -121,10 +120,7 @@ class RequestMappingHandlerMappingTests {
 		this.wac.refresh();
 		this.handlerMapping.afterPropertiesSet();
 		RequestMappingInfo info = this.handlerMapping.getHandlerMethods().keySet().stream()
-				.filter(i -> {
-					PatternsRequestCondition condition = i.getPatternsCondition();
-					return condition.getPatterns().iterator().next().getPatternString().equals("/post");
-				})
+				.filter(i -> i.getPatternsCondition().getPatterns().iterator().next().getPatternString().equals("/post"))
 				.findFirst()
 				.orElseThrow(() -> new AssertionError("No /post"));
 
@@ -157,45 +153,111 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Test  // gh-32049
-	void httpExchangeWithMultipleAnnotationsAtClassLevel() throws NoSuchMethodException {
+	void httpExchangeWithMultipleAnnotationsAtClassLevel() {
 		this.handlerMapping.afterPropertiesSet();
 
 		Class<?> controllerClass = MultipleClassLevelAnnotationsHttpExchangeController.class;
-		Method method = controllerClass.getDeclaredMethod("post");
+		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + controllerClass,
-					"@" + HttpExchange.class.getName(),
-					"@" + ExtraHttpExchange.class.getName()
+					HttpExchange.class.getSimpleName(),
+					ExtraHttpExchange.class.getSimpleName()
 				);
 	}
 
 	@Test  // gh-32049
-	void httpExchangeWithMultipleAnnotationsAtMethodLevel() throws NoSuchMethodException {
+	void httpExchangeWithMultipleAnnotationsAtMethodLevel() {
 		this.handlerMapping.afterPropertiesSet();
 
 		Class<?> controllerClass = MultipleMethodLevelAnnotationsHttpExchangeController.class;
-		Method method = controllerClass.getDeclaredMethod("post");
+		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					"Multiple @HttpExchange annotations found on " + method,
-					"@" + PostExchange.class.getName(),
-					"@" + PutExchange.class.getName()
+					PostExchange.class.getSimpleName(),
+					PutExchange.class.getSimpleName()
 				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeWithMixedAnnotationsAtClassLevel() {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MixedClassLevelAnnotationsController.class;
+		Method method = ReflectionUtils.findMethod(controllerClass, "post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					controllerClass.getName(),
+					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
+					RequestMapping.class.getSimpleName(),
+					HttpExchange.class.getSimpleName()
+				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeWithMixedAnnotationsAtMethodLevel() {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MixedMethodLevelAnnotationsController.class;
+		Method method = ReflectionUtils.findMethod(controllerClass, "post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.withMessageContainingAll(
+					method.toString(),
+					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
+					PostMapping.class.getSimpleName(),
+					PostExchange.class.getSimpleName()
+				);
+	}
+
+	@Test  // gh-32065
+	void httpExchangeAnnotationsOverriddenAtClassLevel() {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = ClassLevelOverriddenHttpExchangeAnnotationsController.class;
+		Method method = ReflectionUtils.findMethod(controllerClass, "post");
+
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, controllerClass);
+
+		assertThat(info).isNotNull();
+		assertThat(info.getPatternsCondition()).isNotNull();
+		assertThat(info.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::getPatternString)
+				.containsOnly("/controller/postExchange");
+	}
+
+	@Test  // gh-32065
+	void httpExchangeAnnotationsOverriddenAtMethodLevel() {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<?> controllerClass = MethodLevelOverriddenHttpExchangeAnnotationsController.class;
+		Method method = ReflectionUtils.findMethod(controllerClass, "post");
+
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, controllerClass);
+
+		assertThat(info).isNotNull();
+		assertThat(info.getPatternsCondition()).isNotNull();
+		assertThat(info.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::getPatternString)
+				.containsOnly("/controller/postMapping");
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
-	void httpExchangeWithDefaultValues() throws NoSuchMethodException {
+	void httpExchangeWithDefaultValues() {
 		this.handlerMapping.afterPropertiesSet();
 
-		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(
-				HttpExchangeController.class.getMethod("defaultValuesExchange"),
-				HttpExchangeController.class);
+		Class<?> clazz = HttpExchangeController.class;
+		Method method = ReflectionUtils.findMethod(clazz, "defaultValuesExchange");
+		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(method, clazz);
 
 		assertThat(mappingInfo.getPatternsCondition().getPatterns())
 				.extracting(PathPattern::toString)
@@ -210,16 +272,16 @@ class RequestMappingHandlerMappingTests {
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
-	void httpExchangeWithCustomValues() throws NoSuchMethodException {
+	void httpExchangeWithCustomValues() {
 		this.handlerMapping.afterPropertiesSet();
 
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 		mapping.afterPropertiesSet();
 
-		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(
-				HttpExchangeController.class.getMethod("customValuesExchange"),
-				HttpExchangeController.class);
+		Class<HttpExchangeController> clazz = HttpExchangeController.class;
+		Method method = ReflectionUtils.findMethod(clazz, "customValuesExchange");
+		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(method, clazz);
 
 		assertThat(mappingInfo.getPatternsCondition().getPatterns())
 				.extracting(PathPattern::toString)
@@ -252,19 +314,18 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, clazz);
 
 		assertThat(info).isNotNull();
+		assertThat(info.getPatternsCondition()).isNotNull();
+		assertThat(info.getPatternsCondition().getPatterns())
+				.extracting(PathPattern::getPatternString)
+				.containsOnly(path);
 
-		Set<PathPattern> paths = info.getPatternsCondition().getPatterns();
-		assertThat(paths).hasSize(1);
-		assertThat(paths.iterator().next().getPatternString()).isEqualTo(path);
-
-		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-		assertThat(methods).containsExactly(requestMethod);
+		assertThat(info.getMethodsCondition().getMethods()).containsOnly(requestMethod);
 
 		return info;
 	}
 
 
-	@Controller @SuppressWarnings("unused")
+	@Controller
 	// gh-31962: The presence of multiple @RequestMappings is intentional.
 	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ExtraRequestMapping
@@ -320,7 +381,7 @@ class RequestMappingHandlerMappingTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface PostJson {
 
-		@AliasFor(annotation = RequestMapping.class, attribute = "path") @SuppressWarnings("unused")
+		@AliasFor(annotation = RequestMapping.class, attribute = "path")
 		String[] value() default {};
 	}
 
@@ -361,6 +422,53 @@ class RequestMappingHandlerMappingTests {
 		@PostExchange("/post")
 		@PutExchange("/post")
 		void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/api")
+	@HttpExchange("/api")
+	static class MixedClassLevelAnnotationsController {
+
+		@PostExchange("/post")
+		void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/api")
+	static class MixedMethodLevelAnnotationsController {
+
+		@PostMapping("/post")
+		@PostExchange("/post")
+		void post() {}
+	}
+
+	@HttpExchange("/service")
+	interface Service {
+
+		@PostExchange("/postExchange")
+		void post();
+
+	}
+
+
+	@Controller
+	@RequestMapping("/controller")
+	static class ClassLevelOverriddenHttpExchangeAnnotationsController implements Service {
+
+		@Override
+		public void post() {}
+	}
+
+
+	@Controller
+	@RequestMapping("/controller")
+	static class MethodLevelOverriddenHttpExchangeAnnotationsController implements Service {
+
+		@PostMapping("/postMapping")
+		@Override
+		public void post() {}
 	}
 
 

@@ -391,11 +391,6 @@ class QuartzSupportTests {
 		try (ClassPathXmlApplicationContext ctx = context("databasePersistence.xml")) {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
 			assertThat(jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").isEmpty()).as("No triggers were persisted").isFalse();
-
-			/*
-				Thread.sleep(3000);
-				assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
-			 */
 		}
 	}
 

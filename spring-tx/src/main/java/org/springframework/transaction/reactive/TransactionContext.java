@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,21 @@ import org.springframework.lang.Nullable;
  */
 public class TransactionContext {
 
-	private final @Nullable TransactionContext parent;
+	@Nullable
+	private final TransactionContext parent;
 
 	private final Map<Object, Object> resources = new LinkedHashMap<>();
 
 	@Nullable
 	private Set<TransactionSynchronization> synchronizations;
 
-	private volatile @Nullable String currentTransactionName;
+	@Nullable
+	private volatile String currentTransactionName;
 
 	private volatile boolean currentTransactionReadOnly;
 
-	private volatile @Nullable Integer currentTransactionIsolationLevel;
+	@Nullable
+	private volatile Integer currentTransactionIsolationLevel;
 
 	private volatile boolean actualTransactionActive;
 

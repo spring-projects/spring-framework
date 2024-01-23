@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -431,7 +430,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		long refreshTimestamp = (getCacheMillis() < 0 ? -1 : System.currentTimeMillis());
 
 		Resource resource = resolveResource(filename);
-		if (resource.exists()) {
+		if (resource != null) {
 			long fileTimestamp = -1;
 			if (getCacheMillis() >= 0) {
 				// Last-modified timestamp of file will just be read if caching with timeout.
@@ -508,18 +507,18 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * {@link PropertiesPersister#load(Properties, InputStream) load} methods
 	 * for other types of resources.
 	 * @param filename the bundle filename (basename + Locale)
-	 * @return the {@code Resource} to use
+	 * @return the {@code Resource} to use, or {@code null} if none found
 	 * @since 6.1
 	 */
+	@Nullable
 	protected Resource resolveResource(String filename) {
-		Resource resource = null;
 		for (String fileExtension : this.fileExtensions) {
-			resource = this.resourceLoader.getResource(filename + fileExtension);
+			Resource resource = this.resourceLoader.getResource(filename + fileExtension);
 			if (resource.exists()) {
 				return resource;
 			}
 		}
-		return Objects.requireNonNull(resource);
+		return null;
 	}
 
 	/**

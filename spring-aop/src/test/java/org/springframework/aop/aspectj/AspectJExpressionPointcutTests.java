@@ -414,7 +414,6 @@ class AspectJExpressionPointcutTests {
 		assertThat(ajexp.matches(BeanA.class.getMethod("getAge"), proxy.getClass())).isTrue();
 	}
 
-
 	@Test
 	void testNotAnnotationOnCglibProxyMethod() throws Exception {
 		String expression = "!@annotation(test.annotation.transaction.Tx)";
