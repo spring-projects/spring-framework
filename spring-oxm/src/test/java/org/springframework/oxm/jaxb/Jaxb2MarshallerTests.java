@@ -36,8 +36,6 @@ import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledForJreRange;
-import org.junit.jupiter.api.condition.JRE;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.xml.sax.Attributes;
@@ -308,7 +306,6 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 	}
 
 	@Test  // SPR-10806
-	@DisabledForJreRange(min = JRE.JAVA_22, disabledReason = "https://bugs.openjdk.org/browse/JDK-8322216")
 	void unmarshalStreamSourceWithXmlOptions() throws Exception {
 		final jakarta.xml.bind.Unmarshaller unmarshaller = mock();
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
@@ -343,7 +340,6 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 	}
 
 	@Test  // SPR-10806
-	@DisabledForJreRange(min = JRE.JAVA_22, disabledReason = "https://bugs.openjdk.org/browse/JDK-8322216")
 	void unmarshalSaxSourceWithXmlOptions() throws Exception {
 		final jakarta.xml.bind.Unmarshaller unmarshaller = mock();
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
