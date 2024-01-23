@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,6 @@ import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.RetainableByteBuffer;
 import org.eclipse.jetty.server.HttpCookieUtils;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.Callback;
@@ -66,15 +64,15 @@ import reactor.core.publisher.Mono;
 class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage
 {
 	private final AtomicBoolean committed = new AtomicBoolean(false);
-
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
 
-	private final Request request;
 	private final Response response;
 	private final HttpHeaders headers;
 
-	public JettyCoreServerHttpResponse(Request request, Response response) {
-		this.request = request;
+	@Nullable
+	private LinkedMultiValueMap<String, ResponseCookie> cookies;
+
+	public JettyCoreServerHttpResponse(Response response) {
 		this.response = response;
 		headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
 	}
@@ -116,6 +114,10 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public Mono<Void> setComplete() {
+		Mono<Void> mono = ensureCommitted();
+		if (mono != null)
+			return mono.then(Mono.defer(this::setComplete));
+
 		Callback.Completable callback = new Callback.Completable();
 		response.write(true, BufferUtil.EMPTY_BUFFER, callback);
 		return Mono.fromFuture(callback);
@@ -124,13 +126,17 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	@Override
 	public Mono<Void> writeWith(Path file, long position, long count)
 	{
+		Mono<Void> mono = ensureCommitted();
+		if (mono != null)
+			return mono.then(Mono.defer(() -> writeWith(file, position, count)));
+
 		Callback.Completable callback = new Callback.Completable();
-		Mono<Void> mono = Mono.fromFuture(callback);
+		mono = Mono.fromFuture(callback);
 		try
 		{
 			// TODO: Why does this say possible blocking call?
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
-			new ContentWriterIteratingCallback(channel, response, callback).iterate();
+			new ContentWriterIteratingCallback(channel, position, count, response, callback).iterate();
 		}
 		catch (Throwable t)
 		{
@@ -141,16 +147,21 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	private static class ContentWriterIteratingCallback extends IteratingCallback
 	{
-		private final ReadableByteChannel source;
+		private final SeekableByteChannel source;
 		private final Content.Sink sink;
 		private final Callback callback;
 		private final RetainableByteBuffer buffer;
+		private final long length;
+		private long totalRead = 0;
 
-		public ContentWriterIteratingCallback(ReadableByteChannel content, Response target, Callback callback) throws IOException
+		public ContentWriterIteratingCallback(SeekableByteChannel content, long position, long count, Response target, Callback callback) throws IOException
 		{
 			this.source = content;
 			this.sink = target;
 			this.callback = callback;
+			this.length = count;
+			source.position(position);
+
 			ByteBufferPool bufferPool = target.getRequest().getComponents().getByteBufferPool();
 			int outputBufferSize = target.getRequest().getConnectionMetaData().getHttpConfiguration().getOutputBufferSize();
 			boolean useOutputDirectByteBuffers = target.getRequest().getConnectionMetaData().getHttpConfiguration().isUseOutputDirectByteBuffers();
@@ -160,11 +171,12 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		@Override
 		protected Action process() throws Throwable
 		{
-			if (!source.isOpen())
+			if (!source.isOpen() || totalRead == length)
 				return Action.SUCCEEDED;
 
 			ByteBuffer byteBuffer = buffer.getByteBuffer();
 			BufferUtil.clearToFill(byteBuffer);
+			byteBuffer.limit((int)Math.min(buffer.capacity(), length - totalRead));
 			int read = source.read(byteBuffer);
 			if (read == -1)
 			{
@@ -172,6 +184,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 				sink.write(true, BufferUtil.EMPTY_BUFFER, this);
 				return Action.SCHEDULED;
 			}
+			totalRead += read;
 			BufferUtil.flipToFlush(byteBuffer, 0);
 			sink.write(false, byteBuffer, this);
 			return Action.SCHEDULED;
@@ -181,6 +194,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		protected void onCompleteSuccess()
 		{
 			buffer.release();
+			IO.close(source);
 			callback.succeeded();
 		}
 
@@ -188,21 +202,48 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		protected void onCompleteFailure(Throwable x)
 		{
 			buffer.release();
+			IO.close(source);
 			callback.failed(x);
 		}
 	}
 
-	private Mono<Void> sendDataBuffer(DataBuffer dataBuffer) {
-
+	@Nullable
+	private Mono<Void> ensureCommitted()
+	{
 		if (committed.compareAndSet(false, true))
 		{
 			if (!this.commitActions.isEmpty())
 			{
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-					.then(Mono.defer(() -> sendDataBuffer(dataBuffer)))
-					.doOnError(t -> getHeaders().clearContentHeaders());
+						.concatWith(Mono.fromRunnable(this::doCommit))
+						.then()
+						.doOnError(t -> getHeaders().clearContentHeaders());
 			}
+
+			doCommit();
 		}
+
+		return null;
+	}
+
+	private void doCommit()
+	{
+		if (cookies != null)
+		{
+			// TODO: are we doubling up on cookies already existing in response?
+			cookies.values().stream()
+					.flatMap(List::stream)
+					.forEach(cookie ->
+					{
+						Response.addCookie(response, new HttpResponseCookie(cookie));
+					});
+		}
+	}
+
+	private Mono<Void> sendDataBuffer(DataBuffer dataBuffer) {
+		Mono<Void> mono = ensureCommitted();
+		if (mono != null)
+			return mono.then(Mono.defer(() -> sendDataBuffer(dataBuffer)));
 
 		@SuppressWarnings("resource")
 		DataBuffer.ByteBufferIterator byteBufferIterator = dataBuffer.readableByteBuffers();
@@ -259,31 +300,28 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		LinkedMultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
-		for (HttpField f : response.getHeaders()) {
-			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie)
-				cookies.add(httpResponseCookie.getName(), httpResponseCookie.getResponseCookie());
-		}
-
-		// TODO: when cookies are added to this list they should be added to the response.
-		//  Maybe something like this ?
-		return new LinkedMultiValueMap<>(cookies)
-		{
-			@Override
-			public void add(String key, ResponseCookie value)
-			{
-				super.add(key, value);
-				addCookie(value);
-			}
-		};
+		if (cookies == null)
+			initializeCookies();
+		return cookies;
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		Response.addCookie(response, new HttpResponseCookie(cookie));
+		if (cookies == null)
+			initializeCookies();
+		cookies.add(cookie.getName(), cookie);
 	}
 
-	private class HttpResponseCookie implements org.eclipse.jetty.http.HttpCookie {
+	private void initializeCookies()
+	{
+		cookies = new LinkedMultiValueMap<>();
+		for (HttpField f : response.getHeaders()) {
+			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie)
+				cookies.add(httpResponseCookie.getName(), httpResponseCookie.getResponseCookie());
+		}
+	}
+
+	private static class HttpResponseCookie implements org.eclipse.jetty.http.HttpCookie {
 		private final ResponseCookie responseCookie;
 
 		public HttpResponseCookie(ResponseCookie responseCookie) {
