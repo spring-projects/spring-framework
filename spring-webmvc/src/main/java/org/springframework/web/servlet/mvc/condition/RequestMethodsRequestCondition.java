@@ -99,13 +99,10 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
-		if (isEmpty() && other.isEmpty()) {
+		if (other.isEmpty()) {
 			return this;
 		}
-		else if (other.isEmpty()) {
-			return this;
-		}
-		else if (isEmpty()) {
+		if (isEmpty()) {
 			return other;
 		}
 		Set<RequestMethod> set = new LinkedHashSet<>(this.methods);
@@ -185,11 +182,11 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		if (other.methods.size() != this.methods.size()) {
 			return other.methods.size() - this.methods.size();
 		}
-		else if (this.methods.size() == 1) {
+		if (this.methods.size() == 1) {
 			if (this.methods.contains(RequestMethod.HEAD) && other.methods.contains(RequestMethod.GET)) {
 				return -1;
 			}
-			else if (this.methods.contains(RequestMethod.GET) && other.methods.contains(RequestMethod.HEAD)) {
+			if (this.methods.contains(RequestMethod.GET) && other.methods.contains(RequestMethod.HEAD)) {
 				return 1;
 			}
 		}
