@@ -46,6 +46,7 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 2.0
  */
 public final class BridgeMethodResolver {
@@ -86,6 +87,9 @@ public final class BridgeMethodResolver {
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method bridgeMethod, @Nullable Class<?> targetClass) {
+		if (targetClass != null && !bridgeMethod.getDeclaringClass().isAssignableFrom(targetClass)) {
+			return bridgeMethod;
+		}
 		Method specificMethod = ClassUtils.getMostSpecificMethod(bridgeMethod, targetClass);
 		return resolveBridgeMethod(specificMethod,
 				(targetClass != null ? targetClass : specificMethod.getDeclaringClass()));

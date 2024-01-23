@@ -55,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 class ClassUtilsTests {
 
@@ -408,6 +409,8 @@ class ClassUtilsTests {
 				.isEqualTo(ClassUtils.getMethod(MethodsInterfaceImplementation.class, "print", String.class));
 		assertThat(ClassUtils.getMostSpecificMethod(printMethod, SubMethodsInterfaceImplementation.class))
 				.isEqualTo(ClassUtils.getMethod(MethodsInterfaceImplementation.class, "print", String.class));
+		assertThat(ClassUtils.getMostSpecificMethod(printMethod, FakeMethodsInterface.class))
+				.isSameAs(printMethod);
 
 		Method protectedPrintMethod = MethodsInterfaceImplementation.class.getDeclaredMethod("protectedPrint");
 		assertThat(ClassUtils.getMostSpecificMethod(protectedPrintMethod, MethodsInterfaceImplementation.class))
@@ -631,4 +634,10 @@ class ClassUtilsTests {
 
 	}
 
+	private class FakeMethodsInterface {
+
+		public void print(String message) {
+
+		}
+	}
 }

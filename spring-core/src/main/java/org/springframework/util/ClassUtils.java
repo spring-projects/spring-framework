@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -1455,6 +1456,9 @@ public abstract class ClassUtils {
 	 * @param targetClass the target class to check against
 	 */
 	private static boolean isOverridable(Method method, @Nullable Class<?> targetClass) {
+		if (targetClass != null && !method.getDeclaringClass().isAssignableFrom(targetClass)) {
+			return false;
+		}
 		if ((method.getModifiers() & NON_OVERRIDABLE_MODIFIER) != 0) {
 			return false;
 		}
