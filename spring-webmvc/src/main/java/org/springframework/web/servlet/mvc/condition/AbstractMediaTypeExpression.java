@@ -73,12 +73,10 @@ abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Compa
 		if (mediaType1.isMoreSpecific(mediaType2)) {
 			return -1;
 		}
-		else if (mediaType1.isLessSpecific(mediaType2)) {
+		if (mediaType1.isLessSpecific(mediaType2)) {
 			return 1;
 		}
-		else {
-			return 0;
-		}
+		return 0;
 	}
 
 	protected boolean matchParameters(MediaType contentType) {
