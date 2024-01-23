@@ -134,7 +134,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		mono = Mono.fromFuture(callback);
 		try
 		{
-			// TODO: Why does this say possible blocking call?
+			// TODO: Why does intellij warn about possible blocking call?
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
 			new ContentWriterIteratingCallback(channel, position, count, response, callback).iterate();
 		}
@@ -310,6 +310,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			return responseCookie.isSecure();
 		}
 
+		@Nullable
 		@Override
 		public SameSite getSameSite() {
 			// Adding non-null return site breaks tests.
