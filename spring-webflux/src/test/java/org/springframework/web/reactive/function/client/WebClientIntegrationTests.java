@@ -481,7 +481,7 @@ class WebClientIntegrationTests {
 				.retrieve()
 				.bodyToMono(Map.class);
 
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest  // SPR-15946
@@ -842,7 +842,7 @@ class WebClientIntegrationTests {
 					MyException error = (MyException) throwable;
 					assertThat(error.getMessage()).isEqualTo("foofoo");
 				})
-				.verify();
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
@@ -884,7 +884,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Internal Server error")
-				.verifyComplete();
+				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {
@@ -914,7 +914,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Internal Server error")
-				.verifyComplete();
+				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {
@@ -1072,7 +1072,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.assertNext(r -> assertThat(r.getStatusCode().is2xxSuccessful()).isTrue())
-				.verifyComplete();
+				.expectComplete().verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
@@ -1241,7 +1241,7 @@ class WebClientIntegrationTests {
 					WebClientException ex = (WebClientException) throwable;
 					assertThat(ex.getCause()).isInstanceOf(IOException.class);
 				})
-				.verify();
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
@@ -1253,7 +1253,7 @@ class WebClientIntegrationTests {
 					WebClientException ex = (WebClientException) throwable;
 					assertThat(ex.getCause()).isInstanceOf(IOException.class);
 				})
-				.verify();
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
