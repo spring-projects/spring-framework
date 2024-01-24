@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -62,6 +63,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CustomizableThreadCreator;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -164,10 +166,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public TaskExecutor clientInboundChannelExecutor() {
-		TaskExecutorRegistration reg = getClientInboundChannelRegistration().taskExecutor();
-		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
-		executor.setThreadNamePrefix("clientInboundChannel-");
-		return executor;
+		return getTaskExecutor(getClientInboundChannelRegistration(),
+				"clientInboundChannel-", this::defaultTaskExecutor);
 	}
 
 	protected final ChannelRegistration getClientInboundChannelRegistration() {
@@ -202,10 +202,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public TaskExecutor clientOutboundChannelExecutor() {
-		TaskExecutorRegistration reg = getClientOutboundChannelRegistration().taskExecutor();
-		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
-		executor.setThreadNamePrefix("clientOutboundChannel-");
-		return executor;
+		return getTaskExecutor(getClientOutboundChannelRegistration(),
+				"clientOutboundChannel-", this::defaultTaskExecutor);
 	}
 
 	protected final ChannelRegistration getClientOutboundChannelRegistration() {
@@ -246,19 +244,31 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 		MessageBrokerRegistry registry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
 		ChannelRegistration registration = registry.getBrokerChannelRegistration();
-		ThreadPoolTaskExecutor executor;
-		if (registration.hasTaskExecutor()) {
-			executor = registration.taskExecutor().getTaskExecutor();
-		}
-		else {
+		return getTaskExecutor(registration, "brokerChannel-", () -> {
 			// Should never be used
-			executor = new ThreadPoolTaskExecutor();
-			executor.setCorePoolSize(0);
-			executor.setMaxPoolSize(1);
-			executor.setQueueCapacity(0);
+			ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+			threadPoolTaskExecutor.setCorePoolSize(0);
+			threadPoolTaskExecutor.setMaxPoolSize(1);
+			threadPoolTaskExecutor.setQueueCapacity(0);
+			return threadPoolTaskExecutor;
+		});
+	}
+
+	private static TaskExecutor getTaskExecutor(ChannelRegistration registration,
+			String threadNamePrefix, Supplier<TaskExecutor> fallback) {
+
+		return registration.getTaskExecutor(fallback,
+				executor -> setThreadNamePrefix(executor, threadNamePrefix));
+	}
+
+	private TaskExecutor defaultTaskExecutor() {
+		return new TaskExecutorRegistration().getTaskExecutor();
+	}
+
+	private static void setThreadNamePrefix(TaskExecutor taskExecutor, String name) {
+		if (taskExecutor instanceof CustomizableThreadCreator ctc) {
+			ctc.setThreadNamePrefix(name);
 		}
-		executor.setThreadNamePrefix("brokerChannel-");
-		return executor;
 	}
 
 	/**
