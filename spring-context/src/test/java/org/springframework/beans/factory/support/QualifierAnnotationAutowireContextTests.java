@@ -63,12 +63,12 @@ public class QualifierAnnotationAutowireContextTests {
 				new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 	}
 
 	@Test
@@ -81,12 +81,13 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 
 	}
 
@@ -100,9 +101,10 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
+
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
 	}
 
 	@Test
@@ -205,12 +207,13 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 	}
 
 	@Test
@@ -227,12 +230,13 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 	}
 
 	@Test
@@ -249,9 +253,10 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
+
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
 	}
 
 	@Test
@@ -374,12 +379,13 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedFieldWithDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 	}
 
 	@Test
@@ -451,12 +457,13 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedFieldWithMultipleAttributesTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 	}
 
 	@Test
@@ -507,12 +514,13 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedFieldWithMultipleAttributesTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> {
-				assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
-				assertThat(ex.getBeanName()).isEqualTo("autowired");
-			});
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> {
+					assertThat(ex.getRootCause()).isInstanceOf(NoSuchBeanDefinitionException.class);
+					assertThat(ex.getBeanName()).isEqualTo("autowired");
+				});
 	}
 
 	@Test
@@ -574,9 +582,10 @@ public class QualifierAnnotationAutowireContextTests {
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedConstructorArgumentWithBaseQualifierNonDefaultValueTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				context::refresh)
-			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
+
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(context::refresh)
+				.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo("autowired"));
 	}
 
 
@@ -752,7 +761,7 @@ public class QualifierAnnotationAutowireContextTests {
 	@Qualifier
 	@interface TestQualifierWithMultipleAttributes {
 
-		String value() default "default";
+		String[] value() default "default";
 
 		int number();
 	}
