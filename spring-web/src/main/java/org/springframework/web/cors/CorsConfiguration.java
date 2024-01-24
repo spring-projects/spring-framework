@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -435,7 +435,7 @@ public class CorsConfiguration {
 	 * origins} and {@link #setAllowedOriginPatterns(List) originPatterns} are processed,
 	 * see related API documentation for more details.
 	 * <p>By default this is not set (i.e. private network access is not supported).
-	 * @since 6.1.3
+	 * @since 5.3.32
 	 * @see <a href="https://wicg.github.io/private-network-access/">Private network access specifications</a>
 	 */
 	public void setAllowPrivateNetwork(@Nullable Boolean allowPrivateNetwork) {
@@ -444,7 +444,7 @@ public class CorsConfiguration {
 
 	/**
 	 * Return the configured {@code allowPrivateNetwork} flag, or {@code null} if none.
-	 * @since 6.1.3
+	 * @since 5.3.32
 	 * @see #setAllowPrivateNetwork(Boolean)
 	 */
 	@Nullable
@@ -539,7 +539,7 @@ public class CorsConfiguration {
 	 * {@link #setAllowedOrigins allowedOrigins} does not contain the special
 	 * value {@code "*"} since this is insecure.
 	 * @throws IllegalArgumentException if the validation fails
-	 * @since 6.1.3
+	 * @since 5.3.32
 	 */
 	public void validateAllowPrivateNetwork() {
 		if (this.allowPrivateNetwork == Boolean.TRUE &&
