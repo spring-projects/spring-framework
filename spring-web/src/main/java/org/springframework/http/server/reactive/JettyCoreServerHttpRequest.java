@@ -80,7 +80,7 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 		this.dataBufferFactory = dataBufferFactory;
 		this.request = request;
 		headers = new HttpHeaders(new JettyHeadersAdapter(request.getHeaders()));
-		path = RequestPath.parse(request.getHttpURI().getCanonicalPath(), request.getContext().getContextPath());
+		path = RequestPath.parse(request.getHttpURI().getPath(), request.getContext().getContextPath());
 	}
 
 	@Override
