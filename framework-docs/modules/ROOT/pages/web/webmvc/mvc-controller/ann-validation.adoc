@@ -8,23 +8,23 @@ Spring MVC has built-in xref:core/validation/validator.adoc[Validation] support 
 xref:core/validation/beanvalidation.adoc[Java Bean Validation].
 The validation support works on two levels.
 
-First, method parameters such as
+First, resolvers for
 xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[@ModelAttribute],
 xref:web/webmvc/mvc-controller/ann-methods/requestbody.adoc[@RequestBody], and
-xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[@RequestPart] do perform
-validation if annotated with Jakarta's `@Valid` or Spring's `@Validated` annotation, and
-raise `MethodArgumentNotValidException` in case of validation errors. If you want to handle
-the errors in the controller method instead, you can declare an `Errors` or `BindingResult`
-method parameter immediately after the validated parameter.
+xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[@RequestPart] method
+parameters perform validation if the parameter has Jakarta's `@Valid` or Spring's
+`@Validated` annotation, and raise `MethodArgumentNotValidException` if necessary.
+Alternatively, you can handle the errors in the controller method by adding an
+`Errors` or `BindingResult` method parameter immediately after the validated one.
 
-Second, if {bean-validation-site}[Java Bean Validation] is present _AND_ other method
-parameters, e.g. `@RequestHeader`, `@RequestParam`, `@PathVariable` have `@Constraint`
-annotations, then method validation is applied to all method arguments, raising
-`HandlerMethodValidationException` in case of validation errors. You can still declare an
-`Errors` or `BindingResult` after an `@Valid` method parameter, and handle validation
-errors within the controller method, as long as there are no validation errors on other
-method arguments. Method validation is also applied to the return value if the method
-is annotated with `@Valid` or has other `@Constraint` annotations.
+Second, if {bean-validation-site}[Java Bean Validation] is present _AND_ any method
+parameter has `@Constraint` annotations, then method validation is applied instead,
+raising `HandlerMethodValidationException` if necessary. For this case you can still add
+an `Errors` or `BindingResult` method parameter to handle validation errors within the
+controller method, but if other method arguments have validation errors then
+`HandlerMethodValidationException` is raised instead. Method validation can apply
+to the return value if the method is annotated with `@Valid` or with `@Constraint`
+annotations.
 
 You can configure a `Validator` globally through the
 xref:web/webmvc/mvc-config/validation.adoc[WebMvc config], or locally through an
