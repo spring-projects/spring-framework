@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * actually invoking the controller method. This is useful when processing
 	 * async return values (e.g. Callable, DeferredResult, ListenableFuture).
 	 */
-	ServletInvocableHandlerMethod wrapConcurrentResult(Object result) {
+	ServletInvocableHandlerMethod wrapConcurrentResult(@Nullable Object result) {
 		return new ConcurrentResultHandlerMethod(result, new ConcurrentResultMethodParameter(result));
 	}
 
@@ -214,7 +214,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		private final MethodParameter returnType;
 
-		public ConcurrentResultHandlerMethod(final Object result, ConcurrentResultMethodParameter returnType) {
+		public ConcurrentResultHandlerMethod(@Nullable Object result, ConcurrentResultMethodParameter returnType) {
 			super((Callable<Object>) () -> {
 				if (result instanceof Exception) {
 					throw (Exception) result;
@@ -278,7 +278,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		private final ResolvableType returnType;
 
-		public ConcurrentResultMethodParameter(Object returnValue) {
+		public ConcurrentResultMethodParameter(@Nullable Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
 			this.returnType = (returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
