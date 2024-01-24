@@ -16,13 +16,10 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+
 import org.springframework.http.server.reactive.JettyCoreHttpHandlerAdapter;
-import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 
 /**
  * @author Rossen Stoyanchev

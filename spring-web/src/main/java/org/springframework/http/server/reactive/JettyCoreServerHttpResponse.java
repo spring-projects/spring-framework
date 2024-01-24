@@ -40,6 +40,9 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.IteratingCallback;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -51,8 +54,6 @@ import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}
@@ -61,12 +62,13 @@ import reactor.core.publisher.Mono;
  * @author Lachlan Roberts
  * @since 6.2
  */
-class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage
-{
+class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage {
 	private final AtomicBoolean committed = new AtomicBoolean(false);
+
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
 
 	private final Response response;
+
 	private final HttpHeaders headers;
 
 	@Nullable
@@ -98,8 +100,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	}
 
 	@Override
-	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body)
-	{
+	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return Flux.from(body)
 				.flatMap(this::sendDataBuffer, 1)
 				.then();
@@ -124,38 +125,32 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	}
 
 	@Override
-	public Mono<Void> writeWith(Path file, long position, long count)
-	{
+	public Mono<Void> writeWith(Path file, long position, long count) {
 		Mono<Void> mono = ensureCommitted();
 		if (mono != null)
 			return mono.then(Mono.defer(() -> writeWith(file, position, count)));
 
 		Callback.Completable callback = new Callback.Completable();
 		mono = Mono.fromFuture(callback);
-		try
-		{
+		try {
 			// TODO: Why does intellij warn about possible blocking call?
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
 			new ContentWriterIteratingCallback(channel, position, count, response, callback).iterate();
 		}
-		catch (Throwable t)
-		{
+		catch (Throwable t) {
 			callback.failed(t);
 		}
 		return mono;
 	}
 
 	@Nullable
-	private Mono<Void> ensureCommitted()
-	{
-		if (committed.compareAndSet(false, true))
-		{
-			if (!this.commitActions.isEmpty())
-			{
+	private Mono<Void> ensureCommitted() {
+		if (committed.compareAndSet(false, true)) {
+			if (!this.commitActions.isEmpty()) {
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-					.concatWith(Mono.fromRunnable(this::doCommit))
-					.then()
-					.doOnError(t -> getHeaders().clearContentHeaders());
+						.concatWith(Mono.fromRunnable(this::doCommit))
+						.then()
+						.doOnError(t -> getHeaders().clearContentHeaders());
 			}
 
 			doCommit();
@@ -164,14 +159,12 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		return null;
 	}
 
-	private void doCommit()
-	{
-		if (cookies != null)
-		{
+	private void doCommit() {
+		if (cookies != null) {
 			// TODO: are we doubling up on cookies already existing in response?
 			cookies.values().stream()
-				.flatMap(List::stream)
-				.forEach(cookie -> Response.addCookie(response, new HttpResponseCookie(cookie)));
+					.flatMap(List::stream)
+					.forEach(cookie -> Response.addCookie(response, new HttpResponseCookie(cookie)));
 		}
 	}
 
@@ -183,11 +176,9 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		@SuppressWarnings("resource")
 		DataBuffer.ByteBufferIterator byteBufferIterator = dataBuffer.readableByteBuffers();
 		Callback.Completable callback = new Callback.Completable();
-		new IteratingCallback()
-		{
+		new IteratingCallback() {
 			@Override
-			protected Action process()
-			{
+			protected Action process() {
 				if (!byteBufferIterator.hasNext())
 					return Action.SUCCEEDED;
 				response.write(false, byteBufferIterator.next(), this);
@@ -195,15 +186,13 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			}
 
 			@Override
-			protected void onCompleteSuccess()
-			{
+			protected void onCompleteSuccess() {
 				byteBufferIterator.close();
 				callback.complete(null);
 			}
 
 			@Override
-			protected void onCompleteFailure(Throwable cause)
-			{
+			protected void onCompleteFailure(Throwable cause) {
 				byteBufferIterator.close();
 				callback.failed(cause);
 			}
@@ -247,8 +236,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		cookies.add(cookie.getName(), cookie);
 	}
 
-	private void initializeCookies()
-	{
+	private void initializeCookies() {
 		cookies = new LinkedMultiValueMap<>();
 		for (HttpField f : response.getHeaders()) {
 			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie)
@@ -333,17 +321,20 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		}
 	}
 
-	private static class ContentWriterIteratingCallback extends IteratingCallback
-	{
+	private static class ContentWriterIteratingCallback extends IteratingCallback {
 		private final SeekableByteChannel source;
+
 		private final Content.Sink sink;
+
 		private final Callback callback;
+
 		private final RetainableByteBuffer buffer;
+
 		private final long length;
+
 		private long totalRead = 0;
 
-		public ContentWriterIteratingCallback(SeekableByteChannel content, long position, long count, Response target, Callback callback) throws IOException
-		{
+		public ContentWriterIteratingCallback(SeekableByteChannel content, long position, long count, Response target, Callback callback) throws IOException {
 			this.source = content;
 			this.sink = target;
 			this.callback = callback;
@@ -357,17 +348,15 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		}
 
 		@Override
-		protected Action process() throws Throwable
-		{
+		protected Action process() throws Throwable {
 			if (!source.isOpen() || totalRead == length)
 				return Action.SUCCEEDED;
 
 			ByteBuffer byteBuffer = buffer.getByteBuffer();
 			BufferUtil.clearToFill(byteBuffer);
-			byteBuffer.limit((int)Math.min(buffer.capacity(), length - totalRead));
+			byteBuffer.limit((int) Math.min(buffer.capacity(), length - totalRead));
 			int read = source.read(byteBuffer);
-			if (read == -1)
-			{
+			if (read == -1) {
 				IO.close(source);
 				sink.write(true, BufferUtil.EMPTY_BUFFER, this);
 				return Action.SCHEDULED;
@@ -379,16 +368,14 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		}
 
 		@Override
-		protected void onCompleteSuccess()
-		{
+		protected void onCompleteSuccess() {
 			buffer.release();
 			IO.close(source);
 			callback.succeeded();
 		}
 
 		@Override
-		protected void onCompleteFailure(Throwable x)
-		{
+		protected void onCompleteFailure(Throwable x) {
 			buffer.release();
 			IO.close(source);
 			callback.failed(x);
