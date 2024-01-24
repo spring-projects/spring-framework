@@ -35,7 +35,6 @@ import org.springframework.util.Assert;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 
-
 /**
  * A {@link ClientHttpRequestFactory} for requests executed via {@link MockMvc}.
  *
