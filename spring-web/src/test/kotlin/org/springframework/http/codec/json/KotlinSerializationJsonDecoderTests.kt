@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,23 +69,44 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 
 	@Test
 	override fun decode() {
-		val output = decoder.decode(Mono.empty(), ResolvableType.forClass(Pojo::class.java), null, emptyMap())
-		StepVerifier
-				.create(output)
-				.expectError(UnsupportedOperationException::class.java)
-	}
-
-
-	@Test
-	fun decodeStream() {
 		val input = Flux.concat(
 			stringBuffer("{\"bar\":\"b1\",\"foo\":\"f1\"}\n"),
 			stringBuffer("{\"bar\":\"b2\",\"foo\":\"f2\"}\n")
 		)
 
-		testDecodeAll(input, ResolvableType.forClass(Pojo::class.java), { step: FirstStep<Any> ->
-			step
-				.expectNext(Pojo("f1", "b1"))
+		testDecodeAll(input, ResolvableType.forClass(Pojo::class.java), {
+			it.expectNext(Pojo("f1", "b1"))
+				.expectNext(Pojo("f2", "b2"))
+				.expectComplete()
+				.verify()
+		}, null, null)
+	}
+
+	@Test
+	fun decodeStreamWithSingleBuffer() {
+		val input = Flux.concat(
+			stringBuffer("{\"bar\":\"b1\",\"foo\":\"f1\"}\n{\"bar\":\"b2\",\"foo\":\"f2\"}\n"),
+		)
+
+		testDecodeAll(input, ResolvableType.forClass(Pojo::class.java), {
+			it.expectNext(Pojo("f1", "b1"))
+				.expectNext(Pojo("f2", "b2"))
+				.expectComplete()
+				.verify()
+		}, null, null)
+	}
+
+	@Test
+	fun decodeStreamWithMultipleBuffersPerElement() {
+		val input = Flux.concat(
+			stringBuffer("{\"bar\":\"b1\","),
+			stringBuffer("\"foo\":\"f1\"}\n"),
+			stringBuffer("{\""),
+			stringBuffer("bar\":\"b2\",\"foo\":\"f2\"}\n")
+		)
+
+		testDecodeAll(input, ResolvableType.forClass(Pojo::class.java), {
+			it.expectNext(Pojo("f1", "b1"))
 				.expectNext(Pojo("f2", "b2"))
 				.expectComplete()
 				.verify()
@@ -100,11 +121,10 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 
 		val elementType = ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java)
 
-		testDecodeToMonoAll(input, elementType, { step: FirstStep<Any> ->
-			step
-					.expectNext(listOf(Pojo("f1", "b1"), Pojo("f2", "b2")))
-					.expectComplete()
-					.verify()
+		testDecodeToMonoAll(input, elementType, {
+			it.expectNext(listOf(Pojo("f1", "b1"), Pojo("f2", "b2")))
+				.expectComplete()
+				.verify()
 		}, null, null)
 	}
 

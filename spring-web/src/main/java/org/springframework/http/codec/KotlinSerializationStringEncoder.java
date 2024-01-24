@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.http.codec;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import kotlin.text.Charsets;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.StringFormat;
 import org.reactivestreams.Publisher;
-import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +35,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.EncodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
@@ -87,9 +91,10 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 					.flux();
 		}
 
-		if (mimeType != null && streamingMediaTypes.contains(mimeType)) {
+		if (mimeType != null && this.streamingMediaTypes.contains(mimeType)) {
 			return Flux.from(inputStream)
-					.map(list -> encodeValue(list, bufferFactory, elementType, mimeType, hints).write("\n", Charsets.UTF_8));
+					.map(list -> encodeValue(list, bufferFactory, elementType, mimeType, hints)
+							.write("\n", Charsets.UTF_8));
 		}
 
 		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.http.codec;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.StringFormat;
@@ -92,8 +93,7 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			@Nullable MimeType mimeType,
-			@Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		return Flux.defer(() -> {
 			KSerializer<Object> serializer = serializer(elementType);
 			if (serializer == null) {
@@ -107,7 +107,7 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-										@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		return Mono.defer(() -> {
 			KSerializer<Object> serializer = serializer(elementType);
 			if (serializer == null) {

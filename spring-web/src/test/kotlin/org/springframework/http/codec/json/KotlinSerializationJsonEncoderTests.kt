@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,30 +69,30 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 			Pojo("foofoo", "barbar"),
 			Pojo("foofoofoo", "barbarbar")
 		)
-		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
-			.consumeNextWith(expectString("[" +
-					"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
-					"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
-					"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
-				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
-			.verifyComplete()
-		})
+		testEncode(input, Pojo::class.java) {
+			it.consumeNextWith(expectString("[" +
+						"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
+						"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
+						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
+				.andThen { dataBuffer -> DataBufferUtils.release(dataBuffer) })
+				.verifyComplete()
+		}
 	}
+
 	@Test
 	fun encodeStream() {
 		val input = Flux.just(
-				Pojo("foo", "bar"),
-				Pojo("foofoo", "barbar"),
-				Pojo("foofoofoo", "barbarbar")
+			Pojo("foo", "bar"),
+			Pojo("foofoo", "barbar"),
+			Pojo("foofoofoo", "barbarbar")
 		)
 		testEncodeAll(
 			input,
 			ResolvableType.forClass(Pojo::class.java),
 			MediaType.APPLICATION_NDJSON,
 			null
-		) { step: FirstStep<DataBuffer?> ->
-			step
-				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+		) {
+			it.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
 				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
 				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
 				.verifyComplete()
@@ -102,11 +102,11 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 	@Test
 	fun encodeMono() {
 		val input = Mono.just(Pojo("foo", "bar"))
-		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
-			.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}")
+		testEncode(input, Pojo::class.java) {
+			it.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}")
 				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
 			.verifyComplete()
-		})
+		}
 	}
 
 	@Test
