@@ -40,10 +40,10 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 	public JettyCoreHttpHandlerAdapter(HttpHandler httpHandler) {
 		this.httpHandler = httpHandler;
 
-		// TODO currently we do not make a DataBufferFactory over the servers ByteBufferPool,
-		//      because we mainly use wrap and there should be few allocation done by the factory.
-		//      But it should be possible to use the servers buffer pool for allocations and to
-		//      create PooledDataBuffers
+		// Currently we do not make a DataBufferFactory over the servers ByteBufferPool,
+		// because we mainly use wrap and there should be few allocation done by the factory.
+		// But it could be possible to use the servers buffer pool for allocations and to
+		// create PooledDataBuffers
 		dataBufferFactory = new DefaultDataBufferFactory();
 	}
 
