@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -42,57 +41,37 @@ import org.springframework.util.MultiValueMap;
  * @see <a href="https://github.com/jetty-project/jetty-reactive-httpclient">
  *     Jetty ReactiveStreams HttpClient</a>
  */
-class JettyClientHttpResponse implements ClientHttpResponse {
+class JettyClientHttpResponse extends AbstractClientHttpResponse {
 
 	private static final Pattern SAMESITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
 
-	private final ReactiveResponse reactiveResponse;
+	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Flux<DataBuffer> content) {
 
-	private final Flux<DataBuffer> content;
-
-	private final HttpHeaders headers;
-
-
-	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Publisher<DataBuffer> content) {
-		this.reactiveResponse = reactiveResponse;
-		this.content = Flux.from(content);
-
-		MultiValueMap<String, String> headers = (Jetty10HttpFieldsHelper.jetty10Present() ?
-				Jetty10HttpFieldsHelper.getHttpHeaders(reactiveResponse.getResponse()) :
-				new JettyHeadersAdapter(reactiveResponse.getHeaders()));
-
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+		super(reactiveResponse.getStatus(),
+				adaptHeaders(reactiveResponse),
+				adaptCookies(reactiveResponse),
+				content);
 	}
 
-
-	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(getRawStatusCode());
+	private static HttpHeaders adaptHeaders(ReactiveResponse response) {
+		MultiValueMap<String, String> headers = new JettyHeadersAdapter(response.getHeaders());
+		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
-
-	@Override
-	public int getRawStatusCode() {
-		return this.reactiveResponse.getStatus();
-	}
-
-	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
+	private static MultiValueMap<String, ResponseCookie> adaptCookies(ReactiveResponse response) {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
-		if (cookieHeader != null) {
-			cookieHeader.forEach(header ->
-					HttpCookie.parse(header).forEach(cookie -> result.add(cookie.getName(),
+		List<HttpField> cookieHeaders = response.getHeaders().getFields(HttpHeaders.SET_COOKIE);
+		cookieHeaders.forEach(header ->
+					HttpCookie.parse(header.getValue()).forEach(cookie -> result.add(cookie.getName(),
 							ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
 									.domain(cookie.getDomain())
 									.path(cookie.getPath())
 									.maxAge(cookie.getMaxAge())
 									.secure(cookie.getSecure())
 									.httpOnly(cookie.isHttpOnly())
-									.sameSite(parseSameSite(header))
+									.sameSite(parseSameSite(header.getValue()))
 									.build()))
 			);
-		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
@@ -100,17 +79,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	private static String parseSameSite(String headerValue) {
 		Matcher matcher = SAMESITE_PATTERN.matcher(headerValue);
 		return (matcher.matches() ? matcher.group(1) : null);
-	}
-
-
-	@Override
-	public Flux<DataBuffer> getBody() {
-		return this.content;
-	}
-
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.headers;
 	}
 
 }
