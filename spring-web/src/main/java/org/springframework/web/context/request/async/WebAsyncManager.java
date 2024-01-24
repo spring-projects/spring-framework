@@ -166,6 +166,7 @@ public final class WebAsyncManager {
 	 * concurrent handling raised one.
 	 * @see #clearConcurrentResult()
 	 */
+	@Nullable
 	public Object getConcurrentResult() {
 		return this.concurrentResult;
 	}

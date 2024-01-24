@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -905,7 +906,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();
-			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+			Object[] resultContext = asyncManager.getConcurrentResultContext();
+			Assert.state(resultContext != null && resultContext.length > 0, "Missing result context");
+			mavContainer = (ModelAndViewContainer) resultContext[0];
 			asyncManager.clearConcurrentResult();
 			LogFormatUtils.traceDebug(logger, traceOn -> {
 				String formatted = LogFormatUtils.formatValue(result, !traceOn);
