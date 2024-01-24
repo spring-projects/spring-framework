@@ -16,18 +16,18 @@
 
 package org.springframework.http.server.reactive;
 
-import org.eclipse.jetty.io.Retainable;
-import org.eclipse.jetty.server.Response;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.PooledDataBuffer;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntPredicate;
+
+import org.eclipse.jetty.io.Retainable;
+
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 
 /**
  * Adapt an Eclipse Jetty {@link Retainable} to a {@link PooledDataBuffer}
@@ -38,7 +38,9 @@ import java.util.function.IntPredicate;
  */
 public class JettyRetainedDataBuffer implements PooledDataBuffer {
 	private final Retainable retainable;
+
 	private final DataBuffer dataBuffer;
+
 	private final AtomicBoolean allocated = new AtomicBoolean(true);
 
 	public JettyRetainedDataBuffer(DataBuffer dataBuffer, Retainable retainable) {

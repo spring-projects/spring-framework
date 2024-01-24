@@ -16,11 +16,21 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.regex.Matcher;
+
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.util.StringUtil;
 import org.reactivestreams.FlowAdapters;
+import reactor.core.publisher.Flux;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
@@ -33,15 +43,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
-
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.regex.Matcher;
 
 import static org.springframework.http.server.reactive.AbstractServerHttpRequest.QUERY_PATTERN;
 
@@ -53,15 +54,23 @@ import static org.springframework.http.server.reactive.AbstractServerHttpRequest
  */
 class JettyCoreServerHttpRequest implements ServerHttpRequest {
 	private final static MultiValueMap<String, String> EMPTY_QUERY = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
+
 	private final static MultiValueMap<String, HttpCookie> EMPTY_COOKIES = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
+
 	private final DataBufferFactory dataBufferFactory;
+
 	private final Request request;
+
 	private final HttpHeaders headers;
+
 	private final RequestPath path;
+
 	@Nullable
 	private URI uri;
+
 	@Nullable
 	MultiValueMap<String, String> queryParameters;
+
 	@Nullable
 	private MultiValueMap<String, HttpCookie> cookies;
 
