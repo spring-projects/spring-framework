@@ -22,8 +22,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.Request;
@@ -189,6 +191,12 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public Builder mutate() {
-		return ServerHttpRequest.super.mutate();
+		return new DefaultServerHttpRequestBuilder(this.getURI(),
+						new HttpHeaders(new JettyHeadersAdapter(HttpFields.build(request.getHeaders()))),
+						this.getMethod(),
+						this.getPath().contextPath().value(),
+						this.getRemoteAddress(),
+						this.getBody(),
+						Objects.requireNonNull(this, "ServerHttpRequest is required"));
 	}
 }
