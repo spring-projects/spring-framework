@@ -211,7 +211,8 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public HttpStatusCode getStatusCode() {
-		return HttpStatusCode.valueOf(response.getStatus());
+		int status = response.getStatus();
+		return HttpStatusCode.valueOf(status == 0 ? 200 : status);
 	}
 
 	@Override
