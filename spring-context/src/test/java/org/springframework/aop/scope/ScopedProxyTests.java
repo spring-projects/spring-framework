@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,7 @@ class ScopedProxyTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(MAP_CONTEXT);
 		Object baseMap = bf.getBean("singletonMap");
-		boolean condition = baseMap instanceof Map;
-		assertThat(condition).isTrue();
+		assertThat(baseMap instanceof Map).isTrue();
 	}
 
 	@Test
@@ -64,10 +63,8 @@ class ScopedProxyTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(MAP_CONTEXT);
 		Object simpleMap = bf.getBean("simpleMap");
-		boolean condition1 = simpleMap instanceof Map;
-		assertThat(condition1).isTrue();
-		boolean condition = simpleMap instanceof HashMap;
-		assertThat(condition).isTrue();
+		assertThat(simpleMap instanceof Map).isTrue();
+		assertThat(simpleMap instanceof HashMap).isTrue();
 	}
 
 	@Test
@@ -97,8 +94,7 @@ class ScopedProxyTests {
 		ITestBean bean = (ITestBean) bf.getBean("testBean");
 		assertThat(bean).isNotNull();
 		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
-		boolean condition1 = bean instanceof ScopedObject;
-		assertThat(condition1).isTrue();
+		assertThat(bean instanceof ScopedObject).isTrue();
 		ScopedObject scoped = (ScopedObject) bean;
 		assertThat(scoped.getTargetObject().getClass()).isEqualTo(TestBean.class);
 		bean.setAge(101);
@@ -110,8 +106,7 @@ class ScopedProxyTests {
 		assertThat(deserialized).isNotNull();
 		assertThat(AopUtils.isJdkDynamicProxy(deserialized)).isTrue();
 		assertThat(bean.getAge()).isEqualTo(101);
-		boolean condition = deserialized instanceof ScopedObject;
-		assertThat(condition).isTrue();
+		assertThat(deserialized instanceof ScopedObject).isTrue();
 		ScopedObject scopedDeserialized = (ScopedObject) deserialized;
 		assertThat(scopedDeserialized.getTargetObject().getClass()).isEqualTo(TestBean.class);
 
@@ -128,8 +123,7 @@ class ScopedProxyTests {
 
 		TestBean tb = (TestBean) bf.getBean("testBean");
 		assertThat(AopUtils.isCglibProxy(tb.getFriends())).isTrue();
-		boolean condition1 = tb.getFriends() instanceof ScopedObject;
-		assertThat(condition1).isTrue();
+		assertThat(tb.getFriends() instanceof ScopedObject).isTrue();
 		ScopedObject scoped = (ScopedObject) tb.getFriends();
 		assertThat(scoped.getTargetObject().getClass()).isEqualTo(ArrayList.class);
 		tb.getFriends().add("myFriend");
@@ -141,8 +135,7 @@ class ScopedProxyTests {
 		assertThat(deserialized).isNotNull();
 		assertThat(AopUtils.isCglibProxy(deserialized)).isTrue();
 		assertThat(deserialized).contains("myFriend");
-		boolean condition = deserialized instanceof ScopedObject;
-		assertThat(condition).isTrue();
+		assertThat(deserialized instanceof ScopedObject).isTrue();
 		ScopedObject scopedDeserialized = (ScopedObject) deserialized;
 		assertThat(scopedDeserialized.getTargetObject().getClass()).isEqualTo(ArrayList.class);
 

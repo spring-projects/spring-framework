@@ -375,9 +375,8 @@ class SimpleAliasRegistryTests {
 
 		@Override
 		public String resolveStringValue(String str) {
-			return (this.placeholders.getOrDefault(str, str));
+			return this.placeholders.getOrDefault(str, str);
 		}
-
 	}
 
 }
