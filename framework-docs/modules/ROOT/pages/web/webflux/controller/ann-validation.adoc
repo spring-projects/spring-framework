@@ -3,7 +3,7 @@
 
 [.small]#xref:web/webmvc/mvc-controller/ann-validation.adoc[See equivalent in the Servlet stack]#
 
-Spring MVC has built-in xref:core/validation/validator.adoc[Validation] support for
+Spring WebFlux has built-in xref:core/validation/validator.adoc[Validation] support for
 `@RequestMapping` methods, including the option to use
 xref:core/validation/beanvalidation.adoc[Java Bean Validation].
 The validation support works on two levels.
