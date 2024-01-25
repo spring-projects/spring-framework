@@ -177,7 +177,11 @@ final class DefaultWebClient implements WebClient {
 	}
 
 	private RequestBodyUriSpec methodInternal(HttpMethod httpMethod) {
-		return new DefaultRequestBodyUriSpec(httpMethod);
+		DefaultRequestBodyUriSpec spec = new DefaultRequestBodyUriSpec(httpMethod);
+		if (this.defaultRequest != null) {
+			this.defaultRequest.accept(spec);
+		}
+		return spec;
 	}
 
 	@Override
@@ -479,9 +483,6 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
-			if (defaultRequest != null) {
-				defaultRequest.accept(this);
-			}
 			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
 					.headers(this::initHeaders)
 					.cookies(this::initCookies)
