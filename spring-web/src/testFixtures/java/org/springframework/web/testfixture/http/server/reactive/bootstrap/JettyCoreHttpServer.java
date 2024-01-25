@@ -16,6 +16,7 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
+import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
@@ -29,12 +30,14 @@ import org.springframework.http.server.reactive.JettyCoreHttpHandlerAdapter;
  */
 public class JettyCoreHttpServer extends AbstractHttpServer {
 
+	private ArrayByteBufferPool.Tracking byteBufferPool; // TODO remove
 	private Server jettyServer;
 
 
 	@Override
 	protected void initServer() {
-		this.jettyServer = new Server();
+		this.byteBufferPool = new ArrayByteBufferPool.Tracking();
+		this.jettyServer = new Server(null, null, byteBufferPool);
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);
 		connector.setHost(getHost());
@@ -62,6 +65,11 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 		catch (Exception ex) {
 			// ignore
 		}
+
+		// TODO remove this or make debug only
+		this.byteBufferPool.dumpLeaks();
+		if (!this.byteBufferPool.getLeaks().isEmpty())
+			throw new IllegalStateException("LEAKS");
 	}
 
 	@Override
