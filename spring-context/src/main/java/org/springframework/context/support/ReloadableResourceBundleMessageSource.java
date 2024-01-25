@@ -257,29 +257,42 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return mergedHolder;
 		}
 
-		Properties mergedProps = newProperties();
-		long latestTimestamp = -1;
+		List<PropertiesHolder> holders = collectPropertiesToMerge(locale);
+
+		mergedHolder = merge(holders);
+		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
+		if (existing != null) {
+			mergedHolder = existing;
+		}
+		return mergedHolder;
+	}
+
+	protected List<PropertiesHolder> collectPropertiesToMerge(Locale locale) {
 		String[] basenames = StringUtils.toStringArray(getBasenameSet());
+		List<PropertiesHolder> holders = new ArrayList<>(basenames.length);
 		for (int i = basenames.length - 1; i >= 0; i--) {
 			List<String> filenames = calculateAllFilenames(basenames[i], locale);
 			for (int j = filenames.size() - 1; j >= 0; j--) {
 				String filename = filenames.get(j);
 				PropertiesHolder propHolder = getProperties(filename);
 				if (propHolder.getProperties() != null) {
-					mergedProps.putAll(propHolder.getProperties());
-					if (propHolder.getFileTimestamp() > latestTimestamp) {
-						latestTimestamp = propHolder.getFileTimestamp();
-					}
+					holders.add(propHolder);
 				}
 			}
 		}
+		return holders;
+	}
 
-		mergedHolder = new PropertiesHolder(mergedProps, latestTimestamp);
-		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
-		if (existing != null) {
-			mergedHolder = existing;
+	protected PropertiesHolder merge(List<PropertiesHolder> holders) {
+		Properties mergedProps = newProperties();
+		long latestTimestamp = -1;
+		for (PropertiesHolder holder : holders) {
+			mergedProps.putAll(holder.getProperties());
+			if (holder.getFileTimestamp() > latestTimestamp) {
+				latestTimestamp = holder.getFileTimestamp();
+			}
 		}
-		return mergedHolder;
+		return new PropertiesHolder(mergedProps, latestTimestamp);
 	}
 
 	/**
