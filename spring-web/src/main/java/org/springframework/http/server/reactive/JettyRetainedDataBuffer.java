@@ -46,6 +46,7 @@ public class JettyRetainedDataBuffer implements PooledDataBuffer {
 	public JettyRetainedDataBuffer(DataBuffer dataBuffer, Retainable retainable) {
 		this.dataBuffer = dataBuffer;
 		this.retainable = retainable;
+		this.retainable.retain();
 	}
 
 	@Override
