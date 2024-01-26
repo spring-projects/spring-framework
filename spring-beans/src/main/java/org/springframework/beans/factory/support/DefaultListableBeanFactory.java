@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 16 April 2001
  * @see #registerBeanDefinition
  * @see #addBeanPostProcessor
@@ -1038,7 +1039,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							"] with [" + beanDefinition + "]");
 				}
 			}
-			this.beanDefinitionMap.put(beanName, beanDefinition);
+			if (existingDefinition.isPrimary() && !beanDefinition.isPrimary()) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Skip overriding user-defined primary bean definition for bean '" + beanName +
+							"' with a non-primary bean definition: skip replacing [" +
+							existingDefinition + "] with [" + beanDefinition + "]");
+				}
+			}
+			else {
+				this.beanDefinitionMap.put(beanName, beanDefinition);
+			}
 		}
 		else {
 			if (isAlias(beanName)) {

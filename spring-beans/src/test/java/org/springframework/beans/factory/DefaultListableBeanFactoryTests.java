@@ -115,6 +115,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 class DefaultListableBeanFactoryTests {
 
@@ -2923,6 +2924,21 @@ class DefaultListableBeanFactoryTests {
 		assertThat(holder.getNonPublicEnum()).isEqualTo(NonPublicEnum.VALUE_1);
 	}
 
+	@Test
+	void nonPrimaryShouldNotOverridePrimaryBeanDefinition() {
+		String beanName = "myBean";
+
+		BeanDefinition existingDefinition = new GenericBeanDefinition();
+		existingDefinition.setPrimary(true);
+		existingDefinition.setBeanClassName(String.class.getName());
+		lbf.registerBeanDefinition(beanName, existingDefinition);
+
+		BeanDefinition beanDefinition = new GenericBeanDefinition();
+		beanDefinition.setBeanClassName(String.class.getName());
+		lbf.registerBeanDefinition(beanName, beanDefinition);
+
+		assertThat(lbf.getBeanDefinition(beanName).isPrimary()).isTrue();
+	}
 
 	private int registerBeanDefinitions(Properties p) {
 		return registerBeanDefinitions(p, null);
