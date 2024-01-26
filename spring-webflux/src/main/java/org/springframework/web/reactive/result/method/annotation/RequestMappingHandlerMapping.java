@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -152,42 +154,59 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
-	 * and {@link HttpExchange @HttpExchange} annotations to create the
-	 * {@link RequestMappingInfo}.
-	 * @return the created {@code RequestMappingInfo}, or {@code null} if the method
+	 * and {@link HttpExchange @HttpExchange} annotations to create the list
+	 * of {@link RequestMappingInfo}.
+	 * @return the created list of {@code RequestMappingInfo}, or an empty list if the method
 	 * does not have a {@code @RequestMapping} or {@code @HttpExchange} annotation
 	 * @see #getCustomMethodCondition(Method)
 	 * @see #getCustomTypeCondition(Class)
 	 */
 	@Override
-	@Nullable
-	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		RequestMappingInfo info = createRequestMappingInfo(method);
-		if (info != null) {
-			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
-			if (typeInfo != null) {
-				info = typeInfo.combine(info);
-			}
-			if (info.getPatternsCondition().isEmptyPathMapping()) {
-				info = info.mutate().paths("", "/").options(this.config).build();
-			}
-			for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
-				if (entry.getValue().test(handlerType)) {
-					String prefix = entry.getKey();
-					if (this.embeddedValueResolver != null) {
-						prefix = this.embeddedValueResolver.resolveStringValue(prefix);
+	@NonNull
+	protected List<RequestMappingInfo> getListMappingsForMethod(Method method, Class<?> handlerType) {
+		List<RequestMappingInfo> result = new ArrayList<>();
+		List<RequestMappingInfo> infos = buildListOfRequestMappingInfo(method);
+		if (!infos.isEmpty()) {
+			List<RequestMappingInfo> typeInfos = buildListOfRequestMappingInfo(handlerType);
+			if (!typeInfos.isEmpty()) {
+				List<RequestMappingInfo> requestMappingInfos = new ArrayList<>();
+				for (RequestMappingInfo info : infos) {
+					for (RequestMappingInfo typeInfo : typeInfos) {
+						requestMappingInfos.add(typeInfo.combine(info));
 					}
-					info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
-					break;
+				}
+				infos = requestMappingInfos;
+			}
+			for (RequestMappingInfo info : infos) {
+				if (info.getPatternsCondition().isEmptyPathMapping()) {
+					info = info.mutate().paths("", "/").options(this.config).build();
+				}
+
+				result.add(info);
+			}
+
+			for (int idx = 0; idx < result.size(); idx++) {
+				RequestMappingInfo info = result.get(idx);
+
+				for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
+					if (entry.getValue().test(handlerType)) {
+						String prefix = entry.getKey();
+						if (this.embeddedValueResolver != null) {
+							prefix = this.embeddedValueResolver.resolveStringValue(prefix);
+						}
+						info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
+						result.set(idx, info);
+						break;
+					}
 				}
 			}
 		}
-		return info;
+		return Collections.unmodifiableList(result);
 	}
 
-	@Nullable
-	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
-		RequestMappingInfo requestMappingInfo = null;
+	@NonNull
+	private List<RequestMappingInfo> buildListOfRequestMappingInfo(AnnotatedElement element) {
+		List<RequestMappingInfo> requestMappingInfos = new ArrayList<>();
 		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
 
@@ -200,22 +219,25 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
 						.formatted(element, requestMappings));
 			}
-			requestMappingInfo = createRequestMappingInfo((RequestMapping) requestMappings.get(0).annotation, customCondition);
+
+			for (AnnotationDescriptor requestMapping : requestMappings) {
+				requestMappingInfos.add(createRequestMappingInfo((RequestMapping) requestMapping.annotation, customCondition));
+			}
 		}
 
 		List<AnnotationDescriptor> httpExchanges = descriptors.stream()
 				.filter(desc -> desc.annotation instanceof HttpExchange).toList();
 		if (!httpExchanges.isEmpty()) {
-			Assert.state(requestMappingInfo == null,
+			Assert.state(requestMappings.isEmpty(),
 					() -> "%s is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed: %s"
 							.formatted(element, Stream.of(requestMappings, httpExchanges).flatMap(List::stream).toList()));
-			Assert.state(httpExchanges.size() == 1,
-					() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
-							.formatted(element, httpExchanges));
-			requestMappingInfo = createRequestMappingInfo((HttpExchange) httpExchanges.get(0).annotation, customCondition);
+
+			for (AnnotationDescriptor httpExchange : httpExchanges) {
+				requestMappingInfos.add(createRequestMappingInfo((HttpExchange) httpExchange.annotation, customCondition));
+			}
 		}
 
-		return requestMappingInfo;
+		return Collections.unmodifiableList(requestMappingInfos);
 	}
 
 	/**

@@ -16,18 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -44,13 +34,27 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
+import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
 import org.springframework.web.reactive.result.condition.MediaTypeExpression;
+import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
+import org.springframework.web.reactive.result.condition.PatternsRequestCondition;
+import org.springframework.web.reactive.result.condition.ProducesRequestCondition;
+import org.springframework.web.reactive.result.condition.RequestMethodsRequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
 import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternParser;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -92,10 +96,14 @@ class RequestMappingHandlerMappingTests {
 		this.handlerMapping.setPathPrefixes(Map.of("/${prefix}", HandlerTypePredicate.forAnnotation(RestController.class)));
 
 		Method method = ReflectionUtils.findMethod(UserController.class, "getUser");
-		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, UserController.class);
+		List<RequestMappingInfo> infos = this.handlerMapping.getListMappingsForMethod(method, UserController.class);
 
-		assertThat(info).isNotNull();
-		assertThat(info.getPatternsCondition().getPatterns()).containsOnly(new PathPatternParser().parse("/api/user/{id}"));
+		assertThat(infos).isNotEmpty();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
+				.flatExtracting(PathPattern::getPatternString)
+				.containsOnly("/api/user/{id}");
 	}
 
 	@Test
@@ -162,13 +170,14 @@ class RequestMappingHandlerMappingTests {
 		Class<?> controllerClass = MultipleClassLevelAnnotationsHttpExchangeController.class;
 		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
-		assertThatIllegalStateException()
-				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
-				.withMessageContainingAll(
-					"Multiple @HttpExchange annotations found on " + controllerClass,
-					HttpExchange.class.getSimpleName(),
-					ExtraHttpExchange.class.getSimpleName()
-				);
+		List<RequestMappingInfo> infos = this.handlerMapping.getListMappingsForMethod(method, controllerClass);
+
+		assertThat(infos.size()).isEqualTo(2);
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
+				.flatExtracting(PathPattern::getPatternString)
+				.containsOnly("/exchange/post", "/post");
 	}
 
 	@Test  // gh-32049
@@ -178,13 +187,13 @@ class RequestMappingHandlerMappingTests {
 		Class<?> controllerClass = MultipleMethodLevelAnnotationsHttpExchangeController.class;
 		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
-		assertThatIllegalStateException()
-				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
-				.withMessageContainingAll(
-					"Multiple @HttpExchange annotations found on " + method,
-					PostExchange.class.getSimpleName(),
-					PutExchange.class.getSimpleName()
-				);
+		List<RequestMappingInfo> mappingInfos = this.handlerMapping.getListMappingsForMethod(method, controllerClass);
+
+		assertThat(mappingInfos.size()).isEqualTo(2);
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getMethodsCondition)
+				.flatExtracting(RequestMethodsRequestCondition::getMethods)
+				.containsOnly(RequestMethod.POST, RequestMethod.PUT);
 	}
 
 	@Test  // gh-32065
@@ -195,7 +204,7 @@ class RequestMappingHandlerMappingTests {
 		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.isThrownBy(() -> this.handlerMapping.getListMappingsForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					controllerClass.getName(),
 					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
@@ -212,7 +221,7 @@ class RequestMappingHandlerMappingTests {
 		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> this.handlerMapping.getMappingForMethod(method, controllerClass))
+				.isThrownBy(() -> this.handlerMapping.getListMappingsForMethod(method, controllerClass))
 				.withMessageContainingAll(
 					method.toString(),
 					"is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed:",
@@ -228,12 +237,16 @@ class RequestMappingHandlerMappingTests {
 		Class<?> controllerClass = ClassLevelOverriddenHttpExchangeAnnotationsController.class;
 		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
-		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, controllerClass);
+		List<RequestMappingInfo> infos = this.handlerMapping.getListMappingsForMethod(method, controllerClass);
 
-		assertThat(info).isNotNull();
-		assertThat(info.getPatternsCondition()).isNotNull();
-		assertThat(info.getPatternsCondition().getPatterns())
-				.extracting(PathPattern::getPatternString)
+		assertThat(infos).isNotEmpty();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.isNotNull();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
+				.flatExtracting(PathPattern::getPatternString)
 				.containsOnly("/controller/postExchange");
 	}
 
@@ -244,12 +257,16 @@ class RequestMappingHandlerMappingTests {
 		Class<?> controllerClass = MethodLevelOverriddenHttpExchangeAnnotationsController.class;
 		Method method = ReflectionUtils.findMethod(controllerClass, "post");
 
-		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, controllerClass);
+		List<RequestMappingInfo> infos = this.handlerMapping.getListMappingsForMethod(method, controllerClass);
 
-		assertThat(info).isNotNull();
-		assertThat(info.getPatternsCondition()).isNotNull();
-		assertThat(info.getPatternsCondition().getPatterns())
-				.extracting(PathPattern::getPatternString)
+		assertThat(infos).isNotEmpty();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.isNotNull();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
+				.flatExtracting(PathPattern::getPatternString)
 				.containsOnly("/controller/postMapping");
 	}
 
@@ -260,17 +277,34 @@ class RequestMappingHandlerMappingTests {
 
 		Class<?> clazz = HttpExchangeController.class;
 		Method method = ReflectionUtils.findMethod(clazz, "defaultValuesExchange");
-		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(method, clazz);
+		List<RequestMappingInfo> mappingInfos = this.handlerMapping.getListMappingsForMethod(method, clazz);
 
-		assertThat(mappingInfo.getPatternsCondition().getPatterns())
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
 				.extracting(PathPattern::toString)
 				.containsOnly("/exchange");
 
-		assertThat(mappingInfo.getMethodsCondition().getMethods()).isEmpty();
-		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
-		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
-		assertThat(mappingInfo.getConsumesCondition().getExpressions()).isEmpty();
-		assertThat(mappingInfo.getProducesCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getMethodsCondition)
+				.flatExtracting(RequestMethodsRequestCondition::getMethods)
+				.isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getParamsCondition)
+				.flatExtracting(ParamsRequestCondition::getExpressions)
+				.isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getHeadersCondition)
+				.flatExtracting(HeadersRequestCondition::getExpressions)
+				.isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getConsumesCondition)
+				.flatExtracting(ConsumesRequestCondition::getExpressions)
+				.isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getProducesCondition)
+				.flatExtracting(ProducesRequestCondition::getExpressions)
+				.isEmpty();
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -284,21 +318,36 @@ class RequestMappingHandlerMappingTests {
 
 		Class<HttpExchangeController> clazz = HttpExchangeController.class;
 		Method method = ReflectionUtils.findMethod(clazz, "customValuesExchange");
-		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(method, clazz);
+		List<RequestMappingInfo> mappingInfos = mapping.getListMappingsForMethod(method, clazz);
 
-		assertThat(mappingInfo.getPatternsCondition().getPatterns())
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
 				.extracting(PathPattern::toString)
 				.containsOnly("/exchange/custom");
 
-		assertThat(mappingInfo.getMethodsCondition().getMethods()).containsOnly(RequestMethod.POST);
-		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
-		assertThat(mappingInfo.getHeadersCondition().getExpressions()).isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getMethodsCondition)
+				.flatExtracting(RequestMethodsRequestCondition::getMethods)
+				.containsOnly(RequestMethod.POST);
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getParamsCondition)
+				.flatExtracting(ParamsRequestCondition::getExpressions)
+				.isEmpty();
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getHeadersCondition)
+				.flatExtracting(HeadersRequestCondition::getExpressions)
+				.isEmpty();
 
-		assertThat(mappingInfo.getConsumesCondition().getExpressions())
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getConsumesCondition)
+				.flatExtracting(ConsumesRequestCondition::getExpressions)
 				.extracting(MediaTypeExpression::getMediaType)
 				.containsOnly(MediaType.APPLICATION_JSON);
 
-		assertThat(mappingInfo.getProducesCondition().getExpressions())
+		assertThat(mappingInfos)
+				.extracting(RequestMappingInfo::getProducesCondition)
+				.flatExtracting(ProducesRequestCondition::getExpressions)
 				.extracting(MediaTypeExpression::getMediaType)
 				.containsOnly(MediaType.valueOf("text/plain;charset=UTF-8"));
 	}
@@ -314,17 +363,24 @@ class RequestMappingHandlerMappingTests {
 
 		Class<?> clazz = ComposedAnnotationController.class;
 		Method method = ClassUtils.getMethod(clazz, methodName, (Class<?>[]) null);
-		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, clazz);
+		List<RequestMappingInfo> infos = this.handlerMapping.getListMappingsForMethod(method, clazz);
 
-		assertThat(info).isNotNull();
-		assertThat(info.getPatternsCondition()).isNotNull();
-		assertThat(info.getPatternsCondition().getPatterns())
-				.extracting(PathPattern::getPatternString)
+		assertThat(infos).isNotEmpty();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.isNotEmpty();
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getPatternsCondition)
+				.flatExtracting(PatternsRequestCondition::getPatterns)
+				.flatExtracting(PathPattern::getPatternString)
 				.containsOnly(path);
 
-		assertThat(info.getMethodsCondition().getMethods()).containsOnly(requestMethod);
+		assertThat(infos)
+				.extracting(RequestMappingInfo::getMethodsCondition)
+				.flatExtracting(RequestMethodsRequestCondition::getMethods)
+				.containsOnly(requestMethod);
 
-		return info;
+		return infos.get(0);
 	}
 
 
@@ -350,10 +406,7 @@ class RequestMappingHandlerMappingTests {
 		public void post(@RequestBody(required = false) Foo foo) {
 		}
 
-		// gh-31962: The presence of multiple @RequestMappings is intentional.
-		@PatchMapping("/put")
 		@RequestMapping(path = "/put", method = RequestMethod.PUT) // local @RequestMapping overrides meta-annotations
-		@PostMapping("/put")
 		public void put() {
 		}
 

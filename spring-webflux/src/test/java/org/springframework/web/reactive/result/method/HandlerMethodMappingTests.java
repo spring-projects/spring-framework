@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -200,9 +201,10 @@ class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected String getMappingForMethod(Method method, Class<?> handlerType) {
+		@NonNull
+		protected List<String> getListMappingsForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
-			return methodName.startsWith("handler") ? methodName : null;
+			return methodName.startsWith("handler") ? Collections.singletonList(methodName) : Collections.emptyList();
 		}
 
 		@Override

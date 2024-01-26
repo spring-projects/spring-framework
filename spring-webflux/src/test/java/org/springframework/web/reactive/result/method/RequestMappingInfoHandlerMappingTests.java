@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -523,19 +524,20 @@ class RequestMappingInfoHandlerMappingTests {
 		}
 
 		@Override
-		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		@NonNull
+		protected List<RequestMappingInfo> getListMappingsForMethod(Method method, Class<?> handlerType) {
+			List<RequestMappingInfo> results = new ArrayList<>();
 			RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annot != null) {
 				BuilderConfiguration options = new BuilderConfiguration();
 				options.setPatternParser(getPathPatternParser());
-				return paths(annot.value()).methods(annot.method())
+				results.add(paths(annot.value()).methods(annot.method())
 						.params(annot.params()).headers(annot.headers())
 						.consumes(annot.consumes()).produces(annot.produces())
-						.options(options).build();
+						.options(options).build());
 			}
-			else {
-				return null;
-			}
+
+			return results;
 		}
 	}
 
