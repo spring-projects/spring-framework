@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,8 @@ class Tokenizer {
 							pushCharToken(TokenKind.PLUS);
 						}
 						break;
-					case '_': // the other way to start an identifier
-						lexIdentifier();
+					case '_':
+						lexIdentifier();  // '_' is another way to start an identifier
 						break;
 					case '-':
 						if (isTwoCharToken(TokenKind.DEC)) {
@@ -206,7 +206,7 @@ class Tokenizer {
 							pushPairToken(TokenKind.SELECT_LAST);
 						}
 						else {
-							lexIdentifier();
+							lexIdentifier();  // '$' is another way to start an identifier
 						}
 						break;
 					case '>':
