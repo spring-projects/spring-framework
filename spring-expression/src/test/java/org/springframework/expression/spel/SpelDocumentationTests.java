@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,13 +283,25 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void numericalOperators() {
+	void stringOperators() {
+		// Concatenation
+		String helloWorld = parser.parseExpression("'hello' + ' ' + 'world'").getValue(String.class);
+		assertThat(helloWorld).isEqualTo("hello world");
+
+		// Character Subtraction
+		char ch = parser.parseExpression("'d' - 3").getValue(char.class);
+		assertThat(ch).isEqualTo('a');
+
+		// Repeat
+		String repeated = parser.parseExpression("'abc' * 2").getValue(String.class);
+		assertThat(repeated).isEqualTo("abcabc");
+	}
+
+	@Test
+	void mathematicalOperators() {
 		// Addition
 		int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
 		assertThat(two).isEqualTo(2);
-
-		String testString = parser.parseExpression("'test' + ' ' + 'string'").getValue(String.class); // 'test string'
-		assertThat(testString).isEqualTo("test string");
 
 		// Subtraction
 		int four = parser.parseExpression("1 - -3").getValue(Integer.class); // 4
