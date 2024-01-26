@@ -114,7 +114,9 @@ public class ChannelRegistration {
 		}
 		else if (this.registration != null) {
 			ThreadPoolTaskExecutor registeredTaskExecutor = this.registration.getTaskExecutor();
-			customizer.accept(registeredTaskExecutor);
+			if (!this.registration.isExternallyDefined()) {
+				customizer.accept(registeredTaskExecutor);
+			}
 			return registeredTaskExecutor;
 		}
 		else {

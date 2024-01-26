@@ -73,15 +73,14 @@ class ChannelRegistrationTests {
 	}
 
 	@Test
-	void taskRegistrationWithExistingThreadPoolTaskExecutor() {
+	void taskRegistrationWithExistingThreadPoolTaskExecutorDoesNotInvokeCustomizer() {
 		ThreadPoolTaskExecutor existingExecutor = mock(ThreadPoolTaskExecutor.class);
 		ChannelRegistration registration = new ChannelRegistration();
 		registration.taskExecutor(existingExecutor);
 		assertThat(registration.hasExecutor()).isTrue();
 		Executor executor = registration.getExecutor(this.fallback, this.customizer);
 		assertThat(executor).isSameAs(existingExecutor);
-		verifyNoInteractions(this.fallback);
-		verify(this.customizer).accept(executor);
+		verifyNoInteractions(this.fallback, this.customizer);
 	}
 
 	@Test
