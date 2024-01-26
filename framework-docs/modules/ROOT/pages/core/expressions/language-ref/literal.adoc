@@ -9,7 +9,7 @@ SpEL supports the following types of literal expressions.
 - boolean values: `true` or `false`
 - null
 
-Strings can delimited by single quotation marks (`'`) or double quotation marks (`"`). To
+Strings can be delimited by single quotation marks (`'`) or double quotation marks (`"`). To
 include a single quotation mark within a string literal enclosed in single quotation
 marks, use two adjacent single quotation mark characters. Similarly, to include a double
 quotation mark within a string literal enclosed in double quotation marks, use two

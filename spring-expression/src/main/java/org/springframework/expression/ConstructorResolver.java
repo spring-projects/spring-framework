@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,33 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 
 /**
- * A constructor resolver attempts to locate a constructor and returns a ConstructorExecutor
- * that can be used to invoke that constructor. The ConstructorExecutor will be cached but
- * if it 'goes stale' the resolvers will be called again.
+ * A constructor resolver attempts to locate a constructor and returns a
+ * {@link ConstructorExecutor} that can be used to invoke that constructor.
+ *
+ * <p>The {@code ConstructorExecutor} will be cached, but if it becomes stale the
+ * resolvers will be called again.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
+ * @see ConstructorExecutor
+ * @see MethodResolver
  */
 @FunctionalInterface
 public interface ConstructorResolver {
 
 	/**
-	 * Within the supplied context determine a suitable constructor on the supplied type
-	 * that can handle the specified arguments. Return a ConstructorExecutor that can be
-	 * used to invoke that constructor (or {@code null} if no constructor could be found).
+	 * Within the supplied context, resolve a suitable constructor on the
+	 * supplied type that can handle the specified arguments.
+	 * <p>Returns a {@link ConstructorExecutor} that can be used to invoke that
+	 * constructor (or {@code null} if no constructor could be found).
 	 * @param context the current evaluation context
-	 * @param typeName the type upon which to look for the constructor
-	 * @param argumentTypes the arguments that the constructor must be able to handle
-	 * @return a ConstructorExecutor that can invoke the constructor, or null if non found
+	 * @param typeName the fully-qualified name of the type upon which to look
+	 * for the constructor
+	 * @param argumentTypes the types of arguments that the constructor must be
+	 * able to handle
+	 * @return a {@code ConstructorExecutor} that can invoke the constructor,
+	 * or {@code null} if the constructor cannot be found
 	 */
 	@Nullable
 	ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)

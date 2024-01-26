@@ -99,7 +99,7 @@ class ParsingTests {
 		}
 
 		@Test
-		void literalNull() {
+		void nullLiteral() {
 			parseCheck("null");
 		}
 
@@ -399,12 +399,12 @@ class ParsingTests {
 
 		@Test
 		void mathOperatorsAddStrings() {
-			parseCheck("'a'+'b'", "('a' + 'b')");
+			parseCheck("'a' + 'b'", "('a' + 'b')");
 		}
 
 		@Test
 		void mathOperatorsAddMultipleStrings() {
-			parseCheck("'hello'+' '+'world'", "(('hello' + ' ') + 'world')");
+			parseCheck("'hello' + ' ' + 'world'", "(('hello' + ' ') + 'world')");
 		}
 
 		@Test
@@ -429,7 +429,7 @@ class ParsingTests {
 	}
 
 	@Nested
-	class References {
+	class BeanReferences {
 
 		@Test
 		void references() {
