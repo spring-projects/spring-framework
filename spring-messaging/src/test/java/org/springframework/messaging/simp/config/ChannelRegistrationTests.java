@@ -16,12 +16,12 @@
 
 package org.springframework.messaging.simp.config;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -38,20 +38,20 @@ import static org.mockito.Mockito.verifyNoInteractions;
  */
 class ChannelRegistrationTests {
 
-	private final Supplier<TaskExecutor> fallback = mock();
+	private final Supplier<Executor> fallback = mock();
 
-	private final Consumer<TaskExecutor> customizer = mock();
+	private final Consumer<Executor> customizer = mock();
 
 	@Test
 	void emptyRegistrationUsesFallback() {
-		TaskExecutor fallbackTaskExecutor = mock(TaskExecutor.class);
-		given(this.fallback.get()).willReturn(fallbackTaskExecutor);
+		Executor fallbackExecutor = mock(Executor.class);
+		given(this.fallback.get()).willReturn(fallbackExecutor);
 		ChannelRegistration registration = new ChannelRegistration();
-		assertThat(registration.hasTaskExecutor()).isFalse();
-		TaskExecutor actual = registration.getTaskExecutor(this.fallback, this.customizer);
-		assertThat(actual).isSameAs(fallbackTaskExecutor);
+		assertThat(registration.hasExecutor()).isFalse();
+		Executor actual = registration.getExecutor(this.fallback, this.customizer);
+		assertThat(actual).isSameAs(fallbackExecutor);
 		verify(this.fallback).get();
-		verify(this.customizer).accept(fallbackTaskExecutor);
+		verify(this.customizer).accept(fallbackExecutor);
 	}
 
 	@Test
@@ -65,45 +65,45 @@ class ChannelRegistrationTests {
 	void taskRegistrationCreatesDefaultInstance() {
 		ChannelRegistration registration = new ChannelRegistration();
 		registration.taskExecutor();
-		assertThat(registration.hasTaskExecutor()).isTrue();
-		TaskExecutor taskExecutor = registration.getTaskExecutor(this.fallback, this.customizer);
-		assertThat(taskExecutor).isInstanceOf(ThreadPoolTaskExecutor.class);
+		assertThat(registration.hasExecutor()).isTrue();
+		Executor executor = registration.getExecutor(this.fallback, this.customizer);
+		assertThat(executor).isInstanceOf(ThreadPoolTaskExecutor.class);
 		verifyNoInteractions(this.fallback);
-		verify(this.customizer).accept(taskExecutor);
+		verify(this.customizer).accept(executor);
 	}
 
 	@Test
 	void taskRegistrationWithExistingThreadPoolTaskExecutor() {
-		ThreadPoolTaskExecutor existingTaskExecutor = mock(ThreadPoolTaskExecutor.class);
+		ThreadPoolTaskExecutor existingExecutor = mock(ThreadPoolTaskExecutor.class);
 		ChannelRegistration registration = new ChannelRegistration();
-		registration.taskExecutor(existingTaskExecutor);
-		assertThat(registration.hasTaskExecutor()).isTrue();
-		TaskExecutor taskExecutor = registration.getTaskExecutor(this.fallback, this.customizer);
-		assertThat(taskExecutor).isSameAs(existingTaskExecutor);
+		registration.taskExecutor(existingExecutor);
+		assertThat(registration.hasExecutor()).isTrue();
+		Executor executor = registration.getExecutor(this.fallback, this.customizer);
+		assertThat(executor).isSameAs(existingExecutor);
 		verifyNoInteractions(this.fallback);
-		verify(this.customizer).accept(taskExecutor);
+		verify(this.customizer).accept(executor);
 	}
 
 	@Test
 	void configureExecutor() {
 		ChannelRegistration registration = new ChannelRegistration();
-		TaskExecutor taskExecutor = mock(TaskExecutor.class);
-		registration.executor(taskExecutor);
-		assertThat(registration.hasTaskExecutor()).isTrue();
-		TaskExecutor taskExecutor1 = registration.getTaskExecutor(this.fallback, this.customizer);
-		assertThat(taskExecutor1).isSameAs(taskExecutor);
+		Executor executor = mock(Executor.class);
+		registration.executor(executor);
+		assertThat(registration.hasExecutor()).isTrue();
+		Executor actualExecutor = registration.getExecutor(this.fallback, this.customizer);
+		assertThat(actualExecutor).isSameAs(executor);
 		verifyNoInteractions(this.fallback, this.customizer);
 	}
 
 	@Test
 	void configureExecutorTakesPrecedenceOverTaskRegistration() {
 		ChannelRegistration registration = new ChannelRegistration();
-		TaskExecutor taskExecutor = mock(TaskExecutor.class);
-		registration.executor(taskExecutor);
+		Executor executor = mock(Executor.class);
+		registration.executor(executor);
 		ThreadPoolTaskExecutor ignored = mock(ThreadPoolTaskExecutor.class);
 		registration.taskExecutor(ignored);
-		assertThat(registration.hasTaskExecutor()).isTrue();
-		assertThat(registration.getTaskExecutor(this.fallback, this.customizer)).isSameAs(taskExecutor);
+		assertThat(registration.hasExecutor()).isTrue();
+		assertThat(registration.getExecutor(this.fallback, this.customizer)).isSameAs(executor);
 		verifyNoInteractions(ignored, this.fallback, this.customizer);
 
 	}

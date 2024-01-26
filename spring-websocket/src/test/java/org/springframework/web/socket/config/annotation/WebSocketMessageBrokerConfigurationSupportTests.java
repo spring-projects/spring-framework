@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.Consumer;
 
@@ -29,7 +30,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -318,7 +318,7 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
+		public AbstractSubscribableChannel clientInboundChannel(Executor clientInboundChannelExecutor) {
 			TestChannel channel = new TestChannel();
 			channel.setInterceptors(super.clientInboundChannel(clientInboundChannelExecutor).getInterceptors());
 			return channel;
@@ -326,7 +326,7 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
+		public AbstractSubscribableChannel clientOutboundChannel(Executor clientOutboundChannelExecutor) {
 			TestChannel channel = new TestChannel();
 			channel.setInterceptors(super.clientOutboundChannel(clientOutboundChannelExecutor).getInterceptors());
 			return channel;
@@ -334,7 +334,7 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@Override
 		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
-				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
+				AbstractSubscribableChannel clientOutboundChannel, Executor brokerChannelExecutor) {
 			TestChannel channel = new TestChannel();
 			channel.setInterceptors(super.brokerChannel(clientInboundChannel, clientOutboundChannel, brokerChannelExecutor).getInterceptors());
 			return channel;
