@@ -25,6 +25,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @since 3.0.3
  */
+@FunctionalInterface
 public interface BeanResolver {
 
 	/**

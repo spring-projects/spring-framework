@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
  * @see MethodExecutor
  * @see ConstructorResolver
  */
+@FunctionalInterface
 public interface MethodResolver {
 
 	/**

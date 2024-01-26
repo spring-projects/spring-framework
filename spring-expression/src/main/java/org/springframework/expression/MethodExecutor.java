@@ -36,6 +36,7 @@ package org.springframework.expression;
  * @see MethodResolver
  * @see ConstructorExecutor
  */
+@FunctionalInterface
 public interface MethodExecutor {
 
 	/**
