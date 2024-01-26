@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,6 +223,43 @@ class SimpleJdbcInsertTests {
 
 		insert.compile();
 		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO `my_schema`.`my_table` (`col1`, `col2`) VALUES(?, ?)");
+	}
+
+	@Test
+	void usingSchema() {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.withSchemaName("my_schema")
+				.usingColumns("col1", "col2");
+
+		insert.compile();
+
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_schema.my_table (col1, col2) VALUES(?, ?)");
+	}
+
+	@Test
+	void usingCatalog() {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.withCatalogName("my_catalog")
+				.usingColumns("col1", "col2");
+
+		insert.compile();
+
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_catalog.my_table (col1, col2) VALUES(?, ?)");
+	}
+
+	@Test
+	void usingSchemaAndCatalog() {
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.withSchemaName("my_schema")
+				.withCatalogName("my_catalog")
+				.usingColumns("col1", "col2");
+
+		insert.compile();
+
+		assertThat(insert.getInsertString()).isEqualTo("INSERT INTO my_catalog.my_schema.my_table (col1, col2) VALUES(?, ?)");
 	}
 
 }

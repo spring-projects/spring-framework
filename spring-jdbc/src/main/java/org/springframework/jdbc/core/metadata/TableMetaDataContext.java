@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,33 +303,25 @@ public class TableMetaDataContext {
 
 		String identifierQuoteString = (isQuoteIdentifiers() ?
 				obtainMetaDataProvider().getIdentifierQuoteString() : null);
-		boolean quoting = StringUtils.hasText(identifierQuoteString);
+		QuoteHandler quoteHandler = new QuoteHandler(identifierQuoteString);
 
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
 
+		String catalogName = getCatalogName();
+		if (catalogName != null) {
+			quoteHandler.appendTo(insertStatement, catalogName);
+			insertStatement.append('.');
+		}
+
 		String schemaName = getSchemaName();
 		if (schemaName != null) {
-			if (quoting) {
-				insertStatement.append(identifierQuoteString);
-				insertStatement.append(schemaName);
-				insertStatement.append(identifierQuoteString);
-			}
-			else {
-				insertStatement.append(schemaName);
-			}
+			quoteHandler.appendTo(insertStatement, schemaName);
 			insertStatement.append('.');
 		}
 
 		String tableName = getTableName();
-		if (quoting) {
-			insertStatement.append(identifierQuoteString);
-			insertStatement.append(tableName);
-			insertStatement.append(identifierQuoteString);
-		}
-		else {
-			insertStatement.append(tableName);
-		}
+		quoteHandler.appendTo(insertStatement, tableName);
 
 		insertStatement.append(" (");
 		int columnCount = 0;
@@ -339,14 +331,7 @@ public class TableMetaDataContext {
 				if (columnCount > 1) {
 					insertStatement.append(", ");
 				}
-				if (quoting) {
-					insertStatement.append(identifierQuoteString);
-					insertStatement.append(columnName);
-					insertStatement.append(identifierQuoteString);
-				}
-				else {
-					insertStatement.append(columnName);
-				}
+				quoteHandler.appendTo(insertStatement, columnName);
 			}
 		}
 		insertStatement.append(") VALUES(");
@@ -438,6 +423,29 @@ public class TableMetaDataContext {
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
 		return obtainMetaDataProvider().isGeneratedKeysColumnNameArraySupported();
+	}
+
+	private static final class QuoteHandler {
+
+		@Nullable
+		private final String identifierQuoteString;
+
+		private final boolean quoting;
+
+		private QuoteHandler(@Nullable String identifierQuoteString) {
+			this.identifierQuoteString = identifierQuoteString;
+			this.quoting = StringUtils.hasText(identifierQuoteString);
+		}
+
+		public void appendTo(StringBuilder stringBuilder, String item) {
+			if (this.quoting) {
+				stringBuilder.append(this.identifierQuoteString)
+						.append(item).append(this.identifierQuoteString);
+			}
+			else {
+				stringBuilder.append(item);
+			}
+		}
 	}
 
 }
