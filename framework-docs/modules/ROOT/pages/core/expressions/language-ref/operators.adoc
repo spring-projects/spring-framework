@@ -167,6 +167,7 @@ Java::
 	boolean falseValue = parser.parseExpression("!true").getValue(Boolean.class);
 
 	// -- AND and NOT --
+
 	String expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
 	boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 ----
@@ -199,6 +200,7 @@ Kotlin::
 	val falseValue = parser.parseExpression("!true").getValue(Boolean::class.java)
 
 	// -- AND and NOT --
+
 	val expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')"
 	val falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean::class.java)
 ----

@@ -13,6 +13,8 @@ Variable names must be composed of one or more of the following supported types 
 characters.
 
 * letter: any character for which `java.lang.Character.isLetter(char)` returns `true`
+  - This includes letters such as `A` to `Z`, `a` to `z`, `ü`, `ñ`, and `é` as well as
+    letters from other character sets such as Chinese, Japanese, Cyrillic, etc.
 * digit: `0` to `9`
 * underscore: `_`
 * dollar sign: `$`

@@ -33,8 +33,10 @@ populate them are listed at the end of the chapter.
 The expression language supports the following functionality:
 
 * Literal expressions
-* Boolean and relational operators
+* Boolean, relational, and logical operators
 * Regular expressions
+* String operators
+* Mathematical operators
 * Class expressions
 * Accessing properties, arrays, lists, and maps
 * Method invocation
@@ -44,15 +46,10 @@ The expression language supports the following functionality:
 * Array construction
 * Inline lists
 * Inline maps
-* Ternary operator
+* Ternary and Elvis operators
 * Variables
-* User-defined functions added to the context
-  * reflective invocation of `Method`
-  * various cases of `MethodHandle`
+* User-defined functions
 * Collection projection
 * Collection selection
 * Templated expressions
-
-
-
 
