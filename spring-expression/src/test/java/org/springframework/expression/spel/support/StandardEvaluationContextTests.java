@@ -20,13 +20,9 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.MethodResolver;
-import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.TypeConverter;
-import org.springframework.expression.TypeLocator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -57,10 +53,10 @@ class StandardEvaluationContextTests {
 	@Test
 	void applyDelegatesToSetOverrideDelegatesInTarget() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
-		target.setBeanResolver(mock(BeanResolver.class));
-		target.setTypeLocator(mock(TypeLocator.class));
-		target.setTypeConverter(mock(TypeConverter.class));
-		target.setOperatorOverloader(mock(OperatorOverloader.class));
+		target.setBeanResolver(mock());
+		target.setTypeLocator(mock());
+		target.setTypeConverter(mock());
+		target.setOperatorOverloader(mock());
 		target.setPropertyAccessors(new ArrayList<>());
 		target.setConstructorResolvers(new ArrayList<>());
 		target.setMethodResolvers(new ArrayList<>());
@@ -79,7 +75,7 @@ class StandardEvaluationContextTests {
 	void applyDelegatesToMakesACopyOfPropertyAccessors() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
 		this.evaluationContext.applyDelegatesTo(target);
-		PropertyAccessor propertyAccessor = mock(PropertyAccessor.class);
+		PropertyAccessor propertyAccessor = mock();
 		this.evaluationContext.getPropertyAccessors().add(propertyAccessor);
 		assertThat(target.getPropertyAccessors()).doesNotContain(propertyAccessor);
 	}
@@ -88,7 +84,7 @@ class StandardEvaluationContextTests {
 	void applyDelegatesToMakesACopyOfConstructorResolvers() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
 		this.evaluationContext.applyDelegatesTo(target);
-		ConstructorResolver methodResolver = mock(ConstructorResolver.class);
+		ConstructorResolver methodResolver = mock();
 		this.evaluationContext.getConstructorResolvers().add(methodResolver);
 		assertThat(target.getConstructorResolvers()).doesNotContain(methodResolver);
 	}
@@ -97,7 +93,7 @@ class StandardEvaluationContextTests {
 	void applyDelegatesToMakesACopyOfMethodResolvers() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
 		this.evaluationContext.applyDelegatesTo(target);
-		MethodResolver methodResolver = mock(MethodResolver.class);
+		MethodResolver methodResolver = mock();
 		this.evaluationContext.getMethodResolvers().add(methodResolver);
 		assertThat(target.getMethodResolvers()).doesNotContain(methodResolver);
 	}

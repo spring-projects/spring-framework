@@ -63,6 +63,7 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
@@ -842,16 +843,10 @@ class SpelReproTests extends AbstractExpressionTests {
 	void customStaticFunctions_SPR9038() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		List<MethodResolver> methodResolvers = new ArrayList<>();
-		methodResolvers.add(new ReflectiveMethodResolver() {
+		List<MethodResolver> methodResolvers = List.of(new ReflectiveMethodResolver() {
 			@Override
 			protected Method[] getMethods(Class<?> type) {
-				try {
-					return new Method[] {Integer.class.getDeclaredMethod("parseInt", String.class, Integer.TYPE)};
-				}
-				catch (NoSuchMethodException ex) {
-					return new Method[0];
-				}
+				return new Method[] {ReflectionUtils.findMethod(Integer.class, "parseInt", String.class, int.class)};
 			}
 		});
 

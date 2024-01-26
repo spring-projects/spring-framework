@@ -25,11 +25,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionInvocationTargetException;
-import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodFilter;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -221,7 +218,10 @@ class MethodInvocationTests extends AbstractExpressionTests {
 		List<MethodResolver> methodResolvers = ctx.getMethodResolvers();
 		assertThat(methodResolvers).hasSize(1);
 
-		MethodResolver dummy = new DummyMethodResolver();
+		MethodResolver dummy = (context, targetObject, name, argumentTypes) -> {
+			throw new UnsupportedOperationException();
+		};
+
 		ctx.addMethodResolver(dummy);
 		assertThat(ctx.getMethodResolvers()).hasSize(2);
 
@@ -385,16 +385,6 @@ class MethodInvocationTests extends AbstractExpressionTests {
 		@Anno
 		public String doit(double d) {
 			return "double "+d;
-		}
-	}
-
-
-	static class DummyMethodResolver implements MethodResolver {
-
-		@Override
-		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
-				List<TypeDescriptor> argumentTypes) {
-			throw new UnsupportedOperationException();
 		}
 	}
 
