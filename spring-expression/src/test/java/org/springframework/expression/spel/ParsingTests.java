@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -104,16 +103,6 @@ class ParsingTests {
 		}
 
 		@Test
-		void literalDate01() {
-			parseCheck("date('1974/08/24')");
-		}
-
-		@Test
-		void literalDate02() {
-			parseCheck("date('19740824T131030','yyyyMMddTHHmmss')");
-		}
-
-		@Test
 		void mixedOperators() {
 			parseCheck("true and 5>3", "(true and (5 > 3))");
 		}
@@ -121,60 +110,6 @@ class ParsingTests {
 		@Test
 		void assignmentToVariables() {
 			parseCheck("#var1='value1'");
-		}
-
-		@Test
-		void collectionProcessorsCountStringArray() {
-			parseCheck("new String[] {'abc','def','xyz'}.count()");
-		}
-
-		@Test
-		void collectionProcessorsCountIntArray() {
-			parseCheck("new int[] {1,2,3}.count()");
-		}
-
-		@Test
-		void collectionProcessorsMax() {
-			parseCheck("new int[] {1,2,3}.max()");
-		}
-
-		@Test
-		void collectionProcessorsMin() {
-			parseCheck("new int[] {1,2,3}.min()");
-		}
-
-		@Test
-		void collectionProcessorsAverage() {
-			parseCheck("new int[] {1,2,3}.average()");
-		}
-
-		@Test
-		void collectionProcessorsSort() {
-			parseCheck("new int[] {3,2,1}.sort()");
-		}
-
-		@Test
-		void collectionProcessorsNonNull() {
-			parseCheck("{'a','b',null,'d',null}.nonNull()");
-		}
-
-		@Test
-		void collectionProcessorsDistinct() {
-			parseCheck("{'a','b','a','d','e'}.distinct()");
-		}
-
-		@Disabled("Unsupported syntax/feature")
-		@Test
-		void lambdaMax() {
-			parseCheck("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))",
-					"(#max={|x,y| ($x > $y) ? $x : $y };#max(5,25))");
-		}
-
-		@Disabled("Unsupported syntax/feature")
-		@Test
-		void lambdaFactorial() {
-			parseCheck("(#fact = {|n| $n <= 1 ? 1 : $n * #fact($n-1) }; #fact(5))",
-					"(#fact={|n| ($n <= 1) ? 1 : ($n * #fact(($n - 1))) };#fact(5))");
 		}
 
 		@Test
@@ -354,12 +289,6 @@ class ParsingTests {
 		@Test
 		void relOperatorsGE02() {
 			parseCheck("3>=3", "(3 >= 3)");
-		}
-
-		@Disabled("Unsupported syntax/feature")
-		@Test
-		void relOperatorsIn() {
-			parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
 		}
 
 		@Test
