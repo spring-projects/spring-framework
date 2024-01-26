@@ -19,7 +19,6 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -227,11 +226,7 @@ class ConstructorInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	@Disabled
-	public void testArgumentConversion01() {
-		// Closest ctor will be new String(String) and converter supports Double>String
-		// TODO currently failing as with new ObjectToArray converter closest constructor
-		// matched becomes String(byte[]) which fails...
+	void testArgumentConversion01() {
 		evaluate("new String(3.0d)", "3.0", String.class);
 	}
 
