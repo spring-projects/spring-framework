@@ -168,8 +168,7 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 
 									HttpHeaders headers = headersToken.headers();
 									Flux<MultipartParser.BodyToken> bodyTokens =
-											flux.filter(t -> t instanceof MultipartParser.BodyToken)
-													.cast(MultipartParser.BodyToken.class);
+											flux.ofType(MultipartParser.BodyToken.class);
 									return createEvents(headers, bodyTokens);
 								}
 								else {
