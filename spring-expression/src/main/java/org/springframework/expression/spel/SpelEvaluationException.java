@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package org.springframework.expression.spel;
 import org.springframework.expression.EvaluationException;
 
 /**
- * Root exception for Spring EL related exceptions. Rather than holding a hard coded
- * string indicating the problem, it records a message key and the inserts for the
- * message. See {@link SpelMessage} for the list of all possible messages that can occur.
+ * Root exception for Spring EL related exceptions.
+ *
+ * <p>Rather than holding a hard-coded string indicating the problem, it records
+ * a message key and the inserts for the message.
+ *
+ * <p>See {@link SpelMessage} for the list of all possible messages that can occur.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
