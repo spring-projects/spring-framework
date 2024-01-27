@@ -28,7 +28,8 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
  * Builds an evaluation context for test expressions.
- * Features of the test evaluation context are:
+ *
+ * <p>Features of the test evaluation context are:
  * <ul>
  * <li>The root context object is an Inventor instance {@link Inventor}
  * </ul>
@@ -112,9 +113,9 @@ class TestScenarioCreator {
 	/**
 	 * Create the root context object, an Inventor instance. Non-qualified property
 	 * and method references will be resolved against this context object.
-	 * @param testContext the evaluation context in which to set the root object
+	 * @param context the evaluation context in which to set the root object
 	 */
-	private static void setupRootContextObject(StandardEvaluationContext testContext) {
+	private static void setupRootContextObject(StandardEvaluationContext context) {
 		GregorianCalendar c = new GregorianCalendar();
 		c.set(1856, 7, 9);
 		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
@@ -122,7 +123,7 @@ class TestScenarioCreator {
 		tesla.setInventions("Telephone repeater", "Rotating magnetic field principle",
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
 				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights");
-		testContext.setRootObject(tesla);
+		context.setRootObject(tesla);
 	}
 
 
@@ -130,10 +131,7 @@ class TestScenarioCreator {
 	// in test expressions
 
 	public static String isEven(int i) {
-		if ((i % 2) == 0) {
-			return "y";
-		}
-		return "n";
+		return ((i % 2) == 0 ? "y" : "n");
 	}
 
 	public static int[] reverseInt(int i, int j, int k) {
@@ -141,11 +139,7 @@ class TestScenarioCreator {
 	}
 
 	public static String reverseString(String input) {
-		StringBuilder backwards = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			backwards.append(input.charAt(input.length() - 1 - i));
-		}
-		return backwards.toString();
+		return new StringBuilder(input).reverse().toString();
 	}
 
 	public static String varargsFunction(String... strings) {

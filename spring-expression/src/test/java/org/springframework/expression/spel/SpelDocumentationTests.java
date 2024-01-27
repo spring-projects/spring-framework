@@ -277,6 +277,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		assertThat(falseValue).isFalse();
 
 		// -- AND and NOT --
+
 		expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
 		falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 		assertThat(falseValue).isFalse();
@@ -284,15 +285,21 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	void stringOperators() {
-		// Concatenation
+		// -- Concatenation --
+
+		// evaluates to "hello world"
 		String helloWorld = parser.parseExpression("'hello' + ' ' + 'world'").getValue(String.class);
 		assertThat(helloWorld).isEqualTo("hello world");
 
-		// Character Subtraction
+		// -- Subtraction --
+
+		// evaluates to 'a'
 		char ch = parser.parseExpression("'d' - 3").getValue(char.class);
 		assertThat(ch).isEqualTo('a');
 
-		// Repeat
+		// -- Repeat --
+
+		// evaluates to "abcabc"
 		String repeated = parser.parseExpression("'abc' * 2").getValue(String.class);
 		assertThat(repeated).isEqualTo("abcabc");
 	}
