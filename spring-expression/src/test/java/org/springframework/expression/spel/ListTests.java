@@ -27,6 +27,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.expression.spel.SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN;
 
 /**
  * Test usage of inline lists.
@@ -89,14 +90,39 @@ class ListTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testInlineListAndProjectionSelection() {
+	void projectionOnList() {
+		evaluate("listOfNumbersUpToTen.![#this<5?'y':'n']", "[y, y, y, y, n, n, n, n, n, n]", ArrayList.class);
+	}
+
+	@Test
+	void projectionOnInlineList() {
 		evaluate("{1,2,3,4,5,6}.![#this>3]", "[false, false, false, true, true, true]", ArrayList.class);
+		evaluate("{1,2,3,4,5,6,7,8,9,10}.![#this<5?'y':'n']", "[y, y, y, y, n, n, n, n, n, n]", ArrayList.class);
+	}
+
+	@Test
+	void selectionOnInlineList() {
 		evaluate("{1,2,3,4,5,6}.?[#this>3]", "[4, 5, 6]", ArrayList.class);
 		evaluate("{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this) == 'y']", "[2, 4, 6, 8, 10]", ArrayList.class);
 	}
 
 	@Test
-	void testSetConstruction01() {
+	void selectionOnListWithNonBooleanSelectionCriteria() {
+		evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']", RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	}
+
+	@Test
+	void selectFirstOnList() {
+		evaluate("listOfNumbersUpToTen.^[#isEven(#this) == 'y']", "2", Integer.class);
+	}
+
+	@Test
+	void selectLastOnList() {
+		evaluate("listOfNumbersUpToTen.$[#isEven(#this) == 'y']", "10", Integer.class);
+	}
+
+	@Test
+	void setConstructionWithInlineList() {
 		evaluate("new java.util.HashSet().addAll({'a','b','c'})", "true", Boolean.class);
 	}
 

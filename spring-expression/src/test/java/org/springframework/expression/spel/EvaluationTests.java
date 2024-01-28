@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.within;
+import static org.springframework.expression.spel.SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -544,6 +545,18 @@ class EvaluationTests extends AbstractExpressionTests {
 			pattern += "?";
 			assertThat(pattern).hasSize(1001);
 			evaluateAndCheckError("'X' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
+		}
+
+		@Test
+		void betweenOperator() {
+			evaluate("1 between listOneFive", "true", Boolean.class);
+			evaluate("1 between {1, 5}", "true", Boolean.class);
+		}
+
+		@Test
+		void betweenOperatorErrors() {
+			evaluateAndCheckError("1 between T(String)", BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+			evaluateAndCheckError("1 between listOfNumbersUpToTen", BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 		}
 
 	}
