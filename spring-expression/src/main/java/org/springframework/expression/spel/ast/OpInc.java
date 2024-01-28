@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,13 @@ import org.springframework.util.Assert;
  */
 public class OpInc extends Operator {
 
+	private static final String INC = "++";
+
 	private final boolean postfix;  // false means prefix
 
 
 	public OpInc(int startPos, int endPos, boolean postfix, SpelNodeImpl... operands) {
-		super("++", startPos, endPos, operands);
+		super(INC, startPos, endPos, operands);
 		this.postfix = postfix;
 		Assert.notEmpty(operands, "Operands must not be empty");
 	}
@@ -128,7 +130,8 @@ public class OpInc extends Operator {
 
 	@Override
 	public String toStringAST() {
-		return getLeftOperand().toStringAST() + "++";
+		String ast = getLeftOperand().toStringAST();
+		return (this.postfix ? ast + INC : INC + ast);
 	}
 
 	@Override

@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -370,7 +369,6 @@ class ParsingTests {
 			parseCheck("7 % 4", "(7 % 4)");
 		}
 
-		@Disabled("Disabled due to a bug in OpInc.toStringAST()")
 		@Test
 		void mathOperatorIncrementPrefix() {
 			parseCheck("++7", "++7");
@@ -383,7 +381,6 @@ class ParsingTests {
 			parseCheck("foo++", "foo++");
 		}
 
-		@Disabled("Disabled due to a bug in OpDec.toStringAST()")
 		@Test
 		void mathOperatorDecrementPrefix() {
 			parseCheck("--7", "--7");
