@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.cache.interceptor;
 import org.springframework.expression.EvaluationException;
 
 /**
- * A specific {@link EvaluationException} to mention that a given variable
- * used in the expression is not available in the context.
+ * An internal {@link EvaluationException} which signals that a given variable
+ * used in an expression is not available in the context.
  *
  * @author Stephane Nicoll
  * @since 4.0.6
@@ -28,17 +28,8 @@ import org.springframework.expression.EvaluationException;
 @SuppressWarnings("serial")
 class VariableNotAvailableException extends EvaluationException {
 
-	private final String name;
-
-
 	public VariableNotAvailableException(String name) {
-		super("Variable not available");
-		this.name = name;
-	}
-
-
-	public final String getName() {
-		return this.name;
+		super("Variable '" + name + "' not available");
 	}
 
 }

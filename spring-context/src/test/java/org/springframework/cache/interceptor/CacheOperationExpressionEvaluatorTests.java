@@ -43,12 +43,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
+ * Tests for {@link CacheOperationExpressionEvaluator}.
+ *
  * @author Costin Leau
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
  */
-class ExpressionEvaluatorTests {
+class CacheOperationExpressionEvaluatorTests {
 
 	private final StandardEvaluationContext originalEvaluationContext = new StandardEvaluationContext();
 
@@ -125,9 +127,9 @@ class ExpressionEvaluatorTests {
 	@Test
 	void unavailableReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE);
-		assertThatExceptionOfType(VariableNotAvailableException.class).isThrownBy(() ->
-				new SpelExpressionParser().parseExpression("#result").getValue(context))
-			.satisfies(ex -> assertThat(ex.getName()).isEqualTo("result"));
+		assertThatExceptionOfType(VariableNotAvailableException.class)
+			.isThrownBy(() -> new SpelExpressionParser().parseExpression("#result").getValue(context))
+			.withMessage("Variable 'result' not available");
 	}
 
 	@Test
