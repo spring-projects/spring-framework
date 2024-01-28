@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,45 +336,45 @@ public class Indexer extends SpelNodeImpl {
 	private void setArrayElement(TypeConverter converter, Object ctx, int idx, @Nullable Object newValue,
 			Class<?> arrayComponentType) throws EvaluationException {
 
-		if (arrayComponentType == Boolean.TYPE) {
+		if (arrayComponentType == boolean.class) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Boolean.class);
+			array[idx] = convertValue(converter, newValue, boolean.class);
 		}
-		else if (arrayComponentType == Byte.TYPE) {
+		else if (arrayComponentType == byte.class) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Byte.class);
+			array[idx] = convertValue(converter, newValue, byte.class);
 		}
-		else if (arrayComponentType == Character.TYPE) {
+		else if (arrayComponentType == char.class) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Character.class);
+			array[idx] = convertValue(converter, newValue, char.class);
 		}
-		else if (arrayComponentType == Double.TYPE) {
+		else if (arrayComponentType == double.class) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Double.class);
+			array[idx] = convertValue(converter, newValue, double.class);
 		}
-		else if (arrayComponentType == Float.TYPE) {
+		else if (arrayComponentType == float.class) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Float.class);
+			array[idx] = convertValue(converter, newValue, float.class);
 		}
-		else if (arrayComponentType == Integer.TYPE) {
+		else if (arrayComponentType == int.class) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Integer.class);
+			array[idx] = convertValue(converter, newValue, int.class);
 		}
-		else if (arrayComponentType == Long.TYPE) {
+		else if (arrayComponentType == long.class) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Long.class);
+			array[idx] = convertValue(converter, newValue, long.class);
 		}
-		else if (arrayComponentType == Short.TYPE) {
+		else if (arrayComponentType == short.class) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, Short.class);
+			array[idx] = convertValue(converter, newValue, short.class);
 		}
 		else {
 			Object[] array = (Object[]) ctx;

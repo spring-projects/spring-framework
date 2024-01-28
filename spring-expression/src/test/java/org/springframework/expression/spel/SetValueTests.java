@@ -21,16 +21,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.assertj.core.api.ThrowableTypeAssert;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.expression.spel.SpelMessage.TYPE_CONVERSION_ERROR;
 
 /**
  * Tests for assignment, setValue(), and isWritable() expressions.
@@ -164,21 +167,19 @@ class SetValueTests extends AbstractExpressionTests {
 		setValue("arrayContainer.doubles[1]", List.of(42D), 42D);
 	}
 
-	@Disabled("Disabled due to bug in Indexer.setArrayElement() regarding primitive/wrapper types")
-	@Test
-	void setArrayElementToPrimitiveFromEmptyCollectionFails() {
-		List<Object> emptyList = List.of();
-		// TODO These fail because CollectionToObjectConverter returns null.
-		// It currently throws: java.lang.IllegalStateException: Null conversion result for index [[]].
-		// Whereas, it should throw a SpelEvaluationException.
-		setValueAndExpectError("arrayContainer.booleans[1]", emptyList);
-		setValueAndExpectError("arrayContainer.chars[1]", emptyList);
-		setValueAndExpectError("arrayContainer.shorts[1]", emptyList);
-		setValueAndExpectError("arrayContainer.bytes[1]", emptyList);
-		setValueAndExpectError("arrayContainer.ints[1]", emptyList);
-		setValueAndExpectError("arrayContainer.longs[1]", emptyList);
-		setValueAndExpectError("arrayContainer.floats[1]", emptyList);
-		setValueAndExpectError("arrayContainer.doubles[1]", emptyList);
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"arrayContainer.booleans[1]",
+		"arrayContainer.chars[1]",
+		"arrayContainer.shorts[1]",
+		"arrayContainer.bytes[1]",
+		"arrayContainer.ints[1]",
+		"arrayContainer.longs[1]",
+		"arrayContainer.floats[1]",
+		"arrayContainer.doubles[1]"
+	})
+	void setArrayElementToPrimitiveFromEmptyCollectionFailsWithTypeConversionError(String expression) {
+		setValueAndExpectError(expression, List.of(), TYPE_CONVERSION_ERROR);
 	}
 
 	@Test
@@ -270,6 +271,40 @@ class SetValueTests extends AbstractExpressionTests {
 			SpelUtilities.printAbstractSyntaxTree(System.out, e);
 		}
 		assertThatSpelEvaluationException().isThrownBy(() -> e.setValue(context, value));
+	}
+
+	/**
+	 * Call setValue() but expect it to fail.
+	 * @see #evaluateAndCheckError(org.springframework.expression.ExpressionParser, String, Class, SpelMessage, Object...)
+	 */
+	private void setValueAndExpectError(String expression, Object value, SpelMessage expectedMessage,
+			Object... otherProperties) {
+
+		Expression expr = parser.parseExpression(expression);
+		assertThat(expr).as("expression").isNotNull();
+
+		if (DEBUG) {
+			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
+		}
+
+		assertThatSpelEvaluationException()
+			.isThrownBy(() -> expr.setValue(context, value))
+			.satisfies(ex -> {
+				assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
+				if (!ObjectUtils.isEmpty(otherProperties)) {
+					// first one is expected position of the error within the string
+					int pos = (Integer) otherProperties[0];
+					assertThat(ex.getPosition()).as("position").isEqualTo(pos);
+					if (otherProperties.length > 1) {
+						// Check inserts match
+						Object[] inserts = ex.getInserts();
+						assertThat(inserts).as("inserts").hasSizeGreaterThanOrEqualTo(otherProperties.length - 1);
+						Object[] expectedInserts = new Object[inserts.length];
+						System.arraycopy(otherProperties, 1, expectedInserts, 0, expectedInserts.length);
+						assertThat(inserts).as("inserts").containsExactly(expectedInserts);
+					}
+				}
+			});
 	}
 
 	private void setValue(String expression, Object value) {
