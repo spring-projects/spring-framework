@@ -24,92 +24,79 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpression;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.expression.spel.SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST;
+import static org.springframework.expression.spel.SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE;
+import static org.springframework.expression.spel.SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN;
 
 /**
- * These are tests for language features that are not yet considered 'live'. Either missing implementation or
- * documentation.
- *
- * Where implementation is missing the tests are commented out.
+ * These are tests for language features that are not yet considered 'live':
+ * either missing implementation or documentation.
  *
  * @author Andy Clement
  */
 class InProgressTests extends AbstractExpressionTests {
 
+	// BETWEEN
+
 	@Test
-	void testRelOperatorsBetween01() {
+	void betweenOperator() {
 		evaluate("1 between listOneFive", "true", Boolean.class);
-		// no inline list building at the moment
-		// evaluate("1 between {1, 5}", "true", Boolean.class);
+		evaluate("1 between {1, 5}", "true", Boolean.class);
 	}
 
 	@Test
-	void testRelOperatorsBetweenErrors01() {
-		evaluateAndCheckError("1 between T(String)", SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
-	}
-
-	@Test
-	void testRelOperatorsBetweenErrors03() {
-		evaluateAndCheckError("1 between listOfNumbersUpToTen",
-				SpelMessage.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+	void betweenOperatorErrors() {
+		evaluateAndCheckError("1 between T(String)", BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
+		evaluateAndCheckError("1 between listOfNumbersUpToTen", BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 	}
 
 	// PROJECTION
+
 	@Test
-	void testProjection01() {
+	void projectionOnList() {
 		evaluate("listOfNumbersUpToTen.![#this<5?'y':'n']", "[y, y, y, y, n, n, n, n, n, n]", ArrayList.class);
-		// inline list creation not supported at the moment
-		// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}", "[n, y, n, y, n, y, n, y, n, y]", ArrayList.class);
 	}
 
 	@Test
-	void testProjection02() {
-		// inline map creation not supported at the moment
-		// evaluate("#{'a':'y','b':'n','c':'y'}.![value=='y'?key:null].nonnull().sort()", "[a, c]", ArrayList.class);
-		evaluate("mapOfNumbersUpToTen.![key>5?value:null]",
+	void projectionOnInlineList() {
+		evaluate("{1,2,3,4,5,6,7,8,9,10}.![#this<5?'y':'n']", "[y, y, y, y, n, n, n, n, n, n]", ArrayList.class);
+	}
+
+	@Test
+	void projectionOnMap() {
+		evaluate("mapOfNumbersUpToTen.![key > 5 ? value : null]",
 				"[null, null, null, null, null, six, seven, eight, nine, ten]", ArrayList.class);
 	}
 
 	@Test
-	void testProjection05() {
-		evaluateAndCheckError("'abc'.![true]", SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE);
-		evaluateAndCheckError("null.![true]", SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE);
-		evaluate("null?.![true]", null, null);
+	void projectionOnUnsupportedType() {
+		evaluateAndCheckError("'abc'.![true]", PROJECTION_NOT_SUPPORTED_ON_TYPE);
+		evaluateAndCheckError("null.![true]", PROJECTION_NOT_SUPPORTED_ON_TYPE);
 	}
 
 	@Test
-	void testProjection06() {
-		SpelExpression expr = (SpelExpression) parser.parseExpression("'abc'.![true]");
-		assertThat(expr.toStringAST()).isEqualTo("'abc'.![true]");
+	void projectionOnNullWithSafeNavigation() {
+		evaluate("null?.![true]", null, null);
 	}
 
 	// SELECTION
 
 	@Test
-	void testSelection02() {
+	void selectionWithNonBooleanSelectionCriteria() {
+		evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']", RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()", RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+	}
+
+	@Test
+	void selectionOnSet() {
 		evaluate("testMap.keySet().?[#this matches '.*o.*']", "[monday]", ArrayList.class);
 		evaluate("testMap.keySet().?[#this matches '.*r.*'].contains('saturday')", "true", Boolean.class);
 		evaluate("testMap.keySet().?[#this matches '.*r.*'].size()", "3", Integer.class);
 	}
 
 	@Test
-	void testSelectionError_NonBooleanSelectionCriteria() {
-		evaluateAndCheckError("listOfNumbersUpToTen.?['nonboolean']",
-				SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
-	}
-
-	@Test
-	void testSelection03() {
+	void selectionOnMap() {
 		evaluate("mapOfNumbersUpToTen.?[key>5].size()", "5", Integer.class);
-	}
-
-	@Test
-	void testSelection04() {
-		evaluateAndCheckError("mapOfNumbersUpToTen.?['hello'].size()",
-				SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
-	}
-
-	@Test
-	void testSelection05() {
 		evaluate("mapOfNumbersUpToTen.?[key>11].size()", "0", Integer.class);
 		evaluate("mapOfNumbersUpToTen.^[key>11]", null, null);
 		evaluate("mapOfNumbersUpToTen.$[key>11]", null, null);
@@ -119,28 +106,28 @@ class InProgressTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testSelectionFirst01() {
+	void selectFirstOnList() {
 		evaluate("listOfNumbersUpToTen.^[#isEven(#this) == 'y']", "2", Integer.class);
 	}
 
 	@Test
-	void testSelectionFirst02() {
+	void selectFirstOnMap() {
 		evaluate("mapOfNumbersUpToTen.^[key>5].size()", "1", Integer.class);
 	}
 
 	@Test
-	void testSelectionLast01() {
+	void selectLastOnList() {
 		evaluate("listOfNumbersUpToTen.$[#isEven(#this) == 'y']", "10", Integer.class);
 	}
 
 	@Test
-	void testSelectionLast02() {
+	void selectLastOnMap() {
 		evaluate("mapOfNumbersUpToTen.$[key>5]", "{10=ten}", HashMap.class);
 		evaluate("mapOfNumbersUpToTen.$[key>5].size()", "1", Integer.class);
 	}
 
 	@Test
-	void testSelectionAST() {
+	void selectionAST() {
 		SpelExpression expr = (SpelExpression) parser.parseExpression("'abc'.^[true]");
 		assertThat(expr.toStringAST()).isEqualTo("'abc'.^[true]");
 		expr = (SpelExpression) parser.parseExpression("'abc'.?[true]");
@@ -150,8 +137,9 @@ class InProgressTests extends AbstractExpressionTests {
 	}
 
 	// Constructor invocation
+
 	@Test
-	void testSetConstruction01() {
+	void constructorInvocationMethodInvocationAndInlineList() {
 		evaluate("new java.util.HashSet().addAll({'a','b','c'})", "true", Boolean.class);
 	}
 

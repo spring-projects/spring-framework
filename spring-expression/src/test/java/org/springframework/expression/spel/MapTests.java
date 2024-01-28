@@ -90,6 +90,7 @@ class MapTests extends AbstractExpressionTests {
 		evaluate("{a:1,b:2,c:3,d:4}.![value > 2]", "[false, false, true, true]", ArrayList.class);
 		evaluate("{a:1,b:2,c:3,d:4}.![value % 2 == 0]", "[false, true, false, true]", ArrayList.class);
 		evaluate("{a:1,b:2,c:3,d:4}.![#isEven(value) == 'y']", "[false, true, false, true]", ArrayList.class);
+		evaluate("{'a':'y','b':'n','c':'y'}.![value == 'y' ? key : null]", "[a, null, c]", ArrayList.class);
 	}
 
 	@Test
