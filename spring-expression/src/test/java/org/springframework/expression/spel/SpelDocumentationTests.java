@@ -351,16 +351,15 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	void assignment() {
 		Inventor inventor = new Inventor();
-		StandardEvaluationContext inventorContext = new StandardEvaluationContext();
-		inventorContext.setRootObject(inventor);
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 
-		parser.parseExpression("foo").setValue(inventorContext, "Alexander Seovic2");
+		parser.parseExpression("foo").setValue(context, inventor, "Alexander Seovic2");
 
-		assertThat(parser.parseExpression("foo").getValue(inventorContext,String.class)).isEqualTo("Alexander Seovic2");
+		assertThat(parser.parseExpression("foo").getValue(context, inventor, String.class)).isEqualTo("Alexander Seovic2");
 
 		// alternatively
-		String aleks = parser.parseExpression("foo = 'Alexandar Seovic'").getValue(inventorContext, String.class);
-		assertThat(parser.parseExpression("foo").getValue(inventorContext,String.class)).isEqualTo("Alexandar Seovic");
+		String aleks = parser.parseExpression("foo = 'Alexandar Seovic'").getValue(context, inventor, String.class);
+		assertThat(parser.parseExpression("foo").getValue(context, inventor, String.class)).isEqualTo("Alexandar Seovic");
 		assertThat(aleks).isEqualTo("Alexandar Seovic");
 	}
 
