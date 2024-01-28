@@ -28,11 +28,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.expression.spel.SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS;
+import static org.springframework.expression.spel.SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS;
+import static org.springframework.expression.spel.SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE;
+import static org.springframework.expression.spel.SpelMessage.SETVALUE_NOT_SUPPORTED;
 import static org.springframework.expression.spel.SpelMessage.TYPE_CONVERSION_ERROR;
 
 /**
@@ -56,22 +61,22 @@ class SetValueTests extends AbstractExpressionTests {
 
 	@Test
 	void setValueFailsWhenLeftOperandIsNotAssignable() {
-		setValueAndExpectError("3=4", "enigma");
+		setValueAndExpectError("3=4", "enigma", SETVALUE_NOT_SUPPORTED, 1, Assign.class.getName());
 	}
 
 	@Test
 	void setValueFailsWhenLeftOperandCannotBeIndexed() {
-		setValueAndExpectError("'hello'[3]", 'p');
+		setValueAndExpectError("'hello'[3]", 'p', INDEXING_NOT_SUPPORTED_FOR_TYPE, 7, String.class.getName());
 	}
 
 	@Test
 	void setArrayElementFailsWhenIndexIsOutOfBounds() {
-		setValueAndExpectError("placesLived[23]", "Wien");
+		setValueAndExpectError("placesLived[23]", "Wien", ARRAY_INDEX_OUT_OF_BOUNDS, 11, 1, 23);
 	}
 
 	@Test
 	void setListElementFailsWhenIndexIsOutOfBounds() {
-		setValueAndExpectError("placesLivedList[23]", "Wien");
+		setValueAndExpectError("placesLivedList[23]", "Wien", COLLECTION_INDEX_OUT_OF_BOUNDS, 15, 1, 23);
 	}
 
 	@Test
@@ -119,19 +124,6 @@ class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void setArrayElementToPrimitiveFromStringFails() {
-		String notPrimitiveOrWrapper = "not primitive or wrapper";
-		setValueAndExpectError("arrayContainer.booleans[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.chars[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.shorts[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.bytes[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.ints[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.longs[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.floats[1]", notPrimitiveOrWrapper);
-		setValueAndExpectError("arrayContainer.doubles[1]", notPrimitiveOrWrapper);
-	}
-
-	@Test
 	void setArrayElementToPrimitiveFromSingleElementPrimitiveArray() {
 		setValue("arrayContainer.booleans[1]", new boolean[] { false }, false);
 		setValue("arrayContainer.chars[1]", new char[] { 'a' }, 'a');
@@ -165,6 +157,21 @@ class SetValueTests extends AbstractExpressionTests {
 		setValue("arrayContainer.longs[1]", List.of(42L), 42L);
 		setValue("arrayContainer.floats[1]", List.of(42F), 42F);
 		setValue("arrayContainer.doubles[1]", List.of(42D), 42D);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"arrayContainer.booleans[1]",
+		"arrayContainer.chars[1]",
+		"arrayContainer.shorts[1]",
+		"arrayContainer.bytes[1]",
+		"arrayContainer.ints[1]",
+		"arrayContainer.longs[1]",
+		"arrayContainer.floats[1]",
+		"arrayContainer.doubles[1]"
+	})
+	void setArrayElementToPrimitiveFromStringFailsWithTypeConversionError(String expression) {
+		setValueAndExpectError(expression, "enigma", TYPE_CONVERSION_ERROR);
 	}
 
 	@ParameterizedTest
