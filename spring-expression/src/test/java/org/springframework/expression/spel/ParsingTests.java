@@ -392,6 +392,15 @@ class ParsingTests {
 			parseCheck("7--", "7--");
 			parseCheck("foo--", "foo--");
 		}
+
+		@Test
+		void mathOperatorPower() {
+			parseCheck("3^2", "(3 ^ 2)");
+			parseCheck("3.0d^2.0d", "(3.0 ^ 2.0)");
+			parseCheck("3L^2L", "(3 ^ 2)");
+			parseCheck("(2^32)^2", "((2 ^ 32) ^ 2)");
+			parseCheck("new java.math.BigDecimal('5') ^ 3", "(new java.math.BigDecimal('5') ^ 3)");
+		}
 	}
 
 	@Nested
