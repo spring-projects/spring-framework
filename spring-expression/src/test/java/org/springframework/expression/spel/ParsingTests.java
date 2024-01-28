@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -319,21 +320,34 @@ class ParsingTests {
 	}
 
 	@Nested
+	class StringOperators {
+
+		@Test
+		void stringConcatenation() {
+			parseCheck("'a' + 'b'", "('a' + 'b')");
+			parseCheck("'hello' + ' ' + 'world'", "(('hello' + ' ') + 'world')");
+		}
+
+		@Test
+		void characterSubtraction() {
+			parseCheck("'X' - 3", "('X' - 3)");
+			parseCheck("'X' - 2 - 1", "(('X' - 2) - 1)");
+		}
+
+		@Test
+		void stringRepeat() {
+			parseCheck("'abc' * 2", "('abc' * 2)");
+			parseCheck("'abc' * 2 * 2", "(('abc' * 2) * 2)");
+		}
+
+	}
+
+	@Nested
 	class MathematicalOperators {
 
 		@Test
 		void mathOperatorsAddIntegers() {
 			parseCheck("2+4", "(2 + 4)");
-		}
-
-		@Test
-		void mathOperatorsAddStrings() {
-			parseCheck("'a' + 'b'", "('a' + 'b')");
-		}
-
-		@Test
-		void mathOperatorsAddMultipleStrings() {
-			parseCheck("'hello' + ' ' + 'world'", "(('hello' + ' ') + 'world')");
 		}
 
 		@Test
@@ -354,6 +368,32 @@ class ParsingTests {
 		@Test
 		void mathOperatorModulus() {
 			parseCheck("7 % 4", "(7 % 4)");
+		}
+
+		@Disabled("Disabled due to a bug in OpInc.toStringAST()")
+		@Test
+		void mathOperatorIncrementPrefix() {
+			parseCheck("++7", "++7");
+			parseCheck("++foo", "++foo");
+		}
+
+		@Test
+		void mathOperatorIncrementPostfix() {
+			parseCheck("7++", "7++");
+			parseCheck("foo++", "foo++");
+		}
+
+		@Disabled("Disabled due to a bug in OpDec.toStringAST()")
+		@Test
+		void mathOperatorDecrementPrefix() {
+			parseCheck("--7", "--7");
+			parseCheck("--foo", "--foo");
+		}
+
+		@Test
+		void mathOperatorDecrementPostfix() {
+			parseCheck("7--", "7--");
+			parseCheck("foo--", "foo--");
 		}
 	}
 
