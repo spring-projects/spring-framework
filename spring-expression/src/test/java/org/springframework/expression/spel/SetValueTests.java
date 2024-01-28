@@ -270,18 +270,6 @@ class SetValueTests extends AbstractExpressionTests {
 
 	/**
 	 * Call setValue() but expect it to fail.
-	 */
-	private void setValueAndExpectError(String expression, Object value) {
-		Expression e = parser.parseExpression(expression);
-		assertThat(e).isNotNull();
-		if (DEBUG) {
-			SpelUtilities.printAbstractSyntaxTree(System.out, e);
-		}
-		assertThatSpelEvaluationException().isThrownBy(() -> e.setValue(context, value));
-	}
-
-	/**
-	 * Call setValue() but expect it to fail.
 	 * @see #evaluateAndCheckError(org.springframework.expression.ExpressionParser, String, Class, SpelMessage, Object...)
 	 */
 	private void setValueAndExpectError(String expression, Object value, SpelMessage expectedMessage,
