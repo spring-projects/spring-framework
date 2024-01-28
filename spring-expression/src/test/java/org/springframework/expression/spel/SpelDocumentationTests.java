@@ -306,43 +306,76 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	void mathematicalOperators() {
-		// Addition
+		Inventor inventor = new Inventor();
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+
+		// -- Addition --
+
 		int two = parser.parseExpression("1 + 1").getValue(int.class);  // 2
 		assertThat(two).isEqualTo(2);
 
-		// Subtraction
+		// -- Subtraction --
+
 		int four = parser.parseExpression("1 - -3").getValue(int.class);  // 4
 		assertThat(four).isEqualTo(4);
 
 		double d = parser.parseExpression("1000.00 - 1e4").getValue(double.class);  // -9000
 		assertThat(d).isCloseTo(-9000.0d, within((double) 0));
 
-		// Multiplication
-		int six = parser.parseExpression("-2 * -3").getValue(int.class);  // 6
+		// -- Increment --
+
+		// The counter property in Inventor has an initial value of 0.
+
+		// evaluates to 2; counter is now 1
+		two = parser.parseExpression("counter++ + 2").getValue(context, inventor, int.class);
+		assertThat(two).isEqualTo(2);
+
+		// evaluates to 5; counter is now 2
+		int five = parser.parseExpression("3 + ++counter").getValue(context, inventor, int.class);
+		assertThat(five).isEqualTo(5);
+
+		// -- Decrement --
+
+		// The counter property in Inventor has a value of 2.
+
+		// evaluates to 6; counter is now 1
+		int six = parser.parseExpression("counter-- + 4").getValue(context, inventor, int.class);
+		assertThat(six).isEqualTo(6);
+
+		// evaluates to 5; counter is now 0
+		five = parser.parseExpression("5 + --counter").getValue(context, inventor, int.class);
+		assertThat(five).isEqualTo(5);
+
+		// -- Multiplication --
+
+		six = parser.parseExpression("-2 * -3").getValue(int.class);  // 6
 		assertThat(six).isEqualTo(6);
 
 		double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(double.class);  // 24.0
 		assertThat(twentyFour).isCloseTo(24.0d, within((double) 0));
 
-		// Division
+		// -- Division --
+
 		int minusTwo = parser.parseExpression("6 / -3").getValue(int.class);  // -2
 		assertThat(minusTwo).isEqualTo(-2);
 
 		double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(double.class);  // 1.0
 		assertThat(one).isCloseTo(1.0d, within((double) 0));
 
-		// Modulus
+		// -- Modulus --
+
 		int three = parser.parseExpression("7 % 4").getValue(int.class);  // 3
 		assertThat(three).isEqualTo(3);
 
 		int oneInt = parser.parseExpression("8 / 5 % 2").getValue(int.class);  // 1
 		assertThat(oneInt).isEqualTo(1);
 
-		// Exponential power
+		// -- Exponential power --
+
 		int maxInt = parser.parseExpression("(2^31) - 1").getValue(int.class);  // Integer.MAX_VALUE
 		assertThat(maxInt).isEqualTo(Integer.MAX_VALUE);
 
-		// Operator precedence
+		// -- Operator precedence --
 
 		int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(int.class);  // -21
 		assertThat(minusTwentyOne).isEqualTo(-21);

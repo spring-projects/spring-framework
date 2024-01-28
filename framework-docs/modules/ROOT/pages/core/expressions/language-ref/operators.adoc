@@ -276,10 +276,18 @@ You can use the following operators on numbers, and standard operator precedence
 
 * addition (`+`)
 * subtraction (`-`)
+* increment (`{pp}`)
+* decrement (`--`)
 * multiplication (`*`)
 * division (`/`)
 * modulus (`%`)
 * exponential power (`^`)
+
+[NOTE]
+====
+The increment and decrement operators can be used with either prefix (`{pp}A`, `--A`) or
+postfix (`A{pp}`, `A--`) notation with variables or properties that can be written to.
+====
 
 The following example shows the mathematical operators in use:
 
@@ -289,7 +297,11 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
+	Inventor inventor = new Inventor();
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+
 	// -- Addition --
+
 	int two = parser.parseExpression("1 + 1").getValue(int.class);  // 2
 
 	// -- Subtraction --
@@ -297,6 +309,26 @@ Java::
 	int four = parser.parseExpression("1 - -3").getValue(int.class);  // 4
 
 	double d = parser.parseExpression("1000.00 - 1e4").getValue(double.class);  // -9000
+
+	// -- Increment --
+
+	// The counter property in Inventor has an initial value of 0.
+
+	// evaluates to 2; counter is now 1
+	two = parser.parseExpression("counter++ + 2").getValue(context, inventor, int.class);
+
+	// evaluates to 5; counter is now 2
+	int five = parser.parseExpression("3 + ++counter").getValue(context, inventor, int.class);
+
+	// -- Decrement --
+
+	// The counter property in Inventor has a value of 2.
+
+	// evaluates to 6; counter is now 1
+	int six = parser.parseExpression("counter-- + 4").getValue(context, inventor, int.class);
+
+	// evaluates to 5; counter is now 0
+	five = parser.parseExpression("5 + --counter").getValue(context, inventor, int.class);
 
 	// -- Multiplication --
 
@@ -329,6 +361,9 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
+	val inventor = Inventor()
+	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
+
 	// -- Addition --
 
 	var two = parser.parseExpression("1 + 1").getValue(Int::class.java)  // 2
@@ -338,6 +373,26 @@ Kotlin::
 	val four = parser.parseExpression("1 - -3").getValue(Int::class.java)  // 4
 
 	val d = parser.parseExpression("1000.00 - 1e4").getValue(Double::class.java)  // -9000
+
+	// -- Increment --
+
+	// The counter property in Inventor has an initial value of 0.
+
+	// evaluates to 2; counter is now 1
+	two = parser.parseExpression("counter++ + 2").getValue(context, inventor, Int::class.java)
+
+	// evaluates to 5; counter is now 2
+	var five = parser.parseExpression("3 + ++counter").getValue(context, inventor, Int::class.java)
+
+	// -- Decrement --
+
+	// The counter property in Inventor has a value of 2.
+
+	// evaluates to 6; counter is now 1
+	var six = parser.parseExpression("counter-- + 4").getValue(context, inventor, Int::class.java)
+
+	// evaluates to 5; counter is now 0
+	five = parser.parseExpression("5 + --counter").getValue(context, inventor, Int::class.java)
 
 	// -- Multiplication --
 
