@@ -197,6 +197,7 @@ public abstract class BeanUtils {
 				}
 				Class<?>[] parameterTypes = ctor.getParameterTypes();
 				Object[] argsWithDefaultValues = new Object[args.length];
+				//获得参数
 				for (int i = 0 ; i < args.length; i++) {
 					if (args[i] == null) {
 						Class<?> parameterType = parameterTypes[i];

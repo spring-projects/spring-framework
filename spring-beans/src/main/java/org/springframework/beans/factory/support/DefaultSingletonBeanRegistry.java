@@ -224,10 +224,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (singletonObject == null) {
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
-							//当某些方法需要提前初始化的时候则会调用addSingletonFactory方法将
+							//当某些方法需要提前初始化的时候则会调用addSingletonFactory方法将对应的ObjectFactory初始化策略
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
-								//如果存在单例,则
+								//此处调用 getEarlyBeanReference方法,创建一个代理
+								//如果存在单例,则通过工厂创建一个单例对象
 								singletonObject = singletonFactory.getObject();
 								this.earlySingletonObjects.put(beanName, singletonObject);
 								this.singletonFactories.remove(beanName);
@@ -250,32 +251,47 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "Bean name must not be null");
+		//使用单例对象的高速缓存Map作为锁,保证线程同步
 		synchronized (this.singletonObjects) {
+			//从单例对象的高速缓存Map中获取beanName对应的单例对象
 			Object singletonObject = this.singletonObjects.get(beanName);
+			//如果单例对象获取不到
 			if (singletonObject == null) {
+				//如果当前在destorySingletons中
 				if (this.singletonsCurrentlyInDestruction) {
 					throw new BeanCreationNotAllowedException(beanName,
 							"Singleton bean creation not allowed while singletons of this factory are in destruction " +
 							"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
 				}
+				//如果当前日志级别为调试
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				//创建单例之前的回调
 				beforeSingletonCreation(beanName);
+				//表示生成了新的单例对象的标记,默认为false,表示没有生成新的单例对象
 				boolean newSingleton = false;
+				//有抑制异常记录标记,没有是为true,否者为false
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
+				//如果没有抑制异常记录
 				if (recordSuppressedExceptions) {
+					//对抑制异常列表惊醒实例化(LinkedHashSet)
 					this.suppressedExceptions = new LinkedHashSet<>();
 				}
 				try {
 					//执行传入时的lambda表达式,调用createBean();
+					//从单例工厂中获取对象
 					singletonObject = singletonFactory.getObject();
+					//生成了新的单例对象的标记为true,表示生成了新的单例对象
 					newSingleton = true;
 				}
 				catch (IllegalStateException ex) {
 					// Has the singleton object implicitly appeared in the meantime ->
 					// if yes, proceed with it since the exception indicates that state.
+					//此时单例对象是否隐式出现->如果是,请继续操作,因为异常表情该状态
+					//尝试从单例对象的高速缓存Map中获取beanName的单例对象
 					singletonObject = this.singletonObjects.get(beanName);
+					//如果失败,抛出异常
 					if (singletonObject == null) {
 						throw ex;
 					}
