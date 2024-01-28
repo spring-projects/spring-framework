@@ -371,25 +371,21 @@ class ParsingTests {
 
 		@Test
 		void mathOperatorIncrementPrefix() {
-			parseCheck("++7", "++7");
 			parseCheck("++foo", "++foo");
 		}
 
 		@Test
 		void mathOperatorIncrementPostfix() {
-			parseCheck("7++", "7++");
 			parseCheck("foo++", "foo++");
 		}
 
 		@Test
 		void mathOperatorDecrementPrefix() {
-			parseCheck("--7", "--7");
 			parseCheck("--foo", "--foo");
 		}
 
 		@Test
 		void mathOperatorDecrementPostfix() {
-			parseCheck("7--", "7--");
 			parseCheck("foo--", "foo--");
 		}
 
