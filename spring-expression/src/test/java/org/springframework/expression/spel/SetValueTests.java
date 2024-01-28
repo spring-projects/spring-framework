@@ -27,14 +27,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Tests set value expressions.
+ * Tests for assignment, setValue(), and isWritable() expressions.
  *
  * @author Keith Donald
  * @author Andy Clement
@@ -46,8 +45,30 @@ class SetValueTests extends AbstractExpressionTests {
 
 
 	@Test
+	void assignmentOperator() {
+		Expression e = parse("publicName='Andy'");
+		assertThat(e.isWritable(context)).isFalse();
+		assertThat(e.getValue(context)).isEqualTo("Andy");
+	}
+
+	@Test
 	void setValueFailsWhenLeftOperandIsNotAssignable() {
 		setValueAndExpectError("3=4", "enigma");
+	}
+
+	@Test
+	void setValueFailsWhenLeftOperandCannotBeIndexed() {
+		setValueAndExpectError("'hello'[3]", 'p');
+	}
+
+	@Test
+	void setArrayElementFailsWhenIndexIsOutOfBounds() {
+		setValueAndExpectError("placesLived[23]", "Wien");
+	}
+
+	@Test
+	void setListElementFailsWhenIndexIsOutOfBounds() {
+		setValueAndExpectError("placesLivedList[23]", "Wien");
 	}
 
 	@Test
@@ -56,23 +77,33 @@ class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	void setPropertyWithTypeConversion() {
+		// Relies on StringToBooleanConverter to convert "yes" to true.
+		setValue("publicBoolean", "yes", true);
+	}
+
+	@Test
+	void setPropertyWithTypeConversionViaSetterMethod() {
+		setValue("SomeProperty", "true", true);
+	}
+
+	@Test
 	void setNestedProperty() {
 		setValue("placeOfBirth.city", "Wien");
 	}
 
 	@Test
-	void setArrayElementValueToStringFromString() {
+	void setArrayElement() {
 		setValue("inventions[0]", "Just the telephone");
 	}
 
 	@Test
-	void setArrayElementInNonexistentIndex() {
-		setValueAndExpectError(
-			"new org.springframework.expression.spel.testresources.Inventor().inventions[1]", "my invention");
+	void setNestedPropertyInArrayElement() {
+		setValue("placesLived[0].city", "Wien");
 	}
 
 	@Test
-	void setArrayElementValueToPrimitiveTypeFromWrapperType() {
+	void setArrayElementToPrimitiveFromWrapper() {
 		// All primitive values below are auto-boxed into their wrapper types.
 		setValue("arrayContainer.booleans[1]", false);
 		setValue("arrayContainer.chars[1]", (char) 3);
@@ -85,7 +116,7 @@ class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void setArrayElementValueToPrimitiveTypeFromStringResultsInError() {
+	void setArrayElementToPrimitiveFromStringFails() {
 		String notPrimitiveOrWrapper = "not primitive or wrapper";
 		setValueAndExpectError("arrayContainer.booleans[1]", notPrimitiveOrWrapper);
 		setValueAndExpectError("arrayContainer.chars[1]", notPrimitiveOrWrapper);
@@ -98,7 +129,31 @@ class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void setArrayElementValueToPrimitiveTypeFromSingleElementList() {
+	void setArrayElementToPrimitiveFromSingleElementPrimitiveArray() {
+		setValue("arrayContainer.booleans[1]", new boolean[] { false }, false);
+		setValue("arrayContainer.chars[1]", new char[] { 'a' }, 'a');
+		setValue("arrayContainer.shorts[1]", new short[] { (short) 3 }, (short) 3);
+		setValue("arrayContainer.bytes[1]", new byte[] { (byte) 3 }, (byte) 3);
+		setValue("arrayContainer.ints[1]", new int[] { 42 }, 42);
+		setValue("arrayContainer.longs[1]", new long[] { 42L }, 42L);
+		setValue("arrayContainer.floats[1]", new float[] { 42F }, 42F);
+		setValue("arrayContainer.doubles[1]", new double[] { 42D }, 42D);
+	}
+
+	@Test
+	void setArrayElementToPrimitiveFromSingleElementWrapperArray() {
+		setValue("arrayContainer.booleans[1]", new Boolean[] { false }, false);
+		setValue("arrayContainer.chars[1]", new Character[] { 'a' }, 'a');
+		setValue("arrayContainer.shorts[1]", new Short[] { (short) 3 }, (short) 3);
+		setValue("arrayContainer.bytes[1]", new Byte[] { (byte) 3 }, (byte) 3);
+		setValue("arrayContainer.ints[1]", new Integer[] { 42 }, 42);
+		setValue("arrayContainer.longs[1]", new Long[] { 42L }, 42L);
+		setValue("arrayContainer.floats[1]", new Float[] { 42F }, 42F);
+		setValue("arrayContainer.doubles[1]", new Double[] { 42D }, 42D);
+	}
+
+	@Test
+	void setArrayElementToPrimitiveFromSingleElementWrapperList() {
 		setValue("arrayContainer.booleans[1]", List.of(false), false);
 		setValue("arrayContainer.chars[1]", List.of('a'), 'a');
 		setValue("arrayContainer.shorts[1]", List.of((short) 3), (short) 3);
@@ -111,7 +166,7 @@ class SetValueTests extends AbstractExpressionTests {
 
 	@Disabled("Disabled due to bug in Indexer.setArrayElement() regarding primitive/wrapper types")
 	@Test
-	void setArrayElementValueToPrimitiveTypeFromEmptyListResultsInError() {
+	void setArrayElementToPrimitiveFromEmptyCollectionFails() {
 		List<Object> emptyList = List.of();
 		// TODO These fail because CollectionToObjectConverter returns null.
 		// It currently throws: java.lang.IllegalStateException: Null conversion result for index [[]].
@@ -126,121 +181,78 @@ class SetValueTests extends AbstractExpressionTests {
 		setValueAndExpectError("arrayContainer.doubles[1]", emptyList);
 	}
 
-	@Test  // gh-15239
-	void isWritableForInvalidExpressions() {
-		// Do NOT reuse super.context!
-		StandardEvaluationContext localContext = TestScenarioCreator.getTestEvaluationContext();
-
-		// PROPERTYORFIELDREFERENCE
-		// Non-existent field (or property):
-		Expression e1 = parser.parseExpression("arrayContainer.wibble");
-		assertThat(e1.isWritable(localContext)).as("Should not be writable!").isFalse();
-
-		Expression e2 = parser.parseExpression("arrayContainer.wibble.foo");
-		assertThatSpelEvaluationException().isThrownBy(() -> e2.isWritable(localContext));
-
-		// VARIABLE
-		// the variable does not exist (but that is OK, we should be writable)
-		Expression e3 = parser.parseExpression("#madeup1");
-		assertThat(e3.isWritable(localContext)).as("Should be writable!").isTrue();
-
-		Expression e4 = parser.parseExpression("#madeup2.bar"); // compound expression
-		assertThat(e4.isWritable(localContext)).as("Should not be writable!").isFalse();
-
-		// INDEXER
-		// non-existent indexer (wibble made up)
-		Expression e5 = parser.parseExpression("arrayContainer.wibble[99]");
-		assertThatSpelEvaluationException().isThrownBy(() -> e5.isWritable(localContext));
-
-		// non-existent indexer (index via a string)
-		Expression e6 = parser.parseExpression("arrayContainer.ints['abc']");
-		assertThatSpelEvaluationException().isThrownBy(() -> e6.isWritable(localContext));
-	}
-
 	@Test
-	void setArrayElementNestedValue() {
-		setValue("placesLived[0].city", "Wien");
-	}
-
-	@Test
-	void setListElementValue() {
+	void setListElement() {
 		setValue("placesLivedList[0]", new PlaceOfBirth("Wien"));
 	}
 
 	@Test
-	void setGenericListElementValueTypeCoercion() {
+	void setGenericListElementWithTypeConversion() {
+		// Relies on StringToBooleanConverter to convert "yes" to true.
+		setValue("booleanList[0]", "yes", true);
+		// Relies on ObjectToObjectConverter to convert a String to a PlaceOfBirth.
 		setValue("placesLivedList[0]", "Wien");
 	}
 
 	@Test
-	void setGenericListElementValueTypeCoercionOK() {
-		setValue("booleanList[0]", "true", Boolean.TRUE);
+	void setNestedPropertyInListElement() {
+		setValue("placesLivedList[0].city", "Wien");
 	}
 
 	@Test
-	void setListElementNestedValue() {
-		setValue("placesLived[0].city", "Wien");
-	}
-
-	@Test
-	void setArrayElementInvalidIndex() {
-		setValueAndExpectError("placesLived[23]", "Wien");
-		setValueAndExpectError("placesLivedList[23]", "Wien");
-	}
-
-	@Test
-	void setMapElements() {
-		setValue("testMap['montag']","lundi");
-	}
-
-	@Test
-	void indexingIntoUnsupportedType() {
-		setValueAndExpectError("'hello'[3]", 'p');
-	}
-
-	@Test
-	void setPropertyTypeCoercion() {
-		setValue("publicBoolean", "true", Boolean.TRUE);
-	}
-
-	@Test
-	void setPropertyTypeCoercionThroughSetter() {
-		setValue("SomeProperty", "true", Boolean.TRUE);
-	}
-
-	@Test
-	void assign() {
-		// Do NOT reuse super.context!
-		StandardEvaluationContext localContext = TestScenarioCreator.getTestEvaluationContext();
-		Expression e = parse("publicName='Andy'");
-		assertThat(e.isWritable(localContext)).isFalse();
-		assertThat(e.getValue(localContext)).isEqualTo("Andy");
+	void setMapElement() {
+		setValue("testMap['montag']", "lundi");
 	}
 
 	/**
-	 * Testing the coercion of both the keys and the values to the correct type.
+	 * Tests the conversion of both the keys and the values to the correct types.
 	 */
 	@Test
-	void setGenericMapElementRequiresCoercion() {
-		// Do NOT reuse super.context!
-		StandardEvaluationContext localContext = TestScenarioCreator.getTestEvaluationContext();
+	void setGenericMapElementWithTypeConversion() {
+		// Key should be converted to string representation of 42
 		Expression e = parse("mapOfStringToBoolean[42]");
-		assertThat(e.getValue(localContext)).isNull();
+		assertThat(e.getValue(context)).isNull();
 
-		// Key should be coerced to string representation of 42
-		e.setValue(localContext, "true");
+		e.setValue(context, "true"); // 42 -> true
 
 		// All keys should be strings
-		Set<?> keys = parse("mapOfStringToBoolean.keySet()").getValue(localContext, Set.class);
+		Set<?> keys = parse("mapOfStringToBoolean.keySet()").getValue(context, Set.class);
 		assertThat(keys).allSatisfy(key -> assertThat(key).isExactlyInstanceOf(String.class));
 
 		// All values should be booleans
-		Collection<?> values = parse("mapOfStringToBoolean.values()").getValue(localContext, Collection.class);
+		Collection<?> values = parse("mapOfStringToBoolean.values()").getValue(context, Collection.class);
 		assertThat(values).allSatisfy(key -> assertThat(key).isExactlyInstanceOf(Boolean.class));
 
-		// One final test check coercion on the key for a map lookup
-		Object o = e.getValue(localContext);
-		assertThat(o).isEqualTo(Boolean.TRUE);
+		// One final test to check conversion on the key for a map lookup
+		assertThat(e.getValue(context, boolean.class)).isTrue();
+	}
+
+	@Test  // gh-15239
+	void isWritableForInvalidExpressions() {
+		// PROPERTYORFIELDREFERENCE
+		// Non-existent field (or property):
+		Expression e1 = parser.parseExpression("arrayContainer.wibble");
+		assertThat(e1.isWritable(context)).as("Should not be writable!").isFalse();
+
+		Expression e2 = parser.parseExpression("arrayContainer.wibble.foo");
+		assertThatSpelEvaluationException().isThrownBy(() -> e2.isWritable(context));
+
+		// VARIABLE
+		// the variable does not exist (but that is OK, we should be writable)
+		Expression e3 = parser.parseExpression("#madeup1");
+		assertThat(e3.isWritable(context)).as("Should be writable!").isTrue();
+
+		Expression e4 = parser.parseExpression("#madeup2.bar"); // compound expression
+		assertThat(e4.isWritable(context)).as("Should not be writable!").isFalse();
+
+		// INDEXER
+		// non-existent indexer (wibble made up)
+		Expression e5 = parser.parseExpression("arrayContainer.wibble[99]");
+		assertThatSpelEvaluationException().isThrownBy(() -> e5.isWritable(context));
+
+		// non-existent indexer (index via a string)
+		Expression e6 = parser.parseExpression("arrayContainer.ints['abc']");
+		assertThatSpelEvaluationException().isThrownBy(() -> e6.isWritable(context));
 	}
 
 
@@ -257,9 +269,7 @@ class SetValueTests extends AbstractExpressionTests {
 		if (DEBUG) {
 			SpelUtilities.printAbstractSyntaxTree(System.out, e);
 		}
-		// Do NOT reuse super.context!
-		StandardEvaluationContext localContext = TestScenarioCreator.getTestEvaluationContext();
-		assertThatSpelEvaluationException().isThrownBy(() -> e.setValue(localContext, value));
+		assertThatSpelEvaluationException().isThrownBy(() -> e.setValue(context, value));
 	}
 
 	private void setValue(String expression, Object value) {
@@ -270,11 +280,9 @@ class SetValueTests extends AbstractExpressionTests {
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			// Do NOT reuse super.context!
-			StandardEvaluationContext localContext = TestScenarioCreator.getTestEvaluationContext();
-			assertThat(e.isWritable(localContext)).as("Expression is not writeable but should be").isTrue();
-			e.setValue(localContext, value);
-			assertThat(e.getValue(localContext, expectedType)).as("Retrieved value was not equal to set value").isEqualTo(value);
+			assertThat(e.isWritable(context)).as("Expression is not writeable but should be").isTrue();
+			e.setValue(context, value);
+			assertThat(e.getValue(context, expectedType)).as("Retrieved value was not equal to set value").isEqualTo(value);
 		}
 		catch (EvaluationException | ParseException ex) {
 			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
@@ -282,8 +290,8 @@ class SetValueTests extends AbstractExpressionTests {
 	}
 
 	/**
-	 * For use when coercion is happening during setValue(). The expectedValue should be
-	 * the coerced form of the value.
+	 * For use when conversion is happening during setValue(). The expectedValue should be
+	 * the converted form of the value.
 	 */
 	private void setValue(String expression, Object value, Object expectedValue) {
 		try {
@@ -292,11 +300,9 @@ class SetValueTests extends AbstractExpressionTests {
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			// Do NOT reuse super.context!
-			StandardEvaluationContext localContext = TestScenarioCreator.getTestEvaluationContext();
-			assertThat(e.isWritable(localContext)).as("Expression is not writeable but should be").isTrue();
-			e.setValue(localContext, value);
-			assertThat(expectedValue).isEqualTo(e.getValue(localContext));
+			assertThat(e.isWritable(context)).as("Expression is not writeable but should be").isTrue();
+			e.setValue(context, value);
+			assertThat(expectedValue).isEqualTo(e.getValue(context));
 		}
 		catch (EvaluationException | ParseException ex) {
 			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
