@@ -16,7 +16,7 @@ The Spring Expression Language supports the following kinds of operators:
 The relational operators (equal, not equal, less than, less than or equal, greater than,
 and greater than or equal) are supported by using standard operator notation.
 These operators work on `Number` types as well as types implementing `Comparable`.
-The following listing shows a few examples of operators:
+The following listing shows a few examples of relational operators:
 
 [tabs]
 ======
@@ -67,7 +67,7 @@ in favor of comparisons against zero (for example, `X > 0` or `X < 0`).
 ====
 
 In addition to the standard relational operators, SpEL supports the `instanceof` and regular
-expression-based `matches` operator. The following listing shows examples of both:
+expression-based `matches` operators. The following listing shows examples of both:
 
 [tabs]
 ======
@@ -108,11 +108,11 @@ Kotlin::
 
 CAUTION: Be careful with primitive types, as they are immediately boxed up to their
 wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
-`1 instanceof T(Integer)` evaluates to `true`, as expected.
+`1 instanceof T(Integer)` evaluates to `true`.
 
-Each symbolic operator can also be specified as a purely alphabetic equivalent. This
-avoids problems where the symbols used have special meaning for the document type in
-which the expression is embedded (such as in an XML document). The textual equivalents are:
+Each symbolic operator can also be specified as a purely textual equivalent. This avoids
+problems where the symbols used have special meaning for the document type in which the
+expression is embedded (such as in an XML document). The textual equivalents are:
 
 * `lt` (`<`)
 * `gt` (`>`)
@@ -120,9 +120,7 @@ which the expression is embedded (such as in an XML document). The textual equiv
 * `ge` (`>=`)
 * `eq` (`==`)
 * `ne` (`!=`)
-* `div` (`/`)
-* `mod` (`%`)
-* `not` (`!`).
+* `not` (`!`)
 
 All of the textual operators are case-insensitive.
 
@@ -135,6 +133,8 @@ SpEL supports the following logical operators:
 * `and` (`&&`)
 * `or` (`||`)
 * `not` (`!`)
+
+All of the textual operators are case-insensitive.
 
 The following example shows how to use the logical operators:
 
@@ -282,6 +282,16 @@ You can use the following operators on numbers, and standard operator precedence
 * division (`/`)
 * modulus (`%`)
 * exponential power (`^`)
+
+The division and modulus operators can also be specified as a purely textual equivalent.
+This avoids problems where the symbols used have special meaning for the document type in
+which the expression is embedded (such as in an XML document). The textual equivalents
+are:
+
+* `div` (`/`)
+* `mod` (`%`)
+
+All of the textual operators are case-insensitive.
 
 [NOTE]
 ====
