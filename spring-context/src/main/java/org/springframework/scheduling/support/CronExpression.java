@@ -29,9 +29,14 @@ import org.springframework.util.StringUtils;
  * <a href="https://www.manpagez.com/man/5/crontab/">crontab expression</a>
  * that can calculate the next time it matches.
  *
- * <p>{@code CronExpression} instances are created through
- * {@link #parse(String)}; the next match is determined with
- * {@link #next(Temporal)}.
+ * <p>{@code CronExpression} instances are created through {@link #parse(String)};
+ * the next match is determined with {@link #next(Temporal)}.
+ *
+ * <p>Supports a Quartz day-of-month/week field with an L/# expression. Follows
+ * common cron conventions in every other respect, including 0-6 for SUN-SAT
+ * (plus 7 for SUN as well). Note that Quartz deviates from the day-of-week
+ * convention in cron through 1-7 for SUN-SAT whereas Spring strictly follows
+ * cron even in combination with the optional Quartz-specific L/# expressions.
  *
  * @author Arjen Poutsma
  * @since 5.3
