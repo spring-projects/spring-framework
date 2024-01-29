@@ -392,6 +392,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return this.observationConvention;
 	}
 
+
 	// GET
 
 	@Override
@@ -872,13 +873,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			request = createRequest(url, method);
 		}
 		catch (IOException ex) {
-			ResourceAccessException exception = createResourceAccessException(url, method, ex);
-			throw exception;
+			throw createResourceAccessException(url, method, ex);
 		}
+
 		ClientRequestObservationContext observationContext = new ClientRequestObservationContext(request);
 		observationContext.setUriTemplate(uriTemplate);
-		Observation observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(this.observationConvention,
-				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry).start();
+		Observation observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(
+				this.observationConvention, DEFAULT_OBSERVATION_CONVENTION,
+				() -> observationContext, this.observationRegistry).start();
 		ClientHttpResponse response = null;
 		try (Observation.Scope scope = observation.openScope()){
 			if (requestCallback != null) {
@@ -890,13 +892,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			return (responseExtractor != null ? responseExtractor.extractData(response) : null);
 		}
 		catch (IOException ex) {
-			ResourceAccessException exception = createResourceAccessException(url, method, ex);
-			observation.error(exception);
-			throw exception;
+			ResourceAccessException accessEx = createResourceAccessException(url, method, ex);
+			observation.error(accessEx);
+			throw accessEx;
 		}
-		catch (Throwable exc) {
-			observation.error(exc);
-			throw exc;
+		catch (Throwable ex) {
+			observation.error(ex);
+			throw ex;
 		}
 		finally {
 			if (response != null) {
