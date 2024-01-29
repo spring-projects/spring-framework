@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,9 @@ import org.springframework.util.StringUtils;
  */
 final class BitsCronField extends CronField {
 
+	public static BitsCronField ZERO_NANOS = forZeroNanos();
+
 	private static final long MASK = 0xFFFFFFFFFFFFFFFFL;
-
-
-	@Nullable
-	private static BitsCronField zeroNanos = null;
-
 
 	// we store at most 60 bits, for seconds and minutes, so a 64-bit long suffices
 	private long bits;
@@ -48,16 +45,14 @@ final class BitsCronField extends CronField {
 		super(type);
 	}
 
+
 	/**
 	 * Return a {@code BitsCronField} enabled for 0 nanoseconds.
 	 */
-	public static BitsCronField zeroNanos() {
-		if (zeroNanos == null) {
-			BitsCronField field = new BitsCronField(Type.NANO);
-			field.setBit(0);
-			zeroNanos = field;
-		}
-		return zeroNanos;
+	private static BitsCronField forZeroNanos() {
+		BitsCronField field = new BitsCronField(Type.NANO);
+		field.setBit(0);
+		return field;
 	}
 
 	/**
@@ -107,7 +102,6 @@ final class BitsCronField extends CronField {
 		}
 		return result;
 	}
-
 
 	private static BitsCronField parseDate(String value, BitsCronField.Type type) {
 		if (value.equals("?")) {
@@ -174,6 +168,7 @@ final class BitsCronField extends CronField {
 		}
 	}
 
+
 	@Nullable
 	@Override
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
@@ -217,7 +212,6 @@ final class BitsCronField extends CronField {
 		else {
 			return -1;
 		}
-
 	}
 
 	private void setBits(ValueRange range) {
@@ -250,20 +244,16 @@ final class BitsCronField extends CronField {
 		this.bits &= ~(1L << index);
 	}
 
+
 	@Override
-	public int hashCode() {
-		return Long.hashCode(this.bits);
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof BitsCronField that &&
+				type() == that.type() && this.bits == that.bits));
 	}
 
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!(o instanceof BitsCronField other)) {
-			return false;
-		}
-		return type() == other.type() && this.bits == other.bits;
+	public int hashCode() {
+		return Long.hashCode(this.bits);
 	}
 
 	@Override
