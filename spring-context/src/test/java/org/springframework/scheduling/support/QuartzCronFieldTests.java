@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Unit tests for {@link QuartzCronField}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 class QuartzCronFieldTests {
 
@@ -68,6 +69,42 @@ class QuartzCronFieldTests {
 
 		LocalDate last = LocalDate.of(2020, 6, 16);
 		LocalDate expected = LocalDate.of(2020, 6, 25);
+		assertThat(field.nextOrSame(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void dayOfWeek_0(){
+		QuartzCronField field = QuartzCronField.parseDaysOfWeek("0#3");
+
+		LocalDate last = LocalDate.of(2024, 1, 1);
+		LocalDate expected = LocalDate.of(2024, 1, 21);
+		assertThat(field.nextOrSame(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void dayOfWeek_1(){
+		QuartzCronField field = QuartzCronField.parseDaysOfWeek("1#3");
+
+		LocalDate last = LocalDate.of(2024, 1, 1);
+		LocalDate expected = LocalDate.of(2024, 1, 15);
+		assertThat(field.nextOrSame(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void dayOfWeek_2(){
+		QuartzCronField field = QuartzCronField.parseDaysOfWeek("2#3");
+
+		LocalDate last = LocalDate.of(2024, 1, 1);
+		LocalDate expected = LocalDate.of(2024, 1, 16);
+		assertThat(field.nextOrSame(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void dayOfWeek_7() {
+		QuartzCronField field = QuartzCronField.parseDaysOfWeek("7#3");
+
+		LocalDate last = LocalDate.of(2024, 1, 1);
+		LocalDate expected = LocalDate.of(2024, 1, 21);
 		assertThat(field.nextOrSame(last)).isEqualTo(expected);
 	}
 
