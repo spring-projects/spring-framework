@@ -83,6 +83,7 @@ class AspectProxyFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void testSerializable() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);

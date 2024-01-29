@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 class ServerHttpsRequestIntegrationTests {
 
 	private final HttpServer server = new ReactorHttpsServer();

@@ -3052,6 +3052,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	static class TestViewResolver implements ViewResolver {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return (model, request, response) -> {
@@ -3073,6 +3074,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 					boolean condition = model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean") instanceof Errors;
 					assertThat(condition).isTrue();
 				}
+				@SuppressWarnings("unchecked")
 				List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 				if (errors.hasFieldErrors("age")) {
 					response.getWriter()
