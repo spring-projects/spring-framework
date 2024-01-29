@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,24 +247,25 @@ final class BitsCronField extends CronField {
 	}
 
 	private void clearBit(int index) {
-		this.bits &=  ~(1L << index);
+		this.bits &= ~(1L << index);
+	}
+
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BitsCronField)) {
+			return false;
+		}
+		BitsCronField otherField = (BitsCronField) other;
+		return (type() == otherField.type() && this.bits == otherField.bits);
 	}
 
 	@Override
 	public int hashCode() {
 		return Long.hashCode(this.bits);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!(o instanceof BitsCronField)) {
-			return false;
-		}
-		BitsCronField other = (BitsCronField) o;
-		return type() == other.type() && this.bits == other.bits;
 	}
 
 	@Override
