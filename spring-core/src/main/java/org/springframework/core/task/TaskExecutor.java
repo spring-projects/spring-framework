@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,16 +37,5 @@ import java.util.concurrent.Executor;
  */
 @FunctionalInterface
 public interface TaskExecutor extends Executor {
-
-	/**
-	 * Execute the given {@code task}.
-	 * <p>The call might return immediately if the implementation uses
-	 * an asynchronous execution strategy, or might block in the case
-	 * of synchronous execution.
-	 * @param task the {@code Runnable} to execute (never {@code null})
-	 * @throws TaskRejectedException if the given task was not accepted
-	 */
-	@Override
-	void execute(Runnable task);
 
 }
