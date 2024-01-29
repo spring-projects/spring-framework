@@ -425,6 +425,7 @@ public class TableMetaDataContext {
 		return obtainMetaDataProvider().isGeneratedKeysColumnNameArraySupported();
 	}
 
+
 	private static final class QuoteHandler {
 
 		@Nullable
@@ -432,7 +433,7 @@ public class TableMetaDataContext {
 
 		private final boolean quoting;
 
-		private QuoteHandler(@Nullable String identifierQuoteString) {
+		public QuoteHandler(@Nullable String identifierQuoteString) {
 			this.identifierQuoteString = identifierQuoteString;
 			this.quoting = StringUtils.hasText(identifierQuoteString);
 		}

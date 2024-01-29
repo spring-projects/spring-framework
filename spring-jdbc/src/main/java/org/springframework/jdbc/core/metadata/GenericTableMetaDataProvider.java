@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,6 +258,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return identifierNameToUse(schemaName);
 	}
 
+	@Nullable
 	private String identifierNameToUse(@Nullable String identifierName) {
 		if (identifierName == null) {
 			return null;
@@ -326,8 +327,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			tables = databaseMetaData.getTables(
 					catalogNameToUse(catalogName), schemaNameToUse(schemaName), tableNameToUse(tableName), null);
 			while (tables != null && tables.next()) {
-				TableMetaData tmd = new TableMetaData(tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"),
-						tables.getString("TABLE_NAME"));
+				TableMetaData tmd = new TableMetaData(tables.getString("TABLE_CAT"),
+						tables.getString("TABLE_SCHEM"), tables.getString("TABLE_NAME"));
 				if (tmd.schemaName() == null) {
 					tableMeta.put(this.userName != null ? this.userName.toUpperCase() : "", tmd);
 				}
