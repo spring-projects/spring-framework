@@ -49,7 +49,7 @@ public abstract class SupplierUtils {
 	 */
 	@Nullable
 	public static Object resolve(@Nullable Object candidate) {
-		return (candidate instanceof Supplier<?> supplier ? supplier.get() : null);
+		return (candidate instanceof Supplier<?> supplier ? supplier.get() : candidate);
 	}
 
 }
