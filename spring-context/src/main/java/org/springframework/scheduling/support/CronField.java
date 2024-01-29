@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Single field in a cron pattern. Created using the {@code parse*} methods,
- * main and only entry point is {@link #nextOrSame(Temporal)}.
+ * the main and only entry point is {@link #nextOrSame(Temporal)}.
  *
  * <p>Supports a Quartz day-of-month/week field with an L/# expression. Follows
  * common cron conventions in every other respect, including 0-6 for SUN-SAT
@@ -60,7 +60,7 @@ abstract class CronField {
 	 * Return a {@code CronField} enabled for 0 nanoseconds.
 	 */
 	public static CronField zeroNanos() {
-		return BitsCronField.zeroNanos();
+		return BitsCronField.ZERO_NANOS;
 	}
 
 	/**
@@ -185,7 +185,6 @@ abstract class CronField {
 		DAY_OF_MONTH(ChronoField.DAY_OF_MONTH, ChronoUnit.MONTHS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
 		MONTH(ChronoField.MONTH_OF_YEAR, ChronoUnit.YEARS, ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
 		DAY_OF_WEEK(ChronoField.DAY_OF_WEEK, ChronoUnit.WEEKS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND);
-
 
 		private final ChronoField field;
 

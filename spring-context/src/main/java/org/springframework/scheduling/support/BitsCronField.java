@@ -29,16 +29,14 @@ import org.springframework.util.StringUtils;
  * Created using the {@code parse*} methods.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.3
  */
 final class BitsCronField extends CronField {
 
+	public static final BitsCronField ZERO_NANOS = forZeroNanos();
+
 	private static final long MASK = 0xFFFFFFFFFFFFFFFFL;
-
-
-	@Nullable
-	private static BitsCronField zeroNanos = null;
-
 
 	// we store at most 60 bits, for seconds and minutes, so a 64-bit long suffices
 	private long bits;
@@ -48,16 +46,14 @@ final class BitsCronField extends CronField {
 		super(type);
 	}
 
+
 	/**
 	 * Return a {@code BitsCronField} enabled for 0 nanoseconds.
 	 */
-	public static BitsCronField zeroNanos() {
-		if (zeroNanos == null) {
-			BitsCronField field = new BitsCronField(Type.NANO);
-			field.setBit(0);
-			zeroNanos = field;
-		}
-		return zeroNanos;
+	private static BitsCronField forZeroNanos() {
+		BitsCronField field = new BitsCronField(Type.NANO);
+		field.setBit(0);
+		return field;
 	}
 
 	/**
@@ -107,7 +103,6 @@ final class BitsCronField extends CronField {
 		}
 		return result;
 	}
-
 
 	private static BitsCronField parseDate(String value, BitsCronField.Type type) {
 		if (value.equals("?")) {
@@ -174,6 +169,7 @@ final class BitsCronField extends CronField {
 		}
 	}
 
+
 	@Nullable
 	@Override
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
@@ -217,7 +213,6 @@ final class BitsCronField extends CronField {
 		else {
 			return -1;
 		}
-
 	}
 
 	private void setBits(ValueRange range) {

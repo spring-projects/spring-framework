@@ -75,8 +75,9 @@ final class QuartzCronField extends CronField {
 	}
 
 	/**
-	 * Parse the given value into a days of months {@code QuartzCronField}, the fourth entry of a cron expression.
-	 * Expects a "L" or "W" in the given value.
+	 * Parse the given value into a days of months {@code QuartzCronField},
+	 * the fourth entry of a cron expression.
+	 * <p>Expects a "L" or "W" in the given value.
 	 */
 	public static QuartzCronField parseDaysOfMonth(String value) {
 		int idx = value.lastIndexOf('L');
