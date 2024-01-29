@@ -35,7 +35,14 @@ import org.springframework.expression.spel.SpelParseException;
  */
 class Tokenizer {
 
-	// If this gets changed, it must remain sorted...
+	/**
+	 * Alternative textual operator names which must match enum constant names
+	 * in {@link TokenKind}.
+	 * <p>Note that {@code AND} and {@code OR} are also alternative textual
+	 * names, but they are handled later in {@link InternalSpelExpressionParser}.
+	 * <p>If this list gets changed, it must remain sorted since we use it with
+	 * {@link Arrays#binarySearch(Object[], Object)}.
+	 */
 	private static final String[] ALTERNATIVE_OPERATOR_NAMES =
 			{"DIV", "EQ", "GE", "GT", "LE", "LT", "MOD", "NE", "NOT"};
 
@@ -448,8 +455,8 @@ class Tokenizer {
 		char[] subarray = subarray(start, this.pos);
 
 		// Check if this is the alternative (textual) representation of an operator (see
-		// alternativeOperatorNames)
-		if ((this.pos - start) == 2 || (this.pos - start) == 3) {
+		// ALTERNATIVE_OPERATOR_NAMES).
+		if (subarray.length == 2 || subarray.length == 3) {
 			String asString = new String(subarray).toUpperCase();
 			int idx = Arrays.binarySearch(ALTERNATIVE_OPERATOR_NAMES, asString);
 			if (idx >= 0) {
