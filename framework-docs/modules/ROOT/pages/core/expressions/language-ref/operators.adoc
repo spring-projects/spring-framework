@@ -66,50 +66,6 @@ If you prefer numeric comparisons instead, avoid number-based `null` comparisons
 in favor of comparisons against zero (for example, `X > 0` or `X < 0`).
 ====
 
-In addition to the standard relational operators, SpEL supports the `instanceof` and regular
-expression-based `matches` operators. The following listing shows examples of both:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	// evaluates to false
-	boolean falseValue = parser.parseExpression(
-			"'xyz' instanceof T(Integer)").getValue(Boolean.class);
-
-	// evaluates to true
-	boolean trueValue = parser.parseExpression(
-			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
-
-	// evaluates to false
-	boolean falseValue = parser.parseExpression(
-			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	// evaluates to false
-	val falseValue = parser.parseExpression(
-			"'xyz' instanceof T(Integer)").getValue(Boolean::class.java)
-
-	// evaluates to true
-	val trueValue = parser.parseExpression(
-			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
-
-	// evaluates to false
-	val falseValue = parser.parseExpression(
-			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
-----
-======
-
-CAUTION: Be careful with primitive types, as they are immediately boxed up to their
-wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
-`1 instanceof T(Integer)` evaluates to `true`.
-
 Each symbolic operator can also be specified as a purely textual equivalent. This avoids
 problems where the symbols used have special meaning for the document type in which the
 expression is embedded (such as in an XML document). The textual equivalents are:
@@ -123,6 +79,104 @@ expression is embedded (such as in an XML document). The textual equivalents are
 * `not` (`!`)
 
 All of the textual operators are case-insensitive.
+
+In addition to the standard relational operators, SpEL supports the `between`,
+`instanceof`, and regular expression-based `matches` operators. The following listing
+shows examples of all three:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	boolean result;
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"1 between {1, 5}").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"1 between {10, 15}").getValue(Boolean.class);
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'zebra'}").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'cobra'}").getValue(Boolean.class);
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"123 instanceof T(Integer)").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'xyz' instanceof T(Integer)").getValue(Boolean.class);
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// evaluates to true
+	var result = parser.parseExpression(
+			"1 between {1, 5}").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"1 between {10, 15}").getValue(Boolean::class.java)
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'zebra'}").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'cobra'}").getValue(Boolean::class.java)
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"123 instanceof T(Integer)").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'xyz' instanceof T(Integer)").getValue(Boolean::class.java)
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
+----
+======
+
+[NOTE]
+====
+The left operand to the `between` operator must be a single value, and the right operand
+must be a 2-element list which defines the range.
+
+The `between` operator returns `true` if the left operand is _between_ the two elements
+in the range, inclusive (using a comparison algorithm based on `java.lang.Comparable`).
+In addition, the first element in the range must be less than or equal to the second
+element in the range.
+====
+
+CAUTION: Be careful with primitive types, as they are immediately boxed up to their
+wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
+`1 instanceof T(Integer)` evaluates to `true`.
 
 
 [[expressions-operators-logical]]

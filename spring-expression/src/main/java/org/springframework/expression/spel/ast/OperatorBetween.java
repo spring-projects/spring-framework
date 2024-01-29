@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,18 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Represents the between operator. The left operand to between must be a single value and
- * the right operand must be a list - this operator returns true if the left operand is
- * between (using the registered comparator) the two elements in the list. The definition
- * of between being inclusive follows the SQL BETWEEN definition.
+ * Represents the {@code between} operator.
+ *
+ * <p>The left operand must be a single value, and the right operand must be a
+ * 2-element list which defines the range.
+ *
+ * <p>This operator returns {@code true} if the left operand is between the two
+ * elements in the range, inclusive (using the registered {@link TypeComparator}
+ * for comparison). In addition, the first element in the range must be less than
+ * or equal to the second element in the range.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
  */
 public class OperatorBetween extends Operator {

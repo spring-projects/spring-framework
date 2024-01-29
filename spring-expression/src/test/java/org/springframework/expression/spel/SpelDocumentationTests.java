@@ -221,6 +221,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 	void relationalOperators() {
 		boolean result = parser.parseExpression("2 == 2").getValue(Boolean.class);
 		assertThat(result).isTrue();
+
 		// evaluates to false
 		result = parser.parseExpression("2 < -5.0").getValue(Boolean.class);
 		assertThat(result).isFalse();
@@ -232,17 +233,47 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 	@Test
 	void otherOperators() {
-		// evaluates to false
-		boolean falseValue = parser.parseExpression("'xyz' instanceof T(int)").getValue(Boolean.class);
-		assertThat(falseValue).isFalse();
+		boolean result;
 
 		// evaluates to true
-		boolean trueValue = parser.parseExpression("'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
-		assertThat(trueValue).isTrue();
+		result = parser.parseExpression(
+				"1 between {1, 5}").getValue(Boolean.class);
+		assertThat(result).isTrue();
 
-		//evaluates to false
-		falseValue = parser.parseExpression("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
-		assertThat(falseValue).isFalse();
+		// evaluates to false
+		result = parser.parseExpression(
+				"1 between {10, 15}").getValue(Boolean.class);
+		assertThat(result).isFalse();
+
+		// evaluates to true
+		result = parser.parseExpression(
+				"'elephant' between {'aardvark', 'zebra'}").getValue(Boolean.class);
+		assertThat(result).isTrue();
+
+		// evaluates to false
+		result = parser.parseExpression(
+				"'elephant' between {'aardvark', 'cobra'}").getValue(Boolean.class);
+		assertThat(result).isFalse();
+
+		// evaluates to true
+		result = parser.parseExpression(
+				"123 instanceof T(Integer)").getValue(Boolean.class);
+		assertThat(result).isTrue();
+
+		// evaluates to false
+		result = parser.parseExpression(
+				"'xyz' instanceof T(Integer)").getValue(Boolean.class);
+		assertThat(result).isFalse();
+
+		// evaluates to true
+		result = parser.parseExpression(
+				"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+		assertThat(result).isTrue();
+
+		// evaluates to false
+		result = parser.parseExpression(
+				"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+		assertThat(result).isFalse();
 	}
 
 	@Test
