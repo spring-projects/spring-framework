@@ -29,11 +29,12 @@ import org.springframework.util.StringUtils;
  * Created using the {@code parse*} methods.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.3
  */
 final class BitsCronField extends CronField {
 
-	public static BitsCronField ZERO_NANOS = forZeroNanos();
+	public static final BitsCronField ZERO_NANOS = forZeroNanos();
 
 	private static final long MASK = 0xFFFFFFFFFFFFFFFFL;
 
