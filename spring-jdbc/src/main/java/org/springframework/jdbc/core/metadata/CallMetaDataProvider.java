@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,6 +151,11 @@ public interface CallMetaDataProvider {
 	String getUserName();
 
 	/**
+	 * Are we using the meta-data for the procedure columns?
+	 */
+	boolean isProcedureColumnMetaDataUsed();
+
+	/**
 	 * Does this database support returning ResultSets that should be retrieved with the JDBC call:
 	 * {@link java.sql.Statement#getResultSet()}?
 	 */
@@ -167,11 +172,6 @@ public interface CallMetaDataProvider {
 	 * if this feature is supported.
 	 */
 	int getRefCursorSqlType();
-
-	/**
-	 * Are we using the meta-data for the procedure columns?
-	 */
-	boolean isProcedureColumnMetaDataUsed();
 
 	/**
 	 * Should we bypass the return parameter with the specified name?

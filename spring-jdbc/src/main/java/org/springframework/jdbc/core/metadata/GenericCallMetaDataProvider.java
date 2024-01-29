@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	private final String userName;
 
+	private boolean procedureColumnMetaDataUsed = false;
+
 	private boolean supportsCatalogsInProcedureCalls = true;
 
 	private boolean supportsSchemasInProcedureCalls = true;
@@ -60,8 +62,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	private boolean storesUpperCaseIdentifiers = true;
 
 	private boolean storesLowerCaseIdentifiers = false;
-
-	private boolean procedureColumnMetaDataUsed = false;
 
 	private final List<CallParameterMetaData> callParameterMetaData = new ArrayList<>();
 
@@ -196,6 +196,11 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
+	public boolean isProcedureColumnMetaDataUsed() {
+		return this.procedureColumnMetaDataUsed;
+	}
+
+	@Override
 	public boolean isReturnResultSetSupported() {
 		return true;
 	}
@@ -211,15 +216,9 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	public boolean isProcedureColumnMetaDataUsed() {
-		return this.procedureColumnMetaDataUsed;
-	}
-
-	@Override
 	public boolean byPassReturnParameter(String parameterName) {
 		return false;
 	}
-
 
 	/**
 	 * Specify whether the database supports the use of catalog name in procedure calls.

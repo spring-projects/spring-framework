@@ -64,17 +64,11 @@ public class TableMetaDataContext {
 	@Nullable
 	private String schemaName;
 
-	// List of columns objects to be used in this context
-	private List<String> tableColumns = new ArrayList<>();
-
 	// Should we access insert parameter meta-data info or not
 	private boolean accessTableColumnMetaData = true;
 
 	// Should we override default for including synonyms for meta-data lookups
 	private boolean overrideIncludeSynonymsDefault = false;
-
-	// Are we using generated key columns?
-	private boolean generatedKeyColumnsUsed = false;
 
 	// Are we quoting identifiers?
 	private boolean quoteIdentifiers = false;
@@ -82,6 +76,12 @@ public class TableMetaDataContext {
 	// The provider of table meta-data
 	@Nullable
 	private TableMetaDataProvider metaDataProvider;
+
+	// List of columns objects to be used in this context
+	private List<String> tableColumns = new ArrayList<>();
+
+	// Are we using generated key columns
+	private boolean generatedKeyColumnsUsed = false;
 
 
 	/**
@@ -343,8 +343,8 @@ public class TableMetaDataContext {
 				}
 			}
 			else {
-				String message = "Unable to locate columns for table '" + tableName
-						+ "' so an insert statement can't be generated.";
+				String message = "Unable to locate columns for table '" + tableName +
+						"' so an insert statement can't be generated.";
 				if (isAccessTableColumnMetaData()) {
 					message += " Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().";
 				}
