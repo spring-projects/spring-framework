@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -490,9 +490,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			try {
 				latch.await(this.timeout, TimeUnit.MILLISECONDS);
 				if (latch.getCount() > 0 && !countDownBeanNames.isEmpty() && logger.isInfoEnabled()) {
-					logger.info("Failed to shut down " + countDownBeanNames.size() + " bean" +
-							(countDownBeanNames.size() > 1 ? "s" : "") + " with phase value " +
-							this.phase + " within timeout of " + this.timeout + "ms: " + countDownBeanNames);
+					logger.info("Shutdown phase " + this.phase + " ends with " + countDownBeanNames.size() +
+							" bean" + (countDownBeanNames.size() > 1 ? "s" : "") +
+							" still running after timeout of " + this.timeout + "ms: " + countDownBeanNames);
 				}
 			}
 			catch (InterruptedException ex) {
