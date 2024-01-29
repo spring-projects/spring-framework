@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ class QuartzCronFieldTests {
 
 	@Test
 	void dayOfWeek_0(){
+		// third Sunday (0) of the month
 		QuartzCronField field = QuartzCronField.parseDaysOfWeek("0#3");
 
 		LocalDate last = LocalDate.of(2024, 1, 1);
@@ -83,6 +84,7 @@ class QuartzCronFieldTests {
 
 	@Test
 	void dayOfWeek_1(){
+		// third Monday (1) of the month
 		QuartzCronField field = QuartzCronField.parseDaysOfWeek("1#3");
 
 		LocalDate last = LocalDate.of(2024, 1, 1);
@@ -92,6 +94,7 @@ class QuartzCronFieldTests {
 
 	@Test
 	void dayOfWeek_2(){
+		// third Tuesday (2) of the month
 		QuartzCronField field = QuartzCronField.parseDaysOfWeek("2#3");
 
 		LocalDate last = LocalDate.of(2024, 1, 1);
@@ -101,6 +104,7 @@ class QuartzCronFieldTests {
 
 	@Test
 	void dayOfWeek_7() {
+		// third Sunday (7 as alternative to 0) of the month
 		QuartzCronField field = QuartzCronField.parseDaysOfWeek("7#3");
 
 		LocalDate last = LocalDate.of(2024, 1, 1);

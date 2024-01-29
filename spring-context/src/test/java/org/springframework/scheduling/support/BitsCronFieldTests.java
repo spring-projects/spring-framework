@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ class BitsCronFieldTests {
 		assertThat(BitsCronField.parseMonth("1")).has(set(1)).has(clearRange(2, 12));
 
 		assertThat(BitsCronField.parseDaysOfWeek("0")).has(set(7, 7)).has(clearRange(0, 6));
-
 		assertThat(BitsCronField.parseDaysOfWeek("7-5")).has(clear(0)).has(setRange(1, 5))
 				.has(clear(6)).has(set(7));
 	}

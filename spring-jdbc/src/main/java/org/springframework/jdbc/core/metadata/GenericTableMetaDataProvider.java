@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error retrieving 'DatabaseMetaData.getGeneratedKeys': " + ex.getMessage());
+				logger.warn("Error retrieving 'DatabaseMetaData.supportsGetGeneratedKeys': " + ex.getMessage());
 			}
 		}
 		try {
@@ -290,7 +290,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Provide access to default schema for subclasses.
+	 * Provide access to the default schema for subclasses.
 	 */
 	@Nullable
 	protected String getDefaultSchema() {
@@ -298,7 +298,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Provide access to version info for subclasses.
+	 * Provide access to the version info for subclasses.
 	 */
 	@Nullable
 	protected String getDatabaseVersion() {
