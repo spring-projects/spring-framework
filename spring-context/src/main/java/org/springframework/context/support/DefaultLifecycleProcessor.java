@@ -54,7 +54,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Default implementation of the {@link LifecycleProcessor} strategy.
+ * Spring's default implementation of the {@link LifecycleProcessor} strategy.
+ *
+ * <p>Provides interaction with {@link Lifecycle} and {@link SmartLifecycle} beans in
+ * groups for specific phases, on startup/shutdown as well as for explicit start/stop
+ * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
  *
  * <p>Provides interaction with {@link Lifecycle} and {@link SmartLifecycle} beans in
  * groups for specific phases, on startup/shutdown as well as for explicit start/stop

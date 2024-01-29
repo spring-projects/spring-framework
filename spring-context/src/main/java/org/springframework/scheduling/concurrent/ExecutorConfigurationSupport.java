@@ -91,7 +91,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
-	 * THe default is the underlying ExecutorService's default thread factory.
+	 * The default is the underlying ExecutorService's default thread factory.
 	 * <p>In a Jakarta EE or other managed environment with JSR-236 support,
 	 * consider specifying a JNDI-located ManagedThreadFactory: by default,
 	 * to be found at "java:comp/DefaultManagedThreadFactory".
