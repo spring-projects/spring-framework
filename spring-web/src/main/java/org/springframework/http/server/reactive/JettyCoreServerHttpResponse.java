@@ -51,7 +51,6 @@ import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.MultiValueMapAdapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -97,7 +96,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public boolean isCommitted() {
-		return response.isCommitted();
+		return committed.get();
 	}
 
 	@Override
@@ -117,13 +116,8 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	@Override
 	public Mono<Void> setComplete() {
 		Mono<Void> mono = ensureCommitted();
-		if (mono != null)
-			return mono.then(Mono.defer(this::setComplete));
-
-		Callback.Completable callback = new Callback.Completable();
-		response.write(true, BufferUtil.EMPTY_BUFFER, callback);
-		return Mono.fromFuture(callback);
-	}
+        return (mono == null) ? Mono.empty() : mono;
+    }
 
 	@Override
 	public Mono<Void> writeWith(Path file, long position, long count) {
@@ -148,16 +142,13 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	private Mono<Void> ensureCommitted() {
 		if (committed.compareAndSet(false, true)) {
 			if (!this.commitActions.isEmpty()) {
-				// TODO: WebSocket upgrade bypasses this response and writes directly with the Jetty Response.
-				//  Because of this our attempt at doing writeCookies doesn't work because some commitActions
-				//  are settings cookies on this instance, but websocket needs them set before because it will do the commit.
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-						//.concatWith(Mono.fromRunnable(this::writeCookies))
+						.concatWith(Mono.fromRunnable(this::writeCookies))
 						.then()
 						.doOnError(t -> getHeaders().clearContentHeaders());
 			}
 
-			// writeCookies();
+			 writeCookies();
 		}
 
 		return null;
@@ -231,35 +222,14 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		if (cookies == null)
 			initializeCookies();
-
-		// TODO: not good enough.
-		return new MultiValueMapAdapter<>(cookies)
-		{
-			@Override
-			public void add(String key, ResponseCookie value)
-			{
-				Response.addCookie(response, new HttpResponseCookie(value));
-				super.add(key, value);
-			}
-
-			@Override
-			public void set(String key, ResponseCookie value)
-			{
-				Response.putCookie(response, new HttpResponseCookie(value));
-				super.set(key, value);
-			}
-		};
+		return cookies;
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		/*
 		if (cookies == null)
 			initializeCookies();
 		cookies.add(cookie.getName(), cookie);
-		 */
-
-		Response.addCookie(response, new HttpResponseCookie(cookie));
 	}
 
 	private void initializeCookies() {
