@@ -160,7 +160,7 @@ class HttpEntityMethodProcessorMockTests {
 				stringHttpMessageConverter, resourceMessageConverter, resourceRegionMessageConverter, jsonMessageConverter));
 
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class,
-				Integer.TYPE, RequestEntity.class);
+				int.class, RequestEntity.class);
 
 		paramHttpEntity = new MethodParameter(handle1, 0);
 		paramRequestEntity = new MethodParameter(handle1, 3);

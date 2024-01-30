@@ -57,15 +57,15 @@ class TestScenarioCreator {
 	private static void populateFunctions(StandardEvaluationContext testContext) {
 		try {
 			testContext.registerFunction("isEven",
-					TestScenarioCreator.class.getDeclaredMethod("isEven", Integer.TYPE));
+					TestScenarioCreator.class.getDeclaredMethod("isEven", int.class));
 			testContext.registerFunction("reverseInt",
-					TestScenarioCreator.class.getDeclaredMethod("reverseInt", Integer.TYPE, Integer.TYPE, Integer.TYPE));
+					TestScenarioCreator.class.getDeclaredMethod("reverseInt", int.class, int.class, int.class));
 			testContext.registerFunction("reverseString",
 					TestScenarioCreator.class.getDeclaredMethod("reverseString", String.class));
 			testContext.registerFunction("varargsFunction",
 					TestScenarioCreator.class.getDeclaredMethod("varargsFunction", String[].class));
 			testContext.registerFunction("varargsFunction2",
-					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", Integer.TYPE, String[].class));
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", int.class, String[].class));
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);

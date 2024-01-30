@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,28 +102,28 @@ public class TypeReference extends SpelNodeImpl {
 		// TODO Future optimization - if followed by a static method call, skip generating code here
 		Assert.state(this.type != null, "No type available");
 		if (this.type.isPrimitive()) {
-			if (this.type == Boolean.TYPE) {
+			if (this.type == boolean.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Byte.TYPE) {
+			else if (this.type == byte.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Byte", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Character.TYPE) {
+			else if (this.type == char.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Double.TYPE) {
+			else if (this.type == double.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Double", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Float.TYPE) {
+			else if (this.type == float.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Float", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Integer.TYPE) {
+			else if (this.type == int.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Long.TYPE) {
+			else if (this.type == long.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
 			}
-			else if (this.type == Short.TYPE) {
+			else if (this.type == short.class) {
 				mv.visitFieldInsn(GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,7 +272,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	@Nullable
 	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
-			if (Boolean.TYPE.equals(paramType)) {
+			if (paramType == boolean.class) {
 				return Boolean.FALSE;
 			}
 			else if (paramType.isPrimitive()) {

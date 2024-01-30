@@ -260,7 +260,7 @@ public abstract class AbstractExpressionTests {
 			StringBuilder sb = new StringBuilder();
 			if (value.getClass().componentType().isPrimitive()) {
 				Class<?> primitiveType = value.getClass().componentType();
-				if (primitiveType == Integer.TYPE) {
+				if (primitiveType == int.class) {
 					int[] l = (int[]) value;
 					sb.append("int[").append(l.length).append("]{");
 					for (int j = 0; j < l.length; j++) {
@@ -271,7 +271,7 @@ public abstract class AbstractExpressionTests {
 					}
 					sb.append('}');
 				}
-				else if (primitiveType == Long.TYPE) {
+				else if (primitiveType == long.class) {
 					long[] l = (long[]) value;
 					sb.append("long[").append(l.length).append("]{");
 					for (int j = 0; j < l.length; j++) {

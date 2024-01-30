@@ -137,7 +137,7 @@ public class AnnotatedMethod {
 	 * Return {@code true} if the method's return type is void, {@code false} otherwise.
 	 */
 	public boolean isVoid() {
-		return Void.TYPE.equals(getReturnType().getParameterType());
+		return (getReturnType().getParameterType() == void.class);
 	}
 
 	/**

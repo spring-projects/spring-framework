@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 
 	@Override
 	public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getType() == Void.class || targetType.getType() == Void.TYPE) {
+		if (targetType.getType() == Void.class || targetType.getType() == void.class) {
 			return null;
 		}
 		if (conversionService.canConvert(sourceType, targetType)) {

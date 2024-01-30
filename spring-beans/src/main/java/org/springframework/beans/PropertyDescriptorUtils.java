@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ abstract class PropertyDescriptorUtils {
 				setter = true;
 				nameIndex = 3;
 			}
-			else if (methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != Void.TYPE) {
+			else if (methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != void.class) {
 				setter = false;
 				nameIndex = 3;
 			}
@@ -152,7 +152,7 @@ abstract class PropertyDescriptorUtils {
 				throw new IntrospectionException("Bad read method arg count: " + readMethod);
 			}
 			propertyType = readMethod.getReturnType();
-			if (propertyType == Void.TYPE) {
+			if (propertyType == void.class) {
 				throw new IntrospectionException("Read method returns void: " + readMethod);
 			}
 		}
@@ -197,11 +197,11 @@ abstract class PropertyDescriptorUtils {
 			if (params.length != 1) {
 				throw new IntrospectionException("Bad indexed read method arg count: " + indexedReadMethod);
 			}
-			if (params[0] != Integer.TYPE) {
+			if (params[0] != int.class) {
 				throw new IntrospectionException("Non int index to indexed read method: " + indexedReadMethod);
 			}
 			indexedPropertyType = indexedReadMethod.getReturnType();
-			if (indexedPropertyType == Void.TYPE) {
+			if (indexedPropertyType == void.class) {
 				throw new IntrospectionException("Indexed read method returns void: " + indexedReadMethod);
 			}
 		}
@@ -211,7 +211,7 @@ abstract class PropertyDescriptorUtils {
 			if (params.length != 2) {
 				throw new IntrospectionException("Bad indexed write method arg count: " + indexedWriteMethod);
 			}
-			if (params[0] != Integer.TYPE) {
+			if (params[0] != int.class) {
 				throw new IntrospectionException("Non int index to indexed write method: " + indexedWriteMethod);
 			}
 			if (indexedPropertyType != null) {

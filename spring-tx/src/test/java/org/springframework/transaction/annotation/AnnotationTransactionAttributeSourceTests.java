@@ -203,7 +203,7 @@ class AnnotationTransactionAttributeSourceTests {
 
 		assertThat(actual.getLabels()).containsOnly("retryable", "long-running");
 
-		method = TestBean11.class.getMethod("setAge", Integer.TYPE);
+		method = TestBean11.class.getMethod("setAge", int.class);
 		actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
 
 		assertThat(actual.getLabels()).containsOnly("short-running");

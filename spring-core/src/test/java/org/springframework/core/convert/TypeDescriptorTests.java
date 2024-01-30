@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ class TypeDescriptorTests {
 	void fieldArray() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("intArray"));
 		assertThat(typeDescriptor.isArray()).isTrue();
-		assertThat(typeDescriptor.getElementTypeDescriptor().getType()).isEqualTo(Integer.TYPE);
+		assertThat(typeDescriptor.getElementTypeDescriptor().getType()).isEqualTo(int.class);
 		assertThat(typeDescriptor.toString()).isEqualTo("int[]");
 	}
 
@@ -359,7 +359,7 @@ class TypeDescriptorTests {
 		assertThat(typeDescriptor.isArray()).isFalse();
 		assertThat(typeDescriptor.isCollection()).isFalse();
 		assertThat(typeDescriptor.isMap()).isFalse();
-		assertThat(typeDescriptor.getType()).isEqualTo(Integer.TYPE);
+		assertThat(typeDescriptor.getType()).isEqualTo(int.class);
 		assertThat(typeDescriptor.getObjectType()).isEqualTo(Integer.class);
 	}
 
@@ -369,7 +369,7 @@ class TypeDescriptorTests {
 		assertThat(typeDescriptor.isArray()).isTrue();
 		assertThat(typeDescriptor.isCollection()).isFalse();
 		assertThat(typeDescriptor.isMap()).isFalse();
-		assertThat(typeDescriptor.getElementTypeDescriptor().getType()).isEqualTo(Integer.TYPE);
+		assertThat(typeDescriptor.getElementTypeDescriptor().getType()).isEqualTo(int.class);
 	}
 
 	@Test

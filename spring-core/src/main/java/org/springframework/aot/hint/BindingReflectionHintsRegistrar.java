@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class BindingReflectionHintsRegistrar {
 						if (methodName.startsWith("set") && method.getParameterCount() == 1) {
 							registerPropertyHints(hints, seen, method, 0);
 						}
-						else if ((methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != Void.TYPE) ||
+						else if ((methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != void.class) ||
 								(methodName.startsWith("is") && method.getParameterCount() == 0 && method.getReturnType() == boolean.class)) {
 							registerPropertyHints(hints, seen, method, -1);
 						}

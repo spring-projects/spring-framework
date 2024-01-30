@@ -698,7 +698,7 @@ class ProxyFactoryBeanTests {
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
 				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
-					return m.getReturnType() == Void.TYPE;
+					return m.getReturnType() == void.class;
 				}
 			});
 		}

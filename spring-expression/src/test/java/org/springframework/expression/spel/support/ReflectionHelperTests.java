@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,16 +128,16 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 		StandardTypeConverter tc = new StandardTypeConverter();
 
 		// Calling foo(String,int) with (String,Integer) requires boxing conversion of argument one
-		checkMatch(new Class<?>[] {String.class, Integer.TYPE}, new Class<?>[] {String.class,Integer.class},tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {String.class, int.class}, new Class<?>[] {String.class,Integer.class},tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,String) on call to foo(Integer,String) requires boxing conversion of argument zero
-		checkMatch(new Class<?>[] {Integer.TYPE, String.class}, new Class<?>[] {Integer.class, String.class},tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {int.class, String.class}, new Class<?>[] {Integer.class, String.class},tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,Sub) on call to foo(Integer,Super) requires boxing conversion of argument zero
-		checkMatch(new Class<?>[] {Integer.TYPE, Sub.class}, new Class<?>[] {Integer.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
+		checkMatch(new Class<?>[] {int.class, Sub.class}, new Class<?>[] {Integer.class, Super.class}, tc, ArgumentsMatchKind.CLOSE);
 
 		// Passing (int,Sub,boolean) on call to foo(Integer,Super,Boolean) requires boxing conversion of arguments zero and two
-		// TODO checkMatch(new Class<?>[] {Integer.TYPE, Sub.class, Boolean.TYPE}, new Class<?>[] {Integer.class, Super.class, Boolean.class}, tc, ArgsMatchKind.REQUIRES_CONVERSION);
+		// TODO checkMatch(new Class<?>[] {int.class, Sub.class, boolean.class}, new Class<?>[] {Integer.class, Super.class, Boolean.class}, tc, ArgsMatchKind.REQUIRES_CONVERSION);
 	}
 
 	@Test

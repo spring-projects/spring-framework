@@ -894,38 +894,38 @@ class EvaluationTests extends AbstractExpressionTests {
 			// double
 			e = parser.parseExpression("ddd++");
 			assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
-			double return_ddd = e.getValue(ctx, Double.TYPE);
+			double return_ddd = e.getValue(ctx, double.class);
 			assertThat((float) return_ddd).isCloseTo((float) 2.0d, within((float) 0d));
 			assertThat((float) helper.ddd).isCloseTo((float) 3.0d, within((float) 0d));
 
 			// float
 			e = parser.parseExpression("fff++");
 			assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
-			float return_fff = e.getValue(ctx, Float.TYPE);
+			float return_fff = e.getValue(ctx, float.class);
 			assertThat(return_fff).isCloseTo(3.0f, within((float) 0d));
 			assertThat(helper.fff).isCloseTo(4.0f, within((float) 0d));
 
 			// long
 			e = parser.parseExpression("lll++");
 			assertThat(helper.lll).isEqualTo(66666L);
-			long return_lll = e.getValue(ctx, Long.TYPE);
+			long return_lll = e.getValue(ctx, long.class);
 			assertThat(return_lll).isEqualTo(66666L);
 			assertThat(helper.lll).isEqualTo(66667L);
 
 			// int
 			e = parser.parseExpression("iii++");
 			assertThat(helper.iii).isEqualTo(42);
-			int return_iii = e.getValue(ctx, Integer.TYPE);
+			int return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(42);
 			assertThat(helper.iii).isEqualTo(43);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(43);
 			assertThat(helper.iii).isEqualTo(44);
 
 			// short
 			e = parser.parseExpression("sss++");
 			assertThat(helper.sss).isEqualTo((short) 15);
-			short return_sss = e.getValue(ctx, Short.TYPE);
+			short return_sss = e.getValue(ctx, short.class);
 			assertThat(return_sss).isEqualTo((short) 15);
 			assertThat(helper.sss).isEqualTo((short) 16);
 		}
@@ -947,31 +947,31 @@ class EvaluationTests extends AbstractExpressionTests {
 			// double
 			e = parser.parseExpression("++ddd");
 			assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
-			double return_ddd = e.getValue(ctx, Double.TYPE);
+			double return_ddd = e.getValue(ctx, double.class);
 			assertThat((float) return_ddd).isCloseTo((float) 3.0d, within((float) 0d));
 			assertThat((float) helper.ddd).isCloseTo((float) 3.0d, within((float) 0d));
 
 			// float
 			e = parser.parseExpression("++fff");
 			assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
-			float return_fff = e.getValue(ctx, Float.TYPE);
+			float return_fff = e.getValue(ctx, float.class);
 			assertThat(return_fff).isCloseTo(4.0f, within((float) 0d));
 			assertThat(helper.fff).isCloseTo(4.0f, within((float) 0d));
 
 			// long
 			e = parser.parseExpression("++lll");
 			assertThat(helper.lll).isEqualTo(66666L);
-			long return_lll = e.getValue(ctx, Long.TYPE);
+			long return_lll = e.getValue(ctx, long.class);
 			assertThat(return_lll).isEqualTo(66667L);
 			assertThat(helper.lll).isEqualTo(66667L);
 
 			// int
 			e = parser.parseExpression("++iii");
 			assertThat(helper.iii).isEqualTo(42);
-			int return_iii = e.getValue(ctx, Integer.TYPE);
+			int return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(43);
 			assertThat(helper.iii).isEqualTo(43);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(44);
 			assertThat(helper.iii).isEqualTo(44);
 
@@ -991,12 +991,12 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			Expression e1 = parser.parseExpression("m()++");
 			assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> e1.getValue(ctx, Double.TYPE))
+				.isThrownBy(() -> e1.getValue(ctx, double.class))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_INCREMENTABLE));
 
 			Expression e2 = parser.parseExpression("++m()");
 			assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> e2.getValue(ctx, Double.TYPE))
+				.isThrownBy(() -> e2.getValue(ctx, double.class))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_INCREMENTABLE));
 		}
 
@@ -1007,11 +1007,11 @@ class EvaluationTests extends AbstractExpressionTests {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e1 = parser.parseExpression("++1");
 			assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> e1.getValue(ctx, Double.TYPE))
+				.isThrownBy(() -> e1.getValue(ctx, double.class))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
 			Expression e2 = parser.parseExpression("1++");
 			assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> e2.getValue(ctx, Double.TYPE))
+				.isThrownBy(() -> e2.getValue(ctx, double.class))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
 		}
 
@@ -1044,38 +1044,38 @@ class EvaluationTests extends AbstractExpressionTests {
 			// double
 			e = parser.parseExpression("ddd--");
 			assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
-			double return_ddd = e.getValue(ctx, Double.TYPE);
+			double return_ddd = e.getValue(ctx, double.class);
 			assertThat((float) return_ddd).isCloseTo((float) 2.0d, within((float) 0d));
 			assertThat((float) helper.ddd).isCloseTo((float) 1.0d, within((float) 0d));
 
 			// float
 			e = parser.parseExpression("fff--");
 			assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
-			float return_fff = e.getValue(ctx, Float.TYPE);
+			float return_fff = e.getValue(ctx, float.class);
 			assertThat(return_fff).isCloseTo(3.0f, within((float) 0d));
 			assertThat(helper.fff).isCloseTo(2.0f, within((float) 0d));
 
 			// long
 			e = parser.parseExpression("lll--");
 			assertThat(helper.lll).isEqualTo(66666L);
-			long return_lll = e.getValue(ctx, Long.TYPE);
+			long return_lll = e.getValue(ctx, long.class);
 			assertThat(return_lll).isEqualTo(66666L);
 			assertThat(helper.lll).isEqualTo(66665L);
 
 			// int
 			e = parser.parseExpression("iii--");
 			assertThat(helper.iii).isEqualTo(42);
-			int return_iii = e.getValue(ctx, Integer.TYPE);
+			int return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(42);
 			assertThat(helper.iii).isEqualTo(41);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(41);
 			assertThat(helper.iii).isEqualTo(40);
 
 			// short
 			e = parser.parseExpression("sss--");
 			assertThat(helper.sss).isEqualTo((short) 15);
-			short return_sss = e.getValue(ctx, Short.TYPE);
+			short return_sss = e.getValue(ctx, short.class);
 			assertThat(return_sss).isEqualTo((short) 15);
 			assertThat(helper.sss).isEqualTo((short) 14);
 		}
@@ -1097,31 +1097,31 @@ class EvaluationTests extends AbstractExpressionTests {
 			// double
 			e = parser.parseExpression("--ddd");
 			assertThat((float) helper.ddd).isCloseTo((float) 2.0d, within((float) 0d));
-			double return_ddd = e.getValue(ctx, Double.TYPE);
+			double return_ddd = e.getValue(ctx, double.class);
 			assertThat((float) return_ddd).isCloseTo((float) 1.0d, within((float) 0d));
 			assertThat((float) helper.ddd).isCloseTo((float) 1.0d, within((float) 0d));
 
 			// float
 			e = parser.parseExpression("--fff");
 			assertThat(helper.fff).isCloseTo(3.0f, within((float) 0d));
-			float return_fff = e.getValue(ctx, Float.TYPE);
+			float return_fff = e.getValue(ctx, float.class);
 			assertThat(return_fff).isCloseTo(2.0f, within((float) 0d));
 			assertThat(helper.fff).isCloseTo(2.0f, within((float) 0d));
 
 			// long
 			e = parser.parseExpression("--lll");
 			assertThat(helper.lll).isEqualTo(66666L);
-			long return_lll = e.getValue(ctx, Long.TYPE);
+			long return_lll = e.getValue(ctx, long.class);
 			assertThat(return_lll).isEqualTo(66665L);
 			assertThat(helper.lll).isEqualTo(66665L);
 
 			// int
 			e = parser.parseExpression("--iii");
 			assertThat(helper.iii).isEqualTo(42);
-			int return_iii = e.getValue(ctx, Integer.TYPE);
+			int return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(41);
 			assertThat(helper.iii).isEqualTo(41);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(40);
 			assertThat(helper.iii).isEqualTo(40);
 
@@ -1141,12 +1141,12 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			Expression e1 = parser.parseExpression("m()--");
 			assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> e1.getValue(ctx, Double.TYPE))
+				.isThrownBy(() -> e1.getValue(ctx, double.class))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_DECREMENTABLE));
 
 			Expression e2 = parser.parseExpression("--m()");
 			assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> e2.getValue(ctx, Double.TYPE))
+				.isThrownBy(() -> e2.getValue(ctx, double.class))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERAND_NOT_DECREMENTABLE));
 		}
 
@@ -1349,26 +1349,26 @@ class EvaluationTests extends AbstractExpressionTests {
 			// iii=42
 			e = parser.parseExpression("iii=iii++");
 			assertThat(helper.iii).isEqualTo(42);
-			int return_iii = e.getValue(ctx, Integer.TYPE);
+			int return_iii = e.getValue(ctx, int.class);
 			assertThat(helper.iii).isEqualTo(42);
 			assertThat(return_iii).isEqualTo(42);
 
 			// Identifier
 			e = parser.parseExpression("iii++");
 			assertThat(helper.iii).isEqualTo(42);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(42);
 			assertThat(helper.iii).isEqualTo(43);
 
 			e = parser.parseExpression("--iii");
 			assertThat(helper.iii).isEqualTo(43);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(42);
 			assertThat(helper.iii).isEqualTo(42);
 
 			e = parser.parseExpression("iii=99");
 			assertThat(helper.iii).isEqualTo(42);
-			return_iii = e.getValue(ctx, Integer.TYPE);
+			return_iii = e.getValue(ctx, int.class);
 			assertThat(return_iii).isEqualTo(99);
 			assertThat(helper.iii).isEqualTo(99);
 
@@ -1376,19 +1376,19 @@ class EvaluationTests extends AbstractExpressionTests {
 			// foo.iii == 99
 			e = parser.parseExpression("foo.iii++");
 			assertThat(helper.foo.iii).isEqualTo(99);
-			int return_foo_iii = e.getValue(ctx, Integer.TYPE);
+			int return_foo_iii = e.getValue(ctx, int.class);
 			assertThat(return_foo_iii).isEqualTo(99);
 			assertThat(helper.foo.iii).isEqualTo(100);
 
 			e = parser.parseExpression("--foo.iii");
 			assertThat(helper.foo.iii).isEqualTo(100);
-			return_foo_iii = e.getValue(ctx, Integer.TYPE);
+			return_foo_iii = e.getValue(ctx, int.class);
 			assertThat(return_foo_iii).isEqualTo(99);
 			assertThat(helper.foo.iii).isEqualTo(99);
 
 			e = parser.parseExpression("foo.iii=999");
 			assertThat(helper.foo.iii).isEqualTo(99);
-			return_foo_iii = e.getValue(ctx, Integer.TYPE);
+			return_foo_iii = e.getValue(ctx, int.class);
 			assertThat(return_foo_iii).isEqualTo(999);
 			assertThat(helper.foo.iii).isEqualTo(999);
 
@@ -1408,7 +1408,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			expectFailSetValueNotSupported(parser, ctx, "('abc' matches '^a..')=('abc' matches '^a..')");
 
 			// Selection
-			ctx.registerFunction("isEven", Spr9751.class.getDeclaredMethod("isEven", Integer.TYPE));
+			ctx.registerFunction("isEven", Spr9751.class.getDeclaredMethod("isEven", int.class));
 
 			expectFailNotIncrementable(parser, ctx, "({1,2,3}.?[#isEven(#this)])++");
 			expectFailNotDecrementable(parser, ctx, "--({1,2,3}.?[#isEven(#this)])");
@@ -1440,19 +1440,19 @@ class EvaluationTests extends AbstractExpressionTests {
 			ctx.setVariable("wobble", 3);
 			e = parser.parseExpression("#wobble++");
 			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
-			int r = e.getValue(ctx, Integer.TYPE);
+			int r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(3);
 			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(4);
 
 			e = parser.parseExpression("--#wobble");
 			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(4);
-			r = e.getValue(ctx, Integer.TYPE);
+			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(3);
 			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
 
 			e = parser.parseExpression("#wobble=34");
 			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
-			r = e.getValue(ctx, Integer.TYPE);
+			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(34);
 			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(34);
 
@@ -1487,19 +1487,19 @@ class EvaluationTests extends AbstractExpressionTests {
 			helper.iii = 42;
 			e = parser.parseExpression("iii++");
 			assertThat(helper.iii).isEqualTo(42);
-			r = e.getValue(ctx, Integer.TYPE);
+			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(42);
 			assertThat(helper.iii).isEqualTo(43);
 
 			e = parser.parseExpression("--iii");
 			assertThat(helper.iii).isEqualTo(43);
-			r = e.getValue(ctx, Integer.TYPE);
+			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(42);
 			assertThat(helper.iii).isEqualTo(42);
 
 			e = parser.parseExpression("iii=100");
 			assertThat(helper.iii).isEqualTo(42);
-			r = e.getValue(ctx, Integer.TYPE);
+			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(100);
 			assertThat(helper.iii).isEqualTo(100);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -454,31 +454,31 @@ public class CodeFlow implements Opcodes {
 			}
 		}
 		if (clazz.isPrimitive()) {
-			if (clazz == Boolean.TYPE) {
+			if (clazz == boolean.class) {
 				sb.append('Z');
 			}
-			else if (clazz == Byte.TYPE) {
+			else if (clazz == byte.class) {
 				sb.append('B');
 			}
-			else if (clazz == Character.TYPE) {
+			else if (clazz == char.class) {
 				sb.append('C');
 			}
-			else if (clazz == Double.TYPE) {
+			else if (clazz == double.class) {
 				sb.append('D');
 			}
-			else if (clazz == Float.TYPE) {
+			else if (clazz == float.class) {
 				sb.append('F');
 			}
-			else if (clazz == Integer.TYPE) {
+			else if (clazz == int.class) {
 				sb.append('I');
 			}
-			else if (clazz == Long.TYPE) {
+			else if (clazz == long.class) {
 				sb.append('J');
 			}
-			else if (clazz == Short.TYPE) {
+			else if (clazz == short.class) {
 				sb.append('S');
 			}
-			else if (clazz == Void.TYPE) {
+			else if (clazz == void.class) {
 				sb.append('V');
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,7 @@ class XStreamMarshallerTests {
 
 	@Test
 	void useAttributesFor() throws Exception {
-		marshaller.setUseAttributeForTypes(Long.TYPE);
+		marshaller.setUseAttributeForTypes(long.class);
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
@@ -239,7 +239,7 @@ class XStreamMarshallerTests {
 
 	@Test
 	void useAttributesForStringClassMap() throws Exception {
-		marshaller.setUseAttributeFor(Collections.singletonMap("flightNumber", Long.TYPE));
+		marshaller.setUseAttributeFor(Collections.singletonMap("flightNumber", long.class));
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class SynthesizingMethodParameterTests {
 
 	@BeforeEach
 	void setUp() throws NoSuchMethodException {
-		method = getClass().getMethod("method", String.class, Long.TYPE);
+		method = getClass().getMethod("method", String.class, long.class);
 		stringParameter = new SynthesizingMethodParameter(method, 0);
 		longParameter = new SynthesizingMethodParameter(method, 1);
 		intReturnType = new SynthesizingMethodParameter(method, -1);
@@ -63,7 +63,7 @@ class SynthesizingMethodParameterTests {
 		assertThat(intReturnType).isNotEqualTo(stringParameter);
 		assertThat(intReturnType).isNotEqualTo(longParameter);
 
-		Method method = getClass().getMethod("method", String.class, Long.TYPE);
+		Method method = getClass().getMethod("method", String.class, long.class);
 		MethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
 		assertThat(methodParameter).isEqualTo(stringParameter);
 		assertThat(stringParameter).isEqualTo(methodParameter);
@@ -83,7 +83,7 @@ class SynthesizingMethodParameterTests {
 		assertThat(longParameter.hashCode()).isEqualTo(longParameter.hashCode());
 		assertThat(intReturnType.hashCode()).isEqualTo(intReturnType.hashCode());
 
-		Method method = getClass().getMethod("method", String.class, Long.TYPE);
+		Method method = getClass().getMethod("method", String.class, long.class);
 		SynthesizingMethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
 		assertThat(methodParameter.hashCode()).isEqualTo(stringParameter.hashCode());
 		assertThat(methodParameter.hashCode()).isNotEqualTo(longParameter.hashCode());

@@ -385,49 +385,49 @@ public class Indexer extends SpelNodeImpl {
 
 	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
 		Class<?> arrayComponentType = ctx.getClass().componentType();
-		if (arrayComponentType == Boolean.TYPE) {
+		if (arrayComponentType == boolean.class) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "Z";
 			return array[idx];
 		}
-		else if (arrayComponentType == Byte.TYPE) {
+		else if (arrayComponentType == byte.class) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "B";
 			return array[idx];
 		}
-		else if (arrayComponentType == Character.TYPE) {
+		else if (arrayComponentType == char.class) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "C";
 			return array[idx];
 		}
-		else if (arrayComponentType == Double.TYPE) {
+		else if (arrayComponentType == double.class) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "D";
 			return array[idx];
 		}
-		else if (arrayComponentType == Float.TYPE) {
+		else if (arrayComponentType == float.class) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "F";
 			return array[idx];
 		}
-		else if (arrayComponentType == Integer.TYPE) {
+		else if (arrayComponentType == int.class) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "I";
 			return array[idx];
 		}
-		else if (arrayComponentType == Long.TYPE) {
+		else if (arrayComponentType == long.class) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "J";
 			return array[idx];
 		}
-		else if (arrayComponentType == Short.TYPE) {
+		else if (arrayComponentType == short.class) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "S";

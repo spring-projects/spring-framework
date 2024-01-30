@@ -274,14 +274,14 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		// warmup
 		for (int i = 0; i < count; i++) {
-			b = expression.getValue(payload, Boolean.TYPE);
+			b = expression.getValue(payload, boolean.class);
 		}
 
 		log("timing interpreted: ");
 		for (int i = 0; i < iterations; i++) {
 			long stime = System.currentTimeMillis();
 			for (int j = 0; j < count; j++) {
-				b = expression.getValue(payload, Boolean.TYPE);
+				b = expression.getValue(payload, boolean.class);
 			}
 			long etime = System.currentTimeMillis();
 			long interpretedSpeed = (etime - stime);
@@ -292,12 +292,12 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		compile(expression);
 		boolean bc = false;
-		expression.getValue(payload, Boolean.TYPE);
+		expression.getValue(payload, boolean.class);
 		log("timing compiled: ");
 		for (int i = 0; i < iterations; i++) {
 			long stime = System.currentTimeMillis();
 			for (int j = 0; j < count; j++) {
-				bc = expression.getValue(payload, Boolean.TYPE);
+				bc = expression.getValue(payload, boolean.class);
 			}
 			long etime = System.currentTimeMillis();
 			long compiledSpeed = (etime - stime);
@@ -316,7 +316,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		// Verify if the input changes, the result changes
 		payload.DR[0].DRFixedSection.duration = 0.04d;
-		bc = expression.getValue(payload, Boolean.TYPE);
+		bc = expression.getValue(payload, boolean.class);
 		assertThat(bc).isTrue();
 	}
 

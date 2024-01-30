@@ -121,7 +121,7 @@ class RequestResponseBodyMethodProcessorMockTests {
 
 		servletRequest.setMethod("POST");
 
-		Method methodHandle1 = getClass().getMethod("handle1", String.class, Integer.TYPE);
+		Method methodHandle1 = getClass().getMethod("handle1", String.class, int.class);
 		paramRequestBodyString = new MethodParameter(methodHandle1, 0);
 		paramInt = new MethodParameter(methodHandle1, 1);
 		paramValidBean = new MethodParameter(getClass().getMethod("handle2", SimpleBean.class), 0);
