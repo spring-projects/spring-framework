@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -43,6 +41,7 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
+import org.springframework.web.reactive.socket.server.upgrade.JettyCoreRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNetty2RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
@@ -52,6 +51,7 @@ import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpg
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import reactor.core.publisher.Mono;
 
 /**
  * {@code WebSocketService} implementation that handles a WebSocket HTTP
@@ -76,6 +76,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final boolean jettyWsPresent;
 
+	private static final boolean jettyCoreWsPresent;
+
 	private static final boolean undertowWsPresent;
 
 	private static final boolean reactorNettyPresent;
@@ -88,6 +90,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
 		jettyWsPresent = ClassUtils.isPresent(
 				"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer", classLoader);
+		jettyCoreWsPresent = ClassUtils.isPresent(
+				"org.eclipse.jetty.websocket.server.ServerWebSocketContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
 		reactorNettyPresent = ClassUtils.isPresent(
@@ -276,6 +280,9 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 		else if (jettyWsPresent) {
 			return new JettyRequestUpgradeStrategy();
+		}
+		else if (jettyCoreWsPresent) {
+			return new JettyCoreRequestUpgradeStrategy();
 		}
 		else if (undertowWsPresent) {
 			return new UndertowRequestUpgradeStrategy();
