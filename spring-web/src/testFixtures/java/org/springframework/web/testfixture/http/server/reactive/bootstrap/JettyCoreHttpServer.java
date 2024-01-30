@@ -19,7 +19,7 @@ package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-
+import org.eclipse.jetty.websocket.server.WebSocketUpgradeHandler;
 import org.springframework.http.server.reactive.JettyCoreHttpHandlerAdapter;
 
 /**
@@ -44,7 +44,10 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
 		this.jettyServer.setHandler(createHandlerAdapter());
-		// TODO add websocket upgrade handler
+
+		// TODO: We don't actually want the upgrade handler but this will create the WebSocketContainer.
+		//  This requires a change in Jetty.
+		WebSocketUpgradeHandler.from(jettyServer);
 	}
 
 	private JettyCoreHttpHandlerAdapter createHandlerAdapter() {

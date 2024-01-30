@@ -72,6 +72,7 @@ dependencies {
 		because("needed by Netty's SelfSignedCertificate on JDK 15+")
 	}
 	testFixturesImplementation("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server")
+	testFixturesImplementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))

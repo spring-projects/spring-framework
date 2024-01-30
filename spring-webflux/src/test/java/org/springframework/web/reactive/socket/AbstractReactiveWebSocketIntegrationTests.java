@@ -31,13 +31,6 @@ import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.*;
-import org.xnio.OptionMap;
-import org.xnio.Xnio;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple3;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -54,6 +47,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.server.upgrade.JettyCoreRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNetty2RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
@@ -61,6 +55,17 @@ import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgra
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
 
 /**
  * Base class for reactive WebSocket integration tests. Subclasses must implement
@@ -93,7 +98,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		Map<HttpServer, Class<?>> servers = new LinkedHashMap<>();
 		servers.put(new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class), TomcatConfig.class);
 		servers.put(new JettyHttpServer(), JettyConfig.class);
-		servers.put(new JettyCoreHttpServer(), JettyConfig.class);
+		servers.put(new JettyCoreHttpServer(), JettyCoreConfig.class);
 		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
 		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
@@ -238,4 +243,12 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		}
 	}
 
+	@Configuration
+	static class JettyCoreConfig extends AbstractHandlerAdapterConfig {
+
+		@Override
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
+			return new JettyCoreRequestUpgradeStrategy();
+		}
+	}
 }
