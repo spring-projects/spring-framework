@@ -32,7 +32,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.core.OpCode;
-
 import org.springframework.core.io.buffer.CloseableDataBuffer;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -53,17 +52,13 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  */
 @WebSocket
 public class JettyWebSocketHandlerAdapter {
-
 	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
 
-
 	private final WebSocketHandler delegateHandler;
-
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
 	@Nullable
 	private JettyWebSocketSession delegateSession;
-
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, JettyWebSocketSession> sessionFactory) {
@@ -73,7 +68,6 @@ public class JettyWebSocketHandlerAdapter {
 		this.delegateHandler = handler;
 		this.sessionFactory = sessionFactory;
 	}
-
 
 	@OnWebSocketOpen
 	public void onWebSocketOpen(Session session) {
@@ -101,6 +95,9 @@ public class JettyWebSocketHandlerAdapter {
 			WebSocketMessage webSocketMessage = new WebSocketMessage(Type.BINARY, buffer);
 			this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		}
+		else {
+			callback.succeed();
+		}
 	}
 
 	@OnWebSocketFrame
@@ -112,8 +109,11 @@ public class JettyWebSocketHandlerAdapter {
 				buffer = new JettyDataBuffer(buffer, callback);
 				WebSocketMessage webSocketMessage = new WebSocketMessage(Type.PONG, buffer);
 				this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
+				return;
 			}
 		}
+
+		callback.succeed();
 	}
 
 	@OnWebSocketClose
