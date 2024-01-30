@@ -67,20 +67,26 @@ import org.springframework.util.ReflectionUtils;
  */
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final List<Class<? extends Annotation>> CALLBACK_TYPES = List.of(PreUpdate.class,
-			PostUpdate.class, PrePersist.class, PostPersist.class, PreRemove.class, PostRemove.class, PostLoad.class);
+	private static final boolean jpaPresent = ClassUtils.isPresent("jakarta.persistence.Entity",
+			PersistenceManagedTypesBeanRegistrationAotProcessor.class.getClassLoader());
 
 	@Nullable
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
-			return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
-					new JpaManagedTypesBeanRegistrationCodeFragments(codeFragments, registeredBean));
+		if (jpaPresent) {
+			if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
+				return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
+						new JpaManagedTypesBeanRegistrationCodeFragments(codeFragments, registeredBean));
+			}
 		}
 		return null;
 	}
 
-	private static class JpaManagedTypesBeanRegistrationCodeFragments extends BeanRegistrationCodeFragmentsDecorator {
+	private static final class JpaManagedTypesBeanRegistrationCodeFragments extends BeanRegistrationCodeFragmentsDecorator {
+
+		private static final List<Class<? extends Annotation>> CALLBACK_TYPES = List.of(PreUpdate.class,
+				PostUpdate.class, PrePersist.class, PostPersist.class, PreRemove.class, PostRemove.class, PostLoad.class);
+
 
 		private static final ParameterizedTypeName LIST_OF_STRINGS_TYPE = ParameterizedTypeName.get(List.class, String.class);
 
@@ -88,7 +94,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 
 		private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
-		public JpaManagedTypesBeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments,
+		private JpaManagedTypesBeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments,
 				RegisteredBean registeredBean) {
 			super(codeFragments);
 			this.registeredBean = registeredBean;
