@@ -238,6 +238,8 @@ public abstract class TransactionSynchronizationManager {
 	//-------------------------------------------------------------------------
 
 	/**
+	 * 返回当前事务同步机制是否活跃。
+	 * 在避免注册不必要的实例创建之前可以调用
 	 * Return if transaction synchronization is active for the current thread.
 	 * Can be called before register to avoid unnecessary instance creation.
 	 * @see #registerSynchronization
@@ -280,6 +282,7 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
+	 * 返回当前线程所有已经注册并且不可修改的同步快照列表
 	 * Return an unmodifiable snapshot list of all registered synchronizations
 	 * for the current thread.
 	 * @return unmodifiable List of TransactionSynchronization instances

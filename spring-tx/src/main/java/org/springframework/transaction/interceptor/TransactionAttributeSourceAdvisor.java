@@ -18,6 +18,9 @@ package org.springframework.transaction.interceptor;
 
 import org.aopalliance.aop.Advice;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
@@ -40,6 +43,9 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 
+	protected final Log logger = LogFactory.getCyziLog(getClass());
+
+
 	@Nullable
 	private TransactionInterceptor transactionInterceptor;
 
@@ -50,6 +56,7 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	 * Create a new TransactionAttributeSourceAdvisor.
 	 */
 	public TransactionAttributeSourceAdvisor() {
+		logger.info("TransactionAttributeSourceAdvisor init,without param.....");
 	}
 
 	/**
@@ -57,6 +64,7 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	 * @param interceptor the transaction interceptor to use for this advisor
 	 */
 	public TransactionAttributeSourceAdvisor(TransactionInterceptor interceptor) {
+		logger.info("TransactionAttributeSourceAdvisor init,with TransactionInterceptor param.....");
 		setTransactionInterceptor(interceptor);
 	}
 

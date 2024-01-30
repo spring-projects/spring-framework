@@ -78,7 +78,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * Caching it in here can prevent repeated calls to ask the logging system whether
 	 * debug logging should be enabled.
 	 * @param suspendedResources a holder for resources that have been suspended
-	 * for this transaction, if any
+	 * for this transaction, if any 当前这个新事务状态，持有已经被这个事务挂起的资源对象
 	 */
 	public DefaultTransactionStatus(
 			@Nullable Object transaction, boolean newTransaction, boolean newSynchronization,

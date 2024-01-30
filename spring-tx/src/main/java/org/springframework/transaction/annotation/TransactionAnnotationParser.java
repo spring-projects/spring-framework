@@ -56,6 +56,7 @@ public interface TransactionAnnotationParser {
 	}
 
 	/**
+	 * 为给定的方法或类解析事务特征
 	 * Parse the transaction attribute for the given method or class,
 	 * based on an annotation type understood by this parser.
 	 * <p>This essentially parses a known transaction annotation into Spring's metadata

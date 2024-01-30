@@ -58,13 +58,18 @@ public abstract class LogFactory {
 	public static Log getLog(Class<?> clazz) {
 		return getLog(clazz.getName());
 	}
-
+	public static Log getCyziLog(Class<?> clazz) {
+		return getCyziLog(clazz.getName());
+	}
 	/**
 	 * Convenience method to return a named logger.
 	 * @param name logical name of the <code>Log</code> instance to be returned
 	 */
 	public static Log getLog(String name) {
 		return LogAdapter.createLog(name);
+	}
+	public static Log getCyziLog(String name) {
+		return new CyziLogAdapter(name);
 	}
 
 

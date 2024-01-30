@@ -19,6 +19,9 @@ package org.springframework.transaction.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
@@ -36,6 +39,8 @@ import org.springframework.util.ObjectUtils;
  */
 @SuppressWarnings("serial")
 final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
+
+	protected final Log logger = LogFactory.getCyziLog(getClass());
 
 	@Nullable
 	private TransactionAttributeSource transactionAttributeSource;
@@ -81,12 +86,26 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 
 		@Override
 		public boolean matches(Class<?> clazz) {
+
+			boolean matched;
+
+			// 有3个class，不在生成代理的考虑之内
+			// TransactionalProxy
+			// TransactionManager 事务管理器本身，不生成代理
+			// PersistenceExceptionTranslator
 			if (TransactionalProxy.class.isAssignableFrom(clazz) ||
 					TransactionManager.class.isAssignableFrom(clazz) ||
 					PersistenceExceptionTranslator.class.isAssignableFrom(clazz)) {
-				return false;
+				matched = false;
 			}
-			return (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
+			else {
+				matched = (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
+			}
+
+			if (matched) {
+				logger.debug("matched clazz is:" + clazz.getName());
+			}
+			return matched;
 		}
 
 		private TransactionAttributeSource getTransactionAttributeSource() {

@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -44,17 +47,18 @@ import org.springframework.util.ClassUtils;
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
- * @since 1.2
  * @see Transactional
  * @see TransactionAnnotationParser
  * @see SpringTransactionAnnotationParser
  * @see Ejb3TransactionAnnotationParser
  * @see org.springframework.transaction.interceptor.TransactionInterceptor#setTransactionAttributeSource
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean#setTransactionAttributeSource
+ * @since 1.2
  */
 @SuppressWarnings("serial")
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements Serializable {
+	protected final Log logger = LogFactory.getCyziLog(getClass());
 
 	private static final boolean jta12Present;
 
@@ -84,12 +88,20 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * Create a custom AnnotationTransactionAttributeSource, supporting
 	 * public methods that carry the {@code Transactional} annotation
 	 * or the EJB3 {@link jakarta.ejb.TransactionAttribute} annotation.
+	 *
 	 * @param publicMethodsOnly whether to support public methods that carry
-	 * the {@code Transactional} annotation only (typically for use
-	 * with proxy-based AOP), or protected/private methods as well
-	 * (typically used with AspectJ class weaving)
+	 *                          the {@code Transactional} annotation only (typically for use
+	 *                          with proxy-based AOP), or protected/private methods as well
+	 *                          (typically used with AspectJ class weaving)
 	 */
 	public AnnotationTransactionAttributeSource(boolean publicMethodsOnly) {
+
+		// 填充解析器
+
+		// SpringTransactionAnnotationParser 用来解析org.springframework.transaction.annotation.Transactional
+		// JtaTransactionAnnotationParser 用来解析jakarta.transaction.Transactional
+		// Ejb3TransactionAnnotationParser用来解析jakarta.ejb.TransactionAttribute
+
 		this.publicMethodsOnly = publicMethodsOnly;
 		if (jta12Present || ejb3Present) {
 			this.annotationParsers = new LinkedHashSet<>(4);
@@ -108,6 +120,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource.
+	 *
 	 * @param annotationParser the TransactionAnnotationParser to use
 	 */
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser annotationParser) {
@@ -118,6 +131,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource.
+	 *
 	 * @param annotationParsers the TransactionAnnotationParsers to use
 	 */
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser... annotationParsers) {
@@ -128,6 +142,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource.
+	 *
 	 * @param annotationParsers the TransactionAnnotationParsers to use
 	 */
 	public AnnotationTransactionAttributeSource(Set<TransactionAnnotationParser> annotationParsers) {
@@ -140,7 +155,9 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	@Override
 	public boolean isCandidateClass(Class<?> targetClass) {
 		for (TransactionAnnotationParser parser : this.annotationParsers) {
+			// 调用TransactionAnnotationParser的isCandidateClass方法
 			if (parser.isCandidateClass(targetClass)) {
+				logger.debug("for targetClass【" + targetClass.getName() + "】, parser【" + parser.getClass().getName() + "】can help...");
 				return true;
 			}
 		}

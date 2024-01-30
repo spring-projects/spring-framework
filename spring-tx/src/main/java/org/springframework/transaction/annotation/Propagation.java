@@ -33,10 +33,18 @@ public enum Propagation {
 	 * Support a current transaction, create a new one if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>This is the default setting of a transaction annotation.
+	 * 支持当前事务，如果当前不存在事务，则新建一个事务。
 	 */
 	REQUIRED(TransactionDefinition.PROPAGATION_REQUIRED),
 
 	/**
+	 *
+	 * Support a current transaction: 表示如果当前存在一个事务（transaction），则该操作将参与到这个已存在的事务中。这通常用于在一个已经开启的事务中执行一系列操作。
+	 * Execute non-transactionally if none exists: 表示如果当前没有已存在的事务，那么执行这个操作时不需要事务。这意味着该操作将在没有事务的情况下执行，不受事务的隔离和回滚等特性的影响。
+	 * 综合起来，这个描述的含义是，该操作具备两种执行方式：
+	 * 如果当前已经存在一个事务，那么该操作将参与到这个已存在的事务中，成为这个事务的一部分。
+	 * 如果当前没有已存在的事务，那么该操作将在没有事务的情况下执行，不受事务的控制。
+	 * <p>
 	 * Support a current transaction, execute non-transactionally if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>Note: For transaction managers with transaction synchronization,
@@ -52,10 +60,12 @@ public enum Propagation {
 	/**
 	 * Support a current transaction, throw an exception if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 * 必须在其他的事务内运行，如果当前不存在事务，则抛出异常
 	 */
 	MANDATORY(TransactionDefinition.PROPAGATION_MANDATORY),
 
 	/**
+	 * 创建一个新事务，如果当前已存在事务，则将当前事务挂起。如果当前不存在事务，则行为和{@code REQUIRED}相同
 	 * Create a new transaction, and suspend the current transaction if one exists.
 	 * Analogous to the EJB transaction attribute of the same name.
 	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
@@ -68,6 +78,7 @@ public enum Propagation {
 	REQUIRES_NEW(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
 
 	/**
+	 * 如果当前已经存在事务，则将当前事务挂起，该操作将在没有事务的情况下执行，不受事务的控制。
 	 * Execute non-transactionally, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
@@ -82,6 +93,8 @@ public enum Propagation {
 	/**
 	 * Execute non-transactionally, throw an exception if a transaction exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 * <p>
+	 * 该操作以非事务的形式执行，如果当前存在事务，则抛出异常。
 	 */
 	NEVER(TransactionDefinition.PROPAGATION_NEVER),
 

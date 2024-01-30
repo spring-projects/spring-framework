@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -116,21 +117,30 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		return invokeWithinTransaction(invocation.getMethod(), targetClass, new CoroutinesInvocationCallback() {
-			@Override
-			@Nullable
-			public Object proceedWithInvocation() throws Throwable {
-				return invocation.proceed();
-			}
-			@Override
-			public Object getTarget() {
-				return invocation.getThis();
-			}
-			@Override
-			public Object[] getArguments() {
-				return invocation.getArguments();
-			}
-		});
+		TransactionInterceptorInvocationCallback invocationCallback = new TransactionInterceptorInvocationCallback(invocation);
+		Method method = invocation.getMethod();
+		Object executeRet = invokeWithinTransaction(method, targetClass, invocationCallback);
+		logger.debug("invoke method "+method.getName()+" ret is:"+executeRet);
+		return executeRet;
+	}
+
+	private record TransactionInterceptorInvocationCallback(
+			MethodInvocation invocation) implements CoroutinesInvocationCallback {
+
+		@Override
+		public Object proceedWithInvocation() throws Throwable {
+			return invocation.proceed();
+		}
+
+		@Override
+		public Object getTarget() {
+			return invocation.getThis();
+		}
+
+		@Override
+		public Object[] getArguments() {
+			return invocation.getArguments();
+		}
 	}
 
 
