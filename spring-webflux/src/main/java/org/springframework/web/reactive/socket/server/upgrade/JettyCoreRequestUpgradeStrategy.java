@@ -24,7 +24,7 @@ import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.FutureCallback;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.websocket.api.Configurable;
 import org.eclipse.jetty.websocket.api.exceptions.WebSocketException;
 import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
@@ -113,8 +113,8 @@ public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		DataBufferFactory factory = response.bufferFactory();
 
 		// Trigger WebFlux preCommit actions before upgrade
-		response.beforeCommit(() -> Mono.deferContextual(contextView ->
-		{
+		return exchange.getResponse().setComplete()
+				.then(Mono.deferContextual(contextView -> {
 			JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
 					ContextWebSocketHandler.decorate(handler, contextView),
 					session -> new JettyWebSocketSession(session, handshakeInfo, factory));
@@ -122,34 +122,25 @@ public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			WebSocketCreator webSocketCreator = (upgradeRequest, upgradeResponse, callback) ->
 			{
 				if (subProtocol != null)
-				{
 					upgradeResponse.setAcceptedSubProtocol(subProtocol);
-				}
 				return adapter;
 			};
 
+			Callback.Completable callback = new Callback.Completable();
+			Mono<Void> mono = Mono.fromFuture(callback);
 			ServerWebSocketContainer container = getWebSocketServerContainer(jettyRequest);
 			try
 			{
-				FutureCallback callback = new FutureCallback();
-				if (container.upgrade(webSocketCreator, jettyRequest, jettyResponse, callback))
-				{
-					callback.block();
-				}
-				else
-				{
+				if (!container.upgrade(webSocketCreator, jettyRequest, jettyResponse, callback))
 					throw new WebSocketException("request could not be upgraded to websocket");
-				}
 			}
-			catch (Exception ex)
+			catch (WebSocketException e)
 			{
-				return Mono.error(ex);
+				callback.failed(e);
 			}
 
-			return Mono.empty();
+			return mono;
 		}));
-
-		return exchange.getResponse().setComplete();
 	}
 
 	private ServerWebSocketContainer getWebSocketServerContainer(Request jettyRequest) {
