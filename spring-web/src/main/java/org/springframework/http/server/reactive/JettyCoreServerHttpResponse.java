@@ -51,6 +51,7 @@ import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -147,19 +148,22 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	private Mono<Void> ensureCommitted() {
 		if (committed.compareAndSet(false, true)) {
 			if (!this.commitActions.isEmpty()) {
+				// TODO: WebSocket upgrade bypasses this response and writes directly with the Jetty Response.
+				//  Because of this our attempt at doing writeCookies doesn't work because some commitActions
+				//  are settings cookies on this instance, but websocket needs them set before because it will do the commit.
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-						.concatWith(Mono.fromRunnable(this::doCommit))
+						//.concatWith(Mono.fromRunnable(this::writeCookies))
 						.then()
 						.doOnError(t -> getHeaders().clearContentHeaders());
 			}
 
-			doCommit();
+			// writeCookies();
 		}
 
 		return null;
 	}
 
-	private void doCommit() {
+	private void writeCookies() {
 		if (cookies != null) {
 			// TODO: are we doubling up on cookies already existing in response?
 			cookies.values().stream()
@@ -227,14 +231,35 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		if (cookies == null)
 			initializeCookies();
-		return cookies;
+
+		// TODO: not good enough.
+		return new MultiValueMapAdapter<>(cookies)
+		{
+			@Override
+			public void add(String key, ResponseCookie value)
+			{
+				Response.addCookie(response, new HttpResponseCookie(value));
+				super.add(key, value);
+			}
+
+			@Override
+			public void set(String key, ResponseCookie value)
+			{
+				Response.putCookie(response, new HttpResponseCookie(value));
+				super.set(key, value);
+			}
+		};
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
+		/*
 		if (cookies == null)
 			initializeCookies();
 		cookies.add(cookie.getName(), cookie);
+		 */
+
+		Response.addCookie(response, new HttpResponseCookie(cookie));
 	}
 
 	private void initializeCookies() {
