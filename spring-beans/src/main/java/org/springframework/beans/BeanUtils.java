@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -605,6 +605,22 @@ public abstract class BeanUtils {
 			}
 		}
 		return Object.class;
+	}
+
+	/**
+	 * Determine whether the specified property has a unique write method,
+	 * i.e. is writable but does not declare overloaded setter methods.
+	 * @param pd the PropertyDescriptor for the property
+	 * @return {@code true} if writable and unique, {@code false} otherwise
+	 * @since 6.1.4
+	 */
+	public static boolean hasUniqueWriteMethod(PropertyDescriptor pd) {
+		if (pd instanceof GenericTypeAwarePropertyDescriptor gpd) {
+			return gpd.hasUniqueWriteMethod();
+		}
+		else {
+			return (pd.getWriteMethod() != null);
+		}
 	}
 
 	/**

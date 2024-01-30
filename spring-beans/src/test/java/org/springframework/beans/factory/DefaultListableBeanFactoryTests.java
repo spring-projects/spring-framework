@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -666,13 +667,13 @@ class DefaultListableBeanFactoryTests {
 		bd.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("tb", bd);
 
-		assertThatExceptionOfType(BeanCreationException.class).as("invalid property").isThrownBy(() ->
-				lbf.getBean("tb"))
-			.withCauseInstanceOf(NotWritablePropertyException.class)
-			.satisfies(ex -> {
-				NotWritablePropertyException cause = (NotWritablePropertyException) ex.getCause();
-				assertThat(cause.getPossibleMatches()).containsExactly("age");
-			});
+		assertThatExceptionOfType(BeanCreationException.class).as("invalid property")
+				.isThrownBy(() -> lbf.getBean("tb"))
+				.withCauseInstanceOf(NotWritablePropertyException.class)
+				.satisfies(ex -> {
+					NotWritablePropertyException cause = (NotWritablePropertyException) ex.getCause();
+					assertThat(cause.getPossibleMatches()).containsExactly("age");
+				});
 	}
 
 	@Test
@@ -720,9 +721,9 @@ class DefaultListableBeanFactoryTests {
 		p.setProperty("rod.spouse", "*kerry");
 		registerBeanDefinitions(p);
 
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				lbf.getBean("kerry"))
-			.satisfies(ex -> assertThat(ex.contains(BeanCurrentlyInCreationException.class)).isTrue());
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> lbf.getBean("kerry"))
+				.satisfies(ex -> assertThat(ex.contains(BeanCurrentlyInCreationException.class)).isTrue());
 	}
 
 	@Test
@@ -903,16 +904,16 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", oldDef);
 		lbf.registerAlias("test", "testX");
 
-		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
-						lbf.registerBeanDefinition("test", newDef))
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class)
+				.isThrownBy(() -> lbf.registerBeanDefinition("test", newDef))
 				.satisfies(ex -> {
 					assertThat(ex.getBeanName()).isEqualTo("test");
 					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
 					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
 				});
 
-		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
-						lbf.registerBeanDefinition("testX", newDef))
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class)
+				.isThrownBy(() -> lbf.registerBeanDefinition("testX", newDef))
 				.satisfies(ex -> {
 					assertThat(ex.getBeanName()).isEqualTo("testX");
 					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
@@ -1318,6 +1319,29 @@ class DefaultListableBeanFactoryTests {
 
 		Properties properties = (Properties) lbf.getBean("myProperties");
 		assertThat(properties.getProperty("foo")).isEqualTo("bar");
+	}
+
+	@Test
+	void withOverloadedSetters() {
+		RootBeanDefinition rbd = new RootBeanDefinition(SetterOverload.class);
+		rbd.getPropertyValues().add("object", "a String");
+		lbf.registerBeanDefinition("overloaded", rbd);
+		assertThat(lbf.getBean(SetterOverload.class).getObject()).isEqualTo("a String");
+
+		rbd = new RootBeanDefinition(SetterOverload.class);
+		rbd.getPropertyValues().add("object", 1000);
+		lbf.registerBeanDefinition("overloaded", rbd);
+		assertThat(lbf.getBean(SetterOverload.class).getObject()).isEqualTo("1000");
+
+		rbd = new RootBeanDefinition(SetterOverload.class);
+		rbd.getPropertyValues().add("value", 1000);
+		lbf.registerBeanDefinition("overloaded", rbd);
+		assertThat(lbf.getBean(SetterOverload.class).getObject()).isEqualTo("1000i");
+
+		rbd = new RootBeanDefinition(SetterOverload.class);
+		rbd.getPropertyValues().add("value", Duration.ofSeconds(1000));
+		lbf.registerBeanDefinition("overloaded", rbd);
+		assertThat(lbf.getBean(SetterOverload.class).getObject()).isEqualTo("1000s");
 	}
 
 	@Test
@@ -3219,6 +3243,7 @@ class DefaultListableBeanFactoryTests {
 		}
 	}
 
+
 	public record City(String name) {}
 
 	public static class CityRepository implements Repository<City, Long> {}
@@ -3324,6 +3349,32 @@ class DefaultListableBeanFactoryTests {
 
 		public Resource[] getResourceArray() {
 			return this.resourceArray;
+		}
+	}
+
+
+	public static class SetterOverload {
+
+		public String value;
+
+		public void setObject(Integer length) {
+			this.value = length + "i";
+		}
+
+		public void setObject(String object) {
+			this.value = object;
+		}
+
+		public String getObject() {
+			return this.value;
+		}
+
+		public void setValue(int length) {
+			this.value = length + "i";
+		}
+
+		public void setValue(Duration duration) {
+			this.value = duration.getSeconds() + "s";
 		}
 	}
 
@@ -3475,6 +3526,7 @@ class DefaultListableBeanFactoryTests {
 		}
 	}
 
+
 	@Order
 	private static class LowestPrecedenceTestBeanFactoryBean implements FactoryBean<TestBean> {
 
@@ -3487,8 +3539,8 @@ class DefaultListableBeanFactoryTests {
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
-
 	}
+
 
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	private static class HighestPrecedenceTestBeanFactoryBean implements FactoryBean<TestBean> {
@@ -3502,7 +3554,6 @@ class DefaultListableBeanFactoryTests {
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
-
 	}
 
 }

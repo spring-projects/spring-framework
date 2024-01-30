@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyValue;
@@ -1683,8 +1684,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
 				Object convertedValue = resolvedValue;
-				boolean convertible = bw.isWritableProperty(propertyName) &&
-						!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
+				boolean convertible = isConvertibleProperty(propertyName, bw);
 				if (convertible) {
 					convertedValue = convertForProperty(resolvedValue, propertyName, bw, converter);
 				}
@@ -1718,6 +1718,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
+		}
+	}
+
+	/**
+	 * Determine whether the factory should cache a converted value for the given property.
+	 */
+	private boolean isConvertibleProperty(String propertyName, BeanWrapper bw) {
+		try {
+			return !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName) &&
+					BeanUtils.hasUniqueWriteMethod(bw.getPropertyDescriptor(propertyName));
+		}
+		catch (InvalidPropertyException ex) {
+			return false;
 		}
 	}
 
