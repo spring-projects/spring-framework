@@ -59,11 +59,9 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			Object typeConverter = ((ConfigurableBeanFactory) beanFactory).getTypeConverter();
-			if (typeConverter instanceof SimpleTypeConverter) {
-				delegate = (SimpleTypeConverter) typeConverter;
-			}
+		if (beanFactory instanceof ConfigurableBeanFactory cbf &&
+				cbf.getTypeConverter() instanceof SimpleTypeConverter simpleTypeConverter) {
+			this.delegate = simpleTypeConverter;
 		}
 	}
 
@@ -86,7 +84,6 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 		if (conversionService.canConvert(sourceTypeDescriptor, targetTypeDescriptor)) {
 			return true;
 		}
-		// TODO: what does this mean? This method is not used in SpEL so probably ignorable?
 		Class<?> sourceType = sourceTypeDescriptor.getObjectType();
 		Class<?> targetType = targetTypeDescriptor.getObjectType();
 		return canConvert(sourceType, targetType);
