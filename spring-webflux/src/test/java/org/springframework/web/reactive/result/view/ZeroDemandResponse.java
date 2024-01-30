@@ -20,9 +20,6 @@ import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.BaseSubscriber;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
@@ -31,6 +28,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Mono;
 
 /**
  * Response that subscribes to the writes source but never posts demand and also
@@ -116,6 +115,11 @@ public class ZeroDemandResponse implements ServerHttpResponse {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public <T> T getNativeResponse()
+	{
+		return null;
+	}
 
 	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
 

@@ -189,6 +189,13 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeRequest()
+	{
+		return (T) request;
+	}
+
 	@Override
 	public Builder mutate() {
 		return new DefaultServerHttpRequestBuilder(this.getURI(),
