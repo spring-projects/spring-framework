@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -155,7 +156,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 		}
 
-		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
+		if (ClassUtils.isVoidType(elementType.resolve())) {
 			return Mono.from((Publisher<Void>) publisher);
 		}
 

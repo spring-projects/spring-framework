@@ -27,6 +27,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.TypeConverter;
+import org.springframework.util.ClassUtils;
 
 /**
  * Copied from Spring Integration for purposes of reproducing
@@ -91,7 +92,7 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 
 	@Override
 	public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getType() == Void.class || targetType.getType() == void.class) {
+		if (ClassUtils.isVoidType(targetType.getType())) {
 			return null;
 		}
 		if (conversionService.canConvert(sourceType, targetType)) {

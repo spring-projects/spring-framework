@@ -350,7 +350,7 @@ final class HttpServiceMethod {
 			Class<?> paramType = param.getNestedParameterType();
 
 			Function<HttpRequestValues, Object> responseFunction;
-			if (paramType.equals(void.class) || paramType.equals(Void.class)) {
+			if (ClassUtils.isVoidType(paramType)) {
 				responseFunction = requestValues -> {
 					client.exchange(requestValues);
 					return null;
@@ -436,7 +436,7 @@ final class HttpServiceMethod {
 			Class<?> actualType = isSuspending ? actualParam.getParameterType() : actualParam.getNestedParameterType();
 
 			Function<HttpRequestValues, Publisher<?>> responseFunction;
-			if (actualType.equals(void.class) || actualType.equals(Void.class)) {
+			if (ClassUtils.isVoidType(actualType)) {
 				responseFunction = client::exchangeForMono;
 			}
 			else if (reactiveAdapter != null && reactiveAdapter.isNoValue()) {

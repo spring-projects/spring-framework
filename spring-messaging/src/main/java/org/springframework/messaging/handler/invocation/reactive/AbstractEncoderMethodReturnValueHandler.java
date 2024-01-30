@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -144,7 +145,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 					ResolvableType.forInstance(content) : returnValueType);
 		}
 
-		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
+		if (ClassUtils.isVoidType(elementType.resolve())) {
 			return Flux.from(publisher).cast(DataBuffer.class);
 		}
 

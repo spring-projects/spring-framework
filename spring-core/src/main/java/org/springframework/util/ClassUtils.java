@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -550,6 +550,18 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the given type represents either {@code Void} or {@code void}.
+	 * @param type the type to check
+	 * @return {@code true} if the type represents {@code Void} or {@code void}
+	 * @since 6.1.4
+	 * @see Void
+	 * @see Void#TYPE
+	 */
+	public static boolean isVoidType(Class<?> type) {
+		return (type == void.class || type == Void.class);
+	}
+
+	/**
 	 * Delegate for {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
 	 * Also used by {@link ObjectUtils#nullSafeConciseToString}.
 	 * <p>Check if the given type represents a common "simple" value type:
@@ -565,7 +577,7 @@ public abstract class ClassUtils {
 	 * @since 6.1
 	 */
 	public static boolean isSimpleValueType(Class<?> type) {
-		return (Void.class != type && void.class != type &&
+		return (!isVoidType(type) &&
 				(isPrimitiveOrWrapper(type) ||
 				Enum.class.isAssignableFrom(type) ||
 				CharSequence.class.isAssignableFrom(type) ||

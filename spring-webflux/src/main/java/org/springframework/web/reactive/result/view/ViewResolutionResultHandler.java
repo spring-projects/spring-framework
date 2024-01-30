@@ -39,6 +39,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.BindingContext;
@@ -202,7 +203,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						clazz = returnValue.getClass();
 					}
 
-					if (returnValue == NO_VALUE || clazz == void.class || clazz == Void.class) {
+					if (returnValue == NO_VALUE || ClassUtils.isVoidType(clazz)) {
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
 					else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
