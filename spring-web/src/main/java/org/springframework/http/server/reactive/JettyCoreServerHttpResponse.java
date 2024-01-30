@@ -232,6 +232,13 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		cookies.add(cookie.getName(), cookie);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getNativeResponse()
+	{
+		return (T) response;
+	}
+
 	private void initializeCookies() {
 		cookies = new LinkedMultiValueMap<>();
 		for (HttpField f : response.getHeaders()) {

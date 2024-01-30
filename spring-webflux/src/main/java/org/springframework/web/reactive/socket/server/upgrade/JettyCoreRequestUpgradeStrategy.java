@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.lang.reflect.Field;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -31,7 +30,9 @@ import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
 import org.eclipse.jetty.websocket.server.WebSocketCreator;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -66,38 +67,6 @@ public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 				this.webSocketConfigurer.andThen(webSocketConfigurer) : webSocketConfigurer);
 	}
 
-	private Request getJettyRequest(ServerHttpRequest request)
-	{
-		try
-		{
-			// TODO: JettyCoreServerHttpRequest should extend AbstractServerHttpRequest.
-			//  This will allow the ServerHttpRequestDecorator.getNativeRequest(request) to extract the native request.
-			Field requestField = request.getClass().getDeclaredField("request");
-			requestField.setAccessible(true);
-			return (Request)requestField.get(request);
-		}
-		catch (NoSuchFieldException | IllegalAccessException e)
-		{
-			return null;
-		}
-	}
-
-	private Response getJettyResponse(ServerHttpResponse response)
-	{
-		try
-		{
-			// TODO: JettyCoreServerHttpResponse should extend AbstractServerHttpResponse.
-			//  This will allow the ServerHttpRequestDecorator.getNativeResponse(response) to extract the native response.
-			Field requestField = response.getClass().getDeclaredField("response");
-			requestField.setAccessible(true);
-			return (Response)requestField.get(response);
-		}
-		catch (NoSuchFieldException | IllegalAccessException e)
-		{
-			return null;
-		}
-	}
-
 	@Override
 	public Mono<Void> upgrade(
 			ServerWebExchange exchange, WebSocketHandler handler,
@@ -106,8 +75,8 @@ public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		Request jettyRequest = getJettyRequest(request);
-		Response jettyResponse = getJettyResponse(response);
+		Request jettyRequest = ServerHttpRequestDecorator.getNativeRequest(request);
+		Response jettyResponse = ServerHttpResponseDecorator.getNativeResponse(response);
 
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory factory = response.bufferFactory();

@@ -204,13 +204,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	protected abstract SslInfo initSslInfo();
 
 	/**
-	 * Return the underlying server response.
-	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
-	 * use such as WebSocket upgrades in the spring-webflux module.
-	 */
-	public abstract <T> T getNativeRequest();
-
-	/**
 	 * For internal use in logging at the HTTP adapter layer.
 	 * @since 5.1
 	 */
