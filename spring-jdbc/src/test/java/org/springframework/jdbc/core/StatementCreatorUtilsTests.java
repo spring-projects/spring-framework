@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 31.08.2004
  */
 class StatementCreatorUtilsTests {
@@ -286,4 +289,17 @@ class StatementCreatorUtilsTests {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = false;
 	}
 
+	@Test
+	void testSetParameterValueWithInputStream() throws SQLException {
+		InputStream binaryStream = mock();
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, binaryStream);
+		verify(preparedStatement).setBinaryStream(1, binaryStream);
+	}
+
+	@Test
+	void testSetParameterValueWithReader() throws SQLException {
+		Reader characterStream = mock();
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, characterStream);
+		verify(preparedStatement).setCharacterStream(1, characterStream);
+	}
 }

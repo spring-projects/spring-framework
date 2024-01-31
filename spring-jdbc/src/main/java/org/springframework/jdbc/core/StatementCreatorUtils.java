@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -55,6 +57,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 1.1
  * @see PreparedStatementSetter
  * @see PreparedStatementCreator
@@ -436,7 +439,13 @@ public abstract class StatementCreatorUtils {
 		}
 		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER &&
 				"Oracle".equals(ps.getConnection().getMetaData().getDatabaseProductName()))) {
-			if (isStringValue(inValue.getClass())) {
+			if (inValue instanceof InputStream binaryStream) {
+				ps.setBinaryStream(paramIndex, binaryStream);
+			}
+			else if (inValue instanceof Reader characterStream) {
+				ps.setCharacterStream(paramIndex, characterStream);
+			}
+			else if (isStringValue(inValue.getClass())) {
 				ps.setString(paramIndex, inValue.toString());
 			}
 			else if (isDateValue(inValue.getClass())) {
