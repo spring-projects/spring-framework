@@ -20,9 +20,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntPredicate;
 
+import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.Retainable;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -37,26 +38,30 @@ import org.springframework.core.io.buffer.PooledDataBuffer;
  * @since 6.1.4
  */
 public class JettyRetainedDataBuffer implements PooledDataBuffer {
-	private final Retainable retainable;
+
+	private final Content.Chunk chunk;
 
 	private final DataBuffer dataBuffer;
 
-	private final AtomicBoolean allocated = new AtomicBoolean(true);
+	private final AtomicInteger allocated = new AtomicInteger(1);
 
-	public JettyRetainedDataBuffer(DataBuffer dataBuffer, Retainable retainable) {
-		this.dataBuffer = dataBuffer;
-		this.retainable = retainable;
-		this.retainable.retain();
+
+	public JettyRetainedDataBuffer(DataBufferFactory dataBufferFactory, Content.Chunk chunk) {
+		this.chunk = chunk;
+		this.dataBuffer = dataBufferFactory.wrap(chunk.getByteBuffer()); // TODO avoid double slice?
+		this.chunk.retain();
 	}
 
 	@Override
 	public boolean isAllocated() {
-		return this.allocated.get();
+		return this.allocated.get() >= 1;
 	}
 
 	@Override
 	public PooledDataBuffer retain() {
-		this.retainable.retain();
+		if (this.allocated.updateAndGet(c -> c >= 1 ? c + 1 : c) < 1) {
+			throw new IllegalStateException("released");
+		}
 		return this;
 	}
 
@@ -67,8 +72,8 @@ public class JettyRetainedDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public boolean release() {
-		if (this.retainable.release()) {
-			this.allocated.set(false);
+		if (this.allocated.decrementAndGet() == 0) {
+			this.chunk.release();
 			return true;
 		}
 		return false;
