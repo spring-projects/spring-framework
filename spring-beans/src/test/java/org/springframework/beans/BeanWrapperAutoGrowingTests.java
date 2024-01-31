@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -149,16 +150,23 @@ class BeanWrapperAutoGrowingTests {
 	@Test
 	void getPropertyValueAutoGrowListFailsAgainstLimit() {
 		wrapper.setAutoGrowCollectionLimit(2);
-		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
-				wrapper.getPropertyValue("list[4]"))
-			.withRootCauseInstanceOf(IndexOutOfBoundsException.class);
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> wrapper.getPropertyValue("list[4]"))
+				.withRootCauseInstanceOf(IndexOutOfBoundsException.class);
 	}
 
 	@Test
-	void getPropertyValueAutoGrowMultiDimensionalList() {
-		assertThat(wrapper.getPropertyValue("multiList[0][0]")).isNotNull();
-		assertThat(bean.getMultiList()).hasSize(1);
-		assertThat(bean.getMultiList().get(0)).singleElement().isInstanceOf(Bean.class);
+	void getPropertyValueAutoGrowNestedList() {
+		assertThat(wrapper.getPropertyValue("nestedList[0][0]")).isNotNull();
+		assertThat(bean.getNestedList()).hasSize(1);
+		assertThat(bean.getNestedList().get(0)).singleElement().isInstanceOf(Bean.class);
+	}
+
+	@Test
+	void getPropertyValueAutoGrowNestedNestedList() {
+		assertThat(wrapper.getPropertyValue("nestedNestedList[0][0][0]")).isNotNull();
+		assertThat(bean.getNestedNestedList()).hasSize(1);
+		assertThat(bean.getNestedNestedList().get(0).get(0)).singleElement().isInstanceOf(Bean.class);
 	}
 
 	@Test
@@ -174,9 +182,21 @@ class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	void setNestedPropertyValueAutoGrowMap() {
+	void setPropertyValueAutoGrowMapNestedValue() {
 		wrapper.setPropertyValue("map[A].nested", new Bean());
 		assertThat(bean.getMap().get("A").getNested()).isInstanceOf(Bean.class);
+	}
+
+	@Test
+	void setPropertyValueAutoGrowNestedMapWithinMap() {
+		wrapper.setPropertyValue("nestedMap[A][B]", new Bean());
+		assertThat(bean.getNestedMap().get("A").get("B")).isInstanceOf(Bean.class);
+	}
+
+	@Test @Disabled  // gh-32154
+	void setPropertyValueAutoGrowNestedNestedMapWithinMap() {
+		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", new Bean());
+		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C)")).isInstanceOf(Bean.class);
 	}
 
 
@@ -197,11 +217,17 @@ class BeanWrapperAutoGrowingTests {
 
 		private List<Bean> list;
 
-		private List<List<Bean>> multiList;
+		private List<List<Bean>> nestedList;
+
+		private List<List<List<Bean>>> nestedNestedList;
 
 		private List listNotParameterized;
 
 		private Map<String, Bean> map;
+
+		private Map<String, Map<String, Bean>> nestedMap;
+
+		private Map<String, Map<String, Map<String, Bean>>> nestedNestedMap;
 
 		public String getProp() {
 			return prop;
@@ -251,12 +277,20 @@ class BeanWrapperAutoGrowingTests {
 			this.list = list;
 		}
 
-		public List<List<Bean>> getMultiList() {
-			return multiList;
+		public List<List<Bean>> getNestedList() {
+			return nestedList;
 		}
 
-		public void setMultiList(List<List<Bean>> multiList) {
-			this.multiList = multiList;
+		public void setNestedList(List<List<Bean>> nestedList) {
+			this.nestedList = nestedList;
+		}
+
+		public List<List<List<Bean>>> getNestedNestedList() {
+			return nestedNestedList;
+		}
+
+		public void setNestedNestedList(List<List<List<Bean>>> nestedNestedList) {
+			this.nestedNestedList = nestedNestedList;
 		}
 
 		public NestedNoDefaultConstructor getNestedNoConstructor() {
@@ -281,6 +315,22 @@ class BeanWrapperAutoGrowingTests {
 
 		public void setMap(Map<String, Bean> map) {
 			this.map = map;
+		}
+
+		public Map<String, Map<String, Bean>> getNestedMap() {
+			return nestedMap;
+		}
+
+		public void setNestedMap(Map<String, Map<String, Bean>> nestedMap) {
+			this.nestedMap = nestedMap;
+		}
+
+		public Map<String, Map<String, Map<String, Bean>>> getNestedNestedMap() {
+			return nestedNestedMap;
+		}
+
+		public void setNestedNestedMap(Map<String, Map<String, Map<String, Bean>>> nestedNestedMap) {
+			this.nestedNestedMap = nestedNestedMap;
 		}
 	}
 
