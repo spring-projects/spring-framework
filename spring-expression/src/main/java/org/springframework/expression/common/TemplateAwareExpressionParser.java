@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,11 +80,11 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * result, evaluating all returned expressions and concatenating the results produces
 	 * the complete evaluated string. Unwrapping is only done of the outermost delimiters
 	 * found, so the string 'hello ${foo${abc}}' would break into the pieces 'hello ' and
-	 * 'foo${abc}'. This means that expression languages that used ${..} as part of their
+	 * 'foo${abc}'. This means that expression languages that use ${..} as part of their
 	 * functionality are supported without any problem. The parsing is aware of the
 	 * structure of an embedded expression. It assumes that parentheses '(', square
-	 * brackets '[' and curly brackets '}' must be in pairs within the expression unless
-	 * they are within a string literal and a string literal starts and terminates with a
+	 * brackets '[', and curly brackets '}' must be in pairs within the expression unless
+	 * they are within a string literal and the string literal starts and terminates with a
 	 * single quote '.
 	 * @param expressionString the expression string
 	 * @return the parsed expressions
@@ -238,48 +238,33 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	/**
 	 * This captures a type of bracket and the position in which it occurs in the
 	 * expression. The positional information is used if an error has to be reported
-	 * because the related end bracket cannot be found. Bracket is used to describe:
-	 * square brackets [] round brackets () and curly brackets {}
+	 * because the related end bracket cannot be found. Bracket is used to describe
+	 * square brackets [], round brackets (), and curly brackets {}.
 	 */
-	private static class Bracket {
-
-		char bracket;
-
-		int pos;
-
-		Bracket(char bracket, int pos) {
-			this.bracket = bracket;
-			this.pos = pos;
-		}
+	private record Bracket(char bracket, int pos) {
 
 		boolean compatibleWithCloseBracket(char closeBracket) {
-			if (this.bracket == '{') {
-				return closeBracket == '}';
-			}
-			else if (this.bracket == '[') {
-				return closeBracket == ']';
-			}
-			return closeBracket == ')';
+			return switch (this.bracket) {
+				case '{' -> closeBracket == '}';
+				case '[' -> closeBracket == ']';
+				default -> closeBracket == ')';
+			};
 		}
 
 		static char theOpenBracketFor(char closeBracket) {
-			if (closeBracket == '}') {
-				return '{';
-			}
-			else if (closeBracket == ']') {
-				return '[';
-			}
-			return '(';
+			return switch (closeBracket) {
+				case '}' -> '{';
+				case ']' -> '[';
+				default -> '(';
+			};
 		}
 
 		static char theCloseBracketFor(char openBracket) {
-			if (openBracket == '{') {
-				return '}';
-			}
-			else if (openBracket == '[') {
-				return ']';
-			}
-			return ')';
+			return switch (openBracket) {
+				case '{' -> '}';
+				case '[' -> ']';
+				default -> ')';
+			};
 		}
 	}
 

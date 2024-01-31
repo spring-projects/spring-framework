@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -223,7 +222,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void typeLocator() throws EvaluationException {
+	void typeLocator() {
 		assertThat(state.getEvaluationContext().getTypeLocator()).isNotNull();
 		assertThat(state.findType("java.lang.Integer")).isEqualTo(Integer.class);
 		assertThatExceptionOfType(SpelEvaluationException.class)
@@ -232,7 +231,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void typeConversion() throws EvaluationException {
+	void typeConversion() {
 		String s = (String) state.convertValue(34, TypeDescriptor.valueOf(String.class));
 		assertThat(s).isEqualTo("34");
 

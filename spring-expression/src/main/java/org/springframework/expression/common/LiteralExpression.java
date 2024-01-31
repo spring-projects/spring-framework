@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ import org.springframework.expression.TypedValue;
 import org.springframework.lang.Nullable;
 
 /**
- * A very simple hardcoded implementation of the Expression interface that represents a
- * string literal. It is used with CompositeStringExpression when representing a template
- * expression which is made up of pieces - some being real expressions to be handled by
+ * A very simple, hard-coded implementation of the {@link Expression} interface
+ * that represents a string literal.
+ *
+ * <p>It is used with {@link CompositeStringExpression} when representing a template
+ * expression which is made up of pieces, some being real expressions to be handled by
  * an EL implementation like SpEL, and some being just textual elements.
  *
  * @author Andy Clement
