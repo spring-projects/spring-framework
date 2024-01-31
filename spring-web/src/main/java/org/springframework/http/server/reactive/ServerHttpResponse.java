@@ -92,8 +92,7 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * use such as WebSocket upgrades in the spring-webflux module.
 	 */
 	@Nullable
-	default <T> T getNativeResponse()
-	{
+	default <T> T getNativeResponse() {
 		return null;
 	}
 }

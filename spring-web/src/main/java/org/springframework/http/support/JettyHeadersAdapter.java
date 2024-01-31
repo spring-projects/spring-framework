@@ -16,7 +16,14 @@
 
 package org.springframework.http.support;
 
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
@@ -38,6 +45,7 @@ import org.springframework.util.MultiValueMap;
 public final class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpFields headers;
+
 	@Nullable
 	private final HttpFields.Mutable mutable;
 
@@ -163,7 +171,8 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 			case 1 -> {
 				if (oldValues == null) {
 					mutableHttpFields.add(key, value.get(0));
-				} else {
+				}
+				else {
 					mutableHttpFields.put(key, value.get(0));
 				}
 			}
@@ -178,9 +187,8 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> list = null;
 		if (key instanceof String name) {
-			for (ListIterator<HttpField> i = mutableHttpFields.listIterator(); i.hasNext();)
-			{
-			    HttpField f = i.next();
+			for (ListIterator<HttpField> i = mutableHttpFields.listIterator(); i.hasNext(); ) {
+				HttpField f = i.next();
 				if (f.is(name)) {
 					if (list == null) {
 						list = new ArrayList<>();
@@ -222,6 +230,7 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
 			}
+
 			@Override
 			public int size() {
 				return headers.size();
@@ -230,10 +239,10 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	}
 
 	private HttpFields.Mutable mutableFields() {
-		if (mutable == null) {
+		if (this.mutable == null) {
 			throw new IllegalStateException("Immutable headers");
 		}
-		return mutable;
+		return this.mutable;
 	}
 
 	@Override

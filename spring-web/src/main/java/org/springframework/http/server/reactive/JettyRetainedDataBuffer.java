@@ -30,7 +30,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 
 /**
- * Adapt an Eclipse Jetty {@link Retainable} to a {@link PooledDataBuffer}
+ * Adapt an Eclipse Jetty {@link Retainable} to a {@link PooledDataBuffer}.
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
@@ -51,12 +51,12 @@ public class JettyRetainedDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public boolean isAllocated() {
-		return allocated.get();
+		return this.allocated.get();
 	}
 
 	@Override
 	public PooledDataBuffer retain() {
-		retainable.retain();
+		this.retainable.retain();
 		return this;
 	}
 
@@ -67,8 +67,8 @@ public class JettyRetainedDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public boolean release() {
-		if (retainable.release()) {
-			allocated.set(false);
+		if (this.retainable.release()) {
+			this.allocated.set(false);
 			return true;
 		}
 		return false;
@@ -76,204 +76,204 @@ public class JettyRetainedDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public DataBufferFactory factory() {
-		return dataBuffer.factory();
+		return this.dataBuffer.factory();
 	}
 
 	@Override
 	public int indexOf(IntPredicate predicate, int fromIndex) {
-		return dataBuffer.indexOf(predicate, fromIndex);
+		return this.dataBuffer.indexOf(predicate, fromIndex);
 	}
 
 	@Override
 	public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-		return dataBuffer.lastIndexOf(predicate, fromIndex);
+		return this.dataBuffer.lastIndexOf(predicate, fromIndex);
 	}
 
 	@Override
 	public int readableByteCount() {
-		return dataBuffer.readableByteCount();
+		return this.dataBuffer.readableByteCount();
 	}
 
 	@Override
 	public int writableByteCount() {
-		return dataBuffer.writableByteCount();
+		return this.dataBuffer.writableByteCount();
 	}
 
 	@Override
 	public int capacity() {
-		return dataBuffer.capacity();
+		return this.dataBuffer.capacity();
 	}
 
 	@Override
 	@Deprecated(since = "6.0")
 	public DataBuffer capacity(int capacity) {
-		return dataBuffer.capacity(capacity);
+		return this.dataBuffer.capacity(capacity);
 	}
 
 	@Override
 	@Deprecated(since = "6.0")
 	public DataBuffer ensureCapacity(int capacity) {
-		return dataBuffer.ensureCapacity(capacity);
+		return this.dataBuffer.ensureCapacity(capacity);
 	}
 
 	@Override
 	public DataBuffer ensureWritable(int capacity) {
-		return dataBuffer.ensureWritable(capacity);
+		return this.dataBuffer.ensureWritable(capacity);
 	}
 
 	@Override
 	public int readPosition() {
-		return dataBuffer.readPosition();
+		return this.dataBuffer.readPosition();
 	}
 
 	@Override
 	public DataBuffer readPosition(int readPosition) {
-		return dataBuffer.readPosition(readPosition);
+		return this.dataBuffer.readPosition(readPosition);
 	}
 
 	@Override
 	public int writePosition() {
-		return dataBuffer.writePosition();
+		return this.dataBuffer.writePosition();
 	}
 
 	@Override
 	public DataBuffer writePosition(int writePosition) {
-		return dataBuffer.writePosition(writePosition);
+		return this.dataBuffer.writePosition(writePosition);
 	}
 
 	@Override
 	public byte getByte(int index) {
-		return dataBuffer.getByte(index);
+		return this.dataBuffer.getByte(index);
 	}
 
 	@Override
 	public byte read() {
-		return dataBuffer.read();
+		return this.dataBuffer.read();
 	}
 
 	@Override
 	public DataBuffer read(byte[] destination) {
-		return dataBuffer.read(destination);
+		return this.dataBuffer.read(destination);
 	}
 
 	@Override
 	public DataBuffer read(byte[] destination, int offset, int length) {
-		return dataBuffer.read(destination, offset, length);
+		return this.dataBuffer.read(destination, offset, length);
 	}
 
 	@Override
 	public DataBuffer write(byte b) {
-		return dataBuffer.write(b);
+		return this.dataBuffer.write(b);
 	}
 
 	@Override
 	public DataBuffer write(byte[] source) {
-		return dataBuffer.write(source);
+		return this.dataBuffer.write(source);
 	}
 
 	@Override
 	public DataBuffer write(byte[] source, int offset, int length) {
-		return dataBuffer.write(source, offset, length);
+		return this.dataBuffer.write(source, offset, length);
 	}
 
 	@Override
 	public DataBuffer write(DataBuffer... buffers) {
-		return dataBuffer.write(buffers);
+		return this.dataBuffer.write(buffers);
 	}
 
 	@Override
 	public DataBuffer write(ByteBuffer... buffers) {
-		return dataBuffer.write(buffers);
+		return this.dataBuffer.write(buffers);
 	}
 
 	@Override
 	public DataBuffer write(CharSequence charSequence, Charset charset) {
-		return dataBuffer.write(charSequence, charset);
+		return this.dataBuffer.write(charSequence, charset);
 	}
 
 	@Override
 	@Deprecated(since = "6.0")
 	public DataBuffer slice(int index, int length) {
-		return dataBuffer.slice(index, length);
+		return this.dataBuffer.slice(index, length);
 	}
 
 	@Override
 	@Deprecated(since = "6.0")
 	public DataBuffer retainedSlice(int index, int length) {
-		return dataBuffer.retainedSlice(index, length);
+		return this.dataBuffer.retainedSlice(index, length);
 	}
 
 	@Override
 	public DataBuffer split(int index) {
-		return dataBuffer.split(index);
+		return this.dataBuffer.split(index);
 	}
 
 	@Override
 	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer() {
-		return dataBuffer.asByteBuffer();
+		return this.dataBuffer.asByteBuffer();
 	}
 
 	@Override
 	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer(int index, int length) {
-		return dataBuffer.asByteBuffer(index, length);
+		return this.dataBuffer.asByteBuffer(index, length);
 	}
 
 	@Override
 	@Deprecated(since = "6.0.5")
 	public ByteBuffer toByteBuffer() {
-		return dataBuffer.toByteBuffer();
+		return this.dataBuffer.toByteBuffer();
 	}
 
 	@Override
 	@Deprecated(since = "6.0.5")
 	public ByteBuffer toByteBuffer(int index, int length) {
-		return dataBuffer.toByteBuffer(index, length);
+		return this.dataBuffer.toByteBuffer(index, length);
 	}
 
 	@Override
 	public void toByteBuffer(ByteBuffer dest) {
-		dataBuffer.toByteBuffer(dest);
+		this.dataBuffer.toByteBuffer(dest);
 	}
 
 	@Override
 	public void toByteBuffer(int srcPos, ByteBuffer dest, int destPos, int length) {
-		dataBuffer.toByteBuffer(srcPos, dest, destPos, length);
+		this.dataBuffer.toByteBuffer(srcPos, dest, destPos, length);
 	}
 
 	@Override
 	public ByteBufferIterator readableByteBuffers() {
-		return dataBuffer.readableByteBuffers();
+		return this.dataBuffer.readableByteBuffers();
 	}
 
 	@Override
 	public ByteBufferIterator writableByteBuffers() {
-		return dataBuffer.writableByteBuffers();
+		return this.dataBuffer.writableByteBuffers();
 	}
 
 	@Override
 	public InputStream asInputStream() {
-		return dataBuffer.asInputStream();
+		return this.dataBuffer.asInputStream();
 	}
 
 	@Override
 	public InputStream asInputStream(boolean releaseOnClose) {
-		return dataBuffer.asInputStream(releaseOnClose);
+		return this.dataBuffer.asInputStream(releaseOnClose);
 	}
 
 	@Override
 	public OutputStream asOutputStream() {
-		return dataBuffer.asOutputStream();
+		return this.dataBuffer.asOutputStream();
 	}
 
 	@Override
 	public String toString(Charset charset) {
-		return dataBuffer.toString(charset);
+		return this.dataBuffer.toString(charset);
 	}
 
 	@Override
 	public String toString(int index, int length, Charset charset) {
-		return dataBuffer.toString(index, length, charset);
+		return this.dataBuffer.toString(index, length, charset);
 	}
 }

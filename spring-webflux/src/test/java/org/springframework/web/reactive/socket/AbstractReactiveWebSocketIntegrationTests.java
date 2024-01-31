@@ -31,6 +31,12 @@ import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -61,11 +67,6 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyH
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
-import org.xnio.OptionMap;
-import org.xnio.Xnio;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple3;
 
 /**
  * Base class for reactive WebSocket integration tests. Subclasses must implement

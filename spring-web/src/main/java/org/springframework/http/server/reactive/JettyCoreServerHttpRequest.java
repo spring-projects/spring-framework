@@ -22,7 +22,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 
 import org.eclipse.jetty.http.HttpFields;
@@ -31,6 +30,8 @@ import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.util.StringUtil;
 import org.reactivestreams.FlowAdapters;
+import reactor.core.publisher.Flux;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
@@ -43,21 +44,20 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
 
 import static org.springframework.http.server.reactive.AbstractServerHttpRequest.QUERY_PATTERN;
 
 /**
- * Adapt an Eclipse Jetty {@link Request} to a {@link org.springframework.http.server.ServerHttpRequest}
+ * Adapt an Eclipse Jetty {@link Request} to a {@link org.springframework.http.server.ServerHttpRequest}.
  *
  * @author Greg Wilkins
  * @since 6.2
  */
 // TODO: extend AbstractServerHttpRequest for websocket.
 class JettyCoreServerHttpRequest implements ServerHttpRequest {
-	private final static MultiValueMap<String, String> EMPTY_QUERY = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
+	private static final MultiValueMap<String, String> EMPTY_QUERY = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
 
-	private final static MultiValueMap<String, HttpCookie> EMPTY_COOKIES = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
+	private static final MultiValueMap<String, HttpCookie> EMPTY_COOKIES = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
 
 	private final DataBufferFactory dataBufferFactory;
 
@@ -79,25 +79,26 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 	public JettyCoreServerHttpRequest(DataBufferFactory dataBufferFactory, Request request) {
 		this.dataBufferFactory = dataBufferFactory;
 		this.request = request;
-		headers = new HttpHeaders(new JettyHeadersAdapter(request.getHeaders()));
-		path = RequestPath.parse(request.getHttpURI().getPath(), request.getContext().getContextPath());
+		this.headers = new HttpHeaders(new JettyHeadersAdapter(request.getHeaders()));
+		this.path = RequestPath.parse(request.getHttpURI().getPath(), request.getContext().getContextPath());
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return headers;
+		return this.headers;
 	}
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(request.getMethod());
+		return HttpMethod.valueOf(this.request.getMethod());
 	}
 
 	@Override
 	public URI getURI() {
-		if (uri == null)
-			uri = request.getHttpURI().toURI();
-		return uri;
+		if (this.uri == null) {
+			this.uri = this.request.getHttpURI().toURI();
+		}
+		return this.uri;
 	}
 
 	@Override
@@ -105,75 +106,78 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 		// We access the request body as a Flow.Publisher, which is wrapped as an org.reactivestreams.Publisher and
 		// then wrapped as a Flux.   The chunks are converted to RetainedDataBuffers with wrapping and can be
 		// retained within a call to onNext.
-		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(request))).map(this::wrap);
+		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request))).map(this::wrap);
 	}
 
 	private JettyRetainedDataBuffer wrap(Content.Chunk chunk) {
-		return new JettyRetainedDataBuffer(dataBufferFactory.wrap(chunk.getByteBuffer()), chunk);
+		return new JettyRetainedDataBuffer(this.dataBufferFactory.wrap(chunk.getByteBuffer()), chunk);
 	}
 
 	@Override
 	public String getId() {
-		return request.getId();
+		return this.request.getId();
 	}
 
 	@Override
 	public RequestPath getPath() {
-		return path;
+		return this.path;
 	}
 
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
-		if (queryParameters == null) {
-			String query = request.getHttpURI().getQuery();
-			if (StringUtil.isBlank(query))
-				queryParameters = EMPTY_QUERY;
+		if (this.queryParameters == null) {
+			String query = this.request.getHttpURI().getQuery();
+			if (StringUtil.isBlank(query)) {
+				this.queryParameters = EMPTY_QUERY;
+			}
 			else {
-				queryParameters = new LinkedMultiValueMap<>();
+				this.queryParameters = new LinkedMultiValueMap<>();
 				Matcher matcher = QUERY_PATTERN.matcher(query);
 				while (matcher.find()) {
 					String name = URLDecoder.decode(matcher.group(1), StandardCharsets.UTF_8);
 					String eq = matcher.group(2);
 					String value = matcher.group(3);
 					value = (value != null ? URLDecoder.decode(value, StandardCharsets.UTF_8) : (StringUtils.hasLength(eq) ? "" : null));
-					queryParameters.add(name, value);
+					this.queryParameters.add(name, value);
 				}
 			}
 		}
-		return queryParameters;
+		return this.queryParameters;
 	}
 
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
-		if (cookies == null) {
-			List<org.eclipse.jetty.http.HttpCookie> httpCookies = Request.getCookies(request);
-			if (httpCookies.isEmpty())
-				cookies = EMPTY_COOKIES;
+		if (this.cookies == null) {
+			List<org.eclipse.jetty.http.HttpCookie> httpCookies = Request.getCookies(this.request);
+			if (httpCookies.isEmpty()) {
+				this.cookies = EMPTY_COOKIES;
+			}
 			else {
-				cookies = new LinkedMultiValueMap<>();
-				for (org.eclipse.jetty.http.HttpCookie c : httpCookies)
-					cookies.add(c.getName(), new HttpCookie(c.getName(), c.getValue()));
-				cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
+				this.cookies = new LinkedMultiValueMap<>();
+				for (org.eclipse.jetty.http.HttpCookie c : httpCookies) {
+					this.cookies.add(c.getName(), new HttpCookie(c.getName(), c.getValue()));
+				}
+				this.cookies = CollectionUtils.unmodifiableMultiValueMap(this.cookies);
 			}
 		}
-		return cookies;
+		return this.cookies;
 	}
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		return request.getConnectionMetaData().getLocalSocketAddress() instanceof InetSocketAddress inet
+		return this.request.getConnectionMetaData().getLocalSocketAddress() instanceof InetSocketAddress inet
 				? inet : null;
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		return request.getConnectionMetaData().getRemoteSocketAddress() instanceof InetSocketAddress inet
+		return this.request.getConnectionMetaData().getRemoteSocketAddress() instanceof InetSocketAddress inet
 				? inet : null;
 	}
 
 	@Override
 	public SslInfo getSslInfo() {
-		if (request.getConnectionMetaData().isSecure() && request.getAttribute(EndPoint.SslSessionData.ATTRIBUTE) instanceof EndPoint.SslSessionData sslSessionData) {
+		if (this.request.getConnectionMetaData().isSecure() && this.request.getAttribute(EndPoint.SslSessionData.ATTRIBUTE) instanceof EndPoint.SslSessionData sslSessionData) {
 			return new SslInfo() {
 				@Override
 				public String getSessionId() {
@@ -191,19 +195,18 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getNativeRequest()
-	{
-		return (T) request;
+	public <T> T getNativeRequest() {
+		return (T) this.request;
 	}
 
 	@Override
 	public Builder mutate() {
 		return new DefaultServerHttpRequestBuilder(this.getURI(),
-						new HttpHeaders(new JettyHeadersAdapter(HttpFields.build(request.getHeaders()))),
-						this.getMethod(),
-						this.getPath().contextPath().value(),
-						this.getRemoteAddress(),
-						this.getBody(),
-						Objects.requireNonNull(this, "ServerHttpRequest is required"));
+				new HttpHeaders(new JettyHeadersAdapter(HttpFields.build(this.request.getHeaders()))),
+				this.getMethod(),
+				this.getPath().contextPath().value(),
+				this.getRemoteAddress(),
+				this.getBody(),
+				this);
 	}
 }

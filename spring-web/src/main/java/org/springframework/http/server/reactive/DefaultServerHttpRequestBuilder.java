@@ -70,10 +70,9 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	public DefaultServerHttpRequestBuilder(ServerHttpRequest original) {
 		this(original.getURI(),
 				HttpHeaders.writableHttpHeaders(original.getHeaders()),
-				original.getMethod(),
-				original.getPath().contextPath().value(),
-		        original.getRemoteAddress(),
-		        original.getBody(),
+				original.getMethod(),original.getPath().contextPath().value(),
+				original.getRemoteAddress(),
+				original.getBody(),
 				Objects.requireNonNull(original, "ServerHttpRequest is required"));
 	}
 

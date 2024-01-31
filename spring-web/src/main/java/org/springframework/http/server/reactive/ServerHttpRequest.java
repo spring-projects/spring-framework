@@ -103,8 +103,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * use such as WebSocket upgrades in the spring-webflux module.
 	 */
 	@Nullable
-	default <T> T getNativeRequest()
-	{
+	default <T> T getNativeRequest() {
 		return null;
 	}
 
