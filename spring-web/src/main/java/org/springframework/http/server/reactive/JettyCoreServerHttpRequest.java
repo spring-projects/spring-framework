@@ -34,6 +34,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -106,11 +107,17 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 		// We access the request body as a Flow.Publisher, which is wrapped as an org.reactivestreams.Publisher and
 		// then wrapped as a Flux.   The chunks are converted to RetainedDataBuffers with wrapping and can be
 		// retained within a call to onNext.
-		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request))).map(this::wrap);
+		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request))).map(this::wrap).doOnNext(this::release);
 	}
 
-	private JettyRetainedDataBuffer wrap(Content.Chunk chunk) {
+	private DataBuffer wrap(Content.Chunk chunk) {
 		return new JettyRetainedDataBuffer(this.dataBufferFactory, chunk);
+	}
+
+	private void release(DataBuffer dataBuffer) {
+		if (dataBuffer instanceof PooledDataBuffer pooled) {
+			pooled.release();
+		}
 	}
 
 	@Override
