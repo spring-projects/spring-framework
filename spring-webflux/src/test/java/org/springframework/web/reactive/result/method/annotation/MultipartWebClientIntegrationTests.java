@@ -169,6 +169,7 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 	@ParameterizedHttpServerTest
 	void transferTo(HttpServer httpServer) throws Exception {
 		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
+		//      Jetty is also failing this test in https://github.com/spring-projects/spring-framework/pull/32097
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
 		startServer(httpServer);
 
