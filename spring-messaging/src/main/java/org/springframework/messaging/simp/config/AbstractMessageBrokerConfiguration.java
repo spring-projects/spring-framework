@@ -254,15 +254,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		});
 	}
 
+	private TaskExecutor defaultTaskExecutor() {
+		return new TaskExecutorRegistration().getTaskExecutor();
+	}
+
 	private static TaskExecutor getTaskExecutor(ChannelRegistration registration,
 			String threadNamePrefix, Supplier<TaskExecutor> fallback) {
 
 		return registration.getTaskExecutor(fallback,
 				executor -> setThreadNamePrefix(executor, threadNamePrefix));
-	}
-
-	private TaskExecutor defaultTaskExecutor() {
-		return new TaskExecutorRegistration().getTaskExecutor();
 	}
 
 	private static void setThreadNamePrefix(TaskExecutor taskExecutor, String name) {

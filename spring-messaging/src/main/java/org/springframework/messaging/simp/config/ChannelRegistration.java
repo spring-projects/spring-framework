@@ -107,6 +107,7 @@ public class ChannelRegistration {
 	 * @param fallback a supplier of a fallback task executor in case none is configured
 	 * @param customizer further customizations
 	 * @return the task executor to use
+	 * @since 6.1.4
 	 */
 	protected TaskExecutor getTaskExecutor(Supplier<TaskExecutor> fallback, Consumer<TaskExecutor> customizer) {
 		if (this.executor != null) {
