@@ -81,9 +81,9 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Set<TestBean> input = new HashSet<>();
 		input.add(new TestBean());
-		assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() ->
-				bw.setPropertyValue("integerSet", input))
-			.withMessageContaining("java.lang.Integer");
+		assertThatExceptionOfType(TypeMismatchException.class)
+				.isThrownBy(() -> bw.setPropertyValue("integerSet", input))
+				.withMessageContaining("java.lang.Integer");
 	}
 
 	@Test

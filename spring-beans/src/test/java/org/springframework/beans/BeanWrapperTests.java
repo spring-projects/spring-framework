@@ -103,13 +103,13 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		pvs.addPropertyValue(new PropertyValue("age", "foobar"));
 		pvs.addPropertyValue(new PropertyValue("name", newName));
 		pvs.addPropertyValue(new PropertyValue("touchy", invalidTouchy));
-		assertThatExceptionOfType(PropertyBatchUpdateException.class).isThrownBy(() ->
-				accessor.setPropertyValues(pvs))
-			.satisfies(ex -> {
-				assertThat(ex.getExceptionCount()).isEqualTo(2);
-				assertThat(ex.getPropertyAccessException("touchy").getPropertyChangeEvent()
-						.getNewValue()).isEqualTo(invalidTouchy);
-			});
+		assertThatExceptionOfType(PropertyBatchUpdateException.class)
+				.isThrownBy(() -> accessor.setPropertyValues(pvs))
+				.satisfies(ex -> {
+					assertThat(ex.getExceptionCount()).isEqualTo(2);
+					assertThat(ex.getPropertyAccessException("touchy").getPropertyChangeEvent()
+							.getNewValue()).isEqualTo(invalidTouchy);
+				});
 		// Test validly set property matches
 		assertThat(target.getName()).as("Valid set property must stick").isEqualTo(newName);
 		assertThat(target.getAge()).as("Invalid set property must retain old value").isEqualTo(0);
@@ -119,9 +119,9 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	void checkNotWritablePropertyHoldPossibleMatches() {
 		TestBean target = new TestBean();
 		BeanWrapper accessor = createAccessor(target);
-		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
-				accessor.setPropertyValue("ag", "foobar"))
-			.satisfies(ex -> assertThat(ex.getPossibleMatches()).containsExactly("age"));
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> accessor.setPropertyValue("ag", "foobar"))
+				.satisfies(ex -> assertThat(ex.getPossibleMatches()).containsExactly("age"));
 	}
 
 	@Test  // Can't be shared; there is no such thing as a read-only field
@@ -294,9 +294,9 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	void incompletelyQuotedKeyLeadsToPropertyException() {
 		TestBean target = new TestBean();
 		BeanWrapper accessor = createAccessor(target);
-		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
-				accessor.setPropertyValue("[']", "foobar"))
-			.satisfies(ex -> assertThat(ex.getPossibleMatches()).isNull());
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> accessor.setPropertyValue("[']", "foobar"))
+				.satisfies(ex -> assertThat(ex.getPossibleMatches()).isNull());
 	}
 
 

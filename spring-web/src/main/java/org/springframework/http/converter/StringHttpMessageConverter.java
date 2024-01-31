@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,8 +95,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		long length = inputMessage.getHeaders().getContentLength();
 		byte[] bytes = (length >= 0 && length <= Integer.MAX_VALUE ?
-				inputMessage.getBody().readNBytes((int) length) :
-				inputMessage.getBody().readAllBytes());
+				inputMessage.getBody().readNBytes((int) length) : inputMessage.getBody().readAllBytes());
 		return new String(bytes, charset);
 	}
 
@@ -110,10 +109,9 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected void addDefaultHeaders(HttpHeaders headers, String s, @Nullable MediaType type) throws IOException {
 		if (headers.getContentType() == null ) {
-			if (type != null && type.isConcrete() &&
-					(type.isCompatibleWith(MediaType.APPLICATION_JSON) ||
+			if (type != null && type.isConcrete() && (type.isCompatibleWith(MediaType.APPLICATION_JSON) ||
 					type.isCompatibleWith(APPLICATION_PLUS_JSON))) {
-				// Prevent charset parameter for JSON..
+				// Prevent charset parameter for JSON.
 				headers.setContentType(type);
 			}
 		}
@@ -167,4 +165,5 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	protected boolean supportsRepeatableWrites(String s) {
 		return true;
 	}
+
 }
