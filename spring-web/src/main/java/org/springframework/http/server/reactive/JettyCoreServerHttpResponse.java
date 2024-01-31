@@ -40,6 +40,9 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.IteratingCallback;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -51,11 +54,9 @@ import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
- * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}
+ * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}.
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
@@ -76,12 +77,12 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	public JettyCoreServerHttpResponse(Response response) {
 		this.response = response;
-		headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
+		this.headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return headers;
+		return this.headers;
 	}
 
 	@Override
@@ -91,12 +92,12 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		commitActions.add(action);
+		this.commitActions.add(action);
 	}
 
 	@Override
 	public boolean isCommitted() {
-		return committed.get();
+		return this.committed.get();
 	}
 
 	@Override
@@ -116,31 +117,33 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	@Override
 	public Mono<Void> setComplete() {
 		Mono<Void> mono = ensureCommitted();
-        return (mono == null) ? Mono.empty() : mono;
-    }
+		return (mono == null) ? Mono.empty() : mono;
+	}
 
 	@Override
 	public Mono<Void> writeWith(Path file, long position, long count) {
 		Mono<Void> mono = ensureCommitted();
-		if (mono != null)
+		if (mono != null) {
 			return mono.then(Mono.defer(() -> writeWith(file, position, count)));
+		}
 
 		Callback.Completable callback = new Callback.Completable();
 		mono = Mono.fromFuture(callback);
 		try {
 			// TODO: Why does intellij warn about possible blocking call?
+			//       Because it can block and we want to be fully asynchronous.  Use AsynchronousFileChannel
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
-			new ContentWriterIteratingCallback(channel, position, count, response, callback).iterate();
+			new ContentWriterIteratingCallback(channel, position, count, this.response, callback).iterate();
 		}
-		catch (Throwable t) {
-			callback.failed(t);
+		catch (Throwable th) {
+			callback.failed(th);
 		}
 		return mono;
 	}
 
 	@Nullable
 	private Mono<Void> ensureCommitted() {
-		if (committed.compareAndSet(false, true)) {
+		if (this.committed.compareAndSet(false, true)) {
 			if (!this.commitActions.isEmpty()) {
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
 						.concatWith(Mono.fromRunnable(this::writeCookies))
@@ -148,25 +151,26 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 						.doOnError(t -> getHeaders().clearContentHeaders());
 			}
 
-			 writeCookies();
+			writeCookies();
 		}
 
 		return null;
 	}
 
 	private void writeCookies() {
-		if (cookies != null) {
+		if (this.cookies != null) {
 			// TODO: are we doubling up on cookies already existing in response?
-			cookies.values().stream()
+			this.cookies.values().stream()
 					.flatMap(List::stream)
-					.forEach(cookie -> Response.addCookie(response, new HttpResponseCookie(cookie)));
+					.forEach(cookie -> Response.addCookie(this.response, new HttpResponseCookie(cookie)));
 		}
 	}
 
 	private Mono<Void> sendDataBuffer(DataBuffer dataBuffer) {
 		Mono<Void> mono = ensureCommitted();
-		if (mono != null)
+		if (mono != null) {
 			return mono.then(Mono.defer(() -> sendDataBuffer(dataBuffer)));
+		}
 
 		@SuppressWarnings("resource")
 		DataBuffer.ByteBufferIterator byteBufferIterator = dataBuffer.readableByteBuffers();
@@ -174,8 +178,9 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		new IteratingCallback() {
 			@Override
 			protected Action process() {
-				if (!byteBufferIterator.hasNext())
+				if (!byteBufferIterator.hasNext()) {
 					return Action.SUCCEEDED;
+				}
 				response.write(false, byteBufferIterator.next(), this);
 				return Action.SCHEDULED;
 			}
@@ -198,52 +203,56 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public boolean setStatusCode(@Nullable HttpStatusCode status) {
-		if (isCommitted() || status == null)
+		if (isCommitted() || status == null) {
 			return false;
-		response.setStatus(status.value());
+		}
+		this.response.setStatus(status.value());
 		return true;
 	}
 
 	@Override
 	public HttpStatusCode getStatusCode() {
-		int status = response.getStatus();
+		int status = this.response.getStatus();
 		return HttpStatusCode.valueOf(status == 0 ? 200 : status);
 	}
 
 	@Override
 	public boolean setRawStatusCode(@Nullable Integer value) {
-		if (isCommitted() || value == null)
+		if (isCommitted() || value == null) {
 			return false;
-		response.setStatus(value);
+		}
+		this.response.setStatus(value);
 		return true;
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		if (cookies == null)
+		if (this.cookies == null) {
 			initializeCookies();
-		return cookies;
+		}
+		return this.cookies;
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		if (cookies == null)
+		if (this.cookies == null) {
 			initializeCookies();
-		cookies.add(cookie.getName(), cookie);
+		}
+		this.cookies.add(cookie.getName(), cookie);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getNativeResponse()
-	{
-		return (T) response;
+	public <T> T getNativeResponse() {
+		return (T) this.response;
 	}
 
 	private void initializeCookies() {
-		cookies = new LinkedMultiValueMap<>();
-		for (HttpField f : response.getHeaders()) {
-			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie)
-				cookies.add(httpResponseCookie.getName(), httpResponseCookie.getResponseCookie());
+		this.cookies = new LinkedMultiValueMap<>();
+		for (HttpField f : this.response.getHeaders()) {
+			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie) {
+				this.cookies.add(httpResponseCookie.getName(), httpResponseCookie.getResponseCookie());
+			}
 		}
 	}
 
@@ -255,17 +264,17 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		}
 
 		public ResponseCookie getResponseCookie() {
-			return responseCookie;
+			return this.responseCookie;
 		}
 
 		@Override
 		public String getName() {
-			return responseCookie.getName();
+			return this.responseCookie.getName();
 		}
 
 		@Override
 		public String getValue() {
-			return responseCookie.getValue();
+			return this.responseCookie.getValue();
 		}
 
 		@Override
@@ -275,7 +284,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 		@Override
 		public long getMaxAge() {
-			return responseCookie.getMaxAge().toSeconds();
+			return this.responseCookie.getMaxAge().toSeconds();
 		}
 
 		@Override
@@ -287,18 +296,18 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		@Override
 		@Nullable
 		public String getDomain() {
-			return responseCookie.getDomain();
+			return this.responseCookie.getDomain();
 		}
 
 		@Override
 		@Nullable
 		public String getPath() {
-			return responseCookie.getPath();
+			return this.responseCookie.getPath();
 		}
 
 		@Override
 		public boolean isSecure() {
-			return responseCookie.isSecure();
+			return this.responseCookie.isSecure();
 		}
 
 		@Nullable
@@ -310,7 +319,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 		@Override
 		public boolean isHttpOnly() {
-			return responseCookie.isHttpOnly();
+			return this.responseCookie.isHttpOnly();
 		}
 
 		@Override
@@ -342,7 +351,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			this.sink = target;
 			this.callback = callback;
 			this.length = count;
-			source.position(position);
+			this.source.position(position);
 
 			ByteBufferPool bufferPool = target.getRequest().getComponents().getByteBufferPool();
 			int outputBufferSize = target.getRequest().getConnectionMetaData().getHttpConfiguration().getOutputBufferSize();
@@ -352,36 +361,37 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 		@Override
 		protected Action process() throws Throwable {
-			if (!source.isOpen() || totalRead == length)
+			if (!this.source.isOpen() || this.totalRead == this.length) {
 				return Action.SUCCEEDED;
+			}
 
-			ByteBuffer byteBuffer = buffer.getByteBuffer();
+			ByteBuffer byteBuffer = this.buffer.getByteBuffer();
 			BufferUtil.clearToFill(byteBuffer);
-			byteBuffer.limit((int) Math.min(buffer.capacity(), length - totalRead));
-			int read = source.read(byteBuffer);
+			byteBuffer.limit((int) Math.min(this.buffer.capacity(), this.length - this.totalRead));
+			int read = this.source.read(byteBuffer);
 			if (read == -1) {
-				IO.close(source);
-				sink.write(true, BufferUtil.EMPTY_BUFFER, this);
+				IO.close(this.source);
+				this.sink.write(true, BufferUtil.EMPTY_BUFFER, this);
 				return Action.SCHEDULED;
 			}
-			totalRead += read;
+			this.totalRead += read;
 			BufferUtil.flipToFlush(byteBuffer, 0);
-			sink.write(false, byteBuffer, this);
+			this.sink.write(false, byteBuffer, this);
 			return Action.SCHEDULED;
 		}
 
 		@Override
 		protected void onCompleteSuccess() {
-			buffer.release();
-			IO.close(source);
-			callback.succeeded();
+			this.buffer.release();
+			IO.close(this.source);
+			this.callback.succeeded();
 		}
 
 		@Override
 		protected void onCompleteFailure(Throwable x) {
-			buffer.release();
-			IO.close(source);
-			callback.failed(x);
+			this.buffer.release();
+			IO.close(this.source);
+			this.callback.failed(x);
 		}
 	}
 }

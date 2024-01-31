@@ -22,6 +22,7 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 
@@ -35,6 +36,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 
 	private final HttpHandler httpHandler;
+
 	private final DataBufferFactory dataBufferFactory;
 
 	public JettyCoreHttpHandlerAdapter(HttpHandler httpHandler) {
@@ -44,12 +46,12 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 		// because we mainly use wrap and there should be few allocation done by the factory.
 		// But it could be possible to use the servers buffer pool for allocations and to
 		// create PooledDataBuffers
-		dataBufferFactory = new DefaultDataBufferFactory();
+		this.dataBufferFactory = new DefaultDataBufferFactory();
 	}
 
 	@Override
 	public boolean handle(Request request, Response response, Callback callback) throws Exception {
-		httpHandler.handle(new JettyCoreServerHttpRequest(dataBufferFactory, request), new JettyCoreServerHttpResponse(response))
+		this.httpHandler.handle(new JettyCoreServerHttpRequest(this.dataBufferFactory, request), new JettyCoreServerHttpResponse(response))
 				.subscribe(new Subscriber<>() {
 					@Override
 					public void onSubscribe(Subscription s) {

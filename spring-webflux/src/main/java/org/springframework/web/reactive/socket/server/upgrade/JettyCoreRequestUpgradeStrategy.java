@@ -28,6 +28,8 @@ import org.eclipse.jetty.websocket.api.Configurable;
 import org.eclipse.jetty.websocket.api.exceptions.WebSocketException;
 import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
 import org.eclipse.jetty.websocket.server.WebSocketCreator;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -41,7 +43,6 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 /**
  * A WebSocket {@code RequestUpgradeStrategy} for Jetty 12 Core.
@@ -84,32 +85,31 @@ public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		// Trigger WebFlux preCommit actions before upgrade
 		return exchange.getResponse().setComplete()
 				.then(Mono.deferContextual(contextView -> {
-			JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
-					ContextWebSocketHandler.decorate(handler, contextView),
-					session -> new JettyWebSocketSession(session, handshakeInfo, factory));
+					JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
+							ContextWebSocketHandler.decorate(handler, contextView),
+							session -> new JettyWebSocketSession(session, handshakeInfo, factory));
 
-			WebSocketCreator webSocketCreator = (upgradeRequest, upgradeResponse, callback) ->
-			{
-				if (subProtocol != null)
-					upgradeResponse.setAcceptedSubProtocol(subProtocol);
-				return adapter;
-			};
+					WebSocketCreator webSocketCreator = (upgradeRequest, upgradeResponse, callback) -> {
+						if (subProtocol != null) {
+							upgradeResponse.setAcceptedSubProtocol(subProtocol);
+						}
+						return adapter;
+					};
 
-			Callback.Completable callback = new Callback.Completable();
-			Mono<Void> mono = Mono.fromFuture(callback);
-			ServerWebSocketContainer container = getWebSocketServerContainer(jettyRequest);
-			try
-			{
-				if (!container.upgrade(webSocketCreator, jettyRequest, jettyResponse, callback))
-					throw new WebSocketException("request could not be upgraded to websocket");
-			}
-			catch (WebSocketException e)
-			{
-				callback.failed(e);
-			}
+					Callback.Completable callback = new Callback.Completable();
+					Mono<Void> mono = Mono.fromFuture(callback);
+					ServerWebSocketContainer container = getWebSocketServerContainer(jettyRequest);
+					try {
+						if (!container.upgrade(webSocketCreator, jettyRequest, jettyResponse, callback)) {
+							throw new WebSocketException("request could not be upgraded to websocket");
+						}
+					}
+					catch (WebSocketException ex) {
+						callback.failed(ex);
+					}
 
-			return mono;
-		}));
+					return mono;
+				}));
 	}
 
 	private ServerWebSocketContainer getWebSocketServerContainer(Request jettyRequest) {

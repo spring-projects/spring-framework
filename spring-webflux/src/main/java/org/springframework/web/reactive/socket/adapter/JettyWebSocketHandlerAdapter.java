@@ -32,6 +32,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.core.OpCode;
+
 import org.springframework.core.io.buffer.CloseableDataBuffer;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -55,6 +56,7 @@ public class JettyWebSocketHandlerAdapter {
 	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
 
 	private final WebSocketHandler delegateHandler;
+
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
 	@Nullable
