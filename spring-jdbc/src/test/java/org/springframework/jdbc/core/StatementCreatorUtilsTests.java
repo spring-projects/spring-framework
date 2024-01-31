@@ -45,12 +45,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link StatementCreatorUtils}.
+ *
  * @author Juergen Hoeller
  * @since 31.08.2004
  */
 class StatementCreatorUtilsTests {
 
-	private final PreparedStatement preparedStatement = mock();
+	private PreparedStatement preparedStatement = mock();
 
 
 	@Test
