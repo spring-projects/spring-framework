@@ -79,7 +79,9 @@ public class JettyHttpServer extends AbstractHttpServer {
 	@Override
 	protected void resetInternal() {
 		try {
-			this.jettyServer.stop();
+			if (this.jettyServer.isRunning()) {
+				this.jettyServer.stop();
+			}
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);

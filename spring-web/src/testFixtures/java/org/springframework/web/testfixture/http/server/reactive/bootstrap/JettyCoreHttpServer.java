@@ -64,6 +64,7 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 
 	@Override
 	protected void stopInternal() {
+		boolean wasRunning = this.jettyServer.isRunning();
 		try {
 			this.jettyServer.stop();
 		}
@@ -72,15 +73,20 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 		}
 
 		// TODO remove this or make debug only
-		this.byteBufferPool.dumpLeaks();
-		if (!this.byteBufferPool.getLeaks().isEmpty())
-			throw new IllegalStateException("LEAKS");
+		if (wasRunning) {
+			if (!this.byteBufferPool.getLeaks().isEmpty()) {
+				System.err.println("Leaks:\n" + this.byteBufferPool.dumpLeaks());
+				throw new IllegalStateException("LEAKS");
+			}
+		}
 	}
 
 	@Override
 	protected void resetInternal() {
 		try {
-			stopInternal();
+			if (this.jettyServer.isRunning()) {
+				stopInternal();
+			}
 			this.jettyServer.destroy();
 		}
 		finally {

@@ -110,7 +110,7 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 	}
 
 	private JettyRetainedDataBuffer wrap(Content.Chunk chunk) {
-		return new JettyRetainedDataBuffer(this.dataBufferFactory.wrap(chunk.getByteBuffer()), chunk);
+		return new JettyRetainedDataBuffer(this.dataBufferFactory, chunk);
 	}
 
 	@Override
