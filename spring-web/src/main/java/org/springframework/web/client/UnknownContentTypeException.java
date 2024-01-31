@@ -79,7 +79,7 @@ public class UnknownContentTypeException extends RestClientException {
 			HttpStatusCode statusCode, String statusText, HttpHeaders responseHeaders, byte[] responseBody) {
 
 		super("Could not extract response: no suitable HttpMessageConverter found " +
-				"for response type [" + targetType + "] and content type [" + contentType + "]");
+				"for type [" + targetType + "] and response: code [" + statusCode.value() + "], content type [" + contentType + "]");
 
 		this.targetType = targetType;
 		this.contentType = contentType;
