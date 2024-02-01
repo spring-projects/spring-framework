@@ -22,6 +22,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 
 import org.eclipse.jetty.http.HttpFields;
@@ -107,14 +108,20 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 		// We access the request body as a Flow.Publisher, which is wrapped as an org.reactivestreams.Publisher and
 		// then wrapped as a Flux.   The chunks are converted to RetainedDataBuffers with wrapping and can be
 		// retained within a call to onNext.
-		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request))).map(this::wrap).doOnNext(this::release);
+
+		// TODO find a better way to release after each onNext call to a subscriber
+		AtomicReference<DataBuffer> last = new AtomicReference<>();
+		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request)))
+				.map(this::wrap)
+				.doOnNext(db -> release(last.getAndSet(db)))
+				.doOnComplete(() -> release(last.getAndSet(null)));
 	}
 
 	private DataBuffer wrap(Content.Chunk chunk) {
 		return new JettyRetainedDataBuffer(this.dataBufferFactory, chunk);
 	}
 
-	private void release(DataBuffer dataBuffer) {
+	private static void release(DataBuffer dataBuffer) {
 		if (dataBuffer instanceof PooledDataBuffer pooled) {
 			pooled.release();
 		}
