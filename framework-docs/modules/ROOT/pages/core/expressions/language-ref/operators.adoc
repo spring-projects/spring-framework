@@ -162,15 +162,13 @@ Kotlin::
 ----
 ======
 
-[NOTE]
+[CAUTION]
 ====
-The left operand to the `between` operator must be a single value, and the right operand
-must be a 2-element list which defines the range.
+The syntax for the `between` operator is `<input> between {<range_begin>, <range_end>}`,
+which is effectively a shortcut for `<input> >= <range_begin> && <input> \<= <range_end>}`.
 
-The `between` operator returns `true` if the left operand is _between_ the two elements
-in the range, inclusive (using a comparison algorithm based on `java.lang.Comparable`).
-In addition, the first element in the range must be less than or equal to the second
-element in the range.
+Consequently, `1 between {1, 5}` evaluates to `true`, while `1 between {5, 1}` evaluates
+to `false`.
 ====
 
 CAUTION: Be careful with primitive types, as they are immediately boxed up to their

@@ -29,12 +29,12 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  * Represents the {@code between} operator.
  *
  * <p>The left operand must be a single value, and the right operand must be a
- * 2-element list which defines the range.
+ * 2-element list which defines a range from a lower bound to an upper bound.
  *
- * <p>This operator returns {@code true} if the left operand is between the two
- * elements in the range, inclusive (using the registered {@link TypeComparator}
- * for comparison). In addition, the first element in the range must be less than
- * or equal to the second element in the range.
+ * <p>This operator returns {@code true} if the left operand is greater than or
+ * equal to the lower bound and less than or equal to the upper bound. Consequently,
+ * {@code 1 between {1, 5}} evaluates to {@code true}, while {@code 1 between {5, 1}}
+ * evaluates to {@code false}.
  *
  * @author Andy Clement
  * @author Sam Brannen
@@ -50,7 +50,7 @@ public class OperatorBetween extends Operator {
 	/**
 	 * Returns a boolean based on whether a value is in the range expressed. The first
 	 * operand is any value whilst the second is a list of two values - those two values
-	 * being the bounds allowed for the first operand (inclusive).
+	 * being the lower and upper bounds allowed for the first operand (inclusive).
 	 * @param state the expression state
 	 * @return true if the left operand is in the range specified, false otherwise
 	 * @throws EvaluationException if there is a problem evaluating the expression
