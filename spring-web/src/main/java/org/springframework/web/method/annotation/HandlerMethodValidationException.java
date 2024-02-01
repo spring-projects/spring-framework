@@ -56,7 +56,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 
 	private final MethodValidationResult validationResult;
 
-	private final Predicate<MethodParameter> modelAttribitePredicate;
+	private final Predicate<MethodParameter> modelAttributePredicate;
 
 	private final Predicate<MethodParameter> requestParamPredicate;
 
@@ -68,11 +68,11 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 	}
 
 	public HandlerMethodValidationException(MethodValidationResult validationResult,
-			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		super(initHttpStatus(validationResult), "Validation failure", null, null, null);
 		this.validationResult = validationResult;
-		this.modelAttribitePredicate = modelAttribitePredicate;
+		this.modelAttributePredicate = modelAttributePredicate;
 		this.requestParamPredicate = requestParamPredicate;
 	}
 
@@ -128,7 +128,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 				visitor.matrixVariable(matrixVariable, result);
 				continue;
 			}
-			if (this.modelAttribitePredicate.test(param)) {
+			if (this.modelAttributePredicate.test(param)) {
 				ModelAttribute modelAttribute = param.getParameterAnnotation(ModelAttribute.class);
 				visitor.modelAttribute(modelAttribute, asErrors(result));
 				continue;
