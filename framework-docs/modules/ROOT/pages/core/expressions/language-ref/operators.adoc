@@ -76,7 +76,6 @@ expression is embedded (such as in an XML document). The textual equivalents are
 * `ge` (`>=`)
 * `eq` (`==`)
 * `ne` (`!=`)
-* `not` (`!`)
 
 All of the textual operators are case-insensitive.
 
@@ -182,7 +181,7 @@ wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
 [[expressions-operators-logical]]
 == Logical Operators
 
-SpEL supports the following logical operators:
+SpEL supports the following logical (`boolean`) operators:
 
 * `and` (`&&`)
 * `or` (`||`)

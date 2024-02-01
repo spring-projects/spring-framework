@@ -34,22 +34,23 @@ populate them are listed at the end of the chapter.
 The expression language supports the following functionality:
 
 * Literal expressions
-* Boolean, relational, and logical operators
-* Regular expressions
-* String operators
-* Mathematical operators
-* Class expressions
 * Accessing properties, arrays, lists, and maps
-* Method invocation
-* Assignment
-* Calling constructors
-* Bean references
-* Array construction
 * Inline lists
 * Inline maps
-* Ternary and Elvis operators
+* Array construction
+* Relational operators
+* Regular expressions
+* Logical operators
+* String operators
+* Mathematical operators
+* Assignment
+* Type expressions
+* Method invocation
+* Constructor invocation
 * Variables
 * User-defined functions
+* Bean references
+* Ternary, Elvis, and safe-navigation operators
 * Collection projection
 * Collection selection
 * Templated expressions
