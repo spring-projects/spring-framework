@@ -22,7 +22,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 
 import org.eclipse.jetty.http.HttpFields;
@@ -31,11 +30,8 @@ import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.util.StringUtil;
 import org.reactivestreams.FlowAdapters;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,6 +42,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 
 import static org.springframework.http.server.reactive.AbstractServerHttpRequest.QUERY_PATTERN;
 
@@ -106,29 +103,9 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		// We access the request body as a Flow.Publisher, which is wrapped as an org.reactivestreams.Publisher and
-		// then wrapped as a Flux.   The chunks are converted to RetainedDataBuffers with wrapping and can be
-		// retained within a call to onNext.
-
-		// TODO find a better way to release after each onNext call to a subscriber
-		DataBufferReleaser releaser = new DataBufferReleaser();
+		// then wrapped as a Flux.
 		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request)))
-				.map(this::wrap)
-				.doOnNext(releaser::onNext)
-				.doOnComplete(releaser::onComplete);
-	}
-
-	private static class DataBufferReleaser {
-		private final AtomicReference<DataBuffer> last = new AtomicReference<>();
-
-		public void onNext(@Nullable DataBuffer dataBuffer) {
-			if (last.getAndSet(dataBuffer) instanceof PooledDataBuffer pooled) {
-				pooled.release();
-			}
-		}
-
-		public void onComplete() {
-			onNext(null);
-		}
+				.map(this::wrap);
 	}
 
 	private DataBuffer wrap(Content.Chunk chunk) {
