@@ -196,7 +196,7 @@ class BeanWrapperAutoGrowingTests {
 	@Test @Disabled  // gh-32154
 	void setPropertyValueAutoGrowNestedNestedMapWithinMap() {
 		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", new Bean());
-		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C)")).isInstanceOf(Bean.class);
+		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C")).isInstanceOf(Bean.class);
 	}
 
 
