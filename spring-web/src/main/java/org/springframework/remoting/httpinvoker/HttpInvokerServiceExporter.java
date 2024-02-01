@@ -205,7 +205,17 @@ public class HttpInvokerServiceExporter extends org.springframework.remoting.rmi
 		public FlushGuardedOutputStream(OutputStream out) {
 			super(out);
 		}
+		
+		@Override
+		public void write(@NotNull byte[] b) throws IOException {
+			out.write(b);
+		}
 
+		@Override
+		public void write(@NotNull byte[] b, int off, int len) throws IOException {
+			out.write(b, off, len);
+		}
+		
 		@Override
 		public void flush() throws IOException {
 			// Do nothing on flush
