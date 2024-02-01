@@ -162,21 +162,20 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	public List<String> put(String key, List<String> value) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> oldValues = get(key);
-		switch (value.size()) {
-			case 0 -> {
-				if (oldValues != null) {
-					mutableHttpFields.remove(key);
-				}
+
+		if (oldValues == null) {
+			switch (value.size()) {
+				case 0 -> {}
+				case 1 -> mutableHttpFields.add(key, value.get(0));
+				default -> mutableHttpFields.add(key, value);
 			}
-			case 1 -> {
-				if (oldValues == null) {
-					mutableHttpFields.add(key, value.get(0));
-				}
-				else {
-					mutableHttpFields.put(key, value.get(0));
-				}
+		}
+		else {
+			switch (value.size()) {
+				case 0 -> mutableHttpFields.remove(key);
+				case 1 -> mutableHttpFields.put(key, value.get(0));
+				default -> mutableHttpFields.put(key, value);
 			}
-			default -> mutableHttpFields.put(key, value);
 		}
 		return oldValues;
 	}

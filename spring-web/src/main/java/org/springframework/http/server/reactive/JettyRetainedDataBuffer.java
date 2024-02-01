@@ -49,8 +49,8 @@ public class JettyRetainedDataBuffer implements PooledDataBuffer {
 
 	public JettyRetainedDataBuffer(DataBufferFactory dataBufferFactory, Content.Chunk chunk) {
 		this.chunk = chunk;
-		// this.dataBuffer = dataBufferFactory.wrap(BufferUtil.copy(chunk.getByteBuffer()));
-		this.dataBuffer = dataBufferFactory.wrap(chunk.getByteBuffer()); // TODO avoid copy and double slice?
+		// this.dataBuffer = dataBufferFactory.wrap(BufferUtil.copy(chunk.getByteBuffer())); // TODO this copy avoids multipart bugs
+		this.dataBuffer = dataBufferFactory.wrap(chunk.getByteBuffer()); // TODO avoid double slice?
 		this.chunk.retain();
 	}
 
