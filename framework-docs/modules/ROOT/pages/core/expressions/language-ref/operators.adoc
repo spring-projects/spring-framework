@@ -8,6 +8,8 @@ The Spring Expression Language supports the following kinds of operators:
 * xref:core/expressions/language-ref/operators.adoc#expressions-operators-string[String Operators]
 * xref:core/expressions/language-ref/operators.adoc#expressions-operators-mathematical[Mathematical Operators]
 * xref:core/expressions/language-ref/operators.adoc#expressions-assignment[The Assignment Operator]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-overloaded[Overloaded Operators]
+
 
 
 [[expressions-operators-relational]]
@@ -519,6 +521,75 @@ Kotlin::
 	// alternatively
 	val aleks = parser.parseExpression(
 			"name = 'Aleksandar Seovic'").getValue(context, inventor, String::class.java)
+----
+======
+
+
+[[expressions-operators-overloaded]]
+== Overloaded Operators
+
+By default, the mathematical operations defined in SpEL's `Operation` enum (`ADD`,
+`SUBTRACT`, `DIVIDE`, `MULTIPLY`, `MODULUS`, and `POWER`) support simple types like
+numbers. By providing an implementation of `OperatorOverloader`, the expression language
+can support these operations on other types.
+
+For example, if we want to overload the `ADD` operator to allow two lists to be
+concatenated using the `+` sign, we can implement a custom `OperatorOverloader` as
+follows.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	pubic class ListConcatenation implements OperatorOverloader {
+
+		@Override
+		public boolean overridesOperation(Operation operation, Object left, Object right) {
+			return (operation == Operation.ADD &&
+					left instanceof List && right instanceof List);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Object operate(Operation operation, Object left, Object right) {
+			if (operation == Operation.ADD &&
+					left instanceof List list1 && right instanceof List list2) {
+
+				List result = new ArrayList(list1);
+				result.addAll(list2);
+				return result;
+			}
+			throw new UnsupportedOperationException(
+				"No overload for operation %s and operands [%s] and [%s]"
+					.formatted(operation.name(), left, right));
+		}
+	}
+----
+
+If we register `ListConcatenation` as the `OperatorOverloader` in a
+`StandardEvaluationContext`, we can then evaluate expressions like `{1, 2, 3} + {4, 5}`
+as demonstrated in the following example.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	StandardEvaluationContext context = new StandardEvaluationContext();
+	context.setOperatorOverloader(new ListConcatenation());
+
+	// evaluates to a new list: [1, 2, 3, 4, 5]
+	parser.parseExpression("{1, 2, 3} + {4, 5}").getValue(context, List.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	StandardEvaluationContext context = StandardEvaluationContext()
+	context.setOperatorOverloader(ListConcatenation())
+
+	// evaluates to a new list: [1, 2, 3, 4, 5]
+	parser.parseExpression("{1, 2, 3} + {4, 5}").getValue(context, List::class.java)
 ----
 ======
 

@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.Operation;
+import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
@@ -447,6 +449,18 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			assertThat(parser.parseExpression("foo").getValue(context, inventor, String.class)).isEqualTo("Alexandar Seovic");
 			assertThat(aleks).isEqualTo("Alexandar Seovic");
 		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void overloadingOperators() {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			context.setOperatorOverloader(new ListConcatenation());
+
+			// evaluates to [1, 2, 3, 4, 5]
+			List list = parser.parseExpression("{1, 2, 3} + {4, 5}").getValue(context, List.class);
+			assertThat(list).containsExactly(1, 2, 3, 4, 5);
+		}
+
 	}
 
 	@Nested
@@ -669,6 +683,30 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 		public static String reverseString(String input) {
 			return new StringBuilder(input).reverse().toString();
+		}
+	}
+
+	private static class ListConcatenation implements OperatorOverloader {
+
+		@Override
+		public boolean overridesOperation(Operation operation, Object left, Object right) {
+			return (operation == Operation.ADD &&
+					left instanceof List && right instanceof List);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Object operate(Operation operation, Object left, Object right) {
+			if (operation == Operation.ADD &&
+					left instanceof List list1 && right instanceof List list2) {
+
+				List result = new ArrayList(list1);
+				result.addAll(list2);
+				return result;
+			}
+			throw new UnsupportedOperationException(
+				"No overload for operation %s and operands [%s] and [%s]"
+					.formatted(operation.name(), left, right));
 		}
 	}
 
