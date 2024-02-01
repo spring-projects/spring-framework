@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,10 +106,9 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected void addDefaultHeaders(HttpHeaders headers, String s, @Nullable MediaType type) throws IOException {
 		if (headers.getContentType() == null ) {
-			if (type != null && type.isConcrete() &&
-					(type.isCompatibleWith(MediaType.APPLICATION_JSON) ||
+			if (type != null && type.isConcrete() && (type.isCompatibleWith(MediaType.APPLICATION_JSON) ||
 					type.isCompatibleWith(APPLICATION_PLUS_JSON))) {
-				// Prevent charset parameter for JSON..
+				// Prevent charset parameter for JSON.
 				headers.setContentType(type);
 			}
 		}
