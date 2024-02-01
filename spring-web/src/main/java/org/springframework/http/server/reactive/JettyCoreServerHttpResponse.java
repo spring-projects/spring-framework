@@ -24,11 +24,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.io.Content;
@@ -131,7 +133,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		mono = Mono.fromFuture(callback);
 		try {
 			// TODO: Why does intellij warn about possible blocking call?
-			//       Because it can block and we want to be fully asynchronous.  Use AsynchronousFileChannel
+			//       Because it can block and we want to be fully asynchronous.  Use AsynchronousFileChannel?
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
 			new ContentWriterIteratingCallback(channel, position, count, this.response, callback).iterate();
 		}
@@ -159,7 +161,6 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	private void writeCookies() {
 		if (this.cookies != null) {
-			// TODO: are we doubling up on cookies already existing in response?
 			this.cookies.values().stream()
 					.flatMap(List::stream)
 					.forEach(cookie -> Response.addCookie(this.response, new HttpResponseCookie(cookie)));
@@ -227,18 +228,12 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		if (this.cookies == null) {
-			initializeCookies();
-		}
-		return this.cookies;
+		return initializeCookies();
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		if (this.cookies == null) {
-			initializeCookies();
-		}
-		this.cookies.add(cookie.getName(), cookie);
+		initializeCookies().add(cookie.getName(), cookie);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -247,13 +242,27 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		return (T) this.response;
 	}
 
-	private void initializeCookies() {
-		this.cookies = new LinkedMultiValueMap<>();
-		for (HttpField f : this.response.getHeaders()) {
-			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField && setCookieHttpField.getHttpCookie() instanceof HttpResponseCookie httpResponseCookie) {
-				this.cookies.add(httpResponseCookie.getName(), httpResponseCookie.getResponseCookie());
+	private LinkedMultiValueMap<String, ResponseCookie> initializeCookies() {
+		if (this.cookies == null) {
+			this.cookies = new LinkedMultiValueMap<>();
+			// remove all existing cookies from the response and add them to the cookie map, to be added back later
+			for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
+				HttpField f = i.next();
+				if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
+					HttpCookie httpCookie = setCookieHttpField.getHttpCookie();
+					ResponseCookie responseCookie = ResponseCookie.from(httpCookie.getName(), httpCookie.getValue())
+							.httpOnly(httpCookie.isHttpOnly())
+							.domain(httpCookie.getDomain())
+							.maxAge(httpCookie.getMaxAge())
+							.sameSite(httpCookie.getSameSite().name())
+							.secure(httpCookie.isSecure())
+							.build();
+					this.cookies.add(responseCookie.getName(), responseCookie);
+					i.remove();
+				}
 			}
 		}
+		return this.cookies;
 	}
 
 	private static class HttpResponseCookie implements org.eclipse.jetty.http.HttpCookie {
