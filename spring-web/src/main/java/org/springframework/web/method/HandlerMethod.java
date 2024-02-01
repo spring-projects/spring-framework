@@ -198,7 +198,7 @@ public class HandlerMethod extends AnnotatedMethod {
 		this.responseStatus = handlerMethod.responseStatus;
 		this.responseStatusReason = handlerMethod.responseStatusReason;
 		this.resolvedFromHandlerMethod = handlerMethod;
-		this.description = handlerMethod.description;
+		this.description = handlerMethod.toString();
 	}
 
 
