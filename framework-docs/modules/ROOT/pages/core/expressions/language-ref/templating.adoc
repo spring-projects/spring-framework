@@ -1,5 +1,5 @@
 [[expressions-templating]]
-= Expression templating
+= Expression Templating
 
 Expression templates allow mixing literal text with one or more evaluation blocks.
 Each evaluation block is delimited with prefix and suffix characters that you can
@@ -32,53 +32,13 @@ Kotlin::
 ======
 
 The string is evaluated by concatenating the literal text `'random number is '` with the
-result of evaluating the expression inside the `#{ }` delimiter (in this case, the result
-of calling that `random()` method). The second argument to the `parseExpression()` method
-is of the type `ParserContext`. The `ParserContext` interface is used to influence how
-the expression is parsed in order to support the expression templating functionality.
-The definition of `TemplateParserContext` follows:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	public class TemplateParserContext implements ParserContext {
-
-		public String getExpressionPrefix() {
-			return "#{";
-		}
-
-		public String getExpressionSuffix() {
-			return "}";
-		}
-
-		public boolean isTemplate() {
-			return true;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	class TemplateParserContext : ParserContext {
-
-		override fun getExpressionPrefix(): String {
-			return "#{"
-		}
-
-		override fun getExpressionSuffix(): String {
-			return "}"
-		}
-
-		override fun isTemplate(): Boolean {
-			return true
-		}
-	}
-----
-======
+result of evaluating the expression inside the `#{ }` delimiters (in this case, the
+result of calling that `random()` method). The second argument to the `parseExpression()`
+method is of the type `ParserContext`. The `ParserContext` interface is used to influence
+how the expression is parsed in order to support the expression templating functionality.
+The `TemplateParserContext` used in the previous example resides in the
+`org.springframework.expression.common` package and is an implementation of the
+`ParserContext` which by default configures the prefix and suffix to `#{` and `}`,
+respectively.
 
 

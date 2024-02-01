@@ -40,11 +40,7 @@ Java::
 	public abstract class StringUtils {
 
 		public static String reverseString(String input) {
-			StringBuilder backwards = new StringBuilder(input.length());
-			for (int i = 0; i < input.length(); i++) {
-				backwards.append(input.charAt(input.length() - 1 - i));
-			}
-			return backwards.toString();
+			return new StringBuilder(input).reverse().toString();
 		}
 	}
 ----
@@ -54,11 +50,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	fun reverseString(input: String): String {
-		val backwards = StringBuilder(input.length)
-		for (i in 0 until input.length) {
-			backwards.append(input[input.length - 1 - i])
-		}
-		return backwards.toString()
+		return StringBuilder(input).reverse().toString()
 	}
 ----
 ======
@@ -161,9 +153,9 @@ Java::
 			.bindTo(varargs); //here we have to provide arguments in a single array binding
 	context.setVariable("message", mh);
 
+	// evaluates to "This is a prerecorded message with 3 words: <Oh Hello World!>"
 	String message = parser.parseExpression("#message()")
 			.getValue(context, String.class);
-	//returns "This is a prerecorded message with 3 words: <Oh Hello World!>"
 ----
 
 Kotlin::
@@ -182,6 +174,7 @@ Kotlin::
 			.bindTo(varargs) //here we have to provide arguments in a single array binding
 	context.setVariable("message", mh)
 
+	// evaluates to "This is a prerecorded message with 3 words: <Oh Hello World!>"
 	val message = parser.parseExpression("#message()")
 			.getValue(context, String::class.java)
 ----
