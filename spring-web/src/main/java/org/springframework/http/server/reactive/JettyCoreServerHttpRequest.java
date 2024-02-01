@@ -110,21 +110,29 @@ class JettyCoreServerHttpRequest implements ServerHttpRequest {
 		// retained within a call to onNext.
 
 		// TODO find a better way to release after each onNext call to a subscriber
-		AtomicReference<DataBuffer> last = new AtomicReference<>();
+		DataBufferReleaser releaser = new DataBufferReleaser();
 		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request)))
 				.map(this::wrap)
-				.doOnNext(db -> release(last.getAndSet(db)))
-				.doOnComplete(() -> release(last.getAndSet(null)));
+				.doOnNext(releaser::onNext)
+				.doOnComplete(releaser::onComplete);
+	}
+
+	private static class DataBufferReleaser {
+		private final AtomicReference<DataBuffer> last = new AtomicReference<>();
+
+		public void onNext(@Nullable DataBuffer dataBuffer) {
+			if (last.getAndSet(dataBuffer) instanceof PooledDataBuffer pooled) {
+				pooled.release();
+			}
+		}
+
+		public void onComplete() {
+			onNext(null);
+		}
 	}
 
 	private DataBuffer wrap(Content.Chunk chunk) {
 		return new JettyRetainedDataBuffer(this.dataBufferFactory, chunk);
-	}
-
-	private static void release(DataBuffer dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer pooled) {
-			pooled.release();
-		}
 	}
 
 	@Override
