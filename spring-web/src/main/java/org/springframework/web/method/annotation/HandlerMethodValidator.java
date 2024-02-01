@@ -56,16 +56,16 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 	private final MethodValidationAdapter validationAdapter;
 
-	private final Predicate<MethodParameter> modelAttribitePredicate;
+	private final Predicate<MethodParameter> modelAttributePredicate;
 
 	private final Predicate<MethodParameter> requestParamPredicate;
 
 
 	private HandlerMethodValidator(MethodValidationAdapter validationAdapter,
-			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		this.validationAdapter = validationAdapter;
-		this.modelAttribitePredicate = modelAttribitePredicate;
+		this.modelAttributePredicate = modelAttributePredicate;
 		this.requestParamPredicate = requestParamPredicate;
 	}
 
@@ -104,7 +104,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 		}
 
 		throw new HandlerMethodValidationException(
-				result, this.modelAttribitePredicate, this.requestParamPredicate);
+				result, this.modelAttributePredicate, this.requestParamPredicate);
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 	@Nullable
 	public static MethodValidator from(
 			@Nullable WebBindingInitializer initializer, @Nullable ParameterNameDiscoverer paramNameDiscoverer,
-			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		if (initializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
 			Validator validator = getValidator(configurableInitializer);
@@ -156,7 +156,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 				if (codesResolver != null) {
 					adapter.setMessageCodesResolver(codesResolver);
 				}
-				return new HandlerMethodValidator(adapter, modelAttribitePredicate, requestParamPredicate);
+				return new HandlerMethodValidator(adapter, modelAttributePredicate, requestParamPredicate);
 			}
 		}
 		return null;
