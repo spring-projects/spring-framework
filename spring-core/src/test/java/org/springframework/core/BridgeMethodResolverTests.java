@@ -106,6 +106,17 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
+	void findBridgedMethodInHierarchyWithBoundedGenerics() throws Exception {
+		Method originalMethod = Bar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		assertThat(originalMethod.isBridge()).isFalse();
+		Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, SubBar.class);
+		assertThat(bridgedMethod.isBridge()).isFalse();
+		assertThat(bridgedMethod.getName()).isEqualTo("someMethod");
+		assertThat(bridgedMethod.getParameterCount()).isEqualTo(2);
+		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(CharSequence.class);
+	}
+
+	@Test
 	void isBridgeMethodFor() throws Exception {
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
@@ -377,8 +388,15 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public abstract static class InterBar<T> extends Bar<T> {
+	public abstract static class InterBar<T extends CharSequence> extends Bar<T> {
 
+		@Override
+		void someMethod(T theArg, Object otherArg) {
+		}
+	}
+
+
+	public abstract static class SubBar<T extends StringBuffer> extends InterBar<T> {
 	}
 
 
