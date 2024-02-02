@@ -20,6 +20,30 @@ Boolean ::
 Null ::
   `null`
 
+[NOTE]
+====
+Due to the design and implementation of the Spring Expression Language, literal numbers
+are always stored internally as positive numbers.
+
+For example, `-2` is stored internally as a positive `2` which is then negated while
+evaluating the expression (by calculating the value of `0 - 2`).
+
+This means that it is not possible to represent a negative literal number equal to the
+minimum value of that type of number in Java. For example, the minimum supported value
+for an `int` in Java is `Integer.MIN_VALUE` which has a value of `-2147483648`. However,
+if you include `-2147483648` in a SpEL expression, an exception will be thrown informing
+you that the value `2147483648` cannot be parsed as an `int` (because it exceeds the
+value of `Integer.MAX_VALUE` which is `2147483647`).
+
+If you need to use the minimum value for a particular type of number within a SpEL
+expression, you can either reference the `MIN_VALUE` constant for the respective wrapper
+type (such as `Integer.MIN_VALUE`, `Long.MIN_VALUE`, etc.) or calculate the minimum
+value. For example, to use the minimum integer value:
+
+- `T(Integer).MIN_VALUE` -- requires a `StandardEvaluationContext`
+- `-2^31` -- can be used with any type of `EvaluationContext`
+====
+
 The following listing shows simple usage of literals. Typically, they are not used in
 isolation like this but, rather, as part of a more complex expression -- for example,
 using a literal on one side of a logical comparison operator or as an argument to a
