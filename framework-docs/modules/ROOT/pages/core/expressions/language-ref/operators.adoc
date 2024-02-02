@@ -415,6 +415,8 @@ Java::
 
 	int maxInt = parser.parseExpression("(2^31) - 1").getValue(int.class);  // Integer.MAX_VALUE
 
+	int minInt = parser.parseExpression("-2^31").getValue(int.class);  // Integer.MIN_VALUE
+
 	// -- Operator precedence --
 
 	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(int.class);  // -21
@@ -478,6 +480,8 @@ Kotlin::
 	// -- Exponential power --
 
 	val maxInt = parser.parseExpression("(2^31) - 1").getValue(Int::class.java)  // Integer.MAX_VALUE
+
+	val minInt = parser.parseExpression("-2^31").getValue(Int::class.java)  // Integer.MIN_VALUE
 
 	// -- Operator precedence --
 

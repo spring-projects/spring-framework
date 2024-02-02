@@ -429,6 +429,9 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			int maxInt = parser.parseExpression("(2^31) - 1").getValue(int.class);  // Integer.MAX_VALUE
 			assertThat(maxInt).isEqualTo(Integer.MAX_VALUE);
 
+			int minInt = parser.parseExpression("-2^31").getValue(int.class);  // Integer.MIN_VALUE
+			assertThat(minInt).isEqualTo(Integer.MIN_VALUE);
+
 			// -- Operator precedence --
 
 			int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(int.class);  // -21
