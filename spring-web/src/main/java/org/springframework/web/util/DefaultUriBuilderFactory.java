@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -46,7 +47,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	private EncodingMode encodingMode = EncodingMode.TEMPLATE_AND_VALUES;
 
-	private final Map<String, Object> defaultUriVariables = new HashMap<>();
+	@Nullable
+	private Map<String, Object> defaultUriVariables;
 
 	private boolean parsePath = true;
 
@@ -108,9 +110,18 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * @param defaultUriVariables default URI variable values
 	 */
 	public void setDefaultUriVariables(@Nullable Map<String, ?> defaultUriVariables) {
-		this.defaultUriVariables.clear();
 		if (defaultUriVariables != null) {
-			this.defaultUriVariables.putAll(defaultUriVariables);
+			if (this.defaultUriVariables == null) {
+				this.defaultUriVariables = new HashMap<>(defaultUriVariables);
+			}
+			else {
+				this.defaultUriVariables.putAll(defaultUriVariables);
+			}
+		}
+		else {
+			if (this.defaultUriVariables != null) {
+				this.defaultUriVariables.clear();
+			}
 		}
 	}
 
@@ -118,7 +129,12 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * Return the configured default URI variable values.
 	 */
 	public Map<String, ?> getDefaultUriVariables() {
-		return Collections.unmodifiableMap(this.defaultUriVariables);
+		if (this.defaultUriVariables != null) {
+			return Collections.unmodifiableMap(this.defaultUriVariables);
+		}
+		else {
+			return Collections.emptyMap();
+		}
 	}
 
 	/**
@@ -139,6 +155,20 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 */
 	public boolean shouldParsePath() {
 		return this.parsePath;
+	}
+
+	/**
+	 * Indicates whether this {@code DefaultUriBuilderFactory} uses the default
+	 * {@link org.springframework.web.client.RestTemplate RestTemplate}
+	 * settings.
+	 * @since 6.1.4
+	 */
+	public boolean hasRestTemplateDefaults() {
+		// see RestTemplate::initUriTemplateHandler
+		return this.baseUri == null &&
+				this.encodingMode == EncodingMode.URI_COMPONENT &&
+				CollectionUtils.isEmpty(this.defaultUriVariables) &&
+				this.parsePath;
 	}
 
 
@@ -379,8 +409,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		@Override
 		public URI build(Map<String, ?> uriVars) {
-			if (!defaultUriVariables.isEmpty()) {
-				Map<String, Object> map = new HashMap<>();
+			if (!CollectionUtils.isEmpty(defaultUriVariables)) {
+				Map<String, Object> map = new HashMap<>(defaultUriVariables.size() + uriVars.size());
 				map.putAll(defaultUriVariables);
 				map.putAll(uriVars);
 				uriVars = map;
@@ -394,7 +424,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		@Override
 		public URI build(Object... uriVars) {
-			if (ObjectUtils.isEmpty(uriVars) && !defaultUriVariables.isEmpty()) {
+			if (ObjectUtils.isEmpty(uriVars) && !CollectionUtils.isEmpty(defaultUriVariables)) {
 				return build(Collections.emptyMap());
 			}
 			if (encodingMode.equals(EncodingMode.VALUES_ONLY)) {

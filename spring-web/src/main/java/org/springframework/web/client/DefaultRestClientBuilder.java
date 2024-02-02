@@ -54,6 +54,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Default implementation of {@link RestClient.Builder}.
@@ -172,9 +173,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	public DefaultRestClientBuilder(RestTemplate restTemplate) {
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 
-		if (restTemplate.getUriTemplateHandler() instanceof UriBuilderFactory builderFactory) {
-			this.uriBuilderFactory = builderFactory;
-		}
+		this.uriBuilderFactory = getUriBuilderFactory(restTemplate);
 		this.statusHandlers = new ArrayList<>();
 		this.statusHandlers.add(StatusHandler.fromErrorHandler(restTemplate.getErrorHandler()));
 
@@ -189,6 +188,26 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		}
 		this.observationRegistry = restTemplate.getObservationRegistry();
 		this.observationConvention = restTemplate.getObservationConvention();
+	}
+
+	@Nullable
+	private static UriBuilderFactory getUriBuilderFactory(RestTemplate restTemplate) {
+		UriTemplateHandler uriTemplateHandler = restTemplate.getUriTemplateHandler();
+		if (uriTemplateHandler instanceof DefaultUriBuilderFactory builderFactory) {
+			// only reuse the DefaultUriBuilderFactory if it has been customized
+			if (builderFactory.hasRestTemplateDefaults()) {
+				return null;
+			}
+			else {
+				return builderFactory;
+			}
+		}
+		else if (uriTemplateHandler instanceof UriBuilderFactory builderFactory) {
+			return builderFactory;
+		}
+		else {
+			return null;
+		}
 	}
 
 	private static ClientHttpRequestFactory getRequestFactory(RestTemplate restTemplate) {
