@@ -205,30 +205,8 @@ class ExceptionHandlerTests {
 		}
 	}
 
-	static class Person {
+	record Person(String name) {}
 
-		private final String name;
-
-		Person(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
-	static class Error {
-
-		private final String error;
-
-		Error(String error) {
-			this.error = error;
-		}
-
-		public String getError() {
-			return error;
-		}
-	}
+	record Error(String error) {}
 
 }
