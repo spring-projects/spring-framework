@@ -3,9 +3,11 @@
 
 This section lists the classes used in the examples throughout this chapter.
 
+== `Inventor`
+
 [tabs]
 ======
-Inventor.Java::
+Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 ----
@@ -80,7 +82,7 @@ Inventor.Java::
 	}
 ----
 
-Inventor.kt::
+Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 ----
@@ -95,9 +97,11 @@ Inventor.kt::
 ----
 ======
 
+== `PlaceOfBirth`
+
 [tabs]
 ======
-PlaceOfBirth.java::
+Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 ----
@@ -135,7 +139,7 @@ PlaceOfBirth.java::
 	}
 ----
 
-PlaceOfBirth.kt::
+Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 ----
@@ -145,9 +149,11 @@ PlaceOfBirth.kt::
 ----
 ======
 
+== `Society`
+
 [tabs]
 ======
-Society.java::
+Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 ----
@@ -192,7 +198,7 @@ Society.java::
 	}
 ----
 
-Society.kt::
+Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 ----
