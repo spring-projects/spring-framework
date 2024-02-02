@@ -26,10 +26,13 @@ import java.nio.charset.Charset;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +50,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
@@ -469,18 +473,75 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public void clear() {
-			List<String> attributeNames = Collections.list(this.servletRequest.getAttributeNames());
-			attributeNames.forEach(this.servletRequest::removeAttribute);
+			this.servletRequest.getAttributeNames().asIterator().forEachRemaining(this.servletRequest::removeAttribute);
 		}
 
 		@Override
 		public Set<Entry<String, Object>> entrySet() {
-			return Collections.list(this.servletRequest.getAttributeNames()).stream()
-					.map(name -> {
-						Object value = this.servletRequest.getAttribute(name);
-						return new SimpleImmutableEntry<>(name, value);
-					})
-					.collect(Collectors.toSet());
+			return new AbstractSet<>() {
+				@Override
+				public Iterator<Entry<String, Object>> iterator() {
+					return new Iterator<>() {
+						private final Iterator<String> attributes = ServletAttributesMap.this.servletRequest.getAttributeNames().asIterator();
+						@Override
+						public boolean hasNext() {
+							return attributes.hasNext();
+						}
+
+						@Override
+						public Entry<String, Object> next() {
+							String attribute = attributes.next();
+							Object value = ServletAttributesMap.this.servletRequest.getAttribute(attribute);
+							return new SimpleImmutableEntry<>(attribute, value);
+						}
+					};
+				}
+
+				@Override
+				public boolean isEmpty() {
+					return ServletAttributesMap.this.isEmpty();
+				}
+
+				@Override
+				public int size() {
+					return ServletAttributesMap.this.size();
+				}
+
+				@Override
+				public boolean contains(Object o) {
+					if (!(o instanceof Map.Entry<?,?> entry)) {
+						return false;
+					}
+					String attribute = (String) entry.getKey();
+					Object value = ServletAttributesMap.this.servletRequest.getAttribute(attribute);
+					return value != null && value.equals(entry.getValue());
+				}
+
+				@Override
+				public boolean addAll(@NotNull Collection<? extends Entry<String, Object>> c) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public boolean remove(Object o) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public boolean removeAll(Collection<?> c) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public boolean retainAll(@NotNull Collection<?> c) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public void clear() {
+					throw new UnsupportedOperationException();
+				}
+			};
 		}
 
 		@Override
@@ -502,6 +563,22 @@ class DefaultServerRequest implements ServerRequest {
 			Object value = this.servletRequest.getAttribute(name);
 			this.servletRequest.removeAttribute(name);
 			return value;
+		}
+
+		@Override
+		public int size() {
+			Enumeration<String> attributes = this.servletRequest.getAttributeNames();
+			int size = 0;
+			while (attributes.hasMoreElements()) {
+				size++;
+				attributes.nextElement();
+			}
+			return size;
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return !this.servletRequest.getAttributeNames().hasMoreElements();
 		}
 	}
 
