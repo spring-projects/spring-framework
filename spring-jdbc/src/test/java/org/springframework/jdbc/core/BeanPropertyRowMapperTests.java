@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,12 @@
  */
 
 package org.springframework.jdbc.core;
+
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Date;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -156,6 +162,16 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 	}
 
 	@Test
+	void queryWithCustomNameMatchOnBirthDate() throws Exception {
+		Mock mock = new Mock(MockType.FOUR);
+		Person person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birthdate, balance from people",
+				new CustomBeanPropertyRowMapper());
+		verifyPerson(person);
+		mock.verifyClosed();
+	}
+
+	@Test
 	void queryWithUnderscoreInColumnNameAndPersonWithMultipleAdjacentUppercaseLettersInPropertyName() throws Exception {
 		Mock mock = new Mock();
 		EmailPerson person = mock.getJdbcTemplate().queryForObject(
@@ -177,6 +193,38 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 	void underscoreName(String input, String expected) {
 		BeanPropertyRowMapper<?> mapper = new BeanPropertyRowMapper<>(Object.class);
 		assertThat(mapper.underscoreName(input)).isEqualTo(expected);
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MyColumnName {
+
+		String value();
+	}
+
+	private static class CustomPerson extends Person {
+
+		@MyColumnName("birthdate")
+		public void setBirth_date(Date date) {
+			super.setBirth_date(date);
+		}
+	}
+
+	private static class CustomBeanPropertyRowMapper extends BeanPropertyRowMapper<CustomPerson> {
+
+		public CustomBeanPropertyRowMapper() {
+			super(CustomPerson.class);
+		}
+
+		@Override
+		protected Set<String> mappedNames(PropertyDescriptor pd) {
+			Set<String> mappedNames = super.mappedNames(pd);
+			MyColumnName customName = pd.getWriteMethod().getAnnotation(MyColumnName.class);
+			if (customName != null) {
+				mappedNames.add(customName.value());
+			}
+			return mappedNames;
+		}
 	}
 
 }
