@@ -474,7 +474,8 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public void clear() {
-			this.servletRequest.getAttributeNames().asIterator().forEachRemaining(this.servletRequest::removeAttribute);
+			List<String> attributeNames = Collections.list(this.servletRequest.getAttributeNames());
+			attributeNames.forEach(this.servletRequest::removeAttribute);
 		}
 
 		@Override
