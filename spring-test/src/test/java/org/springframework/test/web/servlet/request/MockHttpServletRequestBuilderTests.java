@@ -596,7 +596,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 
-	private final class User implements Principal {
+	private static final class User implements Principal {
 
 		@Override
 		public String getName() {

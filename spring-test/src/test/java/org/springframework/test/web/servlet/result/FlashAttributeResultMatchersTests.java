@@ -34,7 +34,7 @@ public class FlashAttributeResultMatchersTests {
 	}
 
 	@Test
-	public void attributeExists_doesntExist() {
+	public void attributeExists_DoesNotExist() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new FlashAttributeResultMatchers().attributeExists("bad").match(getStubMvcResult()));
 	}
