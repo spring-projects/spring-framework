@@ -238,6 +238,7 @@ class PartEventHttpMessageReaderTests {
 		Flux<PartEvent> result = reader.read(forClass(PartEvent.class), request, emptyMap());
 
 		StepVerifier.create(result)
+				.assertNext(form(headers -> assertThat(headers).isEmpty(), "This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak."))
 				.expectError(DecodingException.class)
 				.verify();
 	}
