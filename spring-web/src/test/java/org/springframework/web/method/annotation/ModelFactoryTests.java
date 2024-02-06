@@ -244,7 +244,7 @@ class ModelFactoryTests {
 	}
 
 	@Test  // SPR-12542
-	public void updateModelWhenRedirecting() throws Exception {
+	void updateModelWhenRedirecting() throws Exception {
 		String attributeName = "sessionAttr";
 		String attribute = "value";
 		ModelAndViewContainer container = new ModelAndViewContainer();

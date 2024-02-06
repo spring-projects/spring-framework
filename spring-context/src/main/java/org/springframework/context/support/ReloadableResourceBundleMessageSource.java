@@ -294,7 +294,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	/**
 	 * Merge the given properties holders into a single holder.
 	 * @param holders the list of properties holders
-	 * @return a single merged holder
+	 * @return a single merged properties holder
 	 * @since 6.1.4
 	 * @see #newProperties()
 	 * @see #getMergedProperties
