@@ -250,16 +250,15 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * <p>Only used when caching resource bundle contents forever, i.e.
 	 * with cacheSeconds &lt; 0. Therefore, merged properties are always
 	 * cached forever.
+	 * @see #collectPropertiesToMerge
+	 * @see #mergeProperties
 	 */
 	protected PropertiesHolder getMergedProperties(Locale locale) {
 		PropertiesHolder mergedHolder = this.cachedMergedProperties.get(locale);
 		if (mergedHolder != null) {
 			return mergedHolder;
 		}
-
-		List<PropertiesHolder> holders = collectPropertiesToMerge(locale);
-
-		mergedHolder = merge(holders);
+		mergedHolder = mergeProperties(collectPropertiesToMerge(locale));
 		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
 		if (existing != null) {
 			mergedHolder = existing;
@@ -267,6 +266,15 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		return mergedHolder;
 	}
 
+	/**
+	 * Determine the properties to merge based on the specified basenames.
+	 * @param locale the locale
+	 * @return the list of properties holders
+	 * @since 6.1.4
+	 * @see #getBasenameSet()
+	 * @see #calculateAllFilenames
+	 * @see #mergeProperties
+	 */
 	protected List<PropertiesHolder> collectPropertiesToMerge(Locale locale) {
 		String[] basenames = StringUtils.toStringArray(getBasenameSet());
 		List<PropertiesHolder> holders = new ArrayList<>(basenames.length);
@@ -283,7 +291,16 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		return holders;
 	}
 
-	protected PropertiesHolder merge(List<PropertiesHolder> holders) {
+	/**
+	 * Merge the given properties holders into a single holder.
+	 * @param holders the list of properties holders
+	 * @return a single merged holder
+	 * @since 6.1.4
+	 * @see #newProperties()
+	 * @see #getMergedProperties
+	 * @see #collectPropertiesToMerge
+	 */
+	protected PropertiesHolder mergeProperties(List<PropertiesHolder> holders) {
 		Properties mergedProps = newProperties();
 		long latestTimestamp = -1;
 		for (PropertiesHolder holder : holders) {
