@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
@@ -325,7 +326,7 @@ public abstract class RequestPredicates {
 				return left;
 			}
 			else {
-				Map<K, V> result = new LinkedHashMap<>(left.size() + right.size());
+				Map<K, V> result = CollectionUtils.newLinkedHashMap(left.size() + right.size());
 				result.putAll(left);
 				result.putAll(right);
 				return result;
