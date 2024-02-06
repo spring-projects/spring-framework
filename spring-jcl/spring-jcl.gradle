@@ -3,4 +3,6 @@ description = "Spring Commons Logging Bridge"
 dependencies {
 	optional("org.apache.logging.log4j:log4j-api")
 	optional("org.slf4j:slf4j-api")
+	optional("biz.aQute.bnd:biz.aQute.bnd.annotation:6.3.1")
+	optional("org.osgi:osgi.annotation:8.1.0")
 }
