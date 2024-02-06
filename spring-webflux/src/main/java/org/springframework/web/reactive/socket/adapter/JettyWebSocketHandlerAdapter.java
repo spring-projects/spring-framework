@@ -19,24 +19,20 @@ package org.springframework.web.reactive.socket.adapter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
+import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
-import org.eclipse.jetty.websocket.api.Frame;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.core.OpCode;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.CloseableDataBuffer;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -51,15 +47,12 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@WebSocket
-public class JettyWebSocketHandlerAdapter {
-	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
-
+public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	private final WebSocketHandler delegateHandler;
 
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
-	@Nullable
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private JettyWebSocketSession delegateSession;
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,
@@ -71,65 +64,63 @@ public class JettyWebSocketHandlerAdapter {
 		this.sessionFactory = sessionFactory;
 	}
 
-	@OnWebSocketOpen
+	@Override
 	public void onWebSocketOpen(Session session) {
-		this.delegateSession = this.sessionFactory.apply(session);
+		this.delegateSession = Objects.requireNonNull(this.sessionFactory.apply(session));
 		this.delegateHandler.handle(this.delegateSession)
-				.checkpoint(session.getUpgradeRequest().getRequestURI() + " [JettyWebSocketHandlerAdapter]")
-				.subscribe(this.delegateSession);
+				.subscribe(new Subscriber<>() {
+					@Override
+					public void onSubscribe(Subscription s) {
+						s.request(Long.MAX_VALUE);
+					}
+
+					@Override
+					public void onNext(Void unused) {
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						delegateSession.onHandlerError(t);
+					}
+
+					@Override
+					public void onComplete() {
+						delegateSession.onHandleComplete();
+					}
+				});
 	}
 
-	@OnWebSocketMessage
+	@Override
 	public void onWebSocketText(String message) {
-		if (this.delegateSession != null) {
-			byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
-			DataBuffer buffer = this.delegateSession.bufferFactory().wrap(bytes);
-			WebSocketMessage webSocketMessage = new WebSocketMessage(Type.TEXT, buffer);
-			this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
-		}
+		byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(bytes);
+		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.TEXT, buffer);
+		this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 	}
 
-	@OnWebSocketMessage
+	@Override
 	public void onWebSocketBinary(ByteBuffer byteBuffer, Callback callback) {
-		if (this.delegateSession != null) {
-			DataBuffer buffer = this.delegateSession.bufferFactory().wrap(byteBuffer);
-			buffer = new JettyDataBuffer(buffer, callback);
-			WebSocketMessage webSocketMessage = new WebSocketMessage(Type.BINARY, buffer);
-			this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
-		}
-		else {
-			callback.succeed();
-		}
+		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(byteBuffer);
+		buffer = new JettyDataBuffer(buffer, callback);
+		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.BINARY, buffer);
+		this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 	}
 
-	@OnWebSocketFrame
-	public void onWebSocketFrame(Frame frame, Callback callback) {
-		if (this.delegateSession != null) {
-			if (OpCode.PONG == frame.getOpCode()) {
-				ByteBuffer byteBuffer = (frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD);
-				DataBuffer buffer = this.delegateSession.bufferFactory().wrap(byteBuffer);
-				buffer = new JettyDataBuffer(buffer, callback);
-				WebSocketMessage webSocketMessage = new WebSocketMessage(Type.PONG, buffer);
-				this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
-				return;
-			}
-		}
-
-		callback.succeed();
+	@Override
+	public void onWebSocketPong(ByteBuffer payload) {
+		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(BufferUtil.copy(payload));
+		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.PONG, buffer);
+		this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 	}
 
-	@OnWebSocketClose
+	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
-		if (this.delegateSession != null) {
-			this.delegateSession.handleClose(CloseStatus.create(statusCode, reason));
-		}
+		this.delegateSession.handleClose(CloseStatus.create(statusCode, reason));
 	}
 
-	@OnWebSocketError
+	@Override
 	public void onWebSocketError(Throwable cause) {
-		if (this.delegateSession != null) {
-			this.delegateSession.handleError(cause);
-		}
+		this.delegateSession.handleError(cause);
 	}
 
 

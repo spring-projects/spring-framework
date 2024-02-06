@@ -53,7 +53,6 @@ import static org.springframework.http.server.reactive.AbstractServerHttpRequest
  * @author Greg Wilkins
  * @since 6.2
  */
-// TODO: extend AbstractServerHttpRequest for websocket.
 class JettyCoreServerHttpRequest implements ServerHttpRequest {
 	private static final MultiValueMap<String, String> EMPTY_QUERY = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>());
 
