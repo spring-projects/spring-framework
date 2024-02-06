@@ -45,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
@@ -92,6 +93,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
+				new JettyWebSocketClient(),
 				new ReactorNettyWebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
 		};
