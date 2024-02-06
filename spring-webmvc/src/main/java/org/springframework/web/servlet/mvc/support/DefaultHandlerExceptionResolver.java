@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -524,8 +524,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				response.sendError(status);
 			}
 		}
-		else {
-			logger.warn("Ignoring exception, response committed. : " + errorResponse);
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Ignoring exception, response committed already: " + errorResponse);
 		}
 
 		return new ModelAndView();
@@ -584,14 +584,19 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		if (!response.isCommitted()) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Ignoring exception, response committed already: " + ex);
+		}
 		return new ModelAndView();
 	}
 
 	/**
 	 * Handle the case where a
 	 * {@linkplain org.springframework.http.converter.HttpMessageConverter message converter}
-	 * cannot write to an HTTP request.
+	 * cannot write to an HTTP response.
 	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could
 	 * be rethrown as-is.
@@ -605,7 +610,12 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
-		sendServerError(ex, request, response);
+		if (!response.isCommitted()) {
+			sendServerError(ex, request, response);
+		}
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Ignoring exception, response committed already: " + ex);
+		}
 		return new ModelAndView();
 	}
 
