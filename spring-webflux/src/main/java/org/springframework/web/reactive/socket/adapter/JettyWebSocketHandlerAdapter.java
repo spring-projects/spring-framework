@@ -95,7 +95,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(bytes);
 		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.TEXT, buffer);
-		this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
+		this.delegateSession.handleMessage(webSocketMessage);
 	}
 
 	@Override
@@ -103,14 +103,14 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(byteBuffer);
 		buffer = new JettyDataBuffer(buffer, callback);
 		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.BINARY, buffer);
-		this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
+		this.delegateSession.handleMessage(webSocketMessage);
 	}
 
 	@Override
 	public void onWebSocketPong(ByteBuffer payload) {
 		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(BufferUtil.copy(payload));
 		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.PONG, buffer);
-		this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
+		this.delegateSession.handleMessage(webSocketMessage);
 	}
 
 	@Override
