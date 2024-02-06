@@ -18,8 +18,10 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.reactivestreams.Publisher;
@@ -48,10 +50,12 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private final Flux<WebSocketMessage> flux;
-	private final AtomicLong requested = new AtomicLong(0);
-
 	private final Sinks.One<CloseStatus> closeStatusSink = Sinks.one();
-	@Nullable
+	private final Lock lock = new ReentrantLock();
+	private long requested = 0;
+	private boolean awaitingDemand = false;
+
+	@SuppressWarnings("NotNullFieldNotInitialized")
 	private FluxSink<WebSocketMessage> sink;
 
 	@Nullable
@@ -70,15 +74,49 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 			this.sink = emitter;
 			emitter.onRequest(n ->
 			{
-				requested.addAndGet(n);
-				tryDemand();
+				boolean demand = false;
+				lock.lock();
+				try
+				{
+					requested += n;
+					if (!awaitingDemand && requested > 0) {
+						requested--;
+						awaitingDemand = true;
+						demand = true;
+					}
+				}
+				finally {
+					lock.unlock();
+				}
+
+				if (demand)
+					getDelegate().demand();
 			});
 		});
 	}
 
-	void handleMessage(WebSocketMessage.Type type, WebSocketMessage message) {
+	void handleMessage(WebSocketMessage message) {
 		this.sink.next(message);
-		tryDemand();
+
+		boolean demand = false;
+		lock.lock();
+		try
+		{
+			if (!awaitingDemand)
+				throw new IllegalStateException();
+			awaitingDemand = false;
+			if (requested > 0) {
+				requested--;
+				awaitingDemand = true;
+				demand = true;
+			}
+		}
+		finally {
+			lock.unlock();
+		}
+
+		if (demand)
+			getDelegate().demand();
 	}
 
 	void handleError(Throwable ex) {
@@ -127,23 +165,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return flux;
 	}
 
-	private void tryDemand()
-	{
-		while (true)
-		{
-			long r = requested.get();
-			if (r == 0)
-				return;
-
-			// TODO: protect against readpending from multiple demand.
-			if (requested.compareAndSet(r, r - 1))
-			{
-				getDelegate().demand();
-				return;
-			}
-		}
-	}
-
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		return Flux.from(messages)
@@ -162,17 +183,31 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 			session.sendText(text, completable);
 		}
 		else {
-			// TODO: Ping and Pong message should combine payload into single buffer?
-			try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
-				while (iterator.hasNext()) {
-					ByteBuffer byteBuffer = iterator.next();
-					switch (message.getType()) {
-						case BINARY -> session.sendBinary(byteBuffer, completable);
-						case PING -> session.sendPing(byteBuffer, completable);
-						case PONG -> session.sendPong(byteBuffer, completable);
-						default -> throw new IllegalArgumentException("Unexpected message type: " + message.getType());
+			switch (message.getType()) {
+				case BINARY ->
+				{
+					try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+						while (iterator.hasNext()) {
+							ByteBuffer byteBuffer = iterator.next();
+							session.sendBinary(byteBuffer, completable);
+						}
 					}
 				}
+				case PING ->
+				{
+					// Maximum size of Control frame payload is 125, per RFC 6455.
+					ByteBuffer buffer = BufferUtil.allocate(125);
+					dataBuffer.toByteBuffer(buffer);
+					session.sendPing(buffer, completable);
+				}
+				case PONG ->
+				{
+					// Maximum size of Control frame payload is 125, per RFC 6455.
+					ByteBuffer buffer = BufferUtil.allocate(125);
+					dataBuffer.toByteBuffer(buffer);
+					session.sendPong(buffer, completable);
+				}
+				default -> throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 			}
 		}
 		return Mono.fromFuture(completable);
