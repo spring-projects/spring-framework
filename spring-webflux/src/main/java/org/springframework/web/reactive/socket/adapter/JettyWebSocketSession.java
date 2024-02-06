@@ -16,12 +16,15 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -36,13 +39,23 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Spring {@link WebSocketSession} implementation that adapts to a Jetty
- * WebSocket {@link org.eclipse.jetty.websocket.api.Session}.
+ * WebSocket {@link Session}.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
+public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
+
+	private final Flux<WebSocketMessage> flux;
+	private final AtomicLong requested = new AtomicLong(0);
+
+	private final Sinks.One<CloseStatus> closeStatusSink = Sinks.one();
+	@Nullable
+	private FluxSink<WebSocketMessage> sink;
+
+	@Nullable
+	private final Sinks.Empty<Void> handlerCompletionSink;
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
 		this(session, info, factory, null);
@@ -51,52 +64,45 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
 			@Nullable Sinks.Empty<Void> completionSink) {
 
-		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionSink);
-		// TODO: suspend causes failures if invoked at this stage
-		// suspendReceiving();
+		super(session, ObjectUtils.getIdentityHexString(session), info, factory);
+		this.handlerCompletionSink = completionSink;
+		this.flux = Flux.create(emitter -> {
+			this.sink = emitter;
+			emitter.onRequest(n ->
+			{
+				requested.addAndGet(n);
+				tryDemand();
+			});
+		});
 	}
 
-
-	@Override
-	protected boolean canSuspendReceiving() {
-		// Jetty 12 TODO: research suspend functionality in Jetty 12
-		return false;
+	void handleMessage(WebSocketMessage.Type type, WebSocketMessage message) {
+		this.sink.next(message);
+		tryDemand();
 	}
 
-	@Override
-	protected void suspendReceiving() {
+	void handleError(Throwable ex) {
 	}
 
-	@Override
-	protected void resumeReceiving() {
+	void handleClose(CloseStatus closeStatus) {
+		this.closeStatusSink.tryEmitValue(closeStatus);
+		this.sink.complete();
 	}
 
-	@Override
-	protected boolean sendMessage(WebSocketMessage message) throws IOException {
-		DataBuffer dataBuffer = message.getPayload();
-		Session session = getDelegate();
-		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			getSendProcessor().setReadyToSend(false);
-			String text = dataBuffer.toString(StandardCharsets.UTF_8);
-			session.sendText(text, new SendProcessorCallback());
+	void onHandlerError(Throwable ex) {
+		if (this.handlerCompletionSink != null) {
+			// Ignore result: can't overflow, ok if not first or no one listens
+			this.handlerCompletionSink.tryEmitError(ex);
 		}
-		else {
-			if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-				getSendProcessor().setReadyToSend(false);
-			}
-			try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
-				while (iterator.hasNext()) {
-					ByteBuffer byteBuffer = iterator.next();
-					switch (message.getType()) {
-						case BINARY -> session.sendBinary(byteBuffer, new SendProcessorCallback());
-						case PING -> session.sendPing(byteBuffer, new SendProcessorCallback());
-						case PONG -> session.sendPong(byteBuffer, new SendProcessorCallback());
-						default -> throw new IllegalArgumentException("Unexpected message type: " + message.getType());
-					}
-				}
-			}
+		close(CloseStatus.SERVER_ERROR);
+	}
+
+	void onHandleComplete() {
+		if (this.handlerCompletionSink != null) {
+			// Ignore result: can't overflow, ok if not first or no one listens
+			this.handlerCompletionSink.tryEmitEmpty();
 		}
-		return true;
+		close();
 	}
 
 	@Override
@@ -108,25 +114,67 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	public Mono<Void> close(CloseStatus status) {
 		Callback.Completable callback = new Callback.Completable();
 		getDelegate().close(status.getCode(), status.getReason(), callback);
-
 		return Mono.fromFuture(callback);
 	}
 
-
-	private final class SendProcessorCallback implements Callback {
-
-		@Override
-		public void fail(Throwable x) {
-			getSendProcessor().cancel();
-			getSendProcessor().onError(x);
-		}
-
-		@Override
-		public void succeed() {
-			getSendProcessor().setReadyToSend(true);
-			getSendProcessor().onWritePossible();
-		}
-
+	@Override
+	public Mono<CloseStatus> closeStatus() {
+		return closeStatusSink.asMono();
 	}
 
+	@Override
+	public Flux<WebSocketMessage> receive() {
+		return flux;
+	}
+
+	private void tryDemand()
+	{
+		while (true)
+		{
+			long r = requested.get();
+			if (r == 0)
+				return;
+
+			// TODO: protect against readpending from multiple demand.
+			if (requested.compareAndSet(r, r - 1))
+			{
+				getDelegate().demand();
+				return;
+			}
+		}
+	}
+
+	@Override
+	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
+		return Flux.from(messages)
+				.flatMap(this::sendMessage, 1)
+				.then();
+	}
+
+	protected Mono<Void> sendMessage(WebSocketMessage message) {
+
+		Callback.Completable completable = new Callback.Completable();
+
+		DataBuffer dataBuffer = message.getPayload();
+		Session session = getDelegate();
+		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
+			String text = dataBuffer.toString(StandardCharsets.UTF_8);
+			session.sendText(text, completable);
+		}
+		else {
+			// TODO: Ping and Pong message should combine payload into single buffer?
+			try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+				while (iterator.hasNext()) {
+					ByteBuffer byteBuffer = iterator.next();
+					switch (message.getType()) {
+						case BINARY -> session.sendBinary(byteBuffer, completable);
+						case PING -> session.sendPing(byteBuffer, completable);
+						case PONG -> session.sendPong(byteBuffer, completable);
+						default -> throw new IllegalArgumentException("Unexpected message type: " + message.getType());
+					}
+				}
+			}
+		}
+		return Mono.fromFuture(completable);
+	}
 }
