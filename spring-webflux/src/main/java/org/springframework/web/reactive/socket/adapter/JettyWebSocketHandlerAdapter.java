@@ -26,7 +26,6 @@ import java.util.function.IntPredicate;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -40,7 +39,7 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
 
 /**
- * Jetty {@link WebSocket @WebSocket} handler that delegates events to a
+ * Jetty {@link org.eclipse.jetty.websocket.api.Session.Listener} handler that delegates events to a
  * reactive {@link WebSocketHandler} and its session.
  *
  * @author Violeta Georgieva

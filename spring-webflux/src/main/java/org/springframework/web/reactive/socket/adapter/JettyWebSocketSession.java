@@ -72,25 +72,24 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		this.handlerCompletionSink = completionSink;
 		this.flux = Flux.create(emitter -> {
 			this.sink = emitter;
-			emitter.onRequest(n ->
-			{
+			emitter.onRequest(n -> {
 				boolean demand = false;
-				lock.lock();
-				try
-				{
-					requested += n;
-					if (!awaitingDemand && requested > 0) {
-						requested--;
-						awaitingDemand = true;
+				this.lock.lock();
+				try {
+					this.requested += n;
+					if (!this.awaitingDemand && this.requested > 0) {
+						this.requested--;
+						this.awaitingDemand = true;
 						demand = true;
 					}
 				}
 				finally {
-					lock.unlock();
+					this.lock.unlock();
 				}
 
-				if (demand)
+				if (demand) {
 					getDelegate().demand();
+				}
 			});
 		});
 	}
@@ -99,24 +98,25 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		this.sink.next(message);
 
 		boolean demand = false;
-		lock.lock();
-		try
-		{
-			if (!awaitingDemand)
+		this.lock.lock();
+		try {
+			if (!this.awaitingDemand) {
 				throw new IllegalStateException();
-			awaitingDemand = false;
-			if (requested > 0) {
-				requested--;
-				awaitingDemand = true;
+			}
+			this.awaitingDemand = false;
+			if (this.requested > 0) {
+				this.requested--;
+				this.awaitingDemand = true;
 				demand = true;
 			}
 		}
 		finally {
-			lock.unlock();
+			this.lock.unlock();
 		}
 
-		if (demand)
+		if (demand) {
 			getDelegate().demand();
+		}
 	}
 
 	void handleError(Throwable ex) {
@@ -157,12 +157,12 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public Mono<CloseStatus> closeStatus() {
-		return closeStatusSink.asMono();
+		return this.closeStatusSink.asMono();
 	}
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		return flux;
+		return this.flux;
 	}
 
 	@Override
@@ -184,8 +184,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		}
 		else {
 			switch (message.getType()) {
-				case BINARY ->
-				{
+				case BINARY -> {
 					try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
 						while (iterator.hasNext()) {
 							ByteBuffer byteBuffer = iterator.next();
@@ -193,15 +192,13 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 						}
 					}
 				}
-				case PING ->
-				{
+				case PING -> {
 					// Maximum size of Control frame payload is 125, per RFC 6455.
 					ByteBuffer buffer = BufferUtil.allocate(125);
 					dataBuffer.toByteBuffer(buffer);
 					session.sendPing(buffer, completable);
 				}
-				case PONG ->
-				{
+				case PONG -> {
 					// Maximum size of Control frame payload is 125, per RFC 6455.
 					ByteBuffer buffer = BufferUtil.allocate(125);
 					dataBuffer.toByteBuffer(buffer);

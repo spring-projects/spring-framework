@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.reactive.socket.client;
 
 import java.io.IOException;
@@ -25,14 +41,12 @@ public class JettyWebSocketClient implements WebSocketClient {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
-	public JettyWebSocketClient()
-	{
+	public JettyWebSocketClient() {
 		this.client = new org.eclipse.jetty.websocket.client.WebSocketClient();
 		LifeCycle.start(this.client);
 	}
 
-	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient client)
-	{
+	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient client) {
 		this.client = client;
 	}
 
@@ -46,8 +60,9 @@ public class JettyWebSocketClient implements WebSocketClient {
 
 		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 		upgradeRequest.setSubProtocols(handler.getSubProtocols());
-		if (headers != null)
+		if (headers != null) {
 			headers.keySet().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
+		}
 
 		AtomicReference<HandshakeInfo> handshakeInfo = new AtomicReference<>();
 		JettyUpgradeListener jettyUpgradeListener = new JettyUpgradeListener() {
@@ -66,13 +81,14 @@ public class JettyWebSocketClient implements WebSocketClient {
 		try {
 			this.client.connect(handlerAdapter, url, upgradeRequest, jettyUpgradeListener)
 					.whenComplete((session, throwable) -> {
-						if (throwable != null)
+						if (throwable != null) {
 							completion.tryEmitError(throwable);
+						}
 					});
 			return completion.asMono();
 		}
-		catch (IOException e) {
-			return Mono.error(e);
+		catch (IOException ex) {
+			return Mono.error(ex);
 		}
 	}
 }

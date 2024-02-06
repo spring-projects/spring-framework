@@ -33,7 +33,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 
 /**
- * Adapts {@link WebSocketHandler} to the Jetty WebSocket API.
+ * Adapts {@link WebSocketHandler} to the Jetty WebSocket API {@link org.eclipse.jetty.websocket.api.Session.Listener}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -132,12 +132,12 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	private void tryCloseWithError(Throwable t) {
 
-		if (nativeSession.isOpen()) {
+		if (this.nativeSession.isOpen()) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
 		}
 		else {
 			// Session might be O-SHUT waiting for response close frame, so abort to close the connection.
-			nativeSession.disconnect();
+			this.nativeSession.disconnect();
 		}
 	}
 
