@@ -51,6 +51,7 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
@@ -324,7 +325,7 @@ public abstract class RequestPredicates {
 				return left;
 			}
 			else {
-				Map<K, V> result = new LinkedHashMap<>(left.size() + right.size());
+				Map<K, V> result = CollectionUtils.newLinkedHashMap(left.size() + right.size());
 				result.putAll(left);
 				result.putAll(right);
 				return result;
