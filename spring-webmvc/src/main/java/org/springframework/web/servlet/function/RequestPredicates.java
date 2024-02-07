@@ -1091,6 +1091,12 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		@Deprecated
+		public PathContainer pathContainer() {
+			return this.delegate.pathContainer();
+		}
+
+		@Override
 		public RequestPath requestPath() {
 			return this.delegate.requestPath();
 		}
@@ -1136,8 +1142,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Optional<Object> attribute(String name) {
+			return this.delegate.attribute(name);
+		}
+
+		@Override
 		public Map<String, Object> attributes() {
 			return this.delegate.attributes();
+		}
+
+		@Override
+		public Optional<String> param(String name) {
+			return this.delegate.param(name);
 		}
 
 		@Override
@@ -1148,6 +1164,11 @@ public abstract class RequestPredicates {
 		@Override
 		public MultiValueMap<String, Part> multipartData() throws IOException, ServletException {
 			return this.delegate.multipartData();
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			return this.delegate.pathVariable(name);
 		}
 
 		@Override
@@ -1203,10 +1224,25 @@ public abstract class RequestPredicates {
 			this.attributes = mergeMaps(delegate.attributes(), newAttributes);
 		}
 
+		@Override
+		public Optional<Object> attribute(String name) {
+			return Optional.ofNullable(this.attributes.get(name));
+		}
 
 		@Override
 		public Map<String, Object> attributes() {
 			return this.attributes;
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			Map<String, String> pathVariables = pathVariables();
+			if (pathVariables.containsKey(name)) {
+				return pathVariables().get(name);
+			}
+			else {
+				throw new IllegalArgumentException("No path variable with name \"" + name + "\" available");
+			}
 		}
 
 		@Override
@@ -1256,6 +1292,17 @@ public abstract class RequestPredicates {
 
 		@Override
 		public RequestPath requestPath() {
+			return this.requestPath;
+		}
+
+		@Override
+		public String path() {
+			return this.requestPath.pathWithinApplication().value();
+		}
+
+		@Override
+		@Deprecated
+		public PathContainer pathContainer() {
 			return this.requestPath;
 		}
 	}

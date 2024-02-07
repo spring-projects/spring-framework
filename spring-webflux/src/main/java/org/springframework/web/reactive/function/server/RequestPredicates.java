@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -1087,6 +1088,22 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public String path() {
+			return this.delegate.path();
+		}
+
+		@Override
+		@Deprecated
+		public PathContainer pathContainer() {
+			return this.delegate.pathContainer();
+		}
+
+		@Override
+		public RequestPath requestPath() {
+			return this.delegate.requestPath();
+		}
+
+		@Override
 		public Headers headers() {
 			return this.delegate.headers();
 		}
@@ -1142,8 +1159,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public <T> Mono<T> bind(Class<T> bindType) {
+			return this.delegate.bind(bindType);
+		}
+
+		@Override
 		public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
 			return this.delegate.bind(bindType, dataBinderCustomizer);
+		}
+
+		@Override
+		public Optional<Object> attribute(String name) {
+			return this.delegate.attribute(name);
 		}
 
 		@Override
@@ -1152,8 +1179,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Optional<String> queryParam(String name) {
+			return this.delegate.queryParam(name);
+		}
+
+		@Override
 		public MultiValueMap<String, String> queryParams() {
 			return this.delegate.queryParams();
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			return this.delegate.pathVariable(name);
 		}
 
 		@Override
@@ -1187,8 +1224,23 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Mono<ServerResponse> checkNotModified(Instant lastModified) {
+			return this.delegate.checkNotModified(lastModified);
+		}
+
+		@Override
+		public Mono<ServerResponse> checkNotModified(String etag) {
+			return this.delegate.checkNotModified(etag);
+		}
+
+		@Override
+		public Mono<ServerResponse> checkNotModified(Instant lastModified, String etag) {
+			return this.delegate.checkNotModified(lastModified, etag);
+		}
+
+		@Override
 		public String toString() {
-			return this.delegate.toString();
+			return String.format("HTTP %s %s", method(), path());
 		}
 	}
 
@@ -1204,10 +1256,25 @@ public abstract class RequestPredicates {
 			this.attributes = mergeMaps(delegate.attributes(), newAttributes);
 		}
 
+		@Override
+		public Optional<Object> attribute(String name) {
+			return Optional.ofNullable(this.attributes.get(name));
+		}
 
 		@Override
 		public Map<String, Object> attributes() {
 			return this.attributes;
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			Map<String, String> pathVariables = pathVariables();
+			if (pathVariables.containsKey(name)) {
+				return pathVariables().get(name);
+			}
+			else {
+				throw new IllegalArgumentException("No path variable with name \"" + name + "\" available");
+			}
 		}
 
 		@Override
@@ -1257,6 +1324,17 @@ public abstract class RequestPredicates {
 
 		@Override
 		public RequestPath requestPath() {
+			return this.requestPath;
+		}
+
+		@Override
+		public String path() {
+			return this.requestPath.pathWithinApplication().value();
+		}
+
+		@Override
+		@Deprecated
+		public PathContainer pathContainer() {
 			return this.requestPath;
 		}
 	}
