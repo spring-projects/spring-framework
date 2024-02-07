@@ -429,7 +429,7 @@ Kotlin::
 ----
 ======
 
-A `ConstraintViolation` on `Person.name()` is adapted to a `FieldErrro` with the following:
+A `ConstraintViolation` on `Person.name()` is adapted to a `FieldError` with the following:
 
 - Error codes `"Size.student.name"`, `"Size.name"`, `"Size.java.lang.String"`, and `"Size"`
 - Message arguments `"name"`, `10`, and `1` (the field name and the constraint attributes)
