@@ -38,7 +38,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.INTEGER;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.array;
 import static org.springframework.expression.spel.SpelMessage.INVALID_TYPE_FOR_SELECTION;
@@ -95,21 +94,21 @@ class SelectionAndProjectionTests {
 		void selectionWithList() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(LIST).containsExactly(0, 1, 2, 3, 4);
+			assertThat(expression.getValue(context, List.class)).containsExactly(0, 1, 2, 3, 4);
 		}
 
 		@Test
 		void selectFirstItemInList() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isZero();
+			assertThat(expression.getValue(context, Integer.class)).isZero();
 		}
 
 		@Test
 		void selectLastItemInList() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isEqualTo(4);
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(4);
 		}
 
 		@Test
@@ -124,21 +123,21 @@ class SelectionAndProjectionTests {
 		void selectionWithSet() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(LIST).containsExactly(0, 1, 2, 3, 4);
+			assertThat(expression.getValue(context, List.class)).containsExactly(0, 1, 2, 3, 4);
 		}
 
 		@Test
 		void selectFirstItemInSet() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isZero();
+			assertThat(expression.getValue(context, Integer.class)).isZero();
 		}
 
 		@Test
 		void selectLastItemInSet() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isEqualTo(4);
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(4);
 		}
 
 		@ParameterizedTest
@@ -161,14 +160,14 @@ class SelectionAndProjectionTests {
 		void selectFirstItemInArray() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isZero();
+			assertThat(expression.getValue(context, Integer.class)).isZero();
 		}
 
 		@Test
 		void selectLastItemInArray() {
 			Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isEqualTo(4);
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(4);
 		}
 
 		@Test
@@ -183,14 +182,14 @@ class SelectionAndProjectionTests {
 		void selectFirstItemInPrimitiveArray() {
 			Expression expression = new SpelExpressionParser().parseRaw("ints.^[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isZero();
+			assertThat(expression.getValue(context, Integer.class)).isZero();
 		}
 
 		@Test
 		void selectLastItemInPrimitiveArray() {
 			Expression expression = new SpelExpressionParser().parseRaw("ints.$[#this < 5]");
 			EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(INTEGER).isEqualTo(4);
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(4);
 		}
 
 		@Test
@@ -254,7 +253,7 @@ class SelectionAndProjectionTests {
 			Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
 			EvaluationContext context = new StandardEvaluationContext();
 			context.setVariable("testList", IntegerTestBean.createList());
-			assertThat(expression.getValue(context)).asInstanceOf(LIST).containsExactly(5, 6, 7);
+			assertThat(expression.getValue(context, List.class)).containsExactly(5, 6, 7);
 		}
 
 		@Test
@@ -269,7 +268,7 @@ class SelectionAndProjectionTests {
 			Expression expression = new SpelExpressionParser().parseRaw("#testSet.![wrapper.value]");
 			EvaluationContext context = new StandardEvaluationContext();
 			context.setVariable("testSet", IntegerTestBean.createSet());
-			assertThat(expression.getValue(context)).asInstanceOf(LIST).containsExactly(5, 6, 7);
+			assertThat(expression.getValue(context, List.class)).containsExactly(5, 6, 7);
 		}
 
 		@ParameterizedTest
