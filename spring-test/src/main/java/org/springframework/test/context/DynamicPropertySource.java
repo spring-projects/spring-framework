@@ -23,29 +23,43 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@code @DynamicPropertySource} is an annotation that can be applied to methods
- * in integration test classes that need to add properties with dynamic values to
- * the {@code Environment}'s set of {@code PropertySources}.
+ * {@code @DynamicPropertySource} is an annotation that can be applied to static
+ * methods in integration test classes or to {@code @Bean} methods in test
+ * {@code @Configuration} classes in order to add properties with dynamic values
+ * to the {@code Environment}'s set of {@code PropertySources}.
  *
  * <p>This annotation and its supporting infrastructure were originally designed
  * to allow properties from
  * <a href="https://www.testcontainers.org/">Testcontainers</a> based tests to be
- * exposed easily to Spring integration tests. However, this feature may also be
- * used with any form of external resource whose lifecycle is maintained outside
+ * exposed easily to Spring integration tests. However, this feature may be used
+ * with any form of external resource whose lifecycle is managed outside the
+ * test's {@code ApplicationContext} or with beans whose lifecycle is managed by
  * the test's {@code ApplicationContext}.
  *
- * <p>Methods annotated with {@code @DynamicPropertySource} must be {@code static}
- * and must have a single {@link DynamicPropertyRegistry} argument which is used
- * to add <em>name-value</em> pairs to the {@code Environment}'s set of
- * {@code PropertySources}. Values are dynamic and provided via a
- * {@link java.util.function.Supplier} which is only invoked when the property
- * is resolved. Typically, method references are used to supply values, as in the
- * example below.
+ * <p>{@code @DynamicPropertySource}-annotated methods use a
+ * {@code DynamicPropertyRegistry} to add <em>name-value</em> pairs to the
+ * {@code Environment}'s set of {@code PropertySources}. Values are dynamic and
+ * provided via a {@link java.util.function.Supplier} which is only invoked when
+ * the property is resolved. Typically, method references are used to supply values,
+ * as in the example below.
  *
- * <p>As of Spring Framework 5.3.2, dynamic properties from methods annotated with
- * {@code @DynamicPropertySource} will be <em>inherited</em> from enclosing test
- * classes, analogous to inheritance from superclasses and interfaces. See
- * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ * <p>Methods in integration test classes that are annotated with
+ * {@code @DynamicPropertySource} must be {@code static} and must accept a single
+ * {@link DynamicPropertyRegistry} argument.
+ *
+ * <p>{@code @Bean} methods annotated with {@code @DynamicPropertySource} may
+ * either accept an argument of type {@code DynamicPropertyRegistry} or access a
+ * {@code DynamicPropertyRegistry} instance autowired into their enclosing
+ * {@code @Configuration} class. Note, however, that {@code @Bean} methods which
+ * interact with a {@code DynamicPropertyRegistry} are not required to be annotated
+ * with {@code @DynamicPropertySource} unless they need to enforce eager
+ * initialization of the bean within the context.
+ * See {@link DynamicPropertyRegistry} for details.
+ *
+ * <p>Dynamic properties from methods annotated with {@code @DynamicPropertySource}
+ * will be <em>inherited</em> from enclosing test classes, analogous to inheritance
+ * from superclasses and interfaces.
+ * See {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * <p><strong>NOTE</strong>: if you use {@code @DynamicPropertySource} in a base
  * class and discover that tests in subclasses fail because the dynamic properties
@@ -64,7 +78,13 @@ import java.lang.annotation.Target;
  * override properties loaded via {@code @TestPropertySource}, system property
  * sources, and application property sources.
  *
- * <h3>Example</h3>
+ * <h3>Examples</h3>
+ *
+ * <p>The following example demonstrates how to use {@code @DynamicPropertySource}
+ * in an integration test class. Beans in the {@code ApplicationContext} can
+ * access the {@code redis.host} and {@code redis.port} properties which are
+ * dynamically retrieved from the Redis container.
+ *
  * <pre class="code">
  * &#064;SpringJUnitConfig(...)
  * &#064;Testcontainers
@@ -81,7 +101,24 @@ import java.lang.annotation.Target;
  *         registry.add("redis.host", redis::getHost);
  *         registry.add("redis.port", redis::getFirstMappedPort);
  *     }
+ * }</pre>
  *
+ * <p>The following example demonstrates how to use {@code @DynamicPropertySource}
+ * with a {@code @Bean} method. Beans in the {@code ApplicationContext} can
+ * access the {@code api.url} property which is dynamically retrieved from the
+ * {@code ApiServer} bean.
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * class TestConfig {
+ *
+ *     &#064;Bean
+ *     &#064;DynamicPropertySource
+ *     ApiServer apiServer(DynamicPropertyRegistry registry) {
+ *         ApiServer apiServer = new ApiServer();
+ *         registry.add("api.url", apiServer::getUrl);
+ *         return apiServer;
+ *     }
  * }</pre>
  *
  * @author Phillip Webb

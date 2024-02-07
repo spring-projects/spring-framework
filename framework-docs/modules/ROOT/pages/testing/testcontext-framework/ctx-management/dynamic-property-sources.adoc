@@ -1,42 +1,57 @@
 [[testcontext-ctx-management-dynamic-property-sources]]
 = Context Configuration with Dynamic Property Sources
 
-As of Spring Framework 5.2.5, the TestContext framework provides support for _dynamic_
-properties via the `@DynamicPropertySource` annotation. This annotation can be used in
-integration tests that need to add properties with dynamic values to the set of
-`PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
-integration test.
+The Spring TestContext Framework provides support for _dynamic_ properties via the
+`@DynamicPropertySource` annotation and the `DynamicPropertyRegistry`.
 
 [NOTE]
 ====
-The `@DynamicPropertySource` annotation and its supporting infrastructure were
-originally designed to allow properties from
-{testcontainers-site}[Testcontainers] based tests to be exposed easily to
-Spring integration tests. However, this feature may also be used with any form of
-external resource whose lifecycle is maintained outside the test's `ApplicationContext`.
+The `@DynamicPropertySource` annotation and its supporting infrastructure were originally
+designed to allow properties from {testcontainers-site}[Testcontainers] based tests to be
+exposed easily to Spring integration tests. However, this feature may be used with any
+form of external resource whose lifecycle is managed outside the test's
+`ApplicationContext` or with beans whose lifecycle is managed by the test's
+`ApplicationContext`.
 ====
 
-In contrast to the xref:testing/testcontext-framework/ctx-management/property-sources.adoc[`@TestPropertySource`]
-annotation that is applied at the class level, `@DynamicPropertySource` must be applied
-to a `static` method that accepts a single `DynamicPropertyRegistry` argument which is
-used to add _name-value_ pairs to the `Environment`. Values are dynamic and provided via
-a `Supplier` which is only invoked when the property is resolved. Typically, method
-references are used to supply values, as can be seen in the following example which uses
-the Testcontainers project to manage a Redis container outside of the Spring
-`ApplicationContext`. The IP address and port of the managed Redis container are made
-available to components within the test's `ApplicationContext` via the `redis.host` and
-`redis.port` properties. These properties can be accessed via Spring's `Environment`
-abstraction or injected directly into Spring-managed components – for example, via
-`@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
+In contrast to the
+xref:testing/testcontext-framework/ctx-management/property-sources.adoc[`@TestPropertySource`]
+annotation that is applied at the class level, `@DynamicPropertySource` can be applied to
+`static` methods in integration test classes or to `@Bean` methods in test
+`@Configuration` classes in order to add properties with dynamic values to the set of
+`PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
+integration test.
+
+A `DynamicPropertyRegistry` is used to add _name-value_ pairs to the `Environment`.
+Values are dynamic and provided via a `Supplier` which is only invoked when the property
+is resolved. Typically, method references are used to supply values.
+
+Methods in integration test classes that are annotated with `@DynamicPropertySource` must
+be `static` and must accept a single `DynamicPropertyRegistry` argument.
+
+`@Bean` methods annotated with `@DynamicPropertySource` may either accept an argument of
+type `DynamicPropertyRegistry` or access a `DynamicPropertyRegistry` instance autowired
+into their enclosing `@Configuration` class. Note, however, that `@Bean` methods which
+interact with a `DynamicPropertyRegistry` are not required to be annotated with
+`@DynamicPropertySource` unless they need to enforce eager initialization of the bean
+within the context. See the class-level javadoc for `DynamicPropertyRegistry` for details.
 
 [TIP]
 ====
 If you use `@DynamicPropertySource` in a base class and discover that tests in subclasses
 fail because the dynamic properties change between subclasses, you may need to annotate
-your base class with xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`] to
-ensure that each subclass gets its own `ApplicationContext` with the correct dynamic
+your base class with
+xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
+to ensure that each subclass gets its own `ApplicationContext` with the correct dynamic
 properties.
 ====
+
+The following example uses the Testcontainers project to manage a Redis container outside
+of the Spring `ApplicationContext`. The IP address and port of the managed Redis
+container are made available to components within the test's `ApplicationContext` via the
+`redis.host` and `redis.port` properties. These properties can be accessed via Spring's
+`Environment` abstraction or injected directly into Spring-managed components – for
+example, via `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
 
 [tabs]
 ======
@@ -92,7 +107,55 @@ Kotlin::
 ----
 ======
 
-[[precedence]]
+The following example demonstrates how to use `DynamicPropertyRegistry` and
+`@DynamicPropertySource` with a `@Bean` method. The `api.url` property can be accessed
+via Spring's `Environment` abstraction or injected directly into other Spring-managed
+components – for example, via `@Value("${api.url}")`. The value of the `api.url` property
+will be dynamically retrieved from the `ApiServer` bean.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	class TestConfig {
+
+		@Bean
+		@DynamicPropertySource
+		ApiServer apiServer(DynamicPropertyRegistry registry) {
+			ApiServer apiServer = new ApiServer();
+			registry.add("api.url", apiServer::getUrl);
+			return apiServer;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class TestConfig {
+
+		@Bean
+		@DynamicPropertySource
+		fun apiServer(registry: DynamicPropertyRegistry): ApiServer {
+			val apiServer = ApiServer()
+			registry.add("api.url", apiServer::getUrl)
+			return apiServer
+		}
+	}
+----
+======
+
+NOTE: The use of `@DynamicPropertySource` on the `@Bean` method is optional and results
+in the `ApiServer` bean being eagerly initialized so that other beans in the context can
+be given access to the dynamic properties sourced from the `ApiServer` bean when those
+other beans are initialized.
+
+[[testcontext-ctx-management-dynamic-property-sources-precedence]]
 == Precedence
 
 Dynamic properties have higher precedence than those loaded from `@TestPropertySource`,

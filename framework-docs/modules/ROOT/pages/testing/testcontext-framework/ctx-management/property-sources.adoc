@@ -184,7 +184,6 @@ meta-present `@TestPropertySource` annotations. In other words, `locations` and
 meta-annotation.
 ====
 
-
 [[default-properties-file-detection]]
 == Default Properties File Detection
 
@@ -195,7 +194,7 @@ if the annotated test class is `com.example.MyTest`, the corresponding default p
 file is `classpath:com/example/MyTest.properties`. If the default cannot be detected, an
 `IllegalStateException` is thrown.
 
-[[precedence]]
+[[testcontext-ctx-management-property-sources-precedence]]
 == Precedence
 
 Test properties have higher precedence than those defined in the operating system's
