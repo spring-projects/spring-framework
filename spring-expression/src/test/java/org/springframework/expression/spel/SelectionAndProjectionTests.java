@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.array;
 import static org.springframework.expression.spel.SpelMessage.INVALID_TYPE_FOR_SELECTION;
 import static org.springframework.expression.spel.SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE;
@@ -141,11 +141,56 @@ class SelectionAndProjectionTests {
 		}
 
 		@ParameterizedTest
-		@ValueSource(strings = {"#root.?[#this < 3]", "?[#this < 3]"})
+		@ValueSource(strings = {"#root.?[#this <= 3]", "?[#this <= 3]"})
+		@SuppressWarnings("unchecked")
 		void selectionWithIterable(String expressionString) {
 			Expression expression = new SpelExpressionParser().parseRaw(expressionString);
-			EvaluationContext context = new StandardEvaluationContext(new IterableTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(LIST).containsExactly(1, 2);
+			EvaluationContext context = new StandardEvaluationContext(new Counter(5));
+			assertThat(expression.getValue(context, List.class)).containsExactly(1, 2, 3);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {"#root.^[#this <= 3]", "^[#this <= 3]"})
+		void selectFirstItemInIterable(String expressionString) {
+			Expression expression = new SpelExpressionParser().parseRaw(expressionString);
+			EvaluationContext context = new StandardEvaluationContext(new Counter(5));
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(1);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {"#root.$[#this <= 3]", "$[#this <= 3]"})
+		void selectLastItemInIterable(String expressionString) {
+			Expression expression = new SpelExpressionParser().parseRaw(expressionString);
+			EvaluationContext context = new StandardEvaluationContext(new Counter(5));
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(3);
+		}
+
+		@Test
+		void indexIntoIterableSelection() {
+			EvaluationContext context = new StandardEvaluationContext();
+			context.setVariable("counter", new Counter(5));
+			ExpressionParser parser = new SpelExpressionParser();
+
+			// Select first (selection expression is hard-coded to true)
+			Expression expression = parser.parseExpression("#counter.^[true]");
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(1);
+
+			// Select last (selection expression is hard-coded to true)
+			expression = parser.parseExpression("#counter.$[true]");
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(5);
+
+			// Select index (selection expression is hard-coded to true)
+
+			// The following will not work, since we cannot index into an Iterable.
+			// expression = parser.parseExpression("#counter[1]");
+
+			// The following works, since project selection with a selection expression
+			// that always evaluates to true results in a List containing all elements
+			// of the Iterable, and we can index into that List.
+			expression = parser.parseExpression("#counter.?[true][1]");
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(2);
+			expression = parser.parseExpression("#counter.?[true][2]");
+			assertThat(expression.getValue(context, Integer.class)).isEqualTo(3);
 		}
 
 		@Test
@@ -273,10 +318,11 @@ class SelectionAndProjectionTests {
 
 		@ParameterizedTest
 		@ValueSource(strings = {"#root.![#this * 2]", "![#this * 2]"})
+		@SuppressWarnings("unchecked")
 		void projectionWithIterable(String expressionString) {
 			Expression expression = new SpelExpressionParser().parseRaw(expressionString);
-			EvaluationContext context = new StandardEvaluationContext(new IterableTestBean());
-			assertThat(expression.getValue(context)).asInstanceOf(LIST).containsExactly(2, 4, 6, 8, 10);
+			EvaluationContext context = new StandardEvaluationContext(new Counter(5));
+			assertThat(expression.getValue(context, List.class)).containsExactly(2, 4, 6, 8, 10);
 		}
 
 		@Test
@@ -323,13 +369,20 @@ class SelectionAndProjectionTests {
 	}
 
 
-	static class IterableTestBean implements Iterable<Integer> {
+	/**
+	 * Simulates a custom {@link Iterable} which is itself not a {@link Collection}.
+	 */
+	class Counter implements Iterable<Integer> {
 
-		private final Collection<Integer> integers = List.of(1, 2, 3, 4, 5);
+		private final List<Integer> list = new ArrayList<>();
+
+		Counter(int size) {
+			IntStream.rangeClosed(1, size).forEach(this.list::add);
+		}
 
 		@Override
 		public Iterator<Integer> iterator() {
-			return integers.iterator();
+			return this.list.iterator();
 		}
 	}
 
