@@ -13,16 +13,18 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-	// returns ['Smiljan', 'Idvor' ]
-	List placesOfBirth = (List)parser.parseExpression("members.![placeOfBirth.city]");
+	// evaluates to ["SmilJan", "Idvor"]
+	List placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
+			.getValue(societyContext, List.class);
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// returns ['Smiljan', 'Idvor' ]
-	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]") as List<*>
+	// evaluates to ["SmilJan", "Idvor"]
+	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
+	 		.getValue(societyContext) as List<*>
 ----
 ======
 

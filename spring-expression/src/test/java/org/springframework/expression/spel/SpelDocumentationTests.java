@@ -22,7 +22,6 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -172,28 +171,24 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		@Test
 		void propertyNavigation() {
 			ExpressionParser parser = new SpelExpressionParser();
+			StandardEvaluationContext teslaContext = TestScenarioCreator.getTestEvaluationContext();
 
 			// Inventions Array
-			StandardEvaluationContext teslaContext = TestScenarioCreator.getTestEvaluationContext();
-			// teslaContext.setRootObject(tesla);
-
 			// evaluates to "Induction motor"
 			String invention = parser.parseExpression("inventions[3]").getValue(teslaContext, String.class);
 			assertThat(invention).isEqualTo("Induction motor");
 
 			// Members List
 			StandardEvaluationContext societyContext = new StandardEvaluationContext();
-			IEEE ieee = new IEEE();
-			ieee.Members[0]= tesla;
-			societyContext.setRootObject(ieee);
+			societyContext.setRootObject(new IEEE());
 
 			// evaluates to "Nikola Tesla"
-			String name = parser.parseExpression("Members[0].Name").getValue(societyContext, String.class);
+			String name = parser.parseExpression("members[0].Name").getValue(societyContext, String.class);
 			assertThat(name).isEqualTo("Nikola Tesla");
 
 			// List and Array navigation
 			// evaluates to "Wireless communication"
-			invention = parser.parseExpression("Members[0].Inventions[6]").getValue(societyContext, String.class);
+			invention = parser.parseExpression("members[0].Inventions[6]").getValue(societyContext, String.class);
 			assertThat(invention).isEqualTo("Wireless communication");
 		}
 
@@ -210,12 +205,12 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			assertThat(city).isNotNull();
 
 			// setting values
-			Inventor i = parser.parseExpression("officers['advisors'][0]").getValue(societyContext,Inventor.class);
+			Inventor i = parser.parseExpression("officers['advisors'][0]").getValue(societyContext, Inventor.class);
 			assertThat(i.getName()).isEqualTo("Nikola Tesla");
 
 			parser.parseExpression("officers['advisors'][0].PlaceOfBirth.Country").setValue(societyContext, "Croatia");
 
-			Inventor i2 = parser.parseExpression("reverse[0]['advisors'][0]").getValue(societyContext,Inventor.class);
+			Inventor i2 = parser.parseExpression("reverse[0]['advisors'][0]").getValue(societyContext, Inventor.class);
 			assertThat(i2.getName()).isEqualTo("Nikola Tesla");
 		}
 	}
@@ -489,7 +484,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 					parser.parseExpression("new org.springframework.expression.spel.testresources.Inventor('Albert Einstein',new java.util.Date(), 'German')").getValue(Inventor.class);
 			assertThat(einstein.getName()).isEqualTo("Albert Einstein");
 			//create new inventor instance within add method of List
-			parser.parseExpression("Members2.add(new org.springframework.expression.spel.testresources.Inventor('Albert Einstein', 'German'))").getValue(societyContext);
+			parser.parseExpression("members.add(new org.springframework.expression.spel.testresources.Inventor('Albert Einstein', 'German'))").getValue(societyContext);
 		}
 	}
 
@@ -632,11 +627,25 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		@Test
 		@SuppressWarnings("unchecked")
 		void selection() {
-			StandardEvaluationContext societyContext = new StandardEvaluationContext();
-			societyContext.setRootObject(new IEEE());
-			List<Inventor> list = (List<Inventor>) parser.parseExpression("Members2.?[nationality == 'Serbian']").getValue(societyContext);
-			assertThat(list).hasSize(1);
-			assertThat(list.get(0).getName()).isEqualTo("Nikola Tesla");
+			StandardEvaluationContext societyContext = new StandardEvaluationContext(new IEEE());
+			// evaluates to ["Nikola Tesla"]
+			List<Inventor> list = (List<Inventor>) parser.parseExpression("members.?[nationality == 'Serbian']")
+					.getValue(societyContext);
+			assertThat(list).map(Inventor::getName).containsOnly("Nikola Tesla");
+		}
+	}
+
+	@Nested
+	class CollectionProjection {
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void projection() {
+			StandardEvaluationContext societyContext = new StandardEvaluationContext(new IEEE());
+			// evaluates to ["SmilJan", "Idvor"]
+			List placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
+					.getValue(societyContext, List.class);
+			assertThat(placesOfBirth).containsExactly("SmilJan", "Idvor");
 		}
 	}
 
@@ -654,22 +663,20 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 
 	static class IEEE {
+
 		private String name;
 
-		public Inventor[] Members = new Inventor[1];
-		public List Members2 = new ArrayList();
-		public Map<String,Object> officers = new HashMap<>();
+		public List<Inventor> members = new ArrayList<>();
+
+		public Map<String,Object> officers = Map.of(
+				"president", pupin,
+				"advisors", List.of(tesla));
 
 		public List<Map<String, Object>> reverse = new ArrayList<>();
 
-		@SuppressWarnings("unchecked")
 		IEEE() {
-			officers.put("president",pupin);
-			List linv = new ArrayList();
-			linv.add(tesla);
-			officers.put("advisors",linv);
-			Members2.add(tesla);
-			Members2.add(pupin);
+			members.add(tesla);
+			members.add(pupin);
 
 			reverse.add(officers);
 		}
@@ -678,8 +685,13 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			return true;
 		}
 
-		public String getName() { return name; }
-		public void setName(String n) { this.name = n; }
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String n) {
+			this.name = n;
+		}
 	}
 
 	static class StringUtils {
