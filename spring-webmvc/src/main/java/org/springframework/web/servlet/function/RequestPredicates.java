@@ -1237,7 +1237,7 @@ public abstract class RequestPredicates {
 			PathPattern oldPathPattern = (PathPattern) request.attribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE)
 					.orElse(null);
 
-			Map<String, Object> result = new LinkedHashMap<>(2);
+			Map<String, Object> result = CollectionUtils.newLinkedHashMap(2);
 			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, mergeMaps(oldPathVariables, newPathVariables));
 			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, mergePatterns(oldPathPattern, newPathPattern));
 			return result;
