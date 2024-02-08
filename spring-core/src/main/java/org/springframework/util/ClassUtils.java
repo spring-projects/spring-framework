@@ -1425,12 +1425,17 @@ public abstract class ClassUtils {
 	}
 
 	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
+		Class<?>[] parameterTypes = null;
 		Class<?> current = startClass;
 		while (current != null && current != endClass) {
-			Class<?>[] ifcs = current.getInterfaces();
-			for (Class<?> ifc : ifcs) {
+			if (parameterTypes == null) {
+				// Since Method#getParameterTypes() clones the array, we lazily retrieve
+				// and cache parameter types to avoid cloning the array multiple times.
+				parameterTypes = method.getParameterTypes();
+			}
+			for (Class<?> ifc : current.getInterfaces()) {
 				try {
-					return ifc.getMethod(method.getName(), method.getParameterTypes());
+					return ifc.getMethod(method.getName(), parameterTypes);
 				}
 				catch (NoSuchMethodException ex) {
 					// ignore
