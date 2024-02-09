@@ -1001,6 +1001,11 @@ method parameters:
   `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
   individual value. Type conversion is supported for non-String values.
 
+| `@RequestAttribute`
+| Provide an `Object` to add as a request attribute. Available only when a client
+  that supports request attributes is used under the hood. At this point
+  only supported for `WebClient`.
+
 |===
 
 
