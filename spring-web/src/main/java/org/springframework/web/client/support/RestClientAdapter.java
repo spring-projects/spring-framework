@@ -55,7 +55,7 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	@Override
 	public boolean supportsRequestAttributes() {
-		return true;
+		return false;
 	}
 
 	@Override
