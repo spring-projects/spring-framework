@@ -579,18 +579,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Captures the member (method/field) to call reflectively to access a property value
 	 * and the type descriptor for the value returned by the reflective call.
 	 */
-	private static class InvokerPair {
-
-		final Member member;
-
-		final TypeDescriptor typeDescriptor;
-
-		public InvokerPair(Member member, TypeDescriptor typeDescriptor) {
-			this.member = member;
-			this.typeDescriptor = typeDescriptor;
-		}
-	}
-
+	private record InvokerPair(Member member, TypeDescriptor typeDescriptor) {}
 
 	private static final class PropertyCacheKey implements Comparable<PropertyCacheKey> {
 

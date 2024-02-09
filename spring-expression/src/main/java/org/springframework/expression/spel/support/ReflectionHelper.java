@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -503,14 +503,10 @@ public abstract class ReflectionHelper {
 	 * and the set that are being supplied at the point of invocation. If the kind
 	 * indicates that conversion is required for some of the arguments then the arguments
 	 * that require conversion are listed in the argsRequiringConversion array.
+	 *
+	 * @param kind the kind of match that was achieved
 	 */
-	static class ArgumentsMatchInfo {
-
-		private final ArgumentsMatchKind kind;
-
-		ArgumentsMatchInfo(ArgumentsMatchKind kind) {
-			this.kind = kind;
-		}
+	record ArgumentsMatchInfo(ArgumentsMatchKind kind) {
 
 		public boolean isExactMatch() {
 			return (this.kind == ArgumentsMatchKind.EXACT);

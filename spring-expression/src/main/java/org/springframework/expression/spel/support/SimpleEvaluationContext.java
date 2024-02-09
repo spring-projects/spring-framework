@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,9 +103,9 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 	private final TypeConverter typeConverter;
 
-	private final TypeComparator typeComparator = new StandardTypeComparator();
+	private final TypeComparator typeComparator = StandardTypeComparator.INSTANCE;
 
-	private final OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
+	private final OperatorOverloader operatorOverloader = StandardOperatorOverloader.INSTANCE;
 
 	private final Map<String, Object> variables = new HashMap<>();
 
@@ -168,7 +168,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	/**
 	 * {@code SimpleEvaluationContext} does not support use of type references.
 	 * @return {@code TypeLocator} implementation that raises a
-	 * {@link SpelEvaluationException} with {@link SpelMessage#TYPE_NOT_FOUND}.
+	 * {@link SpelEvaluationException} with {@link SpelMessage#TYPE_NOT_FOUND}
 	 */
 	@Override
 	public TypeLocator getTypeLocator() {
@@ -315,7 +315,6 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 			return this;
 		}
 
-
 		/**
 		 * Register a custom {@link ConversionService}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a
@@ -327,6 +326,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 			this.typeConverter = new StandardTypeConverter(conversionService);
 			return this;
 		}
+
 		/**
 		 * Register a custom {@link TypeConverter}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a

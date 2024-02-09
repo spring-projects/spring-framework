@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.lang.Nullable;
 
 /**
- * A constructor resolver that uses reflection to locate the constructor that should be invoked.
+ * A constructor resolver that uses reflection to locate the constructor that
+ * should be invoked.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -42,12 +43,15 @@ import org.springframework.lang.Nullable;
 public class ReflectiveConstructorResolver implements ConstructorResolver {
 
 	/**
-	 * Locate a constructor on the type. There are three kinds of match that might occur:
+	 * Locate a constructor on the type.
+	 * <p>There are three kinds of matches that might occur:
 	 * <ol>
-	 * <li>An exact match where the types of the arguments match the types of the constructor
-	 * <li>An in-exact match where the types we are looking for are subtypes of those defined on the constructor
-	 * <li>A match where we are able to convert the arguments into those expected by the constructor, according to the
-	 * registered type converter.
+	 * <li>An exact match where the types of the arguments match the types of the
+	 * constructor.</li>
+	 * <li>An inexact match where the types we are looking for are subtypes of
+	 * those defined on the constructor.</li>
+	 * <li>A match where we are able to convert the arguments into those expected
+	 * by the constructor, according to the registered type converter.</li>
 	 * </ol>
 	 */
 	@Override
