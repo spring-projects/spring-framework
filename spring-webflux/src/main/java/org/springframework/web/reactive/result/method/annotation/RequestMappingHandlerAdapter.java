@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -328,7 +329,8 @@ public class RequestMappingHandlerAdapter
 
 
 	/**
-	 * Match methods with a return type without an adapter in {@link ReactiveAdapterRegistry}.
+	 * Match methods with a return type without an adapter in {@link ReactiveAdapterRegistry}
+	 * which are not suspending functions.
 	 */
 	private record NonReactiveHandlerMethodPredicate(ReactiveAdapterRegistry adapterRegistry)
 			implements Predicate<HandlerMethod> {
@@ -336,7 +338,8 @@ public class RequestMappingHandlerAdapter
 		@Override
 		public boolean test(HandlerMethod handlerMethod) {
 			Class<?> returnType = handlerMethod.getReturnType().getParameterType();
-			return (this.adapterRegistry.getAdapter(returnType) == null);
+			return (this.adapterRegistry.getAdapter(returnType) == null
+					&& !KotlinDetector.isSuspendingFunction(handlerMethod.getMethod()));
 		}
 	}
 
