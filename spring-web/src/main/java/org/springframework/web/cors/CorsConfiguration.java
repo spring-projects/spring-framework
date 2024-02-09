@@ -183,7 +183,7 @@ public class CorsConfiguration {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
 		parseCommaDelimitedOrigin(origin, value -> {
-			value = trimTrailingSlash(value);
+			value = trimTrailingSlash(value).trim();
 			this.allowedOrigins.add(value);
 		});
 	}
