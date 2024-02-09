@@ -39,11 +39,13 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.function.RequestPredicates.HEAD;
+import static org.springframework.web.servlet.function.RequestPredicates.path;
 
 /**
  * Tests for {@link RouterFunctionBuilder}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 class RouterFunctionBuilderTests {
 
@@ -94,6 +96,23 @@ class RouterFunctionBuilderTests {
 		catch (Exception ex) {
 			throw new AssertionError(ex.getMessage(), ex);
 		}
+	}
+
+	@Test
+	void resource() {
+		Resource resource = new ClassPathResource("/org/springframework/web/servlet/function/response.txt");
+		assertThat(resource.exists()).isTrue();
+
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.resource(path("/test"), resource)
+				.build();
+
+		ServerRequest resourceRequest = initRequest("GET", "/test");
+
+		Optional<HttpStatusCode> responseStatus = route.route(resourceRequest)
+				.map(handlerFunction -> handle(handlerFunction, resourceRequest))
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.OK);
 	}
 
 	@Test
