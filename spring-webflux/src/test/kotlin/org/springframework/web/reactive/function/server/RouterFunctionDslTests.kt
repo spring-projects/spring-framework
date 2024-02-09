@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,16 +92,6 @@ class RouterFunctionDslTests {
 	}
 
 	@Test
-	fun resourceByPath() {
-		val mockRequest = get("https://example.com/org/springframework/web/reactive/function/response.txt")
-				.build()
-		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
-		StepVerifier.create(sampleRouter().route(request))
-				.expectNextCount(1)
-				.verifyComplete()
-	}
-
-	@Test
 	fun method() {
 		val mockRequest = patch("https://example.com/")
 				.build()
@@ -122,6 +112,24 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun resource() {
+		val mockRequest = get("https://example.com/response2.txt").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request))
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	@Test
+	fun resources() {
+		val mockRequest = get("https://example.com/resources/response.txt").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request))
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	@Test
+	fun resourcesLookupFunction() {
 		val mockRequest = get("https://example.com/response.txt").build()
 		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
@@ -237,8 +245,9 @@ class RouterFunctionDslTests {
 			GET("/api/foo/", ::handle)
 		}
 		headers({ it.header("bar").isNotEmpty() }, ::handle)
-		resources("/org/springframework/web/reactive/function/**",
-				ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+		resource(path("/response2.txt"), ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+		resources("/resources/**",
+				ClassPathResource("/org/springframework/web/reactive/function/"))
 		resources {
 			if (it.path() == "/response.txt") {
 				Mono.just(ClassPathResource("/org/springframework/web/reactive/function/response.txt"))

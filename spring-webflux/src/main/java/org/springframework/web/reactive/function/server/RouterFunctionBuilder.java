@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * Default implementation of {@link RouterFunctions.Builder}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.1
  */
 class RouterFunctionBuilder implements RouterFunctions.Builder {
@@ -236,6 +237,17 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	public RouterFunctions.Builder route(RequestPredicate predicate,
 			HandlerFunction<ServerResponse> handlerFunction) {
 		return add(RouterFunctions.route(predicate, handlerFunction));
+	}
+
+	@Override
+	public RouterFunctions.Builder resource(RequestPredicate predicate, Resource resource) {
+		return add(RouterFunctions.resource(predicate, resource));
+	}
+
+	@Override
+	public RouterFunctions.Builder resource(RequestPredicate predicate, Resource resource,
+			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+		return add(RouterFunctions.resource(predicate, resource, headersConsumer));
 	}
 
 	@Override

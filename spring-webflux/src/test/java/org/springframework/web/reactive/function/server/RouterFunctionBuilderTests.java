@@ -39,6 +39,7 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.RequestPredicates.HEAD;
+import static org.springframework.web.reactive.function.server.RequestPredicates.path;
 
 /**
  * @author Arjen Poutsma
@@ -100,6 +101,27 @@ class RouterFunctionBuilderTests {
 		StepVerifier.create(responseMono)
 				.verifyComplete();
 
+	}
+
+	@Test
+	void resource() {
+		Resource resource = new ClassPathResource("/org/springframework/web/reactive/function/server/response.txt");
+		assertThat(resource.exists()).isTrue();
+
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.resource(path("/test"), resource)
+				.build();
+
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/test").build();
+		ServerRequest resourceRequest = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<HttpStatusCode> responseMono = route.route(resourceRequest)
+				.flatMap(handlerFunction -> handlerFunction.handle(resourceRequest))
+				.map(ServerResponse::statusCode);
+
+		StepVerifier.create(responseMono)
+				.expectNext(HttpStatus.OK)
+				.verifyComplete();
 	}
 
 	@Test
