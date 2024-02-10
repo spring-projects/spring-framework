@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -39,6 +40,7 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -554,24 +556,34 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 	@Nested
 	class Functions {
 
-		@Test
-		void functions() throws Exception {
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-			context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod("reverseString", String.class));
+		private final ExpressionParser parser = new SpelExpressionParser();
 
-			String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
-			assertThat(helloWorldReversed).isEqualTo("dlrow olleh");
+		private final StandardEvaluationContext context = new StandardEvaluationContext();
+
+		private final Method reverseStringMethod = ReflectionUtils.findMethod(StringUtils.class, "reverseString", String.class);
+
+		@Test
+		void registerFunctionViaMethodWithStandardEvaluationContext() {
+			context.registerFunction("reverseString", reverseStringMethod);
+
+			String result = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
+			assertThat(result).isEqualTo("dlrow olleh");
 		}
 
 		@Test
-		void methodHandlesNotBound() throws Exception {
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
+		void registerFunctionViaMethodWithSimpleEvaluationContext() {
+			SimpleEvaluationContext simpleContext = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+			simpleContext.setVariable("reverseString", reverseStringMethod);
 
-			MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+			String result = parser.parseExpression("#reverseString('hello world')").getValue(simpleContext, String.class);
+			assertThat(result).isEqualTo("dlrow olleh");
+		}
+
+		@Test
+		void registerFunctionViaMethodHandleNotBound() throws Exception {
+			MethodHandle methodHandle = MethodHandles.lookup().findVirtual(String.class, "formatted",
 				MethodType.methodType(String.class, Object[].class));
-			context.setVariable("message", mh);
+			context.registerFunction("message", methodHandle);
 
 			String message = parser.parseExpression("#message('Simple message: <%s>', 'Hello World', 'ignored')")
 					.getValue(context, String.class);
@@ -579,20 +591,16 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		}
 
 		@Test
-		void methodHandlesFullyBound() throws Throwable {
-			ExpressionParser parser = new SpelExpressionParser();
-			StandardEvaluationContext context = new StandardEvaluationContext();
-
+		void registerFunctionViaMethodHandleFullyBound() throws Exception {
 			String template = "This is a %s message with %s words: <%s>";
 			Object varargs = new Object[] { "prerecorded", 3, "Oh Hello World!", "ignored" };
-			MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+			MethodHandle methodHandle = MethodHandles.lookup().findVirtual(String.class, "formatted",
 				MethodType.methodType(String.class, Object[].class))
 					.bindTo(template)
-					.bindTo(varargs); //here we have to provide arguments in a single array binding
-			context.setVariable("message", mh);
+					.bindTo(varargs); // here we have to provide arguments in a single array binding
+			context.registerFunction("message", methodHandle);
 
-			String message = parser.parseExpression("#message()")
-					.getValue(context, String.class);
+			String message = parser.parseExpression("#message()").getValue(context, String.class);
 			assertThat(message).isEqualTo("This is a prerecorded message with 3 words: <Oh Hello World!>");
 		}
 	}
