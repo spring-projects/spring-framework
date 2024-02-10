@@ -759,7 +759,7 @@ With a required single object result:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	Actor actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
+	Actor actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?")
 			.param(1212L);
 			.query(Actor.class)
 			.single();
@@ -769,7 +769,7 @@ With a `java.util.Optional` result:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	Optional<Actor> actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
+	Optional<Actor> actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?")
 			.param(1212L);
 			.query(Actor.class)
 			.optional();
