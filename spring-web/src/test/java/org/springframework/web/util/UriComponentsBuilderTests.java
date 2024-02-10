@@ -832,4 +832,23 @@ class UriComponentsBuilderTests {
 		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
 	}
 
+	/**
+	 * This test validates the problem where UriComponentsBuilder double encodes query parameters.
+	 * <p>
+	 * For more details, please refer to the GitHub issue:
+	 * <a href="https://github.com/spring-projects/spring-framework/issues/32234">#32234</a>
+	 * </p>
+	 */
+	@Test
+	void doubleEncodingOfQueryParamReplacement() throws Exception {
+		String url = "http://localhost:8080/app/api/device/queues?devices=100%2C200%2C300%2C400&tenant=root";
+		URI uri = new URI(url);
+
+		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
+		uriComponentsBuilder.replaceQueryParam("tenant", "default");
+
+		URI replaced = uriComponentsBuilder.encode().build().toUri();
+		assertThat(replaced.toString()).isEqualTo("http://localhost:8080/app/api/device/queues?devices=100%2C200%2C300%2C400&tenant=default");
+	}
+
 }

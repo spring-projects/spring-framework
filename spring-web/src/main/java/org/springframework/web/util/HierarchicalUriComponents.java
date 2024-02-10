@@ -638,7 +638,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		QUERY_PARAM {
 			@Override
 			public boolean isAllowed(int c) {
-				if ('=' == c || '&' == c) {
+				if ('=' == c || '&' == c || ',' == c ) {
 					return false;
 				}
 				else {

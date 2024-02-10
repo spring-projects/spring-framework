@@ -18,6 +18,8 @@ package org.springframework.web.util;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
@@ -398,6 +400,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return encode(StandardCharsets.UTF_8);
 	}
 
+	private String decode(String value) {
+		return value != null ? URLDecoder.decode(value,StandardCharsets.UTF_8) : null;
+	}
+
 	/**
 	 * A variant of {@link #encode()} with a charset other than "UTF-8".
 	 * @param charset the charset to use for encoding
@@ -648,8 +654,18 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			while (matcher.find()) {
 				String name = matcher.group(1);
 				String eq = matcher.group(2);
-				String value = matcher.group(3);
-				queryParam(name, (value != null ? value : (StringUtils.hasLength(eq) ? "" : null)));
+				String decodedValue = decode(matcher.group(3));
+				List<String> values = StringUtils.hasLength(eq) ? List.of("") :null;
+				if(decodedValue!=null) {
+					List<String> temp = new ArrayList<>();
+						if(containsNonEnglish(decodedValue)) {
+							temp.add(URLEncoder.encode(decodedValue,StandardCharsets.UTF_8));
+						}else{
+							temp.add(decodedValue);
+						}
+					values = temp;
+				}
+				queryParam(name, values);
 			}
 			resetSchemeSpecificPart();
 		}
@@ -657,6 +673,16 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			this.queryParams.clear();
 		}
 		return this;
+	}
+
+	private boolean containsNonEnglish(String str) {
+		for (char c : str.toCharArray()) {
+			// Check if the character is outside the range of English characters
+			if (c < 0x20 || c > 0x7E) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
