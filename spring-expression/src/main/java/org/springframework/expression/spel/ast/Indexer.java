@@ -24,7 +24,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 import org.springframework.asm.MethodVisitor;
@@ -54,8 +53,6 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @since 3.0
  */
-// TODO support multidimensional arrays
-// TODO support correct syntax for multidimensional [][][] and not [,,,]
 public class Indexer extends SpelNodeImpl {
 
 	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
@@ -185,7 +182,6 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		// Try and treat the index value as a property of the context object
-		// TODO Could call the conversion service to convert the value to a String
 		TypeDescriptor valueType = indexValue.getTypeDescriptor();
 		if (valueType != null && String.class == valueType.getType()) {
 			this.indexedType = IndexedType.OBJECT;
@@ -209,7 +205,7 @@ public class Indexer extends SpelNodeImpl {
 			return (this.children[0] instanceof PropertyOrFieldReference || this.children[0].isCompilable());
 		}
 		else if (this.indexedType == IndexedType.OBJECT) {
-			// If the string name is changing the accessor is clearly going to change (so no compilation possible)
+			// If the string name is changing, the accessor is clearly going to change (so no compilation possible)
 			return (this.cachedReadAccessor != null &&
 					this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor &&
 					getChild(0) instanceof StringLiteral);
@@ -326,12 +322,7 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		// TODO Since we do not support multidimensional arrays, we should be able to return: "[" + getChild(0).toStringAST() + "]"
-		StringJoiner sj = new StringJoiner(",", "[", "]");
-		for (int i = 0; i < getChildCount(); i++) {
-			sj.add(getChild(i).toStringAST());
-		}
-		return sj.toString();
+		return "[" + getChild(0).toStringAST() + "]";
 	}
 
 

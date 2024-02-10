@@ -46,6 +46,25 @@ class IndexingTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
+	void indexIntoArrays() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+
+		// One-dimensional
+		this.property = new int[] {1, 2, 3, 4};
+		Expression expression = parser.parseExpression("property[2]");
+		assertThat(expression.getValue(this)).isEqualTo(3);
+
+		// Multi-dimensional
+		this.property = new int[][] {{1, 2}, {3, 4}};
+		expression = parser.parseExpression("property[0]");
+		assertThat(expression.getValue(this)).isEqualTo(new int[] {1, 2});
+		expression = parser.parseExpression("property[1][1]");
+		assertThat(expression.getValue(this)).isEqualTo(4);
+	}
+
+
+	@Test
+	@SuppressWarnings("unchecked")
 	void indexIntoGenericPropertyContainingMap() {
 		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
