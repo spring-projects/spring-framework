@@ -717,7 +717,7 @@ For example, with positional parameters:
 
 	public int countOfActorsByFirstName(String firstName) {
 		return this.jdbcClient.sql("select count(*) from t_actor where first_name = ?")
-				.param(firstName);
+				.param(firstName)
 				.query(Integer.class).single();
 	}
 ----
@@ -730,7 +730,7 @@ For example, with named parameters:
 
 	public int countOfActorsByFirstName(String firstName) {
 		return this.jdbcClient.sql("select count(*) from t_actor where first_name = :firstName")
-				.param("firstName", firstName);
+				.param("firstName", firstName)
 				.query(Integer.class).single();
 	}
 ----
@@ -759,8 +759,8 @@ With a required single object result:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	Actor actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
-			.param(1212L);
+	Actor actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?")
+			.param(1212L)
 			.query(Actor.class)
 			.single();
 ----
@@ -769,8 +769,8 @@ With a `java.util.Optional` result:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	Optional<Actor> actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?",
-			.param(1212L);
+	Optional<Actor> actor = this.jdbcClient.sql("select first_name, last_name from t_actor where id = ?")
+			.param(1212L)
 			.query(Actor.class)
 			.optional();
 ----
@@ -780,7 +780,7 @@ And for an update statement:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (?, ?)")
-			.param("Leonor").param("Watling");
+			.param("Leonor").param("Watling")
 			.update();
 ----
 
@@ -789,7 +789,7 @@ Or an update statement with named parameters:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
-			.param("firstName", "Leonor").param("lastName", "Watling");
+			.param("firstName", "Leonor").param("lastName", "Watling")
 			.update();
 ----
 
@@ -800,7 +800,7 @@ provides `firstName` and `lastName` properties, such as the `Actor` class from a
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
-			.paramSource(new Actor("Leonor", "Watling");
+			.paramSource(new Actor("Leonor", "Watling")
 			.update();
 ----
 
