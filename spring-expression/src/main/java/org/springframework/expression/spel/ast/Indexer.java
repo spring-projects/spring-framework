@@ -180,12 +180,12 @@ public class Indexer extends SpelNodeImpl {
 			}
 			else {
 				this.indexedType = IndexedType.STRING;
-				return new StringIndexingLValue((String) target, idx, targetDescriptor);
+				return new StringIndexingValueRef((String) target, idx, targetDescriptor);
 			}
 		}
 
 		// Try and treat the index value as a property of the context object
-		// TODO: could call the conversion service to convert the value to a String
+		// TODO Could call the conversion service to convert the value to a String
 		TypeDescriptor valueType = indexValue.getTypeDescriptor();
 		if (valueType != null && String.class == valueType.getType()) {
 			this.indexedType = IndexedType.OBJECT;
@@ -226,41 +226,42 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		if (this.indexedType == IndexedType.ARRAY) {
-			int insn;
-			if ("D".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[D");
-				insn = DALOAD;
-			}
-			else if ("F".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[F");
-				insn = FALOAD;
-			}
-			else if ("J".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[J");
-				insn = LALOAD;
-			}
-			else if ("I".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[I");
-				insn = IALOAD;
-			}
-			else if ("S".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[S");
-				insn = SALOAD;
-			}
-			else if ("B".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[B");
-				insn = BALOAD;
-			}
-			else if ("C".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[C");
-				insn = CALOAD;
-			}
-			else {
-				mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
-						(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
-						//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
-				insn = AALOAD;
-			}
+			int insn = switch (this.exitTypeDescriptor) {
+				case "D" -> {
+					mv.visitTypeInsn(CHECKCAST, "[D");
+					yield DALOAD;
+				}
+				case "F" -> {
+					mv.visitTypeInsn(CHECKCAST, "[F");
+					yield FALOAD;
+				}
+				case "J" -> {
+					mv.visitTypeInsn(CHECKCAST, "[J");
+					yield LALOAD;
+				}
+				case "I" -> {
+					mv.visitTypeInsn(CHECKCAST, "[I");
+					yield IALOAD;
+				}
+				case "S" -> {
+					mv.visitTypeInsn(CHECKCAST, "[S");
+					yield SALOAD;
+				}
+				case "B" -> {
+					mv.visitTypeInsn(CHECKCAST, "[B");
+					yield BALOAD;
+				}
+				case "C" -> {
+					mv.visitTypeInsn(CHECKCAST, "[C");
+					yield CALOAD;
+				}
+				default -> {
+					mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
+							(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
+					yield AALOAD;
+				}
+			};
+
 			SpelNodeImpl index = this.children[0];
 			cf.enterCompilationScope();
 			index.generateCode(mv, cf);
@@ -325,6 +326,7 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
+		// TODO Since we do not support multidimensional arrays, we should be able to return: "[" + getChild(0).toStringAST() + "]"
 		StringJoiner sj = new StringJoiner(",", "[", "]");
 		for (int i = 0; i < getChildCount(); i++) {
 			sj.add(getChild(i).toStringAST());
@@ -744,7 +746,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	private class StringIndexingLValue implements ValueRef {
+	private class StringIndexingValueRef implements ValueRef {
 
 		private final String target;
 
@@ -752,7 +754,7 @@ public class Indexer extends SpelNodeImpl {
 
 		private final TypeDescriptor typeDescriptor;
 
-		public StringIndexingLValue(String target, int index, TypeDescriptor typeDescriptor) {
+		public StringIndexingValueRef(String target, int index, TypeDescriptor typeDescriptor) {
 			this.target = target;
 			this.index = index;
 			this.typeDescriptor = typeDescriptor;

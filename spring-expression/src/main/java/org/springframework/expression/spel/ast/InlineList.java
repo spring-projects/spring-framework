@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,8 +111,7 @@ public class InlineList extends SpelNodeImpl {
 	public String toStringAST() {
 		StringJoiner sj = new StringJoiner(",", "{", "}");
 		// String ast matches input string, not the 'toString()' of the resultant collection, which would use []
-		int count = getChildCount();
-		for (int c = 0; c < count; c++) {
+		for (int c = 0; c < getChildCount(); c++) {
 			sj.add(getChild(c).toStringAST());
 		}
 		return sj.toString();

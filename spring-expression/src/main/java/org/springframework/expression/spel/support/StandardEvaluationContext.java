@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,7 +279,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Register the specified Method as a SpEL function.
+	 * Register the specified {@link Method} as a SpEL function.
 	 * <p>Note: Function names share a namespace with the variables in this
 	 * evaluation context, as populated by {@link #setVariable(String, Object)}.
 	 * Make sure that specified function names and variable names do not overlap.
@@ -292,7 +292,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Register the specified MethodHandle as a SpEL function.
+	 * Register the specified {@link MethodHandle} as a SpEL function.
 	 * <p>Note: Function names share a namespace with the variables in this
 	 * evaluation context, as populated by {@link #setVariable(String, Object)}.
 	 * Make sure that specified function names and variable names do not overlap.

@@ -113,6 +113,24 @@ class ParsingTests {
 		}
 
 		@Test
+		void indexing() {
+			parseCheck("#var[2]");
+			parseCheck("person['name']");
+			parseCheck("person[name]");
+			parseCheck("array[2]");
+			parseCheck("array[2][3]");
+			parseCheck("func()[2]");
+			parseCheck("#func()[2]");
+			parseCheck("'abc'[2]");
+			parseCheck("\"abc\"[2]", "'abc'[2]");
+			parseCheck("{1,2,3}[2]");
+			parseCheck("{'k':'v'}['k']");
+			parseCheck("{'k':'v'}[k]");
+			parseCheck("{'k1':'v1','k2':'v2'}['k2']");
+			parseCheck("{'k1':'v1','k2':'v2'}[k2]");
+		}
+
+		@Test
 		void projection() {
 			parseCheck("{1,2,3,4,5,6,7,8,9,10}.![#isEven()]");
 		}

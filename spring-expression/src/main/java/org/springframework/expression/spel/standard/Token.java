@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,39 +19,47 @@ package org.springframework.expression.spel.standard;
 import org.springframework.lang.Nullable;
 
 /**
- * Holder for a kind of token, the associated data and its position in the input data
- * stream (start/end).
+ * Holder for a kind of token, the associated data, and its position in the input
+ * data stream (start/end).
  *
  * @author Andy Clement
  * @since 3.0
  */
 class Token {
 
-	TokenKind kind;
+	final TokenKind kind;
 
 	@Nullable
-	String data;
+	final String data;
 
-	int startPos;  // index of first character
+	final int startPos;
 
-	int endPos;  // index of char after the last character
+	final int endPos;
 
 
 	/**
 	 * Constructor for use when there is no particular data for the token
-	 * (e.g. TRUE or '+')
-	 * @param startPos the exact start
-	 * @param endPos the index to the last character
+	 * (e.g. TRUE or '+').
+	 * @param tokenKind the kind of token
+	 * @param startPos the exact start position
+	 * @param endPos the index of the last character
 	 */
 	Token(TokenKind tokenKind, int startPos, int endPos) {
-		this.kind = tokenKind;
-		this.startPos = startPos;
-		this.endPos = endPos;
+		this(tokenKind, null, startPos, endPos);
 	}
 
+	/**
+	 * Constructor for use when there is data for the token.
+	 * @param tokenKind the kind of token
+	 * @param tokenData the data for the token
+	 * @param startPos the exact start position
+	 * @param endPos the index of the last character
+	 */
 	Token(TokenKind tokenKind, char[] tokenData, int startPos, int endPos) {
-		this(tokenKind, startPos, endPos);
-		this.data = new String(tokenData);
+		this.kind = tokenKind;
+		this.data = (tokenData != null ? new String(tokenData) : null);
+		this.startPos = startPos;
+		this.endPos = endPos;
 	}
 
 
