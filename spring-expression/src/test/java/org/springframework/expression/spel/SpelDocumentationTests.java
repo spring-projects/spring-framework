@@ -690,6 +690,25 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void nullSafeSelectFirstAndPropertyAccess() {
+			IEEE society = new IEEE();
+			StandardEvaluationContext context = new StandardEvaluationContext(society);
+			String expression = "members?.^[nationality == 'Serbian']?.name"; // <1>
+
+			// evaluates to "Nikola Tesla"
+			String name = parser.parseExpression(expression)
+					.getValue(context, String.class);
+			assertThat(name).isEqualTo("Nikola Tesla");
+
+			society.members = null;
+
+			// evaluates to null - does not throw a NullPointerException
+			name = parser.parseExpression(expression)
+					.getValue(context, String.class);
+			assertThat(name).isNull();
+		}
+
+		@Test
 		@SuppressWarnings("unchecked")
 		void nullSafeSelectLast() {
 			IEEE society = new IEEE();
