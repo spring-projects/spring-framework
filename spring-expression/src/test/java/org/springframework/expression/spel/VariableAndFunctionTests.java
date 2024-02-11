@@ -23,9 +23,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.expression.spel.SpelMessage.FUNCTION_MUST_BE_STATIC;
+import static org.springframework.expression.spel.SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION;
 
 /**
- * Tests the evaluation of expressions that access variables and functions (lambda/java).
+ * Tests the evaluation of expressions that access variables and functions.
  *
  * @author Andy Clement
  * @author Sam Brannen
@@ -33,32 +35,43 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
-	void testVariableAccess01() {
+	void variableAccess() {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
 	}
 
 	@Test
-	void testVariableAccess_WellKnownVariables() {
-		evaluate("#this.getName()","Nikola Tesla",String.class);
-		evaluate("#root.getName()","Nikola Tesla",String.class);
+	void variableAccessWithWellKnownVariables() {
+		evaluate("#this.getName()", "Nikola Tesla", String.class);
+		evaluate("#root.getName()", "Nikola Tesla", String.class);
 	}
 
 	@Test
-	void testFunctionAccess01() {
+	void functionInvocationWithIncorrectNumberOfArguments() {
+		// Method: reverseInt() expects 3 ints
+		evaluateAndCheckError("#reverseInt()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 0, 3);
+		evaluateAndCheckError("#reverseInt(1,2)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 2, 3);
+		evaluateAndCheckError("#reverseInt(1,2,3,4)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 4, 3);
+
+		// MethodHandle: message() maps to java.lang.String.format(String, Object...)
+		evaluateAndCheckError("#message()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 0, 2);
+		evaluateAndCheckError("#message('%s')", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 2);
+	}
+
+	@Test
+	void functionInvocationWithPrimitiveArguments() {
 		evaluate("#reverseInt(1,2,3)", "int[3]{3,2,1}", int[].class);
 		evaluate("#reverseInt('1',2,3)", "int[3]{3,2,1}", int[].class); // requires type conversion of '1' to 1
-		evaluateAndCheckError("#reverseInt(1)", SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 3);
 	}
 
 	@Test
-	void testFunctionAccess02() {
+	void functionInvocationWithStringArgument() {
 		evaluate("#reverseString('hello')", "olleh", String.class);
 		evaluate("#reverseString(37)", "73", String.class); // requires type conversion of 37 to '37'
 	}
 
 	@Test
-	void testCallVarargsFunction() {
+	void functionWithVarargs() {
 		evaluate("#varargsFunction()", "[]", String.class);
 		evaluate("#varargsFunction(new String[0])", "[]", String.class);
 		evaluate("#varargsFunction('a')", "[a]", String.class);
@@ -89,13 +102,13 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testCallingIllegalFunctions() throws Exception {
+	void functionMethodMustBeStatic() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				parser.parseRaw("#notStatic()").getValue(ctx)).
-			satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.FUNCTION_MUST_BE_STATIC));
+		assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> parser.parseRaw("#notStatic()").getValue(ctx))
+				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(FUNCTION_MUST_BE_STATIC));
 	}
 
 
