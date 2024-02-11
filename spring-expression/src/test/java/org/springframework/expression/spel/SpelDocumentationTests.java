@@ -648,6 +648,85 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 					.getValue(context, tesla, String.class);
 			assertThat(city).isNull();
 		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void nullSafeSelection() {
+			IEEE society = new IEEE();
+			StandardEvaluationContext context = new StandardEvaluationContext(society);
+			String expression = "members?.?[nationality == 'Serbian']"; // <1>
+
+			// evaluates to [Inventor("Nikola Tesla")]
+			List<Inventor> list = (List<Inventor>) parser.parseExpression(expression)
+					.getValue(context);
+			assertThat(list).map(Inventor::getName).containsOnly("Nikola Tesla");
+
+			society.members = null;
+
+			// evaluates to null - does not throw a NullPointerException
+			list = (List<Inventor>) parser.parseExpression(expression)
+					.getValue(context);
+			assertThat(list).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void nullSafeSelectFirst() {
+			IEEE society = new IEEE();
+			StandardEvaluationContext context = new StandardEvaluationContext(society);
+			String expression = "members?.^[nationality == 'Serbian' || nationality == 'Idvor']"; // <1>
+
+			// evaluates to Inventor("Nikola Tesla")
+			Inventor inventor = parser.parseExpression(expression)
+					.getValue(context, Inventor.class);
+			assertThat(inventor).extracting(Inventor::getName).isEqualTo("Nikola Tesla");
+
+			society.members = null;
+
+			// evaluates to null - does not throw a NullPointerException
+			inventor = parser.parseExpression(expression)
+					.getValue(context, Inventor.class);
+			assertThat(inventor).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void nullSafeSelectLast() {
+			IEEE society = new IEEE();
+			StandardEvaluationContext context = new StandardEvaluationContext(society);
+			String expression = "members?.$[nationality == 'Serbian' || nationality == 'Idvor']"; // <1>
+
+			// evaluates to Inventor("Pupin")
+			Inventor inventor = parser.parseExpression(expression)
+					.getValue(context, Inventor.class);
+			assertThat(inventor).extracting(Inventor::getName).isEqualTo("Pupin");
+
+			society.members = null;
+
+			// evaluates to null - does not throw a NullPointerException
+			inventor = parser.parseExpression(expression)
+					.getValue(context, Inventor.class);
+			assertThat(inventor).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void nullSafeProjection() {
+			IEEE society = new IEEE();
+			StandardEvaluationContext context = new StandardEvaluationContext(society);
+
+			// evaluates to ["Smiljan", "Idvor"]
+			List placesOfBirth = parser.parseExpression("members?.![placeOfBirth.city]") // <1>
+					.getValue(context, List.class);
+			assertThat(placesOfBirth).containsExactly("Smiljan", "Idvor");
+
+			society.members = null;
+
+			// evaluates to null - does not throw a NullPointerException
+			placesOfBirth = parser.parseExpression("members?.![placeOfBirth.city]") // <2>
+					.getValue(context, List.class);
+			assertThat(placesOfBirth).isNull();
+		}
 	}
 
 	@Nested

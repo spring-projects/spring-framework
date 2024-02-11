@@ -59,5 +59,12 @@ the last element. To obtain the first element matching the selection expression,
 syntax is `.^[selectionExpression]`. To obtain the last element matching the selection
 expression, the syntax is `.$[selectionExpression]`.
 
+[NOTE]
+====
+The Spring Expression Language also supports safe navigation for collection selection.
 
+See
+xref:core/expressions/language-ref/operator-safe-navigation.adoc#expressions-operator-safe-navigation-selection-and-projection[Safe Collection Selection and Projection]
+for details.
+====
 
