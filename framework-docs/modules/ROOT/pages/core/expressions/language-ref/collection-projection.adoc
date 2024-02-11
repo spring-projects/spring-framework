@@ -13,7 +13,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-	// evaluates to ["SmilJan", "Idvor"]
+	// evaluates to ["Smiljan", "Idvor"]
 	List placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
 			.getValue(societyContext, List.class);
 ----
@@ -22,7 +22,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	// evaluates to ["SmilJan", "Idvor"]
+	// evaluates to ["Smiljan", "Idvor"]
 	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
 	 		.getValue(societyContext) as List<*>
 ----

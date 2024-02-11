@@ -58,7 +58,7 @@ class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	void simpleAccess02() {
-		evaluate("placeOfBirth.city", "SmilJan", String.class);
+		evaluate("placeOfBirth.city", "Smiljan", String.class);
 	}
 
 	@Test

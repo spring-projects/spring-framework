@@ -65,7 +65,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		GregorianCalendar c = new GregorianCalendar();
 		c.set(1856, 7, 9);
 		tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
-		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
+		tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 		tesla.setInventions("Telephone repeater", "Rotating magnetic field principle",
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
 				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights");
@@ -167,7 +167,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			assertThat(year).isEqualTo(1856);
 
 			String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);
-			assertThat(city).isEqualTo("SmilJan");
+			assertThat(city).isEqualTo("Smiljan");
 		}
 
 		@Test
@@ -616,16 +616,37 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			StandardEvaluationContext societyContext = new StandardEvaluationContext();
 			societyContext.setRootObject(new IEEE());
 
-
 			parser.parseExpression("Name").setValue(societyContext, "IEEE");
 			societyContext.setVariable("queryName", "Nikola Tesla");
 
-			String expression = "isMember(#queryName)? #queryName + ' is a member of the ' "
+			String expression = "isMember(#queryName) ? #queryName + ' is a member of the ' "
 					+ "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
 
 			String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);
 			assertThat(queryResultString).isEqualTo("Nikola Tesla is a member of the IEEE Society");
 			// queryResultString = "Nikola Tesla is a member of the IEEE Society"
+		}
+	}
+
+	@Nested
+	class SaveNavigationOperator {
+
+		@Test
+		void nullSafePropertyAccess() {
+			Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+			tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
+
+			// evaluates to "Smiljan"
+			String city = parser.parseExpression("placeOfBirth?.city") // <1>
+					.getValue(context, tesla, String.class);
+			assertThat(city).isEqualTo("Smiljan");
+
+			tesla.setPlaceOfBirth(null);
+
+			// evaluates to null - does not throw a NullPointerException
+			city = parser.parseExpression("placeOfBirth?.city") // <2>
+					.getValue(context, tesla, String.class);
+			assertThat(city).isNull();
 		}
 	}
 
@@ -650,10 +671,10 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		@SuppressWarnings("unchecked")
 		void projection() {
 			StandardEvaluationContext societyContext = new StandardEvaluationContext(new IEEE());
-			// evaluates to ["SmilJan", "Idvor"]
+			// evaluates to ["Smiljan", "Idvor"]
 			List placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
 					.getValue(societyContext, List.class);
-			assertThat(placesOfBirth).containsExactly("SmilJan", "Idvor");
+			assertThat(placesOfBirth).containsExactly("Smiljan", "Idvor");
 		}
 	}
 

@@ -119,7 +119,7 @@ class TestScenarioCreator {
 		GregorianCalendar c = new GregorianCalendar();
 		c.set(1856, 7, 9);
 		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
-		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
+		tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 		tesla.setInventions("Telephone repeater", "Rotating magnetic field principle",
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
 				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights");
