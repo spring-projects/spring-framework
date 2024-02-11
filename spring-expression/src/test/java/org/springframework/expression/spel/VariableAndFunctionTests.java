@@ -48,14 +48,14 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	void functionInvocationWithIncorrectNumberOfArguments() {
-		// Method: reverseInt() expects 3 ints
-		evaluateAndCheckError("#reverseInt()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 0, 3);
-		evaluateAndCheckError("#reverseInt(1,2)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 2, 3);
-		evaluateAndCheckError("#reverseInt(1,2,3,4)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 4, 3);
+		// Method: #reverseInt(int, int, int)
+		evaluateAndCheckError("#reverseInt()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "reverseInt", 0, 3);
+		evaluateAndCheckError("#reverseInt(1,2)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "reverseInt", 2, 3);
+		evaluateAndCheckError("#reverseInt(1,2,3,4)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "reverseInt", 4, 3);
 
-		// MethodHandle: message() maps to java.lang.String.format(String, Object...)
-		evaluateAndCheckError("#message()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 0, 2);
-		evaluateAndCheckError("#message('%s')", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, 1, 2);
+		// MethodHandle: #message(template, args...)
+		evaluateAndCheckError("#message()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "message", 0, 2);
+		evaluateAndCheckError("#message('%s')", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "message", 1, 2);
 	}
 
 	@Test

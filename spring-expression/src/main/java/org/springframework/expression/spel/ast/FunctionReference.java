@@ -121,7 +121,7 @@ public class FunctionReference extends SpelNodeImpl {
 			int declaredParamCount = method.getParameterCount();
 			if (declaredParamCount != functionArgs.length) {
 				throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
-						functionArgs.length, declaredParamCount);
+						this.name, functionArgs.length, declaredParamCount);
 			}
 		}
 		if (!Modifier.isStatic(method.getModifiers())) {
@@ -183,7 +183,7 @@ public class FunctionReference extends SpelNodeImpl {
 			// incorrect number, including more arguments and not a vararg
 			// perhaps a subset of arguments was provided but the MethodHandle wasn't bound?
 			throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
-					functionArgs.length, declaredParamCount);
+					this.name, functionArgs.length, declaredParamCount);
 		}
 
 		// simplest case: the MethodHandle is fully bound or represents a static method with no params:
