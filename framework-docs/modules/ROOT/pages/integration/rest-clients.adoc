@@ -973,6 +973,9 @@ method parameters:
   `Map<String, ?>` with multiple variables, or an individual value. Type conversion
   is supported for non-String values.
 
+| `@RequestAttribute`
+| Provide an `Object` to add as a request attribute. Only supported by `WebClient`.
+
 | `@RequestBody`
 | Provide the body of the request either as an Object to be serialized, or a
   Reactive Streams `Publisher` such as `Mono`, `Flux`, or any other async type supported
