@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -317,6 +317,8 @@ public class SubProtocolWebSocketHandler
 			return;
 		}
 
+		checkSessions();
+
 		this.stats.incrementSessionCount(session);
 		session = decorateSession(session);
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
@@ -337,7 +339,6 @@ public class SubProtocolWebSocketHandler
 		if (holder != null) {
 			holder.setHasHandledMessages();
 		}
-		checkSessions();
 	}
 
 	/**
@@ -475,16 +476,17 @@ public class SubProtocolWebSocketHandler
 	}
 
 	/**
-	 * When a session is connected through a higher-level protocol it has a chance
-	 * to use heartbeat management to shut down sessions that are too slow to send
-	 * or receive messages. However, after a WebSocketSession is established and
-	 * before the higher level protocol is fully connected there is a possibility for
-	 * sessions to hang. This method checks and closes any sessions that have been
-	 * connected for more than 60 seconds without having received a single message.
+	 * A higher-level protocol can use heartbeats to detect sessions that need to
+	 * be cleaned up. However, if a WebSocket session is established, but messages
+	 * can't flow (e.g. due to a proxy issue), then the higher level protocol is
+	 * never successfully negotiated, and without heartbeats, sessions can hang.
+	 * The method  checks for sessions that have not received any messages 60
+	 * seconds after the WebSocket session was established, and closes them.
 	 */
 	private void checkSessions() {
 		long currentTime = System.currentTimeMillis();
-		if (!isRunning() || (currentTime - this.lastSessionCheckTime < getTimeToFirstMessage())) {
+		long timeSinceLastCheck = currentTime - this.lastSessionCheckTime;
+		if (!isRunning() || timeSinceLastCheck < getTimeToFirstMessage() / 2) {
 			return;
 		}
 
