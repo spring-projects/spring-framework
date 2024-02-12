@@ -34,6 +34,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
+import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.lang.Nullable;
@@ -303,27 +304,53 @@ public abstract class AopUtils {
 	 * (may be the incoming List as-is)
 	 */
 	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz) {
+		return findAdvisorsThatCanApply(candidateAdvisors, clazz, null);
+	}
+
+	/**
+	 * Determine the sublist of the {@code candidateAdvisors} list
+	 * that is applicable to the given class in parallel of all Advisors.
+	 * @param candidateAdvisors the Advisors to evaluate
+	 * @param clazz the target class
+	 * @param beanName the target's bean name in the bean creation time, or null.
+	 * @return sublist of Advisors that can apply to an object of the given class
+	 * (may be the incoming List as-is)
+	 * @see ProxyCreationContext#getCurrentProxiedBeanName()
+	 */
+	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz, @Nullable String beanName) {
 		if (candidateAdvisors.isEmpty()) {
 			return candidateAdvisors;
 		}
+
 		List<Advisor> eligibleAdvisors = new ArrayList<>();
-		for (Advisor candidate : candidateAdvisors) {
+		candidateAdvisors.parallelStream().forEach(candidate -> runInBeanCreationContextIfSupplied(beanName, () -> {
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
 			}
-		}
+		}));
+
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
-		for (Advisor candidate : candidateAdvisors) {
-			if (candidate instanceof IntroductionAdvisor) {
-				// already processed
-				continue;
-			}
-			if (canApply(candidate, clazz, hasIntroductions)) {
-				eligibleAdvisors.add(candidate);
-			}
-		}
+
+		candidateAdvisors.parallelStream().forEach(candidate -> runInBeanCreationContextIfSupplied(beanName, () -> {
+            if (!(candidate instanceof IntroductionAdvisor) && canApply(candidate, clazz, hasIntroductions)) {
+                eligibleAdvisors.add(candidate);
+            }
+        }));
+
 		return eligibleAdvisors;
 	}
+
+	static void runInBeanCreationContextIfSupplied(@Nullable String beanName, Runnable runnable) {
+		try {
+			if (beanName != null) {
+				ProxyCreationContext.setCurrentProxiedBeanName(beanName);
+			}
+			runnable.run();
+		} finally {
+			ProxyCreationContext.setCurrentProxiedBeanName(null);
+		}
+	}
+
 
 	/**
 	 * Invoke the given target via reflection, as part of an AOP method invocation.

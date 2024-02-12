@@ -51,7 +51,7 @@ public final class ProxyCreationContext {
 	 * Set the name of the currently proxied bean instance.
 	 * @param beanName the name of the bean, or {@code null} to reset it
 	 */
-	static void setCurrentProxiedBeanName(@Nullable String beanName) {
+	public static void setCurrentProxiedBeanName(@Nullable String beanName) {
 		if (beanName != null) {
 			currentProxiedBeanName.set(beanName);
 		}
