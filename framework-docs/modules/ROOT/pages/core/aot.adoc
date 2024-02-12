@@ -17,8 +17,11 @@ Applying such optimizations early implies the following restrictions:
 * The beans defined in your application cannot change at runtime, meaning:
 ** `@Profile`, in particular profile-specific configuration needs to be chosen at build time.
 ** `Environment` properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
-* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time (see related {spring-framework-issues}/29555[spring-framework#29555] issue).
-* Make sure that the bean type is as precise as possible.
+* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time
+* Beans registered as singletons (using `registerSingleton`, typically from
+`ConfigurableListableBeanFactory`) cannot be transformed ahead-of-time either.
+* As we can't rely on the instance, make sure that the bean type is as precise as
+possible.
 
 TIP: See also the xref:core/aot.adoc#aot.bestpractices[] section.
 
@@ -35,7 +38,7 @@ We intend to support more JVM-based use cases in future generations.
 [[aot.basics]]
 == AOT engine overview
 
-The entry point of the AOT engine for processing an `ApplicationContext` arrangement is `ApplicationContextAotGenerator`. It takes care of the following steps, based on a `GenericApplicationContext` that represents the application to optimize and a {spring-framework-api}/aot/generate/GenerationContext.html[`GenerationContext`]:
+The entry point of the AOT engine for processing an `ApplicationContext` is `ApplicationContextAotGenerator`. It takes care of the following steps, based on a `GenericApplicationContext` that represents the application to optimize and a {spring-framework-api}/aot/generate/GenerationContext.html[`GenerationContext`]:
 
 * Refresh an `ApplicationContext` for AOT processing. Contrary to a traditional refresh, this version only creates bean definitions, not bean instances.
 * Invoke the available `BeanFactoryInitializationAotProcessor` implementations and apply their contributions against the `GenerationContext`.
@@ -67,7 +70,13 @@ include-code::./AotProcessingSample[tag=aotcontext]
 In this mode, xref:core/beans/factory-extension.adoc#beans-factory-extension-factory-postprocessors[`BeanFactoryPostProcessor` implementations] are invoked as usual.
 This includes configuration class parsing, import selectors, classpath scanning, etc.
 Such steps make sure that the `BeanRegistry` contains the relevant bean definitions for the application.
-If bean definitions are guarded by conditions (such as `@Profile`), these are discarded at this stage.
+If bean definitions are guarded by conditions (such as `@Profile`), these are evaluated
+and bean definitions that don't match their conditions are discarded at this stage.
+
+If custom code needs to register extra beans programmatically, make sure that they use
+`BeanDefinitionRegistry`, and not `BeanFactory` as only bean definitions are taken into
+account. A good pattern is to implement `ImportBeanDefinitionRegistrar` and register it
+via an `@Import` on one of your configuration classes.
 
 Because this mode does not actually create bean instances, `BeanPostProcessor` implementations are not invoked, except for specific variants that are relevant for AOT processing.
 These are:
@@ -206,6 +215,27 @@ The AOT engine is designed to handle as many use cases as possible, with no code
 However, keep in mind that some optimizations are made at build time based on a static definition of the beans.
 
 This section lists the best practices that make sure your application is ready for AOT.
+
+[[aot.bestpractices.bean-registration]]
+== Programmatic bean registration
+The AOT engine takes care of the `@Configuration` model, and any callback that might be
+invoked as part of processing your configuration. If you need to register additional
+beans programmatically, make sure to use a `BeanDefinitionRegistry` to register
+bean definitions.
+
+This can be typically done via a `BeanDefinitionRegistryPostProcessor`. Note that, if it
+is registered itself as a bean, it will be invoked again at runtime unless you make
+sure to implement `BeanFactoryInitializationAotProcessor` as well. A more idiomatic
+way is to implement `ImportBeanDefinitionRegistrar` and register it using `@Import` on
+one of your configuration classes. This invokes your custom code as part of configuration
+class parsing.
+
+If you declare additional beans programmatically using a different callback, there are
+likely not going to be handled by the AOT engine, and therefore no hints are going to be
+generated for them. Depending on the environment, those beans may not be registered at
+all. For instance, classpath scanning does not work in a native image as there is no
+notion of classpath. For cases like this, it is crucial that the scanning happens at
+build time.
 
 [[aot.bestpractices.bean-type]]
 === Expose The Most Precise Bean Type
