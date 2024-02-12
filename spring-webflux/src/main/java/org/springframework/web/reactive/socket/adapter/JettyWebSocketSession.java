@@ -22,6 +22,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.jetty.util.BufferUtil;
+import org.eclipse.jetty.util.IteratingCallback;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.reactivestreams.Publisher;
@@ -175,7 +176,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	protected Mono<Void> sendMessage(WebSocketMessage message) {
 
 		Callback.Completable completable = new Callback.Completable();
-
 		DataBuffer dataBuffer = message.getPayload();
 		Session session = getDelegate();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
@@ -185,12 +185,32 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		else {
 			switch (message.getType()) {
 				case BINARY -> {
-					try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
-						while (iterator.hasNext()) {
-							ByteBuffer byteBuffer = iterator.next();
-							session.sendBinary(byteBuffer, completable);
+					@SuppressWarnings("resource")
+					DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers();
+					new IteratingCallback() {
+						@Override
+						protected Action process() {
+							if (!iterator.hasNext())
+								return Action.SUCCEEDED;
+
+							ByteBuffer buffer = iterator.next();
+							boolean last = iterator.hasNext();
+							session.sendPartialBinary(buffer, last, Callback.from(this::succeeded, this::failed));
+							return Action.SCHEDULED;
 						}
-					}
+
+						@Override
+						protected void onCompleteSuccess() {
+							iterator.close();
+							completable.complete(null);
+						}
+
+						@Override
+						protected void onCompleteFailure(Throwable cause) {
+							iterator.close();
+							completable.completeExceptionally(cause);
+						}
+					}.iterate();
 				}
 				case PING -> {
 					// Maximum size of Control frame payload is 125, per RFC 6455.

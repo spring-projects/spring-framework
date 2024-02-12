@@ -132,6 +132,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		Callback.Completable callback = new Callback.Completable();
 		mono = Mono.fromFuture(callback);
 		try {
+			// The method can block, but it is not expected to do so for any significant time.
 			@SuppressWarnings("BlockingMethodInNonBlockingContext")
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
 			new ContentWriterIteratingCallback(channel, position, count, this.response, callback).iterate();
