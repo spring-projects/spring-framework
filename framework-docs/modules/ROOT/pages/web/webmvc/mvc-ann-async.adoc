@@ -445,6 +445,13 @@ directly. For example:
 	}
 ----
 
+The following `ThreadLocalAccessor` implementations are provided out of the box:
+
+* `LocaleContextThreadLocalAccessor` -- propagates `LocaleContext` via `LocaleContextHolder`
+* `RequestAttributesThreadLocalAccessor` -- propagates `RequestAttributes` via `RequestContextHolder`
+
+The above are not registered automatically. You need to register them via `ContextRegistry.getInstance()` on startup.
+
 For more details, see the
 https://micrometer.io/docs/contextPropagation[documentation] of the Micrometer Context
 Propagation library.
