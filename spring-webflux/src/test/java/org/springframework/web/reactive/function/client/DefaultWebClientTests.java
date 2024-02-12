@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -522,6 +523,28 @@ public class DefaultWebClientTests {
 		testStatusHandlerForToEntity(spec.toEntityFlux(String.class));
 		testStatusHandlerForToEntity(spec.toEntityFlux(new ParameterizedTypeReference<String>() {}));
 		testStatusHandlerForToEntity(spec.toEntityFlux(BodyExtractors.toFlux(String.class)));
+	}
+
+	@Test
+	public void onOverrideHeadersUsingBuilder() {
+		// Given
+		WebClient client = this.builder.defaultRequest(spec -> spec.accept(MediaType.APPLICATION_JSON))
+				.build();
+		client.get().uri("/path")
+				.accept(MediaType.IMAGE_PNG)
+				.retrieve()
+				.bodyToMono(Void.class)
+				.block(Duration.ofSeconds(10));
+
+		// When
+		ClientRequest request = verifyAndGetRequest();
+
+		// Then
+		assertThat(request)
+				.extracting(ClientRequest::headers)
+				.extracting(HttpHeaders::getAccept)
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly(MediaType.IMAGE_PNG);
 	}
 
 	private void testStatusHandlerForToEntity(Publisher<?> responsePublisher) {
