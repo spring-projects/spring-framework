@@ -25,6 +25,7 @@ import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.IteratingCallback;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -128,20 +129,41 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		this.sink.complete();
 	}
 
-	void onHandlerError(Throwable ex) {
-		if (this.handlerCompletionSink != null) {
-			// Ignore result: can't overflow, ok if not first or no one listens
-			this.handlerCompletionSink.tryEmitError(ex);
-		}
-		close(CloseStatus.SERVER_ERROR);
+	void onHandlerError(Throwable error) {
+		getDelegate().close(StatusCode.SERVER_ERROR, error.getMessage(), new Callback() {
+			@Override
+			public void succeed() {
+				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
+					JettyWebSocketSession.this.handlerCompletionSink.tryEmitError(error);
+				}
+			}
+
+			@Override
+			public void fail(Throwable ex) {
+				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
+					error.addSuppressed(ex);
+					JettyWebSocketSession.this.handlerCompletionSink.tryEmitError(error);
+				}
+			}
+		});
 	}
 
 	void onHandleComplete() {
-		if (this.handlerCompletionSink != null) {
-			// Ignore result: can't overflow, ok if not first or no one listens
-			this.handlerCompletionSink.tryEmitEmpty();
-		}
-		close();
+		getDelegate().close(StatusCode.NORMAL, null, new Callback() {
+			@Override
+			public void succeed() {
+				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
+					JettyWebSocketSession.this.handlerCompletionSink.tryEmitEmpty();
+				}
+			}
+
+			@Override
+			public void fail(Throwable ex) {
+				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
+					JettyWebSocketSession.this.handlerCompletionSink.tryEmitEmpty();
+				}
+			}
+		});
 	}
 
 	@Override

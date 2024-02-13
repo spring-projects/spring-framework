@@ -50,6 +50,14 @@ public class JettyWebSocketClient implements WebSocketClient {
 		this.client = client;
 	}
 
+	public void start() throws Exception {
+		this.client.start();
+	}
+
+	public void stop() throws Exception {
+		this.client.stop();
+	}
+
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
 		return execute(url, null, handler);
