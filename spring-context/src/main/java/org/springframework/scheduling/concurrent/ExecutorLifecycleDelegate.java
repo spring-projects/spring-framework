@@ -18,6 +18,7 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.context.SmartLifecycle;
@@ -36,7 +37,7 @@ final class ExecutorLifecycleDelegate implements SmartLifecycle {
 
 	private final ExecutorService executor;
 
-	private final ReentrantLock pauseLock = new ReentrantLock();
+	private final Lock pauseLock = new ReentrantLock();
 
 	private final Condition unpaused = this.pauseLock.newCondition();
 

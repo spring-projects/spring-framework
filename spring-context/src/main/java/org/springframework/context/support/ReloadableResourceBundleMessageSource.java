@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.context.ResourceLoaderAware;
@@ -650,7 +651,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 		private volatile long refreshTimestamp = -2;
 
-		private final ReentrantLock refreshLock = new ReentrantLock();
+		private final Lock refreshLock = new ReentrantLock();
 
 		/** Cache to hold already generated MessageFormats per message code. */
 		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =

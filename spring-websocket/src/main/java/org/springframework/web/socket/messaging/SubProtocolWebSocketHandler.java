@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
@@ -98,7 +99,7 @@ public class SubProtocolWebSocketHandler
 
 	private volatile long lastSessionCheckTime = System.currentTimeMillis();
 
-	private final ReentrantLock sessionCheckLock = new ReentrantLock();
+	private final Lock sessionCheckLock = new ReentrantLock();
 
 	private final DefaultStats stats = new DefaultStats();
 
