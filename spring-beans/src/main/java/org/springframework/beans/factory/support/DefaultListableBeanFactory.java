@@ -1813,7 +1813,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return whether the bean definition for the given bean name has been
 	 * marked as a primary bean.
 	 * @param beanName the name of the bean
-	 * @param beanInstance the corresponding bean instance (can be null)
+	 * @param beanInstance the corresponding bean instance (can be {@code null})
 	 * @return whether the given bean qualifies as primary
 	 */
 	protected boolean isPrimary(String beanName, Object beanInstance) {
