@@ -489,6 +489,19 @@ class HttpHeadersTests {
 		assertThat(headers.getAcceptLanguageAsLocales()).element(0).isEqualTo(Locale.FRANCE);
 	}
 
+	@Test
+	void acceptLanguageTrailingSemicolon() {
+		String headerValue = "en-us,en;";
+		headers.set(HttpHeaders.ACCEPT_LANGUAGE, headerValue);
+		assertThat(headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE)).isEqualTo(headerValue);
+
+		List<Locale.LanguageRange> expectedRanges = Arrays.asList(
+				new Locale.LanguageRange("en-us"),
+				new Locale.LanguageRange("en")
+		);
+		assertThat(headers.getAcceptLanguage()).isEqualTo(expectedRanges);
+	}
+
 	@Test // SPR-15603
 	void acceptLanguageWithEmptyValue() {
 		this.headers.set(HttpHeaders.ACCEPT_LANGUAGE, "");
