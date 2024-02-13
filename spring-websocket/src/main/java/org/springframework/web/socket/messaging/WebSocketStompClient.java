@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -372,7 +372,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	private class WebSocketTcpConnectionHandlerAdapter implements BiConsumer<WebSocketSession, Throwable>,
 			WebSocketHandler, TcpConnection<byte[]> {
 
-		private final TcpConnectionHandler<byte[]> connectionHandler;
+		private final TcpConnectionHandler<byte[]> stompSession;
 
 		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
 
@@ -385,9 +385,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<>(2);
 
-		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> connectionHandler) {
-			Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
-			this.connectionHandler = connectionHandler;
+		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> stompSession) {
+			Assert.notNull(stompSession, "TcpConnectionHandler must not be null");
+			this.stompSession = stompSession;
 		}
 
 		// CompletableFuture callback implementation: handshake outcome
@@ -395,7 +395,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public void accept(@Nullable WebSocketSession webSocketSession, @Nullable Throwable throwable) {
 			if (throwable != null) {
-				this.connectionHandler.afterConnectFailure(throwable);
+				this.stompSession.afterConnectFailure(throwable);
 			}
 		}
 
@@ -404,7 +404,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) {
 			this.session = session;
-			this.connectionHandler.afterConnected(this);
+			this.stompSession.afterConnected(this);
 		}
 
 		@Override
@@ -415,23 +415,23 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				messages = this.codec.decode(webSocketMessage);
 			}
 			catch (Throwable ex) {
-				this.connectionHandler.handleFailure(ex);
+				this.stompSession.handleFailure(ex);
 				return;
 			}
 			for (Message<byte[]> message : messages) {
-				this.connectionHandler.handleMessage(message);
+				this.stompSession.handleMessage(message);
 			}
 		}
 
 		@Override
-		public void handleTransportError(WebSocketSession session, Throwable ex) throws Exception {
-			this.connectionHandler.handleFailure(ex);
+		public void handleTransportError(WebSocketSession session, Throwable ex) {
+			this.stompSession.handleFailure(ex);
 		}
 
 		@Override
-		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
 			cancelInactivityTasks();
-			this.connectionHandler.afterConnectionClosed();
+			this.stompSession.afterConnectionClosed();
 		}
 
 		private void cancelInactivityTasks() {
