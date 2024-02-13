@@ -212,8 +212,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 					new IteratingCallback() {
 						@Override
 						protected Action process() {
-							if (!iterator.hasNext())
+							if (!iterator.hasNext()) {
 								return Action.SUCCEEDED;
+							}
 
 							ByteBuffer buffer = iterator.next();
 							boolean last = iterator.hasNext();
