@@ -200,9 +200,15 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	private void registerHintsForClassAttributes(ReflectionHints hints, MergedAnnotation<Annotation> annotation) {
-		annotation.getRoot().asMap().values().forEach(value -> {
+		annotation.getRoot().asMap().forEach((key,value) -> {
 			if (value instanceof Class<?> classValue && value != Void.class) {
-				hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				if (key.equals("builder")) {
+					hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+							MemberCategory.INVOKE_DECLARED_METHODS);
+				}
+				else {
+					hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				}
 			}
 		});
 	}
