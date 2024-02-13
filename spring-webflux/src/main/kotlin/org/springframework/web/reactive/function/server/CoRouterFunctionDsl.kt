@@ -170,7 +170,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `GET` requests
-	 * that match the given pattern.
+	 * that match the given predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun GET(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.GET(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `GET` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2
@@ -197,7 +207,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
-	 * that match the given pattern.
+	 * that match the given pattern and predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun HEAD(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.HEAD(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `HEAD` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2
@@ -224,7 +244,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `POST` requests
-	 * that match the given pattern.
+	 * that match the given predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun POST(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.POST(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `POST` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2
@@ -251,7 +281,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
-	 * that match the given pattern.
+	 * that match the given predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun PUT(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.PUT(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `PUT` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2
@@ -278,7 +318,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
-	 * that match the given pattern.
+	 * that match the given pattern and predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun PATCH(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.PATCH(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `PATCH` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2
@@ -307,7 +357,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
-	 * that match the given pattern.
+	 * that match the given predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun DELETE(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.DELETE(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `DELETE` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2
@@ -336,7 +396,17 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 
 	/**
 	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
-	 * that match the given pattern.
+	 * that match the given predicate.
+	 * @param predicate predicate to match
+	 * @since 6.1.4
+	 */
+	fun OPTIONS(predicate: RequestPredicate, f: suspend (ServerRequest) -> ServerResponse) {
+		builder.OPTIONS(predicate, asHandlerFunction(f))
+	}
+
+	/**
+	 * Adds a route to the given handler function that handles all HTTP `OPTIONS` requests
+	 * that match the given pattern and predicate.
 	 * @param pattern the pattern to match to
 	 * @param predicate additional predicate to match
 	 * @since 5.2

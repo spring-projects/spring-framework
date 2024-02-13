@@ -333,7 +333,7 @@ class CoRouterFunctionDslTests {
 				null
 			}
 		}
-		GET("/**", pathExtension { it == "properties" }) {
+		GET(pathExtension { it == "properties" }) {
 			ok().bodyValueAndAwait("foo=bar")
 		}
 		path("/baz", ::handle)
