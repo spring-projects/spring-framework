@@ -121,6 +121,7 @@ public interface EvaluationContext {
 	 * configuration for the context.
 	 * @param name the name of the variable to set
 	 * @param value the value to be placed in the variable
+	 * @see #lookupVariable(String)
 	 */
 	void setVariable(String name, @Nullable Object value);
 

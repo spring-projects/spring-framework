@@ -787,7 +787,7 @@ Kotlin::
 
 WebFlux.fn provides built-in support for serving resources.
 
-NOTE: In addition to the capabilities described below, it is possible to implement an even more flexible resource handling thanks to
+NOTE: In addition to the capabilities described below, it is possible to implement even more flexible resource handling thanks to
 {spring-framework-api}++/web/reactive/function/server/RouterFunctions.html#resources(java.util.function.Function)++[`RouterFunctions#resource(java.util.function.Function)`].
 
 [[webflux-fn-resource]]

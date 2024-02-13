@@ -40,7 +40,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Register the necessary reflection hints so that the specified type can be
- * bound at runtime. Fields, constructors, properties and record components
+ * bound at runtime. Fields, constructors, properties, and record components
  * are registered, except for a set of types like those in the {@code java.}
  * package where just the type is registered. Types are discovered transitively
  * on properties and record components, and generic types are registered as well.
@@ -200,9 +200,9 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	private void registerHintsForClassAttributes(ReflectionHints hints, MergedAnnotation<Annotation> annotation) {
-		annotation.getRoot().asMap().forEach((key,value) -> {
+		annotation.getRoot().asMap().forEach((attributeName, value) -> {
 			if (value instanceof Class<?> classValue && value != Void.class) {
-				if (key.equals("builder")) {
+				if (attributeName.equals("builder")) {
 					hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 							MemberCategory.INVOKE_DECLARED_METHODS);
 				}

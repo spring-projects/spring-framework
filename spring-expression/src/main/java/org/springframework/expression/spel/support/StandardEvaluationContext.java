@@ -269,7 +269,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Set multiple named variables in this evaluation context to given values.
+	 * Set multiple named variables in this evaluation context to the specified values.
 	 * <p>This is a convenience variant of {@link #setVariable(String, Object)}.
 	 * @param variables the names and values of the variables to set
 	 * @see #setVariable(String, Object)
@@ -284,7 +284,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 * evaluation context, as populated by {@link #setVariable(String, Object)}.
 	 * Make sure that specified function names and variable names do not overlap.
 	 * @param name the name of the function
-	 * @param method the Method to register
+	 * @param method the {@code Method} to register
 	 * @see #registerFunction(String, MethodHandle)
 	 */
 	public void registerFunction(String name, Method method) {
@@ -297,7 +297,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 * evaluation context, as populated by {@link #setVariable(String, Object)}.
 	 * Make sure that specified function names and variable names do not overlap.
 	 * @param name the name of the function
-	 * @param methodHandle the MethodHandle to register
+	 * @param methodHandle the {@link MethodHandle} to register
 	 * @since 6.1
 	 * @see #registerFunction(String, Method)
 	 */
