@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.springframework.util.DefaultPropertiesPersister;
  * "spring.xml.ignore" property.
  *
  * <p>This is the standard implementation used in Spring's resource support.
+ * Only intended for internal use within the framework. For other purposes,
+ * use its base class {@link DefaultPropertiesPersister} instead.
  *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
@@ -40,7 +42,6 @@ public class ResourcePropertiesPersister extends DefaultPropertiesPersister {
 	/**
 	 * A convenient constant for a default {@code ResourcePropertiesPersister} instance,
 	 * as used in Spring's common resource support.
-	 * @since 5.3
 	 */
 	public static final ResourcePropertiesPersister INSTANCE = new ResourcePropertiesPersister();
 
