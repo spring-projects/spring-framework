@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -383,7 +382,11 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private volatile long lastWriteTime = -1;
 
-		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<>(2);
+		@Nullable
+		private ScheduledFuture<?> readInactivityFuture;
+
+		@Nullable
+		private ScheduledFuture<?> writeInactivityFuture;
 
 		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> stompSession) {
 			Assert.notNull(stompSession, "TcpConnectionHandler must not be null");
@@ -430,22 +433,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		@Override
 		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-			cancelInactivityTasks();
 			this.stompSession.afterConnectionClosed();
-		}
-
-		private void cancelInactivityTasks() {
-			for (ScheduledFuture<?> task : this.inactivityTasks) {
-				try {
-					task.cancel(true);
-				}
-				catch (Throwable ex) {
-					// Ignore
-				}
-			}
-			this.lastReadTime = -1;
-			this.lastWriteTime = -1;
-			this.inactivityTasks.clear();
 		}
 
 		@Override
@@ -486,7 +474,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
 			Duration delay = Duration.ofMillis(duration / 2);
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+			this.readInactivityFuture = getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastReadTime > duration) {
 					try {
 						runnable.run();
@@ -497,7 +485,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, delay));
+			}, delay);
 		}
 
 		@Override
@@ -505,7 +493,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
 			Duration delay = Duration.ofMillis(duration / 2);
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+			this.writeInactivityFuture = getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
 					try {
 						runnable.run();
@@ -516,11 +504,12 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, delay));
+			}, delay);
 		}
 
 		@Override
 		public void close() {
+			cancelInactivityTasks();
 			WebSocketSession session = this.session;
 			if (session != null) {
 				try {
@@ -533,6 +522,31 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				}
 			}
 		}
+
+		private void cancelInactivityTasks() {
+			ScheduledFuture<?> readFuture = this.readInactivityFuture;
+			this.readInactivityFuture = null;
+			cancelFuture(readFuture);
+
+			ScheduledFuture<?> writeFuture = this.writeInactivityFuture;
+			this.writeInactivityFuture = null;
+			cancelFuture(writeFuture);
+
+			this.lastReadTime = -1;
+			this.lastWriteTime = -1;
+		}
+
+		private static void cancelFuture(@Nullable ScheduledFuture<?> future) {
+			if (future != null) {
+				try {
+					future.cancel(true);
+				}
+				catch (Throwable ex) {
+					// Ignore
+				}
+			}
+		}
+
 	}
 
 
