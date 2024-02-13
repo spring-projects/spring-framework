@@ -268,7 +268,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	/**
 	 * Builder for {@code SimpleEvaluationContext}.
 	 */
-	public static class Builder {
+	public static final class Builder {
 
 		private final List<PropertyAccessor> accessors;
 
@@ -280,7 +280,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		@Nullable
 		private TypedValue rootObject;
 
-		public Builder(PropertyAccessor... accessors) {
+		private Builder(PropertyAccessor... accessors) {
 			this.accessors = Arrays.asList(accessors);
 		}
 
