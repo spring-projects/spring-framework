@@ -1,10 +1,26 @@
 [[expressions-ref-functions]]
 = Functions
 
-You can extend SpEL by registering user-defined functions that can be called within the
-expression string. The function is registered through the `EvaluationContext`. The
-following example shows how to register a user-defined function to be invoked via reflection
-(i.e. a `Method`):
+You can extend SpEL by registering user-defined functions that can be called within
+expressions by using the `#functionName(...)` syntax. Functions can be registered as
+variables in `EvaluationContext` implementations via the `setVariable()` method.
+
+[TIP]
+====
+`StandardEvaluationContext` also defines `registerFunction(...)` methods that provide a
+convenient way to register a function as a `java.lang.reflect.Method` or a
+`java.lang.invoke.MethodHandle`.
+====
+
+[WARNING]
+====
+Since functions share a common namespace with
+xref:core/expressions/language-ref/variables.adoc[variables] in the evaluation context,
+care must be taken to ensure that function names and variable names do not overlap.
+====
+
+The following example shows how to register a user-defined function to be invoked via
+reflection using a `java.lang.reflect.Method`:
 
 [tabs]
 ======

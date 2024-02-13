@@ -74,6 +74,14 @@ import org.springframework.lang.Nullable;
  * {@code EvaluationContext} and a root object as arguments:
  * {@link org.springframework.expression.Expression#getValue(EvaluationContext, Object)}.
  *
+ * <p>In addition to support for setting and looking up variables as defined in
+ * the {@link EvaluationContext} API, {@code SimpleEvaluationContext} also
+ * provides support for {@linkplain #setVariable(String, Object) registering} and
+ * {@linkplain #lookupVariable(String) looking up} functions as variables. Since
+ * functions share a common namespace with the variables in this evaluation
+ * context, care must be taken to ensure that function names and variable names
+ * do not overlap.
+ *
  * <p>For more power and flexibility, in particular for internal configuration
  * scenarios, consider using {@link StandardEvaluationContext} instead.
  *
@@ -214,11 +222,31 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		throw new SpelEvaluationException(SpelMessage.VARIABLE_ASSIGNMENT_NOT_SUPPORTED, "#" + name);
 	}
 
+	/**
+	 * Set a named variable or function in this evaluation context to the specified
+	 * value.
+	 * <p>A function can be registered as a {@link java.lang.reflect.Method} or
+	 * a {@link java.lang.invoke.MethodHandle}.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain SimpleEvaluationContext
+	 * class-level documentation} for details.
+	 * @param name the name of the variable or function to set
+	 * @param value the value to be placed in the variable or function
+	 * @see #lookupVariable(String)
+	 */
 	@Override
 	public void setVariable(String name, @Nullable Object value) {
 		this.variables.put(name, value);
 	}
 
+	/**
+	 * Look up a named variable or function within this evaluation context.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain SimpleEvaluationContext
+	 * class-level documentation} for details.
+	 * @param name the name of the variable or function to look up
+	 * @return the value of the variable or function, or {@code null} if not found
+	 */
 	@Override
 	@Nullable
 	public Object lookupVariable(String name) {
