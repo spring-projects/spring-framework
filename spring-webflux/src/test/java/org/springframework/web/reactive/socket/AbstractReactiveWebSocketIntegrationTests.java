@@ -89,11 +89,13 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 	@interface ParameterizedWebSocketTest {
 	}
 
+	private static final JettyWebSocketClient jettyClient = new JettyWebSocketClient();
+
 	static Stream<Object[]> arguments() throws IOException {
 
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
-				new JettyWebSocketClient(),
+				jettyClient,
 				new ReactorNettyWebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
 		};
