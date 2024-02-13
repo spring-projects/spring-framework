@@ -714,9 +714,14 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		public void run() {
 			TcpConnection<byte[]> conn = connection;
 			if (conn != null) {
-				conn.sendAsync(HEARTBEAT).whenComplete((unused, throwable) -> {
-					if (throwable != null) {
-						handleFailure(throwable);
+				conn.sendAsync(HEARTBEAT).whenComplete((unused, ex) -> {
+					if (ex != null) {
+						String msg = "Heartbeat write failure. Closing connection in session id=" + sessionId + ".";
+						if (logger.isDebugEnabled()) {
+							logger.debug(msg);
+						}
+						resetConnection();
+						handleFailure(new ConnectionLostException(msg, ex));
 					}
 				});
 			}
@@ -728,13 +733,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		@Override
 		public void run() {
-			String error = "Read inactivity. Closing connection in session id=" + sessionId + ".";
+			String msg = "Read inactivity. Closing connection in session id=" + sessionId + ".";
 			if (logger.isDebugEnabled()) {
-				logger.debug(error);
+				logger.debug(msg);
 			}
 			clientSideClose = true;
 			resetConnection();
-			handleFailure(new IllegalStateException(error));
+			handleFailure(new ConnectionLostException(msg));
 		}
 	}
 
