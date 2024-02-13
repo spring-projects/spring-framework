@@ -802,25 +802,25 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-ClassPathResource index = new ClassPathResource("static/index.html");
-List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
-RequestPredicate spaPredicate = path("/api/**").or(path("/error")).or(pathExtension(extensions::contains)).negate();
-RouterFunction<ServerResponse> redirectToIndex = route()
-    .resource(spaPredicate, index)
-    .build();
+	ClassPathResource index = new ClassPathResource("static/index.html");
+	List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
+	RequestPredicate spaPredicate = path("/api/**").or(path("/error")).or(pathExtension(extensions::contains)).negate();
+	RouterFunction<ServerResponse> redirectToIndex = route()
+		.resource(spaPredicate, index)
+		.build();
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-val redirectToIndex = router {
-    val index = ClassPathResource("static/index.html")
-    val extensions = listOf("js", "css", "ico", "png", "jpg", "gif")
-    val spaPredicate = !(path("/api/**") or path("/error") or
-        pathExtension(extensions::contains))
-    resource(spaPredicate, index)
-}
+	val redirectToIndex = router {
+		val index = ClassPathResource("static/index.html")
+		val extensions = listOf("js", "css", "ico", "png", "jpg", "gif")
+		val spaPredicate = !(path("/api/**") or path("/error") or
+			pathExtension(extensions::contains))
+		resource(spaPredicate, index)
+	}
 ----
 ======
 
@@ -835,16 +835,16 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-Resource location = new FileSystemResource("public-resources/");
-RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
+    Resource location = new FileSystemResource("public-resources/");
+    RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-val location = FileSystemResource("public-resources/")
-val resources = router { resources("/resources/**", location) }
+    val location = FileSystemResource("public-resources/")
+    val resources = router { resources("/resources/**", location) }
 ----
 ======
 
