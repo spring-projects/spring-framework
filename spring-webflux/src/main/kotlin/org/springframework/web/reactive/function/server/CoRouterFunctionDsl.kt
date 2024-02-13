@@ -452,7 +452,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 * Route to the given handler function if the given pathExtension predicate applies.
 	 * @see RouterFunctions.route
 	 */
-	fun pathExtension(predicate: (String) -> Boolean, f: suspend (ServerRequest) -> ServerResponse) {
+	fun pathExtension(predicate: (String?) -> Boolean, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), asHandlerFunction(f)))
 	}
 
@@ -461,7 +461,7 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 * predicate.
 	 * @see RequestPredicates.pathExtension
 	 */
-	fun pathExtension(predicate: (String) -> Boolean): RequestPredicate =
+	fun pathExtension(predicate: (String?) -> Boolean): RequestPredicate =
 			RequestPredicates.pathExtension(predicate)
 
 	/**

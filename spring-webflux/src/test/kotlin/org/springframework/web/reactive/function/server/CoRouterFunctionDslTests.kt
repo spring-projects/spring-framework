@@ -113,6 +113,15 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
+	fun pathExtension() {
+		val mockRequest = get("https://example.com/test.properties").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request))
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	@Test
 	fun resource() {
 		val mockRequest = get("https://example.com/response2.txt").build()
 		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
@@ -323,6 +332,9 @@ class CoRouterFunctionDslTests {
 			else {
 				null
 			}
+		}
+		GET("/**", pathExtension { it == "properties" }) {
+			ok().bodyValueAndAwait("foo=bar")
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").buildAndAwait() }

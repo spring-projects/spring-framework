@@ -569,7 +569,7 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 * Route to the given handler function if the given pathExtension predicate applies.
 	 * @see RouterFunctions.route
 	 */
-	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
+	fun pathExtension(predicate: (String?) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
 		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction { f(it).cast(ServerResponse::class.java) }))
 	}
 
@@ -578,7 +578,7 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 * predicate.
 	 * @see RequestPredicates.pathExtension
 	 */
-	fun pathExtension(predicate: (String) -> Boolean): RequestPredicate =
+	fun pathExtension(predicate: (String?) -> Boolean): RequestPredicate =
 			RequestPredicates.pathExtension(predicate)
 
 	/**

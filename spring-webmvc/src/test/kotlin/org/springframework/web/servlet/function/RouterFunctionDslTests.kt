@@ -89,6 +89,13 @@ class RouterFunctionDslTests {
 	}
 
 	@Test
+	fun pathExtension() {
+		val servletRequest = PathPatternsTestUtils.initRequest("GET", "/test.properties", true)
+		val request = DefaultServerRequest(servletRequest, emptyList())
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
+	}
+
+	@Test
 	fun resource() {
 		val servletRequest = PathPatternsTestUtils.initRequest("GET","/response2.txt", true)
 		val request = DefaultServerRequest(servletRequest, emptyList())
@@ -184,6 +191,9 @@ class RouterFunctionDslTests {
 			else {
 				null
 			}
+		}
+		GET(pathExtension { it == "properties" }) {
+			ok().body("foo=bar")
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").build() }
