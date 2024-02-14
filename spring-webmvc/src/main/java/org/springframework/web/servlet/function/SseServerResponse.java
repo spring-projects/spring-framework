@@ -136,6 +136,23 @@ final class SseServerResponse extends AbstractServerResponse {
 		}
 
 		@Override
+		public void send() throws IOException {
+			this.builder.append('\n');
+			try {
+				OutputStream body = this.outputMessage.getBody();
+				body.write(builderBytes());
+				body.flush();
+			}
+			catch (IOException ex) {
+				this.sendFailed = true;
+				throw ex;
+			}
+			finally {
+				this.builder.setLength(0);
+			}
+		}
+
+		@Override
 		public SseBuilder id(String id) {
 			Assert.hasLength(id, "Id must not be empty");
 			return field("id", id);
@@ -186,20 +203,7 @@ final class SseServerResponse extends AbstractServerResponse {
 			for (String line : lines) {
 				field("data", line);
 			}
-			this.builder.append('\n');
-
-			try {
-				OutputStream body = this.outputMessage.getBody();
-				body.write(builderBytes());
-				body.flush();
-			}
-			catch (IOException ex) {
-				this.sendFailed = true;
-				throw ex;
-			}
-			finally {
-				this.builder.setLength(0);
-			}
+			this.send();
 		}
 
 		@SuppressWarnings("unchecked")
