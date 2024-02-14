@@ -103,6 +103,9 @@ public class SubProtocolWebSocketHandler
 
 	private final DefaultStats stats = new DefaultStats();
 
+	@Nullable
+	private Integer phase;
+
 	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
@@ -247,6 +250,20 @@ public class SubProtocolWebSocketHandler
 	 */
 	public int getTimeToFirstMessage() {
 		return this.timeToFirstMessage;
+	}
+
+	/**
+	 * Set the phase that this handler should run in.
+	 * <p>By default, this is {@link SmartLifecycle#DEFAULT_PHASE}.
+	 * @since 6.1.4
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	@Override
+	public int getPhase() {
+		return (this.phase != null ? this.phase : SmartLifecycle.super.getPhase());
 	}
 
 	/**
