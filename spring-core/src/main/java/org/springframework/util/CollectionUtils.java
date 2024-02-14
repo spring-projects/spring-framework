@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 
@@ -504,6 +506,44 @@ public abstract class CollectionUtils {
 			return (MultiValueMap<K, V>) targetMap;
 		}
 		return new UnmodifiableMultiValueMap<>(targetMap);
+	}
+
+	/**
+	 * Return a (partially unmodifiable) map that combines the provided two
+	 * maps. Invoking {@link Map#put(Object, Object)} or {@link Map#putAll(Map)}
+	 * on the returned map results in an {@link UnsupportedOperationException}.
+	 * @param first the first map to compose
+	 * @param second the second map to compose
+	 * @return a new map that composes the given two maps
+	 * @since 6.2
+	 */
+	public static <K, V> Map<K, V> compositeMap(Map<K,V> first, Map<K,V> second) {
+		return new CompositeMap<>(first, second);
+	}
+
+	/**
+	 * Return a map that combines the provided maps. Invoking
+	 * {@link Map#put(Object, Object)} on the returned map will apply
+	 * {@code putFunction}, or will throw an
+	 * {@link UnsupportedOperationException} {@code putFunction} is
+	 * {@code null}. The same applies to {@link Map#putAll(Map)} and
+	 * {@code putAllFunction}.
+	 * @param first the first map to compose
+	 * @param second the second map to compose
+	 * @param putFunction applied when {@code Map::put} is invoked. If
+	 * {@code null}, {@code Map::put} throws an
+	 * {@code UnsupportedOperationException}.
+	 * @param putAllFunction applied when {@code Map::putAll} is invoked. If
+	 * {@code null}, {@code Map::putAll} throws an
+	 * {@code UnsupportedOperationException}.
+	 * @return a new map that composes the give maps
+	 * @since 6.2
+	 */
+	public static <K, V> Map<K, V> compositeMap(Map<K,V> first, Map<K,V> second,
+			@Nullable BiFunction<K, V, V> putFunction,
+			@Nullable Consumer<Map<K, V>> putAllFunction) {
+
+		return new CompositeMap<>(first, second, putFunction, putAllFunction);
 	}
 
 }
