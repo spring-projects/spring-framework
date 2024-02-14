@@ -521,8 +521,8 @@ standard AspectJ. The following example shows the `aop.xml` file:
 	<aspectj>
 
 		<weaver>
-			<!-- only weave classes in our application-specific packages -->
-			<include within="com.xyz.*"/>
+			<!-- only weave classes in our application-specific packages and sub-packages -->
+			<include within="com.xyz..*"/>
 		</weaver>
 
 		<aspects>
@@ -731,8 +731,8 @@ For example:
 	<aspectj>
 
 		<weaver>
-			<!-- only weave classes in our application-specific packages -->
-			<include within="com.xyz.*"/>
+			<!-- only weave classes in our application-specific packages and sub-packages -->
+			<include within="com.xyz..*"/>
 		</weaver>
 
 	</aspectj>
