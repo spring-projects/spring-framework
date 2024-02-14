@@ -51,9 +51,9 @@ val defaultClient = RestClient.create()
 
 val customClient = RestClient.builder()
   .requestFactory(HttpComponentsClientHttpRequestFactory())
-  .messageConverters(converters -> converters.add(MyCustomMessageConverter()))
+  .messageConverters { converters -> converters.add(MyCustomMessageConverter()) }
   .baseUrl("https://example.com")
-  .defaultUriVariables(Map.of("variable", "foo"))
+  .defaultUriVariables(mapOf("variable" to "foo"))
   .defaultHeader("My-Header", "Foo")
   .requestInterceptor(myCustomInterceptor)
   .requestInitializer(myCustomInitializer)
