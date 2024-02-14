@@ -115,7 +115,7 @@ public interface WebSocketMessageBrokerConfigurer {
 	/**
 	 * Return the {@link SmartLifecycle#getPhase() phase} that WebSocket message
 	 * handling beans of type {@link SmartLifecycle} should run in.
-	 * <p>The default implementation returns {@link null} which allows other
+	 * <p>The default implementation returns {@code null} which allows other
 	 * configurers to decide. As soon as any configurer returns a value, that
 	 * value is used. If no configurer returns a value, then by default
 	 * {@link SmartLifecycle#DEFAULT_PHASE} is used.
