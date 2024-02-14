@@ -34,6 +34,9 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.beans.factory.aot.support.ObjectPair;
+import org.springframework.beans.factory.aot.support.RecordPair;
+import org.springframework.beans.factory.aot.support.RecordWithObject;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -681,6 +684,21 @@ class BeanDefinitionMethodGeneratorTests {
 		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
 				.rootBeanDefinition(Boolean.class).setFactoryMethod("parseBoolean").addConstructorArgValue("true").getBeanDefinition();
 		testBeanDefinitionMethodInCurrentFile(Boolean.class, beanDefinition);
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenBeanIsOfCommonValueType() {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(RecordPair.class)
+				.setFactoryMethod("of")
+				.addConstructorArgValue(new RecordWithObject(0, null))
+				.addConstructorArgValue(new ObjectPair<>("Test", 0))
+				.getBeanDefinition();
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registerBean(beanDefinition), null, Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> assertThat(actual).isEqualTo(beanDefinition));
 	}
 
 	@Test

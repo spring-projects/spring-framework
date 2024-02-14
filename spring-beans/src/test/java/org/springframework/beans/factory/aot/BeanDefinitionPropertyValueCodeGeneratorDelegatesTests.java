@@ -18,10 +18,13 @@ package org.springframework.beans.factory.aot;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,9 +39,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.generate.ValueCodeGenerationException;
 import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates;
 import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.beans.factory.aot.support.NestableObject;
+import org.springframework.beans.factory.aot.support.NestableRecord;
+import org.springframework.beans.factory.aot.support.ObjectPair;
+import org.springframework.beans.factory.aot.support.ObjectWithMissingConstructor;
+import org.springframework.beans.factory.aot.support.ObjectWithMissingSetter;
+import org.springframework.beans.factory.aot.support.ObjectWithPrivateConstructor;
+import org.springframework.beans.factory.aot.support.ObjectWithPrivateSetter;
+import org.springframework.beans.factory.aot.support.ObjectWithRecord;
+import org.springframework.beans.factory.aot.support.ProtectedObjectCreator;
+import org.springframework.beans.factory.aot.support.RecordPair;
+import org.springframework.beans.factory.aot.support.RecordWithObject;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -55,8 +70,10 @@ import org.springframework.core.testfixture.aot.generate.value.ExampleClass$$Gen
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Tests for {@link BeanDefinitionPropertyValueCodeGeneratorDelegates}. This
@@ -295,6 +312,15 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 					assertThat(instance).isEqualTo(classes));
 		}
 
+		@Test
+		void noGenerateWhenSelfReference() {
+			Object[] items = new Object[1];
+			items[0] = items;
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(items))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
 	}
 
 	@Nested
@@ -315,6 +341,15 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 			ManagedList<String> list = new ManagedList<>();
 			compile(list, (instance, compiler) -> assertThat(instance).isEqualTo(list)
 					.isInstanceOf(ManagedList.class));
+		}
+
+		@Test
+		void noGenerateWhenSelfReference() {
+			ManagedList<Object> list = new ManagedList<>();
+			list.add(list);
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(list))
+					.isInstanceOf(ValueCodeGenerationException.class);
 		}
 
 	}
@@ -338,7 +373,6 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 			compile(set, (instance, compiler) -> assertThat(instance).isEqualTo(set)
 					.isInstanceOf(ManagedSet.class));
 		}
-
 	}
 
 	@Nested
@@ -359,7 +393,6 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 			compile(map, (instance, compiler) -> assertThat(instance).isEqualTo(map)
 					.isInstanceOf(ManagedMap.class));
 		}
-
 	}
 
 	@Nested
@@ -376,6 +409,15 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 		void generateWhenEmptyList() {
 			List<String> list = List.of();
 			compile(list, (instance, compiler) -> assertThat(instance).isEqualTo(list));
+		}
+
+		@Test
+		void noGenerateWhenSelfReference() {
+			List<Object> list = new ArrayList<>();
+			list.add(list);
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(list))
+					.isInstanceOf(ValueCodeGenerationException.class);
 		}
 
 	}
@@ -408,7 +450,6 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 			Set<Class<?>> set = Set.of(String.class, Integer.class, Long.class);
 			compile(set, (instance, compiler) -> assertThat(instance).isEqualTo(set));
 		}
-
 	}
 
 	@Nested
@@ -442,6 +483,237 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 			});
 		}
 
+		@Test
+		void noGenerateWhenSelfReference() {
+			Map<Object, Object> map = new IdentityHashMap<>();
+			map.put(map, map);
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(map))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+	}
+
+	@Nested
+	class RecordTests {
+		@Test
+		void generatedPublicRecord() {
+			NestableRecord record = new NestableRecord(0, "record", null);
+			compile(record, (instance, compiler) -> {
+				NestableRecord actual = (NestableRecord) instance;
+				assertThat(actual).isEqualTo(record);
+			});
+		}
+
+		@Test
+		void generatedNestedPublicRecord() {
+			NestableRecord record = new NestableRecord(0, "parent", new NestableRecord(1, "child", null));
+			compile(record, (instance, compiler) -> {
+				NestableRecord actual = (NestableRecord) instance;
+				assertThat(actual).isEqualTo(record);
+			});
+		}
+
+		@Test
+		void generatedNestedWithObjects() {
+			RecordWithObject record = new RecordWithObject(0, new ObjectWithRecord(1, new RecordWithObject(2, new ObjectWithRecord(3, null))));
+			compile(record, (instance, compiler) -> {
+				RecordWithObject actual = (RecordWithObject) instance;
+				assertThat(actual).isEqualTo(record);
+			});
+		}
+
+		@Test
+		void generatedGenericRecord() {
+			RecordPair<String, Integer> pair = new RecordPair<>("Left", 1);
+			compile(pair, (instance, compiler) -> {
+				RecordPair<?, ?> actual = (RecordPair<?, ?>) instance;
+				assertThat(actual).isEqualTo(pair);
+			});
+		}
+
+		@Test
+		void notGeneratedCyclicRecord() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			ObjectWithRecord cycleEnd = new ObjectWithRecord(1);
+			RecordWithObject cycleStart = new RecordWithObject(0, cycleEnd);
+			cycleEnd.setNested(cycleStart);
+			assertThatCode(() -> valueCodeGenerator.generateCode(cycleStart))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedProtectedRecord() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(ProtectedObjectCreator.getProtectedRecord()))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		public record InaccessibleRecord() {}
+
+		@Test
+		void notGeneratedPublicRecordInProtectedClass() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(new InaccessibleRecord()))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+	}
+
+	@Nested
+	class ObjectTests {
+		@Test
+		void generatedPublicObject() {
+			NestableObject object = new NestableObject();
+			object.name = "Object";
+			object.setId(1);
+			object.setNested(null);
+			compile(object, (instance, compiler) -> {
+				NestableObject actual = (NestableObject) instance;
+				assertThat(actual).isEqualTo(object);
+			});
+		}
+
+		@Test
+		void generatedNestedPublicObject() {
+			NestableObject parent = new NestableObject();
+			parent.name = "Parent";
+			parent.setId(1);
+			NestableObject child = new NestableObject();
+			child.name = "Child";
+			child.setId(2);
+			child.setNested(null);
+			parent.setNested(child);
+			compile(parent, (instance, compiler) -> {
+				NestableObject actual = (NestableObject) instance;
+				assertThat(actual).isEqualTo(parent);
+			});
+		}
+
+		@Test
+		void generatedGeneric() {
+			ObjectPair<String, Integer> pair = new ObjectPair<>("Test", 1);
+			compile(pair, (instance, compiler) -> {
+				ObjectPair<?, ?> actual = (ObjectPair<?, ?>) instance;
+				assertThat(actual).isEqualTo(pair);
+			});
+		}
+
+		@Test
+		void generatedPairOfObjects() {
+			ObjectPair<ObjectPair<String, Integer>, ObjectPair<Integer, String>> pair =
+					new ObjectPair<>(new ObjectPair<>("Left", 0),
+							new ObjectPair<>(1, "Right"));
+			compile(pair, (instance, compiler) -> {
+				ObjectPair<?, ?> actual = (ObjectPair<?, ?>) instance;
+				assertThat(actual).isEqualTo(pair);
+			});
+		}
+
+		@Test
+		void generatedNestedWithRecords() {
+			ObjectWithRecord object = new ObjectWithRecord(0, new RecordWithObject(1, new ObjectWithRecord(2, new RecordWithObject(3, null))));
+			compile(object, (instance, compiler) -> {
+				ObjectWithRecord actual = (ObjectWithRecord) instance;
+				assertThat(actual).isEqualTo(object);
+			});
+		}
+
+		@Test
+		void generatedPairOfObjectsWithinList() {
+			var pair = new ObjectPair<>(List.of(new ObjectPair<>("Left", 0)),
+							List.of(new ObjectPair<>(1, "Right")));
+			compile(pair, (instance, compiler) -> {
+				ObjectPair<?, ?> actual = (ObjectPair<?, ?>) instance;
+				assertThat(actual).isEqualTo(pair);
+			});
+		}
+
+		@Test
+		void generatedPairOfObjectsWithinSet() {
+			var pair = new ObjectPair<>(Set.of(new ObjectPair<>("Left", 0)),
+					Set.of(new ObjectPair<>(1, "Right")));
+			compile(pair, (instance, compiler) -> {
+				ObjectPair<?, ?> actual = (ObjectPair<?, ?>) instance;
+				assertThat(actual).isEqualTo(pair);
+			});
+		}
+
+		@Test
+		void generatedPairOfObjectsWithinMap() {
+			var pair = new ObjectPair<>(Map.of("a", new ObjectPair<>("Left", 0)),
+					Map.of("b", new ObjectPair<>(1, "Right")));
+			compile(pair, (instance, compiler) -> {
+				ObjectPair<?, ?> actual = (ObjectPair<?, ?>) instance;
+				assertThat(actual).isEqualTo(pair);
+			});
+		}
+
+		@Test
+		void notGeneratedProtectedClass() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(ProtectedObjectCreator.getProtectedObject()))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		public static class InaccessibleObject {}
+
+		@Test
+		void notGeneratedInaccessibleClass() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(new InaccessibleObject()))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedMissingConstructor() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(new ObjectWithMissingConstructor("value")))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedPrivateConstructor()
+				throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			ObjectWithPrivateConstructor instance = ReflectionUtils.accessibleConstructor(ObjectWithPrivateConstructor.class).newInstance();
+			assertThatCode(() -> valueCodeGenerator.generateCode(instance))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedMissingSetter() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(new ObjectWithMissingSetter()))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedPrivateSetter() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(new ObjectWithPrivateSetter()))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedCyclicPublicObject() {
+			NestableObject cyclicObject = new NestableObject();
+			cyclicObject.name = "Cyclic";
+			cyclicObject.setId(0);
+			cyclicObject.setNested(cyclicObject);
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			assertThatCode(() -> valueCodeGenerator.generateCode(cyclicObject))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
+
+		@Test
+		void notGeneratedCyclicObjectFromRecord() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			ObjectWithRecord cycleEnd = new ObjectWithRecord(1);
+			RecordWithObject cycleStart = new RecordWithObject(0, cycleEnd);
+			cycleEnd.setNested(cycleStart);
+			assertThatCode(() -> valueCodeGenerator.generateCode(cycleEnd))
+					.isInstanceOf(ValueCodeGenerationException.class);
+		}
 	}
 
 	@Nested
@@ -474,7 +746,5 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 				assertThat(actual.getBeanType()).isEqualTo(String.class);
 			});
 		}
-
 	}
-
 }

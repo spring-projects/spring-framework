@@ -29,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AssertProvider;
@@ -48,6 +49,8 @@ import org.springframework.javapoet.FieldSpec;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
+import org.springframework.tests.sample.objects.TestObject;
+import org.springframework.tests.sample.objects.TestRecord;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -109,6 +112,16 @@ class ValueCodeGeneratorTests {
 			ValueCodeGenerator scopedValueCodeGenerator = valueCodeGenerator.scoped(generatedMethods);
 			assertThat(scopedValueCodeGenerator).isNotSameAs(valueCodeGenerator);
 			assertThat(scopedValueCodeGenerator.getGeneratedMethods()).isSameAs(generatedMethods);
+			assertThat(valueCodeGenerator.getGeneratedMethods()).isNull();
+		}
+
+		@Test
+		void withIdentifierPrefixReturnsImmutableCopy() {
+			ValueCodeGenerator valueCodeGenerator = ValueCodeGenerator.withDefaults();
+			ValueCodeGenerator withIdentifierPrefixValueCodeGenerator = valueCodeGenerator.withIdentifierPrefix("myPrefix");
+			assertThat(withIdentifierPrefixValueCodeGenerator).isNotSameAs(valueCodeGenerator);
+			assertThat(withIdentifierPrefixValueCodeGenerator.getIdentifierForCurrentDepth()).isEqualTo("myPrefix0");
+			assertThat(valueCodeGenerator.getIdentifierForCurrentDepth()).isEqualTo(ValueCodeGenerator.DEFAULT_IDENTIFIER_PREFIX + "0");
 			assertThat(valueCodeGenerator.getGeneratedMethods()).isNull();
 		}
 
@@ -388,6 +401,84 @@ class ValueCodeGeneratorTests {
 					.valueCode().startsWith("Map.ofEntries(");
 		}
 
+	}
+
+	@Nested
+	class ObjectTests {
+		@Test
+		void generateTestObject() {
+			TestObject testObject = new TestObject("Bob", 12);
+			assertThat(generateCode(testObject).toString())
+					.isEqualTo(CodeBlock.of("(($T<$T>) () -> {$>\n"
+					+ "$T $$valueCodeGeneratorObject1 = new $T();\n"
+					+ "$$valueCodeGeneratorObject1.setAge(12);\n"
+					+ "$$valueCodeGeneratorObject1.setName(\"Bob\");\n"
+					+ "$$valueCodeGeneratorObject1.setSpouse(null);\n"
+					+ "return $$valueCodeGeneratorObject1;$<\n"
+					+ "}).get()",
+							Supplier.class, TestObject.class, TestObject.class, TestObject.class)
+							.toString());
+		}
+
+		@Test
+		void generateNestedTestObject() {
+			TestObject spouse = new TestObject("Ann", 13);
+			TestObject testObject = new TestObject("Bob", 12);
+			testObject.setSpouse(spouse);
+			assertThat(generateCode(testObject).toString())
+					.isEqualTo(CodeBlock.of("(($T<$T>) () -> {$>\n"
+											+ "$T $$valueCodeGeneratorObject1 = new $T();\n"
+											+ "$$valueCodeGeneratorObject1.setAge(12);\n"
+											+ "$$valueCodeGeneratorObject1.setName(\"Bob\");\n"
+											+ "$$valueCodeGeneratorObject1.setSpouse((($T<$T>) () -> {$>\n"
+											+ "$T $$valueCodeGeneratorObject2 = new $T();\n"
+											+ "$$valueCodeGeneratorObject2.setAge(13);\n"
+											+ "$$valueCodeGeneratorObject2.setName(\"Ann\");\n"
+											+ "$$valueCodeGeneratorObject2.setSpouse(null);\n"
+											+ "return $$valueCodeGeneratorObject2;$<\n"
+											+ "}).get());\n"
+											+ "return $$valueCodeGeneratorObject1;$<\n"
+											+ "}).get()",
+									Supplier.class, TestObject.class, TestObject.class, TestObject.class,
+									Supplier.class, TestObject.class, TestObject.class, TestObject.class)
+							.toString());
+		}
+
+		@Test
+		void generateTestObjectWithDifferentIdentifierPrefix() {
+			TestObject testObject = new TestObject("Bob", 12);
+			assertThat(ValueCodeGenerator.withDefaults()
+					.withIdentifierPrefix("testObject")
+					.generateCode(testObject).toString())
+					.isEqualTo(CodeBlock.of("(($T<$T>) () -> {$>\n"
+											+ "$T testObject1 = new $T();\n"
+											+ "testObject1.setAge(12);\n"
+											+ "testObject1.setName(\"Bob\");\n"
+											+ "testObject1.setSpouse(null);\n"
+											+ "return testObject1;$<\n"
+											+ "}).get()",
+									Supplier.class, TestObject.class, TestObject.class, TestObject.class)
+							.toString());
+		}
+	}
+
+	@Nested
+	class RecordTests {
+		@Test
+		void generateTestRecord() {
+			TestRecord testRecord = new TestRecord("Bob", 12);
+			assertThat(resolve(generateCode(testRecord)))
+					.hasImport(TestRecord.class)
+					.hasValueCode("new TestRecord(\"Bob\", 12, null)");
+		}
+
+		@Test
+		void generateNestedTestRecord() {
+			TestRecord testRecord = new TestRecord("Bob", 12, new TestRecord("Ann", 13));
+			assertThat(resolve(generateCode(testRecord)))
+					.hasImport(TestRecord.class)
+					.hasValueCode("new TestRecord(\"Bob\", 12, new TestRecord(\"Ann\", 13, null))");
+		}
 	}
 
 	@Nested

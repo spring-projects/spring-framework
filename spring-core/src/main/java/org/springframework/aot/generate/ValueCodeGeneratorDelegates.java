@@ -16,10 +16,18 @@
 
 package org.springframework.aot.generate;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
@@ -37,6 +46,7 @@ import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Code generator {@link Delegate} for well known value types.
@@ -59,7 +69,9 @@ public abstract class ValueCodeGeneratorDelegates {
 	 * <li>Array,</li>
 	 * <li>List via {@code List.of},</li>
 	 * <li>Set via {@code Set.of} and support of {@link LinkedHashSet},</li>
-	 * <li>Map via {@code Map.of} or {@code Map.ofEntries}.</li>
+	 * <li>Map via {@code Map.of} or {@code Map.ofEntries},</li>
+	 * <li>Records containing common value types for all its {@link RecordComponent components},</li>
+	 * <li>Objects with public setters for all non-public fields, with the value of each field being a common value type.</li>
 	 * </ul>
 	 * Those implementations do not require the {@link ValueCodeGenerator} to be
 	 * {@linkplain ValueCodeGenerator#scoped(GeneratedMethods) scoped}.
@@ -74,8 +86,21 @@ public abstract class ValueCodeGeneratorDelegates {
 			new ArrayDelegate(),
 			new ListDelegate(),
 			new SetDelegate(),
-			new MapDelegate());
+			new MapDelegate(),
+			new RecordDelegate(),
+			new ObjectDelegate()
+	);
 
+	private static boolean isAccessible(Class<?> type) {
+		Class<?> currentType = type;
+		while (currentType != null) {
+			if (!Modifier.isPublic(currentType.getModifiers())) {
+				return false;
+			}
+			currentType = currentType.getDeclaringClass();
+		}
+		return true;
+	}
 
 	/**
 	 * Abstract {@link Delegate} for {@code Collection} types.
@@ -125,7 +150,6 @@ public abstract class ValueCodeGeneratorDelegates {
 			return code.build();
 		}
 	}
-
 
 	/**
 	 * {@link Delegate} for {@link Map} types.
@@ -188,7 +212,6 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
-
 	/**
 	 * {@link Delegate} for {@code primitive} types.
 	 */
@@ -243,7 +266,6 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
-
 	/**
 	 * {@link Delegate} for {@link String} types.
 	 */
@@ -259,7 +281,6 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
-
 	/**
 	 * {@link Delegate} for {@link Charset} types.
 	 */
@@ -274,7 +295,6 @@ public abstract class ValueCodeGeneratorDelegates {
 			return null;
 		}
 	}
-
 
 	/**
 	 * {@link Delegate} for {@link Enum} types.
@@ -292,7 +312,6 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
-
 	/**
 	 * {@link Delegate} for {@link Class} types.
 	 */
@@ -308,21 +327,10 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
-
 	/**
 	 * {@link Delegate} for {@link ResolvableType} types.
 	 */
 	private static class ResolvableTypeDelegate implements Delegate {
-
-		@Override
-		@Nullable
-		public CodeBlock generateCode(ValueCodeGenerator codeGenerator, Object value) {
-			if (value instanceof ResolvableType resolvableType) {
-				return generateCode(resolvableType, false);
-			}
-			return null;
-		}
-
 
 		private static CodeBlock generateCode(ResolvableType resolvableType, boolean allowClassResult) {
 			if (ResolvableType.NONE.equals(resolvableType)) {
@@ -349,8 +357,16 @@ public abstract class ValueCodeGeneratorDelegates {
 			code.add(")");
 			return code.build();
 		}
-	}
 
+		@Override
+		@Nullable
+		public CodeBlock generateCode(ValueCodeGenerator codeGenerator, Object value) {
+			if (value instanceof ResolvableType resolvableType) {
+				return generateCode(resolvableType, false);
+			}
+			return null;
+		}
+	}
 
 	/**
 	 * {@link Delegate} for {@code array} types.
@@ -373,7 +389,6 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
-
 	/**
 	 * {@link Delegate} for {@link List} types.
 	 */
@@ -383,7 +398,6 @@ public abstract class ValueCodeGeneratorDelegates {
 			super(List.class, CodeBlock.of("$T.emptyList()", Collections.class));
 		}
 	}
-
 
 	/**
 	 * {@link Delegate} for {@link Set} types.
@@ -415,4 +429,150 @@ public abstract class ValueCodeGeneratorDelegates {
 		}
 	}
 
+	/**
+	 * {@link Delegate} for accessible public {@link Record}.
+	 */
+	private static class RecordDelegate implements Delegate {
+		@Override
+		public CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
+			if (!(value instanceof Record record) || !isAccessible(record.getClass())) {
+				return null;
+			}
+			// Guaranteed to be in the same order as the canonical constructor
+			RecordComponent[] recordComponents = record.getClass().getRecordComponents();
+			// A public record is guaranteed to have a public constructor taking all its components
+			CodeBlock.Builder builder = CodeBlock.builder();
+			builder.add("new $T(", record.getClass());
+			for (int i = 0; i < recordComponents.length; i++) {
+				if (i != 0) {
+					builder.add(", ");
+				}
+				Object componentValue;
+				try {
+					componentValue = recordComponents[i].getAccessor().invoke(record);
+				}
+				catch (IllegalAccessException | InvocationTargetException ex) {
+					throw new ValueCodeGenerationException("Unable to generate code for value (" + record + ") since its component (" + recordComponents[i].getName() + ") could not be read.", record, ex);
+				}
+				builder.add(valueCodeGenerator.generateCode(componentValue));
+			}
+			builder.add(")");
+			return builder.build();
+		}
+	}
+
+	/**
+	 * {@link Delegate} for accessible public {@link Record} and {@link Object} types with a public no-args constructor and
+	 * public setters for all non-public fields.
+	 */
+	private static class ObjectDelegate implements Delegate {
+		private static boolean isNotObjectCommonValueType(Object value) {
+			return getGeneratedCodeType(value.getClass()) != value.getClass()
+					|| value instanceof Record
+					|| ClassUtils.isSimpleValueType(value.getClass())
+					|| value.getClass().isArray();
+		}
+
+		@Override
+		public CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
+			if (isNotObjectCommonValueType(value) || !isAccessible(value.getClass())) {
+				// Use a different delegate to generate the code
+				return null;
+			}
+			try {
+				CodeBlock.Builder builder = CodeBlock.builder();
+
+				// A trick to get a code block where we can generate statements
+				// anywhere in an expression (i.e. we can put the generated code as an argument
+				// to a method): create a supplier lambda and immediately call its
+				// "get" method.
+				// We need to cast the lambda to Supplier, so Java will
+				// know the type of the lambda
+				// String tryMe = ((Supplier<String>) () -> { return "hi"; }).get();
+				builder.add("(($T<$T>) () -> {$>\n", Supplier.class, value.getClass());
+
+				String identifier = valueCodeGenerator.getIdentifierForCurrentDepth();
+
+				generateCodeToSetFields(valueCodeGenerator, builder, identifier,
+						value);
+
+				builder.add("return $N;", identifier);
+				builder.add("$<\n}).get()");
+				return builder.build();
+			}
+			catch (ValueCodeGenerationException ex) {
+				// If we fail to generate code, return null, since a different Delegate
+				// might be able to handle this Object
+				return null;
+			}
+		}
+
+		private static Class<?> getGeneratedCodeType(Class<?> type) {
+			if (Set.class.isAssignableFrom(type)) {
+				return Set.class;
+			}
+			if (List.class.isAssignableFrom(type)) {
+				return List.class;
+			}
+			if (Map.class.isAssignableFrom(type)) {
+				return Map.class;
+			}
+			return type;
+		}
+
+		private static void generateCodeToSetFields(ValueCodeGenerator valueCodeGenerator,
+				CodeBlock.Builder builder,
+				String identifier,
+				Object value) {
+			try {
+				// A Constructor is returned only if it is public; a private no-args
+				// Constructor will also raise a NoSuchMethodException
+				value.getClass().getConstructor();
+			}
+			catch (NoSuchMethodException ex) {
+				throw new ValueCodeGenerationException("Unable to generate code for value (" + value + ") since its class does not have an accessible no-args constructor.", value, ex);
+			}
+			builder.add("$T $N = new $T();\n", value.getClass(), identifier, value.getClass());
+			// Sort the object's fields, so we have a consistent ordering
+			List<Field> objectFields = new ArrayList<>();
+			ReflectionUtils.doWithFields(value.getClass(), objectFields::add);
+			objectFields.sort(Comparator.comparing(Field::getName));
+
+			for (Field field : objectFields) {
+				if (Modifier.isStatic(field.getModifiers())) {
+					continue;
+				}
+				Object fieldValue;
+				try {
+					// Set the field to accessible so we can read it
+					field.setAccessible(true);
+					// Use Field::get instead of ReflectionUtils::getField,
+					// since we want to throw a ValueCodeGenerationException
+					// if the field cannot be read for any reason
+					fieldValue = field.get(value);
+				}
+				catch (InaccessibleObjectException | IllegalAccessException | SecurityException ex) {
+					throw new ValueCodeGenerationException("Unable to generate code for value (" + value + ") since its field (" + field + ") cannot be read.",
+							value, ex);
+				}
+				if (Modifier.isPublic(field.getModifiers())) {
+					builder.add("$N.$N = $L;\n", identifier, field.getName(),
+							valueCodeGenerator.generateCode(fieldValue));
+					continue;
+				}
+				String methodSuffix = Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
+				String setterMethodName = "set" + methodSuffix;
+				Class<?> expectedParameterType = getGeneratedCodeType(field.getType());
+				Method setterMethod = ReflectionUtils.findMethod(value.getClass(), setterMethodName, expectedParameterType);
+				if (setterMethod == null
+						|| !Modifier.isPublic(setterMethod.getModifiers())
+						|| Modifier.isStatic(setterMethod.getModifiers())) {
+					throw new ValueCodeGenerationException("Unable to generate code for value (" + value + ") since its field (" + field + ") is not public and does not have a public setter.",
+							value, null);
+				}
+				builder.add("$N.$N($L);\n", identifier, setterMethodName,
+						valueCodeGenerator.generateCode(fieldValue));
+			}
+		}
+	}
 }
