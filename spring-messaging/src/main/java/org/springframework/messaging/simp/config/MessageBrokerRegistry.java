@@ -150,10 +150,10 @@ public class MessageBrokerRegistry {
 	 * session as well as for others to send messages to those unique,
 	 * user-specific queues.
 	 * <p>For example when a user attempts to subscribe to "/user/queue/position-updates",
-	 * the destination may be translated to "/queue/position-updatesi9oqdfzo" yielding a
+	 * the destination may be translated to "/queue/position-updates-useri9oqdfzo" yielding a
 	 * unique queue name that does not collide with any other user attempting to do the same.
 	 * Subsequently when messages are sent to "/user/{username}/queue/position-updates",
-	 * the destination is translated to "/queue/position-updatesi9oqdfzo".
+	 * the destination is translated to "/queue/position-updates-useri9oqdfzo".
 	 * <p>The default prefix used to identify such destinations is "/user/".
 	 */
 	public MessageBrokerRegistry setUserDestinationPrefix(String destinationPrefix) {
